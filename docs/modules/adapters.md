@@ -5,6 +5,7 @@
 - Parse command-line arguments
 - Invoke app-level use cases
 - Print user-facing experiment summaries
+- Expose a dedicated CLI for ResNet-50 speed benchmarking
 
 ## Inputs / Outputs
 
@@ -16,4 +17,3 @@
 - Dataset generation
 - Model training internals
 - Persistence or network IO
-

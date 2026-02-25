@@ -3,16 +3,16 @@
 ## Boundaries
 
 - `src/core`
-  - Responsibilities: model math, training rules, traffic summaries, adaptation interfaces
-  - Inputs/outputs: numpy arrays and typed dataclasses
+  - Responsibilities: model math, training rules, traffic summaries, adaptation interfaces, ResNet-50 variant definitions
+  - Inputs/outputs: numpy arrays or torch tensors and typed dataclasses
   - Non-responsibilities: CLI parsing, environment loading, file/network IO
 - `src/app`
-  - Responsibilities: compose dataset + models into a reproducible experiment
-  - Inputs/outputs: config objects in, single-run and aggregate experiment reports out
+  - Responsibilities: compose dataset + models into reproducible experiments and benchmarks
+  - Inputs/outputs: config objects in, single-run/aggregate/benchmark reports out
   - Non-responsibilities: low-level math implementation
 - `src/infra`
-  - Responsibilities: synthetic dataset generation
-  - Inputs/outputs: deterministic train/test split
+  - Responsibilities: synthetic tabular and vision dataset generation
+  - Inputs/outputs: deterministic train/test splits and dataloaders
   - Non-responsibilities: model optimization logic
 - `src/adapters`
   - Responsibilities: command-line argument handling and output formatting
@@ -31,6 +31,7 @@ config   -> adapters
 infra    -> app
 app      -> core + infra
 core     -> (no inward dependency on app/infra/adapters)
+shared   -> core + app + infra
 ```
 
 ## Key Choices
@@ -46,3 +47,6 @@ Reason: enables future growth/pruning experiments without destabilizing the base
 
 4. In-depth comparison runs repeated seed/noise scenarios.
 Reason: single-run metrics are noisy; aggregate stats make differences between learning rules clearer.
+
+5. ResNet benchmark uses a synthetic image task and optional torch dependencies.
+Reason: it enables fast, deterministic speed/accuracy testing (including circadian split/prune behavior) without external dataset downloads.

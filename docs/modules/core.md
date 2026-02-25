@@ -2,8 +2,8 @@
 
 ## Responsibilities
 
-- Define model behavior (`BackpropMLP`, `PredictiveCodingNetwork`)
 - Define model behavior (`BackpropMLP`, `PredictiveCodingNetwork`, `CircadianPredictiveCodingNetwork`)
+- Define ResNet-50 benchmark variants (`BackpropResNet50Classifier`, `PredictiveCodingResNet50Classifier`, `CircadianPredictiveCodingResNet50Classifier`)
 - Provide activation utilities
 - Define neuron adaptation interfaces and traffic summaries
 

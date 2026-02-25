@@ -3,6 +3,7 @@
 ## Responsibilities
 
 - Generate deterministic synthetic datasets for experiments
+- Generate deterministic synthetic vision datasets for ResNet benchmarks
 
 ## Inputs / Outputs
 
@@ -14,4 +15,3 @@
 - Training orchestration
 - Model internals
 - CLI concerns
-

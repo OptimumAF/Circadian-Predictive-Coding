@@ -36,6 +36,7 @@ scripts/      # Utility scripts (reserved)
 ## Requirements
 
 - Python 3.11+
+- Optional for ResNet-50 benchmark: PyTorch + torchvision
 
 ## Setup
 
@@ -45,6 +46,12 @@ PowerShell:
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+```
+
+Optional ResNet benchmark dependencies:
+
+```powershell
+pip install -r requirements-resnet.txt
 ```
 
 ## How To Run
@@ -64,6 +71,18 @@ In-depth multi-run comparison:
 ```powershell
 python predictive_coding_experiment.py --mode indepth --samples 400 --epochs 160 --noise-levels 0.6,0.8,1.0 --seed-list 3,7,11,19,23 --sleep-interval 40
 ```
+
+ResNet-50 speed benchmark:
+
+```powershell
+python resnet50_benchmark.py --train-samples 2000 --test-samples 500 --epochs 8 --batch-size 32 --image-size 96 --target-accuracy 0.99 --device auto
+```
+
+ResNet-50 benchmark focuses on:
+- training speed (`samples/s`, `ms/step`)
+- inference speed (mean and p95 latency, inference `samples/s`)
+- time/epochs to target accuracy (early stop)
+- circadian sleep dynamics (split/prune totals and hidden size change)
 
 ## How To Test
 
