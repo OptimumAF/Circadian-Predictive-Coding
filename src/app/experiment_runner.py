@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from src.core.backprop_mlp import BackpropMLP
-from src.core.circadian_predictive_coding import CircadianPredictiveCodingNetwork
+from src.core.circadian_predictive_coding import CircadianConfig, CircadianPredictiveCodingNetwork
 from src.core.neuron_adaptation import (
     LayerTraffic,
     NeuronAdaptationPolicy,
@@ -31,6 +31,9 @@ class ExperimentConfig:
     circadian_inference_steps: int = 25
     circadian_inference_learning_rate: float = 0.2
     circadian_sleep_interval: int = 40
+    circadian_force_sleep: bool = True
+    circadian_use_policy_for_sleep: bool = False
+    circadian_config: CircadianConfig | None = None
     random_seed: int = 7
 
 
@@ -81,7 +84,10 @@ def run_experiment(
         input_dim=2, hidden_dim=config.hidden_dim, seed=config.random_seed + 1
     )
     circadian_model = CircadianPredictiveCodingNetwork(
-        input_dim=2, hidden_dim=config.hidden_dim, seed=config.random_seed + 2
+        input_dim=2,
+        hidden_dim=config.hidden_dim,
+        seed=config.random_seed + 2,
+        circadian_config=config.circadian_config,
     )
 
     backprop_losses: list[float] = []
@@ -120,10 +126,20 @@ def run_experiment(
         circadian_energies.append(circadian_step.energy)
 
         if config.circadian_sleep_interval > 0 and epoch_index % config.circadian_sleep_interval == 0:
-            sleep_result = circadian_model.sleep_event()
-            sleep_event_count += 1
-            total_splits += len(sleep_result.split_indices)
-            total_prunes += len(sleep_result.pruned_indices)
+            sleep_policy = policy if config.circadian_use_policy_for_sleep else None
+            sleep_result = circadian_model.sleep_event(
+                adaptation_policy=sleep_policy,
+                force_sleep=config.circadian_force_sleep,
+            )
+            performed_sleep = (
+                len(sleep_result.split_indices) > 0
+                or len(sleep_result.pruned_indices) > 0
+                or sleep_result.new_hidden_dim != sleep_result.old_hidden_dim
+            )
+            if performed_sleep:
+                sleep_event_count += 1
+                total_splits += len(sleep_result.split_indices)
+                total_prunes += len(sleep_result.pruned_indices)
 
     backprop_traffic = backprop_model.get_layer_traffic()
     predictive_coding_traffic = predictive_coding_model.get_layer_traffic()

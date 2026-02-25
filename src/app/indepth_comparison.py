@@ -156,6 +156,9 @@ def _run_scenario(
             circadian_inference_steps=base_config.circadian_inference_steps,
             circadian_inference_learning_rate=base_config.circadian_inference_learning_rate,
             circadian_sleep_interval=base_config.circadian_sleep_interval,
+            circadian_force_sleep=base_config.circadian_force_sleep,
+            circadian_use_policy_for_sleep=base_config.circadian_use_policy_for_sleep,
+            circadian_config=base_config.circadian_config,
             random_seed=seed,
         )
         scenario_results.append(run_experiment(config=scenario_config))
@@ -259,4 +262,3 @@ def _format_aggregate_line(
         f"final_metric={mean_metric:.4f}+/-{std_metric:.4f}, "
         f"epoch_80pct={mean_epoch:.1f}+/-{std_epoch:.1f}"
     )
-
