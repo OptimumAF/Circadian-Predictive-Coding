@@ -21,6 +21,13 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--classes", type=int, default=10)
     parser.add_argument("--image-size", type=int, default=96)
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument(
+        "--dataset-difficulty",
+        choices=["easy", "medium", "hard"],
+        default="medium",
+        help="Controls class overlap/distractors/noise in synthetic data.",
+    )
+    parser.add_argument("--dataset-noise-std", type=float, default=0.06)
     parser.add_argument("--epochs", type=int, default=8)
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--device", type=str, default="auto", help="auto, cpu, cuda, cuda:0")
@@ -76,6 +83,8 @@ def main() -> None:
         num_classes=args.classes,
         image_size=args.image_size,
         batch_size=args.batch_size,
+        dataset_difficulty=args.dataset_difficulty,
+        dataset_noise_std=args.dataset_noise_std,
         epochs=args.epochs,
         seed=args.seed,
         device=args.device,

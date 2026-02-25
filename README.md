@@ -95,6 +95,13 @@ ResNet-50 benchmark focuses on:
 - inference speed (mean and p95 latency, inference `samples/s`)
 - time/epochs to target accuracy (early stop)
 - circadian sleep dynamics (split/prune totals and hidden size change)
+- constant model comparison: each run always includes traditional backprop, traditional predictive coding, and circadian predictive coding
+
+Harder benchmark mode (recommended to avoid trivial 1.0 accuracy):
+
+```powershell
+python resnet50_benchmark.py --device cuda --train-samples 2000 --test-samples 500 --classes 10 --image-size 96 --batch-size 64 --dataset-difficulty medium --dataset-noise-std 0.07 --epochs 12 --target-accuracy -1 --backprop-freeze-backbone --pc-hidden-dim 256 --pc-lr 0.03 --pc-steps 10 --pc-inference-lr 0.15 --circ-hidden-dim 256 --circ-lr 0.03 --circ-steps 10 --circ-inference-lr 0.15 --circ-sleep-interval 2 --circ-min-hidden-dim 96 --circ-max-hidden-dim 768 --circ-split-threshold 0.8 --circ-prune-threshold 0.65 --circ-max-split-per-sleep 2 --circ-max-prune-per-sleep 2
+```
 
 ## How To Test
 

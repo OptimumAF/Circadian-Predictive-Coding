@@ -27,6 +27,8 @@ class ResNet50BenchmarkConfig:
     num_classes: int = 10
     image_size: int = 96
     batch_size: int = 32
+    dataset_difficulty: str = "medium"
+    dataset_noise_std: float = 0.06
     epochs: int = 8
     seed: int = 7
     device: str = "auto"
@@ -96,6 +98,7 @@ class ResNet50BenchmarkResult:
 
 def run_resnet50_benchmark(config: ResNet50BenchmarkConfig) -> ResNet50BenchmarkResult:
     """Benchmark all three model families on the same synthetic image task."""
+    _validate_benchmark_config(config)
     torch = require_torch()
     _set_seed(torch, config.seed)
     device = _resolve_device(torch, config.device)
@@ -107,6 +110,8 @@ def run_resnet50_benchmark(config: ResNet50BenchmarkConfig) -> ResNet50Benchmark
             num_classes=config.num_classes,
             image_size=config.image_size,
             batch_size=config.batch_size,
+            noise_std=config.dataset_noise_std,
+            difficulty=config.dataset_difficulty,
             seed=config.seed,
         )
     )
@@ -116,6 +121,7 @@ def run_resnet50_benchmark(config: ResNet50BenchmarkConfig) -> ResNet50Benchmark
         _benchmark_predictive(torch=torch, device=device, loaders=loaders, config=config),
         _benchmark_circadian(torch=torch, device=device, loaders=loaders, config=config),
     ]
+    _validate_report_models(reports)
     return ResNet50BenchmarkResult(device=str(device), config=config, reports=reports)
 
 
@@ -128,10 +134,12 @@ def format_resnet50_benchmark_result(result: ResNet50BenchmarkResult) -> str:
         (
             "Dataset: "
             f"train={result.config.train_samples}, test={result.config.test_samples}, "
-            f"classes={result.config.num_classes}, image={result.config.image_size}x{result.config.image_size}"
+            f"classes={result.config.num_classes}, image={result.config.image_size}x{result.config.image_size}, "
+            f"difficulty={result.config.dataset_difficulty}, noise_std={result.config.dataset_noise_std:.3f}"
         ),
         "",
     ]
+    backprop_report = _find_report_by_name(result.reports, "BackpropResNet50")
     for report in result.reports:
         lines.extend(
             [
@@ -157,6 +165,16 @@ def format_resnet50_benchmark_result(result: ResNet50BenchmarkResult) -> str:
                 ),
             ]
         )
+        if report.model_name != "BackpropResNet50":
+            accuracy_delta = report.test_accuracy - backprop_report.test_accuracy
+            speed_delta = report.train_samples_per_second - backprop_report.train_samples_per_second
+            lines.append(
+                (
+                    "  vs backprop: "
+                    f"acc_delta={accuracy_delta:+.3f}, "
+                    f"train_samples_per_second_delta={speed_delta:+.1f}"
+                )
+            )
         if report.circadian_hidden_dim_start is not None and report.circadian_hidden_dim_end is not None:
             lines.append(
                 (
@@ -516,6 +534,34 @@ def _resolve_device(torch: Any, requested_device: str) -> Any:
     if requested_device == "auto":
         return torch.device("cuda" if torch.cuda.is_available() else "cpu")
     return torch.device(requested_device)
+
+
+def _find_report_by_name(reports: list[ModelSpeedReport], model_name: str) -> ModelSpeedReport:
+    for report in reports:
+        if report.model_name == model_name:
+            return report
+    raise ValueError(f"Missing report for model {model_name}.")
+
+
+def _validate_report_models(reports: list[ModelSpeedReport]) -> None:
+    expected = {
+        "BackpropResNet50",
+        "PredictiveCodingResNet50",
+        "CircadianPredictiveCodingResNet50",
+    }
+    observed = {report.model_name for report in reports}
+    if observed != expected:
+        raise RuntimeError(
+            "Benchmark must compare traditional backprop, traditional predictive coding, "
+            f"and circadian predictive coding. Observed={sorted(observed)}"
+        )
+
+
+def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
+    if config.dataset_difficulty not in {"easy", "medium", "hard"}:
+        raise ValueError("dataset_difficulty must be one of: easy, medium, hard.")
+    if config.dataset_noise_std < 0.0:
+        raise ValueError("dataset_noise_std must be non-negative.")
 
 
 def _set_seed(torch: Any, seed: int) -> None:

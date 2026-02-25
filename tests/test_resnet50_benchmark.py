@@ -15,6 +15,8 @@ def test_should_run_resnet50_benchmark_and_return_three_reports() -> None:
         num_classes=6,
         image_size=64,
         batch_size=8,
+        dataset_difficulty="hard",
+        dataset_noise_std=0.08,
         epochs=1,
         seed=5,
         device="cpu",
@@ -30,6 +32,11 @@ def test_should_run_resnet50_benchmark_and_return_three_reports() -> None:
 
     result = run_resnet50_benchmark(config)
     assert len(result.reports) == 3
+    assert {report.model_name for report in result.reports} == {
+        "BackpropResNet50",
+        "PredictiveCodingResNet50",
+        "CircadianPredictiveCodingResNet50",
+    }
 
     for report in result.reports:
         assert report.train_seconds >= 0.0
@@ -38,4 +45,3 @@ def test_should_run_resnet50_benchmark_and_return_three_reports() -> None:
         assert 0.0 <= report.test_accuracy <= 1.0
         assert report.total_parameters > 0
         assert report.trainable_parameters > 0
-

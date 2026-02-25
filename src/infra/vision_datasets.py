@@ -18,6 +18,7 @@ class SyntheticVisionDatasetConfig:
     image_size: int = 96
     batch_size: int = 32
     noise_std: float = 0.04
+    difficulty: str = "easy"
     seed: int = 7
     num_workers: int = 0
 
@@ -32,7 +33,7 @@ class VisionDataLoaders:
 
 
 class SyntheticPatternDataset:
-    """Easy synthetic task where classes map to fixed spatial/channel patterns."""
+    """Synthetic task with adjustable difficulty and class overlap."""
 
     def __init__(
         self,
@@ -40,6 +41,7 @@ class SyntheticPatternDataset:
         num_classes: int,
         image_size: int,
         noise_std: float,
+        difficulty: str,
         seed: int,
     ) -> None:
         if sample_count <= 0:
@@ -50,11 +52,14 @@ class SyntheticPatternDataset:
             raise ValueError("image_size must be at least 32 for ResNet-50.")
         if noise_std < 0.0:
             raise ValueError("noise_std must be non-negative.")
+        if difficulty not in {"easy", "medium", "hard"}:
+            raise ValueError("difficulty must be one of: easy, medium, hard.")
 
         torch = require_torch()
         self._torch = torch
         generator = torch.Generator()
         generator.manual_seed(seed)
+        self._difficulty = difficulty
 
         self.labels = torch.randint(
             low=0,
@@ -70,28 +75,69 @@ class SyntheticPatternDataset:
         if grid_side * grid_side < num_classes:
             grid_side += 1
         stride = max((image_size - patch_size - 2) // max(grid_side, 1), 1)
+        overlap_group_size = self._resolve_overlap_group_size(num_classes)
 
         for sample_index in range(sample_count):
             class_index = int(self.labels[sample_index].item())
-            row = class_index // grid_side
-            col = class_index % grid_side
+            canonical_class = class_index % overlap_group_size
+            row = canonical_class // grid_side
+            col = canonical_class % grid_side
             start_y = min(1 + row * stride, image_size - patch_size - 1)
             start_x = min(1 + col * stride, image_size - patch_size - 1)
 
-            channel_index = class_index % 3
-            secondary_channel = (class_index + 1) % 3
-            intensity = 0.6 + 0.35 * (class_index / max(num_classes - 1, 1))
+            jitter_limit = self._resolve_jitter_limit(patch_size)
+            if jitter_limit > 0:
+                offset_y = int(torch.randint(-jitter_limit, jitter_limit + 1, (1,), generator=generator).item())
+                offset_x = int(torch.randint(-jitter_limit, jitter_limit + 1, (1,), generator=generator).item())
+                start_y = max(1, min(start_y + offset_y, image_size - patch_size - 1))
+                start_x = max(1, min(start_x + offset_x, image_size - patch_size - 1))
 
-            self.images[sample_index, channel_index, start_y : start_y + patch_size, start_x : start_x + patch_size] = intensity
-            self.images[sample_index, secondary_channel, start_y : start_y + (patch_size // 2), start_x : start_x + (patch_size // 2)] = 0.35
+            channel_index = self._resolve_channel_index(class_index, overlap_group_size)
+            secondary_channel = (channel_index + 1) % 3
+            intensity = self._resolve_primary_intensity(class_index, num_classes)
+            secondary_intensity = self._resolve_secondary_intensity()
+
+            self.images[
+                sample_index,
+                channel_index,
+                start_y : start_y + patch_size,
+                start_x : start_x + patch_size,
+            ] = intensity
+            self.images[
+                sample_index,
+                secondary_channel,
+                start_y : start_y + (patch_size // 2),
+                start_x : start_x + (patch_size // 2),
+            ] = secondary_intensity
 
             diagonal_start = image_size - start_y - patch_size
             diagonal_end = image_size - start_x - patch_size
             diagonal_y = max(min(diagonal_start, image_size - patch_size - 1), 0)
             diagonal_x = max(min(diagonal_end, image_size - patch_size - 1), 0)
-            self.images[sample_index, channel_index, diagonal_y : diagonal_y + (patch_size // 3), diagonal_x : diagonal_x + patch_size] = 0.2
+            diagonal_height = max(patch_size // 3, 2)
+            self.images[
+                sample_index,
+                channel_index,
+                diagonal_y : diagonal_y + diagonal_height,
+                diagonal_x : diagonal_x + patch_size,
+            ] = self._resolve_diagonal_intensity()
 
-        noise = noise_std * torch.randn(self.images.shape, generator=generator, dtype=torch.float32)
+            self._add_distractor_patch(
+                sample_index=sample_index,
+                patch_size=patch_size,
+                image_size=image_size,
+                num_classes=num_classes,
+                generator=generator,
+            )
+            self._add_occlusion_blob(
+                sample_index=sample_index,
+                patch_size=patch_size,
+                image_size=image_size,
+                generator=generator,
+            )
+
+        effective_noise = noise_std * self._resolve_noise_multiplier()
+        noise = effective_noise * torch.randn(self.images.shape, generator=generator, dtype=torch.float32)
         self.images = torch.clamp(self.images + noise, min=0.0, max=1.0)
 
     def __len__(self) -> int:
@@ -99,6 +145,104 @@ class SyntheticPatternDataset:
 
     def __getitem__(self, index: int) -> tuple[Any, Any]:
         return self.images[index], self.labels[index]
+
+    def _resolve_overlap_group_size(self, num_classes: int) -> int:
+        if self._difficulty == "easy":
+            return num_classes
+        if self._difficulty == "medium":
+            return max(num_classes // 2, 2)
+        return max(num_classes // 3, 2)
+
+    def _resolve_jitter_limit(self, patch_size: int) -> int:
+        if self._difficulty == "easy":
+            return 0
+        if self._difficulty == "medium":
+            return max(patch_size // 4, 1)
+        return max(patch_size // 2, 1)
+
+    def _resolve_channel_index(self, class_index: int, overlap_group_size: int) -> int:
+        if self._difficulty == "easy":
+            return class_index % 3
+        if self._difficulty == "medium":
+            return (class_index + overlap_group_size) % 3
+        return (class_index // max(overlap_group_size, 1)) % 3
+
+    def _resolve_primary_intensity(self, class_index: int, num_classes: int) -> float:
+        normalized = class_index / max(num_classes - 1, 1)
+        if self._difficulty == "easy":
+            return float(0.60 + 0.35 * normalized)
+        if self._difficulty == "medium":
+            return float(0.50 + 0.28 * normalized)
+        return float(0.42 + 0.22 * normalized)
+
+    def _resolve_secondary_intensity(self) -> float:
+        if self._difficulty == "easy":
+            return 0.35
+        if self._difficulty == "medium":
+            return 0.30
+        return 0.24
+
+    def _resolve_diagonal_intensity(self) -> float:
+        if self._difficulty == "easy":
+            return 0.20
+        if self._difficulty == "medium":
+            return 0.18
+        return 0.15
+
+    def _resolve_noise_multiplier(self) -> float:
+        if self._difficulty == "easy":
+            return 1.0
+        if self._difficulty == "medium":
+            return 1.6
+        return 2.3
+
+    def _add_distractor_patch(
+        self,
+        sample_index: int,
+        patch_size: int,
+        image_size: int,
+        num_classes: int,
+        generator: Any,
+    ) -> None:
+        torch = self._torch
+        if self._difficulty == "easy":
+            return
+
+        distractor_probability = 0.55 if self._difficulty == "medium" else 0.90
+        probability_sample = float(torch.rand((1,), generator=generator).item())
+        if probability_sample > distractor_probability:
+            return
+
+        distractor_class = int(torch.randint(0, num_classes, (1,), generator=generator).item())
+        distractor_channel = distractor_class % 3
+        y = int(torch.randint(0, image_size - patch_size, (1,), generator=generator).item())
+        x = int(torch.randint(0, image_size - patch_size, (1,), generator=generator).item())
+        intensity = 0.14 if self._difficulty == "medium" else 0.20
+        self.images[
+            sample_index,
+            distractor_channel,
+            y : y + max(patch_size // 2, 2),
+            x : x + max(patch_size // 2, 2),
+        ] = intensity
+
+    def _add_occlusion_blob(
+        self,
+        sample_index: int,
+        patch_size: int,
+        image_size: int,
+        generator: Any,
+    ) -> None:
+        torch = self._torch
+        if self._difficulty != "hard":
+            return
+
+        channel = int(torch.randint(0, 3, (1,), generator=generator).item())
+        blob_h = max(patch_size // 2, 2)
+        blob_w = max(patch_size // 2, 2)
+        y = int(torch.randint(0, image_size - blob_h, (1,), generator=generator).item())
+        x = int(torch.randint(0, image_size - blob_w, (1,), generator=generator).item())
+        blob_value = float(torch.rand((1,), generator=generator).item() * 0.4)
+        self.images[sample_index, channel, y : y + blob_h, x : x + blob_w] = blob_value
 
 
 def build_synthetic_vision_dataloaders(config: SyntheticVisionDatasetConfig) -> VisionDataLoaders:
@@ -110,6 +254,7 @@ def build_synthetic_vision_dataloaders(config: SyntheticVisionDatasetConfig) -> 
         num_classes=config.num_classes,
         image_size=config.image_size,
         noise_std=config.noise_std,
+        difficulty=config.difficulty,
         seed=config.seed,
     )
     test_dataset = SyntheticPatternDataset(
@@ -117,6 +262,7 @@ def build_synthetic_vision_dataloaders(config: SyntheticVisionDatasetConfig) -> 
         num_classes=config.num_classes,
         image_size=config.image_size,
         noise_std=config.noise_std,
+        difficulty=config.difficulty,
         seed=config.seed + 1,
     )
 
@@ -143,4 +289,3 @@ def build_synthetic_vision_dataloaders(config: SyntheticVisionDatasetConfig) -> 
         test_loader=test_loader,
         num_classes=config.num_classes,
     )
-
