@@ -48,6 +48,16 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--circ-sleep-interval", type=int, default=2)
     parser.add_argument("--circ-min-hidden-dim", type=int, default=96)
     parser.add_argument("--circ-max-hidden-dim", type=int, default=1024)
+    parser.add_argument("--circ-chemical-decay", type=float, default=0.995)
+    parser.add_argument("--circ-chemical-buildup-rate", type=float, default=0.02)
+    parser.add_argument("--circ-plasticity-sensitivity", type=float, default=0.7)
+    parser.add_argument("--circ-min-plasticity", type=float, default=0.2)
+    parser.add_argument("--circ-split-threshold", type=float, default=0.8)
+    parser.add_argument("--circ-prune-threshold", type=float, default=0.08)
+    parser.add_argument("--circ-max-split-per-sleep", type=int, default=2)
+    parser.add_argument("--circ-max-prune-per-sleep", type=int, default=2)
+    parser.add_argument("--circ-split-noise-scale", type=float, default=0.01)
+    parser.add_argument("--circ-sleep-reset-factor", type=float, default=0.45)
     return parser
 
 
@@ -86,6 +96,16 @@ def main() -> None:
         circadian_sleep_interval=args.circ_sleep_interval,
         circadian_min_hidden_dim=args.circ_min_hidden_dim,
         circadian_max_hidden_dim=args.circ_max_hidden_dim,
+        circadian_chemical_decay=args.circ_chemical_decay,
+        circadian_chemical_buildup_rate=args.circ_chemical_buildup_rate,
+        circadian_plasticity_sensitivity=args.circ_plasticity_sensitivity,
+        circadian_min_plasticity=args.circ_min_plasticity,
+        circadian_split_threshold=args.circ_split_threshold,
+        circadian_prune_threshold=args.circ_prune_threshold,
+        circadian_max_split_per_sleep=args.circ_max_split_per_sleep,
+        circadian_max_prune_per_sleep=args.circ_max_prune_per_sleep,
+        circadian_split_noise_scale=args.circ_split_noise_scale,
+        circadian_sleep_reset_factor=args.circ_sleep_reset_factor,
     )
     try:
         result = run_resnet50_benchmark(config)

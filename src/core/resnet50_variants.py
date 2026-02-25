@@ -230,7 +230,8 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             raise ValueError("max_hidden_dim cannot be less than initial hidden_dim.")
 
         self._chemical = torch.zeros(hidden_dim, dtype=torch.float32, device=device)
-        generator = torch.Generator()
+        generator_device = "cuda" if str(device).startswith("cuda") else "cpu"
+        generator = torch.Generator(device=generator_device)
         generator.manual_seed(seed + 9_999)
         self._split_generator = generator
 
@@ -551,4 +552,3 @@ class CircadianPredictiveCodingResNet50Classifier:
         if self.freeze_backbone:
             return self.head.parameter_count()
         return self.parameter_count()
-

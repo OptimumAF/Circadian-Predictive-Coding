@@ -10,6 +10,7 @@ import numpy as np
 
 from src.core.resnet50_variants import (
     BackpropResNet50Classifier,
+    CircadianHeadConfig,
     CircadianPredictiveCodingResNet50Classifier,
     PredictiveCodingResNet50Classifier,
 )
@@ -49,6 +50,16 @@ class ResNet50BenchmarkConfig:
     circadian_sleep_interval: int = 2
     circadian_min_hidden_dim: int = 96
     circadian_max_hidden_dim: int = 1024
+    circadian_chemical_decay: float = 0.995
+    circadian_chemical_buildup_rate: float = 0.02
+    circadian_plasticity_sensitivity: float = 0.7
+    circadian_min_plasticity: float = 0.2
+    circadian_split_threshold: float = 0.80
+    circadian_prune_threshold: float = 0.08
+    circadian_max_split_per_sleep: int = 2
+    circadian_max_prune_per_sleep: int = 2
+    circadian_split_noise_scale: float = 0.01
+    circadian_sleep_reset_factor: float = 0.45
 
 
 @dataclass(frozen=True)
@@ -322,12 +333,25 @@ def _benchmark_circadian(
     loaders: Any,
     config: ResNet50BenchmarkConfig,
 ) -> ModelSpeedReport:
+    circadian_config = CircadianHeadConfig(
+        chemical_decay=config.circadian_chemical_decay,
+        chemical_buildup_rate=config.circadian_chemical_buildup_rate,
+        plasticity_sensitivity=config.circadian_plasticity_sensitivity,
+        min_plasticity=config.circadian_min_plasticity,
+        split_threshold=config.circadian_split_threshold,
+        prune_threshold=config.circadian_prune_threshold,
+        max_split_per_sleep=config.circadian_max_split_per_sleep,
+        max_prune_per_sleep=config.circadian_max_prune_per_sleep,
+        split_noise_scale=config.circadian_split_noise_scale,
+        sleep_reset_factor=config.circadian_sleep_reset_factor,
+    )
     model = CircadianPredictiveCodingResNet50Classifier(
         num_classes=loaders.num_classes,
         device=device,
         head_hidden_dim=config.circadian_head_hidden_dim,
         seed=config.seed + 23,
         freeze_backbone=True,
+        circadian_config=circadian_config,
         min_hidden_dim=config.circadian_min_hidden_dim,
         max_hidden_dim=config.circadian_max_hidden_dim,
     )

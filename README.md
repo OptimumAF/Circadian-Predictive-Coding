@@ -54,6 +54,12 @@ Optional ResNet benchmark dependencies:
 pip install -r requirements-resnet.txt
 ```
 
+For NVIDIA GPU acceleration (recommended), install CUDA wheels in your venv:
+
+```powershell
+python -m pip install --upgrade --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu128
+```
+
 ## How To Run
 
 ```powershell
@@ -76,6 +82,12 @@ ResNet-50 speed benchmark:
 
 ```powershell
 python resnet50_benchmark.py --train-samples 2000 --test-samples 500 --epochs 8 --batch-size 32 --image-size 96 --target-accuracy 0.99 --device auto
+```
+
+Tuned circadian run (GPU) with both split and prune while reaching high accuracy:
+
+```powershell
+python resnet50_benchmark.py --device cuda --train-samples 2000 --test-samples 500 --classes 10 --image-size 96 --batch-size 64 --epochs 12 --target-accuracy 0.995 --backprop-freeze-backbone --pc-hidden-dim 256 --pc-lr 0.03 --pc-steps 10 --pc-inference-lr 0.15 --circ-hidden-dim 256 --circ-lr 0.03 --circ-steps 10 --circ-inference-lr 0.15 --circ-sleep-interval 2 --circ-min-hidden-dim 96 --circ-max-hidden-dim 768 --circ-split-threshold 0.8 --circ-prune-threshold 0.65 --circ-max-split-per-sleep 2 --circ-max-prune-per-sleep 2
 ```
 
 ResNet-50 benchmark focuses on:
