@@ -3,6 +3,7 @@
 ## Responsibilities
 
 - Define model behavior (`BackpropMLP`, `PredictiveCodingNetwork`)
+- Define model behavior (`BackpropMLP`, `PredictiveCodingNetwork`, `CircadianPredictiveCodingNetwork`)
 - Provide activation utilities
 - Define neuron adaptation interfaces and traffic summaries
 
@@ -16,4 +17,3 @@
 - CLI handling
 - Environment configuration
 - Dataset generation and external IO
-
