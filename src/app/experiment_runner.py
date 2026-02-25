@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from src.core.backprop_mlp import BackpropMLP
+from src.core.circadian_predictive_coding import CircadianPredictiveCodingNetwork
 from src.core.neuron_adaptation import (
     LayerTraffic,
     NeuronAdaptationPolicy,
@@ -26,6 +27,10 @@ class ExperimentConfig:
     pc_learning_rate: float = 0.05
     pc_inference_steps: int = 25
     pc_inference_learning_rate: float = 0.2
+    circadian_learning_rate: float = 0.05
+    circadian_inference_steps: int = 25
+    circadian_inference_learning_rate: float = 0.2
+    circadian_sleep_interval: int = 40
     random_seed: int = 7
 
 
@@ -39,18 +44,31 @@ class ModelReport:
 
 
 @dataclass(frozen=True)
+class CircadianSleepSummary:
+    """Sleep-event summary for the circadian model."""
+
+    event_count: int
+    total_splits: int
+    total_prunes: int
+    hidden_dim_start: int
+    hidden_dim_end: int
+
+
+@dataclass(frozen=True)
 class ExperimentResult:
     """End-to-end comparison output."""
 
     backprop: ModelReport
     predictive_coding: ModelReport
+    circadian_predictive_coding: ModelReport
+    circadian_sleep: CircadianSleepSummary
 
 
 def run_experiment(
     config: ExperimentConfig,
     adaptation_policy: NeuronAdaptationPolicy | None = None,
 ) -> ExperimentResult:
-    """Train both models on the same data and return comparable reports."""
+    """Train all three models on the same data and return comparable reports."""
     policy = adaptation_policy or NoOpNeuronAdaptationPolicy()
     dataset = generate_two_cluster_dataset(
         sample_count=config.sample_count,
@@ -62,10 +80,20 @@ def run_experiment(
     predictive_coding_model = PredictiveCodingNetwork(
         input_dim=2, hidden_dim=config.hidden_dim, seed=config.random_seed + 1
     )
+    circadian_model = CircadianPredictiveCodingNetwork(
+        input_dim=2, hidden_dim=config.hidden_dim, seed=config.random_seed + 2
+    )
 
     backprop_losses: list[float] = []
     predictive_coding_energies: list[float] = []
-    for _ in range(config.epoch_count):
+    circadian_energies: list[float] = []
+
+    sleep_event_count = 0
+    total_splits = 0
+    total_prunes = 0
+    hidden_dim_start = circadian_model.hidden_dim
+
+    for epoch_index in range(1, config.epoch_count + 1):
         backprop_step = backprop_model.train_epoch(
             input_batch=dataset.train_input,
             target_batch=dataset.train_target,
@@ -82,11 +110,28 @@ def run_experiment(
         )
         predictive_coding_energies.append(predictive_coding_step.energy)
 
+        circadian_step = circadian_model.train_epoch(
+            input_batch=dataset.train_input,
+            target_batch=dataset.train_target,
+            learning_rate=config.circadian_learning_rate,
+            inference_steps=config.circadian_inference_steps,
+            inference_learning_rate=config.circadian_inference_learning_rate,
+        )
+        circadian_energies.append(circadian_step.energy)
+
+        if config.circadian_sleep_interval > 0 and epoch_index % config.circadian_sleep_interval == 0:
+            sleep_result = circadian_model.sleep_event()
+            sleep_event_count += 1
+            total_splits += len(sleep_result.split_indices)
+            total_prunes += len(sleep_result.pruned_indices)
+
     backprop_traffic = backprop_model.get_layer_traffic()
     predictive_coding_traffic = predictive_coding_model.get_layer_traffic()
+    circadian_traffic = circadian_model.get_layer_traffic()
 
     backprop_model.apply_neuron_proposals(policy.propose(backprop_traffic))
     predictive_coding_model.apply_neuron_proposals(policy.propose(predictive_coding_traffic))
+    circadian_model.apply_neuron_proposals(policy.propose(circadian_traffic))
 
     backprop_accuracy = backprop_model.compute_accuracy(
         dataset.test_input, dataset.test_target
@@ -94,6 +139,7 @@ def run_experiment(
     predictive_coding_accuracy = predictive_coding_model.compute_accuracy(
         dataset.test_input, dataset.test_target
     )
+    circadian_accuracy = circadian_model.compute_accuracy(dataset.test_input, dataset.test_target)
 
     return ExperimentResult(
         backprop=ModelReport(
@@ -106,6 +152,18 @@ def run_experiment(
             test_accuracy=predictive_coding_accuracy,
             traffic_by_layer=predictive_coding_traffic,
         ),
+        circadian_predictive_coding=ModelReport(
+            loss_history=circadian_energies,
+            test_accuracy=circadian_accuracy,
+            traffic_by_layer=circadian_traffic,
+        ),
+        circadian_sleep=CircadianSleepSummary(
+            event_count=sleep_event_count,
+            total_splits=total_splits,
+            total_prunes=total_prunes,
+            hidden_dim_start=hidden_dim_start,
+            hidden_dim_end=circadian_model.hidden_dim,
+        ),
     )
 
 
@@ -115,22 +173,42 @@ def format_experiment_result(result: ExperimentResult) -> str:
     bp_end = result.backprop.loss_history[-1]
     pc_start = result.predictive_coding.loss_history[0]
     pc_end = result.predictive_coding.loss_history[-1]
+    cpc_start = result.circadian_predictive_coding.loss_history[0]
+    cpc_end = result.circadian_predictive_coding.loss_history[-1]
 
     return "\n".join(
         [
-            "Predictive Coding vs Backprop Baseline",
-            "--------------------------------------",
+            "Backprop vs Predictive Coding vs Circadian Predictive Coding",
+            "------------------------------------------------------------",
             f"Backprop loss: {bp_start:.4f} -> {bp_end:.4f}",
             f"Backprop test accuracy: {result.backprop.test_accuracy:.3f}",
             f"Predictive coding energy: {pc_start:.4f} -> {pc_end:.4f}",
             f"Predictive coding test accuracy: {result.predictive_coding.test_accuracy:.3f}",
+            f"Circadian predictive coding energy: {cpc_start:.4f} -> {cpc_end:.4f}",
+            f"Circadian predictive coding test accuracy: {result.circadian_predictive_coding.test_accuracy:.3f}",
+            (
+                "Circadian sleep: "
+                f"events={result.circadian_sleep.event_count}, "
+                f"splits={result.circadian_sleep.total_splits}, "
+                f"prunes={result.circadian_sleep.total_prunes}, "
+                f"hidden_dim={result.circadian_sleep.hidden_dim_start}"
+                f"->{result.circadian_sleep.hidden_dim_end}"
+            ),
             "",
-            "Traffic snapshot (mean absolute activation, hidden layer):",
+            "Traffic snapshot (mean absolute activation):",
             "Backprop: "
             + _format_traffic_vector(result.backprop.traffic_by_layer[0].mean_abs_activation),
             "Predictive coding: "
             + _format_traffic_vector(
                 result.predictive_coding.traffic_by_layer[0].mean_abs_activation
+            ),
+            "Circadian hidden: "
+            + _format_traffic_vector(
+                result.circadian_predictive_coding.traffic_by_layer[0].mean_abs_activation
+            ),
+            "Circadian chemical: "
+            + _format_traffic_vector(
+                result.circadian_predictive_coding.traffic_by_layer[1].mean_abs_activation
             ),
         ]
     )
@@ -142,4 +220,3 @@ def _format_traffic_vector(values: object) -> str:
     else:
         rounded = [str(values)]
     return "[" + ", ".join(rounded) + "]"
-

@@ -1,8 +1,9 @@
 # Predictive Coding vs Backprop (Baseline)
 
-This project compares two learning approaches on the same toy binary-classification task:
+This project compares three learning approaches on the same toy binary-classification task:
 - A traditional one-hidden-layer neural network trained with backpropagation
 - A predictive-coding style network with iterative hidden-state inference
+- A circadian predictive-coding network with chemical state and sleep-time split/prune events
 
 It also includes a scaffold for future neuron creation/deletion policies based on neuron traffic.
 It now also includes a circadian predictive-coding variant with chemical buildup and sleep consolidation.
@@ -10,9 +11,10 @@ It now also includes a circadian predictive-coding variant with chemical buildup
 ## What It Does
 
 - Builds a synthetic 2D dataset with two noisy clusters.
-- Trains both models using the same train/test split.
-- Reports learning progress (`loss` for backprop, `energy` for predictive coding) and test accuracy.
+- Trains all three models using the same train/test split.
+- Reports learning progress (`loss` for backprop, `energy` for predictive coding variants) and test accuracy.
 - Records hidden-layer traffic (mean absolute activation) for future structural adaptation policies.
+- Supports in-depth aggregate comparisons across multiple seeds and noise levels.
 
 ## Project Structure
 
@@ -55,6 +57,12 @@ Optional CLI arguments:
 
 ```powershell
 python predictive_coding_experiment.py --samples 500 --epochs 200 --hidden-dim 16 --noise 0.75 --seed 7
+```
+
+In-depth multi-run comparison:
+
+```powershell
+python predictive_coding_experiment.py --mode indepth --samples 400 --epochs 160 --noise-levels 0.6,0.8,1.0 --seed-list 3,7,11,19,23 --sleep-interval 40
 ```
 
 ## How To Test

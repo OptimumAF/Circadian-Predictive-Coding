@@ -15,8 +15,12 @@ def test_should_run_experiment_and_return_reports() -> None:
 
     assert len(result.backprop.loss_history) == config.epoch_count
     assert len(result.predictive_coding.loss_history) == config.epoch_count
+    assert len(result.circadian_predictive_coding.loss_history) == config.epoch_count
     assert 0.0 <= result.backprop.test_accuracy <= 1.0
     assert 0.0 <= result.predictive_coding.test_accuracy <= 1.0
+    assert 0.0 <= result.circadian_predictive_coding.test_accuracy <= 1.0
     assert len(result.backprop.traffic_by_layer) == 1
     assert len(result.predictive_coding.traffic_by_layer) == 1
-
+    assert len(result.circadian_predictive_coding.traffic_by_layer) == 2
+    assert result.circadian_sleep.hidden_dim_start == config.hidden_dim
+    assert result.circadian_sleep.hidden_dim_end >= 4

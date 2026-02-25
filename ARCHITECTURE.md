@@ -8,7 +8,7 @@
   - Non-responsibilities: CLI parsing, environment loading, file/network IO
 - `src/app`
   - Responsibilities: compose dataset + models into a reproducible experiment
-  - Inputs/outputs: config objects in, experiment report out
+  - Inputs/outputs: config objects in, single-run and aggregate experiment reports out
   - Non-responsibilities: low-level math implementation
 - `src/infra`
   - Responsibilities: synthetic dataset generation
@@ -44,3 +44,5 @@ Reason: keeps comparison focused on learning rule differences rather than datase
 3. Neuron adaptation policy defined as an interface with no-op default.
 Reason: enables future growth/pruning experiments without destabilizing the baseline comparison now.
 
+4. In-depth comparison runs repeated seed/noise scenarios.
+Reason: single-run metrics are noisy; aggregate stats make differences between learning rules clearer.
