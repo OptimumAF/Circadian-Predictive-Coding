@@ -9,6 +9,11 @@
   - per-neuron chemical buildup layer
   - plasticity suppression from chemical accumulation
   - sleep events that split high-use neurons and prune low-use neurons
+  - adaptive split/prune threshold option using chemical percentiles
+  - adaptive sleep-trigger option based on energy plateau + chemical variance
+  - weight-norm-aware split/prune ranking
+  - optional gradual prune decay, replay consolidation, and homeostatic downscaling
+  - support for external `NeuronAdaptationPolicy` proposals
 - Three-model experiment runner and CLI entrypoint.
 - In-depth aggregate comparison runner (`seeds x noise levels`) with:
   - mean/std test accuracy

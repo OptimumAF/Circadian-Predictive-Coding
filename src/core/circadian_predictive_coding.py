@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass
 
 import numpy as np
@@ -13,7 +14,11 @@ from src.core.activations import (
     tanh,
     tanh_derivative_from_linear,
 )
-from src.core.neuron_adaptation import LayerTraffic, NeuronChangeProposal
+from src.core.neuron_adaptation import (
+    LayerTraffic,
+    NeuronAdaptationPolicy,
+    NeuronChangeProposal,
+)
 from src.core.predictive_coding import PredictiveCodingTrainResult
 
 Array = NDArray[np.float64]
@@ -27,12 +32,44 @@ class CircadianConfig:
     chemical_buildup_rate: float = 0.02
     plasticity_sensitivity: float = 0.7
     min_plasticity: float = 0.20
+
+    # Static thresholds are still available, but adaptive percentile thresholds
+    # can be enabled to react to changing chemical distributions over training.
+    use_adaptive_thresholds: bool = False
+    adaptive_split_percentile: float = 85.0
+    adaptive_prune_percentile: float = 20.0
     split_threshold: float = 0.80
     prune_threshold: float = 0.08
+
+    # Blend chemical accumulation and output weight-norm for split/prune ranking.
+    split_weight_norm_mix: float = 0.30
+    prune_weight_norm_mix: float = 0.30
+
     max_split_per_sleep: int = 2
     max_prune_per_sleep: int = 2
     split_noise_scale: float = 0.02
     sleep_reset_factor: float = 0.45
+
+    # Adaptive sleep trigger (optional) based on energy plateau and chemistry variance.
+    use_adaptive_sleep_trigger: bool = False
+    min_epochs_between_sleep: int = 10
+    sleep_energy_window: int = 8
+    sleep_plateau_delta: float = 1e-3
+    sleep_chemical_variance_threshold: float = 0.02
+
+    # Gradual pruning: marked neurons decay for a few epochs before removal.
+    prune_decay_steps: int = 1
+    prune_decay_factor: float = 0.60
+
+    # Optional post-sleep global downscaling for homeostasis.
+    homeostatic_downscale_factor: float = 1.0
+
+    # Optional replay-style consolidation from a small recent-memory buffer.
+    replay_steps: int = 0
+    replay_memory_size: int = 8
+    replay_learning_rate: float = 0.01
+    replay_inference_steps: int = 12
+    replay_inference_learning_rate: float = 0.15
 
 
 @dataclass(frozen=True)
@@ -87,6 +124,15 @@ class CircadianPredictiveCodingNetwork:
         self._traffic_sum = np.zeros(hidden_dim, dtype=np.float64)
         self._traffic_steps = 0
         self._min_hidden_dim = min_hidden_dim
+        self._prune_ttl = np.zeros(hidden_dim, dtype=np.int32)
+        self._prune_marked = np.zeros(hidden_dim, dtype=bool)
+
+        self._epoch_count = 0
+        self._epochs_since_sleep = 0
+        self._energy_history: list[float] = []
+        self._replay_memory: deque[tuple[Array, Array]] = deque(
+            maxlen=self.config.replay_memory_size
+        )
 
     @property
     def hidden_dim(self) -> int:
@@ -101,12 +147,35 @@ class CircadianPredictiveCodingNetwork:
         inference_steps: int,
         inference_learning_rate: float,
     ) -> PredictiveCodingTrainResult:
+        energy = self._run_training_step(
+            input_batch=input_batch,
+            target_batch=target_batch,
+            learning_rate=learning_rate,
+            inference_steps=inference_steps,
+            inference_learning_rate=inference_learning_rate,
+            update_epoch_state=True,
+            store_replay_snapshot=True,
+        )
+        return PredictiveCodingTrainResult(energy=energy)
+
+    def _run_training_step(
+        self,
+        input_batch: Array,
+        target_batch: Array,
+        learning_rate: float,
+        inference_steps: int,
+        inference_learning_rate: float,
+        update_epoch_state: bool,
+        store_replay_snapshot: bool,
+    ) -> float:
         if learning_rate <= 0.0:
             raise ValueError("learning_rate must be positive")
         if inference_steps <= 0:
             raise ValueError("inference_steps must be positive")
         if inference_learning_rate <= 0.0:
             raise ValueError("inference_learning_rate must be positive")
+
+        self._apply_prune_decay_step()
 
         hidden_linear_prior = input_batch @ self.weight_input_hidden + self.bias_hidden
         hidden_prior = tanh(hidden_linear_prior)
@@ -152,19 +221,66 @@ class CircadianPredictiveCodingNetwork:
 
         self._record_hidden_traffic(hidden_state)
         energy = self._compute_energy(output_error, hidden_error)
-        return PredictiveCodingTrainResult(energy=energy)
+        if update_epoch_state:
+            self._epoch_count += 1
+            self._epochs_since_sleep += 1
+            self._energy_history.append(energy)
+            max_history = max(self.config.sleep_energy_window * 4, 16)
+            if len(self._energy_history) > max_history:
+                self._energy_history = self._energy_history[-max_history:]
+        if store_replay_snapshot:
+            self._store_replay_snapshot(input_batch, target_batch)
+        return energy
 
-    def sleep_event(self) -> SleepEventResult:
-        """Consolidate network structure using chemical accumulation."""
+    def should_trigger_sleep(self) -> bool:
+        """Return whether adaptive sleep criteria indicate consolidation is needed."""
+        if not self.config.use_adaptive_sleep_trigger:
+            return False
+        if self._epochs_since_sleep < self.config.min_epochs_between_sleep:
+            return False
+        if len(self._energy_history) < self.config.sleep_energy_window:
+            return False
+
+        recent = self._energy_history[-self.config.sleep_energy_window :]
+        energy_improvement = recent[0] - recent[-1]
+        plateau = energy_improvement <= self.config.sleep_plateau_delta
+        chemical_variance = float(np.var(self._hidden_chemical))
+        high_chemical_variance = (
+            chemical_variance >= self.config.sleep_chemical_variance_threshold
+        )
+        return plateau and high_chemical_variance
+
+    def sleep_event(
+        self,
+        adaptation_policy: NeuronAdaptationPolicy | None = None,
+        force_sleep: bool = True,
+    ) -> SleepEventResult:
+        """Consolidate structure; optionally trigger only when adaptive criteria fire."""
+        if not force_sleep and not self.should_trigger_sleep():
+            return SleepEventResult(
+                old_hidden_dim=self.hidden_dim,
+                new_hidden_dim=self.hidden_dim,
+                split_indices=(),
+                pruned_indices=(),
+            )
+
         old_hidden_dim = self.hidden_dim
-        split_indices = self._select_split_indices()
+        split_indices: tuple[int, ...]
+        pruned_indices: tuple[int, ...]
+        if adaptation_policy is None:
+            split_indices = self._select_split_indices()
+            pruned_indices = self._select_prune_indices()
+        else:
+            split_indices, pruned_indices = self._derive_indices_from_policy(adaptation_policy)
+
         self._split_neurons(split_indices)
+        self._schedule_or_prune(pruned_indices)
+        self._apply_homeostatic_downscaling()
+        self._run_replay_consolidation()
 
-        pruned_indices = self._select_prune_indices()
-        self._prune_neurons(pruned_indices)
-
-        # Sleep partially clears chemistry after consolidation.
+        # Sleep partially clears chemistry after consolidation to reset plasticity gate.
         self._hidden_chemical *= self.config.sleep_reset_factor
+        self._epochs_since_sleep = 0
 
         return SleepEventResult(
             old_hidden_dim=old_hidden_dim,
@@ -215,11 +331,9 @@ class CircadianPredictiveCodingNetwork:
         return np.clip(plasticity, self.config.min_plasticity, 1.0)
 
     def apply_neuron_proposals(self, proposals: list[NeuronChangeProposal]) -> None:
-        for proposal in proposals:
-            if proposal.add_count > 0 or proposal.remove_indices:
-                raise NotImplementedError(
-                    "CircadianPredictiveCodingNetwork uses sleep_event() for structural updates."
-                )
+        split_indices, prune_indices = self._indices_from_proposals(proposals)
+        self._split_neurons(split_indices)
+        self._schedule_or_prune(prune_indices)
 
     def _compute_energy(self, output_error: Array, hidden_error: Array) -> float:
         return float(0.5 * (np.mean(np.square(output_error)) + np.mean(np.square(hidden_error))))
@@ -236,16 +350,18 @@ class CircadianPredictiveCodingNetwork:
         )
 
     def _select_split_indices(self) -> tuple[int, ...]:
+        split_threshold, _ = self._resolve_split_prune_thresholds()
         current_dim = self.hidden_dim
         remaining_capacity = self.max_hidden_dim - current_dim
         if remaining_capacity <= 0 or self.config.max_split_per_sleep <= 0:
             return ()
 
-        candidates = np.where(self._hidden_chemical >= self.config.split_threshold)[0]
+        candidates = np.where(self._hidden_chemical >= split_threshold)[0]
         if candidates.size == 0:
             return ()
 
-        sorted_candidates = candidates[np.argsort(self._hidden_chemical[candidates])[::-1]]
+        split_scores = self._compute_split_scores()
+        sorted_candidates = candidates[np.argsort(split_scores[candidates])[::-1]]
         split_count = min(
             int(sorted_candidates.size),
             int(self.config.max_split_per_sleep),
@@ -255,15 +371,19 @@ class CircadianPredictiveCodingNetwork:
         return tuple(int(index) for index in chosen.tolist())
 
     def _select_prune_indices(self) -> tuple[int, ...]:
+        _, prune_threshold = self._resolve_split_prune_thresholds()
         removable = self.hidden_dim - self._min_hidden_dim
         if removable <= 0 or self.config.max_prune_per_sleep <= 0:
             return ()
 
-        candidates = np.where(self._hidden_chemical <= self.config.prune_threshold)[0]
+        candidates = np.where(
+            np.logical_and(self._hidden_chemical <= prune_threshold, ~self._prune_marked)
+        )[0]
         if candidates.size == 0:
             return ()
 
-        sorted_candidates = candidates[np.argsort(self._hidden_chemical[candidates])]
+        prune_scores = self._compute_prune_scores()
+        sorted_candidates = candidates[np.argsort(prune_scores[candidates])[::-1]]
         prune_count = min(
             int(sorted_candidates.size),
             int(self.config.max_prune_per_sleep),
@@ -271,6 +391,72 @@ class CircadianPredictiveCodingNetwork:
         )
         chosen = sorted_candidates[:prune_count]
         return tuple(sorted(int(index) for index in chosen.tolist()))
+
+    def _resolve_split_prune_thresholds(self) -> tuple[float, float]:
+        if not self.config.use_adaptive_thresholds:
+            return self.config.split_threshold, self.config.prune_threshold
+
+        split_threshold = float(
+            np.percentile(self._hidden_chemical, self.config.adaptive_split_percentile)
+        )
+        prune_threshold = float(
+            np.percentile(self._hidden_chemical, self.config.adaptive_prune_percentile)
+        )
+        return split_threshold, prune_threshold
+
+    def _compute_split_scores(self) -> Array:
+        chemical_component = self._normalize_vector(self._hidden_chemical)
+        output_weight_norm = np.linalg.norm(self.weight_hidden_output, axis=1)
+        norm_component = self._normalize_vector(output_weight_norm)
+        mix = np.clip(self.config.split_weight_norm_mix, 0.0, 1.0)
+        return (1.0 - mix) * chemical_component + mix * norm_component
+
+    def _compute_prune_scores(self) -> Array:
+        chemical_component = 1.0 - self._normalize_vector(self._hidden_chemical)
+        output_weight_norm = np.linalg.norm(self.weight_hidden_output, axis=1)
+        norm_component = 1.0 - self._normalize_vector(output_weight_norm)
+        mix = np.clip(self.config.prune_weight_norm_mix, 0.0, 1.0)
+        return (1.0 - mix) * chemical_component + mix * norm_component
+
+    def _normalize_vector(self, values: Array) -> Array:
+        max_value = float(np.max(values))
+        min_value = float(np.min(values))
+        span = max_value - min_value
+        if span <= 1e-12:
+            return np.ones_like(values)
+        return (values - min_value) / span
+
+    def _derive_indices_from_policy(
+        self, adaptation_policy: NeuronAdaptationPolicy
+    ) -> tuple[tuple[int, ...], tuple[int, ...]]:
+        traffic = self.get_layer_traffic()
+        proposals = adaptation_policy.propose(traffic)
+        return self._indices_from_proposals(proposals)
+
+    def _indices_from_proposals(
+        self, proposals: list[NeuronChangeProposal]
+    ) -> tuple[tuple[int, ...], tuple[int, ...]]:
+        add_count = 0
+        remove_indices: set[int] = set()
+        for proposal in proposals:
+            if proposal.layer_name != "hidden":
+                continue
+            add_count += max(0, int(proposal.add_count))
+            for index in proposal.remove_indices:
+                if 0 <= int(index) < self.hidden_dim:
+                    remove_indices.add(int(index))
+
+        split_candidates = list(self._select_split_indices())
+        if add_count > len(split_candidates):
+            split_rank = np.argsort(self._compute_split_scores())[::-1]
+            for index in split_rank.tolist():
+                if index not in split_candidates:
+                    split_candidates.append(int(index))
+                if len(split_candidates) >= add_count:
+                    break
+        split_indices = tuple(split_candidates[:add_count]) if add_count > 0 else ()
+        prune_indices = tuple(sorted(remove_indices))
+        return split_indices, prune_indices
 
     def _split_neurons(self, split_indices: tuple[int, ...]) -> None:
         if not split_indices:
@@ -287,14 +473,16 @@ class CircadianPredictiveCodingNetwork:
             output_row = self.weight_hidden_output[index, :]
             bias_value = float(self.bias_hidden[0, index])
             chemical_value = float(self._hidden_chemical[index])
+            parent_norm = float(np.linalg.norm(output_row))
+            noise_scale = self.config.split_noise_scale * max(parent_norm, 1e-3)
 
             input_noise = self._rng.normal(
-                loc=0.0, scale=self.config.split_noise_scale, size=input_column.shape
+                loc=0.0, scale=noise_scale, size=input_column.shape
             )
             output_noise = self._rng.normal(
-                loc=0.0, scale=self.config.split_noise_scale, size=output_row.shape
+                loc=0.0, scale=noise_scale, size=output_row.shape
             )
-            bias_noise = float(self._rng.normal(loc=0.0, scale=self.config.split_noise_scale))
+            bias_noise = float(self._rng.normal(loc=0.0, scale=noise_scale))
 
             new_in_columns.append((input_column + input_noise).astype(np.float64))
             new_out_rows.append((output_row + output_noise).astype(np.float64))
@@ -319,18 +507,95 @@ class CircadianPredictiveCodingNetwork:
         self._traffic_sum = np.concatenate(
             [self._traffic_sum, np.array(new_traffic_values, dtype=np.float64)]
         )
+        self._prune_ttl = np.concatenate(
+            [self._prune_ttl, np.zeros(len(split_indices), dtype=np.int32)]
+        )
+        self._prune_marked = np.concatenate(
+            [self._prune_marked, np.zeros(len(split_indices), dtype=bool)]
+        )
 
-    def _prune_neurons(self, prune_indices: tuple[int, ...]) -> None:
+    def _schedule_or_prune(self, prune_indices: tuple[int, ...]) -> None:
         if not prune_indices:
             return
+        if self.config.prune_decay_steps <= 1:
+            self._remove_neurons(prune_indices)
+            return
+
+        for index in prune_indices:
+            if 0 <= index < self.hidden_dim:
+                self._prune_marked[index] = True
+                self._prune_ttl[index] = self.config.prune_decay_steps
+
+    def _apply_prune_decay_step(self) -> None:
+        if self.config.prune_decay_steps <= 1:
+            return
+        active_indices = np.where(self._prune_marked)[0]
+        if active_indices.size == 0:
+            return
+
+        decay_factor = self.config.prune_decay_factor
+        self.weight_input_hidden[:, active_indices] *= decay_factor
+        self.weight_hidden_output[active_indices, :] *= decay_factor
+        self.bias_hidden[:, active_indices] *= decay_factor
+        self._hidden_chemical[active_indices] *= decay_factor
+        self._traffic_sum[active_indices] *= decay_factor
+
+        self._prune_ttl[active_indices] -= 1
+        finalize_indices = np.where(np.logical_and(self._prune_marked, self._prune_ttl <= 0))[0]
+        if finalize_indices.size > 0:
+            self._remove_neurons(tuple(int(index) for index in finalize_indices.tolist()))
+
+    def _remove_neurons(self, prune_indices: tuple[int, ...]) -> None:
+        unique_indices = sorted({index for index in prune_indices if 0 <= index < self.hidden_dim})
+        if not unique_indices:
+            return
+        if self.hidden_dim - len(unique_indices) < self._min_hidden_dim:
+            allowed = self.hidden_dim - self._min_hidden_dim
+            unique_indices = unique_indices[:allowed]
+        if not unique_indices:
+            return
+
         mask = np.ones(self.hidden_dim, dtype=bool)
-        mask[list(prune_indices)] = False
+        mask[unique_indices] = False
 
         self.weight_input_hidden = self.weight_input_hidden[:, mask]
         self.weight_hidden_output = self.weight_hidden_output[mask, :]
         self.bias_hidden = self.bias_hidden[:, mask]
         self._hidden_chemical = self._hidden_chemical[mask]
         self._traffic_sum = self._traffic_sum[mask]
+        self._prune_ttl = self._prune_ttl[mask]
+        self._prune_marked = self._prune_marked[mask]
+
+    def _apply_homeostatic_downscaling(self) -> None:
+        scale_factor = self.config.homeostatic_downscale_factor
+        if abs(scale_factor - 1.0) <= 1e-12:
+            return
+        self.weight_input_hidden *= scale_factor
+        self.weight_hidden_output *= scale_factor
+        self.bias_hidden *= scale_factor
+        self.bias_output *= scale_factor
+
+    def _store_replay_snapshot(self, input_batch: Array, target_batch: Array) -> None:
+        if self.config.replay_memory_size <= 0:
+            return
+        self._replay_memory.append((input_batch.copy(), target_batch.copy()))
+
+    def _run_replay_consolidation(self) -> None:
+        if self.config.replay_steps <= 0 or len(self._replay_memory) == 0:
+            return
+
+        replay_count = min(self.config.replay_steps, len(self._replay_memory))
+        for replay_index in range(replay_count):
+            replay_input, replay_target = self._replay_memory[-(replay_index + 1)]
+            self._run_training_step(
+                input_batch=replay_input,
+                target_batch=replay_target,
+                learning_rate=self.config.replay_learning_rate,
+                inference_steps=self.config.replay_inference_steps,
+                inference_learning_rate=self.config.replay_inference_learning_rate,
+                update_epoch_state=False,
+                store_replay_snapshot=False,
+            )
 
     def _validate_config(self, config: CircadianConfig) -> None:
         if not (0.0 <= config.chemical_decay <= 1.0):
@@ -341,9 +606,42 @@ class CircadianPredictiveCodingNetwork:
             raise ValueError("plasticity_sensitivity must be positive")
         if not (0.0 < config.min_plasticity <= 1.0):
             raise ValueError("min_plasticity must be in (0, 1]")
+        if not (0.0 <= config.split_weight_norm_mix <= 1.0):
+            raise ValueError("split_weight_norm_mix must be between 0 and 1")
+        if not (0.0 <= config.prune_weight_norm_mix <= 1.0):
+            raise ValueError("prune_weight_norm_mix must be between 0 and 1")
+        if not (0.0 <= config.adaptive_split_percentile <= 100.0):
+            raise ValueError("adaptive_split_percentile must be between 0 and 100")
+        if not (0.0 <= config.adaptive_prune_percentile <= 100.0):
+            raise ValueError("adaptive_prune_percentile must be between 0 and 100")
+        if config.min_epochs_between_sleep < 0:
+            raise ValueError("min_epochs_between_sleep must be non-negative")
+        if config.sleep_energy_window <= 1:
+            raise ValueError("sleep_energy_window must be greater than 1")
+        if config.sleep_plateau_delta < 0.0:
+            raise ValueError("sleep_plateau_delta must be non-negative")
+        if config.sleep_chemical_variance_threshold < 0.0:
+            raise ValueError("sleep_chemical_variance_threshold must be non-negative")
         if config.max_split_per_sleep < 0 or config.max_prune_per_sleep < 0:
             raise ValueError("max split/prune per sleep must be non-negative")
         if config.split_noise_scale < 0.0:
             raise ValueError("split_noise_scale must be non-negative")
         if not (0.0 <= config.sleep_reset_factor <= 1.0):
             raise ValueError("sleep_reset_factor must be between 0 and 1")
+        if config.prune_decay_steps < 1:
+            raise ValueError("prune_decay_steps must be at least 1")
+        if not (0.0 < config.prune_decay_factor <= 1.0):
+            raise ValueError("prune_decay_factor must be in (0, 1]")
+        if not (0.0 < config.homeostatic_downscale_factor <= 1.0):
+            raise ValueError("homeostatic_downscale_factor must be in (0, 1]")
+        if config.replay_steps < 0:
+            raise ValueError("replay_steps must be non-negative")
+        if config.replay_memory_size < 0:
+            raise ValueError("replay_memory_size must be non-negative")
+        if config.replay_steps > 0:
+            if config.replay_learning_rate <= 0.0:
+                raise ValueError("replay_learning_rate must be positive")
+            if config.replay_inference_steps <= 0:
+                raise ValueError("replay_inference_steps must be positive")
+            if config.replay_inference_learning_rate <= 0.0:
+                raise ValueError("replay_inference_learning_rate must be positive")

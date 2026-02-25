@@ -157,3 +157,11 @@ for _ in range(120):
 sleep_report = model.sleep_event()
 print(sleep_report)
 ```
+
+Circadian model supports optional advanced mechanisms through `CircadianConfig`:
+- adaptive split/prune thresholds via chemical percentiles
+- adaptive sleep triggering (energy plateau + chemical variance)
+- weight-norm-aware split/prune ranking
+- gradual prune decay and delayed removal
+- replay-style consolidation during sleep
+- homeostatic downscaling after sleep
