@@ -134,7 +134,7 @@ def test_should_restore_snapshot_after_structure_change_in_torch_head() -> None:
         split_threshold=0.7,
         prune_threshold=0.05,
         max_split_per_sleep=1,
-        max_prune_per_sleep=1,
+        max_prune_per_sleep=0,
         split_noise_scale=0.0,
     )
     head = CircadianPredictiveCodingHead(
