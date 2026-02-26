@@ -45,3 +45,13 @@ def test_should_run_resnet50_benchmark_and_return_three_reports() -> None:
         assert 0.0 <= report.test_accuracy <= 1.0
         assert report.total_parameters > 0
         assert report.trainable_parameters > 0
+        assert report.circadian_total_rollbacks >= 0
+
+
+def test_should_validate_new_sleep_config_values() -> None:
+    config = ResNet50BenchmarkConfig(
+        circadian_sleep_energy_window=1,
+    )
+
+    with pytest.raises(ValueError):
+        _ = run_resnet50_benchmark(config)

@@ -93,7 +93,8 @@ def main() -> None:
             f"acc={report.test_accuracy:.4f} train_sps={report.train_samples_per_second:.1f} "
             f"infer_sps={report.inference_samples_per_second:.1f} "
             f"hidden={report.circadian_hidden_dim_start}->{report.circadian_hidden_dim_end} "
-            f"split={report.circadian_total_splits} prune={report.circadian_total_prunes}"
+            f"split={report.circadian_total_splits} prune={report.circadian_total_prunes} "
+            f"rollback={report.circadian_total_rollbacks}"
         )
 
     scores = compute_balanced_scores(trials)
@@ -268,6 +269,7 @@ def report_to_dict(report: Any) -> dict[str, Any]:
         "circadian_hidden_dim_end": report.circadian_hidden_dim_end,
         "circadian_total_splits": report.circadian_total_splits,
         "circadian_total_prunes": report.circadian_total_prunes,
+        "circadian_total_rollbacks": report.circadian_total_rollbacks,
     }
 
 

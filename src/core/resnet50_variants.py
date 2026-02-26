@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import cast
 from typing import Any
 
 from src.shared.torch_runtime import require_torch, require_torchvision_models
@@ -55,6 +56,11 @@ class CircadianHeadConfig:
     homeostasis_target_input_norm: float = 0.0
     homeostasis_target_output_norm: float = 0.0
     homeostasis_strength: float = 0.50
+    use_adaptive_sleep_trigger: bool = False
+    min_sleep_steps: int = 40
+    sleep_energy_window: int = 32
+    sleep_plateau_delta: float = 1e-4
+    sleep_chemical_variance_threshold: float = 0.02
 
 
 @dataclass(frozen=True)
@@ -289,6 +295,8 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self._importance_ema = torch.zeros(hidden_dim, dtype=torch.float32, device=device)
         self._split_cooldown = torch.zeros(hidden_dim, dtype=torch.int32, device=device)
         self._prune_cooldown = torch.zeros(hidden_dim, dtype=torch.int32, device=device)
+        self._steps_since_sleep = 0
+        self._energy_history: list[float] = []
         generator_device = "cuda" if str(device).startswith("cuda") else "cpu"
         generator = torch.Generator(device=generator_device)
         generator.manual_seed(seed + 9_999)
@@ -350,11 +358,27 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self._neuron_age = self._neuron_age + 1.0
 
         energy = 0.5 * (torch.mean(output_error * output_error) + torch.mean(hidden_error * hidden_error))
-        return float(energy.item())
+        energy_value = float(energy.item())
+        self._steps_since_sleep += 1
+        self._energy_history.append(energy_value)
+        max_history = max(self.config.sleep_energy_window * 4, 16)
+        if len(self._energy_history) > max_history:
+            self._energy_history = self._energy_history[-max_history:]
+        return energy_value
 
     def sleep_event(
-        self, current_step: int | None = None, total_steps: int | None = None
+        self,
+        current_step: int | None = None,
+        total_steps: int | None = None,
+        force_sleep: bool = True,
     ) -> SleepEventResult:
+        if not force_sleep and not self.should_trigger_sleep():
+            return SleepEventResult(
+                old_hidden_dim=self.hidden_dim,
+                new_hidden_dim=self.hidden_dim,
+                split_indices=(),
+                pruned_indices=(),
+            )
         split_budget, prune_budget, should_skip = self._resolve_sleep_budgets(
             current_step=current_step,
             total_steps=total_steps,
@@ -378,12 +402,66 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         if self.config.use_dual_chemical:
             self._chemical_fast = self._chemical_fast * self.config.sleep_reset_factor
             self._chemical_slow = self._chemical_slow * self.config.sleep_reset_factor
+        self._steps_since_sleep = 0
         return SleepEventResult(
             old_hidden_dim=old_hidden_dim,
             new_hidden_dim=self.hidden_dim,
             split_indices=split_indices,
             pruned_indices=prune_indices,
         )
+
+    def should_trigger_sleep(self) -> bool:
+        if not self.config.use_adaptive_sleep_trigger:
+            return False
+        if self._steps_since_sleep < self.config.min_sleep_steps:
+            return False
+        if len(self._energy_history) < self.config.sleep_energy_window:
+            return False
+
+        recent = self._energy_history[-self.config.sleep_energy_window :]
+        energy_improvement = recent[0] - recent[-1]
+        plateau = energy_improvement <= self.config.sleep_plateau_delta
+        chemical_variance = float(self._torch.var(self._chemical).item())
+        high_chemical_variance = (
+            chemical_variance >= self.config.sleep_chemical_variance_threshold
+        )
+        return plateau and high_chemical_variance
+
+    def snapshot_state(self) -> dict[str, Any]:
+        return {
+            "weight_feature_hidden": self.weight_feature_hidden.clone(),
+            "bias_hidden": self.bias_hidden.clone(),
+            "weight_hidden_output": self.weight_hidden_output.clone(),
+            "bias_output": self.bias_output.clone(),
+            "chemical": self._chemical.clone(),
+            "chemical_fast": self._chemical_fast.clone(),
+            "chemical_slow": self._chemical_slow.clone(),
+            "neuron_age": self._neuron_age.clone(),
+            "importance_ema": self._importance_ema.clone(),
+            "traffic_sum": self._traffic_sum.clone(),
+            "traffic_steps": self._traffic_steps,
+            "split_cooldown": self._split_cooldown.clone(),
+            "prune_cooldown": self._prune_cooldown.clone(),
+            "steps_since_sleep": self._steps_since_sleep,
+            "energy_history": list(self._energy_history),
+        }
+
+    def restore_state(self, state: dict[str, Any]) -> None:
+        self.weight_feature_hidden = cast(Any, state["weight_feature_hidden"]).clone()
+        self.bias_hidden = cast(Any, state["bias_hidden"]).clone()
+        self.weight_hidden_output = cast(Any, state["weight_hidden_output"]).clone()
+        self.bias_output = cast(Any, state["bias_output"]).clone()
+        self._chemical = cast(Any, state["chemical"]).clone()
+        self._chemical_fast = cast(Any, state["chemical_fast"]).clone()
+        self._chemical_slow = cast(Any, state["chemical_slow"]).clone()
+        self._neuron_age = cast(Any, state["neuron_age"]).clone()
+        self._importance_ema = cast(Any, state["importance_ema"]).clone()
+        self._traffic_sum = cast(Any, state["traffic_sum"]).clone()
+        self._traffic_steps = int(state["traffic_steps"])
+        self._split_cooldown = cast(Any, state["split_cooldown"]).clone()
+        self._prune_cooldown = cast(Any, state["prune_cooldown"]).clone()
+        self._steps_since_sleep = int(state["steps_since_sleep"])
+        self._energy_history = list(cast(list[float], state["energy_history"]))
 
     def mean_chemical(self) -> Any:
         return self._chemical.clone()
@@ -796,6 +874,14 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             raise ValueError("homeostasis target norms must be non-negative.")
         if not (0.0 < config.homeostasis_strength <= 1.0):
             raise ValueError("homeostasis_strength must be in (0, 1].")
+        if config.min_sleep_steps < 0:
+            raise ValueError("min_sleep_steps must be non-negative.")
+        if config.sleep_energy_window < 2:
+            raise ValueError("sleep_energy_window must be at least 2.")
+        if config.sleep_plateau_delta < 0.0:
+            raise ValueError("sleep_plateau_delta must be non-negative.")
+        if config.sleep_chemical_variance_threshold < 0.0:
+            raise ValueError("sleep_chemical_variance_threshold must be non-negative.")
 
 
 class PredictiveCodingResNet50Classifier:
@@ -924,9 +1010,25 @@ class CircadianPredictiveCodingResNet50Classifier:
         return self.head.predict_logits(features)
 
     def sleep_event(
-        self, current_step: int | None = None, total_steps: int | None = None
+        self,
+        current_step: int | None = None,
+        total_steps: int | None = None,
+        force_sleep: bool = True,
     ) -> SleepEventResult:
-        return self.head.sleep_event(current_step=current_step, total_steps=total_steps)
+        return self.head.sleep_event(
+            current_step=current_step,
+            total_steps=total_steps,
+            force_sleep=force_sleep,
+        )
+
+    def should_trigger_sleep(self) -> bool:
+        return self.head.should_trigger_sleep()
+
+    def snapshot_state(self) -> dict[str, Any]:
+        return self.head.snapshot_state()
+
+    def restore_state(self, state: dict[str, Any]) -> None:
+        self.head.restore_state(state)
 
     def parameter_count(self) -> int:
         return _count_parameters(self.backbone) + self.head.parameter_count()

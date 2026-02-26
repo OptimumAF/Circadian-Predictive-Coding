@@ -51,6 +51,14 @@ class ResNet50BenchmarkConfig:
     circadian_inference_steps: int = 10
     circadian_inference_learning_rate: float = 0.15
     circadian_sleep_interval: int = 2
+    circadian_force_sleep: bool = True
+    circadian_use_adaptive_sleep_trigger: bool = False
+    circadian_min_sleep_steps: int = 40
+    circadian_sleep_energy_window: int = 32
+    circadian_sleep_plateau_delta: float = 1e-4
+    circadian_sleep_chemical_variance_threshold: float = 0.02
+    circadian_enable_sleep_rollback: bool = False
+    circadian_sleep_rollback_tolerance: float = 0.01
     circadian_min_hidden_dim: int = 96
     circadian_max_hidden_dim: int = 1024
     circadian_chemical_decay: float = 0.995
@@ -119,6 +127,7 @@ class ModelSpeedReport:
     circadian_hidden_dim_end: int | None = None
     circadian_total_splits: int = 0
     circadian_total_prunes: int = 0
+    circadian_total_rollbacks: int = 0
 
 
 @dataclass(frozen=True)
@@ -215,7 +224,9 @@ def format_resnet50_benchmark_result(result: ResNet50BenchmarkResult) -> str:
                 (
                     "  circadian sleep: "
                     f"hidden={report.circadian_hidden_dim_start}->{report.circadian_hidden_dim_end}, "
-                    f"splits={report.circadian_total_splits}, prunes={report.circadian_total_prunes}"
+                    f"splits={report.circadian_total_splits}, "
+                    f"prunes={report.circadian_total_prunes}, "
+                    f"rollbacks={report.circadian_total_rollbacks}"
                 )
             )
         lines.append("")
@@ -432,6 +443,11 @@ def _benchmark_circadian(
         homeostasis_target_input_norm=config.circadian_homeostasis_target_input_norm,
         homeostasis_target_output_norm=config.circadian_homeostasis_target_output_norm,
         homeostasis_strength=config.circadian_homeostasis_strength,
+        use_adaptive_sleep_trigger=config.circadian_use_adaptive_sleep_trigger,
+        min_sleep_steps=config.circadian_min_sleep_steps,
+        sleep_energy_window=config.circadian_sleep_energy_window,
+        sleep_plateau_delta=config.circadian_sleep_plateau_delta,
+        sleep_chemical_variance_threshold=config.circadian_sleep_chemical_variance_threshold,
     )
     model = CircadianPredictiveCodingResNet50Classifier(
         num_classes=loaders.num_classes,
@@ -447,6 +463,7 @@ def _benchmark_circadian(
     hidden_dim_start = model.head.hidden_dim
     sleep_splits = 0
     sleep_prunes = 0
+    sleep_rollbacks = 0
 
     step_times_ms: list[float] = []
     seen_samples = 0
@@ -474,8 +491,43 @@ def _benchmark_circadian(
             final_energy = float(energy)
             seen_samples += int(labels.shape[0])
 
-        if config.circadian_sleep_interval > 0 and epoch % config.circadian_sleep_interval == 0:
-            sleep_result = model.sleep_event(current_step=epoch, total_steps=config.epochs)
+        interval_triggered = (
+            config.circadian_sleep_interval > 0 and epoch % config.circadian_sleep_interval == 0
+        )
+        adaptive_triggered = (
+            config.circadian_use_adaptive_sleep_trigger and model.should_trigger_sleep()
+        )
+        if interval_triggered or adaptive_triggered:
+            maybe_snapshot = None
+            pre_sleep_accuracy = 0.0
+            if config.circadian_enable_sleep_rollback:
+                maybe_snapshot = model.snapshot_state()
+                pre_sleep_accuracy = _compute_pc_accuracy(
+                    torch, model, loaders.test_loader, device
+                )
+
+            force_sleep = config.circadian_force_sleep and interval_triggered
+            sleep_result = model.sleep_event(
+                current_step=epoch,
+                total_steps=config.epochs,
+                force_sleep=force_sleep,
+            )
+
+            if config.circadian_enable_sleep_rollback and maybe_snapshot is not None:
+                post_sleep_accuracy = _compute_pc_accuracy(
+                    torch, model, loaders.test_loader, device
+                )
+                accuracy_drop = pre_sleep_accuracy - post_sleep_accuracy
+                if accuracy_drop > config.circadian_sleep_rollback_tolerance:
+                    model.restore_state(maybe_snapshot)
+                    sleep_rollbacks += 1
+                    sleep_result = type(sleep_result)(
+                        old_hidden_dim=model.head.hidden_dim,
+                        new_hidden_dim=model.head.hidden_dim,
+                        split_indices=(),
+                        pruned_indices=(),
+                    )
+
             sleep_splits += len(sleep_result.split_indices)
             sleep_prunes += len(sleep_result.pruned_indices)
 
@@ -514,6 +566,7 @@ def _benchmark_circadian(
         circadian_hidden_dim_end=model.head.hidden_dim,
         circadian_total_splits=sleep_splits,
         circadian_total_prunes=sleep_prunes,
+        circadian_total_rollbacks=sleep_rollbacks,
     )
 
 
@@ -633,6 +686,8 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         raise ValueError("dataset_difficulty must be one of: easy, medium, hard.")
     if config.dataset_noise_std < 0.0:
         raise ValueError("dataset_noise_std must be non-negative.")
+    if config.circadian_sleep_interval < 0:
+        raise ValueError("circadian_sleep_interval must be non-negative.")
     if config.backbone_weights not in {"none", "imagenet"}:
         raise ValueError("backbone_weights must be one of: none, imagenet.")
     if config.circadian_chemical_max_value <= 0.0:
@@ -667,6 +722,16 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         raise ValueError("circadian_sleep_min_change_count must be non-negative.")
     if config.circadian_prune_min_age_steps < 0:
         raise ValueError("circadian_prune_min_age_steps must be non-negative.")
+    if config.circadian_min_sleep_steps < 0:
+        raise ValueError("circadian_min_sleep_steps must be non-negative.")
+    if config.circadian_sleep_energy_window < 2:
+        raise ValueError("circadian_sleep_energy_window must be at least 2.")
+    if config.circadian_sleep_plateau_delta < 0.0:
+        raise ValueError("circadian_sleep_plateau_delta must be non-negative.")
+    if config.circadian_sleep_chemical_variance_threshold < 0.0:
+        raise ValueError("circadian_sleep_chemical_variance_threshold must be non-negative.")
+    if config.circadian_sleep_rollback_tolerance < 0.0:
+        raise ValueError("circadian_sleep_rollback_tolerance must be non-negative.")
 
 
 def _set_seed(torch: Any, seed: int) -> None:

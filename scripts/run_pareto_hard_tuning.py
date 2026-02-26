@@ -393,7 +393,8 @@ def run_circadian_sweep(
             f"circadian {index}/{len(candidate_params)} "
             f"acc={report.test_accuracy:.4f} train_sps={report.train_samples_per_second:.1f} "
             f"hidden={report.circadian_hidden_dim_start}->{report.circadian_hidden_dim_end} "
-            f"split={report.circadian_total_splits} prune={report.circadian_total_prunes}"
+            f"split={report.circadian_total_splits} prune={report.circadian_total_prunes} "
+            f"rollback={report.circadian_total_rollbacks}"
         )
     return candidates
 
@@ -417,6 +418,7 @@ def report_to_dict(report: Any) -> dict[str, Any]:
         "circadian_hidden_dim_end": report.circadian_hidden_dim_end,
         "circadian_total_splits": report.circadian_total_splits,
         "circadian_total_prunes": report.circadian_total_prunes,
+        "circadian_total_rollbacks": report.circadian_total_rollbacks,
     }
     row["accuracy_per_train_second"] = (
         0.0 if row["train_seconds"] == 0.0 else row["test_accuracy"] / row["train_seconds"]

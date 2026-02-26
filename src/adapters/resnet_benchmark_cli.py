@@ -59,6 +59,26 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--circ-steps", type=int, default=10)
     parser.add_argument("--circ-inference-lr", type=float, default=0.15)
     parser.add_argument("--circ-sleep-interval", type=int, default=2)
+    parser.add_argument("--circ-use-adaptive-sleep-trigger", action="store_true", default=False)
+    parser.add_argument("--circ-min-sleep-steps", type=int, default=40)
+    parser.add_argument("--circ-sleep-energy-window", type=int, default=32)
+    parser.add_argument("--circ-sleep-plateau-delta", type=float, default=1e-4)
+    parser.add_argument("--circ-sleep-chemical-variance-threshold", type=float, default=0.02)
+    parser.add_argument(
+        "--circ-force-sleep",
+        dest="circ_force_sleep",
+        action="store_true",
+        help="Always execute sleep events at interval checkpoints.",
+    )
+    parser.add_argument(
+        "--circ-respect-adaptive-sleep-trigger",
+        dest="circ_force_sleep",
+        action="store_false",
+        help="At interval checkpoints, run sleep only when adaptive trigger conditions are met.",
+    )
+    parser.set_defaults(circ_force_sleep=True)
+    parser.add_argument("--circ-enable-sleep-rollback", action="store_true", default=False)
+    parser.add_argument("--circ-sleep-rollback-tolerance", type=float, default=0.01)
     parser.add_argument("--circ-min-hidden-dim", type=int, default=96)
     parser.add_argument("--circ-max-hidden-dim", type=int, default=1024)
     parser.add_argument("--circ-chemical-decay", type=float, default=0.995)
@@ -143,6 +163,16 @@ def main() -> None:
         circadian_inference_steps=args.circ_steps,
         circadian_inference_learning_rate=args.circ_inference_lr,
         circadian_sleep_interval=args.circ_sleep_interval,
+        circadian_force_sleep=args.circ_force_sleep,
+        circadian_use_adaptive_sleep_trigger=args.circ_use_adaptive_sleep_trigger,
+        circadian_min_sleep_steps=args.circ_min_sleep_steps,
+        circadian_sleep_energy_window=args.circ_sleep_energy_window,
+        circadian_sleep_plateau_delta=args.circ_sleep_plateau_delta,
+        circadian_sleep_chemical_variance_threshold=(
+            args.circ_sleep_chemical_variance_threshold
+        ),
+        circadian_enable_sleep_rollback=args.circ_enable_sleep_rollback,
+        circadian_sleep_rollback_tolerance=args.circ_sleep_rollback_tolerance,
         circadian_min_hidden_dim=args.circ_min_hidden_dim,
         circadian_max_hidden_dim=args.circ_max_hidden_dim,
         circadian_chemical_decay=args.circ_chemical_decay,
