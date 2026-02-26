@@ -45,6 +45,12 @@ class CircadianHeadConfig:
     max_prune_per_sleep: int = 2
     split_noise_scale: float = 0.01
     sleep_reset_factor: float = 0.45
+    sleep_warmup_steps: int = 0
+    sleep_split_only_until_fraction: float = 0.50
+    sleep_prune_only_after_fraction: float = 0.85
+    sleep_max_change_fraction: float = 1.0
+    sleep_min_change_count: int = 1
+    prune_min_age_steps: int = 0
     homeostatic_downscale_factor: float = 1.0
     homeostasis_target_input_norm: float = 0.0
     homeostasis_target_output_norm: float = 0.0
@@ -346,12 +352,25 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         energy = 0.5 * (torch.mean(output_error * output_error) + torch.mean(hidden_error * hidden_error))
         return float(energy.item())
 
-    def sleep_event(self) -> SleepEventResult:
+    def sleep_event(
+        self, current_step: int | None = None, total_steps: int | None = None
+    ) -> SleepEventResult:
+        split_budget, prune_budget, should_skip = self._resolve_sleep_budgets(
+            current_step=current_step,
+            total_steps=total_steps,
+        )
+        if should_skip or (split_budget <= 0 and prune_budget <= 0):
+            return SleepEventResult(
+                old_hidden_dim=self.hidden_dim,
+                new_hidden_dim=self.hidden_dim,
+                split_indices=(),
+                pruned_indices=(),
+            )
         old_hidden_dim = self.hidden_dim
-        split_indices = self._select_split_indices()
+        split_indices = self._select_split_indices(max_split_limit=split_budget)
         self._apply_split(split_indices)
 
-        prune_indices = self._select_prune_indices()
+        prune_indices = self._select_prune_indices(max_prune_limit=prune_budget)
         self._apply_prune(prune_indices)
         self._apply_homeostatic_downscaling()
 
@@ -444,12 +463,15 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self._split_cooldown = torch.clamp(self._split_cooldown - 1, min=0)
         self._prune_cooldown = torch.clamp(self._prune_cooldown - 1, min=0)
 
-    def _select_split_indices(self) -> tuple[int, ...]:
+    def _select_split_indices(self, max_split_limit: int | None = None) -> tuple[int, ...]:
         torch = self._torch
         split_threshold, _ = self._resolve_split_prune_thresholds()
         split_threshold += self.config.split_hysteresis_margin
         remaining_capacity = self._max_hidden_dim - self.hidden_dim
         if remaining_capacity <= 0 or self.config.max_split_per_sleep <= 0:
+            return ()
+        limit = self.config.max_split_per_sleep if max_split_limit is None else max_split_limit
+        if limit <= 0:
             return ()
         candidates = torch.where(
             (self._chemical >= split_threshold) & (self._split_cooldown <= 0)
@@ -460,19 +482,24 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         candidate_values = split_scores[candidates]
         sorted_order = torch.argsort(candidate_values, descending=True)
         sorted_candidates = candidates[sorted_order]
-        split_count = min(int(sorted_candidates.numel()), self.config.max_split_per_sleep, remaining_capacity)
+        split_count = min(int(sorted_candidates.numel()), int(limit), remaining_capacity)
         chosen = sorted_candidates[:split_count].tolist()
         return tuple(int(index) for index in chosen)
 
-    def _select_prune_indices(self) -> tuple[int, ...]:
+    def _select_prune_indices(self, max_prune_limit: int | None = None) -> tuple[int, ...]:
         torch = self._torch
         _, prune_threshold = self._resolve_split_prune_thresholds()
         prune_threshold -= self.config.prune_hysteresis_margin
         removable = self.hidden_dim - self._min_hidden_dim
         if removable <= 0 or self.config.max_prune_per_sleep <= 0:
             return ()
+        limit = self.config.max_prune_per_sleep if max_prune_limit is None else max_prune_limit
+        if limit <= 0:
+            return ()
         candidates = torch.where(
-            (self._chemical <= prune_threshold) & (self._prune_cooldown <= 0)
+            (self._chemical <= prune_threshold)
+            & (self._prune_cooldown <= 0)
+            & (self._neuron_age >= float(self.config.prune_min_age_steps))
         )[0]
         if int(candidates.numel()) == 0:
             return ()
@@ -480,7 +507,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         candidate_values = prune_scores[candidates]
         sorted_order = torch.argsort(candidate_values, descending=True)
         sorted_candidates = candidates[sorted_order]
-        prune_count = min(int(sorted_candidates.numel()), self.config.max_prune_per_sleep, removable)
+        prune_count = min(int(sorted_candidates.numel()), int(limit), removable)
         chosen = sorted_candidates[:prune_count].tolist()
         return tuple(sorted(int(index) for index in chosen))
 
@@ -492,6 +519,33 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         split_threshold = float(torch.quantile(self._chemical, self.config.adaptive_split_percentile / 100.0))
         prune_threshold = float(torch.quantile(self._chemical, self.config.adaptive_prune_percentile / 100.0))
         return split_threshold, prune_threshold
+
+    def _resolve_sleep_budgets(
+        self, current_step: int | None, total_steps: int | None
+    ) -> tuple[int, int, bool]:
+        split_budget = self._resolve_structural_budget(self.config.max_split_per_sleep)
+        prune_budget = self._resolve_structural_budget(self.config.max_prune_per_sleep)
+        if current_step is None or total_steps is None or total_steps <= 0:
+            return split_budget, prune_budget, False
+
+        if current_step <= self.config.sleep_warmup_steps:
+            return 0, 0, True
+        progress = float(current_step) / float(total_steps)
+        if progress < self.config.sleep_split_only_until_fraction:
+            prune_budget = 0
+        elif progress >= self.config.sleep_prune_only_after_fraction:
+            split_budget = 0
+        return split_budget, prune_budget, False
+
+    def _resolve_structural_budget(self, configured_limit: int) -> int:
+        if configured_limit <= 0:
+            return 0
+        fraction = self.config.sleep_max_change_fraction
+        if fraction <= 0.0:
+            return 0
+        by_fraction = int(float(self.hidden_dim) * fraction)
+        by_fraction = max(by_fraction, int(self.config.sleep_min_change_count))
+        return min(int(configured_limit), int(by_fraction))
 
     def _compute_split_scores(self) -> Any:
         norm_scores = self._normalize_tensor(self._row_norm(self.weight_hidden_output))
@@ -720,6 +774,22 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             raise ValueError("split_noise_scale must be non-negative.")
         if not (0.0 <= config.sleep_reset_factor <= 1.0):
             raise ValueError("sleep_reset_factor must be between 0 and 1.")
+        if config.sleep_warmup_steps < 0:
+            raise ValueError("sleep_warmup_steps must be non-negative.")
+        if not (0.0 <= config.sleep_split_only_until_fraction <= 1.0):
+            raise ValueError("sleep_split_only_until_fraction must be between 0 and 1.")
+        if not (0.0 <= config.sleep_prune_only_after_fraction <= 1.0):
+            raise ValueError("sleep_prune_only_after_fraction must be between 0 and 1.")
+        if config.sleep_split_only_until_fraction > config.sleep_prune_only_after_fraction:
+            raise ValueError(
+                "sleep_split_only_until_fraction cannot exceed sleep_prune_only_after_fraction."
+            )
+        if not (0.0 <= config.sleep_max_change_fraction <= 1.0):
+            raise ValueError("sleep_max_change_fraction must be between 0 and 1.")
+        if config.sleep_min_change_count < 0:
+            raise ValueError("sleep_min_change_count must be non-negative.")
+        if config.prune_min_age_steps < 0:
+            raise ValueError("prune_min_age_steps must be non-negative.")
         if not (0.0 < config.homeostatic_downscale_factor <= 1.0):
             raise ValueError("homeostatic_downscale_factor must be in (0, 1].")
         if config.homeostasis_target_input_norm < 0.0 or config.homeostasis_target_output_norm < 0.0:
@@ -853,8 +923,10 @@ class CircadianPredictiveCodingResNet50Classifier:
         features = self.extract_features(images)
         return self.head.predict_logits(features)
 
-    def sleep_event(self) -> SleepEventResult:
-        return self.head.sleep_event()
+    def sleep_event(
+        self, current_step: int | None = None, total_steps: int | None = None
+    ) -> SleepEventResult:
+        return self.head.sleep_event(current_step=current_step, total_steps=total_steps)
 
     def parameter_count(self) -> int:
         return _count_parameters(self.backbone) + self.head.parameter_count()

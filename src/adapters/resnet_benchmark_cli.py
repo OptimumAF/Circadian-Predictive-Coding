@@ -79,6 +79,12 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--circ-use-adaptive-thresholds", action="store_true", default=None)
     parser.add_argument("--circ-adaptive-split-percentile", type=float, default=85.0)
     parser.add_argument("--circ-adaptive-prune-percentile", type=float, default=20.0)
+    parser.add_argument("--circ-sleep-warmup-steps", type=int, default=0)
+    parser.add_argument("--circ-sleep-split-only-until-fraction", type=float, default=0.50)
+    parser.add_argument("--circ-sleep-prune-only-after-fraction", type=float, default=0.85)
+    parser.add_argument("--circ-sleep-max-change-fraction", type=float, default=1.0)
+    parser.add_argument("--circ-sleep-min-change-count", type=int, default=1)
+    parser.add_argument("--circ-prune-min-age-steps", type=int, default=0)
     parser.add_argument("--circ-split-threshold", type=float, default=0.8)
     parser.add_argument("--circ-prune-threshold", type=float, default=0.08)
     parser.add_argument("--circ-split-hysteresis-margin", type=float, default=0.02)
@@ -171,6 +177,12 @@ def main() -> None:
         ),
         circadian_adaptive_split_percentile=args.circ_adaptive_split_percentile,
         circadian_adaptive_prune_percentile=args.circ_adaptive_prune_percentile,
+        circadian_sleep_warmup_steps=args.circ_sleep_warmup_steps,
+        circadian_sleep_split_only_until_fraction=args.circ_sleep_split_only_until_fraction,
+        circadian_sleep_prune_only_after_fraction=args.circ_sleep_prune_only_after_fraction,
+        circadian_sleep_max_change_fraction=args.circ_sleep_max_change_fraction,
+        circadian_sleep_min_change_count=args.circ_sleep_min_change_count,
+        circadian_prune_min_age_steps=args.circ_prune_min_age_steps,
         circadian_split_threshold=args.circ_split_threshold,
         circadian_prune_threshold=args.circ_prune_threshold,
         circadian_split_hysteresis_margin=args.circ_split_hysteresis_margin,

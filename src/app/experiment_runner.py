@@ -130,6 +130,8 @@ def run_experiment(
             sleep_result = circadian_model.sleep_event(
                 adaptation_policy=sleep_policy,
                 force_sleep=config.circadian_force_sleep,
+                current_step=epoch_index,
+                total_steps=config.epoch_count,
             )
             performed_sleep = (
                 len(sleep_result.split_indices) > 0

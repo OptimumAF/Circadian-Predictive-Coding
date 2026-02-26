@@ -71,6 +71,12 @@ class ResNet50BenchmarkConfig:
     circadian_use_adaptive_thresholds: bool = True
     circadian_adaptive_split_percentile: float = 85.0
     circadian_adaptive_prune_percentile: float = 20.0
+    circadian_sleep_warmup_steps: int = 0
+    circadian_sleep_split_only_until_fraction: float = 0.50
+    circadian_sleep_prune_only_after_fraction: float = 0.85
+    circadian_sleep_max_change_fraction: float = 1.0
+    circadian_sleep_min_change_count: int = 1
+    circadian_prune_min_age_steps: int = 0
     circadian_split_threshold: float = 0.80
     circadian_prune_threshold: float = 0.08
     circadian_split_hysteresis_margin: float = 0.02
@@ -401,6 +407,12 @@ def _benchmark_circadian(
         use_adaptive_thresholds=config.circadian_use_adaptive_thresholds,
         adaptive_split_percentile=config.circadian_adaptive_split_percentile,
         adaptive_prune_percentile=config.circadian_adaptive_prune_percentile,
+        sleep_warmup_steps=config.circadian_sleep_warmup_steps,
+        sleep_split_only_until_fraction=config.circadian_sleep_split_only_until_fraction,
+        sleep_prune_only_after_fraction=config.circadian_sleep_prune_only_after_fraction,
+        sleep_max_change_fraction=config.circadian_sleep_max_change_fraction,
+        sleep_min_change_count=config.circadian_sleep_min_change_count,
+        prune_min_age_steps=config.circadian_prune_min_age_steps,
         split_threshold=config.circadian_split_threshold,
         prune_threshold=config.circadian_prune_threshold,
         split_hysteresis_margin=config.circadian_split_hysteresis_margin,
@@ -463,7 +475,7 @@ def _benchmark_circadian(
             seen_samples += int(labels.shape[0])
 
         if config.circadian_sleep_interval > 0 and epoch % config.circadian_sleep_interval == 0:
-            sleep_result = model.sleep_event()
+            sleep_result = model.sleep_event(current_step=epoch, total_steps=config.epochs)
             sleep_splits += len(sleep_result.split_indices)
             sleep_prunes += len(sleep_result.pruned_indices)
 
@@ -635,6 +647,26 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         )
     if not (0.0 <= config.circadian_plasticity_importance_mix <= 1.0):
         raise ValueError("circadian_plasticity_importance_mix must be between 0 and 1.")
+    if config.circadian_sleep_warmup_steps < 0:
+        raise ValueError("circadian_sleep_warmup_steps must be non-negative.")
+    if not (0.0 <= config.circadian_sleep_split_only_until_fraction <= 1.0):
+        raise ValueError("circadian_sleep_split_only_until_fraction must be between 0 and 1.")
+    if not (0.0 <= config.circadian_sleep_prune_only_after_fraction <= 1.0):
+        raise ValueError("circadian_sleep_prune_only_after_fraction must be between 0 and 1.")
+    if (
+        config.circadian_sleep_split_only_until_fraction
+        > config.circadian_sleep_prune_only_after_fraction
+    ):
+        raise ValueError(
+            "circadian_sleep_split_only_until_fraction must be <= "
+            "circadian_sleep_prune_only_after_fraction."
+        )
+    if not (0.0 <= config.circadian_sleep_max_change_fraction <= 1.0):
+        raise ValueError("circadian_sleep_max_change_fraction must be between 0 and 1.")
+    if config.circadian_sleep_min_change_count < 0:
+        raise ValueError("circadian_sleep_min_change_count must be non-negative.")
+    if config.circadian_prune_min_age_steps < 0:
+        raise ValueError("circadian_prune_min_age_steps must be non-negative.")
 
 
 def _set_seed(torch: Any, seed: int) -> None:

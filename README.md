@@ -167,6 +167,8 @@ Circadian model supports optional advanced mechanisms through `CircadianConfig`:
 - optional dual-timescale chemical dynamics (fast + slow accumulation)
 - optional saturating chemical accumulation with configurable maximum
 - adaptive per-neuron plasticity sensitivity (age + importance driven)
+- sleep-phase scheduling (warm-up, split-first, prune-late)
+- per-sleep structural-change caps and prune age floor
 - gradual prune decay and delayed removal
 - prioritized and class-balanced replay consolidation during sleep
 - targeted homeostatic norm matching after sleep

@@ -76,6 +76,12 @@ class CircadianConfig:
     max_prune_per_sleep: int = 2
     split_noise_scale: float = 0.02
     sleep_reset_factor: float = 0.45
+    sleep_warmup_steps: int = 0
+    sleep_split_only_until_fraction: float = 0.50
+    sleep_prune_only_after_fraction: float = 0.85
+    sleep_max_change_fraction: float = 1.0
+    sleep_min_change_count: int = 1
+    prune_min_age_steps: int = 0
 
     # Adaptive sleep trigger (optional) based on energy plateau and chemistry variance.
     use_adaptive_sleep_trigger: bool = False
@@ -297,9 +303,22 @@ class CircadianPredictiveCodingNetwork:
         self,
         adaptation_policy: NeuronAdaptationPolicy | None = None,
         force_sleep: bool = True,
+        current_step: int | None = None,
+        total_steps: int | None = None,
     ) -> SleepEventResult:
         """Consolidate structure; optionally trigger only when adaptive criteria fire."""
         if not force_sleep and not self.should_trigger_sleep():
+            return SleepEventResult(
+                old_hidden_dim=self.hidden_dim,
+                new_hidden_dim=self.hidden_dim,
+                split_indices=(),
+                pruned_indices=(),
+            )
+        split_budget, prune_budget, should_skip = self._resolve_sleep_budgets(
+            current_step=current_step,
+            total_steps=total_steps,
+        )
+        if should_skip or (split_budget <= 0 and prune_budget <= 0):
             return SleepEventResult(
                 old_hidden_dim=self.hidden_dim,
                 new_hidden_dim=self.hidden_dim,
@@ -311,10 +330,12 @@ class CircadianPredictiveCodingNetwork:
         split_indices: tuple[int, ...]
         pruned_indices: tuple[int, ...]
         if adaptation_policy is None:
-            split_indices = self._select_split_indices()
-            pruned_indices = self._select_prune_indices()
+            split_indices = self._select_split_indices(max_split_limit=split_budget)
+            pruned_indices = self._select_prune_indices(max_prune_limit=prune_budget)
         else:
             split_indices, pruned_indices = self._derive_indices_from_policy(adaptation_policy)
+            split_indices = split_indices[:split_budget]
+            pruned_indices = tuple(sorted(pruned_indices[:prune_budget]))
 
         self._split_neurons(split_indices)
         self._schedule_or_prune(pruned_indices)
@@ -473,12 +494,15 @@ class CircadianPredictiveCodingNetwork:
         self._split_cooldown = np.maximum(0, self._split_cooldown - 1)
         self._prune_cooldown = np.maximum(0, self._prune_cooldown - 1)
 
-    def _select_split_indices(self) -> tuple[int, ...]:
+    def _select_split_indices(self, max_split_limit: int | None = None) -> tuple[int, ...]:
         split_threshold, _ = self._resolve_split_prune_thresholds()
         split_threshold += self.config.split_hysteresis_margin
         current_dim = self.hidden_dim
         remaining_capacity = self.max_hidden_dim - current_dim
         if remaining_capacity <= 0 or self.config.max_split_per_sleep <= 0:
+            return ()
+        limit = self.config.max_split_per_sleep if max_split_limit is None else max_split_limit
+        if limit <= 0:
             return ()
 
         candidates = np.where(
@@ -497,17 +521,20 @@ class CircadianPredictiveCodingNetwork:
         sorted_candidates = candidates[np.argsort(split_scores[candidates])[::-1]]
         split_count = min(
             int(sorted_candidates.size),
-            int(self.config.max_split_per_sleep),
+            int(limit),
             int(remaining_capacity),
         )
         chosen = sorted_candidates[:split_count]
         return tuple(int(index) for index in chosen.tolist())
 
-    def _select_prune_indices(self) -> tuple[int, ...]:
+    def _select_prune_indices(self, max_prune_limit: int | None = None) -> tuple[int, ...]:
         _, prune_threshold = self._resolve_split_prune_thresholds()
         prune_threshold -= self.config.prune_hysteresis_margin
         removable = self.hidden_dim - self._min_hidden_dim
         if removable <= 0 or self.config.max_prune_per_sleep <= 0:
+            return ()
+        limit = self.config.max_prune_per_sleep if max_prune_limit is None else max_prune_limit
+        if limit <= 0:
             return ()
 
         candidates = np.where(
@@ -516,6 +543,7 @@ class CircadianPredictiveCodingNetwork:
                     self._hidden_chemical <= prune_threshold,
                     ~self._prune_marked,
                     self._prune_cooldown <= 0,
+                    self._neuron_age >= float(self.config.prune_min_age_steps),
                 )
             )
         )[0]
@@ -526,7 +554,7 @@ class CircadianPredictiveCodingNetwork:
         sorted_candidates = candidates[np.argsort(prune_scores[candidates])[::-1]]
         prune_count = min(
             int(sorted_candidates.size),
-            int(self.config.max_prune_per_sleep),
+            int(limit),
             int(removable),
         )
         chosen = sorted_candidates[:prune_count]
@@ -543,6 +571,34 @@ class CircadianPredictiveCodingNetwork:
             np.percentile(self._hidden_chemical, self.config.adaptive_prune_percentile)
         )
         return split_threshold, prune_threshold
+
+    def _resolve_sleep_budgets(
+        self, current_step: int | None, total_steps: int | None
+    ) -> tuple[int, int, bool]:
+        split_budget = self._resolve_structural_budget(self.config.max_split_per_sleep)
+        prune_budget = self._resolve_structural_budget(self.config.max_prune_per_sleep)
+        if current_step is None or total_steps is None or total_steps <= 0:
+            return split_budget, prune_budget, False
+
+        if current_step <= self.config.sleep_warmup_steps:
+            return 0, 0, True
+
+        progress = float(current_step) / float(total_steps)
+        if progress < self.config.sleep_split_only_until_fraction:
+            prune_budget = 0
+        elif progress >= self.config.sleep_prune_only_after_fraction:
+            split_budget = 0
+        return split_budget, prune_budget, False
+
+    def _resolve_structural_budget(self, configured_limit: int) -> int:
+        if configured_limit <= 0:
+            return 0
+        fraction = self.config.sleep_max_change_fraction
+        if fraction <= 0.0:
+            return 0
+        by_fraction = int(np.floor(float(self.hidden_dim) * fraction))
+        by_fraction = max(by_fraction, int(self.config.sleep_min_change_count))
+        return min(int(configured_limit), int(by_fraction))
 
     def _compute_split_scores(self) -> Array:
         chemical_component = self._normalize_vector(self._hidden_chemical)
@@ -934,6 +990,22 @@ class CircadianPredictiveCodingNetwork:
             raise ValueError("split_noise_scale must be non-negative")
         if not (0.0 <= config.sleep_reset_factor <= 1.0):
             raise ValueError("sleep_reset_factor must be between 0 and 1")
+        if config.sleep_warmup_steps < 0:
+            raise ValueError("sleep_warmup_steps must be non-negative")
+        if not (0.0 <= config.sleep_split_only_until_fraction <= 1.0):
+            raise ValueError("sleep_split_only_until_fraction must be between 0 and 1")
+        if not (0.0 <= config.sleep_prune_only_after_fraction <= 1.0):
+            raise ValueError("sleep_prune_only_after_fraction must be between 0 and 1")
+        if config.sleep_split_only_until_fraction > config.sleep_prune_only_after_fraction:
+            raise ValueError(
+                "sleep_split_only_until_fraction cannot exceed sleep_prune_only_after_fraction"
+            )
+        if not (0.0 <= config.sleep_max_change_fraction <= 1.0):
+            raise ValueError("sleep_max_change_fraction must be between 0 and 1")
+        if config.sleep_min_change_count < 0:
+            raise ValueError("sleep_min_change_count must be non-negative")
+        if config.prune_min_age_steps < 0:
+            raise ValueError("prune_min_age_steps must be non-negative")
         if config.prune_decay_steps < 1:
             raise ValueError("prune_decay_steps must be at least 1")
         if not (0.0 < config.prune_decay_factor <= 1.0):
