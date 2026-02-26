@@ -63,11 +63,18 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--circ-max-hidden-dim", type=int, default=1024)
     parser.add_argument("--circ-chemical-decay", type=float, default=0.995)
     parser.add_argument("--circ-chemical-buildup-rate", type=float, default=0.02)
+    parser.add_argument("--circ-use-saturating-chemical", action="store_true", default=None)
+    parser.add_argument("--circ-chemical-max-value", type=float, default=2.5)
+    parser.add_argument("--circ-chemical-saturation-gain", type=float, default=1.0)
     parser.add_argument("--circ-use-dual-chemical", action="store_true", default=None)
     parser.add_argument("--circ-dual-fast-mix", type=float, default=0.70)
     parser.add_argument("--circ-slow-chemical-decay", type=float, default=0.999)
     parser.add_argument("--circ-slow-buildup-scale", type=float, default=0.25)
     parser.add_argument("--circ-plasticity-sensitivity", type=float, default=0.7)
+    parser.add_argument("--circ-use-adaptive-plasticity-sensitivity", action="store_true", default=None)
+    parser.add_argument("--circ-plasticity-sensitivity-min", type=float, default=0.35)
+    parser.add_argument("--circ-plasticity-sensitivity-max", type=float, default=1.20)
+    parser.add_argument("--circ-plasticity-importance-mix", type=float, default=0.50)
     parser.add_argument("--circ-min-plasticity", type=float, default=0.2)
     parser.add_argument("--circ-use-adaptive-thresholds", action="store_true", default=None)
     parser.add_argument("--circ-adaptive-split-percentile", type=float, default=85.0)
@@ -134,6 +141,13 @@ def main() -> None:
         circadian_max_hidden_dim=args.circ_max_hidden_dim,
         circadian_chemical_decay=args.circ_chemical_decay,
         circadian_chemical_buildup_rate=args.circ_chemical_buildup_rate,
+        circadian_use_saturating_chemical=(
+            True
+            if args.circ_use_saturating_chemical is None
+            else args.circ_use_saturating_chemical
+        ),
+        circadian_chemical_max_value=args.circ_chemical_max_value,
+        circadian_chemical_saturation_gain=args.circ_chemical_saturation_gain,
         circadian_use_dual_chemical=(
             True if args.circ_use_dual_chemical is None else args.circ_use_dual_chemical
         ),
@@ -141,6 +155,14 @@ def main() -> None:
         circadian_slow_chemical_decay=args.circ_slow_chemical_decay,
         circadian_slow_buildup_scale=args.circ_slow_buildup_scale,
         circadian_plasticity_sensitivity=args.circ_plasticity_sensitivity,
+        circadian_use_adaptive_plasticity_sensitivity=(
+            True
+            if args.circ_use_adaptive_plasticity_sensitivity is None
+            else args.circ_use_adaptive_plasticity_sensitivity
+        ),
+        circadian_plasticity_sensitivity_min=args.circ_plasticity_sensitivity_min,
+        circadian_plasticity_sensitivity_max=args.circ_plasticity_sensitivity_max,
+        circadian_plasticity_importance_mix=args.circ_plasticity_importance_mix,
         circadian_min_plasticity=args.circ_min_plasticity,
         circadian_use_adaptive_thresholds=(
             True

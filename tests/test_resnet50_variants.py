@@ -73,3 +73,28 @@ def test_should_apply_split_cooldown_in_torch_circadian_head() -> None:
 
     assert first_sleep.split_indices == (0,)
     assert second_sleep.split_indices == ()
+
+
+def test_should_reduce_plasticity_for_high_importance_in_torch_head() -> None:
+    torch = pytest.importorskip("torch")
+    device = torch.device("cpu")
+    config = CircadianHeadConfig(
+        use_adaptive_plasticity_sensitivity=True,
+        plasticity_sensitivity_min=0.2,
+        plasticity_sensitivity_max=1.0,
+        plasticity_importance_mix=1.0,
+    )
+    head = CircadianPredictiveCodingHead(
+        feature_dim=6,
+        hidden_dim=4,
+        num_classes=2,
+        device=device,
+        seed=23,
+        config=config,
+        min_hidden_dim=4,
+    )
+    head._chemical = torch.full((4,), 0.4, dtype=torch.float32)
+    head._importance_ema = torch.tensor([1.0, 0.0, 0.0, 0.0], dtype=torch.float32)
+    plasticity = head._plasticity()
+
+    assert float(plasticity[0].item()) < float(plasticity[1].item())

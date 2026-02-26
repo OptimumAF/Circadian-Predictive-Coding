@@ -55,11 +55,18 @@ class ResNet50BenchmarkConfig:
     circadian_max_hidden_dim: int = 1024
     circadian_chemical_decay: float = 0.995
     circadian_chemical_buildup_rate: float = 0.02
+    circadian_use_saturating_chemical: bool = True
+    circadian_chemical_max_value: float = 2.5
+    circadian_chemical_saturation_gain: float = 1.0
     circadian_use_dual_chemical: bool = True
     circadian_dual_fast_mix: float = 0.70
     circadian_slow_chemical_decay: float = 0.999
     circadian_slow_buildup_scale: float = 0.25
     circadian_plasticity_sensitivity: float = 0.7
+    circadian_use_adaptive_plasticity_sensitivity: bool = True
+    circadian_plasticity_sensitivity_min: float = 0.35
+    circadian_plasticity_sensitivity_max: float = 1.20
+    circadian_plasticity_importance_mix: float = 0.50
     circadian_min_plasticity: float = 0.2
     circadian_use_adaptive_thresholds: bool = True
     circadian_adaptive_split_percentile: float = 85.0
@@ -378,11 +385,18 @@ def _benchmark_circadian(
     circadian_config = CircadianHeadConfig(
         chemical_decay=config.circadian_chemical_decay,
         chemical_buildup_rate=config.circadian_chemical_buildup_rate,
+        use_saturating_chemical=config.circadian_use_saturating_chemical,
+        chemical_max_value=config.circadian_chemical_max_value,
+        chemical_saturation_gain=config.circadian_chemical_saturation_gain,
         use_dual_chemical=config.circadian_use_dual_chemical,
         dual_fast_mix=config.circadian_dual_fast_mix,
         slow_chemical_decay=config.circadian_slow_chemical_decay,
         slow_buildup_scale=config.circadian_slow_buildup_scale,
         plasticity_sensitivity=config.circadian_plasticity_sensitivity,
+        use_adaptive_plasticity_sensitivity=config.circadian_use_adaptive_plasticity_sensitivity,
+        plasticity_sensitivity_min=config.circadian_plasticity_sensitivity_min,
+        plasticity_sensitivity_max=config.circadian_plasticity_sensitivity_max,
+        plasticity_importance_mix=config.circadian_plasticity_importance_mix,
         min_plasticity=config.circadian_min_plasticity,
         use_adaptive_thresholds=config.circadian_use_adaptive_thresholds,
         adaptive_split_percentile=config.circadian_adaptive_split_percentile,
@@ -609,6 +623,18 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         raise ValueError("dataset_noise_std must be non-negative.")
     if config.backbone_weights not in {"none", "imagenet"}:
         raise ValueError("backbone_weights must be one of: none, imagenet.")
+    if config.circadian_chemical_max_value <= 0.0:
+        raise ValueError("circadian_chemical_max_value must be positive.")
+    if config.circadian_chemical_saturation_gain <= 0.0:
+        raise ValueError("circadian_chemical_saturation_gain must be positive.")
+    if config.circadian_plasticity_sensitivity_min <= 0.0:
+        raise ValueError("circadian_plasticity_sensitivity_min must be positive.")
+    if config.circadian_plasticity_sensitivity_max < config.circadian_plasticity_sensitivity_min:
+        raise ValueError(
+            "circadian_plasticity_sensitivity_max must be >= circadian_plasticity_sensitivity_min."
+        )
+    if not (0.0 <= config.circadian_plasticity_importance_mix <= 1.0):
+        raise ValueError("circadian_plasticity_importance_mix must be between 0 and 1.")
 
 
 def _set_seed(torch: Any, seed: int) -> None:

@@ -269,3 +269,51 @@ def test_should_select_balanced_high_priority_replay_snapshots_when_enabled() ->
 
     assert len(chosen) == 2
     assert {snapshot.positive_fraction for snapshot in chosen} == {0.0, 1.0}
+
+
+def test_should_keep_chemical_bounded_with_saturating_updates() -> None:
+    config = CircadianConfig(
+        use_saturating_chemical=True,
+        chemical_max_value=0.5,
+        chemical_saturation_gain=4.0,
+        use_dual_chemical=False,
+    )
+    model = CircadianPredictiveCodingNetwork(
+        input_dim=2,
+        hidden_dim=4,
+        seed=33,
+        circadian_config=config,
+    )
+    dataset = generate_two_cluster_dataset(sample_count=220, noise_scale=0.9, seed=10)
+
+    for _ in range(120):
+        model.train_epoch(
+            input_batch=dataset.train_input,
+            target_batch=dataset.train_target,
+            learning_rate=0.05,
+            inference_steps=12,
+            inference_learning_rate=0.2,
+        )
+
+    chemical = model.get_chemical_state()
+    assert float(np.max(chemical)) <= 0.5000001
+
+
+def test_should_reduce_plasticity_for_high_importance_when_adaptive_sensitivity_is_enabled() -> None:
+    config = CircadianConfig(
+        use_adaptive_plasticity_sensitivity=True,
+        plasticity_sensitivity_min=0.2,
+        plasticity_sensitivity_max=1.0,
+        plasticity_importance_mix=1.0,
+    )
+    model = CircadianPredictiveCodingNetwork(
+        input_dim=2,
+        hidden_dim=4,
+        seed=44,
+        circadian_config=config,
+    )
+    model.set_chemical_state(np.array([0.4, 0.4, 0.4, 0.4], dtype=np.float64))
+    model._importance_ema = np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64)
+    plasticity = model.get_plasticity_state()
+
+    assert float(plasticity[0]) < float(plasticity[1])

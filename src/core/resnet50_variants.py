@@ -14,11 +14,18 @@ class CircadianHeadConfig:
 
     chemical_decay: float = 0.995
     chemical_buildup_rate: float = 0.02
+    use_saturating_chemical: bool = False
+    chemical_max_value: float = 2.5
+    chemical_saturation_gain: float = 1.0
     use_dual_chemical: bool = False
     dual_fast_mix: float = 0.70
     slow_chemical_decay: float = 0.999
     slow_buildup_scale: float = 0.25
     plasticity_sensitivity: float = 0.7
+    use_adaptive_plasticity_sensitivity: bool = False
+    plasticity_sensitivity_min: float = 0.35
+    plasticity_sensitivity_max: float = 1.20
+    plasticity_importance_mix: float = 0.50
     min_plasticity: float = 0.20
     use_adaptive_thresholds: bool = False
     adaptive_split_percentile: float = 85.0
@@ -272,6 +279,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self._chemical = torch.zeros(hidden_dim, dtype=torch.float32, device=device)
         self._chemical_fast = torch.zeros(hidden_dim, dtype=torch.float32, device=device)
         self._chemical_slow = torch.zeros(hidden_dim, dtype=torch.float32, device=device)
+        self._neuron_age = torch.zeros(hidden_dim, dtype=torch.float32, device=device)
         self._importance_ema = torch.zeros(hidden_dim, dtype=torch.float32, device=device)
         self._split_cooldown = torch.zeros(hidden_dim, dtype=torch.int32, device=device)
         self._prune_cooldown = torch.zeros(hidden_dim, dtype=torch.int32, device=device)
@@ -333,6 +341,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
 
         self._traffic_sum = self._traffic_sum + torch.mean(torch.abs(hidden_state), dim=0)
         self._traffic_steps += 1
+        self._neuron_age = self._neuron_age + 1.0
 
         energy = 0.5 * (torch.mean(output_error * output_error) + torch.mean(hidden_error * hidden_error))
         return float(energy.item())
@@ -362,8 +371,22 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
 
     def _plasticity(self) -> Any:
         torch = self._torch
-        values = torch.exp(-self.config.plasticity_sensitivity * self._chemical)
+        sensitivity = self._plasticity_sensitivity_vector()
+        values = torch.exp(-sensitivity * self._chemical)
         return torch.clamp(values, min=self.config.min_plasticity, max=1.0)
+
+    def _plasticity_sensitivity_vector(self) -> Any:
+        torch = self._torch
+        if not self.config.use_adaptive_plasticity_sensitivity:
+            return torch.full_like(self._chemical, self.config.plasticity_sensitivity)
+
+        age_component = self._normalize_tensor_zero_base(self._neuron_age)
+        importance_component = self._normalize_tensor_zero_base(self._importance_ema)
+        importance_mix = float(max(0.0, min(1.0, self.config.plasticity_importance_mix)))
+        stability = importance_mix * importance_component + (1.0 - importance_mix) * age_component
+        span = self.config.plasticity_sensitivity_max - self.config.plasticity_sensitivity_min
+        base = torch.full_like(self._chemical, self.config.plasticity_sensitivity_min)
+        return base + span * stability
 
     def _update_importance_ema(self, grad_hidden_output: Any) -> None:
         torch = self._torch
@@ -375,20 +398,46 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         torch = self._torch
         activity = torch.mean(torch.abs(hidden_state), dim=0)
         if not self.config.use_dual_chemical:
-            self._chemical = (
-                self.config.chemical_decay * self._chemical + self.config.chemical_buildup_rate * activity
+            self._chemical = self._accumulate_chemical(
+                current=self._chemical,
+                decay=self.config.chemical_decay,
+                buildup_rate=self.config.chemical_buildup_rate,
+                activity=activity,
             )
             self._chemical_fast = self._chemical.clone()
             self._chemical_slow = self._chemical.clone()
             return
 
-        self._chemical_fast = (
-            self.config.chemical_decay * self._chemical_fast + self.config.chemical_buildup_rate * activity
+        self._chemical_fast = self._accumulate_chemical(
+            current=self._chemical_fast,
+            decay=self.config.chemical_decay,
+            buildup_rate=self.config.chemical_buildup_rate,
+            activity=activity,
         )
         slow_rate = self.config.chemical_buildup_rate * self.config.slow_buildup_scale
-        self._chemical_slow = self.config.slow_chemical_decay * self._chemical_slow + slow_rate * activity
+        self._chemical_slow = self._accumulate_chemical(
+            current=self._chemical_slow,
+            decay=self.config.slow_chemical_decay,
+            buildup_rate=slow_rate,
+            activity=activity,
+        )
         fast_mix = float(max(0.0, min(1.0, self.config.dual_fast_mix)))
         self._chemical = fast_mix * self._chemical_fast + (1.0 - fast_mix) * self._chemical_slow
+
+    def _accumulate_chemical(
+        self, current: Any, decay: float, buildup_rate: float, activity: Any
+    ) -> Any:
+        torch = self._torch
+        decayed = decay * current
+        increment = buildup_rate * activity
+        if not self.config.use_saturating_chemical:
+            return decayed + increment
+
+        max_value = self.config.chemical_max_value
+        headroom = torch.clamp(max_value - decayed, min=0.0)
+        scaled_increment = (self.config.chemical_saturation_gain * increment) / max(max_value, 1e-8)
+        saturating_delta = headroom * (1.0 - torch.exp(-scaled_increment))
+        return torch.minimum(decayed + saturating_delta, torch.full_like(decayed, max_value))
 
     def _decay_cooldowns(self) -> None:
         torch = self._torch
@@ -475,6 +524,15 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             return torch.ones_like(values)
         return (values - min_value) / span
 
+    def _normalize_tensor_zero_base(self, values: Any) -> Any:
+        torch = self._torch
+        max_value = torch.max(values)
+        min_value = torch.min(values)
+        span = max_value - min_value
+        if float(span.item()) <= 1e-12:
+            return torch.zeros_like(values)
+        return (values - min_value) / span
+
     def _apply_split(self, split_indices: tuple[int, ...]) -> None:
         if not split_indices:
             return
@@ -486,6 +544,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         chemical_values = []
         chemical_fast_values = []
         chemical_slow_values = []
+        age_values = []
         traffic_values = []
         importance_values = []
         split_cooldown_values = []
@@ -498,6 +557,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             chemical_value = self._chemical[index]
             chemical_fast_value = self._chemical_fast[index]
             chemical_slow_value = self._chemical_slow[index]
+            age_value = self._neuron_age[index]
             importance_value = self._importance_ema[index]
             parent_norm = float(torch.linalg.norm(output_row).item())
             noise_scale = self.config.split_noise_scale * max(parent_norm, 1e-3)
@@ -518,6 +578,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             chemical_values.append((chemical_value * 0.5).reshape(1))
             chemical_fast_values.append((chemical_fast_value * 0.5).reshape(1))
             chemical_slow_values.append((chemical_slow_value * 0.5).reshape(1))
+            age_values.append(torch.tensor([0.0], dtype=torch.float32, device=self.device))
             traffic_values.append(torch.zeros((1,), dtype=torch.float32, device=self.device))
             importance_values.append(importance_value.reshape(1))
             split_cooldown_values.append(
@@ -530,6 +591,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             self._chemical[index] = chemical_value * 0.5
             self._chemical_fast[index] = chemical_fast_value * 0.5
             self._chemical_slow[index] = chemical_slow_value * 0.5
+            self._neuron_age[index] = age_value
             self._split_cooldown[index] = self.config.split_cooldown_steps
             self._prune_cooldown[index] = self.config.prune_cooldown_steps
 
@@ -539,6 +601,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self._chemical = torch.cat([self._chemical, torch.cat(chemical_values, dim=0)], dim=0)
         self._chemical_fast = torch.cat([self._chemical_fast, torch.cat(chemical_fast_values, dim=0)], dim=0)
         self._chemical_slow = torch.cat([self._chemical_slow, torch.cat(chemical_slow_values, dim=0)], dim=0)
+        self._neuron_age = torch.cat([self._neuron_age, torch.cat(age_values, dim=0)], dim=0)
         self._traffic_sum = torch.cat([self._traffic_sum, torch.cat(traffic_values, dim=0)], dim=0)
         self._importance_ema = torch.cat([self._importance_ema, torch.cat(importance_values, dim=0)], dim=0)
         self._split_cooldown = torch.cat(
@@ -561,6 +624,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self._chemical = self._chemical[mask]
         self._chemical_fast = self._chemical_fast[mask]
         self._chemical_slow = self._chemical_slow[mask]
+        self._neuron_age = self._neuron_age[mask]
         self._traffic_sum = self._traffic_sum[mask]
         self._importance_ema = self._importance_ema[mask]
         self._split_cooldown = self._split_cooldown[mask]
@@ -608,6 +672,10 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
     def _validate_config(self, config: CircadianHeadConfig) -> None:
         if not (0.0 <= config.chemical_decay <= 1.0):
             raise ValueError("chemical_decay must be between 0 and 1.")
+        if config.chemical_max_value <= 0.0:
+            raise ValueError("chemical_max_value must be positive.")
+        if config.chemical_saturation_gain <= 0.0:
+            raise ValueError("chemical_saturation_gain must be positive.")
         if not (0.0 <= config.slow_chemical_decay <= 1.0):
             raise ValueError("slow_chemical_decay must be between 0 and 1.")
         if not (0.0 <= config.dual_fast_mix <= 1.0):
@@ -616,6 +684,16 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             raise ValueError("chemical_buildup_rate must be positive.")
         if config.slow_buildup_scale <= 0.0:
             raise ValueError("slow_buildup_scale must be positive.")
+        if config.plasticity_sensitivity <= 0.0:
+            raise ValueError("plasticity_sensitivity must be positive.")
+        if config.plasticity_sensitivity_min <= 0.0:
+            raise ValueError("plasticity_sensitivity_min must be positive.")
+        if config.plasticity_sensitivity_max < config.plasticity_sensitivity_min:
+            raise ValueError(
+                "plasticity_sensitivity_max must be greater than or equal to plasticity_sensitivity_min."
+            )
+        if not (0.0 <= config.plasticity_importance_mix <= 1.0):
+            raise ValueError("plasticity_importance_mix must be between 0 and 1.")
         if not (0.0 < config.min_plasticity <= 1.0):
             raise ValueError("min_plasticity must be in (0, 1].")
         if not (0.0 <= config.adaptive_split_percentile <= 100.0):

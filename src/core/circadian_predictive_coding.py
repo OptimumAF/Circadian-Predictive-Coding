@@ -39,11 +39,18 @@ class CircadianConfig:
 
     chemical_decay: float = 0.995
     chemical_buildup_rate: float = 0.02
+    use_saturating_chemical: bool = False
+    chemical_max_value: float = 2.5
+    chemical_saturation_gain: float = 1.0
     use_dual_chemical: bool = False
     dual_fast_mix: float = 0.70
     slow_chemical_decay: float = 0.999
     slow_buildup_scale: float = 0.25
     plasticity_sensitivity: float = 0.7
+    use_adaptive_plasticity_sensitivity: bool = False
+    plasticity_sensitivity_min: float = 0.35
+    plasticity_sensitivity_max: float = 1.20
+    plasticity_importance_mix: float = 0.50
     min_plasticity: float = 0.20
 
     # Static thresholds are still available, but adaptive percentile thresholds
@@ -148,6 +155,7 @@ class CircadianPredictiveCodingNetwork:
         self._hidden_chemical = np.zeros(hidden_dim, dtype=np.float64)
         self._hidden_chemical_fast = np.zeros(hidden_dim, dtype=np.float64)
         self._hidden_chemical_slow = np.zeros(hidden_dim, dtype=np.float64)
+        self._neuron_age = np.zeros(hidden_dim, dtype=np.float64)
         self._traffic_sum = np.zeros(hidden_dim, dtype=np.float64)
         self._importance_ema = np.zeros(hidden_dim, dtype=np.float64)
         self._traffic_steps = 0
@@ -257,6 +265,7 @@ class CircadianPredictiveCodingNetwork:
         )
         if update_epoch_state:
             self._epoch_count += 1
+            self._neuron_age += 1.0
             self._epochs_since_sleep += 1
             self._energy_history.append(energy)
             max_history = max(self.config.sleep_energy_window * 4, 16)
@@ -366,8 +375,22 @@ class CircadianPredictiveCodingNetwork:
 
     def get_plasticity_state(self) -> Array:
         """Map chemical buildup to plasticity factors."""
-        plasticity = np.exp(-self.config.plasticity_sensitivity * self._hidden_chemical)
+        sensitivity = self._compute_plasticity_sensitivity()
+        plasticity = np.exp(-sensitivity * self._hidden_chemical)
         return np.clip(plasticity, self.config.min_plasticity, 1.0)
+
+    def _compute_plasticity_sensitivity(self) -> Array:
+        if not self.config.use_adaptive_plasticity_sensitivity:
+            return np.full_like(self._hidden_chemical, self.config.plasticity_sensitivity)
+
+        age_component = self._normalize_vector_zero_base(self._neuron_age)
+        importance_component = self._normalize_vector_zero_base(self._importance_ema)
+        importance_mix = np.clip(self.config.plasticity_importance_mix, 0.0, 1.0)
+        stability = (
+            importance_mix * importance_component + (1.0 - importance_mix) * age_component
+        )
+        span = self.config.plasticity_sensitivity_max - self.config.plasticity_sensitivity_min
+        return self.config.plasticity_sensitivity_min + span * stability
 
     def apply_neuron_proposals(self, proposals: list[NeuronChangeProposal]) -> None:
         split_indices, prune_indices = self._indices_from_proposals(proposals)
@@ -403,26 +426,48 @@ class CircadianPredictiveCodingNetwork:
     def _update_chemical_layer(self, hidden_state: Array) -> None:
         activity = np.mean(np.abs(hidden_state), axis=0)
         if not self.config.use_dual_chemical:
-            self._hidden_chemical = (
-                self.config.chemical_decay * self._hidden_chemical
-                + self.config.chemical_buildup_rate * activity
+            self._hidden_chemical = self._accumulate_chemical(
+                current=self._hidden_chemical,
+                decay=self.config.chemical_decay,
+                buildup_rate=self.config.chemical_buildup_rate,
+                activity=activity,
             )
             self._hidden_chemical_fast = self._hidden_chemical.copy()
             self._hidden_chemical_slow = self._hidden_chemical.copy()
             return
 
-        self._hidden_chemical_fast = (
-            self.config.chemical_decay * self._hidden_chemical_fast
-            + self.config.chemical_buildup_rate * activity
+        self._hidden_chemical_fast = self._accumulate_chemical(
+            current=self._hidden_chemical_fast,
+            decay=self.config.chemical_decay,
+            buildup_rate=self.config.chemical_buildup_rate,
+            activity=activity,
         )
         slow_rate = self.config.chemical_buildup_rate * self.config.slow_buildup_scale
-        self._hidden_chemical_slow = (
-            self.config.slow_chemical_decay * self._hidden_chemical_slow + slow_rate * activity
+        self._hidden_chemical_slow = self._accumulate_chemical(
+            current=self._hidden_chemical_slow,
+            decay=self.config.slow_chemical_decay,
+            buildup_rate=slow_rate,
+            activity=activity,
         )
         fast_mix = np.clip(self.config.dual_fast_mix, 0.0, 1.0)
         self._hidden_chemical = (
             fast_mix * self._hidden_chemical_fast + (1.0 - fast_mix) * self._hidden_chemical_slow
         )
+
+    def _accumulate_chemical(
+        self, current: Array, decay: float, buildup_rate: float, activity: Array
+    ) -> Array:
+        decayed = decay * current
+        increment = buildup_rate * activity
+        if not self.config.use_saturating_chemical:
+            return decayed + increment
+
+        max_value = self.config.chemical_max_value
+        headroom = np.maximum(max_value - decayed, 0.0)
+        scaled_increment = (self.config.chemical_saturation_gain * increment) / max(max_value, 1e-8)
+        saturating_delta = headroom * (1.0 - np.exp(-scaled_increment))
+        updated = decayed + saturating_delta
+        return np.minimum(updated, max_value)
 
     def _decay_cooldowns(self) -> None:
         self._split_cooldown = np.maximum(0, self._split_cooldown - 1)
@@ -535,6 +580,14 @@ class CircadianPredictiveCodingNetwork:
             return np.ones_like(values)
         return (values - min_value) / span
 
+    def _normalize_vector_zero_base(self, values: Array) -> Array:
+        max_value = float(np.max(values))
+        min_value = float(np.min(values))
+        span = max_value - min_value
+        if span <= 1e-12:
+            return np.zeros_like(values)
+        return (values - min_value) / span
+
     def _derive_indices_from_policy(
         self, adaptation_policy: NeuronAdaptationPolicy
     ) -> tuple[tuple[int, ...], tuple[int, ...]]:
@@ -577,6 +630,7 @@ class CircadianPredictiveCodingNetwork:
         new_chemical_values: list[float] = []
         new_chemical_fast_values: list[float] = []
         new_chemical_slow_values: list[float] = []
+        new_age_values: list[float] = []
         new_traffic_values: list[float] = []
         new_importance_values: list[float] = []
         new_split_cooldowns: list[int] = []
@@ -603,6 +657,7 @@ class CircadianPredictiveCodingNetwork:
             new_chemical_values.append(chemical_value * 0.5)
             new_chemical_fast_values.append(chemical_fast_value * 0.5)
             new_chemical_slow_values.append(chemical_slow_value * 0.5)
+            new_age_values.append(0.0)
             new_traffic_values.append(0.0)
             new_importance_values.append(importance_value)
             new_split_cooldowns.append(self.config.split_cooldown_epochs)
@@ -631,6 +686,9 @@ class CircadianPredictiveCodingNetwork:
         )
         self._hidden_chemical_slow = np.concatenate(
             [self._hidden_chemical_slow, np.array(new_chemical_slow_values, dtype=np.float64)]
+        )
+        self._neuron_age = np.concatenate(
+            [self._neuron_age, np.array(new_age_values, dtype=np.float64)]
         )
         self._traffic_sum = np.concatenate(
             [self._traffic_sum, np.array(new_traffic_values, dtype=np.float64)]
@@ -705,6 +763,7 @@ class CircadianPredictiveCodingNetwork:
         self._hidden_chemical = self._hidden_chemical[mask]
         self._hidden_chemical_fast = self._hidden_chemical_fast[mask]
         self._hidden_chemical_slow = self._hidden_chemical_slow[mask]
+        self._neuron_age = self._neuron_age[mask]
         self._traffic_sum = self._traffic_sum[mask]
         self._importance_ema = self._importance_ema[mask]
         self._prune_ttl = self._prune_ttl[mask]
@@ -819,6 +878,10 @@ class CircadianPredictiveCodingNetwork:
     def _validate_config(self, config: CircadianConfig) -> None:
         if not (0.0 <= config.chemical_decay <= 1.0):
             raise ValueError("chemical_decay must be between 0 and 1")
+        if config.chemical_max_value <= 0.0:
+            raise ValueError("chemical_max_value must be positive")
+        if config.chemical_saturation_gain <= 0.0:
+            raise ValueError("chemical_saturation_gain must be positive")
         if not (0.0 <= config.slow_chemical_decay <= 1.0):
             raise ValueError("slow_chemical_decay must be between 0 and 1")
         if config.chemical_buildup_rate <= 0.0:
@@ -829,6 +892,14 @@ class CircadianPredictiveCodingNetwork:
             raise ValueError("dual_fast_mix must be between 0 and 1")
         if config.plasticity_sensitivity <= 0.0:
             raise ValueError("plasticity_sensitivity must be positive")
+        if config.plasticity_sensitivity_min <= 0.0:
+            raise ValueError("plasticity_sensitivity_min must be positive")
+        if config.plasticity_sensitivity_max < config.plasticity_sensitivity_min:
+            raise ValueError(
+                "plasticity_sensitivity_max must be greater than or equal to plasticity_sensitivity_min"
+            )
+        if not (0.0 <= config.plasticity_importance_mix <= 1.0):
+            raise ValueError("plasticity_importance_mix must be between 0 and 1")
         if not (0.0 < config.min_plasticity <= 1.0):
             raise ValueError("min_plasticity must be in (0, 1]")
         if not (0.0 <= config.split_weight_norm_mix <= 1.0):

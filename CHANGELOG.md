@@ -15,6 +15,7 @@
   - weight-norm + gradient-importance-aware split/prune ranking
   - split/prune hysteresis and per-neuron cooldown controls
   - optional dual-timescale chemical dynamics (fast+slow accumulation)
+  - optional saturating chemical accumulation and per-neuron adaptive plasticity sensitivity
   - optional gradual prune decay, prioritized replay consolidation, and targeted homeostasis
   - support for external `NeuronAdaptationPolicy` proposals
 - BCE-consistent binary predictive-coding gradients (`p - y`) for toy predictive and circadian models.
