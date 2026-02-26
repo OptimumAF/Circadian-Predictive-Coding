@@ -9,7 +9,6 @@ from numpy.typing import NDArray
 
 from src.core.activations import (
     sigmoid,
-    sigmoid_derivative_from_linear,
     tanh,
     tanh_derivative_from_linear,
 )
@@ -70,9 +69,7 @@ class PredictiveCodingNetwork:
             output_error = output_prediction - target_batch
 
             hidden_error = hidden_state - hidden_prior
-            output_to_hidden = (output_error * sigmoid_derivative_from_linear(output_linear)) @ (
-                self.weight_hidden_output.T
-            )
+            output_to_hidden = output_error @ self.weight_hidden_output.T
             hidden_gradient = hidden_error + output_to_hidden
             hidden_state -= inference_learning_rate * hidden_gradient
 
@@ -82,13 +79,8 @@ class PredictiveCodingNetwork:
         hidden_error = hidden_state - hidden_prior
 
         sample_count = float(input_batch.shape[0])
-        grad_hidden_output = hidden_state.T @ (
-            output_error * sigmoid_derivative_from_linear(output_linear)
-        )
-        grad_hidden_output /= sample_count
-        grad_output_bias = np.sum(
-            output_error * sigmoid_derivative_from_linear(output_linear), axis=0, keepdims=True
-        ) / sample_count
+        grad_hidden_output = (hidden_state.T @ output_error) / sample_count
+        grad_output_bias = np.sum(output_error, axis=0, keepdims=True) / sample_count
 
         hidden_prior_gradient = (-hidden_error) * tanh_derivative_from_linear(hidden_linear_prior)
         grad_input_hidden = (input_batch.T @ hidden_prior_gradient) / sample_count
@@ -100,7 +92,11 @@ class PredictiveCodingNetwork:
         self.bias_hidden -= learning_rate * grad_hidden_bias
 
         self._record_hidden_traffic(hidden_state)
-        energy = self._compute_energy(output_error, hidden_error)
+        energy = self._compute_energy(
+            output_prediction=output_prediction,
+            target_batch=target_batch,
+            hidden_error=hidden_error,
+        )
         return PredictiveCodingTrainResult(energy=energy)
 
     def predict_proba(self, input_batch: Array) -> Array:
@@ -131,10 +127,23 @@ class PredictiveCodingNetwork:
                     "Dynamic neuron changes are not implemented yet for PredictiveCodingNetwork."
                 )
 
-    def _compute_energy(self, output_error: Array, hidden_error: Array) -> float:
-        return float(0.5 * (np.mean(np.square(output_error)) + np.mean(np.square(hidden_error))))
+    def _compute_energy(self, output_prediction: Array, target_batch: Array, hidden_error: Array) -> float:
+        bce = self._binary_cross_entropy(output_prediction, target_batch)
+        hidden_penalty = 0.5 * float(np.mean(np.square(hidden_error)))
+        return bce + hidden_penalty
+
+    def _binary_cross_entropy(self, output_prediction: Array, target_batch: Array) -> float:
+        epsilon = 1e-8
+        clipped_prediction = np.clip(output_prediction, epsilon, 1.0 - epsilon)
+        return float(
+            np.mean(
+                -(
+                    target_batch * np.log(clipped_prediction)
+                    + (1.0 - target_batch) * np.log(1.0 - clipped_prediction)
+                )
+            )
+        )
 
     def _record_hidden_traffic(self, hidden_state: Array) -> None:
         self._traffic_sum += np.mean(np.abs(hidden_state), axis=0)
         self._traffic_steps += 1
-

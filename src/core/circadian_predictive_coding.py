@@ -10,7 +10,6 @@ from numpy.typing import NDArray
 
 from src.core.activations import (
     sigmoid,
-    sigmoid_derivative_from_linear,
     tanh,
     tanh_derivative_from_linear,
 )
@@ -187,9 +186,7 @@ class CircadianPredictiveCodingNetwork:
             output_error = output_prediction - target_batch
 
             hidden_error = hidden_state - hidden_prior
-            output_to_hidden = (output_error * sigmoid_derivative_from_linear(output_linear)) @ (
-                self.weight_hidden_output.T
-            )
+            output_to_hidden = output_error @ self.weight_hidden_output.T
             hidden_gradient = hidden_error + output_to_hidden
             hidden_state -= inference_learning_rate * hidden_gradient
 
@@ -199,7 +196,7 @@ class CircadianPredictiveCodingNetwork:
         hidden_error = hidden_state - hidden_prior
 
         sample_count = float(input_batch.shape[0])
-        output_term = output_error * sigmoid_derivative_from_linear(output_linear)
+        output_term = output_error
         grad_hidden_output = (hidden_state.T @ output_term) / sample_count
         grad_output_bias = np.sum(output_term, axis=0, keepdims=True) / sample_count
 
@@ -220,7 +217,11 @@ class CircadianPredictiveCodingNetwork:
         self.bias_hidden -= learning_rate * gated_hidden_bias
 
         self._record_hidden_traffic(hidden_state)
-        energy = self._compute_energy(output_error, hidden_error)
+        energy = self._compute_energy(
+            output_prediction=output_prediction,
+            target_batch=target_batch,
+            hidden_error=hidden_error,
+        )
         if update_epoch_state:
             self._epoch_count += 1
             self._epochs_since_sleep += 1
@@ -335,8 +336,22 @@ class CircadianPredictiveCodingNetwork:
         self._split_neurons(split_indices)
         self._schedule_or_prune(prune_indices)
 
-    def _compute_energy(self, output_error: Array, hidden_error: Array) -> float:
-        return float(0.5 * (np.mean(np.square(output_error)) + np.mean(np.square(hidden_error))))
+    def _compute_energy(self, output_prediction: Array, target_batch: Array, hidden_error: Array) -> float:
+        bce = self._binary_cross_entropy(output_prediction, target_batch)
+        hidden_penalty = 0.5 * float(np.mean(np.square(hidden_error)))
+        return bce + hidden_penalty
+
+    def _binary_cross_entropy(self, output_prediction: Array, target_batch: Array) -> float:
+        epsilon = 1e-8
+        clipped_prediction = np.clip(output_prediction, epsilon, 1.0 - epsilon)
+        return float(
+            np.mean(
+                -(
+                    target_batch * np.log(clipped_prediction)
+                    + (1.0 - target_batch) * np.log(1.0 - clipped_prediction)
+                )
+            )
+        )
 
     def _record_hidden_traffic(self, hidden_state: Array) -> None:
         self._traffic_sum += np.mean(np.abs(hidden_state), axis=0)
@@ -470,23 +485,19 @@ class CircadianPredictiveCodingNetwork:
 
         for index in split_indices:
             input_column = self.weight_input_hidden[:, index]
-            output_row = self.weight_hidden_output[index, :]
+            output_row = self.weight_hidden_output[index, :].copy()
             bias_value = float(self.bias_hidden[0, index])
             chemical_value = float(self._hidden_chemical[index])
             parent_norm = float(np.linalg.norm(output_row))
             noise_scale = self.config.split_noise_scale * max(parent_norm, 1e-3)
+            output_noise = self._rng.normal(loc=0.0, scale=noise_scale, size=output_row.shape)
+            self.weight_hidden_output[index, :] = 0.5 * output_row + output_noise
 
-            input_noise = self._rng.normal(
-                loc=0.0, scale=noise_scale, size=input_column.shape
-            )
-            output_noise = self._rng.normal(
-                loc=0.0, scale=noise_scale, size=output_row.shape
-            )
-            bias_noise = float(self._rng.normal(loc=0.0, scale=noise_scale))
-
-            new_in_columns.append((input_column + input_noise).astype(np.float64))
-            new_out_rows.append((output_row + output_noise).astype(np.float64))
-            new_hidden_bias_values.append(bias_value + bias_noise)
+            # Keep split function-preserving by keeping duplicate activations and
+            # making output rows sum to the original row.
+            new_in_columns.append(input_column.astype(np.float64))
+            new_out_rows.append((0.5 * output_row - output_noise).astype(np.float64))
+            new_hidden_bias_values.append(bias_value)
             new_chemical_values.append(chemical_value * 0.5)
             new_traffic_values.append(0.0)
 

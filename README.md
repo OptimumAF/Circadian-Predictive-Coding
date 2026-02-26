@@ -165,3 +165,6 @@ Circadian model supports optional advanced mechanisms through `CircadianConfig`:
 - gradual prune decay and delayed removal
 - replay-style consolidation during sleep
 - homeostatic downscaling after sleep
+- function-preserving split behavior (parent+child outgoing weights sum to original)
+
+Predictive-coding binary training now uses BCE-consistent output gradients (`p - y`) while keeping a hidden-state error penalty in the reported energy metric.

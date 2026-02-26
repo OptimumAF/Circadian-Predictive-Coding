@@ -71,6 +71,35 @@ def test_should_split_busy_neurons_and_prune_idle_neurons_during_sleep() -> None
     assert model.get_chemical_state().shape[0] == 6
 
 
+def test_should_preserve_function_on_split_when_split_noise_is_zero() -> None:
+    config = CircadianConfig(
+        split_threshold=0.7,
+        prune_threshold=-1.0,
+        max_split_per_sleep=1,
+        max_prune_per_sleep=0,
+        split_noise_scale=0.0,
+    )
+    model = CircadianPredictiveCodingNetwork(
+        input_dim=2,
+        hidden_dim=5,
+        seed=21,
+        circadian_config=config,
+        min_hidden_dim=4,
+        max_hidden_dim=10,
+    )
+    model.set_chemical_state(np.array([0.95, 0.10, 0.20, 0.30, 0.40], dtype=np.float64))
+
+    probe_input = np.array([[0.2, -0.1], [-0.7, 0.4], [0.5, 0.3]], dtype=np.float64)
+    pre_sleep_prediction = model.predict_proba(probe_input)
+    sleep_result = model.sleep_event()
+    post_sleep_prediction = model.predict_proba(probe_input)
+
+    assert sleep_result.split_indices == (0,)
+    assert sleep_result.pruned_indices == ()
+    assert model.hidden_dim == 6
+    assert np.allclose(pre_sleep_prediction, post_sleep_prediction, atol=1e-10)
+
+
 def test_should_trigger_adaptive_sleep_when_plateau_and_chemical_variance_are_high() -> None:
     dataset = generate_two_cluster_dataset(sample_count=260, noise_scale=0.8, seed=10)
     config = CircadianConfig(

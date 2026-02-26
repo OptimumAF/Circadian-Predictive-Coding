@@ -9,11 +9,13 @@
   - per-neuron chemical buildup layer
   - plasticity suppression from chemical accumulation
   - sleep events that split high-use neurons and prune low-use neurons
+  - function-preserving split updates for both NumPy and Torch circadian implementations
   - adaptive split/prune threshold option using chemical percentiles
   - adaptive sleep-trigger option based on energy plateau + chemical variance
   - weight-norm-aware split/prune ranking
   - optional gradual prune decay, replay consolidation, and homeostatic downscaling
   - support for external `NeuronAdaptationPolicy` proposals
+- BCE-consistent binary predictive-coding gradients (`p - y`) for toy predictive and circadian models.
 - Three-model experiment runner and CLI entrypoint.
 - In-depth aggregate comparison runner (`seeds x noise levels`) with:
   - mean/std test accuracy

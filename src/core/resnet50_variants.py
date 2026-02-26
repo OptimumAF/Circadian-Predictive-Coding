@@ -362,32 +362,25 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
 
         for index in split_indices:
             input_column = self.weight_feature_hidden[:, index]
-            output_row = self.weight_hidden_output[index, :]
+            output_row = self.weight_hidden_output[index, :].clone()
             bias_value = self.bias_hidden[0, index]
             chemical_value = self._chemical[index]
-
-            input_noise = self.config.split_noise_scale * torch.randn(
-                input_column.shape,
-                generator=self._split_generator,
-                dtype=torch.float32,
-                device=self.device,
-            )
-            output_noise = self.config.split_noise_scale * torch.randn(
+            parent_norm = float(torch.linalg.norm(output_row).item())
+            noise_scale = self.config.split_noise_scale * max(parent_norm, 1e-3)
+            output_noise = noise_scale * torch.randn(
                 output_row.shape,
                 generator=self._split_generator,
                 dtype=torch.float32,
                 device=self.device,
             )
-            bias_noise = self.config.split_noise_scale * torch.randn(
-                (1,),
-                generator=self._split_generator,
-                dtype=torch.float32,
-                device=self.device,
-            )[0]
 
-            input_columns.append((input_column + input_noise).unsqueeze(1))
-            output_rows.append((output_row + output_noise).unsqueeze(0))
-            bias_values.append((bias_value + bias_noise).reshape(1, 1))
+            self.weight_hidden_output[index, :] = 0.5 * output_row + output_noise
+
+            # Keep split function-preserving by duplicating incoming pathway while
+            # ensuring the parent and child outgoing rows sum to the original row.
+            input_columns.append(input_column.unsqueeze(1))
+            output_rows.append((0.5 * output_row - output_noise).unsqueeze(0))
+            bias_values.append(bias_value.reshape(1, 1))
             chemical_values.append((chemical_value * 0.5).reshape(1))
             traffic_values.append(torch.zeros((1,), dtype=torch.float32, device=self.device))
 
