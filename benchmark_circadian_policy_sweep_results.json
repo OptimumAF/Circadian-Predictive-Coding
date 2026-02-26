@@ -1,0 +1,1223 @@
+{
+  "dataset": {
+    "difficulty": "hard",
+    "noise_std": 0.08,
+    "train_samples": 2500,
+    "test_samples": 700,
+    "classes": 10,
+    "image_size": 96,
+    "device": "cuda",
+    "epochs": 14,
+    "backbone_weights": "imagenet"
+  },
+  "trials": [
+    {
+      "trial": 1,
+      "params": {},
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0028919000178575516,
+        "test_accuracy": 0.9214285714285714,
+        "train_seconds": 14.566055500000001,
+        "train_samples_per_second": 2402.846810517782,
+        "mean_train_step_ms": 17.786585714285707,
+        "inference_latency_mean_ms": 15.738271428570728,
+        "inference_latency_p95_ms": 16.643934999999388,
+        "inference_samples_per_second": 4048.366175628471,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.595396559095532
+      }
+    },
+    {
+      "trial": 2,
+      "params": {
+        "circadian_adaptive_split_percentile": 90.0,
+        "circadian_adaptive_prune_percentile": 10.0
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0003763737913686782,
+        "test_accuracy": 0.9242857142857143,
+        "train_seconds": 14.171758,
+        "train_samples_per_second": 2469.700653934395,
+        "mean_train_step_ms": 17.33923857142838,
+        "inference_latency_mean_ms": 16.262671428572265,
+        "inference_latency_p95_ms": 17.45708499999985,
+        "inference_samples_per_second": 3917.824079157414,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.6433232280461385
+      }
+    },
+    {
+      "trial": 3,
+      "params": {
+        "circadian_adaptive_split_percentile": 92.0,
+        "circadian_adaptive_prune_percentile": 8.0,
+        "circadian_split_cooldown_steps": 3,
+        "circadian_prune_cooldown_steps": 3
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0004798781592398882,
+        "test_accuracy": 0.93,
+        "train_seconds": 14.238487399999997,
+        "train_samples_per_second": 2458.1262754075974,
+        "mean_train_step_ms": 17.422351607142847,
+        "inference_latency_mean_ms": 16.123228571427514,
+        "inference_latency_p95_ms": 17.424895000001328,
+        "inference_samples_per_second": 3951.7076516049538,
+        "total_parameters": 24292521,
+        "trainable_parameters": 784489,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 381,
+        "circadian_total_splits": 25,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.711441160719185
+      }
+    },
+    {
+      "trial": 4,
+      "params": {
+        "circadian_adaptive_split_percentile": 85.0,
+        "circadian_adaptive_prune_percentile": 20.0,
+        "circadian_split_hysteresis_margin": 0.03,
+        "circadian_prune_hysteresis_margin": 0.03
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0019489661790430546,
+        "test_accuracy": 0.9214285714285714,
+        "train_seconds": 14.104893000000004,
+        "train_samples_per_second": 2481.408402034669,
+        "mean_train_step_ms": 17.307563750000007,
+        "inference_latency_mean_ms": 15.822100000000157,
+        "inference_latency_p95_ms": 16.82896500000055,
+        "inference_samples_per_second": 4026.917142116728,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7057155532380858
+      }
+    },
+    {
+      "trial": 5,
+      "params": {
+        "circadian_split_importance_mix": 0.3,
+        "circadian_prune_importance_mix": 0.5,
+        "circadian_split_weight_norm_mix": 0.2,
+        "circadian_prune_weight_norm_mix": 0.2
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0004454291774891317,
+        "test_accuracy": 0.9271428571428572,
+        "train_seconds": 14.17107200000001,
+        "train_samples_per_second": 2469.820208379435,
+        "mean_train_step_ms": 17.388660178571797,
+        "inference_latency_mean_ms": 15.93671428571294,
+        "inference_latency_p95_ms": 16.87508000000193,
+        "inference_samples_per_second": 3997.9562017626654,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7304201940764087
+      }
+    },
+    {
+      "trial": 6,
+      "params": {
+        "circadian_split_importance_mix": 0.15,
+        "circadian_prune_importance_mix": 0.45,
+        "circadian_importance_ema_decay": 0.98
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0012186206877231598,
+        "test_accuracy": 0.9185714285714286,
+        "train_seconds": 14.1685387,
+        "train_samples_per_second": 2470.261806180478,
+        "mean_train_step_ms": 17.37821178571427,
+        "inference_latency_mean_ms": 15.830071428575414,
+        "inference_latency_p95_ms": 16.91093000000734,
+        "inference_samples_per_second": 4024.8893381032276,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.6549828146301716
+      }
+    },
+    {
+      "trial": 7,
+      "params": {
+        "circadian_use_dual_chemical": true,
+        "circadian_dual_fast_mix": 0.6,
+        "circadian_slow_chemical_decay": 0.9995
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.002798889297991991,
+        "test_accuracy": 0.88,
+        "train_seconds": 14.480240899999998,
+        "train_samples_per_second": 2417.0868593767664,
+        "mean_train_step_ms": 17.71122107142844,
+        "inference_latency_mean_ms": 16.107964285714008,
+        "inference_latency_p95_ms": 17.039074999991755,
+        "inference_samples_per_second": 3955.452382694521,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.09602982544309668
+      }
+    },
+    {
+      "trial": 8,
+      "params": {
+        "circadian_use_dual_chemical": true,
+        "circadian_dual_fast_mix": 0.8,
+        "circadian_slow_buildup_scale": 0.15
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.003503313520923257,
+        "test_accuracy": 0.9,
+        "train_seconds": 14.36326129999999,
+        "train_samples_per_second": 2436.77248982444,
+        "mean_train_step_ms": 17.645698928571438,
+        "inference_latency_mean_ms": 16.24860000000337,
+        "inference_latency_p95_ms": 17.638385000000056,
+        "inference_samples_per_second": 3921.21694880005,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.32479863039579426
+      }
+    },
+    {
+      "trial": 9,
+      "params": {
+        "circadian_use_dual_chemical": false,
+        "circadian_use_adaptive_thresholds": true,
+        "circadian_adaptive_split_percentile": 88.0,
+        "circadian_adaptive_prune_percentile": 15.0
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0005776115576736629,
+        "test_accuracy": 0.9171428571428571,
+        "train_seconds": 14.173664200000005,
+        "train_samples_per_second": 2469.3685066985,
+        "mean_train_step_ms": 17.333848571428994,
+        "inference_latency_mean_ms": 15.408264285708485,
+        "inference_latency_p95_ms": 16.188484999983643,
+        "inference_samples_per_second": 4135.072227011459,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7138468337860333
+      }
+    },
+    {
+      "trial": 10,
+      "params": {
+        "circadian_split_noise_scale": 0.0,
+        "circadian_max_split_per_sleep": 1,
+        "circadian_max_prune_per_sleep": 1
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0002551946381572634,
+        "test_accuracy": 0.9242857142857143,
+        "train_seconds": 14.020675600000004,
+        "train_samples_per_second": 2496.3133730873847,
+        "mean_train_step_ms": 17.172219821428467,
+        "inference_latency_mean_ms": 15.692757142860257,
+        "inference_latency_p95_ms": 16.687529999987305,
+        "inference_samples_per_second": 4060.10780223371,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 14,
+        "circadian_total_prunes": 14,
+        "balanced_score": 0.7839509648167616
+      }
+    },
+    {
+      "trial": 11,
+      "params": {
+        "circadian_sleep_interval": 2,
+        "circadian_max_split_per_sleep": 1,
+        "circadian_max_prune_per_sleep": 1
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.008978886529803276,
+        "test_accuracy": 0.8842857142857142,
+        "train_seconds": 14.127985300000006,
+        "train_samples_per_second": 2477.352521027891,
+        "mean_train_step_ms": 17.37955107142908,
+        "inference_latency_mean_ms": 15.6842857142822,
+        "inference_latency_p95_ms": 16.651289999998653,
+        "inference_samples_per_second": 4062.3007559896155,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 7,
+        "circadian_total_prunes": 7,
+        "balanced_score": 0.31316003510635104
+      }
+    },
+    {
+      "trial": 12,
+      "params": {
+        "circadian_head_hidden_dim": 512,
+        "circadian_learning_rate": 0.02,
+        "circadian_inference_steps": 14,
+        "circadian_inference_learning_rate": 0.12,
+        "circadian_adaptive_split_percentile": 90.0,
+        "circadian_adaptive_prune_percentile": 10.0
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.004107816144824028,
+        "test_accuracy": 0.8985714285714286,
+        "train_seconds": 14.0989036,
+        "train_samples_per_second": 2482.462537015999,
+        "mean_train_step_ms": 17.292787321428754,
+        "inference_latency_mean_ms": 15.45027857142348,
+        "inference_latency_p95_ms": 16.3587200000066,
+        "inference_samples_per_second": 4123.827633252539,
+        "total_parameters": 24562250,
+        "trainable_parameters": 1054218,
+        "circadian_hidden_dim_start": 512,
+        "circadian_hidden_dim_end": 512,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.5216752444434325
+      }
+    },
+    {
+      "trial": 13,
+      "params": {
+        "circadian_head_hidden_dim": 512,
+        "circadian_learning_rate": 0.03,
+        "circadian_inference_steps": 14,
+        "circadian_inference_learning_rate": 0.15,
+        "circadian_adaptive_split_percentile": 92.0,
+        "circadian_adaptive_prune_percentile": 8.0
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0027585607022047043,
+        "test_accuracy": 0.8757142857142857,
+        "train_seconds": 13.950191799999999,
+        "train_samples_per_second": 2508.926077991272,
+        "mean_train_step_ms": 17.046975535713624,
+        "inference_latency_mean_ms": 15.642049999992683,
+        "inference_latency_p95_ms": 16.324634999989485,
+        "inference_samples_per_second": 4073.2695340006917,
+        "total_parameters": 24560191,
+        "trainable_parameters": 1052159,
+        "circadian_hidden_dim_start": 512,
+        "circadian_hidden_dim_end": 511,
+        "circadian_total_splits": 27,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.2762852611098147
+      }
+    },
+    {
+      "trial": 14,
+      "params": {
+        "circadian_homeostatic_downscale_factor": 0.995,
+        "circadian_homeostasis_target_input_norm": 1.2,
+        "circadian_homeostasis_target_output_norm": 1.0,
+        "circadian_homeostasis_strength": 0.35
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 2.173127722926438e-05,
+        "test_accuracy": 0.9185714285714286,
+        "train_seconds": 13.95403189999999,
+        "train_samples_per_second": 2508.2356304488617,
+        "mean_train_step_ms": 17.045908749999327,
+        "inference_latency_mean_ms": 15.708628571429374,
+        "inference_latency_p95_ms": 16.582565000001637,
+        "inference_samples_per_second": 4056.0056165672113,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7369498122316371
+      }
+    },
+    {
+      "trial": 15,
+      "params": {
+        "circadian_homeostatic_downscale_factor": 0.998,
+        "circadian_homeostasis_target_input_norm": 1.0,
+        "circadian_homeostasis_target_output_norm": 0.8,
+        "circadian_homeostasis_strength": 0.5
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 4.8239686293527484e-05,
+        "test_accuracy": 0.8957142857142857,
+        "train_seconds": 13.937116599999996,
+        "train_samples_per_second": 2511.279843924102,
+        "mean_train_step_ms": 17.07042875000008,
+        "inference_latency_mean_ms": 15.493921428569836,
+        "inference_latency_p95_ms": 16.433494999998288,
+        "inference_samples_per_second": 4112.211747556722,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.5279746750636217
+      }
+    },
+    {
+      "trial": 16,
+      "params": {
+        "circadian_homeostatic_downscale_factor": 1.0,
+        "circadian_homeostasis_target_input_norm": 0.0,
+        "circadian_homeostasis_target_output_norm": 0.0
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0003129869292024523,
+        "test_accuracy": 0.9171428571428571,
+        "train_seconds": 13.672897599999999,
+        "train_samples_per_second": 2559.8085368532275,
+        "mean_train_step_ms": 16.710786428571673,
+        "inference_latency_mean_ms": 15.409650000003287,
+        "inference_latency_p95_ms": 16.502480000018238,
+        "inference_samples_per_second": 4134.700380233952,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.8576379934950293
+      }
+    },
+    {
+      "trial": 17,
+      "params": {
+        "circadian_learning_rate": 0.025,
+        "circadian_inference_steps": 16,
+        "circadian_inference_learning_rate": 0.12,
+        "circadian_split_cooldown_steps": 3,
+        "circadian_prune_cooldown_steps": 3,
+        "circadian_split_importance_mix": 0.25,
+        "circadian_prune_importance_mix": 0.45
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.004079664126038551,
+        "test_accuracy": 0.9185714285714286,
+        "train_seconds": 13.836322499999994,
+        "train_samples_per_second": 2529.573880631939,
+        "mean_train_step_ms": 16.999870357143266,
+        "inference_latency_mean_ms": 15.477535714272303,
+        "inference_latency_p95_ms": 16.37150499995812,
+        "inference_samples_per_second": 4116.565252408551,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.8127498867375428
+      }
+    },
+    {
+      "trial": 18,
+      "params": {
+        "circadian_learning_rate": 0.035,
+        "circadian_inference_steps": 10,
+        "circadian_inference_learning_rate": 0.18,
+        "circadian_split_cooldown_steps": 1,
+        "circadian_prune_cooldown_steps": 1,
+        "circadian_split_hysteresis_margin": 0.01,
+        "circadian_prune_hysteresis_margin": 0.01
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.006421617232263088,
+        "test_accuracy": 0.89,
+        "train_seconds": 13.748717499999998,
+        "train_samples_per_second": 2545.6919890891645,
+        "mean_train_step_ms": 16.71509250000014,
+        "inference_latency_mean_ms": 15.618607142861103,
+        "inference_latency_p95_ms": 16.714220000005753,
+        "inference_samples_per_second": 4079.383336266833,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.49696002127215366
+      }
+    }
+  ],
+  "top10_by_accuracy": [
+    {
+      "trial": 3,
+      "params": {
+        "circadian_adaptive_split_percentile": 92.0,
+        "circadian_adaptive_prune_percentile": 8.0,
+        "circadian_split_cooldown_steps": 3,
+        "circadian_prune_cooldown_steps": 3
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0004798781592398882,
+        "test_accuracy": 0.93,
+        "train_seconds": 14.238487399999997,
+        "train_samples_per_second": 2458.1262754075974,
+        "mean_train_step_ms": 17.422351607142847,
+        "inference_latency_mean_ms": 16.123228571427514,
+        "inference_latency_p95_ms": 17.424895000001328,
+        "inference_samples_per_second": 3951.7076516049538,
+        "total_parameters": 24292521,
+        "trainable_parameters": 784489,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 381,
+        "circadian_total_splits": 25,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.711441160719185
+      }
+    },
+    {
+      "trial": 5,
+      "params": {
+        "circadian_split_importance_mix": 0.3,
+        "circadian_prune_importance_mix": 0.5,
+        "circadian_split_weight_norm_mix": 0.2,
+        "circadian_prune_weight_norm_mix": 0.2
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0004454291774891317,
+        "test_accuracy": 0.9271428571428572,
+        "train_seconds": 14.17107200000001,
+        "train_samples_per_second": 2469.820208379435,
+        "mean_train_step_ms": 17.388660178571797,
+        "inference_latency_mean_ms": 15.93671428571294,
+        "inference_latency_p95_ms": 16.87508000000193,
+        "inference_samples_per_second": 3997.9562017626654,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7304201940764087
+      }
+    },
+    {
+      "trial": 10,
+      "params": {
+        "circadian_split_noise_scale": 0.0,
+        "circadian_max_split_per_sleep": 1,
+        "circadian_max_prune_per_sleep": 1
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0002551946381572634,
+        "test_accuracy": 0.9242857142857143,
+        "train_seconds": 14.020675600000004,
+        "train_samples_per_second": 2496.3133730873847,
+        "mean_train_step_ms": 17.172219821428467,
+        "inference_latency_mean_ms": 15.692757142860257,
+        "inference_latency_p95_ms": 16.687529999987305,
+        "inference_samples_per_second": 4060.10780223371,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 14,
+        "circadian_total_prunes": 14,
+        "balanced_score": 0.7839509648167616
+      }
+    },
+    {
+      "trial": 2,
+      "params": {
+        "circadian_adaptive_split_percentile": 90.0,
+        "circadian_adaptive_prune_percentile": 10.0
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0003763737913686782,
+        "test_accuracy": 0.9242857142857143,
+        "train_seconds": 14.171758,
+        "train_samples_per_second": 2469.700653934395,
+        "mean_train_step_ms": 17.33923857142838,
+        "inference_latency_mean_ms": 16.262671428572265,
+        "inference_latency_p95_ms": 17.45708499999985,
+        "inference_samples_per_second": 3917.824079157414,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.6433232280461385
+      }
+    },
+    {
+      "trial": 4,
+      "params": {
+        "circadian_adaptive_split_percentile": 85.0,
+        "circadian_adaptive_prune_percentile": 20.0,
+        "circadian_split_hysteresis_margin": 0.03,
+        "circadian_prune_hysteresis_margin": 0.03
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0019489661790430546,
+        "test_accuracy": 0.9214285714285714,
+        "train_seconds": 14.104893000000004,
+        "train_samples_per_second": 2481.408402034669,
+        "mean_train_step_ms": 17.307563750000007,
+        "inference_latency_mean_ms": 15.822100000000157,
+        "inference_latency_p95_ms": 16.82896500000055,
+        "inference_samples_per_second": 4026.917142116728,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7057155532380858
+      }
+    },
+    {
+      "trial": 1,
+      "params": {},
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0028919000178575516,
+        "test_accuracy": 0.9214285714285714,
+        "train_seconds": 14.566055500000001,
+        "train_samples_per_second": 2402.846810517782,
+        "mean_train_step_ms": 17.786585714285707,
+        "inference_latency_mean_ms": 15.738271428570728,
+        "inference_latency_p95_ms": 16.643934999999388,
+        "inference_samples_per_second": 4048.366175628471,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.595396559095532
+      }
+    },
+    {
+      "trial": 17,
+      "params": {
+        "circadian_learning_rate": 0.025,
+        "circadian_inference_steps": 16,
+        "circadian_inference_learning_rate": 0.12,
+        "circadian_split_cooldown_steps": 3,
+        "circadian_prune_cooldown_steps": 3,
+        "circadian_split_importance_mix": 0.25,
+        "circadian_prune_importance_mix": 0.45
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.004079664126038551,
+        "test_accuracy": 0.9185714285714286,
+        "train_seconds": 13.836322499999994,
+        "train_samples_per_second": 2529.573880631939,
+        "mean_train_step_ms": 16.999870357143266,
+        "inference_latency_mean_ms": 15.477535714272303,
+        "inference_latency_p95_ms": 16.37150499995812,
+        "inference_samples_per_second": 4116.565252408551,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.8127498867375428
+      }
+    },
+    {
+      "trial": 14,
+      "params": {
+        "circadian_homeostatic_downscale_factor": 0.995,
+        "circadian_homeostasis_target_input_norm": 1.2,
+        "circadian_homeostasis_target_output_norm": 1.0,
+        "circadian_homeostasis_strength": 0.35
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 2.173127722926438e-05,
+        "test_accuracy": 0.9185714285714286,
+        "train_seconds": 13.95403189999999,
+        "train_samples_per_second": 2508.2356304488617,
+        "mean_train_step_ms": 17.045908749999327,
+        "inference_latency_mean_ms": 15.708628571429374,
+        "inference_latency_p95_ms": 16.582565000001637,
+        "inference_samples_per_second": 4056.0056165672113,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7369498122316371
+      }
+    },
+    {
+      "trial": 6,
+      "params": {
+        "circadian_split_importance_mix": 0.15,
+        "circadian_prune_importance_mix": 0.45,
+        "circadian_importance_ema_decay": 0.98
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0012186206877231598,
+        "test_accuracy": 0.9185714285714286,
+        "train_seconds": 14.1685387,
+        "train_samples_per_second": 2470.261806180478,
+        "mean_train_step_ms": 17.37821178571427,
+        "inference_latency_mean_ms": 15.830071428575414,
+        "inference_latency_p95_ms": 16.91093000000734,
+        "inference_samples_per_second": 4024.8893381032276,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.6549828146301716
+      }
+    },
+    {
+      "trial": 16,
+      "params": {
+        "circadian_homeostatic_downscale_factor": 1.0,
+        "circadian_homeostasis_target_input_norm": 0.0,
+        "circadian_homeostasis_target_output_norm": 0.0
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0003129869292024523,
+        "test_accuracy": 0.9171428571428571,
+        "train_seconds": 13.672897599999999,
+        "train_samples_per_second": 2559.8085368532275,
+        "mean_train_step_ms": 16.710786428571673,
+        "inference_latency_mean_ms": 15.409650000003287,
+        "inference_latency_p95_ms": 16.502480000018238,
+        "inference_samples_per_second": 4134.700380233952,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.8576379934950293
+      }
+    }
+  ],
+  "top10_by_balanced_score": [
+    {
+      "trial": 16,
+      "params": {
+        "circadian_homeostatic_downscale_factor": 1.0,
+        "circadian_homeostasis_target_input_norm": 0.0,
+        "circadian_homeostasis_target_output_norm": 0.0
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0003129869292024523,
+        "test_accuracy": 0.9171428571428571,
+        "train_seconds": 13.672897599999999,
+        "train_samples_per_second": 2559.8085368532275,
+        "mean_train_step_ms": 16.710786428571673,
+        "inference_latency_mean_ms": 15.409650000003287,
+        "inference_latency_p95_ms": 16.502480000018238,
+        "inference_samples_per_second": 4134.700380233952,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.8576379934950293
+      }
+    },
+    {
+      "trial": 17,
+      "params": {
+        "circadian_learning_rate": 0.025,
+        "circadian_inference_steps": 16,
+        "circadian_inference_learning_rate": 0.12,
+        "circadian_split_cooldown_steps": 3,
+        "circadian_prune_cooldown_steps": 3,
+        "circadian_split_importance_mix": 0.25,
+        "circadian_prune_importance_mix": 0.45
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.004079664126038551,
+        "test_accuracy": 0.9185714285714286,
+        "train_seconds": 13.836322499999994,
+        "train_samples_per_second": 2529.573880631939,
+        "mean_train_step_ms": 16.999870357143266,
+        "inference_latency_mean_ms": 15.477535714272303,
+        "inference_latency_p95_ms": 16.37150499995812,
+        "inference_samples_per_second": 4116.565252408551,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.8127498867375428
+      }
+    },
+    {
+      "trial": 10,
+      "params": {
+        "circadian_split_noise_scale": 0.0,
+        "circadian_max_split_per_sleep": 1,
+        "circadian_max_prune_per_sleep": 1
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0002551946381572634,
+        "test_accuracy": 0.9242857142857143,
+        "train_seconds": 14.020675600000004,
+        "train_samples_per_second": 2496.3133730873847,
+        "mean_train_step_ms": 17.172219821428467,
+        "inference_latency_mean_ms": 15.692757142860257,
+        "inference_latency_p95_ms": 16.687529999987305,
+        "inference_samples_per_second": 4060.10780223371,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 14,
+        "circadian_total_prunes": 14,
+        "balanced_score": 0.7839509648167616
+      }
+    },
+    {
+      "trial": 14,
+      "params": {
+        "circadian_homeostatic_downscale_factor": 0.995,
+        "circadian_homeostasis_target_input_norm": 1.2,
+        "circadian_homeostasis_target_output_norm": 1.0,
+        "circadian_homeostasis_strength": 0.35
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 2.173127722926438e-05,
+        "test_accuracy": 0.9185714285714286,
+        "train_seconds": 13.95403189999999,
+        "train_samples_per_second": 2508.2356304488617,
+        "mean_train_step_ms": 17.045908749999327,
+        "inference_latency_mean_ms": 15.708628571429374,
+        "inference_latency_p95_ms": 16.582565000001637,
+        "inference_samples_per_second": 4056.0056165672113,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7369498122316371
+      }
+    },
+    {
+      "trial": 5,
+      "params": {
+        "circadian_split_importance_mix": 0.3,
+        "circadian_prune_importance_mix": 0.5,
+        "circadian_split_weight_norm_mix": 0.2,
+        "circadian_prune_weight_norm_mix": 0.2
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0004454291774891317,
+        "test_accuracy": 0.9271428571428572,
+        "train_seconds": 14.17107200000001,
+        "train_samples_per_second": 2469.820208379435,
+        "mean_train_step_ms": 17.388660178571797,
+        "inference_latency_mean_ms": 15.93671428571294,
+        "inference_latency_p95_ms": 16.87508000000193,
+        "inference_samples_per_second": 3997.9562017626654,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7304201940764087
+      }
+    },
+    {
+      "trial": 9,
+      "params": {
+        "circadian_use_dual_chemical": false,
+        "circadian_use_adaptive_thresholds": true,
+        "circadian_adaptive_split_percentile": 88.0,
+        "circadian_adaptive_prune_percentile": 15.0
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0005776115576736629,
+        "test_accuracy": 0.9171428571428571,
+        "train_seconds": 14.173664200000005,
+        "train_samples_per_second": 2469.3685066985,
+        "mean_train_step_ms": 17.333848571428994,
+        "inference_latency_mean_ms": 15.408264285708485,
+        "inference_latency_p95_ms": 16.188484999983643,
+        "inference_samples_per_second": 4135.072227011459,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7138468337860333
+      }
+    },
+    {
+      "trial": 3,
+      "params": {
+        "circadian_adaptive_split_percentile": 92.0,
+        "circadian_adaptive_prune_percentile": 8.0,
+        "circadian_split_cooldown_steps": 3,
+        "circadian_prune_cooldown_steps": 3
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0004798781592398882,
+        "test_accuracy": 0.93,
+        "train_seconds": 14.238487399999997,
+        "train_samples_per_second": 2458.1262754075974,
+        "mean_train_step_ms": 17.422351607142847,
+        "inference_latency_mean_ms": 16.123228571427514,
+        "inference_latency_p95_ms": 17.424895000001328,
+        "inference_samples_per_second": 3951.7076516049538,
+        "total_parameters": 24292521,
+        "trainable_parameters": 784489,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 381,
+        "circadian_total_splits": 25,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.711441160719185
+      }
+    },
+    {
+      "trial": 4,
+      "params": {
+        "circadian_adaptive_split_percentile": 85.0,
+        "circadian_adaptive_prune_percentile": 20.0,
+        "circadian_split_hysteresis_margin": 0.03,
+        "circadian_prune_hysteresis_margin": 0.03
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0019489661790430546,
+        "test_accuracy": 0.9214285714285714,
+        "train_seconds": 14.104893000000004,
+        "train_samples_per_second": 2481.408402034669,
+        "mean_train_step_ms": 17.307563750000007,
+        "inference_latency_mean_ms": 15.822100000000157,
+        "inference_latency_p95_ms": 16.82896500000055,
+        "inference_samples_per_second": 4026.917142116728,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.7057155532380858
+      }
+    },
+    {
+      "trial": 6,
+      "params": {
+        "circadian_split_importance_mix": 0.15,
+        "circadian_prune_importance_mix": 0.45,
+        "circadian_importance_ema_decay": 0.98
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0012186206877231598,
+        "test_accuracy": 0.9185714285714286,
+        "train_seconds": 14.1685387,
+        "train_samples_per_second": 2470.261806180478,
+        "mean_train_step_ms": 17.37821178571427,
+        "inference_latency_mean_ms": 15.830071428575414,
+        "inference_latency_p95_ms": 16.91093000000734,
+        "inference_samples_per_second": 4024.8893381032276,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.6549828146301716
+      }
+    },
+    {
+      "trial": 2,
+      "params": {
+        "circadian_adaptive_split_percentile": 90.0,
+        "circadian_adaptive_prune_percentile": 10.0
+      },
+      "report": {
+        "model_name": "CircadianPredictiveCodingResNet50",
+        "epochs_ran": 14,
+        "final_metric_name": "energy",
+        "final_metric_value": 0.0003763737913686782,
+        "test_accuracy": 0.9242857142857143,
+        "train_seconds": 14.171758,
+        "train_samples_per_second": 2469.700653934395,
+        "mean_train_step_ms": 17.33923857142838,
+        "inference_latency_mean_ms": 16.262671428572265,
+        "inference_latency_p95_ms": 17.45708499999985,
+        "inference_samples_per_second": 3917.824079157414,
+        "total_parameters": 24298698,
+        "trainable_parameters": 790666,
+        "circadian_hidden_dim_start": 384,
+        "circadian_hidden_dim_end": 384,
+        "circadian_total_splits": 28,
+        "circadian_total_prunes": 28,
+        "balanced_score": 0.6433232280461385
+      }
+    }
+  ],
+  "best_accuracy": {
+    "trial": 3,
+    "params": {
+      "circadian_adaptive_split_percentile": 92.0,
+      "circadian_adaptive_prune_percentile": 8.0,
+      "circadian_split_cooldown_steps": 3,
+      "circadian_prune_cooldown_steps": 3
+    },
+    "report": {
+      "model_name": "CircadianPredictiveCodingResNet50",
+      "epochs_ran": 14,
+      "final_metric_name": "energy",
+      "final_metric_value": 0.0004798781592398882,
+      "test_accuracy": 0.93,
+      "train_seconds": 14.238487399999997,
+      "train_samples_per_second": 2458.1262754075974,
+      "mean_train_step_ms": 17.422351607142847,
+      "inference_latency_mean_ms": 16.123228571427514,
+      "inference_latency_p95_ms": 17.424895000001328,
+      "inference_samples_per_second": 3951.7076516049538,
+      "total_parameters": 24292521,
+      "trainable_parameters": 784489,
+      "circadian_hidden_dim_start": 384,
+      "circadian_hidden_dim_end": 381,
+      "circadian_total_splits": 25,
+      "circadian_total_prunes": 28,
+      "balanced_score": 0.711441160719185
+    }
+  },
+  "best_train_speed": {
+    "trial": 16,
+    "params": {
+      "circadian_homeostatic_downscale_factor": 1.0,
+      "circadian_homeostasis_target_input_norm": 0.0,
+      "circadian_homeostasis_target_output_norm": 0.0
+    },
+    "report": {
+      "model_name": "CircadianPredictiveCodingResNet50",
+      "epochs_ran": 14,
+      "final_metric_name": "energy",
+      "final_metric_value": 0.0003129869292024523,
+      "test_accuracy": 0.9171428571428571,
+      "train_seconds": 13.672897599999999,
+      "train_samples_per_second": 2559.8085368532275,
+      "mean_train_step_ms": 16.710786428571673,
+      "inference_latency_mean_ms": 15.409650000003287,
+      "inference_latency_p95_ms": 16.502480000018238,
+      "inference_samples_per_second": 4134.700380233952,
+      "total_parameters": 24298698,
+      "trainable_parameters": 790666,
+      "circadian_hidden_dim_start": 384,
+      "circadian_hidden_dim_end": 384,
+      "circadian_total_splits": 28,
+      "circadian_total_prunes": 28,
+      "balanced_score": 0.8576379934950293
+    }
+  },
+  "best_inference_speed": {
+    "trial": 9,
+    "params": {
+      "circadian_use_dual_chemical": false,
+      "circadian_use_adaptive_thresholds": true,
+      "circadian_adaptive_split_percentile": 88.0,
+      "circadian_adaptive_prune_percentile": 15.0
+    },
+    "report": {
+      "model_name": "CircadianPredictiveCodingResNet50",
+      "epochs_ran": 14,
+      "final_metric_name": "energy",
+      "final_metric_value": 0.0005776115576736629,
+      "test_accuracy": 0.9171428571428571,
+      "train_seconds": 14.173664200000005,
+      "train_samples_per_second": 2469.3685066985,
+      "mean_train_step_ms": 17.333848571428994,
+      "inference_latency_mean_ms": 15.408264285708485,
+      "inference_latency_p95_ms": 16.188484999983643,
+      "inference_samples_per_second": 4135.072227011459,
+      "total_parameters": 24298698,
+      "trainable_parameters": 790666,
+      "circadian_hidden_dim_start": 384,
+      "circadian_hidden_dim_end": 384,
+      "circadian_total_splits": 28,
+      "circadian_total_prunes": 28,
+      "balanced_score": 0.7138468337860333
+    }
+  },
+  "best_balanced": {
+    "trial": 16,
+    "params": {
+      "circadian_homeostatic_downscale_factor": 1.0,
+      "circadian_homeostasis_target_input_norm": 0.0,
+      "circadian_homeostasis_target_output_norm": 0.0
+    },
+    "report": {
+      "model_name": "CircadianPredictiveCodingResNet50",
+      "epochs_ran": 14,
+      "final_metric_name": "energy",
+      "final_metric_value": 0.0003129869292024523,
+      "test_accuracy": 0.9171428571428571,
+      "train_seconds": 13.672897599999999,
+      "train_samples_per_second": 2559.8085368532275,
+      "mean_train_step_ms": 16.710786428571673,
+      "inference_latency_mean_ms": 15.409650000003287,
+      "inference_latency_p95_ms": 16.502480000018238,
+      "inference_samples_per_second": 4134.700380233952,
+      "total_parameters": 24298698,
+      "trainable_parameters": 790666,
+      "circadian_hidden_dim_start": 384,
+      "circadian_hidden_dim_end": 384,
+      "circadian_total_splits": 28,
+      "circadian_total_prunes": 28,
+      "balanced_score": 0.8576379934950293
+    }
+  }
+}
