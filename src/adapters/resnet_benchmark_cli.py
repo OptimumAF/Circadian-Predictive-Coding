@@ -38,6 +38,12 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--backprop-lr", type=float, default=0.02)
     parser.add_argument("--backprop-momentum", type=float, default=0.9)
     parser.add_argument(
+        "--backbone-weights",
+        choices=["none", "imagenet"],
+        default="none",
+        help="ResNet-50 initialization: random weights or ImageNet-pretrained weights.",
+    )
+    parser.add_argument(
         "--backprop-freeze-backbone",
         action="store_true",
         help="Freeze ResNet backbone for backprop baseline.",
@@ -94,6 +100,7 @@ def main() -> None:
         backprop_learning_rate=args.backprop_lr,
         backprop_momentum=args.backprop_momentum,
         backprop_freeze_backbone=args.backprop_freeze_backbone,
+        backbone_weights=args.backbone_weights,
         predictive_head_hidden_dim=args.pc_hidden_dim,
         predictive_learning_rate=args.pc_lr,
         predictive_inference_steps=args.pc_steps,

@@ -39,6 +39,7 @@ def main() -> None:
         inference_batches=14,
         warmup_batches=4,
         backprop_freeze_backbone=True,
+        backbone_weights="imagenet",
     )
     _set_seed(torch, base.seed)
     device = _resolve_device(torch, base.device)

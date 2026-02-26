@@ -43,11 +43,26 @@ def _count_parameters(module_or_tensor: Any) -> int:
     raise ValueError("Unsupported parameter container.")
 
 
-def _build_resnet50_backbone(device: Any, freeze_backbone: bool) -> tuple[Any, int]:
+def _build_resnet50_backbone(
+    device: Any, freeze_backbone: bool, backbone_weights: str
+) -> tuple[Any, int]:
     torch = require_torch()
     models = require_torchvision_models()
 
-    backbone = models.resnet50(weights=None)
+    if backbone_weights == "none":
+        weights = None
+    elif backbone_weights == "imagenet":
+        weights = models.ResNet50_Weights.IMAGENET1K_V2
+    else:
+        raise ValueError("backbone_weights must be one of: none, imagenet.")
+
+    try:
+        backbone = models.resnet50(weights=weights)
+    except Exception as exc:  # pragma: no cover - environment/network dependent
+        raise RuntimeError(
+            f"Failed to initialize ResNet-50 with backbone_weights='{backbone_weights}'."
+        ) from exc
+
     feature_dim = int(backbone.fc.in_features)
     backbone.fc = torch.nn.Identity()
     backbone = backbone.to(device)
@@ -66,12 +81,17 @@ class BackpropResNet50Classifier:
         num_classes: int,
         device: Any,
         freeze_backbone: bool = False,
+        backbone_weights: str = "none",
     ) -> None:
         torch = require_torch()
         self._torch = torch
         self.device = device
         self.freeze_backbone = freeze_backbone
-        self.backbone, feature_dim = _build_resnet50_backbone(device=device, freeze_backbone=freeze_backbone)
+        self.backbone, feature_dim = _build_resnet50_backbone(
+            device=device,
+            freeze_backbone=freeze_backbone,
+            backbone_weights=backbone_weights,
+        )
         self.classifier = torch.nn.Linear(feature_dim, num_classes).to(device)
 
     def forward_logits(self, images: Any) -> Any:
@@ -430,10 +450,15 @@ class PredictiveCodingResNet50Classifier:
         head_hidden_dim: int = 256,
         seed: int = 7,
         freeze_backbone: bool = True,
+        backbone_weights: str = "none",
     ) -> None:
         self.device = device
         self.freeze_backbone = freeze_backbone
-        self.backbone, feature_dim = _build_resnet50_backbone(device=device, freeze_backbone=freeze_backbone)
+        self.backbone, feature_dim = _build_resnet50_backbone(
+            device=device,
+            freeze_backbone=freeze_backbone,
+            backbone_weights=backbone_weights,
+        )
         self.head = PredictiveCodingHead(
             feature_dim=feature_dim,
             hidden_dim=head_hidden_dim,
@@ -489,13 +514,18 @@ class CircadianPredictiveCodingResNet50Classifier:
         head_hidden_dim: int = 256,
         seed: int = 7,
         freeze_backbone: bool = True,
+        backbone_weights: str = "none",
         circadian_config: CircadianHeadConfig | None = None,
         min_hidden_dim: int = 64,
         max_hidden_dim: int = 2048,
     ) -> None:
         self.device = device
         self.freeze_backbone = freeze_backbone
-        self.backbone, feature_dim = _build_resnet50_backbone(device=device, freeze_backbone=freeze_backbone)
+        self.backbone, feature_dim = _build_resnet50_backbone(
+            device=device,
+            freeze_backbone=freeze_backbone,
+            backbone_weights=backbone_weights,
+        )
         self.head = CircadianPredictiveCodingHead(
             feature_dim=feature_dim,
             hidden_dim=head_hidden_dim,

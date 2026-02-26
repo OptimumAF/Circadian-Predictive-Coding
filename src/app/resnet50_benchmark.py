@@ -39,6 +39,7 @@ class ResNet50BenchmarkConfig:
     backprop_learning_rate: float = 0.02
     backprop_momentum: float = 0.9
     backprop_freeze_backbone: bool = False
+    backbone_weights: str = "none"
 
     predictive_head_hidden_dim: int = 256
     predictive_learning_rate: float = 0.03
@@ -135,7 +136,8 @@ def format_resnet50_benchmark_result(result: ResNet50BenchmarkResult) -> str:
             "Dataset: "
             f"train={result.config.train_samples}, test={result.config.test_samples}, "
             f"classes={result.config.num_classes}, image={result.config.image_size}x{result.config.image_size}, "
-            f"difficulty={result.config.dataset_difficulty}, noise_std={result.config.dataset_noise_std:.3f}"
+            f"difficulty={result.config.dataset_difficulty}, noise_std={result.config.dataset_noise_std:.3f}, "
+            f"backbone_weights={result.config.backbone_weights}"
         ),
         "",
     ]
@@ -197,6 +199,7 @@ def _benchmark_backprop(
         num_classes=loaders.num_classes,
         device=device,
         freeze_backbone=config.backprop_freeze_backbone,
+        backbone_weights=config.backbone_weights,
     )
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(
@@ -283,6 +286,7 @@ def _benchmark_predictive(
         head_hidden_dim=config.predictive_head_hidden_dim,
         seed=config.seed + 11,
         freeze_backbone=True,
+        backbone_weights=config.backbone_weights,
     )
 
     step_times_ms: list[float] = []
@@ -369,6 +373,7 @@ def _benchmark_circadian(
         head_hidden_dim=config.circadian_head_hidden_dim,
         seed=config.seed + 23,
         freeze_backbone=True,
+        backbone_weights=config.backbone_weights,
         circadian_config=circadian_config,
         min_hidden_dim=config.circadian_min_hidden_dim,
         max_hidden_dim=config.circadian_max_hidden_dim,
@@ -562,6 +567,8 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         raise ValueError("dataset_difficulty must be one of: easy, medium, hard.")
     if config.dataset_noise_std < 0.0:
         raise ValueError("dataset_noise_std must be non-negative.")
+    if config.backbone_weights not in {"none", "imagenet"}:
+        raise ValueError("backbone_weights must be one of: none, imagenet.")
 
 
 def _set_seed(torch: Any, seed: int) -> None:

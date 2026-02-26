@@ -27,6 +27,7 @@
   - training speed metrics (samples/s, ms/step)
   - inference latency/throughput metrics (mean, p95, samples/s)
   - target-accuracy early-stop support
+  - configurable ResNet backbone initialization (`none` or `imagenet`)
   - circadian sleep split/prune and hidden-size tracking
 - Neuron traffic tracking scaffold and adaptation policy interface.
 - Optional `requirements-resnet.txt` dependency set for torch-based benchmarks.
