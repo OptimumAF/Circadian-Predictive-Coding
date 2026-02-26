@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from src.core.circadian_predictive_coding import CircadianConfig, CircadianPredictiveCodingNetwork
+from src.core.circadian_predictive_coding import (
+    CircadianConfig,
+    CircadianPredictiveCodingNetwork,
+    ReplaySnapshot,
+)
 from src.core.neuron_adaptation import LayerTraffic, NeuronChangeProposal
 from src.infra.datasets import generate_two_cluster_dataset
 
@@ -196,3 +200,72 @@ def test_should_gradually_prune_marked_neurons_when_decay_is_enabled() -> None:
         inference_learning_rate=0.2,
     )
     assert model.hidden_dim == 5
+
+
+def test_should_respect_split_cooldown_and_hysteresis_between_sleep_events() -> None:
+    config = CircadianConfig(
+        split_threshold=0.5,
+        split_hysteresis_margin=0.1,
+        split_cooldown_epochs=3,
+        max_split_per_sleep=1,
+        max_prune_per_sleep=0,
+        split_noise_scale=0.0,
+    )
+    model = CircadianPredictiveCodingNetwork(
+        input_dim=2,
+        hidden_dim=4,
+        seed=42,
+        circadian_config=config,
+        min_hidden_dim=3,
+        max_hidden_dim=8,
+    )
+    model.set_chemical_state(np.array([0.9, 0.2, 0.1, 0.1], dtype=np.float64))
+
+    first_sleep = model.sleep_event()
+    second_sleep = model.sleep_event()
+
+    assert first_sleep.split_indices == (0,)
+    assert second_sleep.split_indices == ()
+
+
+def test_should_select_balanced_high_priority_replay_snapshots_when_enabled() -> None:
+    config = CircadianConfig(
+        replay_steps=2,
+        replay_memory_size=6,
+        replay_prioritized=True,
+        replay_class_balanced=True,
+    )
+    model = CircadianPredictiveCodingNetwork(
+        input_dim=2,
+        hidden_dim=4,
+        seed=12,
+        circadian_config=config,
+    )
+    model._replay_memory.clear()
+    model._replay_memory.extend(
+        [
+            ReplaySnapshot(
+                input_batch=np.zeros((2, 2), dtype=np.float64),
+                target_batch=np.zeros((2, 1), dtype=np.float64),
+                priority=0.20,
+                positive_fraction=0.0,
+            ),
+            ReplaySnapshot(
+                input_batch=np.zeros((2, 2), dtype=np.float64),
+                target_batch=np.ones((2, 1), dtype=np.float64),
+                priority=0.95,
+                positive_fraction=1.0,
+            ),
+            ReplaySnapshot(
+                input_batch=np.zeros((2, 2), dtype=np.float64),
+                target_batch=np.zeros((2, 1), dtype=np.float64),
+                priority=0.90,
+                positive_fraction=0.0,
+            ),
+        ]
+    )
+
+    chosen = model._select_replay_snapshots(replay_count=2)
+
+    assert len(chosen) == 2
+    assert {snapshot.positive_fraction for snapshot in chosen} == {0.0, 1.0}

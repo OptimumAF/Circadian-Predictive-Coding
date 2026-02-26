@@ -24,11 +24,25 @@ Array = NDArray[np.float64]
 
 
 @dataclass(frozen=True)
+class ReplaySnapshot:
+    """Stored wake snapshot for optional sleep replay consolidation."""
+
+    input_batch: Array
+    target_batch: Array
+    priority: float
+    positive_fraction: float
+
+
+@dataclass(frozen=True)
 class CircadianConfig:
     """Hyperparameters for circadian-style plasticity and sleep behavior."""
 
     chemical_decay: float = 0.995
     chemical_buildup_rate: float = 0.02
+    use_dual_chemical: bool = False
+    dual_fast_mix: float = 0.70
+    slow_chemical_decay: float = 0.999
+    slow_buildup_scale: float = 0.25
     plasticity_sensitivity: float = 0.7
     min_plasticity: float = 0.20
 
@@ -39,10 +53,17 @@ class CircadianConfig:
     adaptive_prune_percentile: float = 20.0
     split_threshold: float = 0.80
     prune_threshold: float = 0.08
+    split_hysteresis_margin: float = 0.0
+    prune_hysteresis_margin: float = 0.0
+    split_cooldown_epochs: int = 0
+    prune_cooldown_epochs: int = 0
 
     # Blend chemical accumulation and output weight-norm for split/prune ranking.
     split_weight_norm_mix: float = 0.30
     prune_weight_norm_mix: float = 0.30
+    split_importance_mix: float = 0.20
+    prune_importance_mix: float = 0.35
+    importance_ema_decay: float = 0.95
 
     max_split_per_sleep: int = 2
     max_prune_per_sleep: int = 2
@@ -62,6 +83,9 @@ class CircadianConfig:
 
     # Optional post-sleep global downscaling for homeostasis.
     homeostatic_downscale_factor: float = 1.0
+    homeostasis_target_input_norm: float = 0.0
+    homeostasis_target_output_norm: float = 0.0
+    homeostasis_strength: float = 0.50
 
     # Optional replay-style consolidation from a small recent-memory buffer.
     replay_steps: int = 0
@@ -69,6 +93,8 @@ class CircadianConfig:
     replay_learning_rate: float = 0.01
     replay_inference_steps: int = 12
     replay_inference_learning_rate: float = 0.15
+    replay_prioritized: bool = True
+    replay_class_balanced: bool = True
 
 
 @dataclass(frozen=True)
@@ -120,16 +146,21 @@ class CircadianPredictiveCodingNetwork:
         self.bias_output = np.zeros((1, 1), dtype=np.float64)
 
         self._hidden_chemical = np.zeros(hidden_dim, dtype=np.float64)
+        self._hidden_chemical_fast = np.zeros(hidden_dim, dtype=np.float64)
+        self._hidden_chemical_slow = np.zeros(hidden_dim, dtype=np.float64)
         self._traffic_sum = np.zeros(hidden_dim, dtype=np.float64)
+        self._importance_ema = np.zeros(hidden_dim, dtype=np.float64)
         self._traffic_steps = 0
         self._min_hidden_dim = min_hidden_dim
         self._prune_ttl = np.zeros(hidden_dim, dtype=np.int32)
         self._prune_marked = np.zeros(hidden_dim, dtype=bool)
+        self._split_cooldown = np.zeros(hidden_dim, dtype=np.int32)
+        self._prune_cooldown = np.zeros(hidden_dim, dtype=np.int32)
 
         self._epoch_count = 0
         self._epochs_since_sleep = 0
         self._energy_history: list[float] = []
-        self._replay_memory: deque[tuple[Array, Array]] = deque(
+        self._replay_memory: deque[ReplaySnapshot] = deque(
             maxlen=self.config.replay_memory_size
         )
 
@@ -174,6 +205,7 @@ class CircadianPredictiveCodingNetwork:
         if inference_learning_rate <= 0.0:
             raise ValueError("inference_learning_rate must be positive")
 
+        self._decay_cooldowns()
         self._apply_prune_decay_step()
 
         hidden_linear_prior = input_batch @ self.weight_input_hidden + self.bias_hidden
@@ -205,6 +237,7 @@ class CircadianPredictiveCodingNetwork:
         grad_hidden_bias = np.sum(hidden_prior_gradient, axis=0, keepdims=True) / sample_count
 
         self._update_chemical_layer(hidden_state)
+        self._update_importance_ema(grad_hidden_output)
         plasticity = self.get_plasticity_state()
 
         gated_input_hidden = grad_input_hidden * plasticity[np.newaxis, :]
@@ -281,6 +314,9 @@ class CircadianPredictiveCodingNetwork:
 
         # Sleep partially clears chemistry after consolidation to reset plasticity gate.
         self._hidden_chemical *= self.config.sleep_reset_factor
+        if self.config.use_dual_chemical:
+            self._hidden_chemical_fast *= self.config.sleep_reset_factor
+            self._hidden_chemical_slow *= self.config.sleep_reset_factor
         self._epochs_since_sleep = 0
 
         return SleepEventResult(
@@ -325,6 +361,8 @@ class CircadianPredictiveCodingNetwork:
         if np.any(chemical_state < 0.0):
             raise ValueError("chemical_state cannot contain negative values")
         self._hidden_chemical = chemical_state.copy()
+        self._hidden_chemical_fast = chemical_state.copy()
+        self._hidden_chemical_slow = chemical_state.copy()
 
     def get_plasticity_state(self) -> Array:
         """Map chemical buildup to plasticity factors."""
@@ -357,21 +395,56 @@ class CircadianPredictiveCodingNetwork:
         self._traffic_sum += np.mean(np.abs(hidden_state), axis=0)
         self._traffic_steps += 1
 
+    def _update_importance_ema(self, grad_hidden_output: Array) -> None:
+        importance = np.mean(np.abs(grad_hidden_output), axis=1)
+        decay = self.config.importance_ema_decay
+        self._importance_ema = decay * self._importance_ema + (1.0 - decay) * importance
+
     def _update_chemical_layer(self, hidden_state: Array) -> None:
         activity = np.mean(np.abs(hidden_state), axis=0)
-        self._hidden_chemical = (
-            self.config.chemical_decay * self._hidden_chemical
+        if not self.config.use_dual_chemical:
+            self._hidden_chemical = (
+                self.config.chemical_decay * self._hidden_chemical
+                + self.config.chemical_buildup_rate * activity
+            )
+            self._hidden_chemical_fast = self._hidden_chemical.copy()
+            self._hidden_chemical_slow = self._hidden_chemical.copy()
+            return
+
+        self._hidden_chemical_fast = (
+            self.config.chemical_decay * self._hidden_chemical_fast
             + self.config.chemical_buildup_rate * activity
         )
+        slow_rate = self.config.chemical_buildup_rate * self.config.slow_buildup_scale
+        self._hidden_chemical_slow = (
+            self.config.slow_chemical_decay * self._hidden_chemical_slow + slow_rate * activity
+        )
+        fast_mix = np.clip(self.config.dual_fast_mix, 0.0, 1.0)
+        self._hidden_chemical = (
+            fast_mix * self._hidden_chemical_fast + (1.0 - fast_mix) * self._hidden_chemical_slow
+        )
+
+    def _decay_cooldowns(self) -> None:
+        self._split_cooldown = np.maximum(0, self._split_cooldown - 1)
+        self._prune_cooldown = np.maximum(0, self._prune_cooldown - 1)
 
     def _select_split_indices(self) -> tuple[int, ...]:
         split_threshold, _ = self._resolve_split_prune_thresholds()
+        split_threshold += self.config.split_hysteresis_margin
         current_dim = self.hidden_dim
         remaining_capacity = self.max_hidden_dim - current_dim
         if remaining_capacity <= 0 or self.config.max_split_per_sleep <= 0:
             return ()
 
-        candidates = np.where(self._hidden_chemical >= split_threshold)[0]
+        candidates = np.where(
+            np.logical_and.reduce(
+                (
+                    self._hidden_chemical >= split_threshold,
+                    self._split_cooldown <= 0,
+                    ~self._prune_marked,
+                )
+            )
+        )[0]
         if candidates.size == 0:
             return ()
 
@@ -387,12 +460,19 @@ class CircadianPredictiveCodingNetwork:
 
     def _select_prune_indices(self) -> tuple[int, ...]:
         _, prune_threshold = self._resolve_split_prune_thresholds()
+        prune_threshold -= self.config.prune_hysteresis_margin
         removable = self.hidden_dim - self._min_hidden_dim
         if removable <= 0 or self.config.max_prune_per_sleep <= 0:
             return ()
 
         candidates = np.where(
-            np.logical_and(self._hidden_chemical <= prune_threshold, ~self._prune_marked)
+            np.logical_and.reduce(
+                (
+                    self._hidden_chemical <= prune_threshold,
+                    ~self._prune_marked,
+                    self._prune_cooldown <= 0,
+                )
+            )
         )[0]
         if candidates.size == 0:
             return ()
@@ -423,15 +503,29 @@ class CircadianPredictiveCodingNetwork:
         chemical_component = self._normalize_vector(self._hidden_chemical)
         output_weight_norm = np.linalg.norm(self.weight_hidden_output, axis=1)
         norm_component = self._normalize_vector(output_weight_norm)
-        mix = np.clip(self.config.split_weight_norm_mix, 0.0, 1.0)
-        return (1.0 - mix) * chemical_component + mix * norm_component
+        importance_component = self._normalize_vector(self._importance_ema)
+        norm_mix = np.clip(self.config.split_weight_norm_mix, 0.0, 1.0)
+        importance_mix = np.clip(self.config.split_importance_mix, 0.0, 1.0)
+        chemical_mix = max(0.0, 1.0 - norm_mix - importance_mix)
+        return (
+            chemical_mix * chemical_component
+            + norm_mix * norm_component
+            + importance_mix * importance_component
+        )
 
     def _compute_prune_scores(self) -> Array:
         chemical_component = 1.0 - self._normalize_vector(self._hidden_chemical)
         output_weight_norm = np.linalg.norm(self.weight_hidden_output, axis=1)
         norm_component = 1.0 - self._normalize_vector(output_weight_norm)
-        mix = np.clip(self.config.prune_weight_norm_mix, 0.0, 1.0)
-        return (1.0 - mix) * chemical_component + mix * norm_component
+        importance_component = 1.0 - self._normalize_vector(self._importance_ema)
+        norm_mix = np.clip(self.config.prune_weight_norm_mix, 0.0, 1.0)
+        importance_mix = np.clip(self.config.prune_importance_mix, 0.0, 1.0)
+        chemical_mix = max(0.0, 1.0 - norm_mix - importance_mix)
+        return (
+            chemical_mix * chemical_component
+            + norm_mix * norm_component
+            + importance_mix * importance_component
+        )
 
     def _normalize_vector(self, values: Array) -> Array:
         max_value = float(np.max(values))
@@ -481,13 +575,21 @@ class CircadianPredictiveCodingNetwork:
         new_hidden_bias_values: list[float] = []
         new_out_rows: list[Array] = []
         new_chemical_values: list[float] = []
+        new_chemical_fast_values: list[float] = []
+        new_chemical_slow_values: list[float] = []
         new_traffic_values: list[float] = []
+        new_importance_values: list[float] = []
+        new_split_cooldowns: list[int] = []
+        new_prune_cooldowns: list[int] = []
 
         for index in split_indices:
             input_column = self.weight_input_hidden[:, index]
             output_row = self.weight_hidden_output[index, :].copy()
             bias_value = float(self.bias_hidden[0, index])
             chemical_value = float(self._hidden_chemical[index])
+            chemical_fast_value = float(self._hidden_chemical_fast[index])
+            chemical_slow_value = float(self._hidden_chemical_slow[index])
+            importance_value = float(self._importance_ema[index])
             parent_norm = float(np.linalg.norm(output_row))
             noise_scale = self.config.split_noise_scale * max(parent_norm, 1e-3)
             output_noise = self._rng.normal(loc=0.0, scale=noise_scale, size=output_row.shape)
@@ -499,9 +601,18 @@ class CircadianPredictiveCodingNetwork:
             new_out_rows.append((0.5 * output_row - output_noise).astype(np.float64))
             new_hidden_bias_values.append(bias_value)
             new_chemical_values.append(chemical_value * 0.5)
+            new_chemical_fast_values.append(chemical_fast_value * 0.5)
+            new_chemical_slow_values.append(chemical_slow_value * 0.5)
             new_traffic_values.append(0.0)
+            new_importance_values.append(importance_value)
+            new_split_cooldowns.append(self.config.split_cooldown_epochs)
+            new_prune_cooldowns.append(self.config.prune_cooldown_epochs)
 
             self._hidden_chemical[index] = chemical_value * 0.5
+            self._hidden_chemical_fast[index] = chemical_fast_value * 0.5
+            self._hidden_chemical_slow[index] = chemical_slow_value * 0.5
+            self._split_cooldown[index] = self.config.split_cooldown_epochs
+            self._prune_cooldown[index] = self.config.prune_cooldown_epochs
 
         appended_input_columns = np.column_stack(new_in_columns)
         self.weight_input_hidden = np.hstack([self.weight_input_hidden, appended_input_columns])
@@ -515,14 +626,29 @@ class CircadianPredictiveCodingNetwork:
         self._hidden_chemical = np.concatenate(
             [self._hidden_chemical, np.array(new_chemical_values, dtype=np.float64)]
         )
+        self._hidden_chemical_fast = np.concatenate(
+            [self._hidden_chemical_fast, np.array(new_chemical_fast_values, dtype=np.float64)]
+        )
+        self._hidden_chemical_slow = np.concatenate(
+            [self._hidden_chemical_slow, np.array(new_chemical_slow_values, dtype=np.float64)]
+        )
         self._traffic_sum = np.concatenate(
             [self._traffic_sum, np.array(new_traffic_values, dtype=np.float64)]
+        )
+        self._importance_ema = np.concatenate(
+            [self._importance_ema, np.array(new_importance_values, dtype=np.float64)]
         )
         self._prune_ttl = np.concatenate(
             [self._prune_ttl, np.zeros(len(split_indices), dtype=np.int32)]
         )
         self._prune_marked = np.concatenate(
             [self._prune_marked, np.zeros(len(split_indices), dtype=bool)]
+        )
+        self._split_cooldown = np.concatenate(
+            [self._split_cooldown, np.array(new_split_cooldowns, dtype=np.int32)]
+        )
+        self._prune_cooldown = np.concatenate(
+            [self._prune_cooldown, np.array(new_prune_cooldowns, dtype=np.int32)]
         )
 
     def _schedule_or_prune(self, prune_indices: tuple[int, ...]) -> None:
@@ -536,6 +662,7 @@ class CircadianPredictiveCodingNetwork:
             if 0 <= index < self.hidden_dim:
                 self._prune_marked[index] = True
                 self._prune_ttl[index] = self.config.prune_decay_steps
+                self._prune_cooldown[index] = self.config.prune_cooldown_epochs
 
     def _apply_prune_decay_step(self) -> None:
         if self.config.prune_decay_steps <= 1:
@@ -549,7 +676,10 @@ class CircadianPredictiveCodingNetwork:
         self.weight_hidden_output[active_indices, :] *= decay_factor
         self.bias_hidden[:, active_indices] *= decay_factor
         self._hidden_chemical[active_indices] *= decay_factor
+        self._hidden_chemical_fast[active_indices] *= decay_factor
+        self._hidden_chemical_slow[active_indices] *= decay_factor
         self._traffic_sum[active_indices] *= decay_factor
+        self._importance_ema[active_indices] *= decay_factor
 
         self._prune_ttl[active_indices] -= 1
         finalize_indices = np.where(np.logical_and(self._prune_marked, self._prune_ttl <= 0))[0]
@@ -573,34 +703,78 @@ class CircadianPredictiveCodingNetwork:
         self.weight_hidden_output = self.weight_hidden_output[mask, :]
         self.bias_hidden = self.bias_hidden[:, mask]
         self._hidden_chemical = self._hidden_chemical[mask]
+        self._hidden_chemical_fast = self._hidden_chemical_fast[mask]
+        self._hidden_chemical_slow = self._hidden_chemical_slow[mask]
         self._traffic_sum = self._traffic_sum[mask]
+        self._importance_ema = self._importance_ema[mask]
         self._prune_ttl = self._prune_ttl[mask]
         self._prune_marked = self._prune_marked[mask]
+        self._split_cooldown = self._split_cooldown[mask]
+        self._prune_cooldown = self._prune_cooldown[mask]
 
     def _apply_homeostatic_downscaling(self) -> None:
         scale_factor = self.config.homeostatic_downscale_factor
-        if abs(scale_factor - 1.0) <= 1e-12:
-            return
-        self.weight_input_hidden *= scale_factor
-        self.weight_hidden_output *= scale_factor
-        self.bias_hidden *= scale_factor
-        self.bias_output *= scale_factor
+        if abs(scale_factor - 1.0) > 1e-12:
+            self.weight_input_hidden *= scale_factor
+            self.weight_hidden_output *= scale_factor
+            self.bias_hidden *= scale_factor
+            self.bias_output *= scale_factor
+
+        self._match_target_norms()
+
+    def _match_target_norms(self) -> None:
+        if self.config.homeostasis_target_input_norm > 0.0:
+            self.weight_input_hidden = self._scale_columns_to_target(
+                matrix=self.weight_input_hidden,
+                target_norm=self.config.homeostasis_target_input_norm,
+                strength=self.config.homeostasis_strength,
+            )
+        if self.config.homeostasis_target_output_norm > 0.0:
+            self.weight_hidden_output = self._scale_rows_to_target(
+                matrix=self.weight_hidden_output,
+                target_norm=self.config.homeostasis_target_output_norm,
+                strength=self.config.homeostasis_strength,
+            )
+
+    def _scale_columns_to_target(self, matrix: Array, target_norm: float, strength: float) -> Array:
+        norms = np.linalg.norm(matrix, axis=0)
+        safe_norms = np.maximum(norms, 1e-8)
+        raw_scale = np.power(target_norm / safe_norms, strength)
+        scale = np.clip(raw_scale, 0.5, 2.0)
+        return matrix * scale[np.newaxis, :]
+
+    def _scale_rows_to_target(self, matrix: Array, target_norm: float, strength: float) -> Array:
+        norms = np.linalg.norm(matrix, axis=1)
+        safe_norms = np.maximum(norms, 1e-8)
+        raw_scale = np.power(target_norm / safe_norms, strength)
+        scale = np.clip(raw_scale, 0.5, 2.0)
+        return matrix * scale[:, np.newaxis]
 
     def _store_replay_snapshot(self, input_batch: Array, target_batch: Array) -> None:
         if self.config.replay_memory_size <= 0:
             return
-        self._replay_memory.append((input_batch.copy(), target_batch.copy()))
+        output_prediction = self.predict_proba(input_batch)
+        priority = float(np.mean(np.abs(output_prediction - target_batch)))
+        positive_fraction = float(np.mean(target_batch))
+        self._replay_memory.append(
+            ReplaySnapshot(
+                input_batch=input_batch.copy(),
+                target_batch=target_batch.copy(),
+                priority=priority,
+                positive_fraction=positive_fraction,
+            )
+        )
 
     def _run_replay_consolidation(self) -> None:
         if self.config.replay_steps <= 0 or len(self._replay_memory) == 0:
             return
 
         replay_count = min(self.config.replay_steps, len(self._replay_memory))
-        for replay_index in range(replay_count):
-            replay_input, replay_target = self._replay_memory[-(replay_index + 1)]
+        replay_snapshots = self._select_replay_snapshots(replay_count)
+        for snapshot in replay_snapshots:
             self._run_training_step(
-                input_batch=replay_input,
-                target_batch=replay_target,
+                input_batch=snapshot.input_batch,
+                target_batch=snapshot.target_batch,
                 learning_rate=self.config.replay_learning_rate,
                 inference_steps=self.config.replay_inference_steps,
                 inference_learning_rate=self.config.replay_inference_learning_rate,
@@ -608,11 +782,51 @@ class CircadianPredictiveCodingNetwork:
                 store_replay_snapshot=False,
             )
 
+    def _select_replay_snapshots(self, replay_count: int) -> list[ReplaySnapshot]:
+        if replay_count <= 0:
+            return []
+        snapshots = list(self._replay_memory)
+        if not self.config.replay_prioritized:
+            return snapshots[-replay_count:]
+
+        sorted_snapshots = sorted(snapshots, key=lambda snapshot: snapshot.priority, reverse=True)
+        if not self.config.replay_class_balanced:
+            return sorted_snapshots[:replay_count]
+
+        positive = [snapshot for snapshot in sorted_snapshots if snapshot.positive_fraction >= 0.5]
+        negative = [snapshot for snapshot in sorted_snapshots if snapshot.positive_fraction < 0.5]
+        if not positive or not negative:
+            return sorted_snapshots[:replay_count]
+
+        selected: list[ReplaySnapshot] = []
+        positive_index = 0
+        negative_index = 0
+        while len(selected) < replay_count:
+            if positive_index < len(positive):
+                selected.append(positive[positive_index])
+                positive_index += 1
+                if len(selected) >= replay_count:
+                    break
+            if negative_index < len(negative):
+                selected.append(negative[negative_index])
+                negative_index += 1
+                if len(selected) >= replay_count:
+                    break
+            if positive_index >= len(positive) and negative_index >= len(negative):
+                break
+        return selected
+
     def _validate_config(self, config: CircadianConfig) -> None:
         if not (0.0 <= config.chemical_decay <= 1.0):
             raise ValueError("chemical_decay must be between 0 and 1")
+        if not (0.0 <= config.slow_chemical_decay <= 1.0):
+            raise ValueError("slow_chemical_decay must be between 0 and 1")
         if config.chemical_buildup_rate <= 0.0:
             raise ValueError("chemical_buildup_rate must be positive")
+        if config.slow_buildup_scale <= 0.0:
+            raise ValueError("slow_buildup_scale must be positive")
+        if not (0.0 <= config.dual_fast_mix <= 1.0):
+            raise ValueError("dual_fast_mix must be between 0 and 1")
         if config.plasticity_sensitivity <= 0.0:
             raise ValueError("plasticity_sensitivity must be positive")
         if not (0.0 < config.min_plasticity <= 1.0):
@@ -625,6 +839,16 @@ class CircadianPredictiveCodingNetwork:
             raise ValueError("adaptive_split_percentile must be between 0 and 100")
         if not (0.0 <= config.adaptive_prune_percentile <= 100.0):
             raise ValueError("adaptive_prune_percentile must be between 0 and 100")
+        if config.split_hysteresis_margin < 0.0 or config.prune_hysteresis_margin < 0.0:
+            raise ValueError("split/prune hysteresis margins must be non-negative")
+        if config.split_cooldown_epochs < 0 or config.prune_cooldown_epochs < 0:
+            raise ValueError("split/prune cooldown epochs must be non-negative")
+        if not (0.0 <= config.split_importance_mix <= 1.0):
+            raise ValueError("split_importance_mix must be between 0 and 1")
+        if not (0.0 <= config.prune_importance_mix <= 1.0):
+            raise ValueError("prune_importance_mix must be between 0 and 1")
+        if not (0.0 <= config.importance_ema_decay < 1.0):
+            raise ValueError("importance_ema_decay must be in [0, 1)")
         if config.min_epochs_between_sleep < 0:
             raise ValueError("min_epochs_between_sleep must be non-negative")
         if config.sleep_energy_window <= 1:
@@ -645,6 +869,12 @@ class CircadianPredictiveCodingNetwork:
             raise ValueError("prune_decay_factor must be in (0, 1]")
         if not (0.0 < config.homeostatic_downscale_factor <= 1.0):
             raise ValueError("homeostatic_downscale_factor must be in (0, 1]")
+        if config.homeostasis_target_input_norm < 0.0:
+            raise ValueError("homeostasis_target_input_norm must be non-negative")
+        if config.homeostasis_target_output_norm < 0.0:
+            raise ValueError("homeostasis_target_output_norm must be non-negative")
+        if not (0.0 < config.homeostasis_strength <= 1.0):
+            raise ValueError("homeostasis_strength must be in (0, 1]")
         if config.replay_steps < 0:
             raise ValueError("replay_steps must be non-negative")
         if config.replay_memory_size < 0:

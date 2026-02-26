@@ -63,14 +63,34 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--circ-max-hidden-dim", type=int, default=1024)
     parser.add_argument("--circ-chemical-decay", type=float, default=0.995)
     parser.add_argument("--circ-chemical-buildup-rate", type=float, default=0.02)
+    parser.add_argument("--circ-use-dual-chemical", action="store_true", default=None)
+    parser.add_argument("--circ-dual-fast-mix", type=float, default=0.70)
+    parser.add_argument("--circ-slow-chemical-decay", type=float, default=0.999)
+    parser.add_argument("--circ-slow-buildup-scale", type=float, default=0.25)
     parser.add_argument("--circ-plasticity-sensitivity", type=float, default=0.7)
     parser.add_argument("--circ-min-plasticity", type=float, default=0.2)
+    parser.add_argument("--circ-use-adaptive-thresholds", action="store_true", default=None)
+    parser.add_argument("--circ-adaptive-split-percentile", type=float, default=85.0)
+    parser.add_argument("--circ-adaptive-prune-percentile", type=float, default=20.0)
     parser.add_argument("--circ-split-threshold", type=float, default=0.8)
     parser.add_argument("--circ-prune-threshold", type=float, default=0.08)
+    parser.add_argument("--circ-split-hysteresis-margin", type=float, default=0.02)
+    parser.add_argument("--circ-prune-hysteresis-margin", type=float, default=0.02)
+    parser.add_argument("--circ-split-cooldown-steps", type=int, default=2)
+    parser.add_argument("--circ-prune-cooldown-steps", type=int, default=2)
+    parser.add_argument("--circ-split-weight-norm-mix", type=float, default=0.30)
+    parser.add_argument("--circ-prune-weight-norm-mix", type=float, default=0.30)
+    parser.add_argument("--circ-split-importance-mix", type=float, default=0.20)
+    parser.add_argument("--circ-prune-importance-mix", type=float, default=0.35)
+    parser.add_argument("--circ-importance-ema-decay", type=float, default=0.95)
     parser.add_argument("--circ-max-split-per-sleep", type=int, default=2)
     parser.add_argument("--circ-max-prune-per-sleep", type=int, default=2)
     parser.add_argument("--circ-split-noise-scale", type=float, default=0.01)
     parser.add_argument("--circ-sleep-reset-factor", type=float, default=0.45)
+    parser.add_argument("--circ-homeostatic-downscale-factor", type=float, default=1.0)
+    parser.add_argument("--circ-homeostasis-target-input-norm", type=float, default=0.0)
+    parser.add_argument("--circ-homeostasis-target-output-norm", type=float, default=0.0)
+    parser.add_argument("--circ-homeostasis-strength", type=float, default=0.50)
     return parser
 
 
@@ -114,14 +134,40 @@ def main() -> None:
         circadian_max_hidden_dim=args.circ_max_hidden_dim,
         circadian_chemical_decay=args.circ_chemical_decay,
         circadian_chemical_buildup_rate=args.circ_chemical_buildup_rate,
+        circadian_use_dual_chemical=(
+            True if args.circ_use_dual_chemical is None else args.circ_use_dual_chemical
+        ),
+        circadian_dual_fast_mix=args.circ_dual_fast_mix,
+        circadian_slow_chemical_decay=args.circ_slow_chemical_decay,
+        circadian_slow_buildup_scale=args.circ_slow_buildup_scale,
         circadian_plasticity_sensitivity=args.circ_plasticity_sensitivity,
         circadian_min_plasticity=args.circ_min_plasticity,
+        circadian_use_adaptive_thresholds=(
+            True
+            if args.circ_use_adaptive_thresholds is None
+            else args.circ_use_adaptive_thresholds
+        ),
+        circadian_adaptive_split_percentile=args.circ_adaptive_split_percentile,
+        circadian_adaptive_prune_percentile=args.circ_adaptive_prune_percentile,
         circadian_split_threshold=args.circ_split_threshold,
         circadian_prune_threshold=args.circ_prune_threshold,
+        circadian_split_hysteresis_margin=args.circ_split_hysteresis_margin,
+        circadian_prune_hysteresis_margin=args.circ_prune_hysteresis_margin,
+        circadian_split_cooldown_steps=args.circ_split_cooldown_steps,
+        circadian_prune_cooldown_steps=args.circ_prune_cooldown_steps,
+        circadian_split_weight_norm_mix=args.circ_split_weight_norm_mix,
+        circadian_prune_weight_norm_mix=args.circ_prune_weight_norm_mix,
+        circadian_split_importance_mix=args.circ_split_importance_mix,
+        circadian_prune_importance_mix=args.circ_prune_importance_mix,
+        circadian_importance_ema_decay=args.circ_importance_ema_decay,
         circadian_max_split_per_sleep=args.circ_max_split_per_sleep,
         circadian_max_prune_per_sleep=args.circ_max_prune_per_sleep,
         circadian_split_noise_scale=args.circ_split_noise_scale,
         circadian_sleep_reset_factor=args.circ_sleep_reset_factor,
+        circadian_homeostatic_downscale_factor=args.circ_homeostatic_downscale_factor,
+        circadian_homeostasis_target_input_norm=args.circ_homeostasis_target_input_norm,
+        circadian_homeostasis_target_output_norm=args.circ_homeostasis_target_output_norm,
+        circadian_homeostasis_strength=args.circ_homeostasis_strength,
     )
     try:
         result = run_resnet50_benchmark(config)

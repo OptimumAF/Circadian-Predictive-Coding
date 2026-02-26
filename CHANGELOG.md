@@ -12,8 +12,10 @@
   - function-preserving split updates for both NumPy and Torch circadian implementations
   - adaptive split/prune threshold option using chemical percentiles
   - adaptive sleep-trigger option based on energy plateau + chemical variance
-  - weight-norm-aware split/prune ranking
-  - optional gradual prune decay, replay consolidation, and homeostatic downscaling
+  - weight-norm + gradient-importance-aware split/prune ranking
+  - split/prune hysteresis and per-neuron cooldown controls
+  - optional dual-timescale chemical dynamics (fast+slow accumulation)
+  - optional gradual prune decay, prioritized replay consolidation, and targeted homeostasis
   - support for external `NeuronAdaptationPolicy` proposals
 - BCE-consistent binary predictive-coding gradients (`p - y`) for toy predictive and circadian models.
 - Three-model experiment runner and CLI entrypoint.

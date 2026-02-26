@@ -162,9 +162,12 @@ Circadian model supports optional advanced mechanisms through `CircadianConfig`:
 - adaptive split/prune thresholds via chemical percentiles
 - adaptive sleep triggering (energy plateau + chemical variance)
 - weight-norm-aware split/prune ranking
+- gradient-importance-aware split/prune ranking
+- split/prune hysteresis and per-neuron cooldown
+- optional dual-timescale chemical dynamics (fast + slow accumulation)
 - gradual prune decay and delayed removal
-- replay-style consolidation during sleep
-- homeostatic downscaling after sleep
+- prioritized and class-balanced replay consolidation during sleep
+- targeted homeostatic norm matching after sleep
 - function-preserving split behavior (parent+child outgoing weights sum to original)
 
 Predictive-coding binary training now uses BCE-consistent output gradients (`p - y`) while keeping a hidden-state error penalty in the reported energy metric.
