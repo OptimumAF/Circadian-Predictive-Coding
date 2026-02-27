@@ -5,9 +5,16 @@ from __future__ import annotations
 from dataclasses import replace
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
-from src.app.resnet50_benchmark import (
+import numpy as np
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.app.resnet50_benchmark import (  # noqa: E402
     ResNet50BenchmarkConfig,
     _benchmark_backprop,
     _benchmark_circadian,
@@ -15,11 +22,13 @@ from src.app.resnet50_benchmark import (
     _resolve_device,
     _set_seed,
 )
-from src.infra.vision_datasets import (
+from src.infra.vision_datasets import (  # noqa: E402
     SyntheticVisionDatasetConfig,
     build_synthetic_vision_dataloaders,
 )
-from src.shared.torch_runtime import require_torch
+from src.shared.torch_runtime import require_torch  # noqa: E402
+
+MULTI_SEEDS: tuple[int, ...] = (7, 13, 29)
 
 
 def main() -> None:
@@ -62,22 +71,11 @@ def main() -> None:
     )
     _set_seed(torch, base.seed)
     device = _resolve_device(torch, base.device)
-    loaders = build_synthetic_vision_dataloaders(
-        SyntheticVisionDatasetConfig(
-            train_samples=base.train_samples,
-            test_samples=base.test_samples,
-            num_classes=base.num_classes,
-            image_size=base.image_size,
-            batch_size=base.batch_size,
-            noise_std=base.dataset_noise_std,
-            difficulty=base.dataset_difficulty,
-            seed=base.seed,
-        )
-    )
+    seeds = MULTI_SEEDS
 
-    backprop_trials = run_backprop_sweep(base, torch, device, loaders)
-    predictive_trials = run_predictive_sweep(base, torch, device, loaders)
-    circadian_trials = run_circadian_sweep(base, torch, device, loaders)
+    backprop_trials = run_backprop_sweep(base, torch, device, seeds)
+    predictive_trials = run_predictive_sweep(base, torch, device, seeds)
+    circadian_trials = run_circadian_sweep(base, torch, device, seeds)
 
     output = {
         "dataset": {
@@ -89,6 +87,7 @@ def main() -> None:
             "image_size": base.image_size,
             "device": str(device),
             "epochs": base.epochs,
+            "seeds": list(seeds),
         },
         "backprop": summarize_model_trials(backprop_trials),
         "predictive": summarize_model_trials(predictive_trials),
@@ -121,7 +120,7 @@ def run_backprop_sweep(
     base: ResNet50BenchmarkConfig,
     torch_module: Any,
     device: Any,
-    loaders: Any,
+    seeds: tuple[int, ...],
 ) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
     candidate_params = [
@@ -138,12 +137,20 @@ def run_backprop_sweep(
     ]
     for index, (lr, momentum) in enumerate(candidate_params, start=1):
         override: dict[str, Any] = {"backprop_learning_rate": lr, "backprop_momentum": momentum}
-        config = replace(base, **override)
-        report = _benchmark_backprop(torch=torch_module, device=device, loaders=loaders, config=config)
-        candidates.append({"trial": index, "params": override, "report": report_to_dict(report)})
+        trial = _run_multiseed_trial(
+            base=base,
+            override=override,
+            seeds=seeds,
+            torch_module=torch_module,
+            device=device,
+            benchmark_fn=_benchmark_backprop,
+        )
+        candidates.append({"trial": index, "params": override, **trial})
+        report = trial["report"]
         print(
             f"backprop {index}/{len(candidate_params)} "
-            f"acc={report.test_accuracy:.4f} train_sps={report.train_samples_per_second:.1f}"
+            f"acc={report['test_accuracy']:.4f}±{report['test_accuracy_std']:.4f} "
+            f"train_sps={report['train_samples_per_second']:.1f}±{report['train_samples_per_second_std']:.1f}"
         )
     return candidates
 
@@ -152,7 +159,7 @@ def run_predictive_sweep(
     base: ResNet50BenchmarkConfig,
     torch_module: Any,
     device: Any,
-    loaders: Any,
+    seeds: tuple[int, ...],
 ) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
     candidate_params = [
@@ -176,12 +183,20 @@ def run_predictive_sweep(
             "predictive_inference_steps": steps,
             "predictive_inference_learning_rate": inf_lr,
         }
-        config = replace(base, **override)
-        report = _benchmark_predictive(torch=torch_module, device=device, loaders=loaders, config=config)
-        candidates.append({"trial": index, "params": override, "report": report_to_dict(report)})
+        trial = _run_multiseed_trial(
+            base=base,
+            override=override,
+            seeds=seeds,
+            torch_module=torch_module,
+            device=device,
+            benchmark_fn=_benchmark_predictive,
+        )
+        candidates.append({"trial": index, "params": override, **trial})
+        report = trial["report"]
         print(
             f"predictive {index}/{len(candidate_params)} "
-            f"acc={report.test_accuracy:.4f} train_sps={report.train_samples_per_second:.1f}"
+            f"acc={report['test_accuracy']:.4f}±{report['test_accuracy_std']:.4f} "
+            f"train_sps={report['train_samples_per_second']:.1f}±{report['train_samples_per_second_std']:.1f}"
         )
     return candidates
 
@@ -190,7 +205,7 @@ def run_circadian_sweep(
     base: ResNet50BenchmarkConfig,
     torch_module: Any,
     device: Any,
-    loaders: Any,
+    seeds: tuple[int, ...],
 ) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
     candidate_params: list[dict[str, Any]] = [
@@ -386,17 +401,118 @@ def run_circadian_sweep(
         },
     ]
     for index, override in enumerate(candidate_params, start=1):
-        config = replace(base, **override)
-        report = _benchmark_circadian(torch=torch_module, device=device, loaders=loaders, config=config)
-        candidates.append({"trial": index, "params": override, "report": report_to_dict(report)})
+        trial = _run_multiseed_trial(
+            base=base,
+            override=override,
+            seeds=seeds,
+            torch_module=torch_module,
+            device=device,
+            benchmark_fn=_benchmark_circadian,
+        )
+        candidates.append({"trial": index, "params": override, **trial})
+        report = trial["report"]
         print(
             f"circadian {index}/{len(candidate_params)} "
-            f"acc={report.test_accuracy:.4f} train_sps={report.train_samples_per_second:.1f} "
-            f"hidden={report.circadian_hidden_dim_start}->{report.circadian_hidden_dim_end} "
-            f"split={report.circadian_total_splits} prune={report.circadian_total_prunes} "
-            f"rollback={report.circadian_total_rollbacks}"
+            f"acc={report['test_accuracy']:.4f}±{report['test_accuracy_std']:.4f} "
+            f"train_sps={report['train_samples_per_second']:.1f}±{report['train_samples_per_second_std']:.1f} "
+            f"hidden={report['circadian_hidden_dim_start']:.1f}->{report['circadian_hidden_dim_end']:.1f} "
+            f"split={report['circadian_total_splits']:.2f} prune={report['circadian_total_prunes']:.2f} "
+            f"rollback={report['circadian_total_rollbacks']:.2f}"
         )
     return candidates
+
+
+def _run_multiseed_trial(
+    base: ResNet50BenchmarkConfig,
+    override: dict[str, Any],
+    seeds: tuple[int, ...],
+    torch_module: Any,
+    device: Any,
+    benchmark_fn: Any,
+) -> dict[str, Any]:
+    if len(seeds) == 0:
+        raise ValueError("seeds must be non-empty.")
+
+    reports: list[dict[str, Any]] = []
+    for seed in seeds:
+        config = replace(base, seed=seed, **override)
+        _set_seed(torch_module, seed)
+        loaders = _build_loaders_for_config(config)
+        report = benchmark_fn(torch=torch_module, device=device, loaders=loaders, config=config)
+        reports.append(report_to_dict(report))
+
+    aggregate = _aggregate_reports(reports)
+    return {"report": aggregate, "seed_reports": reports}
+
+
+def _build_loaders_for_config(config: ResNet50BenchmarkConfig) -> Any:
+    return build_synthetic_vision_dataloaders(
+        SyntheticVisionDatasetConfig(
+            train_samples=config.train_samples,
+            test_samples=config.test_samples,
+            num_classes=config.num_classes,
+            image_size=config.image_size,
+            batch_size=config.batch_size,
+            noise_std=config.dataset_noise_std,
+            difficulty=config.dataset_difficulty,
+            seed=config.seed,
+        )
+    )
+
+
+def _aggregate_reports(seed_reports: list[dict[str, Any]]) -> dict[str, Any]:
+    if len(seed_reports) == 0:
+        raise ValueError("seed_reports must be non-empty.")
+
+    model_name = seed_reports[0]["model_name"]
+    final_metric_name = seed_reports[0]["final_metric_name"]
+    numeric_keys = [
+        "epochs_ran",
+        "final_metric_value",
+        "test_accuracy",
+        "train_seconds",
+        "train_samples_per_second",
+        "mean_train_step_ms",
+        "inference_latency_mean_ms",
+        "inference_latency_p95_ms",
+        "inference_samples_per_second",
+        "total_parameters",
+        "trainable_parameters",
+        "accuracy_per_train_second",
+        "accuracy_per_million_trainable_params",
+    ]
+    optional_numeric_keys = [
+        "final_cross_entropy",
+        "final_energy",
+        "circadian_hidden_dim_start",
+        "circadian_hidden_dim_end",
+        "circadian_total_splits",
+        "circadian_total_prunes",
+        "circadian_total_rollbacks",
+    ]
+
+    aggregate: dict[str, Any] = {
+        "model_name": model_name,
+        "final_metric_name": final_metric_name,
+        "seed_count": len(seed_reports),
+    }
+
+    for key in numeric_keys:
+        values = [float(report[key]) for report in seed_reports]
+        aggregate[key] = float(np.mean(values))
+        aggregate[f"{key}_std"] = float(np.std(values))
+
+    for key in optional_numeric_keys:
+        raw_values = [report[key] for report in seed_reports if report[key] is not None]
+        if len(raw_values) == 0:
+            aggregate[key] = None
+            aggregate[f"{key}_std"] = None
+        else:
+            values = [float(value) for value in raw_values]
+            aggregate[key] = float(np.mean(values))
+            aggregate[f"{key}_std"] = float(np.std(values))
+
+    return aggregate
 
 
 def report_to_dict(report: Any) -> dict[str, Any]:
@@ -405,6 +521,8 @@ def report_to_dict(report: Any) -> dict[str, Any]:
         "epochs_ran": report.epochs_ran,
         "final_metric_name": report.final_metric_name,
         "final_metric_value": report.final_metric_value,
+        "final_cross_entropy": report.final_cross_entropy,
+        "final_energy": report.final_energy,
         "test_accuracy": report.test_accuracy,
         "train_seconds": report.train_seconds,
         "train_samples_per_second": report.train_samples_per_second,

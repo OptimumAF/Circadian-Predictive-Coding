@@ -22,6 +22,7 @@ def test_should_run_resnet50_benchmark_and_return_three_reports() -> None:
         device="cpu",
         target_accuracy=None,
         inference_batches=3,
+        evaluation_batches=1,
         warmup_batches=1,
         backprop_freeze_backbone=True,
         predictive_head_hidden_dim=64,
@@ -46,12 +47,22 @@ def test_should_run_resnet50_benchmark_and_return_three_reports() -> None:
         assert report.total_parameters > 0
         assert report.trainable_parameters > 0
         assert report.circadian_total_rollbacks >= 0
+        assert report.final_cross_entropy is not None
+        if report.model_name != "BackpropResNet50":
+            assert report.final_energy is not None
 
 
 def test_should_validate_new_sleep_config_values() -> None:
     config = ResNet50BenchmarkConfig(
         circadian_sleep_energy_window=1,
     )
+
+    with pytest.raises(ValueError):
+        _ = run_resnet50_benchmark(config)
+
+
+def test_should_validate_rollback_metric_name() -> None:
+    config = ResNet50BenchmarkConfig(circadian_sleep_rollback_metric="invalid")
 
     with pytest.raises(ValueError):
         _ = run_resnet50_benchmark(config)

@@ -5,19 +5,24 @@ from __future__ import annotations
 from dataclasses import replace
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
-from src.app.resnet50_benchmark import (
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.app.resnet50_benchmark import (  # noqa: E402
     ResNet50BenchmarkConfig,
     _benchmark_circadian,
     _resolve_device,
     _set_seed,
 )
-from src.infra.vision_datasets import (
+from src.infra.vision_datasets import (  # noqa: E402
     SyntheticVisionDatasetConfig,
     build_synthetic_vision_dataloaders,
 )
-from src.shared.torch_runtime import require_torch
+from src.shared.torch_runtime import require_torch  # noqa: E402
 
 
 def main() -> None:
@@ -256,6 +261,8 @@ def report_to_dict(report: Any) -> dict[str, Any]:
         "epochs_ran": report.epochs_ran,
         "final_metric_name": report.final_metric_name,
         "final_metric_value": report.final_metric_value,
+        "final_cross_entropy": report.final_cross_entropy,
+        "final_energy": report.final_energy,
         "test_accuracy": report.test_accuracy,
         "train_seconds": report.train_seconds,
         "train_samples_per_second": report.train_samples_per_second,

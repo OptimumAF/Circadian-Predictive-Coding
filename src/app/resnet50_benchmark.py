@@ -33,6 +33,7 @@ class ResNet50BenchmarkConfig:
     seed: int = 7
     device: str = "auto"
     target_accuracy: float | None = 0.99
+    evaluation_batches: int = 0
     inference_batches: int = 50
     warmup_batches: int = 10
 
@@ -59,6 +60,8 @@ class ResNet50BenchmarkConfig:
     circadian_sleep_chemical_variance_threshold: float = 0.02
     circadian_enable_sleep_rollback: bool = False
     circadian_sleep_rollback_tolerance: float = 0.01
+    circadian_sleep_rollback_metric: str = "cross_entropy"
+    circadian_sleep_rollback_eval_batches: int = 0
     circadian_min_hidden_dim: int = 96
     circadian_max_hidden_dim: int = 1024
     circadian_chemical_decay: float = 0.995
@@ -123,6 +126,8 @@ class ModelSpeedReport:
     inference_samples_per_second: float
     total_parameters: int
     trainable_parameters: int
+    final_cross_entropy: float | None = None
+    final_energy: float | None = None
     circadian_hidden_dim_start: int | None = None
     circadian_hidden_dim_end: int | None = None
     circadian_total_splits: int = 0
@@ -219,6 +224,10 @@ def format_resnet50_benchmark_result(result: ResNet50BenchmarkResult) -> str:
                     f"train_samples_per_second_delta={speed_delta:+.1f}"
                 )
             )
+        if report.final_cross_entropy is not None and report.final_metric_name != "cross_entropy":
+            lines.append(f"  cross_entropy={report.final_cross_entropy:.4f}")
+        if report.final_energy is not None and report.final_metric_name != "energy":
+            lines.append(f"  energy={report.final_energy:.4f}")
         if report.circadian_hidden_dim_start is not None and report.circadian_hidden_dim_end is not None:
             lines.append(
                 (
@@ -255,7 +264,7 @@ def _benchmark_backprop(
     step_times_ms: list[float] = []
     seen_samples = 0
     epochs_ran = 0
-    final_loss = 0.0
+    eval_batches = _resolve_eval_batches(config.evaluation_batches)
 
     if config.backprop_freeze_backbone:
         model.backbone.eval()
@@ -279,20 +288,24 @@ def _benchmark_backprop(
             sync_device(torch, device)
 
             step_times_ms.append((perf_counter() - step_start) * 1000.0)
-            final_loss = float(loss.item())
             seen_samples += int(labels.shape[0])
 
         epochs_ran = epoch
+        eval_accuracy, _ = _compute_backprop_metrics(
+            torch, model, loaders.test_loader, device, max_batches=eval_batches
+        )
         if _should_stop_early(
             target_accuracy=config.target_accuracy,
-            accuracy=_compute_backprop_accuracy(torch, model, loaders.test_loader, device),
+            accuracy=eval_accuracy,
         ):
             break
     train_seconds = perf_counter() - train_timer_start
 
     model.backbone.eval()
     model.classifier.eval()
-    test_accuracy = _compute_backprop_accuracy(torch, model, loaders.test_loader, device)
+    test_accuracy, final_cross_entropy = _compute_backprop_metrics(
+        torch, model, loaders.test_loader, device, max_batches=None
+    )
     inference_metrics = _benchmark_inference(
         torch=torch,
         device=device,
@@ -304,8 +317,9 @@ def _benchmark_backprop(
     return ModelSpeedReport(
         model_name="BackpropResNet50",
         epochs_ran=epochs_ran,
-        final_metric_name="loss",
-        final_metric_value=final_loss,
+        final_metric_name="cross_entropy",
+        final_metric_value=final_cross_entropy,
+        final_cross_entropy=final_cross_entropy,
         test_accuracy=test_accuracy,
         train_seconds=train_seconds,
         train_samples_per_second=_safe_div(seen_samples, train_seconds),
@@ -337,6 +351,7 @@ def _benchmark_predictive(
     seen_samples = 0
     epochs_ran = 0
     final_energy = 0.0
+    eval_batches = _resolve_eval_batches(config.evaluation_batches)
 
     train_timer_start = perf_counter()
     for epoch in range(1, config.epochs + 1):
@@ -360,14 +375,19 @@ def _benchmark_predictive(
             seen_samples += int(labels.shape[0])
 
         epochs_ran = epoch
+        eval_accuracy, _ = _compute_pc_metrics(
+            torch, model, loaders.test_loader, device, max_batches=eval_batches
+        )
         if _should_stop_early(
             target_accuracy=config.target_accuracy,
-            accuracy=_compute_pc_accuracy(torch, model, loaders.test_loader, device),
+            accuracy=eval_accuracy,
         ):
             break
     train_seconds = perf_counter() - train_timer_start
 
-    test_accuracy = _compute_pc_accuracy(torch, model, loaders.test_loader, device)
+    test_accuracy, final_cross_entropy = _compute_pc_metrics(
+        torch, model, loaders.test_loader, device, max_batches=None
+    )
     inference_metrics = _benchmark_inference(
         torch=torch,
         device=device,
@@ -379,8 +399,10 @@ def _benchmark_predictive(
     return ModelSpeedReport(
         model_name="PredictiveCodingResNet50",
         epochs_ran=epochs_ran,
-        final_metric_name="energy",
-        final_metric_value=final_energy,
+        final_metric_name="cross_entropy",
+        final_metric_value=final_cross_entropy,
+        final_cross_entropy=final_cross_entropy,
+        final_energy=final_energy,
         test_accuracy=test_accuracy,
         train_seconds=train_seconds,
         train_samples_per_second=_safe_div(seen_samples, train_seconds),
@@ -469,6 +491,12 @@ def _benchmark_circadian(
     seen_samples = 0
     epochs_ran = 0
     final_energy = 0.0
+    eval_batches = _resolve_eval_batches(config.evaluation_batches)
+    rollback_eval_batches = _resolve_eval_batches(
+        config.circadian_sleep_rollback_eval_batches
+    )
+    if rollback_eval_batches is None:
+        rollback_eval_batches = eval_batches
 
     train_timer_start = perf_counter()
     for epoch in range(1, config.epochs + 1):
@@ -500,10 +528,15 @@ def _benchmark_circadian(
         if interval_triggered or adaptive_triggered:
             maybe_snapshot = None
             pre_sleep_accuracy = 0.0
+            pre_sleep_cross_entropy = 0.0
             if config.circadian_enable_sleep_rollback:
                 maybe_snapshot = model.snapshot_state()
-                pre_sleep_accuracy = _compute_pc_accuracy(
-                    torch, model, loaders.test_loader, device
+                pre_sleep_accuracy, pre_sleep_cross_entropy = _compute_pc_metrics(
+                    torch,
+                    model,
+                    loaders.test_loader,
+                    device,
+                    max_batches=rollback_eval_batches,
                 )
 
             force_sleep = config.circadian_force_sleep and interval_triggered
@@ -514,11 +547,21 @@ def _benchmark_circadian(
             )
 
             if config.circadian_enable_sleep_rollback and maybe_snapshot is not None:
-                post_sleep_accuracy = _compute_pc_accuracy(
-                    torch, model, loaders.test_loader, device
+                post_sleep_accuracy, post_sleep_cross_entropy = _compute_pc_metrics(
+                    torch,
+                    model,
+                    loaders.test_loader,
+                    device,
+                    max_batches=rollback_eval_batches,
                 )
-                accuracy_drop = pre_sleep_accuracy - post_sleep_accuracy
-                if accuracy_drop > config.circadian_sleep_rollback_tolerance:
+                rollback_delta = _compute_rollback_delta(
+                    metric_name=config.circadian_sleep_rollback_metric,
+                    pre_accuracy=pre_sleep_accuracy,
+                    post_accuracy=post_sleep_accuracy,
+                    pre_cross_entropy=pre_sleep_cross_entropy,
+                    post_cross_entropy=post_sleep_cross_entropy,
+                )
+                if rollback_delta > config.circadian_sleep_rollback_tolerance:
                     model.restore_state(maybe_snapshot)
                     sleep_rollbacks += 1
                     sleep_result = type(sleep_result)(
@@ -532,14 +575,19 @@ def _benchmark_circadian(
             sleep_prunes += len(sleep_result.pruned_indices)
 
         epochs_ran = epoch
+        eval_accuracy, _ = _compute_pc_metrics(
+            torch, model, loaders.test_loader, device, max_batches=eval_batches
+        )
         if _should_stop_early(
             target_accuracy=config.target_accuracy,
-            accuracy=_compute_pc_accuracy(torch, model, loaders.test_loader, device),
+            accuracy=eval_accuracy,
         ):
             break
     train_seconds = perf_counter() - train_timer_start
 
-    test_accuracy = _compute_pc_accuracy(torch, model, loaders.test_loader, device)
+    test_accuracy, final_cross_entropy = _compute_pc_metrics(
+        torch, model, loaders.test_loader, device, max_batches=None
+    )
     inference_metrics = _benchmark_inference(
         torch=torch,
         device=device,
@@ -551,8 +599,10 @@ def _benchmark_circadian(
     return ModelSpeedReport(
         model_name="CircadianPredictiveCodingResNet50",
         epochs_ran=epochs_ran,
-        final_metric_name="energy",
-        final_metric_value=final_energy,
+        final_metric_name="cross_entropy",
+        final_metric_value=final_cross_entropy,
+        final_cross_entropy=final_cross_entropy,
+        final_energy=final_energy,
         test_accuracy=test_accuracy,
         train_seconds=train_seconds,
         train_samples_per_second=_safe_div(seen_samples, train_seconds),
@@ -625,33 +675,91 @@ def _benchmark_inference(
 
 
 def _compute_backprop_accuracy(torch: Any, model: Any, loader: Any, device: Any) -> float:
+    accuracy, _ = _compute_backprop_metrics(
+        torch, model, loader, device=device, max_batches=None
+    )
+    return accuracy
+
+
+def _compute_backprop_metrics(
+    torch: Any,
+    model: Any,
+    loader: Any,
+    device: Any,
+    max_batches: int | None,
+) -> tuple[float, float]:
     correct = 0
     total = 0
+    total_loss = 0.0
     model.backbone.eval()
     model.classifier.eval()
+    criterion = torch.nn.CrossEntropyLoss(reduction="sum")
     with torch.no_grad():
-        for images, labels in loader:
+        for batch_index, (images, labels) in enumerate(loader):
             images = images.to(device)
             labels = labels.to(device)
             logits = model.forward_logits(images)
+            batch_loss = criterion(logits, labels)
             predictions = torch.argmax(logits, dim=1)
             correct += int((predictions == labels).sum().item())
             total += int(labels.shape[0])
-    return _safe_div(correct, total)
+            total_loss += float(batch_loss.item())
+            if max_batches is not None and batch_index + 1 >= max_batches:
+                break
+    return _safe_div(correct, total), _safe_div(total_loss, total)
 
 
 def _compute_pc_accuracy(torch: Any, model: Any, loader: Any, device: Any) -> float:
+    accuracy, _ = _compute_pc_metrics(torch, model, loader, device=device, max_batches=None)
+    return accuracy
+
+
+def _compute_pc_metrics(
+    torch: Any,
+    model: Any,
+    loader: Any,
+    device: Any,
+    max_batches: int | None,
+) -> tuple[float, float]:
     correct = 0
     total = 0
+    total_loss = 0.0
+    criterion = torch.nn.CrossEntropyLoss(reduction="sum")
     with torch.no_grad():
-        for images, labels in loader:
+        for batch_index, (images, labels) in enumerate(loader):
             images = images.to(device)
             labels = labels.to(device)
             logits = model.predict_logits(images)
+            batch_loss = criterion(logits, labels)
             predictions = torch.argmax(logits, dim=1)
             correct += int((predictions == labels).sum().item())
             total += int(labels.shape[0])
-    return _safe_div(correct, total)
+            total_loss += float(batch_loss.item())
+            if max_batches is not None and batch_index + 1 >= max_batches:
+                break
+    return _safe_div(correct, total), _safe_div(total_loss, total)
+
+
+def _resolve_eval_batches(configured_batches: int) -> int | None:
+    if configured_batches <= 0:
+        return None
+    return configured_batches
+
+
+def _compute_rollback_delta(
+    metric_name: str,
+    pre_accuracy: float,
+    post_accuracy: float,
+    pre_cross_entropy: float,
+    post_cross_entropy: float,
+) -> float:
+    if metric_name == "accuracy":
+        return pre_accuracy - post_accuracy
+    if metric_name == "cross_entropy":
+        return post_cross_entropy - pre_cross_entropy
+    raise ValueError(
+        "circadian_sleep_rollback_metric must be one of: accuracy, cross_entropy."
+    )
 
 
 def _resolve_device(torch: Any, requested_device: str) -> Any:
@@ -686,6 +794,8 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         raise ValueError("dataset_difficulty must be one of: easy, medium, hard.")
     if config.dataset_noise_std < 0.0:
         raise ValueError("dataset_noise_std must be non-negative.")
+    if config.evaluation_batches < 0:
+        raise ValueError("evaluation_batches must be non-negative.")
     if config.circadian_sleep_interval < 0:
         raise ValueError("circadian_sleep_interval must be non-negative.")
     if config.backbone_weights not in {"none", "imagenet"}:
@@ -732,6 +842,12 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         raise ValueError("circadian_sleep_chemical_variance_threshold must be non-negative.")
     if config.circadian_sleep_rollback_tolerance < 0.0:
         raise ValueError("circadian_sleep_rollback_tolerance must be non-negative.")
+    if config.circadian_sleep_rollback_eval_batches < 0:
+        raise ValueError("circadian_sleep_rollback_eval_batches must be non-negative.")
+    if config.circadian_sleep_rollback_metric not in {"accuracy", "cross_entropy"}:
+        raise ValueError(
+            "circadian_sleep_rollback_metric must be one of: accuracy, cross_entropy."
+        )
 
 
 def _set_seed(torch: Any, seed: int) -> None:

@@ -32,6 +32,12 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--device", type=str, default="auto", help="auto, cpu, cuda, cuda:0")
     parser.add_argument("--target-accuracy", type=float, default=0.99)
+    parser.add_argument(
+        "--eval-batches",
+        type=int,
+        default=0,
+        help="Per-epoch evaluation batch count for early-stop/rollback checks; 0 uses full test loader.",
+    )
     parser.add_argument("--inference-batches", type=int, default=50)
     parser.add_argument("--warmup-batches", type=int, default=10)
 
@@ -79,6 +85,17 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.set_defaults(circ_force_sleep=True)
     parser.add_argument("--circ-enable-sleep-rollback", action="store_true", default=False)
     parser.add_argument("--circ-sleep-rollback-tolerance", type=float, default=0.01)
+    parser.add_argument(
+        "--circ-sleep-rollback-metric",
+        choices=["accuracy", "cross_entropy"],
+        default="cross_entropy",
+    )
+    parser.add_argument(
+        "--circ-sleep-rollback-eval-batches",
+        type=int,
+        default=0,
+        help="Evaluation batches used only for pre/post sleep rollback checks; 0 inherits --eval-batches.",
+    )
     parser.add_argument("--circ-min-hidden-dim", type=int, default=96)
     parser.add_argument("--circ-max-hidden-dim", type=int, default=1024)
     parser.add_argument("--circ-chemical-decay", type=float, default=0.995)
@@ -148,6 +165,7 @@ def main() -> None:
         seed=args.seed,
         device=args.device,
         target_accuracy=target_accuracy,
+        evaluation_batches=args.eval_batches,
         inference_batches=args.inference_batches,
         warmup_batches=args.warmup_batches,
         backprop_learning_rate=args.backprop_lr,
@@ -173,6 +191,8 @@ def main() -> None:
         ),
         circadian_enable_sleep_rollback=args.circ_enable_sleep_rollback,
         circadian_sleep_rollback_tolerance=args.circ_sleep_rollback_tolerance,
+        circadian_sleep_rollback_metric=args.circ_sleep_rollback_metric,
+        circadian_sleep_rollback_eval_batches=args.circ_sleep_rollback_eval_batches,
         circadian_min_hidden_dim=args.circ_min_hidden_dim,
         circadian_max_hidden_dim=args.circ_max_hidden_dim,
         circadian_chemical_decay=args.circ_chemical_decay,
