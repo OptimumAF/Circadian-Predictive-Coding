@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose a new capability, benchmark, or algorithmic improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What limitation does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Include expected API/config changes if applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Circadian core algorithm
+        - Benchmarking and evaluation
+        - Developer tooling and docs
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: Success criteria
+      description: How should this be validated?
+    validations:
+      required: true

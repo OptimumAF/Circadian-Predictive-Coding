@@ -1,40 +1,44 @@
 # Changelog
 
-## Unreleased
+All notable changes to this project are documented in this file.
+
+The format is inspired by Keep a Changelog and this project follows semantic intent
+for versioning even while in research-stage development.
+
+## [Unreleased]
 
 ### Added
-- Baseline project structure with layered modules.
-- Backprop MLP and predictive-coding network implementations.
-- Circadian predictive-coding network with:
-  - per-neuron chemical buildup layer
-  - plasticity suppression from chemical accumulation
-  - sleep events that split high-use neurons and prune low-use neurons
-  - function-preserving split updates for both NumPy and Torch circadian implementations
-  - adaptive split/prune threshold option using chemical percentiles
-  - adaptive sleep-trigger option based on energy plateau + chemical variance
-  - weight-norm + gradient-importance-aware split/prune ranking
-  - split/prune hysteresis and per-neuron cooldown controls
-  - optional dual-timescale chemical dynamics (fast+slow accumulation)
-  - optional saturating chemical accumulation and per-neuron adaptive plasticity sensitivity
-  - sleep-phase scheduling (warm-up/split-first/prune-late) with per-sleep topology caps
-  - prune minimum-age gating to reduce early instability
-  - optional gradual prune decay, prioritized replay consolidation, and targeted homeostasis
-  - support for external `NeuronAdaptationPolicy` proposals
-- BCE-consistent binary predictive-coding gradients (`p - y`) for toy predictive and circadian models.
-- Three-model experiment runner and CLI entrypoint.
-- In-depth aggregate comparison runner (`seeds x noise levels`) with:
-  - mean/std test accuracy
-  - mean/std final metric
-  - mean/std epoch-to-80%-progress
-  - circadian split/prune and hidden-dimension end-state stats
-- ResNet-50 benchmark workflow with:
-  - backprop, predictive-coding-head, and circadian predictive-coding-head variants
-  - training speed metrics (samples/s, ms/step)
-  - inference latency/throughput metrics (mean, p95, samples/s)
-  - target-accuracy early-stop support
-  - configurable ResNet backbone initialization (`none` or `imagenet`)
-  - circadian sleep split/prune and hidden-size tracking
-- Neuron traffic tracking scaffold and adaptation policy interface.
-- Optional `requirements-resnet.txt` dependency set for torch-based benchmarks.
-- Unit and integration tests for baseline behavior.
-- Core documentation (`README`, `ARCHITECTURE`, `CONTRIBUTING`, ADRs, module docs).
+
+- Open-source community baseline files:
+  - `LICENSE` (MIT)
+  - `CODE_OF_CONDUCT.md`
+  - `SECURITY.md`
+  - `SUPPORT.md`
+  - `GOVERNANCE.md`
+  - `CITATION.cff`
+- GitHub collaboration scaffolding:
+  - issue templates
+  - pull request template
+  - CI workflow
+  - dependabot config
+- `pyproject.toml` with centralized tool configuration for `pytest`, `ruff`, and `mypy`.
+- Multi-seed benchmark runner:
+  - `scripts/run_multiseed_resnet_benchmark.py`
+  - JSON and CSV export support for reproducible cross-seed comparison.
+
+### Changed
+
+- Repositioned repository messaging to Circadian Predictive Coding as the primary focus.
+- Updated `README.md` with:
+  - circadian-first project framing
+  - reproducible benchmark commands
+  - governance and citation references
+- Updated `ARCHITECTURE.md` with clearer module boundaries and circadian-centric design intent.
+- Updated `CONTRIBUTING.md` with concrete contribution workflow and quality gates.
+
+### Existing Core Work (Carried Forward)
+
+- Backpropagation, predictive coding, and circadian predictive coding implementations.
+- Circadian mechanisms including chemical gating, adaptive sleep policies, split/prune logic, and rollback support.
+- ResNet-50 benchmark path comparing all three model families.
+- Test suite and deterministic data generation for reproducible experiments.

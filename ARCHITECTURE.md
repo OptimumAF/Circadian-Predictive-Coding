@@ -1,52 +1,82 @@
 # Architecture
 
-## Boundaries
+## Objective
+
+The repository is designed to evolve Circadian Predictive Coding as the main algorithm while preserving reproducible comparisons with:
+
+- traditional backpropagation
+- traditional predictive coding
+
+## Layer Boundaries
 
 - `src/core`
-  - Responsibilities: model math, training rules, traffic summaries, adaptation interfaces, ResNet-50 variant definitions
-  - Inputs/outputs: numpy arrays or torch tensors and typed dataclasses
-  - Non-responsibilities: CLI parsing, environment loading, file/network IO
+  - Pure model logic, learning dynamics, and typed model configs
+  - No CLI parsing, environment loading, or dataset IO
 - `src/app`
-  - Responsibilities: compose dataset + models into reproducible experiments and benchmarks
-  - Inputs/outputs: config objects in, single-run/aggregate/benchmark reports out
-  - Non-responsibilities: low-level math implementation
+  - Use-case orchestration for experiment runs and benchmark workflows
 - `src/infra`
-  - Responsibilities: synthetic tabular and vision dataset generation
-  - Inputs/outputs: deterministic train/test splits and dataloaders
-  - Non-responsibilities: model optimization logic
+  - Dataset and dataloader construction only
 - `src/adapters`
-  - Responsibilities: command-line argument handling and output formatting
-  - Inputs/outputs: process arguments in, text output out
-  - Non-responsibilities: core training logic
+  - User-facing CLI parsing and text formatting
 - `src/config`
-  - Responsibilities: map environment variables to typed defaults
-  - Inputs/outputs: process environment in, `Settings` out
-  - Non-responsibilities: training orchestration
+  - Environment variable mapping into typed settings
+- `src/shared`
+  - Small runtime helpers shared across modules (for example optional torch loading)
 
-## Dependency Graph
+## Dependency Direction
 
 ```text
 adapters -> app -> core
 config   -> adapters
 infra    -> app
-app      -> core + infra
-core     -> (no inward dependency on app/infra/adapters)
 shared   -> core + app + infra
+
+core must not depend on app/infra/adapters.
 ```
 
-## Key Choices
+## Core Domain Components
 
-1. Predictive coding implementation uses iterative hidden-state inference.
-Reason: this is the minimum mechanism that makes it conceptually different from standard backprop.
+- `BackpropMLP`
+  - Baseline one-hidden-layer backprop model for toy tasks
+- `PredictiveCodingNetwork`
+  - Baseline predictive coding model with iterative hidden-state inference
+- `CircadianPredictiveCodingNetwork`
+  - Primary algorithm with:
+    - chemical-gated plasticity
+    - wake/sleep phases
+    - split/prune structural adaptation
+    - replay/homeostasis/threshold control knobs
+- `resnet50_variants.py`
+  - Head-to-head benchmark implementations for all three model families on a shared ResNet-50 backbone
 
-2. Same dataset and near-similar architecture for both models.
-Reason: keeps comparison focused on learning rule differences rather than dataset/model mismatch.
+## Data Flow
 
-3. Neuron adaptation policy defined as an interface with no-op default.
-Reason: enables future growth/pruning experiments without destabilizing the baseline comparison now.
+### Toy baseline
 
-4. In-depth comparison runs repeated seed/noise scenarios.
-Reason: single-run metrics are noisy; aggregate stats make differences between learning rules clearer.
+1. `infra.datasets` creates deterministic two-cluster data
+2. `app.experiment_runner` trains all three toy models
+3. `adapters.cli` exposes baseline and in-depth modes
 
-5. ResNet benchmark uses a synthetic image task and optional torch dependencies.
-Reason: it enables fast, deterministic speed/accuracy testing (including circadian split/prune behavior) without external dataset downloads.
+### ResNet benchmark
+
+1. `infra.vision_datasets` creates synthetic or torchvision dataloaders
+2. `app.resnet50_benchmark` runs all three models with aligned evaluation metrics
+3. `adapters.resnet_benchmark_cli` exposes benchmark configuration
+4. `scripts/run_multiseed_resnet_benchmark.py` aggregates cross-seed results
+
+## Design Decisions
+
+1. Circadian-first with mandatory baseline comparisons
+   - Why: improvements are only meaningful when measured against stable references.
+2. Separate wake training and sleep consolidation
+   - Why: mirrors the circadian concept and keeps adaptation logic explicit and testable.
+3. Configuration-heavy experiment control
+   - Why: enables reproducible sweeps and ablations without branching code paths.
+4. Deterministic seed handling
+   - Why: avoids flaky claims in model comparisons.
+
+## Extension Rules
+
+- New adaptation strategies should be added via policy/config extension points, not by hardcoding branches across modules.
+- New datasets must be added in `infra` and wired via `app`, never directly from `core`.
+- Major algorithmic changes require an ADR in `docs/adr/`.

@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: Circadian Predictive Coding
+message: If you use this project, please cite it with the metadata below.
+type: software
+authors:
+  - name: Circadian Predictive Coding Contributors
+repository-code: https://github.com/OptimumAF/Circadian-Predictive-Coding
+license: MIT
+version: 0.1.0
+date-released: 2026-02-27
+abstract: >
+  Circadian Predictive Coding is a research-focused repository for biologically inspired
+  predictive coding with sleep-phase structural plasticity and chemical-gated learning.
+keywords:
+  - predictive coding
+  - circadian learning
+  - structural plasticity
+  - backpropagation baseline
+  - neural networks
