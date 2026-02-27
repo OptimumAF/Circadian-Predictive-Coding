@@ -25,6 +25,14 @@ for versioning even while in research-stage development.
 - Multi-seed benchmark runner:
   - `scripts/run_multiseed_resnet_benchmark.py`
   - JSON and CSV export support for reproducible cross-seed comparison.
+- README visual generation pipeline:
+  - `scripts/generate_readme_figures.py`
+  - generated PNG benchmark charts under `docs/figures/`
+  - illustrative circadian adaptation GIF (`docs/figures/circadian_sleep_dynamics.gif`)
+- Ownership and governance metadata:
+  - `.github/CODEOWNERS`
+  - `docs/model-card.md`
+  - `docs/figures/README.md`
 
 ### Changed
 
@@ -32,6 +40,7 @@ for versioning even while in research-stage development.
 - Updated `README.md` with:
   - circadian-first project framing
   - reproducible benchmark commands
+  - badges, mermaid circadian loop diagram, benchmark visuals, and results snapshot tables
   - governance and citation references
 - Updated `ARCHITECTURE.md` with clearer module boundaries and circadian-centric design intent.
 - Updated `CONTRIBUTING.md` with concrete contribution workflow and quality gates.
