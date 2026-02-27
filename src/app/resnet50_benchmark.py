@@ -14,7 +14,12 @@ from src.core.resnet50_variants import (
     CircadianPredictiveCodingResNet50Classifier,
     PredictiveCodingResNet50Classifier,
 )
-from src.infra.vision_datasets import SyntheticVisionDatasetConfig, build_synthetic_vision_dataloaders
+from src.infra.vision_datasets import (
+    SyntheticVisionDatasetConfig,
+    TorchVisionDatasetConfig,
+    build_synthetic_vision_dataloaders,
+    build_torchvision_vision_dataloaders,
+)
 from src.shared.torch_runtime import require_torch, sync_device
 
 
@@ -27,6 +32,13 @@ class ResNet50BenchmarkConfig:
     num_classes: int = 10
     image_size: int = 96
     batch_size: int = 32
+    dataset_name: str = "synthetic"
+    dataset_data_root: str = "data"
+    dataset_download: bool = True
+    dataset_train_subset_size: int = 0
+    dataset_test_subset_size: int = 0
+    dataset_num_workers: int = 0
+    dataset_use_augmentation: bool = True
     dataset_difficulty: str = "medium"
     dataset_noise_std: float = 0.06
     epochs: int = 8
@@ -145,24 +157,12 @@ class ResNet50BenchmarkResult:
 
 
 def run_resnet50_benchmark(config: ResNet50BenchmarkConfig) -> ResNet50BenchmarkResult:
-    """Benchmark all three model families on the same synthetic image task."""
+    """Benchmark all three model families on the same vision task."""
     _validate_benchmark_config(config)
     torch = require_torch()
     _set_seed(torch, config.seed)
     device = _resolve_device(torch, config.device)
-
-    loaders = build_synthetic_vision_dataloaders(
-        SyntheticVisionDatasetConfig(
-            train_samples=config.train_samples,
-            test_samples=config.test_samples,
-            num_classes=config.num_classes,
-            image_size=config.image_size,
-            batch_size=config.batch_size,
-            noise_std=config.dataset_noise_std,
-            difficulty=config.dataset_difficulty,
-            seed=config.seed,
-        )
-    )
+    loaders = _build_benchmark_loaders(config)
 
     reports = [
         _benchmark_backprop(torch=torch, device=device, loaders=loaders, config=config),
@@ -179,13 +179,7 @@ def format_resnet50_benchmark_result(result: ResNet50BenchmarkResult) -> str:
         "ResNet-50 Speed Benchmark (Backprop vs Predictive vs Circadian)",
         "---------------------------------------------------------------",
         f"Device: {result.device}",
-        (
-            "Dataset: "
-            f"train={result.config.train_samples}, test={result.config.test_samples}, "
-            f"classes={result.config.num_classes}, image={result.config.image_size}x{result.config.image_size}, "
-            f"difficulty={result.config.dataset_difficulty}, noise_std={result.config.dataset_noise_std:.3f}, "
-            f"backbone_weights={result.config.backbone_weights}"
-        ),
+        _format_dataset_summary(result.config),
         "",
     ]
     backprop_report = _find_report_by_name(result.reports, "BackpropResNet50")
@@ -240,6 +234,59 @@ def format_resnet50_benchmark_result(result: ResNet50BenchmarkResult) -> str:
             )
         lines.append("")
     return "\n".join(lines).strip()
+
+
+def _build_benchmark_loaders(config: ResNet50BenchmarkConfig) -> Any:
+    if config.dataset_name == "synthetic":
+        return build_synthetic_vision_dataloaders(
+            SyntheticVisionDatasetConfig(
+                train_samples=config.train_samples,
+                test_samples=config.test_samples,
+                num_classes=config.num_classes,
+                image_size=config.image_size,
+                batch_size=config.batch_size,
+                noise_std=config.dataset_noise_std,
+                difficulty=config.dataset_difficulty,
+                seed=config.seed,
+                num_workers=config.dataset_num_workers,
+            )
+        )
+    return build_torchvision_vision_dataloaders(
+        TorchVisionDatasetConfig(
+            dataset_name=config.dataset_name,
+            data_root=config.dataset_data_root,
+            batch_size=config.batch_size,
+            image_size=config.image_size,
+            seed=config.seed,
+            num_workers=config.dataset_num_workers,
+            download=config.dataset_download,
+            train_subset_size=config.dataset_train_subset_size,
+            test_subset_size=config.dataset_test_subset_size,
+            use_augmentation=config.dataset_use_augmentation,
+        )
+    )
+
+
+def _format_dataset_summary(config: ResNet50BenchmarkConfig) -> str:
+    if config.dataset_name == "synthetic":
+        return (
+            "Dataset: synthetic"
+            f" ({config.train_samples} train / {config.test_samples} test, "
+            f"classes={config.num_classes}, size={config.image_size}, "
+            f"difficulty={config.dataset_difficulty}, noise={config.dataset_noise_std:.3f})"
+        )
+    subset_suffix = ""
+    if config.dataset_train_subset_size > 0 or config.dataset_test_subset_size > 0:
+        subset_suffix = (
+            f", subset_train={config.dataset_train_subset_size or 'full'}"
+            f", subset_test={config.dataset_test_subset_size or 'full'}"
+        )
+    return (
+        f"Dataset: {config.dataset_name} "
+        f"(root={config.dataset_data_root}, size={config.image_size}, "
+        f"batch={config.batch_size}, augmentation={config.dataset_use_augmentation}"
+        f"{subset_suffix})"
+    )
 
 
 def _benchmark_backprop(
@@ -790,6 +837,20 @@ def _validate_report_models(reports: list[ModelSpeedReport]) -> None:
 
 
 def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
+    if config.dataset_name not in {"synthetic", "cifar10", "cifar100"}:
+        raise ValueError("dataset_name must be one of: synthetic, cifar10, cifar100.")
+    if config.dataset_num_workers < 0:
+        raise ValueError("dataset_num_workers must be non-negative.")
+    if config.dataset_train_subset_size < 0:
+        raise ValueError("dataset_train_subset_size must be non-negative.")
+    if config.dataset_test_subset_size < 0:
+        raise ValueError("dataset_test_subset_size must be non-negative.")
+    if config.dataset_name != "synthetic":
+        expected_classes = 10 if config.dataset_name == "cifar10" else 100
+        if config.num_classes != expected_classes:
+            raise ValueError(
+                f"num_classes must be {expected_classes} when dataset_name={config.dataset_name}."
+            )
     if config.dataset_difficulty not in {"easy", "medium", "hard"}:
         raise ValueError("dataset_difficulty must be one of: easy, medium, hard.")
     if config.dataset_noise_std < 0.0:

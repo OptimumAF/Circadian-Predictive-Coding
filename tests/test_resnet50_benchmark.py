@@ -76,3 +76,17 @@ def test_should_validate_hidden_dim_bounds() -> None:
 
     with pytest.raises(ValueError):
         _ = run_resnet50_benchmark(config)
+
+
+def test_should_validate_dataset_name() -> None:
+    config = ResNet50BenchmarkConfig(dataset_name="invalid")
+
+    with pytest.raises(ValueError):
+        _ = run_resnet50_benchmark(config)
+
+
+def test_should_validate_num_classes_for_torchvision_dataset() -> None:
+    config = ResNet50BenchmarkConfig(dataset_name="cifar100", num_classes=10)
+
+    with pytest.raises(ValueError):
+        _ = run_resnet50_benchmark(config)

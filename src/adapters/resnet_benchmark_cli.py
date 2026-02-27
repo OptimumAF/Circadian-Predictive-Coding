@@ -18,9 +18,40 @@ def build_argument_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--train-samples", type=int, default=2000)
     parser.add_argument("--test-samples", type=int, default=500)
-    parser.add_argument("--classes", type=int, default=10)
+    parser.add_argument(
+        "--classes",
+        type=int,
+        default=None,
+        help="Class count for synthetic dataset mode. Ignored for CIFAR modes unless set explicitly.",
+    )
     parser.add_argument("--image-size", type=int, default=96)
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument(
+        "--dataset-name",
+        choices=["synthetic", "cifar10", "cifar100"],
+        default="synthetic",
+        help="Dataset source used for all three models.",
+    )
+    parser.add_argument("--dataset-root", type=str, default="data")
+    parser.add_argument("--dataset-download", dest="dataset_download", action="store_true")
+    parser.add_argument("--dataset-no-download", dest="dataset_download", action="store_false")
+    parser.set_defaults(dataset_download=True)
+    parser.add_argument("--dataset-train-subset-size", type=int, default=0)
+    parser.add_argument("--dataset-test-subset-size", type=int, default=0)
+    parser.add_argument("--dataset-num-workers", type=int, default=0)
+    parser.add_argument(
+        "--dataset-use-augmentation",
+        dest="dataset_use_augmentation",
+        action="store_true",
+        help="Enable train-time augmentation for torchvision datasets.",
+    )
+    parser.add_argument(
+        "--dataset-no-augmentation",
+        dest="dataset_use_augmentation",
+        action="store_false",
+        help="Disable train-time augmentation for torchvision datasets.",
+    )
+    parser.set_defaults(dataset_use_augmentation=True)
     parser.add_argument(
         "--dataset-difficulty",
         choices=["easy", "medium", "hard"],
@@ -176,13 +207,29 @@ def main() -> None:
     target_accuracy = args.target_accuracy
     if target_accuracy < 0.0:
         target_accuracy = None
+    if args.classes is None:
+        if args.dataset_name == "cifar10":
+            num_classes = 10
+        elif args.dataset_name == "cifar100":
+            num_classes = 100
+        else:
+            num_classes = 10
+    else:
+        num_classes = args.classes
 
     config = ResNet50BenchmarkConfig(
         train_samples=args.train_samples,
         test_samples=args.test_samples,
-        num_classes=args.classes,
+        num_classes=num_classes,
         image_size=args.image_size,
         batch_size=args.batch_size,
+        dataset_name=args.dataset_name,
+        dataset_data_root=args.dataset_root,
+        dataset_download=args.dataset_download,
+        dataset_train_subset_size=args.dataset_train_subset_size,
+        dataset_test_subset_size=args.dataset_test_subset_size,
+        dataset_num_workers=args.dataset_num_workers,
+        dataset_use_augmentation=args.dataset_use_augmentation,
         dataset_difficulty=args.dataset_difficulty,
         dataset_noise_std=args.dataset_noise_std,
         epochs=args.epochs,

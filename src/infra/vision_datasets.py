@@ -5,7 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from src.shared.torch_runtime import require_torch
+from src.shared.torch_runtime import (
+    require_torch,
+    require_torchvision_datasets,
+    require_torchvision_transforms,
+)
 
 
 @dataclass(frozen=True)
@@ -21,6 +25,22 @@ class SyntheticVisionDatasetConfig:
     difficulty: str = "easy"
     seed: int = 7
     num_workers: int = 0
+
+
+@dataclass(frozen=True)
+class TorchVisionDatasetConfig:
+    """Config for torchvision-backed benchmark datasets."""
+
+    dataset_name: str = "cifar100"
+    data_root: str = "data"
+    batch_size: int = 64
+    image_size: int = 96
+    seed: int = 7
+    num_workers: int = 0
+    download: bool = True
+    train_subset_size: int = 0
+    test_subset_size: int = 0
+    use_augmentation: bool = True
 
 
 @dataclass(frozen=True)
@@ -289,3 +309,103 @@ def build_synthetic_vision_dataloaders(config: SyntheticVisionDatasetConfig) -> 
         test_loader=test_loader,
         num_classes=config.num_classes,
     )
+
+
+def build_torchvision_vision_dataloaders(config: TorchVisionDatasetConfig) -> VisionDataLoaders:
+    """Create train/test dataloaders backed by torchvision datasets."""
+    if config.dataset_name not in {"cifar10", "cifar100"}:
+        raise ValueError("dataset_name must be one of: cifar10, cifar100.")
+    if config.batch_size <= 0:
+        raise ValueError("batch_size must be positive.")
+    if config.image_size < 32:
+        raise ValueError("image_size must be at least 32 for ResNet-50.")
+    if config.train_subset_size < 0 or config.test_subset_size < 0:
+        raise ValueError("train/test subset sizes must be non-negative.")
+
+    torch = require_torch()
+    datasets = require_torchvision_datasets()
+    transforms = require_torchvision_transforms()
+
+    imagenet_mean = [0.485, 0.456, 0.406]
+    imagenet_std = [0.229, 0.224, 0.225]
+
+    train_transforms: list[Any] = [transforms.Resize((config.image_size, config.image_size))]
+    if config.use_augmentation:
+        train_transforms.append(transforms.RandomHorizontalFlip())
+    train_transforms.extend(
+        [transforms.ToTensor(), transforms.Normalize(mean=imagenet_mean, std=imagenet_std)]
+    )
+    test_transform = transforms.Compose(
+        [
+            transforms.Resize((config.image_size, config.image_size)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=imagenet_mean, std=imagenet_std),
+        ]
+    )
+
+    train_transform = transforms.Compose(train_transforms)
+
+    dataset_class = datasets.CIFAR100 if config.dataset_name == "cifar100" else datasets.CIFAR10
+    train_dataset = dataset_class(
+        root=config.data_root,
+        train=True,
+        download=config.download,
+        transform=train_transform,
+    )
+    test_dataset = dataset_class(
+        root=config.data_root,
+        train=False,
+        download=config.download,
+        transform=test_transform,
+    )
+
+    if config.train_subset_size > 0:
+        train_dataset = _select_subset(
+            dataset=train_dataset,
+            subset_size=config.train_subset_size,
+            seed=config.seed,
+            torch_module=torch,
+        )
+    if config.test_subset_size > 0:
+        test_dataset = _select_subset(
+            dataset=test_dataset,
+            subset_size=config.test_subset_size,
+            seed=config.seed + 1,
+            torch_module=torch,
+        )
+
+    loader_generator = torch.Generator()
+    loader_generator.manual_seed(config.seed + 2)
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset,
+        batch_size=config.batch_size,
+        shuffle=True,
+        num_workers=config.num_workers,
+        pin_memory=False,
+        generator=loader_generator,
+    )
+    test_loader = torch.utils.data.DataLoader(
+        test_dataset,
+        batch_size=config.batch_size,
+        shuffle=False,
+        num_workers=config.num_workers,
+        pin_memory=False,
+    )
+
+    num_classes = 100 if config.dataset_name == "cifar100" else 10
+    return VisionDataLoaders(
+        train_loader=train_loader,
+        test_loader=test_loader,
+        num_classes=num_classes,
+    )
+
+
+def _select_subset(dataset: Any, subset_size: int, seed: int, torch_module: Any) -> Any:
+    if subset_size <= 0:
+        return dataset
+    total_size = len(dataset)
+    keep_size = min(subset_size, total_size)
+    generator = torch_module.Generator()
+    generator.manual_seed(seed)
+    indices = torch_module.randperm(total_size, generator=generator)[:keep_size].tolist()
+    return torch_module.utils.data.Subset(dataset, indices)

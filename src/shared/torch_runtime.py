@@ -26,8 +26,27 @@ def require_torchvision_models() -> Any:
         ) from exc
 
 
+def require_torchvision_datasets() -> Any:
+    """Load torchvision datasets lazily."""
+    try:
+        return importlib.import_module("torchvision.datasets")
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "torchvision is required for dataset benchmarks. Install requirements-resnet.txt first."
+        ) from exc
+
+
+def require_torchvision_transforms() -> Any:
+    """Load torchvision transforms lazily."""
+    try:
+        return importlib.import_module("torchvision.transforms")
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "torchvision is required for dataset benchmarks. Install requirements-resnet.txt first."
+        ) from exc
+
+
 def sync_device(torch_module: Any, device: Any) -> None:
     """Synchronize CUDA device timing when available."""
     if str(device).startswith("cuda"):
         torch_module.cuda.synchronize(device=device)
-
