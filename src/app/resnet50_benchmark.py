@@ -33,7 +33,7 @@ class ResNet50BenchmarkConfig:
     seed: int = 7
     device: str = "auto"
     target_accuracy: float | None = 0.99
-    evaluation_batches: int = 0
+    evaluation_batches: int = 2
     inference_batches: int = 50
     warmup_batches: int = 10
 
@@ -42,28 +42,28 @@ class ResNet50BenchmarkConfig:
     backprop_freeze_backbone: bool = False
     backbone_weights: str = "none"
 
-    predictive_head_hidden_dim: int = 256
+    predictive_head_hidden_dim: int = 384
     predictive_learning_rate: float = 0.03
     predictive_inference_steps: int = 10
     predictive_inference_learning_rate: float = 0.15
 
-    circadian_head_hidden_dim: int = 256
-    circadian_learning_rate: float = 0.03
-    circadian_inference_steps: int = 10
-    circadian_inference_learning_rate: float = 0.15
+    circadian_head_hidden_dim: int = 384
+    circadian_learning_rate: float = 0.025
+    circadian_inference_steps: int = 14
+    circadian_inference_learning_rate: float = 0.12
     circadian_sleep_interval: int = 2
-    circadian_force_sleep: bool = True
-    circadian_use_adaptive_sleep_trigger: bool = False
-    circadian_min_sleep_steps: int = 40
-    circadian_sleep_energy_window: int = 32
-    circadian_sleep_plateau_delta: float = 1e-4
+    circadian_force_sleep: bool = False
+    circadian_use_adaptive_sleep_trigger: bool = True
+    circadian_min_sleep_steps: int = 60
+    circadian_sleep_energy_window: int = 48
+    circadian_sleep_plateau_delta: float = 5e-5
     circadian_sleep_chemical_variance_threshold: float = 0.02
-    circadian_enable_sleep_rollback: bool = False
-    circadian_sleep_rollback_tolerance: float = 0.01
+    circadian_enable_sleep_rollback: bool = True
+    circadian_sleep_rollback_tolerance: float = 0.002
     circadian_sleep_rollback_metric: str = "cross_entropy"
-    circadian_sleep_rollback_eval_batches: int = 0
-    circadian_min_hidden_dim: int = 96
-    circadian_max_hidden_dim: int = 1024
+    circadian_sleep_rollback_eval_batches: int = 2
+    circadian_min_hidden_dim: int = 384
+    circadian_max_hidden_dim: int = 640
     circadian_chemical_decay: float = 0.995
     circadian_chemical_buildup_rate: float = 0.02
     circadian_use_saturating_chemical: bool = True
@@ -73,34 +73,34 @@ class ResNet50BenchmarkConfig:
     circadian_dual_fast_mix: float = 0.70
     circadian_slow_chemical_decay: float = 0.999
     circadian_slow_buildup_scale: float = 0.25
-    circadian_plasticity_sensitivity: float = 0.7
+    circadian_plasticity_sensitivity: float = 0.45
     circadian_use_adaptive_plasticity_sensitivity: bool = True
-    circadian_plasticity_sensitivity_min: float = 0.35
-    circadian_plasticity_sensitivity_max: float = 1.20
+    circadian_plasticity_sensitivity_min: float = 0.25
+    circadian_plasticity_sensitivity_max: float = 0.55
     circadian_plasticity_importance_mix: float = 0.50
-    circadian_min_plasticity: float = 0.2
+    circadian_min_plasticity: float = 0.5
     circadian_use_adaptive_thresholds: bool = True
-    circadian_adaptive_split_percentile: float = 85.0
-    circadian_adaptive_prune_percentile: float = 20.0
-    circadian_sleep_warmup_steps: int = 0
-    circadian_sleep_split_only_until_fraction: float = 0.50
-    circadian_sleep_prune_only_after_fraction: float = 0.85
-    circadian_sleep_max_change_fraction: float = 1.0
+    circadian_adaptive_split_percentile: float = 92.0
+    circadian_adaptive_prune_percentile: float = 8.0
+    circadian_sleep_warmup_steps: int = 6
+    circadian_sleep_split_only_until_fraction: float = 0.75
+    circadian_sleep_prune_only_after_fraction: float = 0.95
+    circadian_sleep_max_change_fraction: float = 0.01
     circadian_sleep_min_change_count: int = 1
-    circadian_prune_min_age_steps: int = 0
+    circadian_prune_min_age_steps: int = 120
     circadian_split_threshold: float = 0.80
     circadian_prune_threshold: float = 0.08
     circadian_split_hysteresis_margin: float = 0.02
     circadian_prune_hysteresis_margin: float = 0.02
-    circadian_split_cooldown_steps: int = 2
-    circadian_prune_cooldown_steps: int = 2
+    circadian_split_cooldown_steps: int = 3
+    circadian_prune_cooldown_steps: int = 3
     circadian_split_weight_norm_mix: float = 0.30
     circadian_prune_weight_norm_mix: float = 0.30
     circadian_split_importance_mix: float = 0.20
     circadian_prune_importance_mix: float = 0.35
     circadian_importance_ema_decay: float = 0.95
-    circadian_max_split_per_sleep: int = 2
-    circadian_max_prune_per_sleep: int = 2
+    circadian_max_split_per_sleep: int = 1
+    circadian_max_prune_per_sleep: int = 1
     circadian_split_noise_scale: float = 0.01
     circadian_sleep_reset_factor: float = 0.45
     circadian_homeostatic_downscale_factor: float = 1.0
@@ -794,6 +794,12 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         raise ValueError("dataset_difficulty must be one of: easy, medium, hard.")
     if config.dataset_noise_std < 0.0:
         raise ValueError("dataset_noise_std must be non-negative.")
+    if config.target_accuracy is not None and not (0.0 <= config.target_accuracy <= 1.0):
+        raise ValueError("target_accuracy must be in [0, 1] when provided.")
+    if config.batch_size <= 0:
+        raise ValueError("batch_size must be positive.")
+    if config.epochs <= 0:
+        raise ValueError("epochs must be positive.")
     if config.evaluation_batches < 0:
         raise ValueError("evaluation_batches must be non-negative.")
     if config.circadian_sleep_interval < 0:
@@ -847,6 +853,14 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
     if config.circadian_sleep_rollback_metric not in {"accuracy", "cross_entropy"}:
         raise ValueError(
             "circadian_sleep_rollback_metric must be one of: accuracy, cross_entropy."
+        )
+    if config.circadian_min_hidden_dim > config.circadian_head_hidden_dim:
+        raise ValueError(
+            "circadian_min_hidden_dim cannot exceed circadian_head_hidden_dim."
+        )
+    if config.circadian_max_hidden_dim < config.circadian_head_hidden_dim:
+        raise ValueError(
+            "circadian_max_hidden_dim cannot be lower than circadian_head_hidden_dim."
         )
 
 

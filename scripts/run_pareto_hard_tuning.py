@@ -41,33 +41,55 @@ def main() -> None:
         batch_size=64,
         dataset_difficulty="hard",
         dataset_noise_std=0.08,
-        epochs=14,
+        epochs=20,
         seed=7,
         device="cuda",
         target_accuracy=None,
+        evaluation_batches=2,
         inference_batches=14,
         warmup_batches=4,
         backprop_freeze_backbone=True,
         backbone_weights="imagenet",
+        predictive_head_hidden_dim=384,
+        circadian_head_hidden_dim=384,
+        circadian_learning_rate=0.025,
+        circadian_inference_steps=14,
+        circadian_inference_learning_rate=0.12,
+        circadian_sleep_interval=2,
+        circadian_force_sleep=False,
+        circadian_use_adaptive_sleep_trigger=True,
+        circadian_min_sleep_steps=60,
+        circadian_sleep_energy_window=48,
+        circadian_sleep_plateau_delta=5e-5,
+        circadian_enable_sleep_rollback=True,
+        circadian_sleep_rollback_tolerance=0.002,
+        circadian_sleep_rollback_metric="cross_entropy",
+        circadian_sleep_rollback_eval_batches=2,
+        circadian_min_hidden_dim=384,
+        circadian_max_hidden_dim=640,
         circadian_use_saturating_chemical=True,
         circadian_chemical_max_value=2.5,
         circadian_chemical_saturation_gain=1.0,
         circadian_use_dual_chemical=True,
         circadian_use_adaptive_thresholds=True,
         circadian_use_adaptive_plasticity_sensitivity=True,
-        circadian_plasticity_sensitivity_min=0.35,
-        circadian_plasticity_sensitivity_max=1.20,
+        circadian_plasticity_sensitivity=0.45,
+        circadian_plasticity_sensitivity_min=0.25,
+        circadian_plasticity_sensitivity_max=0.55,
         circadian_plasticity_importance_mix=0.50,
-        circadian_sleep_warmup_steps=3,
-        circadian_sleep_split_only_until_fraction=0.50,
-        circadian_sleep_prune_only_after_fraction=0.85,
-        circadian_sleep_max_change_fraction=0.02,
+        circadian_min_plasticity=0.5,
+        circadian_sleep_warmup_steps=6,
+        circadian_sleep_split_only_until_fraction=0.75,
+        circadian_sleep_prune_only_after_fraction=0.95,
+        circadian_sleep_max_change_fraction=0.01,
         circadian_sleep_min_change_count=1,
-        circadian_prune_min_age_steps=40,
+        circadian_prune_min_age_steps=120,
         circadian_adaptive_split_percentile=92.0,
         circadian_adaptive_prune_percentile=8.0,
         circadian_split_cooldown_steps=3,
         circadian_prune_cooldown_steps=3,
+        circadian_max_split_per_sleep=1,
+        circadian_max_prune_per_sleep=1,
     )
     _set_seed(torch, base.seed)
     device = _resolve_device(torch, base.device)
@@ -149,8 +171,8 @@ def run_backprop_sweep(
         report = trial["report"]
         print(
             f"backprop {index}/{len(candidate_params)} "
-            f"acc={report['test_accuracy']:.4f}±{report['test_accuracy_std']:.4f} "
-            f"train_sps={report['train_samples_per_second']:.1f}±{report['train_samples_per_second_std']:.1f}"
+            f"acc={report['test_accuracy']:.4f}+/-{report['test_accuracy_std']:.4f} "
+            f"train_sps={report['train_samples_per_second']:.1f}+/-{report['train_samples_per_second_std']:.1f}"
         )
     return candidates
 
@@ -195,8 +217,8 @@ def run_predictive_sweep(
         report = trial["report"]
         print(
             f"predictive {index}/{len(candidate_params)} "
-            f"acc={report['test_accuracy']:.4f}±{report['test_accuracy_std']:.4f} "
-            f"train_sps={report['train_samples_per_second']:.1f}±{report['train_samples_per_second_std']:.1f}"
+            f"acc={report['test_accuracy']:.4f}+/-{report['test_accuracy_std']:.4f} "
+            f"train_sps={report['train_samples_per_second']:.1f}+/-{report['train_samples_per_second_std']:.1f}"
         )
     return candidates
 
@@ -413,8 +435,8 @@ def run_circadian_sweep(
         report = trial["report"]
         print(
             f"circadian {index}/{len(candidate_params)} "
-            f"acc={report['test_accuracy']:.4f}±{report['test_accuracy_std']:.4f} "
-            f"train_sps={report['train_samples_per_second']:.1f}±{report['train_samples_per_second_std']:.1f} "
+            f"acc={report['test_accuracy']:.4f}+/-{report['test_accuracy_std']:.4f} "
+            f"train_sps={report['train_samples_per_second']:.1f}+/-{report['train_samples_per_second_std']:.1f} "
             f"hidden={report['circadian_hidden_dim_start']:.1f}->{report['circadian_hidden_dim_end']:.1f} "
             f"split={report['circadian_total_splits']:.2f} prune={report['circadian_total_prunes']:.2f} "
             f"rollback={report['circadian_total_rollbacks']:.2f}"
@@ -665,3 +687,4 @@ def best_from_all_trials(all_trial_reports: list[dict[str, Any]], key: str) -> d
 
 if __name__ == "__main__":
     main()
+

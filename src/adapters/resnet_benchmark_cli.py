@@ -35,7 +35,7 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--eval-batches",
         type=int,
-        default=0,
+        default=2,
         help="Per-epoch evaluation batch count for early-stop/rollback checks; 0 uses full test loader.",
     )
     parser.add_argument("--inference-batches", type=int, default=50)
@@ -55,20 +55,32 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help="Freeze ResNet backbone for backprop baseline.",
     )
 
-    parser.add_argument("--pc-hidden-dim", type=int, default=256)
+    parser.add_argument("--pc-hidden-dim", type=int, default=384)
     parser.add_argument("--pc-lr", type=float, default=0.03)
     parser.add_argument("--pc-steps", type=int, default=10)
     parser.add_argument("--pc-inference-lr", type=float, default=0.15)
 
-    parser.add_argument("--circ-hidden-dim", type=int, default=256)
-    parser.add_argument("--circ-lr", type=float, default=0.03)
-    parser.add_argument("--circ-steps", type=int, default=10)
-    parser.add_argument("--circ-inference-lr", type=float, default=0.15)
+    parser.add_argument("--circ-hidden-dim", type=int, default=384)
+    parser.add_argument("--circ-lr", type=float, default=0.025)
+    parser.add_argument("--circ-steps", type=int, default=14)
+    parser.add_argument("--circ-inference-lr", type=float, default=0.12)
     parser.add_argument("--circ-sleep-interval", type=int, default=2)
-    parser.add_argument("--circ-use-adaptive-sleep-trigger", action="store_true", default=False)
-    parser.add_argument("--circ-min-sleep-steps", type=int, default=40)
-    parser.add_argument("--circ-sleep-energy-window", type=int, default=32)
-    parser.add_argument("--circ-sleep-plateau-delta", type=float, default=1e-4)
+    parser.add_argument(
+        "--circ-use-adaptive-sleep-trigger",
+        dest="circ_use_adaptive_sleep_trigger",
+        action="store_true",
+        help="Enable adaptive sleep triggering from energy/chemical dynamics.",
+    )
+    parser.add_argument(
+        "--circ-disable-adaptive-sleep-trigger",
+        dest="circ_use_adaptive_sleep_trigger",
+        action="store_false",
+        help="Disable adaptive sleep triggering.",
+    )
+    parser.set_defaults(circ_use_adaptive_sleep_trigger=True)
+    parser.add_argument("--circ-min-sleep-steps", type=int, default=60)
+    parser.add_argument("--circ-sleep-energy-window", type=int, default=48)
+    parser.add_argument("--circ-sleep-plateau-delta", type=float, default=5e-5)
     parser.add_argument("--circ-sleep-chemical-variance-threshold", type=float, default=0.02)
     parser.add_argument(
         "--circ-force-sleep",
@@ -82,9 +94,21 @@ def build_argument_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="At interval checkpoints, run sleep only when adaptive trigger conditions are met.",
     )
-    parser.set_defaults(circ_force_sleep=True)
-    parser.add_argument("--circ-enable-sleep-rollback", action="store_true", default=False)
-    parser.add_argument("--circ-sleep-rollback-tolerance", type=float, default=0.01)
+    parser.set_defaults(circ_force_sleep=False)
+    parser.add_argument(
+        "--circ-enable-sleep-rollback",
+        dest="circ_enable_sleep_rollback",
+        action="store_true",
+        help="Enable post-sleep rollback guard.",
+    )
+    parser.add_argument(
+        "--circ-disable-sleep-rollback",
+        dest="circ_enable_sleep_rollback",
+        action="store_false",
+        help="Disable post-sleep rollback guard.",
+    )
+    parser.set_defaults(circ_enable_sleep_rollback=True)
+    parser.add_argument("--circ-sleep-rollback-tolerance", type=float, default=0.002)
     parser.add_argument(
         "--circ-sleep-rollback-metric",
         choices=["accuracy", "cross_entropy"],
@@ -93,11 +117,11 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--circ-sleep-rollback-eval-batches",
         type=int,
-        default=0,
+        default=2,
         help="Evaluation batches used only for pre/post sleep rollback checks; 0 inherits --eval-batches.",
     )
-    parser.add_argument("--circ-min-hidden-dim", type=int, default=96)
-    parser.add_argument("--circ-max-hidden-dim", type=int, default=1024)
+    parser.add_argument("--circ-min-hidden-dim", type=int, default=384)
+    parser.add_argument("--circ-max-hidden-dim", type=int, default=640)
     parser.add_argument("--circ-chemical-decay", type=float, default=0.995)
     parser.add_argument("--circ-chemical-buildup-rate", type=float, default=0.02)
     parser.add_argument("--circ-use-saturating-chemical", action="store_true", default=None)
@@ -107,34 +131,34 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--circ-dual-fast-mix", type=float, default=0.70)
     parser.add_argument("--circ-slow-chemical-decay", type=float, default=0.999)
     parser.add_argument("--circ-slow-buildup-scale", type=float, default=0.25)
-    parser.add_argument("--circ-plasticity-sensitivity", type=float, default=0.7)
+    parser.add_argument("--circ-plasticity-sensitivity", type=float, default=0.45)
     parser.add_argument("--circ-use-adaptive-plasticity-sensitivity", action="store_true", default=None)
-    parser.add_argument("--circ-plasticity-sensitivity-min", type=float, default=0.35)
-    parser.add_argument("--circ-plasticity-sensitivity-max", type=float, default=1.20)
+    parser.add_argument("--circ-plasticity-sensitivity-min", type=float, default=0.25)
+    parser.add_argument("--circ-plasticity-sensitivity-max", type=float, default=0.55)
     parser.add_argument("--circ-plasticity-importance-mix", type=float, default=0.50)
-    parser.add_argument("--circ-min-plasticity", type=float, default=0.2)
+    parser.add_argument("--circ-min-plasticity", type=float, default=0.5)
     parser.add_argument("--circ-use-adaptive-thresholds", action="store_true", default=None)
-    parser.add_argument("--circ-adaptive-split-percentile", type=float, default=85.0)
-    parser.add_argument("--circ-adaptive-prune-percentile", type=float, default=20.0)
-    parser.add_argument("--circ-sleep-warmup-steps", type=int, default=0)
-    parser.add_argument("--circ-sleep-split-only-until-fraction", type=float, default=0.50)
-    parser.add_argument("--circ-sleep-prune-only-after-fraction", type=float, default=0.85)
-    parser.add_argument("--circ-sleep-max-change-fraction", type=float, default=1.0)
+    parser.add_argument("--circ-adaptive-split-percentile", type=float, default=92.0)
+    parser.add_argument("--circ-adaptive-prune-percentile", type=float, default=8.0)
+    parser.add_argument("--circ-sleep-warmup-steps", type=int, default=6)
+    parser.add_argument("--circ-sleep-split-only-until-fraction", type=float, default=0.75)
+    parser.add_argument("--circ-sleep-prune-only-after-fraction", type=float, default=0.95)
+    parser.add_argument("--circ-sleep-max-change-fraction", type=float, default=0.01)
     parser.add_argument("--circ-sleep-min-change-count", type=int, default=1)
-    parser.add_argument("--circ-prune-min-age-steps", type=int, default=0)
+    parser.add_argument("--circ-prune-min-age-steps", type=int, default=120)
     parser.add_argument("--circ-split-threshold", type=float, default=0.8)
     parser.add_argument("--circ-prune-threshold", type=float, default=0.08)
     parser.add_argument("--circ-split-hysteresis-margin", type=float, default=0.02)
     parser.add_argument("--circ-prune-hysteresis-margin", type=float, default=0.02)
-    parser.add_argument("--circ-split-cooldown-steps", type=int, default=2)
-    parser.add_argument("--circ-prune-cooldown-steps", type=int, default=2)
+    parser.add_argument("--circ-split-cooldown-steps", type=int, default=3)
+    parser.add_argument("--circ-prune-cooldown-steps", type=int, default=3)
     parser.add_argument("--circ-split-weight-norm-mix", type=float, default=0.30)
     parser.add_argument("--circ-prune-weight-norm-mix", type=float, default=0.30)
     parser.add_argument("--circ-split-importance-mix", type=float, default=0.20)
     parser.add_argument("--circ-prune-importance-mix", type=float, default=0.35)
     parser.add_argument("--circ-importance-ema-decay", type=float, default=0.95)
-    parser.add_argument("--circ-max-split-per-sleep", type=int, default=2)
-    parser.add_argument("--circ-max-prune-per-sleep", type=int, default=2)
+    parser.add_argument("--circ-max-split-per-sleep", type=int, default=1)
+    parser.add_argument("--circ-max-prune-per-sleep", type=int, default=1)
     parser.add_argument("--circ-split-noise-scale", type=float, default=0.01)
     parser.add_argument("--circ-sleep-reset-factor", type=float, default=0.45)
     parser.add_argument("--circ-homeostatic-downscale-factor", type=float, default=1.0)

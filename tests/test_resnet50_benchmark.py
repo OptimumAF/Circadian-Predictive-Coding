@@ -66,3 +66,13 @@ def test_should_validate_rollback_metric_name() -> None:
 
     with pytest.raises(ValueError):
         _ = run_resnet50_benchmark(config)
+
+
+def test_should_validate_hidden_dim_bounds() -> None:
+    config = ResNet50BenchmarkConfig(
+        circadian_head_hidden_dim=64,
+        circadian_min_hidden_dim=96,
+    )
+
+    with pytest.raises(ValueError):
+        _ = run_resnet50_benchmark(config)
