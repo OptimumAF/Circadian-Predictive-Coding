@@ -5,3 +5,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 data/
+benchmark_multiseed_*.json
+benchmark_multiseed_*_seed.csv
+benchmark_multiseed_*_summary.csv
+benchmark_multiseed_*_per_seed.csv
