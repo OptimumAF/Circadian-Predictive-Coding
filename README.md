@@ -48,6 +48,7 @@ This lets model capacity adapt over time instead of staying fixed.
 - NumPy circadian predictive coding baseline for small-scale experiments
 - Torch ResNet-50 benchmark pipeline for speed and accuracy comparisons
 - Adaptive sleep triggers, adaptive split/prune thresholds, dual-timescale chemical dynamics
+- Reward-modulated wake learning and adaptive sleep budget scaling (NumPy + ResNet circadian head)
 - Function-preserving split behavior and guarded sleep rollback
 - Multi-seed benchmark runner with JSON/CSV output
 
@@ -141,6 +142,12 @@ Toy baseline:
 python predictive_coding_experiment.py
 ```
 
+Toy baseline with review-driven circadian controls:
+
+```powershell
+python predictive_coding_experiment.py --adaptive-sleep-trigger --adaptive-sleep-budget --reward-modulated-learning --reward-scale-min 0.8 --reward-scale-max 1.4
+```
+
 ResNet benchmark (all 3 models):
 
 ```powershell
@@ -183,6 +190,7 @@ pytest -q
 - Governance: [GOVERNANCE.md](GOVERNANCE.md)
 - Support process: [SUPPORT.md](SUPPORT.md)
 - Model Card: [docs/model-card.md](docs/model-card.md)
+- Review Notes: [docs/circadian-model-review-notes.md](docs/circadian-model-review-notes.md)
 
 ## Citation
 

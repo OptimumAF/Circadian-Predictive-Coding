@@ -317,3 +317,88 @@ def test_should_reduce_plasticity_for_high_importance_when_adaptive_sensitivity_
     plasticity = model.get_plasticity_state()
 
     assert float(plasticity[0]) < float(plasticity[1])
+
+
+def test_should_scale_learning_rate_by_reward_signal_for_easy_vs_hard_batches() -> None:
+    config = CircadianConfig(
+        use_reward_modulated_learning=True,
+        reward_baseline_decay=0.95,
+        reward_scale_min=0.8,
+        reward_scale_max=1.6,
+    )
+    model = CircadianPredictiveCodingNetwork(
+        input_dim=2,
+        hidden_dim=5,
+        seed=54,
+        circadian_config=config,
+    )
+    train_input = np.array(
+        [[0.2, -0.1], [0.3, 0.4], [-0.2, 0.8], [0.7, -0.5]],
+        dtype=np.float64,
+    )
+
+    model._reward_error_ema = 1.0
+    easy_target = model.predict_proba(train_input)
+    model.train_epoch(
+        input_batch=train_input,
+        target_batch=easy_target,
+        learning_rate=0.03,
+        inference_steps=8,
+        inference_learning_rate=0.2,
+    )
+    easy_scale = model.get_last_reward_scale()
+
+    model._reward_error_ema = 0.05
+    hard_target = 1.0 - easy_target
+    model.train_epoch(
+        input_batch=train_input,
+        target_batch=hard_target,
+        learning_rate=0.03,
+        inference_steps=8,
+        inference_learning_rate=0.2,
+    )
+    hard_scale = model.get_last_reward_scale()
+
+    assert easy_scale <= config.reward_scale_min + 1e-6
+    assert hard_scale > 1.0
+
+
+def test_should_expand_sleep_budget_when_plateau_and_chemical_variance_are_high() -> None:
+    config = CircadianConfig(
+        use_adaptive_sleep_budget=True,
+        max_split_per_sleep=4,
+        max_prune_per_sleep=4,
+        sleep_energy_window=3,
+        sleep_plateau_delta=0.1,
+        sleep_chemical_variance_threshold=0.05,
+        adaptive_sleep_budget_min_scale=0.25,
+        adaptive_sleep_budget_max_scale=1.0,
+        adaptive_sleep_budget_plateau_weight=0.5,
+        adaptive_sleep_budget_variance_weight=0.5,
+    )
+    model = CircadianPredictiveCodingNetwork(
+        input_dim=2,
+        hidden_dim=10,
+        seed=71,
+        circadian_config=config,
+        max_hidden_dim=20,
+    )
+
+    model._energy_history = [1.0, 0.7, 0.3]
+    model.set_chemical_state(np.full(10, 0.2, dtype=np.float64))
+    low_split_budget, low_prune_budget, _ = model._resolve_sleep_budgets(
+        current_step=None,
+        total_steps=None,
+    )
+
+    model._energy_history = [0.5, 0.5, 0.5]
+    model.set_chemical_state(np.array([0.0, 1.0] * 5, dtype=np.float64))
+    high_split_budget, high_prune_budget, _ = model._resolve_sleep_budgets(
+        current_step=None,
+        total_steps=None,
+    )
+
+    assert low_split_budget == 1
+    assert low_prune_budget == 1
+    assert high_split_budget == 4
+    assert high_prune_budget == 4

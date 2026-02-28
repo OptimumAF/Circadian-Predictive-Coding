@@ -9,6 +9,14 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- Review-driven circadian updates in NumPy and ResNet circadian cores:
+  - optional reward-modulated wake learning (`use_reward_modulated_learning`)
+  - optional adaptive sleep budget scaling (`use_adaptive_sleep_budget`)
+  - `get_last_reward_scale()` telemetry helper
+- Baseline and ResNet benchmark CLI flags for reward modulation and adaptive sleep budget controls.
+- Review follow-up docs:
+  - `docs/circadian-model-review-notes.md`
+  - `docs/adr/ADR-0004-reward-modulated-wake-and-adaptive-sleep-budget.md`
 - Open-source community baseline files:
   - `LICENSE` (MIT)
   - `CODE_OF_CONDUCT.md`
@@ -41,6 +49,9 @@ for versioning even while in research-stage development.
 
 ### Changed
 
+- ResNet benchmark defaults now enable adaptive sleep budget scaling by default while keeping reward-modulated learning disabled by default.
+- Updated circadian unit tests (NumPy + Torch) with coverage for reward scaling and adaptive budget behavior.
+- Updated README, model card, and core module docs to document new circadian controls.
 - Repositioned repository messaging to Circadian Predictive Coding as the primary focus.
 - Updated `README.md` with:
   - circadian-first project framing

@@ -28,6 +28,11 @@ class CircadianHeadConfig:
     plasticity_sensitivity_max: float = 1.20
     plasticity_importance_mix: float = 0.50
     min_plasticity: float = 0.20
+    use_reward_modulated_learning: bool = False
+    reward_baseline_decay: float = 0.95
+    reward_difficulty_exponent: float = 1.0
+    reward_scale_min: float = 0.75
+    reward_scale_max: float = 1.5
     use_adaptive_thresholds: bool = False
     adaptive_split_percentile: float = 85.0
     adaptive_prune_percentile: float = 20.0
@@ -61,6 +66,11 @@ class CircadianHeadConfig:
     sleep_energy_window: int = 32
     sleep_plateau_delta: float = 1e-4
     sleep_chemical_variance_threshold: float = 0.02
+    use_adaptive_sleep_budget: bool = False
+    adaptive_sleep_budget_min_scale: float = 0.25
+    adaptive_sleep_budget_max_scale: float = 1.0
+    adaptive_sleep_budget_plateau_weight: float = 0.6
+    adaptive_sleep_budget_variance_weight: float = 0.4
 
 
 @dataclass(frozen=True)
@@ -297,6 +307,8 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self._prune_cooldown = torch.zeros(hidden_dim, dtype=torch.int32, device=device)
         self._steps_since_sleep = 0
         self._energy_history: list[float] = []
+        self._reward_error_ema: float | None = None
+        self._last_reward_scale = 1.0
         generator_device = "cuda" if str(device).startswith("cuda") else "cpu"
         generator = torch.Generator(device=generator_device)
         generator.manual_seed(seed + 9_999)
@@ -341,17 +353,24 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         grad_hidden_bias = torch.mean(hidden_prior_grad, dim=0, keepdim=True)
 
         self._update_chemical(hidden_state)
-        self._update_importance_ema(grad_hidden_output)
+        reward_scale = self._compute_reward_scale(output_error)
+        self._last_reward_scale = reward_scale
+        self._update_importance_ema(grad_hidden_output, reward_scale=reward_scale)
         plasticity = self._plasticity()
 
         grad_hidden_output = grad_hidden_output * plasticity[:, None]
         grad_feature_hidden = grad_feature_hidden * plasticity[None, :]
         grad_hidden_bias = grad_hidden_bias * plasticity[None, :]
+        effective_learning_rate = learning_rate * reward_scale
 
-        self.weight_hidden_output = self.weight_hidden_output - learning_rate * grad_hidden_output
-        self.bias_output = self.bias_output - learning_rate * grad_output_bias
-        self.weight_feature_hidden = self.weight_feature_hidden - learning_rate * grad_feature_hidden
-        self.bias_hidden = self.bias_hidden - learning_rate * grad_hidden_bias
+        self.weight_hidden_output = (
+            self.weight_hidden_output - effective_learning_rate * grad_hidden_output
+        )
+        self.bias_output = self.bias_output - effective_learning_rate * grad_output_bias
+        self.weight_feature_hidden = (
+            self.weight_feature_hidden - effective_learning_rate * grad_feature_hidden
+        )
+        self.bias_hidden = self.bias_hidden - effective_learning_rate * grad_hidden_bias
 
         self._traffic_sum = self._traffic_sum + torch.mean(torch.abs(hidden_state), dim=0)
         self._traffic_steps += 1
@@ -444,6 +463,8 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             "prune_cooldown": self._prune_cooldown.clone(),
             "steps_since_sleep": self._steps_since_sleep,
             "energy_history": list(self._energy_history),
+            "reward_error_ema": self._reward_error_ema,
+            "last_reward_scale": self._last_reward_scale,
         }
 
     def restore_state(self, state: dict[str, Any]) -> None:
@@ -462,9 +483,15 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self._prune_cooldown = cast(Any, state["prune_cooldown"]).clone()
         self._steps_since_sleep = int(state["steps_since_sleep"])
         self._energy_history = list(cast(list[float], state["energy_history"]))
+        reward_error_ema = state.get("reward_error_ema")
+        self._reward_error_ema = None if reward_error_ema is None else float(reward_error_ema)
+        self._last_reward_scale = float(state.get("last_reward_scale", 1.0))
 
     def mean_chemical(self) -> Any:
         return self._chemical.clone()
+
+    def last_reward_scale(self) -> float:
+        return float(self._last_reward_scale)
 
     def _plasticity(self) -> Any:
         torch = self._torch
@@ -485,11 +512,27 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         base = torch.full_like(self._chemical, self.config.plasticity_sensitivity_min)
         return base + span * stability
 
-    def _update_importance_ema(self, grad_hidden_output: Any) -> None:
+    def _update_importance_ema(self, grad_hidden_output: Any, reward_scale: float) -> None:
         torch = self._torch
-        importance = torch.mean(torch.abs(grad_hidden_output), dim=1)
+        importance = torch.mean(torch.abs(grad_hidden_output), dim=1) * reward_scale
         decay = self.config.importance_ema_decay
         self._importance_ema = decay * self._importance_ema + (1.0 - decay) * importance
+
+    def _compute_reward_scale(self, output_error: Any) -> float:
+        torch = self._torch
+        if not self.config.use_reward_modulated_learning:
+            return 1.0
+
+        batch_error = float(torch.mean(torch.abs(output_error)).item())
+        baseline = batch_error if self._reward_error_ema is None else self._reward_error_ema
+        difficulty_ratio = batch_error / max(float(baseline), 1e-8)
+        raw_scale = difficulty_ratio ** self.config.reward_difficulty_exponent
+        reward_scale = float(
+            max(self.config.reward_scale_min, min(self.config.reward_scale_max, raw_scale))
+        )
+        decay = self.config.reward_baseline_decay
+        self._reward_error_ema = decay * float(baseline) + (1.0 - decay) * batch_error
+        return reward_scale
 
     def _update_chemical(self, hidden_state: Any) -> None:
         torch = self._torch
@@ -601,8 +644,13 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
     def _resolve_sleep_budgets(
         self, current_step: int | None, total_steps: int | None
     ) -> tuple[int, int, bool]:
-        split_budget = self._resolve_structural_budget(self.config.max_split_per_sleep)
-        prune_budget = self._resolve_structural_budget(self.config.max_prune_per_sleep)
+        budget_scale = self._compute_adaptive_sleep_budget_scale()
+        split_budget = self._resolve_structural_budget(
+            self.config.max_split_per_sleep, budget_scale=budget_scale
+        )
+        prune_budget = self._resolve_structural_budget(
+            self.config.max_prune_per_sleep, budget_scale=budget_scale
+        )
         if current_step is None or total_steps is None or total_steps <= 0:
             return split_budget, prune_budget, False
 
@@ -615,15 +663,56 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             split_budget = 0
         return split_budget, prune_budget, False
 
-    def _resolve_structural_budget(self, configured_limit: int) -> int:
+    def _compute_adaptive_sleep_budget_scale(self) -> float:
+        torch = self._torch
+        if not self.config.use_adaptive_sleep_budget:
+            return 1.0
+        if len(self._energy_history) < self.config.sleep_energy_window:
+            return 1.0
+
+        recent = self._energy_history[-self.config.sleep_energy_window :]
+        energy_improvement = max(0.0, float(recent[0] - recent[-1]))
+        plateau_delta = self.config.sleep_plateau_delta
+        if plateau_delta <= 1e-12:
+            plateau_score = 1.0 if energy_improvement <= 0.0 else 0.0
+        else:
+            plateau_score = max(0.0, min(1.0, (plateau_delta - energy_improvement) / plateau_delta))
+
+        variance_threshold = self.config.sleep_chemical_variance_threshold
+        if variance_threshold <= 1e-12:
+            variance_score = 1.0
+        else:
+            chemical_variance = float(torch.var(self._chemical).item())
+            variance_score = max(0.0, min(1.0, chemical_variance / variance_threshold))
+
+        plateau_weight = max(0.0, self.config.adaptive_sleep_budget_plateau_weight)
+        variance_weight = max(0.0, self.config.adaptive_sleep_budget_variance_weight)
+        total_weight = plateau_weight + variance_weight
+        if total_weight <= 1e-12:
+            combined_signal = 1.0
+        else:
+            combined_signal = (
+                plateau_weight * plateau_score + variance_weight * variance_score
+            ) / total_weight
+
+        min_scale = self.config.adaptive_sleep_budget_min_scale
+        max_scale = self.config.adaptive_sleep_budget_max_scale
+        return float(min_scale + (max_scale - min_scale) * combined_signal)
+
+    def _resolve_structural_budget(self, configured_limit: int, budget_scale: float) -> int:
         if configured_limit <= 0:
             return 0
+        if budget_scale <= 0.0:
+            return 0
+        scaled_limit = int(float(configured_limit) * budget_scale)
+        if scaled_limit <= 0:
+            scaled_limit = 1
         fraction = self.config.sleep_max_change_fraction
         if fraction <= 0.0:
             return 0
         by_fraction = int(float(self.hidden_dim) * fraction)
         by_fraction = max(by_fraction, int(self.config.sleep_min_change_count))
-        return min(int(configured_limit), int(by_fraction))
+        return min(int(scaled_limit), int(by_fraction))
 
     def _compute_split_scores(self) -> Any:
         norm_scores = self._normalize_tensor(self._row_norm(self.weight_hidden_output))
@@ -828,6 +917,14 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             raise ValueError("plasticity_importance_mix must be between 0 and 1.")
         if not (0.0 < config.min_plasticity <= 1.0):
             raise ValueError("min_plasticity must be in (0, 1].")
+        if not (0.0 <= config.reward_baseline_decay < 1.0):
+            raise ValueError("reward_baseline_decay must be in [0, 1).")
+        if config.reward_difficulty_exponent <= 0.0:
+            raise ValueError("reward_difficulty_exponent must be positive.")
+        if config.reward_scale_min <= 0.0:
+            raise ValueError("reward_scale_min must be positive.")
+        if config.reward_scale_max < config.reward_scale_min:
+            raise ValueError("reward_scale_max must be >= reward_scale_min.")
         if not (0.0 <= config.adaptive_split_percentile <= 100.0):
             raise ValueError("adaptive_split_percentile must be between 0 and 100.")
         if not (0.0 <= config.adaptive_prune_percentile <= 100.0):
@@ -882,6 +979,16 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             raise ValueError("sleep_plateau_delta must be non-negative.")
         if config.sleep_chemical_variance_threshold < 0.0:
             raise ValueError("sleep_chemical_variance_threshold must be non-negative.")
+        if config.adaptive_sleep_budget_min_scale <= 0.0:
+            raise ValueError("adaptive_sleep_budget_min_scale must be positive.")
+        if config.adaptive_sleep_budget_max_scale < config.adaptive_sleep_budget_min_scale:
+            raise ValueError("adaptive_sleep_budget_max_scale must be >= min scale.")
+        if config.adaptive_sleep_budget_max_scale > 1.0:
+            raise ValueError("adaptive_sleep_budget_max_scale must be <= 1.0.")
+        if config.adaptive_sleep_budget_plateau_weight < 0.0:
+            raise ValueError("adaptive_sleep_budget_plateau_weight must be non-negative.")
+        if config.adaptive_sleep_budget_variance_weight < 0.0:
+            raise ValueError("adaptive_sleep_budget_variance_weight must be non-negative.")
 
 
 class PredictiveCodingResNet50Classifier:

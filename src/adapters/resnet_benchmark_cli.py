@@ -114,6 +114,23 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--circ-sleep-plateau-delta", type=float, default=5e-5)
     parser.add_argument("--circ-sleep-chemical-variance-threshold", type=float, default=0.02)
     parser.add_argument(
+        "--circ-use-adaptive-sleep-budget",
+        dest="circ_use_adaptive_sleep_budget",
+        action="store_true",
+        help="Enable adaptive split/prune budget scaling by plateau and chemical variance.",
+    )
+    parser.add_argument(
+        "--circ-disable-adaptive-sleep-budget",
+        dest="circ_use_adaptive_sleep_budget",
+        action="store_false",
+        help="Disable adaptive split/prune budget scaling.",
+    )
+    parser.set_defaults(circ_use_adaptive_sleep_budget=True)
+    parser.add_argument("--circ-adaptive-sleep-budget-min-scale", type=float, default=0.25)
+    parser.add_argument("--circ-adaptive-sleep-budget-max-scale", type=float, default=1.0)
+    parser.add_argument("--circ-adaptive-sleep-budget-plateau-weight", type=float, default=0.6)
+    parser.add_argument("--circ-adaptive-sleep-budget-variance-weight", type=float, default=0.4)
+    parser.add_argument(
         "--circ-force-sleep",
         dest="circ_force_sleep",
         action="store_true",
@@ -168,6 +185,15 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--circ-plasticity-sensitivity-max", type=float, default=0.55)
     parser.add_argument("--circ-plasticity-importance-mix", type=float, default=0.50)
     parser.add_argument("--circ-min-plasticity", type=float, default=0.5)
+    parser.add_argument(
+        "--circ-use-reward-modulated-learning",
+        action="store_true",
+        help="Scale wake learning rate by batch difficulty relative to a moving baseline.",
+    )
+    parser.add_argument("--circ-reward-baseline-decay", type=float, default=0.95)
+    parser.add_argument("--circ-reward-difficulty-exponent", type=float, default=1.0)
+    parser.add_argument("--circ-reward-scale-min", type=float, default=0.75)
+    parser.add_argument("--circ-reward-scale-max", type=float, default=1.5)
     parser.add_argument("--circ-use-adaptive-thresholds", action="store_true", default=None)
     parser.add_argument("--circ-adaptive-split-percentile", type=float, default=92.0)
     parser.add_argument("--circ-adaptive-prune-percentile", type=float, default=8.0)
@@ -260,6 +286,15 @@ def main() -> None:
         circadian_sleep_chemical_variance_threshold=(
             args.circ_sleep_chemical_variance_threshold
         ),
+        circadian_use_adaptive_sleep_budget=args.circ_use_adaptive_sleep_budget,
+        circadian_adaptive_sleep_budget_min_scale=args.circ_adaptive_sleep_budget_min_scale,
+        circadian_adaptive_sleep_budget_max_scale=args.circ_adaptive_sleep_budget_max_scale,
+        circadian_adaptive_sleep_budget_plateau_weight=(
+            args.circ_adaptive_sleep_budget_plateau_weight
+        ),
+        circadian_adaptive_sleep_budget_variance_weight=(
+            args.circ_adaptive_sleep_budget_variance_weight
+        ),
         circadian_enable_sleep_rollback=args.circ_enable_sleep_rollback,
         circadian_sleep_rollback_tolerance=args.circ_sleep_rollback_tolerance,
         circadian_sleep_rollback_metric=args.circ_sleep_rollback_metric,
@@ -291,6 +326,11 @@ def main() -> None:
         circadian_plasticity_sensitivity_max=args.circ_plasticity_sensitivity_max,
         circadian_plasticity_importance_mix=args.circ_plasticity_importance_mix,
         circadian_min_plasticity=args.circ_min_plasticity,
+        circadian_use_reward_modulated_learning=args.circ_use_reward_modulated_learning,
+        circadian_reward_baseline_decay=args.circ_reward_baseline_decay,
+        circadian_reward_difficulty_exponent=args.circ_reward_difficulty_exponent,
+        circadian_reward_scale_min=args.circ_reward_scale_min,
+        circadian_reward_scale_max=args.circ_reward_scale_max,
         circadian_use_adaptive_thresholds=(
             True
             if args.circ_use_adaptive_thresholds is None

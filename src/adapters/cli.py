@@ -117,6 +117,37 @@ def build_argument_parser() -> argparse.ArgumentParser:
         type=float,
         default=circadian_defaults.sleep_chemical_variance_threshold,
     )
+    parser.add_argument(
+        "--adaptive-sleep-budget",
+        action="store_true",
+        help="Scale split/prune budgets based on plateau severity and chemical variance.",
+    )
+    parser.add_argument(
+        "--adaptive-sleep-budget-min-scale",
+        type=float,
+        default=circadian_defaults.adaptive_sleep_budget_min_scale,
+    )
+    parser.add_argument(
+        "--adaptive-sleep-budget-max-scale",
+        type=float,
+        default=circadian_defaults.adaptive_sleep_budget_max_scale,
+    )
+
+    parser.add_argument(
+        "--reward-modulated-learning",
+        action="store_true",
+        help="Scale wake learning rate by batch difficulty relative to recent error baseline.",
+    )
+    parser.add_argument(
+        "--reward-scale-min",
+        type=float,
+        default=circadian_defaults.reward_scale_min,
+    )
+    parser.add_argument(
+        "--reward-scale-max",
+        type=float,
+        default=circadian_defaults.reward_scale_max,
+    )
 
     parser.add_argument(
         "--split-weight-norm-mix",
@@ -188,6 +219,12 @@ def main() -> None:
         sleep_energy_window=arguments.sleep_energy_window,
         sleep_plateau_delta=arguments.sleep_plateau_delta,
         sleep_chemical_variance_threshold=arguments.sleep_chemical_variance_threshold,
+        use_adaptive_sleep_budget=arguments.adaptive_sleep_budget,
+        adaptive_sleep_budget_min_scale=arguments.adaptive_sleep_budget_min_scale,
+        adaptive_sleep_budget_max_scale=arguments.adaptive_sleep_budget_max_scale,
+        use_reward_modulated_learning=arguments.reward_modulated_learning,
+        reward_scale_min=arguments.reward_scale_min,
+        reward_scale_max=arguments.reward_scale_max,
         split_weight_norm_mix=arguments.split_weight_norm_mix,
         prune_weight_norm_mix=arguments.prune_weight_norm_mix,
         prune_decay_steps=arguments.prune_decay_steps,
