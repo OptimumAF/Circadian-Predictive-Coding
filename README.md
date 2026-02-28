@@ -112,6 +112,24 @@ python resnet50_benchmark.py --dataset-name cifar100 --classes 100 --dataset-tra
 
 Raw benchmark output: [`docs/benchmarks/benchmark_master_cifar100_subset_2026-02-28.txt`](docs/benchmarks/benchmark_master_cifar100_subset_2026-02-28.txt)
 
+## Strengths and Weaknesses
+
+Strengths:
+
+- Strong retention/adaptation balance under hard continual shift.
+- Hardest-case balanced score: circadian `0.922` vs predictive coding `0.916` vs backprop `0.889`.
+- Hardest-case retention ratio: circadian `0.994`.
+- Source: [`docs/benchmarks/benchmark_continual_shift_hardest_case_2026-02-28.txt`](docs/benchmarks/benchmark_continual_shift_hardest_case_2026-02-28.txt).
+- Dynamic capacity adaptation is observable and measurable (for hardest-case: mean splits `6.29`, hidden size `8 -> 14.29`).
+- Competitive behavior in moderate continual-shift stress tests with stable multi-seed performance.
+
+Weaknesses:
+
+- Not best on every benchmark; on the latest CIFAR-100 subset master check, predictive coding accuracy (`0.692`) was higher than circadian (`0.685`).
+- Extra algorithmic machinery (sleep scheduling, replay, split/prune controls) adds tuning burden and implementation complexity compared with fixed-width baselines.
+- Speed overhead can appear depending on configuration; in the latest CIFAR-100 subset master check, circadian train speed (`874.2` SPS) was lower than predictive coding (`965.2` SPS).
+- Results are regime-dependent; claims should be tied to specific benchmark settings and seeds instead of treated as universal.
+
 ## Repository Layout
 
 ```text
