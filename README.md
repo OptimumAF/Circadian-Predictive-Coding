@@ -56,9 +56,7 @@ This lets model capacity adapt over time instead of staying fixed.
 
 ### Multi-seed CIFAR-100 Snapshot (3 seeds, subset benchmark)
 
-![Accuracy Chart](docs/figures/benchmark_accuracy.png)
-![Training Speed Chart](docs/figures/benchmark_train_speed.png)
-![Inference Latency Chart](docs/figures/benchmark_inference_latency_p95.png)
+![Benchmark Overview (Compact)](docs/figures/benchmark_overview_compact.png)
 
 Interactive dashboard:
 
@@ -67,6 +65,7 @@ Interactive dashboard:
 
 Interactive Plotly chart files:
 
+- [Overview (interactive, compact)](https://optimumaf.github.io/Circadian-Predictive-Coding/figures/interactive_benchmark_overview.html)
 - [Accuracy (interactive)](https://optimumaf.github.io/Circadian-Predictive-Coding/figures/interactive_benchmark_accuracy.html)
 - [Training speed (interactive)](https://optimumaf.github.io/Circadian-Predictive-Coding/figures/interactive_benchmark_train_speed.html)
 - [Inference latency P95 (interactive)](https://optimumaf.github.io/Circadian-Predictive-Coding/figures/interactive_benchmark_inference_latency_p95.html)

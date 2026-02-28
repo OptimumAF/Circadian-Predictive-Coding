@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Benchmark Overview</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; background: #f7f9fc;">
+  <div id="chart" style="width: 100%; max-width: 1200px; height: 900px; margin: 18px auto;"></div>
+  <script>
+    const payload = {"labels": ["Backprop", "Predictive", "Circadian"], "colors": ["#2e61ad", "#3d9d56", "#bd6624"], "metrics": [{"title": "Accuracy", "subtitle": "Mean test accuracy", "objective_note": "Higher is better", "y_label": "Accuracy", "values": [0.6900666666666666, 0.681, 0.6714666666666668], "formatted_values": ["0.690", "0.681", "0.671"], "range": [0.0, 1.0]}, {"title": "Training Throughput", "subtitle": "Mean samples / second", "objective_note": "Higher is better", "y_label": "Train SPS", "values": [1775.275277733633, 1732.0788999689255, 1643.5856944964762], "formatted_values": ["1775", "1732", "1644"], "range": [1630.4167361727605, 1788.4442360573487]}, {"title": "Inference Latency P95", "subtitle": "Mean latency (ms)", "objective_note": "Lower is better", "y_label": "P95 latency (ms)", "values": [17.338261666694166, 17.741378333375717, 18.710663333350414], "formatted_values": ["17.34", "17.74", "18.71"], "range": [17.173573466695416, 18.875351533349164]}, {"title": "Balanced Score", "subtitle": "Composite utility score", "objective_note": "Higher is better", "y_label": "Balanced score", "values": [1.0, 0.5864393641855423, 0.0], "formatted_values": ["1.000", "0.586", "0.000"], "range": [0.0, 1.0]}]};
+    const traces = [];
+    const annotations = [];
+    payload.metrics.forEach((metric, idx) => {
+      const axisIndex = idx + 1;
+      const xRef = axisIndex === 1 ? "x" : "x" + axisIndex;
+      const yRef = axisIndex === 1 ? "y" : "y" + axisIndex;
+      traces.push({
+        type: "bar",
+        x: payload.labels,
+        y: metric.values,
+        marker: { color: payload.colors },
+        text: metric.formatted_values,
+        textposition: "outside",
+        cliponaxis: false,
+        xaxis: xRef,
+        yaxis: yRef,
+        showlegend: false
+      });
+
+      const col = idx % 2;
+      const row = Math.floor(idx / 2);
+      const xCenter = col === 0 ? 0.225 : 0.775;
+      const yTop = row === 0 ? 1.12 : 0.56;
+      annotations.push({
+        xref: "paper",
+        yref: "paper",
+        x: xCenter,
+        y: yTop,
+        text: "<b>" + metric.title + "</b><br><span style='color:#5e6672'>" + metric.objective_note + "</span>",
+        showarrow: false,
+        align: "center",
+        font: {size: 12, color: "#1e2430"}
+      });
+    });
+
+    const layout = {
+      title: {
+        text: "Benchmark Overview (Compact)<br><sup>Multi-seed CIFAR-100 summary</sup>"
+      },
+      grid: { rows: 2, columns: 2, pattern: "independent" },
+      paper_bgcolor: "#f7f9fc",
+      plot_bgcolor: "#ffffff",
+      margin: { l: 70, r: 35, t: 120, b: 70 },
+      annotations: annotations
+    };
+
+    payload.metrics.forEach((metric, idx) => {
+      const axisIndex = idx + 1;
+      const xAxisName = axisIndex === 1 ? "xaxis" : "xaxis" + axisIndex;
+      const yAxisName = axisIndex === 1 ? "yaxis" : "yaxis" + axisIndex;
+      layout[xAxisName] = { title: "Model" };
+      layout[yAxisName] = { title: metric.y_label, range: metric.range };
+    });
+
+    Plotly.newPlot("chart", traces, layout, {responsive: true});
+  </script>
+</body>
+</html>

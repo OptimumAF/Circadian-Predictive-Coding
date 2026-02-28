@@ -4,10 +4,12 @@ This folder stores visual assets used by `README.md`.
 
 ## Generated Artifacts
 
+- `benchmark_overview_compact.png`
 - `benchmark_accuracy.png`
 - `benchmark_train_speed.png`
 - `benchmark_inference_latency_p95.png`
 - `circadian_sleep_dynamics.gif`
+- `interactive_benchmark_overview.html`
 - `interactive_benchmark_accuracy.html`
 - `interactive_benchmark_train_speed.html`
 - `interactive_benchmark_inference_latency_p95.html`

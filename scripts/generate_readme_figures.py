@@ -12,7 +12,7 @@ import csv
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Any
+from typing import Callable
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -24,6 +24,20 @@ class SummaryRow:
     train_samples_per_second_mean: float
     inference_latency_p95_ms_mean: float
     balanced_score: float
+
+
+@dataclass(frozen=True)
+class MetricSpec:
+    title: str
+    subtitle: str
+    objective_note: str
+    y_label: str
+    value_getter: Callable[[SummaryRow], float]
+    value_formatter: Callable[[float], str]
+    y_min: float | None = None
+    y_max: float | None = None
+    y_padding_ratio: float = 0.08
+    clamp_zero: bool = True
 
 
 MODEL_ORDER = ["BackpropResNet50", "PredictiveCodingResNet50", "CircadianPredictiveCodingResNet50"]
@@ -107,8 +121,8 @@ def draw_bar_chart(
     rows: list[SummaryRow],
     title: str,
     subtitle: str,
-    value_getter: Any,
-    value_formatter: Any,
+    value_getter: Callable[[SummaryRow], float],
+    value_formatter: Callable[[float], str],
     output_path: Path,
     objective_note: str,
     y_min: float | None = None,
@@ -205,7 +219,7 @@ def write_plotly_bar_html(
     rows: list[SummaryRow],
     title: str,
     y_label: str,
-    value_getter: Any,
+    value_getter: Callable[[SummaryRow], float],
     output_path: Path,
     objective_note: str,
     y_min: float | None = None,
@@ -272,6 +286,279 @@ def write_plotly_bar_html(
 
 def rgb_to_hex(color: tuple[int, int, int]) -> str:
     return f"#{color[0]:02x}{color[1]:02x}{color[2]:02x}"
+
+
+def default_metric_specs() -> list[MetricSpec]:
+    return [
+        MetricSpec(
+            title="Accuracy",
+            subtitle="Mean test accuracy",
+            objective_note="Higher is better",
+            y_label="Accuracy",
+            value_getter=lambda row: row.test_accuracy_mean,
+            value_formatter=lambda value: f"{value:.3f}",
+            y_min=0.0,
+            y_max=1.0,
+            clamp_zero=False,
+        ),
+        MetricSpec(
+            title="Training Throughput",
+            subtitle="Mean samples / second",
+            objective_note="Higher is better",
+            y_label="Train SPS",
+            value_getter=lambda row: row.train_samples_per_second_mean,
+            value_formatter=lambda value: f"{value:.0f}",
+            y_padding_ratio=0.10,
+        ),
+        MetricSpec(
+            title="Inference Latency P95",
+            subtitle="Mean latency (ms)",
+            objective_note="Lower is better",
+            y_label="P95 latency (ms)",
+            value_getter=lambda row: row.inference_latency_p95_ms_mean,
+            value_formatter=lambda value: f"{value:.2f}",
+            y_padding_ratio=0.12,
+        ),
+        MetricSpec(
+            title="Balanced Score",
+            subtitle="Composite utility score",
+            objective_note="Higher is better",
+            y_label="Balanced score",
+            value_getter=lambda row: row.balanced_score,
+            value_formatter=lambda value: f"{value:.3f}",
+            y_min=0.0,
+            y_max=1.0,
+            clamp_zero=False,
+        ),
+    ]
+
+
+def draw_metric_panel(
+    draw: ImageDraw.ImageDraw,
+    rows: list[SummaryRow],
+    spec: MetricSpec,
+    panel_box: tuple[int, int, int, int],
+    font_title: ImageFont.ImageFont | ImageFont.FreeTypeFont,
+    font_body: ImageFont.ImageFont | ImageFont.FreeTypeFont,
+) -> None:
+    panel_left, panel_top, panel_right, panel_bottom = panel_box
+    draw.rounded_rectangle(
+        [(panel_left, panel_top), (panel_right, panel_bottom)],
+        radius=12,
+        fill=(255, 255, 255),
+        outline=(216, 222, 232),
+        width=2,
+    )
+    draw.text((panel_left + 14, panel_top + 12), spec.title, fill=(24, 24, 30), font=font_title)
+    draw.text((panel_left + 14, panel_top + 30), spec.subtitle, fill=(98, 104, 114), font=font_body)
+    draw.text(
+        (panel_left + 14, panel_top + 48),
+        spec.objective_note,
+        fill=(121, 126, 136),
+        font=font_body,
+    )
+
+    chart_left = panel_left + 52
+    chart_right = panel_right - 20
+    chart_top = panel_top + 74
+    chart_bottom = panel_bottom - 44
+    chart_height = chart_bottom - chart_top
+    chart_width = chart_right - chart_left
+    draw.rectangle([(chart_left, chart_top), (chart_right, chart_bottom)], outline=(220, 225, 234), width=1)
+
+    values = [float(spec.value_getter(row)) for row in rows]
+    chart_min, chart_max = resolve_y_range(
+        values=values,
+        requested_min=spec.y_min,
+        requested_max=spec.y_max,
+        padding_ratio=spec.y_padding_ratio,
+        clamp_zero=spec.clamp_zero,
+    )
+    chart_span = max(chart_max - chart_min, 1e-8)
+
+    for tick_index in range(5):
+        tick_ratio = tick_index / 4
+        y = chart_bottom - int(tick_ratio * chart_height)
+        tick_value = chart_min + tick_ratio * chart_span
+        draw.line([(chart_left, y), (chart_right, y)], fill=(236, 240, 246), width=1)
+        draw.text((chart_left - 40, y - 6), f"{tick_value:.2f}", fill=(110, 115, 124), font=font_body)
+
+    for index, row in enumerate(rows):
+        value = float(spec.value_getter(row))
+        x0 = chart_left + int((index + 0.12) * chart_width / len(rows))
+        x1 = chart_left + int((index + 0.88) * chart_width / len(rows))
+        ratio = (value - chart_min) / chart_span
+        bar_height = max(int(chart_height * ratio), 3)
+        y0 = chart_bottom - bar_height
+        draw.rectangle([(x0, y0), (x1, chart_bottom)], fill=MODEL_COLORS[row.model_name], outline=(40, 40, 44))
+        draw.text((x0, chart_bottom + 8), MODEL_LABELS[row.model_name], fill=(32, 33, 38), font=font_body)
+        draw.text((x0, y0 - 14), spec.value_formatter(value), fill=(22, 22, 26), font=font_body)
+
+
+def draw_compact_overview_chart(
+    rows: list[SummaryRow],
+    specs: list[MetricSpec],
+    output_path: Path,
+) -> None:
+    width = 1500
+    height = 920
+    image = Image.new("RGB", (width, height), (246, 249, 253))
+    draw = ImageDraw.Draw(image)
+    font_title = ImageFont.load_default()
+    font_body = ImageFont.load_default()
+
+    draw.text((34, 20), "Benchmark Overview (Compact)", fill=(18, 20, 25), font=font_title)
+    draw.text(
+        (34, 40),
+        "Multi-seed CIFAR-100 summary across key metrics for all three models.",
+        fill=(92, 98, 108),
+        font=font_body,
+    )
+
+    legend_y = 60
+    legend_x = 34
+    for model_name in MODEL_ORDER:
+        color = MODEL_COLORS[model_name]
+        label = MODEL_LABELS[model_name]
+        draw.rectangle([(legend_x, legend_y), (legend_x + 16, legend_y + 12)], fill=color, outline=(60, 60, 64))
+        draw.text((legend_x + 22, legend_y), label, fill=(36, 38, 44), font=font_body)
+        legend_x += 160
+
+    panel_gap = 18
+    panel_width = (width - 34 * 2 - panel_gap) // 2
+    panel_height = (height - 96 - 38 - panel_gap) // 2
+    panel_top_start = 96
+
+    for index, spec in enumerate(specs):
+        row_index = index // 2
+        col_index = index % 2
+        panel_left = 34 + col_index * (panel_width + panel_gap)
+        panel_top = panel_top_start + row_index * (panel_height + panel_gap)
+        panel_right = panel_left + panel_width
+        panel_bottom = panel_top + panel_height
+        draw_metric_panel(
+            draw=draw,
+            rows=rows,
+            spec=spec,
+            panel_box=(panel_left, panel_top, panel_right, panel_bottom),
+            font_title=font_title,
+            font_body=font_body,
+        )
+
+    draw.text(
+        (34, height - 24),
+        "Source: benchmark_multiseed_cifar100_summary.csv",
+        fill=(118, 122, 131),
+        font=font_body,
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(output_path, format="PNG")
+
+
+def write_plotly_overview_html(
+    rows: list[SummaryRow],
+    specs: list[MetricSpec],
+    output_path: Path,
+) -> None:
+    labels = [MODEL_LABELS[row.model_name] for row in rows]
+    colors = [rgb_to_hex(MODEL_COLORS[row.model_name]) for row in rows]
+
+    metrics: list[dict[str, object]] = []
+    for spec in specs:
+        values = [float(spec.value_getter(row)) for row in rows]
+        resolved_min, resolved_max = resolve_y_range(
+            values=values,
+            requested_min=spec.y_min,
+            requested_max=spec.y_max,
+            padding_ratio=spec.y_padding_ratio,
+            clamp_zero=spec.clamp_zero,
+        )
+        metrics.append(
+            {
+                "title": spec.title,
+                "subtitle": spec.subtitle,
+                "objective_note": spec.objective_note,
+                "y_label": spec.y_label,
+                "values": values,
+                "formatted_values": [spec.value_formatter(value) for value in values],
+                "range": [resolved_min, resolved_max],
+            }
+        )
+
+    payload = {"labels": labels, "colors": colors, "metrics": metrics}
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Benchmark Overview</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; background: #f7f9fc;">
+  <div id="chart" style="width: 100%; max-width: 1200px; height: 900px; margin: 18px auto;"></div>
+  <script>
+    const payload = {json.dumps(payload)};
+    const traces = [];
+    const annotations = [];
+    payload.metrics.forEach((metric, idx) => {{
+      const axisIndex = idx + 1;
+      const xRef = axisIndex === 1 ? "x" : "x" + axisIndex;
+      const yRef = axisIndex === 1 ? "y" : "y" + axisIndex;
+      traces.push({{
+        type: "bar",
+        x: payload.labels,
+        y: metric.values,
+        marker: {{ color: payload.colors }},
+        text: metric.formatted_values,
+        textposition: "outside",
+        cliponaxis: false,
+        xaxis: xRef,
+        yaxis: yRef,
+        showlegend: false
+      }});
+
+      const col = idx % 2;
+      const row = Math.floor(idx / 2);
+      const xCenter = col === 0 ? 0.225 : 0.775;
+      const yTop = row === 0 ? 1.12 : 0.56;
+      annotations.push({{
+        xref: "paper",
+        yref: "paper",
+        x: xCenter,
+        y: yTop,
+        text: "<b>" + metric.title + "</b><br><span style='color:#5e6672'>" + metric.objective_note + "</span>",
+        showarrow: false,
+        align: "center",
+        font: {{size: 12, color: "#1e2430"}}
+      }});
+    }});
+
+    const layout = {{
+      title: {{
+        text: "Benchmark Overview (Compact)<br><sup>Multi-seed CIFAR-100 summary</sup>"
+      }},
+      grid: {{ rows: 2, columns: 2, pattern: "independent" }},
+      paper_bgcolor: "#f7f9fc",
+      plot_bgcolor: "#ffffff",
+      margin: {{ l: 70, r: 35, t: 120, b: 70 }},
+      annotations: annotations
+    }};
+
+    payload.metrics.forEach((metric, idx) => {{
+      const axisIndex = idx + 1;
+      const xAxisName = axisIndex === 1 ? "xaxis" : "xaxis" + axisIndex;
+      const yAxisName = axisIndex === 1 ? "yaxis" : "yaxis" + axisIndex;
+      layout[xAxisName] = {{ title: "Model" }};
+      layout[yAxisName] = {{ title: metric.y_label, range: metric.range }};
+    }});
+
+    Plotly.newPlot("chart", traces, layout, {{responsive: true}});
+  </script>
+</body>
+</html>
+"""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(html, encoding="utf-8")
 
 
 def build_delta_sequence(cycles: int, splits: int, prunes: int) -> list[int]:
@@ -398,68 +685,81 @@ def main() -> None:
     summary_path = Path(args.summary_csv)
     output_dir = Path(args.output_dir)
     rows = load_summary_rows(summary_path)
+    specs = default_metric_specs()
+    specs_by_title = {spec.title: spec for spec in specs}
+
+    draw_compact_overview_chart(
+        rows=rows,
+        specs=specs,
+        output_path=output_dir / "benchmark_overview_compact.png",
+    )
+    write_plotly_overview_html(
+        rows=rows,
+        specs=specs,
+        output_path=output_dir / "interactive_benchmark_overview.html",
+    )
 
     draw_bar_chart(
         rows=rows,
         title="Accuracy Comparison (Higher Is Better)",
         subtitle="Mean test accuracy across multi-seed CIFAR-100 benchmark",
-        value_getter=lambda row: row.test_accuracy_mean,
-        value_formatter=lambda value: f"{value:.3f}",
+        value_getter=specs_by_title["Accuracy"].value_getter,
+        value_formatter=specs_by_title["Accuracy"].value_formatter,
         output_path=output_dir / "benchmark_accuracy.png",
-        objective_note="Higher is better",
-        y_min=0.0,
-        y_max=1.0,
-        clamp_zero=False,
+        objective_note=specs_by_title["Accuracy"].objective_note,
+        y_min=specs_by_title["Accuracy"].y_min,
+        y_max=specs_by_title["Accuracy"].y_max,
+        clamp_zero=specs_by_title["Accuracy"].clamp_zero,
     )
     draw_bar_chart(
         rows=rows,
         title="Training Throughput (Higher Is Better)",
         subtitle="Mean training samples per second",
-        value_getter=lambda row: row.train_samples_per_second_mean,
-        value_formatter=lambda value: f"{value:.0f}",
+        value_getter=specs_by_title["Training Throughput"].value_getter,
+        value_formatter=specs_by_title["Training Throughput"].value_formatter,
         output_path=output_dir / "benchmark_train_speed.png",
-        objective_note="Higher is better",
-        y_padding_ratio=0.10,
+        objective_note=specs_by_title["Training Throughput"].objective_note,
+        y_padding_ratio=specs_by_title["Training Throughput"].y_padding_ratio,
     )
     draw_bar_chart(
         rows=rows,
         title="Inference Latency P95 (Lower Is Better)",
         subtitle="Mean p95 inference latency in milliseconds",
-        value_getter=lambda row: row.inference_latency_p95_ms_mean,
+        value_getter=specs_by_title["Inference Latency P95"].value_getter,
         value_formatter=lambda value: f"{value:.2f} ms",
         output_path=output_dir / "benchmark_inference_latency_p95.png",
-        objective_note="Lower is better",
-        y_padding_ratio=0.12,
+        objective_note=specs_by_title["Inference Latency P95"].objective_note,
+        y_padding_ratio=specs_by_title["Inference Latency P95"].y_padding_ratio,
     )
 
     write_plotly_bar_html(
         rows=rows,
         title="Accuracy Comparison",
         y_label="Mean test accuracy",
-        value_getter=lambda row: row.test_accuracy_mean,
+        value_getter=specs_by_title["Accuracy"].value_getter,
         output_path=output_dir / "interactive_benchmark_accuracy.html",
-        objective_note="Higher is better",
-        y_min=0.0,
-        y_max=1.0,
-        clamp_zero=False,
+        objective_note=specs_by_title["Accuracy"].objective_note,
+        y_min=specs_by_title["Accuracy"].y_min,
+        y_max=specs_by_title["Accuracy"].y_max,
+        clamp_zero=specs_by_title["Accuracy"].clamp_zero,
     )
     write_plotly_bar_html(
         rows=rows,
         title="Training Throughput",
         y_label="Mean training samples per second",
-        value_getter=lambda row: row.train_samples_per_second_mean,
+        value_getter=specs_by_title["Training Throughput"].value_getter,
         output_path=output_dir / "interactive_benchmark_train_speed.html",
-        objective_note="Higher is better",
-        y_padding_ratio=0.10,
+        objective_note=specs_by_title["Training Throughput"].objective_note,
+        y_padding_ratio=specs_by_title["Training Throughput"].y_padding_ratio,
     )
     write_plotly_bar_html(
         rows=rows,
         title="Inference Latency P95",
         y_label="Mean p95 inference latency (ms)",
-        value_getter=lambda row: row.inference_latency_p95_ms_mean,
+        value_getter=specs_by_title["Inference Latency P95"].value_getter,
         output_path=output_dir / "interactive_benchmark_inference_latency_p95.html",
-        objective_note="Lower is better",
-        y_padding_ratio=0.12,
+        objective_note=specs_by_title["Inference Latency P95"].objective_note,
+        y_padding_ratio=specs_by_title["Inference Latency P95"].y_padding_ratio,
     )
     draw_circadian_gif(
         output_path=output_dir / "circadian_sleep_dynamics.gif",
