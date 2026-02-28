@@ -59,6 +59,20 @@ This lets model capacity adapt over time instead of staying fixed.
 ![Training Speed Chart](docs/figures/benchmark_train_speed.png)
 ![Inference Latency Chart](docs/figures/benchmark_inference_latency_p95.png)
 
+Interactive dashboard:
+
+- [Benchmark Dashboard (GitHub Pages)](https://optimumaf.github.io/Circadian-Predictive-Coding/)
+- [Dashboard Source](docs/index.html)
+
+Interactive Plotly chart files:
+
+- [Accuracy (interactive)](https://optimumaf.github.io/Circadian-Predictive-Coding/figures/interactive_benchmark_accuracy.html)
+- [Training speed (interactive)](https://optimumaf.github.io/Circadian-Predictive-Coding/figures/interactive_benchmark_train_speed.html)
+- [Inference latency P95 (interactive)](https://optimumaf.github.io/Circadian-Predictive-Coding/figures/interactive_benchmark_inference_latency_p95.html)
+- [Interactive chart source files](docs/figures/)
+
+Note: GitHub README pages do not execute custom JavaScript, so Plotly interactivity will not run inline inside README itself.
+
 ### Circadian Dynamics (Illustrative)
 
 ![Circadian Sleep Dynamics](docs/figures/circadian_sleep_dynamics.gif)
@@ -144,6 +158,11 @@ Regenerate README charts:
 ```powershell
 python scripts/generate_readme_figures.py --summary-csv benchmark_multiseed_cifar100_summary.csv --output-dir docs/figures
 ```
+
+Deploy dashboard via GitHub Pages:
+
+- Workflow: `.github/workflows/pages.yml`
+- Hosted entrypoint: `docs/index.html`
 
 ## Quality Commands
 

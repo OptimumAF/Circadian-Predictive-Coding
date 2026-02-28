@@ -29,6 +29,11 @@ for versioning even while in research-stage development.
   - `scripts/generate_readme_figures.py`
   - generated PNG benchmark charts under `docs/figures/`
   - illustrative circadian adaptation GIF (`docs/figures/circadian_sleep_dynamics.gif`)
+  - interactive Plotly HTML chart outputs under `docs/figures/`
+- Docs dashboard and hosting:
+  - `docs/index.html` interactive chart dashboard
+  - `.github/workflows/pages.yml` for GitHub Pages deployment
+  - `docs/.nojekyll` for static pages compatibility
 - Ownership and governance metadata:
   - `.github/CODEOWNERS`
   - `docs/model-card.md`
@@ -41,6 +46,7 @@ for versioning even while in research-stage development.
   - circadian-first project framing
   - reproducible benchmark commands
   - badges, mermaid circadian loop diagram, benchmark visuals, and results snapshot tables
+  - dashboard and interactive chart links
   - governance and citation references
 - Updated `ARCHITECTURE.md` with clearer module boundaries and circadian-centric design intent.
 - Updated `CONTRIBUTING.md` with concrete contribution workflow and quality gates.

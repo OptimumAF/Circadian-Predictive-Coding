@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import csv
 from dataclasses import dataclass
+import json
 from pathlib import Path
 from typing import Any
 
@@ -109,7 +110,11 @@ def draw_bar_chart(
     value_getter: Any,
     value_formatter: Any,
     output_path: Path,
-    higher_is_better: bool = True,
+    objective_note: str,
+    y_min: float | None = None,
+    y_max: float | None = None,
+    y_padding_ratio: float = 0.08,
+    clamp_zero: bool = True,
 ) -> None:
     width = 1280
     height = 720
@@ -120,6 +125,7 @@ def draw_bar_chart(
 
     draw.text((50, 28), title, fill=(20, 20, 24), font=font_title)
     draw.text((50, 52), subtitle, fill=(90, 94, 103), font=font_body)
+    draw.text((50, 72), objective_note, fill=(120, 124, 132), font=font_body)
 
     left = 100
     top = 110
@@ -130,18 +136,28 @@ def draw_bar_chart(
     draw.rectangle([(left, top), (right, bottom)], outline=(215, 220, 228), width=2)
 
     values = [float(value_getter(row)) for row in rows]
-    max_value = max(values)
-    min_value = min(values)
-    span = max(max_value - min_value, 1e-8)
+    chart_min, chart_max = resolve_y_range(
+        values=values,
+        requested_min=y_min,
+        requested_max=y_max,
+        padding_ratio=y_padding_ratio,
+        clamp_zero=clamp_zero,
+    )
+    chart_span = max(chart_max - chart_min, 1e-8)
+
+    tick_count = 5
+    for tick_index in range(tick_count + 1):
+        tick_ratio = tick_index / tick_count
+        y = bottom - int(tick_ratio * chart_height)
+        tick_value = chart_min + tick_ratio * chart_span
+        draw.line([(left, y), (right, y)], fill=(234, 238, 244), width=1)
+        draw.text((left - 72, y - 6), f"{tick_value:.2f}", fill=(107, 112, 120), font=font_body)
 
     for index, row in enumerate(rows):
         value = float(value_getter(row))
         x0 = left + int((index + 0.15) * chart_width / len(rows))
         x1 = left + int((index + 0.85) * chart_width / len(rows))
-        if higher_is_better:
-            ratio = value / max(max_value, 1e-8)
-        else:
-            ratio = (max_value - value) / span
+        ratio = (value - chart_min) / chart_span
         bar_height = max(int(chart_height * ratio), 3)
         y0 = bottom - bar_height
         y1 = bottom
@@ -158,6 +174,104 @@ def draw_bar_chart(
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     image.save(output_path, format="PNG")
+
+
+def resolve_y_range(
+    values: list[float],
+    requested_min: float | None,
+    requested_max: float | None,
+    padding_ratio: float,
+    clamp_zero: bool,
+) -> tuple[float, float]:
+    if requested_min is not None and requested_max is not None:
+        return requested_min, requested_max
+    value_min = min(values)
+    value_max = max(values)
+    span = value_max - value_min
+    if span < 1e-12:
+        base_pad = max(abs(value_max) * 0.05, 1e-3)
+    else:
+        base_pad = span * padding_ratio
+    y_min = value_min - base_pad if requested_min is None else requested_min
+    y_max = value_max + base_pad if requested_max is None else requested_max
+    if clamp_zero and y_min > 0.0:
+        y_min = max(0.0, y_min)
+    if y_max <= y_min:
+        y_max = y_min + max(abs(y_min) * 0.1, 1.0)
+    return y_min, y_max
+
+
+def write_plotly_bar_html(
+    rows: list[SummaryRow],
+    title: str,
+    y_label: str,
+    value_getter: Any,
+    output_path: Path,
+    objective_note: str,
+    y_min: float | None = None,
+    y_max: float | None = None,
+    y_padding_ratio: float = 0.08,
+    clamp_zero: bool = True,
+) -> None:
+    labels = [MODEL_LABELS[row.model_name] for row in rows]
+    values = [float(value_getter(row)) for row in rows]
+    colors = [rgb_to_hex(MODEL_COLORS[row.model_name]) for row in rows]
+    resolved_min, resolved_max = resolve_y_range(
+        values=values,
+        requested_min=y_min,
+        requested_max=y_max,
+        padding_ratio=y_padding_ratio,
+        clamp_zero=clamp_zero,
+    )
+    payload = {
+        "labels": labels,
+        "values": values,
+        "colors": colors,
+        "title": title,
+        "y_label": y_label,
+        "objective_note": objective_note,
+        "range": [resolved_min, resolved_max],
+    }
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; background: #f8fafc;">
+  <div id="chart" style="width: 100%; max-width: 1080px; height: 640px; margin: 24px auto;"></div>
+  <script>
+    const payload = {json.dumps(payload)};
+    const trace = {{
+      x: payload.labels,
+      y: payload.values,
+      type: "bar",
+      marker: {{ color: payload.colors }},
+      text: payload.values.map(v => String(v)),
+      textposition: "outside",
+      cliponaxis: false
+    }};
+    const layout = {{
+      title: {{ text: payload.title + "<br><sup>" + payload.objective_note + "</sup>" }},
+      yaxis: {{ title: payload.y_label, range: payload.range }},
+      xaxis: {{ title: "Model" }},
+      margin: {{ l: 80, r: 40, t: 100, b: 80 }},
+      paper_bgcolor: "#f8fafc",
+      plot_bgcolor: "#ffffff"
+    }};
+    Plotly.newPlot("chart", [trace], layout, {{responsive: true}});
+  </script>
+</body>
+</html>
+"""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(html, encoding="utf-8")
+
+
+def rgb_to_hex(color: tuple[int, int, int]) -> str:
+    return f"#{color[0]:02x}{color[1]:02x}{color[2]:02x}"
 
 
 def build_delta_sequence(cycles: int, splits: int, prunes: int) -> list[int]:
@@ -292,7 +406,10 @@ def main() -> None:
         value_getter=lambda row: row.test_accuracy_mean,
         value_formatter=lambda value: f"{value:.3f}",
         output_path=output_dir / "benchmark_accuracy.png",
-        higher_is_better=True,
+        objective_note="Higher is better",
+        y_min=0.0,
+        y_max=1.0,
+        clamp_zero=False,
     )
     draw_bar_chart(
         rows=rows,
@@ -301,7 +418,8 @@ def main() -> None:
         value_getter=lambda row: row.train_samples_per_second_mean,
         value_formatter=lambda value: f"{value:.0f}",
         output_path=output_dir / "benchmark_train_speed.png",
-        higher_is_better=True,
+        objective_note="Higher is better",
+        y_padding_ratio=0.10,
     )
     draw_bar_chart(
         rows=rows,
@@ -310,7 +428,38 @@ def main() -> None:
         value_getter=lambda row: row.inference_latency_p95_ms_mean,
         value_formatter=lambda value: f"{value:.2f} ms",
         output_path=output_dir / "benchmark_inference_latency_p95.png",
-        higher_is_better=False,
+        objective_note="Lower is better",
+        y_padding_ratio=0.12,
+    )
+
+    write_plotly_bar_html(
+        rows=rows,
+        title="Accuracy Comparison",
+        y_label="Mean test accuracy",
+        value_getter=lambda row: row.test_accuracy_mean,
+        output_path=output_dir / "interactive_benchmark_accuracy.html",
+        objective_note="Higher is better",
+        y_min=0.0,
+        y_max=1.0,
+        clamp_zero=False,
+    )
+    write_plotly_bar_html(
+        rows=rows,
+        title="Training Throughput",
+        y_label="Mean training samples per second",
+        value_getter=lambda row: row.train_samples_per_second_mean,
+        output_path=output_dir / "interactive_benchmark_train_speed.html",
+        objective_note="Higher is better",
+        y_padding_ratio=0.10,
+    )
+    write_plotly_bar_html(
+        rows=rows,
+        title="Inference Latency P95",
+        y_label="Mean p95 inference latency (ms)",
+        value_getter=lambda row: row.inference_latency_p95_ms_mean,
+        output_path=output_dir / "interactive_benchmark_inference_latency_p95.html",
+        objective_note="Lower is better",
+        y_padding_ratio=0.12,
     )
     draw_circadian_gif(
         output_path=output_dir / "circadian_sleep_dynamics.gif",

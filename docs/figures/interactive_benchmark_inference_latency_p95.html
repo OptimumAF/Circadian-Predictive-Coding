@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inference Latency P95</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; background: #f8fafc;">
+  <div id="chart" style="width: 100%; max-width: 1080px; height: 640px; margin: 24px auto;"></div>
+  <script>
+    const payload = {"labels": ["Backprop", "Predictive", "Circadian"], "values": [17.338261666694166, 17.741378333375717, 18.710663333350414], "colors": ["#2e61ad", "#3d9d56", "#bd6624"], "title": "Inference Latency P95", "y_label": "Mean p95 inference latency (ms)", "objective_note": "Lower is better", "range": [17.173573466695416, 18.875351533349164]};
+    const trace = {
+      x: payload.labels,
+      y: payload.values,
+      type: "bar",
+      marker: { color: payload.colors },
+      text: payload.values.map(v => String(v)),
+      textposition: "outside",
+      cliponaxis: false
+    };
+    const layout = {
+      title: { text: payload.title + "<br><sup>" + payload.objective_note + "</sup>" },
+      yaxis: { title: payload.y_label, range: payload.range },
+      xaxis: { title: "Model" },
+      margin: { l: 80, r: 40, t: 100, b: 80 },
+      paper_bgcolor: "#f8fafc",
+      plot_bgcolor: "#ffffff"
+    };
+    Plotly.newPlot("chart", [trace], layout, {responsive: true});
+  </script>
+</body>
+</html>
