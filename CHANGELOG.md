@@ -49,6 +49,7 @@ for versioning even while in research-stage development.
 
 ### Changed
 
+- ResNet benchmark defaults now enable adaptive sleep budget scaling by default while keeping reward-modulated learning disabled by default.
 - Updated circadian unit tests (NumPy + Torch) with coverage for reward scaling and adaptive budget behavior.
 - Updated README, model card, and core module docs to document new circadian controls.
 - Repositioned repository messaging to Circadian Predictive Coding as the primary focus.

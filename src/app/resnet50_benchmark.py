@@ -70,7 +70,7 @@ class ResNet50BenchmarkConfig:
     circadian_sleep_energy_window: int = 48
     circadian_sleep_plateau_delta: float = 5e-5
     circadian_sleep_chemical_variance_threshold: float = 0.02
-    circadian_use_adaptive_sleep_budget: bool = False
+    circadian_use_adaptive_sleep_budget: bool = True
     circadian_adaptive_sleep_budget_min_scale: float = 0.25
     circadian_adaptive_sleep_budget_max_scale: float = 1.0
     circadian_adaptive_sleep_budget_plateau_weight: float = 0.6

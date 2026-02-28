@@ -115,9 +115,17 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--circ-sleep-chemical-variance-threshold", type=float, default=0.02)
     parser.add_argument(
         "--circ-use-adaptive-sleep-budget",
+        dest="circ_use_adaptive_sleep_budget",
         action="store_true",
-        help="Scale split/prune budgets by plateau severity and chemical variance.",
+        help="Enable adaptive split/prune budget scaling by plateau and chemical variance.",
     )
+    parser.add_argument(
+        "--circ-disable-adaptive-sleep-budget",
+        dest="circ_use_adaptive_sleep_budget",
+        action="store_false",
+        help="Disable adaptive split/prune budget scaling.",
+    )
+    parser.set_defaults(circ_use_adaptive_sleep_budget=True)
     parser.add_argument("--circ-adaptive-sleep-budget-min-scale", type=float, default=0.25)
     parser.add_argument("--circ-adaptive-sleep-budget-max-scale", type=float, default=1.0)
     parser.add_argument("--circ-adaptive-sleep-budget-plateau-weight", type=float, default=0.6)
