@@ -53,6 +53,13 @@ class CircadianConfig:
     plasticity_importance_mix: float = 0.50
     min_plasticity: float = 0.20
 
+    # Optional reward modulation: scale wake updates toward harder batches.
+    use_reward_modulated_learning: bool = False
+    reward_baseline_decay: float = 0.95
+    reward_difficulty_exponent: float = 1.0
+    reward_scale_min: float = 0.75
+    reward_scale_max: float = 1.5
+
     # Static thresholds are still available, but adaptive percentile thresholds
     # can be enabled to react to changing chemical distributions over training.
     use_adaptive_thresholds: bool = False
@@ -89,6 +96,13 @@ class CircadianConfig:
     sleep_energy_window: int = 8
     sleep_plateau_delta: float = 1e-3
     sleep_chemical_variance_threshold: float = 0.02
+
+    # Optional adaptive budget scaling for split/prune counts during sleep.
+    use_adaptive_sleep_budget: bool = False
+    adaptive_sleep_budget_min_scale: float = 0.25
+    adaptive_sleep_budget_max_scale: float = 1.0
+    adaptive_sleep_budget_plateau_weight: float = 0.6
+    adaptive_sleep_budget_variance_weight: float = 0.4
 
     # Gradual pruning: marked neurons decay for a few epochs before removal.
     prune_decay_steps: int = 1
@@ -174,6 +188,8 @@ class CircadianPredictiveCodingNetwork:
         self._epoch_count = 0
         self._epochs_since_sleep = 0
         self._energy_history: list[float] = []
+        self._reward_error_ema: float | None = None
+        self._last_reward_scale = 1.0
         self._replay_memory: deque[ReplaySnapshot] = deque(
             maxlen=self.config.replay_memory_size
         )
@@ -251,17 +267,20 @@ class CircadianPredictiveCodingNetwork:
         grad_hidden_bias = np.sum(hidden_prior_gradient, axis=0, keepdims=True) / sample_count
 
         self._update_chemical_layer(hidden_state)
-        self._update_importance_ema(grad_hidden_output)
+        reward_scale = self._compute_reward_scale(output_error)
+        self._last_reward_scale = reward_scale
+        self._update_importance_ema(grad_hidden_output, reward_scale=reward_scale)
         plasticity = self.get_plasticity_state()
 
         gated_input_hidden = grad_input_hidden * plasticity[np.newaxis, :]
         gated_hidden_output = grad_hidden_output * plasticity[:, np.newaxis]
         gated_hidden_bias = grad_hidden_bias * plasticity[np.newaxis, :]
+        effective_learning_rate = learning_rate * reward_scale
 
-        self.weight_hidden_output -= learning_rate * gated_hidden_output
-        self.bias_output -= learning_rate * grad_output_bias
-        self.weight_input_hidden -= learning_rate * gated_input_hidden
-        self.bias_hidden -= learning_rate * gated_hidden_bias
+        self.weight_hidden_output -= effective_learning_rate * gated_hidden_output
+        self.bias_output -= effective_learning_rate * grad_output_bias
+        self.weight_input_hidden -= effective_learning_rate * gated_input_hidden
+        self.bias_hidden -= effective_learning_rate * gated_hidden_bias
 
         self._record_hidden_traffic(hidden_state)
         energy = self._compute_energy(
@@ -400,6 +419,10 @@ class CircadianPredictiveCodingNetwork:
         plasticity = np.exp(-sensitivity * self._hidden_chemical)
         return np.clip(plasticity, self.config.min_plasticity, 1.0)
 
+    def get_last_reward_scale(self) -> float:
+        """Return most recent reward modulation scale from wake training."""
+        return float(self._last_reward_scale)
+
     def _compute_plasticity_sensitivity(self) -> Array:
         if not self.config.use_adaptive_plasticity_sensitivity:
             return np.full_like(self._hidden_chemical, self.config.plasticity_sensitivity)
@@ -439,10 +462,28 @@ class CircadianPredictiveCodingNetwork:
         self._traffic_sum += np.mean(np.abs(hidden_state), axis=0)
         self._traffic_steps += 1
 
-    def _update_importance_ema(self, grad_hidden_output: Array) -> None:
-        importance = np.mean(np.abs(grad_hidden_output), axis=1)
+    def _update_importance_ema(self, grad_hidden_output: Array, reward_scale: float) -> None:
+        importance = np.mean(np.abs(grad_hidden_output), axis=1) * float(reward_scale)
         decay = self.config.importance_ema_decay
         self._importance_ema = decay * self._importance_ema + (1.0 - decay) * importance
+
+    def _compute_reward_scale(self, output_error: Array) -> float:
+        if not self.config.use_reward_modulated_learning:
+            return 1.0
+
+        batch_error = float(np.mean(np.abs(output_error)))
+        baseline = batch_error if self._reward_error_ema is None else self._reward_error_ema
+        difficulty_ratio = batch_error / max(float(baseline), 1e-8)
+        raw_scale = difficulty_ratio ** self.config.reward_difficulty_exponent
+        reward_scale = float(
+            np.clip(raw_scale, self.config.reward_scale_min, self.config.reward_scale_max)
+        )
+
+        # Why this: update baseline after computing ratio so scale reflects
+        # current surprise against past performance, not a blended present.
+        decay = self.config.reward_baseline_decay
+        self._reward_error_ema = decay * float(baseline) + (1.0 - decay) * batch_error
+        return reward_scale
 
     def _update_chemical_layer(self, hidden_state: Array) -> None:
         activity = np.mean(np.abs(hidden_state), axis=0)
@@ -575,8 +616,13 @@ class CircadianPredictiveCodingNetwork:
     def _resolve_sleep_budgets(
         self, current_step: int | None, total_steps: int | None
     ) -> tuple[int, int, bool]:
-        split_budget = self._resolve_structural_budget(self.config.max_split_per_sleep)
-        prune_budget = self._resolve_structural_budget(self.config.max_prune_per_sleep)
+        budget_scale = self._compute_adaptive_sleep_budget_scale()
+        split_budget = self._resolve_structural_budget(
+            self.config.max_split_per_sleep, budget_scale=budget_scale
+        )
+        prune_budget = self._resolve_structural_budget(
+            self.config.max_prune_per_sleep, budget_scale=budget_scale
+        )
         if current_step is None or total_steps is None or total_steps <= 0:
             return split_budget, prune_budget, False
 
@@ -590,15 +636,58 @@ class CircadianPredictiveCodingNetwork:
             split_budget = 0
         return split_budget, prune_budget, False
 
-    def _resolve_structural_budget(self, configured_limit: int) -> int:
+    def _compute_adaptive_sleep_budget_scale(self) -> float:
+        if not self.config.use_adaptive_sleep_budget:
+            return 1.0
+        if len(self._energy_history) < self.config.sleep_energy_window:
+            return 1.0
+
+        recent = self._energy_history[-self.config.sleep_energy_window :]
+        energy_improvement = max(0.0, float(recent[0] - recent[-1]))
+
+        plateau_delta = self.config.sleep_plateau_delta
+        if plateau_delta <= 1e-12:
+            plateau_score = 1.0 if energy_improvement <= 0.0 else 0.0
+        else:
+            plateau_score = float(
+                np.clip((plateau_delta - energy_improvement) / plateau_delta, 0.0, 1.0)
+            )
+
+        variance_threshold = self.config.sleep_chemical_variance_threshold
+        if variance_threshold <= 1e-12:
+            variance_score = 1.0
+        else:
+            chemical_variance = float(np.var(self._hidden_chemical))
+            variance_score = float(np.clip(chemical_variance / variance_threshold, 0.0, 1.0))
+
+        plateau_weight = max(0.0, self.config.adaptive_sleep_budget_plateau_weight)
+        variance_weight = max(0.0, self.config.adaptive_sleep_budget_variance_weight)
+        total_weight = plateau_weight + variance_weight
+        if total_weight <= 1e-12:
+            combined_signal = 1.0
+        else:
+            combined_signal = (
+                plateau_weight * plateau_score + variance_weight * variance_score
+            ) / total_weight
+
+        min_scale = self.config.adaptive_sleep_budget_min_scale
+        max_scale = self.config.adaptive_sleep_budget_max_scale
+        return float(min_scale + (max_scale - min_scale) * combined_signal)
+
+    def _resolve_structural_budget(self, configured_limit: int, budget_scale: float) -> int:
         if configured_limit <= 0:
             return 0
+        if budget_scale <= 0.0:
+            return 0
+        scaled_limit = int(np.floor(float(configured_limit) * budget_scale))
+        if scaled_limit <= 0:
+            scaled_limit = 1
         fraction = self.config.sleep_max_change_fraction
         if fraction <= 0.0:
             return 0
         by_fraction = int(np.floor(float(self.hidden_dim) * fraction))
         by_fraction = max(by_fraction, int(self.config.sleep_min_change_count))
-        return min(int(configured_limit), int(by_fraction))
+        return min(int(scaled_limit), int(by_fraction))
 
     def _compute_split_scores(self) -> Array:
         chemical_component = self._normalize_vector(self._hidden_chemical)
@@ -958,6 +1047,14 @@ class CircadianPredictiveCodingNetwork:
             raise ValueError("plasticity_importance_mix must be between 0 and 1")
         if not (0.0 < config.min_plasticity <= 1.0):
             raise ValueError("min_plasticity must be in (0, 1]")
+        if not (0.0 <= config.reward_baseline_decay < 1.0):
+            raise ValueError("reward_baseline_decay must be in [0, 1)")
+        if config.reward_difficulty_exponent <= 0.0:
+            raise ValueError("reward_difficulty_exponent must be positive")
+        if config.reward_scale_min <= 0.0:
+            raise ValueError("reward_scale_min must be positive")
+        if config.reward_scale_max < config.reward_scale_min:
+            raise ValueError("reward_scale_max must be >= reward_scale_min")
         if not (0.0 <= config.split_weight_norm_mix <= 1.0):
             raise ValueError("split_weight_norm_mix must be between 0 and 1")
         if not (0.0 <= config.prune_weight_norm_mix <= 1.0):
@@ -984,6 +1081,16 @@ class CircadianPredictiveCodingNetwork:
             raise ValueError("sleep_plateau_delta must be non-negative")
         if config.sleep_chemical_variance_threshold < 0.0:
             raise ValueError("sleep_chemical_variance_threshold must be non-negative")
+        if config.adaptive_sleep_budget_min_scale <= 0.0:
+            raise ValueError("adaptive_sleep_budget_min_scale must be positive")
+        if config.adaptive_sleep_budget_max_scale < config.adaptive_sleep_budget_min_scale:
+            raise ValueError("adaptive_sleep_budget_max_scale must be >= min scale")
+        if config.adaptive_sleep_budget_max_scale > 1.0:
+            raise ValueError("adaptive_sleep_budget_max_scale must be <= 1.0")
+        if config.adaptive_sleep_budget_plateau_weight < 0.0:
+            raise ValueError("adaptive_sleep_budget_plateau_weight must be non-negative")
+        if config.adaptive_sleep_budget_variance_weight < 0.0:
+            raise ValueError("adaptive_sleep_budget_variance_weight must be non-negative")
         if config.max_split_per_sleep < 0 or config.max_prune_per_sleep < 0:
             raise ValueError("max split/prune per sleep must be non-negative")
         if config.split_noise_scale < 0.0:

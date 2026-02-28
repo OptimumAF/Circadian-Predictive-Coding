@@ -4,6 +4,7 @@
 
 - Define model behavior (`BackpropMLP`, `PredictiveCodingNetwork`, `CircadianPredictiveCodingNetwork`)
 - Define ResNet-50 benchmark variants (`BackpropResNet50Classifier`, `PredictiveCodingResNet50Classifier`, `CircadianPredictiveCodingResNet50Classifier`)
+- Implement circadian mechanisms such as chemical gating, reward-modulated wake updates, and adaptive sleep budgeting
 - Provide activation utilities
 - Define neuron adaptation interfaces and traffic summaries
 

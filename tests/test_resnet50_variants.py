@@ -159,3 +159,96 @@ def test_should_restore_snapshot_after_structure_change_in_torch_head() -> None:
     assert torch.allclose(head.weight_feature_hidden, snapshot["weight_feature_hidden"])
     assert torch.allclose(head.weight_hidden_output, snapshot["weight_hidden_output"])
     assert torch.allclose(head._chemical, snapshot["chemical"])
+
+
+def test_should_scale_learning_rate_by_reward_signal_in_torch_head() -> None:
+    torch = pytest.importorskip("torch")
+    device = torch.device("cpu")
+    config = CircadianHeadConfig(
+        use_reward_modulated_learning=True,
+        reward_baseline_decay=0.95,
+        reward_scale_min=0.8,
+        reward_scale_max=1.6,
+    )
+    head = CircadianPredictiveCodingHead(
+        feature_dim=6,
+        hidden_dim=5,
+        num_classes=2,
+        device=device,
+        seed=37,
+        config=config,
+        min_hidden_dim=4,
+        max_hidden_dim=10,
+    )
+    features = torch.tensor(
+        [[0.3, -0.2, 0.5, 0.1, -0.4, 0.2], [-0.1, 0.4, 0.2, -0.6, 0.8, 0.3]],
+        dtype=torch.float32,
+    )
+    labels = torch.tensor([0, 1], dtype=torch.long)
+
+    head._reward_error_ema = 10.0
+    head.train_step(
+        features=features,
+        targets=labels,
+        learning_rate=0.03,
+        inference_steps=8,
+        inference_learning_rate=0.2,
+    )
+    easy_scale = head.last_reward_scale()
+
+    head._reward_error_ema = 0.01
+    head.train_step(
+        features=features,
+        targets=labels,
+        learning_rate=0.03,
+        inference_steps=8,
+        inference_learning_rate=0.2,
+    )
+    hard_scale = head.last_reward_scale()
+
+    assert easy_scale <= config.reward_scale_min + 1e-6
+    assert hard_scale > 1.0
+
+
+def test_should_expand_sleep_budget_when_plateau_and_variance_are_high_in_torch_head() -> None:
+    torch = pytest.importorskip("torch")
+    device = torch.device("cpu")
+    config = CircadianHeadConfig(
+        use_adaptive_sleep_budget=True,
+        max_split_per_sleep=4,
+        max_prune_per_sleep=4,
+        sleep_energy_window=3,
+        sleep_plateau_delta=0.1,
+        sleep_chemical_variance_threshold=0.05,
+        adaptive_sleep_budget_min_scale=0.25,
+        adaptive_sleep_budget_max_scale=1.0,
+        adaptive_sleep_budget_plateau_weight=0.5,
+        adaptive_sleep_budget_variance_weight=0.5,
+    )
+    head = CircadianPredictiveCodingHead(
+        feature_dim=6,
+        hidden_dim=10,
+        num_classes=2,
+        device=device,
+        seed=41,
+        config=config,
+        min_hidden_dim=4,
+        max_hidden_dim=20,
+    )
+
+    head._energy_history = [1.0, 0.7, 0.3]
+    head._chemical = torch.full((10,), 0.2, dtype=torch.float32)
+    low_split_budget, low_prune_budget, _ = head._resolve_sleep_budgets(
+        current_step=None, total_steps=None
+    )
+
+    head._energy_history = [0.5, 0.5, 0.5]
+    head._chemical = torch.tensor([0.0, 1.0] * 5, dtype=torch.float32)
+    high_split_budget, high_prune_budget, _ = head._resolve_sleep_budgets(
+        current_step=None, total_steps=None
+    )
+
+    assert low_split_budget == 1
+    assert low_prune_budget == 1
+    assert high_split_budget == 4
+    assert high_prune_budget == 4

@@ -21,7 +21,9 @@ It tracks per-neuron chemical usage, modulates plasticity during wake, and appli
 - Extension: circadian dynamics:
   - chemical accumulation and decay
   - plasticity gating
+  - reward-modulated wake learning (optional)
   - adaptive sleep triggers
+  - adaptive sleep budget scaling (optional)
   - structural split/prune
   - optional rollback and homeostatic controls
 

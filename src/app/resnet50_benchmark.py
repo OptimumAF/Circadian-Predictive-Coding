@@ -70,6 +70,11 @@ class ResNet50BenchmarkConfig:
     circadian_sleep_energy_window: int = 48
     circadian_sleep_plateau_delta: float = 5e-5
     circadian_sleep_chemical_variance_threshold: float = 0.02
+    circadian_use_adaptive_sleep_budget: bool = False
+    circadian_adaptive_sleep_budget_min_scale: float = 0.25
+    circadian_adaptive_sleep_budget_max_scale: float = 1.0
+    circadian_adaptive_sleep_budget_plateau_weight: float = 0.6
+    circadian_adaptive_sleep_budget_variance_weight: float = 0.4
     circadian_enable_sleep_rollback: bool = True
     circadian_sleep_rollback_tolerance: float = 0.002
     circadian_sleep_rollback_metric: str = "cross_entropy"
@@ -91,6 +96,11 @@ class ResNet50BenchmarkConfig:
     circadian_plasticity_sensitivity_max: float = 0.55
     circadian_plasticity_importance_mix: float = 0.50
     circadian_min_plasticity: float = 0.5
+    circadian_use_reward_modulated_learning: bool = False
+    circadian_reward_baseline_decay: float = 0.95
+    circadian_reward_difficulty_exponent: float = 1.0
+    circadian_reward_scale_min: float = 0.75
+    circadian_reward_scale_max: float = 1.5
     circadian_use_adaptive_thresholds: bool = True
     circadian_adaptive_split_percentile: float = 92.0
     circadian_adaptive_prune_percentile: float = 8.0
@@ -484,6 +494,11 @@ def _benchmark_circadian(
         plasticity_sensitivity_max=config.circadian_plasticity_sensitivity_max,
         plasticity_importance_mix=config.circadian_plasticity_importance_mix,
         min_plasticity=config.circadian_min_plasticity,
+        use_reward_modulated_learning=config.circadian_use_reward_modulated_learning,
+        reward_baseline_decay=config.circadian_reward_baseline_decay,
+        reward_difficulty_exponent=config.circadian_reward_difficulty_exponent,
+        reward_scale_min=config.circadian_reward_scale_min,
+        reward_scale_max=config.circadian_reward_scale_max,
         use_adaptive_thresholds=config.circadian_use_adaptive_thresholds,
         adaptive_split_percentile=config.circadian_adaptive_split_percentile,
         adaptive_prune_percentile=config.circadian_adaptive_prune_percentile,
@@ -517,6 +532,11 @@ def _benchmark_circadian(
         sleep_energy_window=config.circadian_sleep_energy_window,
         sleep_plateau_delta=config.circadian_sleep_plateau_delta,
         sleep_chemical_variance_threshold=config.circadian_sleep_chemical_variance_threshold,
+        use_adaptive_sleep_budget=config.circadian_use_adaptive_sleep_budget,
+        adaptive_sleep_budget_min_scale=config.circadian_adaptive_sleep_budget_min_scale,
+        adaptive_sleep_budget_max_scale=config.circadian_adaptive_sleep_budget_max_scale,
+        adaptive_sleep_budget_plateau_weight=config.circadian_adaptive_sleep_budget_plateau_weight,
+        adaptive_sleep_budget_variance_weight=config.circadian_adaptive_sleep_budget_variance_weight,
     )
     model = CircadianPredictiveCodingResNet50Classifier(
         num_classes=loaders.num_classes,
@@ -879,6 +899,14 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         )
     if not (0.0 <= config.circadian_plasticity_importance_mix <= 1.0):
         raise ValueError("circadian_plasticity_importance_mix must be between 0 and 1.")
+    if not (0.0 <= config.circadian_reward_baseline_decay < 1.0):
+        raise ValueError("circadian_reward_baseline_decay must be in [0, 1).")
+    if config.circadian_reward_difficulty_exponent <= 0.0:
+        raise ValueError("circadian_reward_difficulty_exponent must be positive.")
+    if config.circadian_reward_scale_min <= 0.0:
+        raise ValueError("circadian_reward_scale_min must be positive.")
+    if config.circadian_reward_scale_max < config.circadian_reward_scale_min:
+        raise ValueError("circadian_reward_scale_max must be >= circadian_reward_scale_min.")
     if config.circadian_sleep_warmup_steps < 0:
         raise ValueError("circadian_sleep_warmup_steps must be non-negative.")
     if not (0.0 <= config.circadian_sleep_split_only_until_fraction <= 1.0):
@@ -907,6 +935,22 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         raise ValueError("circadian_sleep_plateau_delta must be non-negative.")
     if config.circadian_sleep_chemical_variance_threshold < 0.0:
         raise ValueError("circadian_sleep_chemical_variance_threshold must be non-negative.")
+    if config.circadian_adaptive_sleep_budget_min_scale <= 0.0:
+        raise ValueError("circadian_adaptive_sleep_budget_min_scale must be positive.")
+    if (
+        config.circadian_adaptive_sleep_budget_max_scale
+        < config.circadian_adaptive_sleep_budget_min_scale
+    ):
+        raise ValueError(
+            "circadian_adaptive_sleep_budget_max_scale must be >= "
+            "circadian_adaptive_sleep_budget_min_scale."
+        )
+    if config.circadian_adaptive_sleep_budget_max_scale > 1.0:
+        raise ValueError("circadian_adaptive_sleep_budget_max_scale must be <= 1.0.")
+    if config.circadian_adaptive_sleep_budget_plateau_weight < 0.0:
+        raise ValueError("circadian_adaptive_sleep_budget_plateau_weight must be non-negative.")
+    if config.circadian_adaptive_sleep_budget_variance_weight < 0.0:
+        raise ValueError("circadian_adaptive_sleep_budget_variance_weight must be non-negative.")
     if config.circadian_sleep_rollback_tolerance < 0.0:
         raise ValueError("circadian_sleep_rollback_tolerance must be non-negative.")
     if config.circadian_sleep_rollback_eval_batches < 0:
