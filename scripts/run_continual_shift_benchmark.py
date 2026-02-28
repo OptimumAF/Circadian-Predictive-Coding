@@ -154,14 +154,14 @@ def _build_hardest_case_circadian_config() -> CircadianConfig:
     """Build circadian profile tuned for the hardest continual-shift setup."""
     return CircadianConfig(
         use_reward_modulated_learning=False,
-        split_threshold=0.25,
+        split_threshold=0.22,
         prune_threshold=0.04,
-        max_split_per_sleep=1,
+        max_split_per_sleep=2,
         max_prune_per_sleep=0,
-        replay_steps=2,
-        replay_memory_size=10,
+        replay_steps=3,
+        replay_memory_size=14,
         replay_learning_rate=0.04,
-        replay_inference_steps=12,
+        replay_inference_steps=14,
         replay_inference_learning_rate=0.14,
     )
 
@@ -173,19 +173,19 @@ def _build_baseline_circadian_config() -> CircadianConfig:
 def _build_profile_defaults(profile: str) -> ProfileDefaults:
     if profile == "hardest-case":
         return ProfileDefaults(
-            sample_count_phase_a=500,
-            sample_count_phase_b=500,
-            phase_b_train_fraction=0.08,
-            phase_a_epochs=90,
-            phase_b_epochs=120,
-            hidden_dim=8,
+            sample_count_phase_a=700,
+            sample_count_phase_b=700,
+            phase_b_train_fraction=0.05,
+            phase_a_epochs=120,
+            phase_b_epochs=180,
+            hidden_dim=24,
             phase_a_noise_scale=0.8,
-            phase_b_noise_scale=1.2,
-            phase_b_rotation_degrees=44.0,
-            phase_b_translation_x=0.9,
-            phase_b_translation_y=-0.7,
+            phase_b_noise_scale=1.45,
+            phase_b_rotation_degrees=68.0,
+            phase_b_translation_x=1.6,
+            phase_b_translation_y=-1.3,
             sleep_interval_phase_a=40,
-            sleep_interval_phase_b=8,
+            sleep_interval_phase_b=6,
         )
     return ProfileDefaults(
         sample_count_phase_a=500,

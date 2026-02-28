@@ -61,6 +61,7 @@ for versioning even while in research-stage development.
 - Enhanced benchmark visuals with a compact combined overview figure (static + interactive) and linked it in README/dashboard for faster comparison.
 - Added hardest-case dynamics GIF (training progression + inference decision-map evolution) and surfaced it near the top of README and docs dashboard.
 - Added an interactive Plotly hardest-case dynamics page with playback controls and circadian internals visualization (node/edge weights, chemical/plasticity state) on the docs dashboard.
+- Increased hardest-case difficulty substantially (higher drift/noise, lower phase-B train fraction, longer training horizon) and raised hidden-layer width in hardest-case runs for all three models.
 - Refreshed README benchmark section with a latest master verification run on 2026-02-28 and added raw output artifact under `docs/benchmarks/`.
 - Repositioned repository messaging to Circadian Predictive Coding as the primary focus.
 - Updated `README.md` with:

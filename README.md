@@ -123,16 +123,18 @@ Raw benchmark output: [`docs/benchmarks/benchmark_master_cifar100_subset_2026-02
 
 Strengths:
 
-- Strong retention/adaptation balance under hard continual shift.
-- Hardest-case balanced score: circadian `0.922` vs predictive coding `0.916` vs backprop `0.889`.
-- Hardest-case retention ratio: circadian `0.994`.
-- Source: [`docs/benchmarks/benchmark_continual_shift_hardest_case_2026-02-28.txt`](docs/benchmarks/benchmark_continual_shift_hardest_case_2026-02-28.txt).
-- Dynamic capacity adaptation is observable and measurable (for hardest-case: mean splits `6.29`, hidden size `8 -> 14.29`).
+- Competitive retention/adaptation behavior under hard continual shift.
+- Strong balance in the moderate strength-case stress test (circadian balanced score `0.949` vs predictive coding `0.947` vs backprop `0.946`).
+- Sources:
+  - [`docs/benchmarks/benchmark_continual_shift_strength_case_2026-02-28.txt`](docs/benchmarks/benchmark_continual_shift_strength_case_2026-02-28.txt)
+  - [`docs/benchmarks/benchmark_continual_shift_hardest_case_2026-02-28.txt`](docs/benchmarks/benchmark_continual_shift_hardest_case_2026-02-28.txt)
+- Dynamic capacity adaptation is observable and measurable (updated hardest-case: mean splits `27.57`, hidden size `24 -> 51.57`).
 - Competitive behavior in moderate continual-shift stress tests with stable multi-seed performance.
 
 Weaknesses:
 
 - Not best on every benchmark; on the latest CIFAR-100 subset master check, predictive coding accuracy (`0.692`) was higher than circadian (`0.685`).
+- In the updated ultra-hard hardest-case setting, predictive coding currently leads circadian on balanced score (`0.844` vs `0.831`), even though circadian still outperforms backprop (`0.785`).
 - Extra algorithmic machinery (sleep scheduling, replay, split/prune controls) adds tuning burden and implementation complexity compared with fixed-width baselines.
 - Speed overhead can appear depending on configuration; in the latest CIFAR-100 subset master check, circadian train speed (`874.2` SPS) was lower than predictive coding (`965.2` SPS).
 - Results are regime-dependent; claims should be tied to specific benchmark settings and seeds instead of treated as universal.
@@ -195,7 +197,7 @@ Continual shift stress test (retention vs adaptation):
 python scripts/run_continual_shift_benchmark.py --profile strength-case --seeds 3,7,11,19,23,31,37
 ```
 
-Hardest continual-shift stress test (small starting capacity + heavy drift):
+Hardest continual-shift stress test (expanded hidden capacity + very heavy drift):
 
 ```powershell
 python scripts/run_continual_shift_benchmark.py --profile hardest-case --seeds 3,7,11,19,23,31,37

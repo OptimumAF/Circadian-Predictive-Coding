@@ -40,21 +40,21 @@ MODEL_COLORS = {
 @dataclass(frozen=True)
 class HardestModeConfig:
     seed: int = 7
-    sample_count_phase_a: int = 500
-    sample_count_phase_b: int = 500
+    sample_count_phase_a: int = 700
+    sample_count_phase_b: int = 700
     test_ratio: float = 0.25
-    phase_b_train_fraction: float = 0.08
-    hidden_dim: int = 8
-    phase_a_epochs: int = 90
-    phase_b_epochs: int = 120
+    phase_b_train_fraction: float = 0.05
+    hidden_dim: int = 24
+    phase_a_epochs: int = 120
+    phase_b_epochs: int = 180
     phase_a_noise: float = 0.8
-    phase_b_noise: float = 1.2
-    phase_b_rotation_degrees: float = 44.0
-    phase_b_translation_x: float = 0.9
-    phase_b_translation_y: float = -0.7
+    phase_b_noise: float = 1.45
+    phase_b_rotation_degrees: float = 68.0
+    phase_b_translation_x: float = 1.6
+    phase_b_translation_y: float = -1.3
     sleep_interval_phase_a: int = 40
-    sleep_interval_phase_b: int = 8
-    snapshot_interval: int = 4
+    sleep_interval_phase_b: int = 6
+    snapshot_interval: int = 6
     decision_grid_size: int = 110
     latency_repeats: int = 10
     gif_duration_ms: int = 120
@@ -110,14 +110,14 @@ def parse_args() -> argparse.Namespace:
 def build_hardest_circadian_config() -> CircadianConfig:
     return CircadianConfig(
         use_reward_modulated_learning=False,
-        split_threshold=0.25,
+        split_threshold=0.22,
         prune_threshold=0.04,
-        max_split_per_sleep=1,
+        max_split_per_sleep=2,
         max_prune_per_sleep=0,
-        replay_steps=2,
-        replay_memory_size=10,
+        replay_steps=3,
+        replay_memory_size=14,
         replay_learning_rate=0.04,
-        replay_inference_steps=12,
+        replay_inference_steps=14,
         replay_inference_learning_rate=0.14,
     )
 
