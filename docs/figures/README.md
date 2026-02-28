@@ -9,6 +9,7 @@ This folder stores visual assets used by `README.md`.
 - `benchmark_train_speed.png`
 - `benchmark_inference_latency_p95.png`
 - `hardest_mode_dynamics.gif`
+- `interactive_hardest_mode_dynamics.html`
 - `circadian_sleep_dynamics.gif`
 - `interactive_benchmark_overview.html`
 - `interactive_benchmark_accuracy.html`
@@ -21,7 +22,7 @@ Run:
 
 ```powershell
 python scripts/generate_readme_figures.py --summary-csv benchmark_multiseed_cifar100_summary.csv --output-dir docs/figures
-python scripts/generate_hardest_mode_dynamics.py --output-path docs/figures/hardest_mode_dynamics.gif
+python scripts/generate_hardest_mode_dynamics.py --gif-output-path docs/figures/hardest_mode_dynamics.gif --interactive-output-path docs/figures/interactive_hardest_mode_dynamics.html
 ```
 
 The GIF is illustrative and intended for communication in the README.

@@ -60,6 +60,7 @@ for versioning even while in research-stage development.
 - Updated README, model card, and core module docs to document new circadian controls.
 - Enhanced benchmark visuals with a compact combined overview figure (static + interactive) and linked it in README/dashboard for faster comparison.
 - Added hardest-case dynamics GIF (training progression + inference decision-map evolution) and surfaced it near the top of README and docs dashboard.
+- Added an interactive Plotly hardest-case dynamics page with playback controls and circadian internals visualization (node/edge weights, chemical/plasticity state) on the docs dashboard.
 - Refreshed README benchmark section with a latest master verification run on 2026-02-28 and added raw output artifact under `docs/benchmarks/`.
 - Repositioned repository messaging to Circadian Predictive Coding as the primary focus.
 - Updated `README.md` with:

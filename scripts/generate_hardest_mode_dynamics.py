@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Callable
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import sys
 import time
@@ -25,6 +26,8 @@ from src.infra.datasets import DatasetSplit, generate_two_cluster_dataset_with_t
 Array = NDArray[np.float64]
 DecisionMap = NDArray[np.float32]
 LabelPrediction = NDArray[np.int8]
+FloatVector = NDArray[np.float32]
+FloatMatrix = NDArray[np.float32]
 
 MODEL_ORDER = ["Backprop", "Predictive", "Circadian"]
 MODEL_COLORS = {
@@ -75,16 +78,28 @@ class HardestModeSnapshot:
     circadian_total_prunes: int
     decision_map: DecisionMap
     circadian_phase_b_predictions: LabelPrediction
+    input_hidden_weights: FloatMatrix
+    hidden_output_weights: FloatVector
+    hidden_bias: FloatVector
+    chemical_state: FloatVector
+    plasticity_state: FloatVector
+    probe_hidden_activation: FloatVector
+    probe_output_probability: float
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate hardest-case train+inference dynamics GIF."
+        description="Generate hardest-case train+inference dynamics GIF + interactive plotly page."
     )
     parser.add_argument(
-        "--output-path",
+        "--gif-output-path",
         type=str,
         default="docs/figures/hardest_mode_dynamics.gif",
+    )
+    parser.add_argument(
+        "--interactive-output-path",
+        type=str,
+        default="docs/figures/interactive_hardest_mode_dynamics.html",
     )
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--snapshot-interval", type=int, default=4)
@@ -242,6 +257,7 @@ def collect_hardest_mode_snapshots(
     total_splits = 0
     total_prunes = 0
     total_epochs = config.phase_a_epochs + config.phase_b_epochs
+    probe_input = phase_b.test_input[:1]
 
     for epoch in range(1, total_epochs + 1):
         in_phase_b = epoch > config.phase_a_epochs
@@ -316,6 +332,14 @@ def collect_hardest_mode_snapshots(
             grid_size=config.decision_grid_size,
         )
         predictions = circadian.predict_label(phase_b.test_input).reshape(-1).astype(np.int8)
+        hidden_linear = probe_input @ circadian.weight_input_hidden + circadian.bias_hidden
+        probe_hidden_activation = np.tanh(hidden_linear).reshape(-1).astype(np.float32)
+        probe_output_probability = float(circadian.predict_proba(probe_input)[0, 0])
+        input_hidden_weights = circadian.weight_input_hidden.astype(np.float32, copy=True)
+        hidden_output_weights = circadian.weight_hidden_output.reshape(-1).astype(np.float32, copy=True)
+        hidden_bias = circadian.bias_hidden.reshape(-1).astype(np.float32, copy=True)
+        chemical_state = circadian.get_chemical_state().astype(np.float32, copy=True)
+        plasticity_state = circadian.get_plasticity_state().astype(np.float32, copy=True)
 
         snapshots.append(
             HardestModeSnapshot(
@@ -335,6 +359,13 @@ def collect_hardest_mode_snapshots(
                 circadian_total_prunes=total_prunes,
                 decision_map=decision_map,
                 circadian_phase_b_predictions=predictions,
+                input_hidden_weights=input_hidden_weights,
+                hidden_output_weights=hidden_output_weights,
+                hidden_bias=hidden_bias,
+                chemical_state=chemical_state,
+                plasticity_state=plasticity_state,
+                probe_hidden_activation=probe_hidden_activation,
+                probe_output_probability=probe_output_probability,
             )
         )
 
@@ -573,6 +604,509 @@ def render_hardest_mode_gif(
     )
 
 
+def _round_list(values: list[float], precision: int = 4) -> list[float]:
+    return [round(float(value), precision) for value in values]
+
+
+def build_interactive_payload(
+    snapshots: list[HardestModeSnapshot],
+    phase_b_test_input: Array,
+    phase_b_test_target: Array,
+    x_bounds: tuple[float, float],
+    y_bounds: tuple[float, float],
+) -> dict[str, object]:
+    normalized_objective = {
+        "Backprop": normalize_series([snapshot.backprop_metric for snapshot in snapshots]),
+        "Predictive": normalize_series([snapshot.predictive_metric for snapshot in snapshots]),
+        "Circadian": normalize_series([snapshot.circadian_metric for snapshot in snapshots]),
+    }
+
+    phase_b_target = [int(value >= 0.5) for value in phase_b_test_target.reshape(-1).tolist()]
+    phase_b_x = _round_list(phase_b_test_input[:, 0].tolist(), precision=4)
+    phase_b_y = _round_list(phase_b_test_input[:, 1].tolist(), precision=4)
+    frame_payload: list[dict[str, object]] = []
+    for snapshot in snapshots:
+        frame_payload.append(
+            {
+                "epoch": snapshot.epoch,
+                "phase_name": snapshot.phase_name,
+                "backprop_accuracy": round(snapshot.backprop_phase_b_accuracy, 4),
+                "predictive_accuracy": round(snapshot.predictive_phase_b_accuracy, 4),
+                "circadian_accuracy": round(snapshot.circadian_phase_b_accuracy, 4),
+                "backprop_latency_ms": round(snapshot.backprop_latency_ms, 4),
+                "predictive_latency_ms": round(snapshot.predictive_latency_ms, 4),
+                "circadian_latency_ms": round(snapshot.circadian_latency_ms, 4),
+                "circadian_hidden_dim": snapshot.circadian_hidden_dim,
+                "circadian_total_splits": snapshot.circadian_total_splits,
+                "circadian_total_prunes": snapshot.circadian_total_prunes,
+                "decision_map": np.round(snapshot.decision_map, 4).tolist(),
+                "circadian_predictions": snapshot.circadian_phase_b_predictions.tolist(),
+                "input_hidden_weights": np.round(snapshot.input_hidden_weights, 4).tolist(),
+                "hidden_output_weights": np.round(snapshot.hidden_output_weights, 4).tolist(),
+                "hidden_bias": np.round(snapshot.hidden_bias, 4).tolist(),
+                "chemical_state": np.round(snapshot.chemical_state, 4).tolist(),
+                "plasticity_state": np.round(snapshot.plasticity_state, 4).tolist(),
+                "probe_hidden_activation": np.round(snapshot.probe_hidden_activation, 4).tolist(),
+                "probe_output_probability": round(snapshot.probe_output_probability, 4),
+            }
+        )
+
+    return {
+        "epochs": [snapshot.epoch for snapshot in snapshots],
+        "phase_b_start_index": next(
+            (index for index, snap in enumerate(snapshots) if "Phase B" in snap.phase_name),
+            0,
+        ),
+        "objective_series": {
+            model_name: _round_list(values, precision=4)
+            for model_name, values in normalized_objective.items()
+        },
+        "accuracy_series": {
+            "Backprop": _round_list([snap.backprop_phase_b_accuracy for snap in snapshots], 4),
+            "Predictive": _round_list([snap.predictive_phase_b_accuracy for snap in snapshots], 4),
+            "Circadian": _round_list([snap.circadian_phase_b_accuracy for snap in snapshots], 4),
+        },
+        "latency_series": {
+            "Backprop": _round_list([snap.backprop_latency_ms for snap in snapshots], 4),
+            "Predictive": _round_list([snap.predictive_latency_ms for snap in snapshots], 4),
+            "Circadian": _round_list([snap.circadian_latency_ms for snap in snapshots], 4),
+        },
+        "x_bounds": [round(x_bounds[0], 4), round(x_bounds[1], 4)],
+        "y_bounds": [round(y_bounds[0], 4), round(y_bounds[1], 4)],
+        "phase_b_test_points_x": phase_b_x,
+        "phase_b_test_points_y": phase_b_y,
+        "phase_b_test_labels": phase_b_target,
+        "frames": frame_payload,
+        "model_colors": {
+            "Backprop": "#2e61ad",
+            "Predictive": "#3d9d56",
+            "Circadian": "#bd6624",
+        },
+    }
+
+
+def write_interactive_hardest_mode_html(
+    snapshots: list[HardestModeSnapshot],
+    phase_b_test_input: Array,
+    phase_b_test_target: Array,
+    x_bounds: tuple[float, float],
+    y_bounds: tuple[float, float],
+    output_path: Path,
+) -> None:
+    if not snapshots:
+        raise ValueError("snapshots cannot be empty.")
+    payload = build_interactive_payload(
+        snapshots=snapshots,
+        phase_b_test_input=phase_b_test_input,
+        phase_b_test_target=phase_b_test_target,
+        x_bounds=x_bounds,
+        y_bounds=y_bounds,
+    )
+
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hardest-Case Dynamics Interactive</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {{
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --border: #d8deea;
+      --text: #1f2633;
+      --muted: #5d6678;
+    }}
+    body {{
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }}
+    .wrap {{
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 18px;
+    }}
+    .hero {{
+      background: linear-gradient(135deg, #ffffff 0%, #eef3fc 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 16px rgba(18, 31, 57, 0.06);
+      margin-bottom: 14px;
+    }}
+    .controls {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }}
+    .controls button {{
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: var(--text);
+    }}
+    .controls input[type=range] {{
+      width: 460px;
+      max-width: 100%;
+    }}
+    .grid {{
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: start;
+    }}
+    .card {{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(18, 31, 57, 0.05);
+      padding: 10px;
+    }}
+    .stack {{
+      display: grid;
+      gap: 14px;
+    }}
+    .subtitle {{
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }}
+    .status {{
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }}
+    .plot {{
+      width: 100%;
+      height: 320px;
+    }}
+    .plot-lg {{
+      width: 100%;
+      height: 470px;
+    }}
+    .plot-net {{
+      width: 100%;
+      height: 520px;
+    }}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h2 style="margin:0 0 6px;">Hardest-Case Dynamics (Interactive)</h2>
+      <p class="subtitle">Replay circadian adaptation over hardest-case training: objective, accuracy, latency, decision boundary, and model internals.</p>
+      <div class="controls">
+        <button id="playBtn" type="button">Play</button>
+        <button id="pauseBtn" type="button">Pause</button>
+        <label for="frameSlider">Frame</label>
+        <input id="frameSlider" type="range" min="0" max="0" value="0" />
+        <span id="frameLabel">Frame 1</span>
+      </div>
+      <div id="statusText" class="status"></div>
+    </section>
+
+    <section class="grid">
+      <div class="stack">
+        <div class="card">
+          <div id="objectiveChart" class="plot"></div>
+        </div>
+        <div class="card">
+          <div id="accuracyChart" class="plot"></div>
+        </div>
+        <div class="card">
+          <div id="latencyChart" class="plot"></div>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <div id="decisionMapChart" class="plot-lg"></div>
+        </div>
+        <div class="card">
+          <div id="networkChart" class="plot-net"></div>
+        </div>
+        <div class="card">
+          <div id="stateBarChart" class="plot"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const payload = {json.dumps(payload)};
+    const modelOrder = ["Backprop", "Predictive", "Circadian"];
+    const modelColors = payload.model_colors;
+
+    const slider = document.getElementById("frameSlider");
+    const frameLabel = document.getElementById("frameLabel");
+    const statusText = document.getElementById("statusText");
+    const playBtn = document.getElementById("playBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    slider.max = String(payload.frames.length - 1);
+
+    let currentFrameIndex = 0;
+    let timer = null;
+
+    function stopPlayback() {{
+      if (timer !== null) {{
+        clearInterval(timer);
+        timer = null;
+      }}
+    }}
+
+    function drawLineChart(divId, title, seriesDict, yTitle, yRange, frameIndex) {{
+      const traces = modelOrder.map((name) => {{
+        return {{
+          x: payload.epochs,
+          y: seriesDict[name],
+          mode: "lines",
+          line: {{color: modelColors[name], width: 2.5}},
+          name: name
+        }};
+      }});
+      const markerEpoch = payload.epochs[frameIndex];
+      const layout = {{
+        title: {{text: title}},
+        paper_bgcolor: "#ffffff",
+        plot_bgcolor: "#ffffff",
+        margin: {{l: 62, r: 22, t: 46, b: 50}},
+        yaxis: {{title: yTitle, range: yRange}},
+        xaxis: {{title: "Epoch"}},
+        legend: {{orientation: "h", y: 1.15}},
+        shapes: [{{
+          type: "line",
+          x0: markerEpoch,
+          x1: markerEpoch,
+          y0: yRange[0],
+          y1: yRange[1],
+          line: {{color: "#6e7584", width: 1, dash: "dot"}}
+        }}]
+      }};
+      Plotly.react(divId, traces, layout, {{responsive: true, displayModeBar: false}});
+    }}
+
+    function drawDecisionMap(frame) {{
+      const symbols = payload.phase_b_test_labels.map((label) => label === 1 ? "circle" : "square");
+      const markerColor = frame.circadian_predictions.map((prediction, idx) => {{
+        return prediction === payload.phase_b_test_labels[idx] ? "#27ae60" : "#d64541";
+      }});
+      const heat = {{
+        z: frame.decision_map,
+        type: "heatmap",
+        colorscale: "RdBu",
+        zmin: 0.0,
+        zmax: 1.0,
+        opacity: 0.86,
+        showscale: false
+      }};
+      const scatter = {{
+        x: payload.phase_b_test_points_x,
+        y: payload.phase_b_test_points_y,
+        mode: "markers",
+        type: "scatter",
+        marker: {{
+          size: 7,
+          color: markerColor,
+          symbol: symbols,
+          line: {{width: 1.2, color: "#121212"}}
+        }},
+        text: payload.phase_b_test_labels.map((label, idx) => {{
+          const correct = frame.circadian_predictions[idx] === label;
+          return "true=" + label + " pred=" + frame.circadian_predictions[idx] + " " + (correct ? "correct" : "wrong");
+        }}),
+        hoverinfo: "text",
+        name: "Phase-B test points"
+      }};
+      const layout = {{
+        title: {{text: "Circadian Inference Map (current frame)"}},
+        margin: {{l: 58, r: 18, t: 42, b: 52}},
+        xaxis: {{title: "x1", range: payload.x_bounds}},
+        yaxis: {{title: "x2", range: payload.y_bounds, scaleanchor: "x", scaleratio: 1}},
+        paper_bgcolor: "#ffffff",
+        plot_bgcolor: "#ffffff",
+        showlegend: false
+      }};
+      Plotly.react("decisionMapChart", [heat, scatter], layout, {{responsive: true, displayModeBar: false}});
+    }}
+
+    function drawNetwork(frame) {{
+      const hiddenCount = frame.circadian_hidden_dim;
+      const hiddenY = [];
+      if (hiddenCount <= 1) {{
+        hiddenY.push(0.0);
+      }} else {{
+        for (let i = 0; i < hiddenCount; i++) {{
+          hiddenY.push(0.85 - (1.7 * i / (hiddenCount - 1)));
+        }}
+      }}
+      const nodeX = [-1.0, -1.0];
+      const nodeY = [0.35, -0.35];
+      const nodeText = ["x1", "x2"];
+      const nodeValues = [payload.phase_b_test_points_x[0], payload.phase_b_test_points_y[0]];
+
+      for (let i = 0; i < hiddenCount; i++) {{
+        nodeX.push(0.0);
+        nodeY.push(hiddenY[i]);
+        nodeText.push("h" + (i + 1));
+        nodeValues.push(frame.probe_hidden_activation[i] ?? 0.0);
+      }}
+      nodeX.push(1.0);
+      nodeY.push(0.0);
+      nodeText.push("y");
+      nodeValues.push(frame.probe_output_probability);
+
+      const edgeTraces = [];
+      const inputHidden = frame.input_hidden_weights;
+      const hiddenOutput = frame.hidden_output_weights;
+      const maxAbsWeight = Math.max(
+        1e-6,
+        ...inputHidden.flat().map((v) => Math.abs(v)),
+        ...hiddenOutput.map((v) => Math.abs(v))
+      );
+      for (let inputIndex = 0; inputIndex < 2; inputIndex++) {{
+        for (let h = 0; h < hiddenCount; h++) {{
+          const w = inputHidden[inputIndex][h];
+          edgeTraces.push({{
+            x: [-1.0, 0.0],
+            y: [inputIndex === 0 ? 0.35 : -0.35, hiddenY[h]],
+            mode: "lines",
+            hoverinfo: "text",
+            text: ["w_in[" + (inputIndex + 1) + "->h" + (h + 1) + "]=" + w.toFixed(4)],
+            line: {{
+              color: w >= 0 ? "#2874c8" : "#c45b58",
+              width: 1 + 5 * Math.abs(w) / maxAbsWeight
+            }},
+            showlegend: false
+          }});
+        }}
+      }}
+      for (let h = 0; h < hiddenCount; h++) {{
+        const w = hiddenOutput[h];
+        edgeTraces.push({{
+          x: [0.0, 1.0],
+          y: [hiddenY[h], 0.0],
+          mode: "lines",
+          hoverinfo: "text",
+          text: ["w_out[h" + (h + 1) + "->y]=" + w.toFixed(4)],
+          line: {{
+            color: w >= 0 ? "#2874c8" : "#c45b58",
+            width: 1 + 5 * Math.abs(w) / maxAbsWeight
+          }},
+          showlegend: false
+        }});
+      }}
+
+      const nodeTrace = {{
+        x: nodeX,
+        y: nodeY,
+        mode: "markers+text",
+        text: nodeText,
+        textposition: "bottom center",
+        hovertext: nodeText.map((name, idx) => name + " value=" + Number(nodeValues[idx]).toFixed(4)),
+        hoverinfo: "text",
+        marker: {{
+          size: 14,
+          color: nodeValues,
+          colorscale: "Viridis",
+          cmin: -1.0,
+          cmax: 1.0,
+          line: {{color: "#0f1724", width: 1}}
+        }},
+        showlegend: false
+      }};
+
+      const layout = {{
+        title: {{text: "Circadian Internals Graph (nodes + edge weights)"}},
+        margin: {{l: 20, r: 20, t: 42, b: 20}},
+        xaxis: {{visible: false, range: [-1.25, 1.25]}},
+        yaxis: {{visible: false, range: [-1.0, 1.0]}},
+        paper_bgcolor: "#ffffff",
+        plot_bgcolor: "#ffffff"
+      }};
+      Plotly.react("networkChart", edgeTraces.concat([nodeTrace]), layout, {{responsive: true, displayModeBar: false}});
+    }}
+
+    function drawStateBars(frame) {{
+      const hiddenCount = frame.circadian_hidden_dim;
+      const labels = Array.from({{length: hiddenCount}}, (_, idx) => "h" + (idx + 1));
+      const chemical = frame.chemical_state.slice(0, hiddenCount);
+      const plasticity = frame.plasticity_state.slice(0, hiddenCount);
+      const outputWeights = frame.hidden_output_weights.slice(0, hiddenCount).map((v) => Math.abs(v));
+      const bias = frame.hidden_bias.slice(0, hiddenCount);
+
+      const traces = [
+        {{x: labels, y: chemical, type: "bar", name: "chemical"}},
+        {{x: labels, y: plasticity, type: "bar", name: "plasticity"}},
+        {{x: labels, y: outputWeights, type: "bar", name: "|w_out|"}},
+        {{x: labels, y: bias, type: "bar", name: "bias"}}
+      ];
+      const layout = {{
+        title: {{text: "Hidden-State Scalars by Node"}},
+        barmode: "group",
+        margin: {{l: 48, r: 20, t: 42, b: 56}},
+        xaxis: {{title: "Hidden node"}},
+        yaxis: {{title: "Value"}},
+        legend: {{orientation: "h", y: 1.12}},
+        paper_bgcolor: "#ffffff",
+        plot_bgcolor: "#ffffff"
+      }};
+      Plotly.react("stateBarChart", traces, layout, {{responsive: true, displayModeBar: false}});
+    }}
+
+    function renderFrame(index) {{
+      currentFrameIndex = Math.max(0, Math.min(index, payload.frames.length - 1));
+      slider.value = String(currentFrameIndex);
+      frameLabel.textContent = "Frame " + (currentFrameIndex + 1) + " / " + payload.frames.length;
+
+      const frame = payload.frames[currentFrameIndex];
+      drawLineChart("objectiveChart", "Training Signal (normalized)", payload.objective_series, "Normalized objective", [0, 1], currentFrameIndex);
+      drawLineChart("accuracyChart", "Phase-B Test Accuracy", payload.accuracy_series, "Accuracy", [0, 1], currentFrameIndex);
+      const maxLatency = Math.max(
+        ...payload.latency_series.Backprop,
+        ...payload.latency_series.Predictive,
+        ...payload.latency_series.Circadian
+      );
+      drawLineChart("latencyChart", "Inference Latency per Snapshot", payload.latency_series, "Latency (ms)", [0, maxLatency * 1.2], currentFrameIndex);
+      drawDecisionMap(frame);
+      drawNetwork(frame);
+      drawStateBars(frame);
+      statusText.textContent = "Epoch " + frame.epoch + " | " + frame.phase_name +
+        " | hidden_dim=" + frame.circadian_hidden_dim +
+        " | splits=" + frame.circadian_total_splits +
+        " | acc(B/P/C)=" + frame.backprop_accuracy.toFixed(3) + "/" + frame.predictive_accuracy.toFixed(3) + "/" + frame.circadian_accuracy.toFixed(3);
+    }}
+
+    slider.addEventListener("input", (event) => {{
+      stopPlayback();
+      renderFrame(Number(event.target.value));
+    }});
+    playBtn.addEventListener("click", () => {{
+      stopPlayback();
+      timer = setInterval(() => {{
+        let next = currentFrameIndex + 1;
+        if (next >= payload.frames.length) {{
+          next = 0;
+        }}
+        renderFrame(next);
+      }}, 260);
+    }});
+    pauseBtn.addEventListener("click", () => stopPlayback());
+
+    renderFrame(0);
+  </script>
+</body>
+</html>
+"""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(html, encoding="utf-8")
+
+
 def main() -> None:
     args = parse_args()
     config = HardestModeConfig(
@@ -581,17 +1115,27 @@ def main() -> None:
         gif_duration_ms=args.gif_duration_ms,
     )
     snapshots, phase_b_test_input, phase_b_test_target, x_bounds, y_bounds = collect_hardest_mode_snapshots(config)
-    output_path = Path(args.output_path)
+    gif_output_path = Path(args.gif_output_path)
     render_hardest_mode_gif(
         snapshots=snapshots,
         phase_b_test_input=phase_b_test_input,
         phase_b_test_target=phase_b_test_target,
         x_bounds=x_bounds,
         y_bounds=y_bounds,
-        output_path=output_path,
+        output_path=gif_output_path,
         frame_duration_ms=config.gif_duration_ms,
     )
-    print(f"Wrote {output_path}")
+    interactive_output_path = Path(args.interactive_output_path)
+    write_interactive_hardest_mode_html(
+        snapshots=snapshots,
+        phase_b_test_input=phase_b_test_input,
+        phase_b_test_target=phase_b_test_target,
+        x_bounds=x_bounds,
+        y_bounds=y_bounds,
+        output_path=interactive_output_path,
+    )
+    print(f"Wrote {gif_output_path}")
+    print(f"Wrote {interactive_output_path}")
 
 
 if __name__ == "__main__":

@@ -38,6 +38,10 @@ flowchart LR
 
 ![Hardest-Case Dynamics](docs/figures/hardest_mode_dynamics.gif)
 
+Interactive version (Plotly, with internals replay):
+
+- [Hardest-Case Dynamics Interactive](https://optimumaf.github.io/Circadian-Predictive-Coding/figures/interactive_hardest_mode_dynamics.html)
+
 ## Core Idea
 
 The circadian algorithm models wake and sleep phases:
