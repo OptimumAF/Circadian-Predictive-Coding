@@ -96,6 +96,22 @@ Note: GitHub README pages do not execute custom JavaScript, so Plotly interactiv
 | PredictiveCodingResNet50 | 0.723 | 2093.4 | 4839.0 | fixed head |
 | CircadianPredictiveCodingResNet50 | 0.734 | 2059.9 | 4831.4 | hidden 384->394, splits=12, prunes=2, rollbacks=7 |
 
+### Latest master verification run (single-seed subset, 2026-02-28)
+
+Command:
+
+```powershell
+python resnet50_benchmark.py --dataset-name cifar100 --classes 100 --dataset-train-subset-size 20000 --dataset-test-subset-size 5000 --epochs 12 --device cuda --target-accuracy -1 --backprop-freeze-backbone --backbone-weights imagenet
+```
+
+| Model | Accuracy | Cross-Entropy | Train SPS | Inference P95 (ms) | Notes |
+|---|---:|---:|---:|---:|---|
+| BackpropResNet50 | 0.678 | 1.7144 | 981.3 | 23.03 | fixed head |
+| PredictiveCodingResNet50 | 0.692 | 1.1175 | 965.2 | 20.77 | fixed head |
+| CircadianPredictiveCodingResNet50 | 0.685 | 1.1082 | 874.2 | 23.27 | hidden 384->384, splits=0, prunes=0, rollbacks=0 |
+
+Raw benchmark output: [`docs/benchmarks/benchmark_master_cifar100_subset_2026-02-28.txt`](docs/benchmarks/benchmark_master_cifar100_subset_2026-02-28.txt)
+
 ## Repository Layout
 
 ```text
