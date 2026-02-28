@@ -178,6 +178,12 @@ def format_continual_shift_benchmark(result: ContinualShiftBenchmarkResult) -> s
         "Phase A trains on base distribution; phase B trains on shifted/rotated distribution.",
         f"Seeds: {result.seeds}",
         (
+            "Setup: "
+            f"hidden_dim={config.hidden_dim}, "
+            f"phaseA_epochs={config.phase_a_epochs}, phaseB_epochs={config.phase_b_epochs}, "
+            f"phaseA_noise={config.phase_a_noise_scale:.2f}, phaseB_noise={config.phase_b_noise_scale:.2f}"
+        ),
+        (
             "Phase B transform: "
             f"rotation={config.phase_b_rotation_degrees:.1f} deg, "
             f"translation=({config.phase_b_translation_x:.2f}, {config.phase_b_translation_y:.2f})"

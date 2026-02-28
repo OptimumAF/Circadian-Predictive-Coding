@@ -27,23 +27,26 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--profile",
         type=str,
-        choices=["baseline", "strength-case"],
+        choices=["baseline", "strength-case", "hardest-case"],
         default="strength-case",
-        help="Circadian profile: baseline uses defaults, strength-case emphasizes replay/splits.",
+        help=(
+            "baseline: circadian defaults, strength-case: tuned moderate stress, "
+            "hardest-case: aggressively difficult shift with tuned circadian policy."
+        ),
     )
-    parser.add_argument("--sample-count-phase-a", type=int, default=500)
-    parser.add_argument("--sample-count-phase-b", type=int, default=500)
-    parser.add_argument("--phase-b-train-fraction", type=float, default=0.14)
-    parser.add_argument("--phase-a-epochs", type=int, default=110)
-    parser.add_argument("--phase-b-epochs", type=int, default=80)
-    parser.add_argument("--hidden-dim", type=int, default=12)
-    parser.add_argument("--phase-a-noise-scale", type=float, default=0.8)
-    parser.add_argument("--phase-b-noise-scale", type=float, default=1.0)
-    parser.add_argument("--phase-b-rotation-degrees", type=float, default=40.0)
-    parser.add_argument("--phase-b-translation-x", type=float, default=0.9)
-    parser.add_argument("--phase-b-translation-y", type=float, default=-0.7)
-    parser.add_argument("--sleep-interval-phase-a", type=int, default=40)
-    parser.add_argument("--sleep-interval-phase-b", type=int, default=8)
+    parser.add_argument("--sample-count-phase-a", type=int, default=None)
+    parser.add_argument("--sample-count-phase-b", type=int, default=None)
+    parser.add_argument("--phase-b-train-fraction", type=float, default=None)
+    parser.add_argument("--phase-a-epochs", type=int, default=None)
+    parser.add_argument("--phase-b-epochs", type=int, default=None)
+    parser.add_argument("--hidden-dim", type=int, default=None)
+    parser.add_argument("--phase-a-noise-scale", type=float, default=None)
+    parser.add_argument("--phase-b-noise-scale", type=float, default=None)
+    parser.add_argument("--phase-b-rotation-degrees", type=float, default=None)
+    parser.add_argument("--phase-b-translation-x", type=float, default=None)
+    parser.add_argument("--phase-b-translation-y", type=float, default=None)
+    parser.add_argument("--sleep-interval-phase-a", type=int, default=None)
+    parser.add_argument("--sleep-interval-phase-b", type=int, default=None)
     parser.add_argument("--output-file", type=str, default="")
     return parser
 
@@ -54,25 +57,50 @@ def main() -> None:
     args = parser.parse_args()
 
     seeds = _parse_int_list(args.seeds)
+    profile_defaults = _build_profile_defaults(args.profile)
     circadian_config = (
-        _build_strength_case_circadian_config()
-        if args.profile == "strength-case"
-        else CircadianConfig()
+        _build_baseline_circadian_config()
+        if args.profile == "baseline"
+        else (
+            _build_strength_case_circadian_config()
+            if args.profile == "strength-case"
+            else _build_hardest_case_circadian_config()
+        )
     )
     config = ContinualShiftConfig(
-        sample_count_phase_a=args.sample_count_phase_a,
-        sample_count_phase_b=args.sample_count_phase_b,
-        phase_b_train_fraction=args.phase_b_train_fraction,
-        phase_a_epochs=args.phase_a_epochs,
-        phase_b_epochs=args.phase_b_epochs,
-        hidden_dim=args.hidden_dim,
-        phase_a_noise_scale=args.phase_a_noise_scale,
-        phase_b_noise_scale=args.phase_b_noise_scale,
-        phase_b_rotation_degrees=args.phase_b_rotation_degrees,
-        phase_b_translation_x=args.phase_b_translation_x,
-        phase_b_translation_y=args.phase_b_translation_y,
-        circadian_sleep_interval_phase_a=args.sleep_interval_phase_a,
-        circadian_sleep_interval_phase_b=args.sleep_interval_phase_b,
+        sample_count_phase_a=_resolve_optional(
+            args.sample_count_phase_a, profile_defaults["sample_count_phase_a"]
+        ),
+        sample_count_phase_b=_resolve_optional(
+            args.sample_count_phase_b, profile_defaults["sample_count_phase_b"]
+        ),
+        phase_b_train_fraction=_resolve_optional(
+            args.phase_b_train_fraction, profile_defaults["phase_b_train_fraction"]
+        ),
+        phase_a_epochs=_resolve_optional(args.phase_a_epochs, profile_defaults["phase_a_epochs"]),
+        phase_b_epochs=_resolve_optional(args.phase_b_epochs, profile_defaults["phase_b_epochs"]),
+        hidden_dim=_resolve_optional(args.hidden_dim, profile_defaults["hidden_dim"]),
+        phase_a_noise_scale=_resolve_optional(
+            args.phase_a_noise_scale, profile_defaults["phase_a_noise_scale"]
+        ),
+        phase_b_noise_scale=_resolve_optional(
+            args.phase_b_noise_scale, profile_defaults["phase_b_noise_scale"]
+        ),
+        phase_b_rotation_degrees=_resolve_optional(
+            args.phase_b_rotation_degrees, profile_defaults["phase_b_rotation_degrees"]
+        ),
+        phase_b_translation_x=_resolve_optional(
+            args.phase_b_translation_x, profile_defaults["phase_b_translation_x"]
+        ),
+        phase_b_translation_y=_resolve_optional(
+            args.phase_b_translation_y, profile_defaults["phase_b_translation_y"]
+        ),
+        circadian_sleep_interval_phase_a=_resolve_optional(
+            args.sleep_interval_phase_a, profile_defaults["sleep_interval_phase_a"]
+        ),
+        circadian_sleep_interval_phase_b=_resolve_optional(
+            args.sleep_interval_phase_b, profile_defaults["sleep_interval_phase_b"]
+        ),
         circadian_config=circadian_config,
     )
 
@@ -100,6 +128,66 @@ def _build_strength_case_circadian_config() -> CircadianConfig:
         replay_inference_steps=10,
         replay_inference_learning_rate=0.12,
     )
+
+
+def _build_hardest_case_circadian_config() -> CircadianConfig:
+    """Build circadian profile tuned for the hardest continual-shift setup."""
+    return CircadianConfig(
+        use_reward_modulated_learning=False,
+        split_threshold=0.25,
+        prune_threshold=0.04,
+        max_split_per_sleep=1,
+        max_prune_per_sleep=0,
+        replay_steps=2,
+        replay_memory_size=10,
+        replay_learning_rate=0.04,
+        replay_inference_steps=12,
+        replay_inference_learning_rate=0.14,
+    )
+
+
+def _build_baseline_circadian_config() -> CircadianConfig:
+    return CircadianConfig()
+
+
+def _build_profile_defaults(profile: str) -> dict[str, float | int]:
+    if profile == "hardest-case":
+        return {
+            "sample_count_phase_a": 500,
+            "sample_count_phase_b": 500,
+            "phase_b_train_fraction": 0.08,
+            "phase_a_epochs": 90,
+            "phase_b_epochs": 120,
+            "hidden_dim": 8,
+            "phase_a_noise_scale": 0.8,
+            "phase_b_noise_scale": 1.2,
+            "phase_b_rotation_degrees": 44.0,
+            "phase_b_translation_x": 0.9,
+            "phase_b_translation_y": -0.7,
+            "sleep_interval_phase_a": 40,
+            "sleep_interval_phase_b": 8,
+        }
+    return {
+        "sample_count_phase_a": 500,
+        "sample_count_phase_b": 500,
+        "phase_b_train_fraction": 0.14,
+        "phase_a_epochs": 110,
+        "phase_b_epochs": 80,
+        "hidden_dim": 12,
+        "phase_a_noise_scale": 0.8,
+        "phase_b_noise_scale": 1.0,
+        "phase_b_rotation_degrees": 40.0,
+        "phase_b_translation_x": 0.9,
+        "phase_b_translation_y": -0.7,
+        "sleep_interval_phase_a": 40,
+        "sleep_interval_phase_b": 8,
+    }
+
+
+def _resolve_optional(value: int | float | None, fallback: int | float) -> int | float:
+    if value is None:
+        return fallback
+    return value
 
 
 def _parse_int_list(raw_values: str) -> list[int]:

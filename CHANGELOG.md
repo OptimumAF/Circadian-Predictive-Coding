@@ -51,6 +51,7 @@ for versioning even while in research-stage development.
   - `scripts/run_continual_shift_benchmark.py`
   - `tests/test_continual_shift_benchmark.py`
   - shifted/rotated dataset support in `src/infra/datasets.py`
+  - new `hardest-case` profile in continual-shift CLI for a stronger stress scenario
 
 ### Changed
 

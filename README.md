@@ -170,6 +170,12 @@ Continual shift stress test (retention vs adaptation):
 python scripts/run_continual_shift_benchmark.py --profile strength-case --seeds 3,7,11,19,23,31,37
 ```
 
+Hardest continual-shift stress test (small starting capacity + heavy drift):
+
+```powershell
+python scripts/run_continual_shift_benchmark.py --profile hardest-case --seeds 3,7,11,19,23,31,37
+```
+
 ResNet benchmark (all 3 models):
 
 ```powershell
