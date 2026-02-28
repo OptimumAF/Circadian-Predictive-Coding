@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 from pathlib import Path
 import sys
 
@@ -16,6 +17,25 @@ from src.app.continual_shift_benchmark import (
     run_continual_shift_benchmark,
 )
 from src.core.circadian_predictive_coding import CircadianConfig
+
+
+@dataclass(frozen=True)
+class ProfileDefaults:
+    """Typed defaults for benchmark profile presets."""
+
+    sample_count_phase_a: int
+    sample_count_phase_b: int
+    phase_b_train_fraction: float
+    phase_a_epochs: int
+    phase_b_epochs: int
+    hidden_dim: int
+    phase_a_noise_scale: float
+    phase_b_noise_scale: float
+    phase_b_rotation_degrees: float
+    phase_b_translation_x: float
+    phase_b_translation_y: float
+    sleep_interval_phase_a: int
+    sleep_interval_phase_b: int
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -68,38 +88,38 @@ def main() -> None:
         )
     )
     config = ContinualShiftConfig(
-        sample_count_phase_a=_resolve_optional(
-            args.sample_count_phase_a, profile_defaults["sample_count_phase_a"]
+        sample_count_phase_a=_resolve_optional_int(
+            args.sample_count_phase_a, profile_defaults.sample_count_phase_a
         ),
-        sample_count_phase_b=_resolve_optional(
-            args.sample_count_phase_b, profile_defaults["sample_count_phase_b"]
+        sample_count_phase_b=_resolve_optional_int(
+            args.sample_count_phase_b, profile_defaults.sample_count_phase_b
         ),
-        phase_b_train_fraction=_resolve_optional(
-            args.phase_b_train_fraction, profile_defaults["phase_b_train_fraction"]
+        phase_b_train_fraction=_resolve_optional_float(
+            args.phase_b_train_fraction, profile_defaults.phase_b_train_fraction
         ),
-        phase_a_epochs=_resolve_optional(args.phase_a_epochs, profile_defaults["phase_a_epochs"]),
-        phase_b_epochs=_resolve_optional(args.phase_b_epochs, profile_defaults["phase_b_epochs"]),
-        hidden_dim=_resolve_optional(args.hidden_dim, profile_defaults["hidden_dim"]),
-        phase_a_noise_scale=_resolve_optional(
-            args.phase_a_noise_scale, profile_defaults["phase_a_noise_scale"]
+        phase_a_epochs=_resolve_optional_int(args.phase_a_epochs, profile_defaults.phase_a_epochs),
+        phase_b_epochs=_resolve_optional_int(args.phase_b_epochs, profile_defaults.phase_b_epochs),
+        hidden_dim=_resolve_optional_int(args.hidden_dim, profile_defaults.hidden_dim),
+        phase_a_noise_scale=_resolve_optional_float(
+            args.phase_a_noise_scale, profile_defaults.phase_a_noise_scale
         ),
-        phase_b_noise_scale=_resolve_optional(
-            args.phase_b_noise_scale, profile_defaults["phase_b_noise_scale"]
+        phase_b_noise_scale=_resolve_optional_float(
+            args.phase_b_noise_scale, profile_defaults.phase_b_noise_scale
         ),
-        phase_b_rotation_degrees=_resolve_optional(
-            args.phase_b_rotation_degrees, profile_defaults["phase_b_rotation_degrees"]
+        phase_b_rotation_degrees=_resolve_optional_float(
+            args.phase_b_rotation_degrees, profile_defaults.phase_b_rotation_degrees
         ),
-        phase_b_translation_x=_resolve_optional(
-            args.phase_b_translation_x, profile_defaults["phase_b_translation_x"]
+        phase_b_translation_x=_resolve_optional_float(
+            args.phase_b_translation_x, profile_defaults.phase_b_translation_x
         ),
-        phase_b_translation_y=_resolve_optional(
-            args.phase_b_translation_y, profile_defaults["phase_b_translation_y"]
+        phase_b_translation_y=_resolve_optional_float(
+            args.phase_b_translation_y, profile_defaults.phase_b_translation_y
         ),
-        circadian_sleep_interval_phase_a=_resolve_optional(
-            args.sleep_interval_phase_a, profile_defaults["sleep_interval_phase_a"]
+        circadian_sleep_interval_phase_a=_resolve_optional_int(
+            args.sleep_interval_phase_a, profile_defaults.sleep_interval_phase_a
         ),
-        circadian_sleep_interval_phase_b=_resolve_optional(
-            args.sleep_interval_phase_b, profile_defaults["sleep_interval_phase_b"]
+        circadian_sleep_interval_phase_b=_resolve_optional_int(
+            args.sleep_interval_phase_b, profile_defaults.sleep_interval_phase_b
         ),
         circadian_config=circadian_config,
     )
@@ -150,41 +170,47 @@ def _build_baseline_circadian_config() -> CircadianConfig:
     return CircadianConfig()
 
 
-def _build_profile_defaults(profile: str) -> dict[str, float | int]:
+def _build_profile_defaults(profile: str) -> ProfileDefaults:
     if profile == "hardest-case":
-        return {
-            "sample_count_phase_a": 500,
-            "sample_count_phase_b": 500,
-            "phase_b_train_fraction": 0.08,
-            "phase_a_epochs": 90,
-            "phase_b_epochs": 120,
-            "hidden_dim": 8,
-            "phase_a_noise_scale": 0.8,
-            "phase_b_noise_scale": 1.2,
-            "phase_b_rotation_degrees": 44.0,
-            "phase_b_translation_x": 0.9,
-            "phase_b_translation_y": -0.7,
-            "sleep_interval_phase_a": 40,
-            "sleep_interval_phase_b": 8,
-        }
-    return {
-        "sample_count_phase_a": 500,
-        "sample_count_phase_b": 500,
-        "phase_b_train_fraction": 0.14,
-        "phase_a_epochs": 110,
-        "phase_b_epochs": 80,
-        "hidden_dim": 12,
-        "phase_a_noise_scale": 0.8,
-        "phase_b_noise_scale": 1.0,
-        "phase_b_rotation_degrees": 40.0,
-        "phase_b_translation_x": 0.9,
-        "phase_b_translation_y": -0.7,
-        "sleep_interval_phase_a": 40,
-        "sleep_interval_phase_b": 8,
-    }
+        return ProfileDefaults(
+            sample_count_phase_a=500,
+            sample_count_phase_b=500,
+            phase_b_train_fraction=0.08,
+            phase_a_epochs=90,
+            phase_b_epochs=120,
+            hidden_dim=8,
+            phase_a_noise_scale=0.8,
+            phase_b_noise_scale=1.2,
+            phase_b_rotation_degrees=44.0,
+            phase_b_translation_x=0.9,
+            phase_b_translation_y=-0.7,
+            sleep_interval_phase_a=40,
+            sleep_interval_phase_b=8,
+        )
+    return ProfileDefaults(
+        sample_count_phase_a=500,
+        sample_count_phase_b=500,
+        phase_b_train_fraction=0.14,
+        phase_a_epochs=110,
+        phase_b_epochs=80,
+        hidden_dim=12,
+        phase_a_noise_scale=0.8,
+        phase_b_noise_scale=1.0,
+        phase_b_rotation_degrees=40.0,
+        phase_b_translation_x=0.9,
+        phase_b_translation_y=-0.7,
+        sleep_interval_phase_a=40,
+        sleep_interval_phase_b=8,
+    )
 
 
-def _resolve_optional(value: int | float | None, fallback: int | float) -> int | float:
+def _resolve_optional_int(value: int | None, fallback: int) -> int:
+    if value is None:
+        return fallback
+    return value
+
+
+def _resolve_optional_float(value: float | None, fallback: float) -> float:
     if value is None:
         return fallback
     return value
