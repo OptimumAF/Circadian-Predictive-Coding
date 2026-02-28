@@ -43,6 +43,30 @@ def test_should_build_chemical_and_learn_with_circadian_predictive_coding() -> N
     assert float(np.min(plasticity_state)) < 1.0
 
 
+def test_should_support_multi_hidden_layer_circadian_with_adaptive_top_layer() -> None:
+    dataset = generate_two_cluster_dataset(sample_count=320, noise_scale=0.75, seed=17)
+    model = CircadianPredictiveCodingNetwork(
+        input_dim=2,
+        hidden_dim=8,
+        hidden_dims=[14, 8],
+        seed=19,
+        circadian_config=CircadianConfig(max_split_per_sleep=1, max_prune_per_sleep=0),
+    )
+
+    for _ in range(100):
+        model.train_epoch(
+            input_batch=dataset.train_input,
+            target_batch=dataset.train_target,
+            learning_rate=0.05,
+            inference_steps=16,
+            inference_learning_rate=0.2,
+        )
+
+    assert model.hidden_dim == 8
+    assert model.weight_input_hidden.shape[0] == 14
+    assert model.compute_accuracy(dataset.test_input, dataset.test_target) >= 0.70
+
+
 def test_should_split_busy_neurons_and_prune_idle_neurons_during_sleep() -> None:
     config = CircadianConfig(
         split_threshold=0.75,

@@ -45,6 +45,7 @@ class HardestModeConfig:
     test_ratio: float = 0.25
     phase_b_train_fraction: float = 0.05
     hidden_dim: int = 24
+    hidden_dims: tuple[int, ...] = (24, 24, 24)
     phase_a_epochs: int = 120
     phase_b_epochs: int = 180
     phase_a_noise: float = 0.8
@@ -83,6 +84,7 @@ class HardestModeSnapshot:
     hidden_bias: FloatVector
     chemical_state: FloatVector
     plasticity_state: FloatVector
+    probe_adaptive_input: FloatVector
     probe_hidden_activation: FloatVector
     probe_output_probability: float
 
@@ -244,13 +246,24 @@ def collect_hardest_mode_snapshots(
     phase_a, phase_b = build_datasets(config)
     x_bounds, y_bounds = compute_bounds(phase_a, phase_b)
 
-    backprop = BackpropMLP(input_dim=2, hidden_dim=config.hidden_dim, seed=config.seed)
-    predictive = PredictiveCodingNetwork(input_dim=2, hidden_dim=config.hidden_dim, seed=config.seed + 1)
+    backprop = BackpropMLP(
+        input_dim=2,
+        hidden_dim=config.hidden_dim,
+        seed=config.seed,
+        hidden_dims=list(config.hidden_dims),
+    )
+    predictive = PredictiveCodingNetwork(
+        input_dim=2,
+        hidden_dim=config.hidden_dim,
+        seed=config.seed + 1,
+        hidden_dims=list(config.hidden_dims),
+    )
     circadian = CircadianPredictiveCodingNetwork(
         input_dim=2,
         hidden_dim=config.hidden_dim,
         seed=config.seed + 2,
         circadian_config=build_hardest_circadian_config(),
+        hidden_dims=list(config.hidden_dims),
     )
 
     snapshots: list[HardestModeSnapshot] = []
@@ -332,7 +345,8 @@ def collect_hardest_mode_snapshots(
             grid_size=config.decision_grid_size,
         )
         predictions = circadian.predict_label(phase_b.test_input).reshape(-1).astype(np.int8)
-        hidden_linear = probe_input @ circadian.weight_input_hidden + circadian.bias_hidden
+        _, _, probe_adaptive_input = circadian._forward_pre_hidden(probe_input)
+        hidden_linear = probe_adaptive_input @ circadian.weight_input_hidden + circadian.bias_hidden
         probe_hidden_activation = np.tanh(hidden_linear).reshape(-1).astype(np.float32)
         probe_output_probability = float(circadian.predict_proba(probe_input)[0, 0])
         input_hidden_weights = circadian.weight_input_hidden.astype(np.float32, copy=True)
@@ -364,6 +378,7 @@ def collect_hardest_mode_snapshots(
                 hidden_bias=hidden_bias,
                 chemical_state=chemical_state,
                 plasticity_state=plasticity_state,
+                probe_adaptive_input=probe_adaptive_input.reshape(-1).astype(np.float32),
                 probe_hidden_activation=probe_hidden_activation,
                 probe_output_probability=probe_output_probability,
             )
@@ -646,6 +661,7 @@ def build_interactive_payload(
                 "hidden_bias": np.round(snapshot.hidden_bias, 4).tolist(),
                 "chemical_state": np.round(snapshot.chemical_state, 4).tolist(),
                 "plasticity_state": np.round(snapshot.plasticity_state, 4).tolist(),
+                "probe_adaptive_input": np.round(snapshot.probe_adaptive_input, 4).tolist(),
                 "probe_hidden_activation": np.round(snapshot.probe_hidden_activation, 4).tolist(),
                 "probe_output_probability": round(snapshot.probe_output_probability, 4),
             }
@@ -937,18 +953,34 @@ def write_interactive_hardest_mode_html(
 
     function drawNetwork(frame) {{
       const hiddenCount = frame.circadian_hidden_dim;
+      const sourceCount = frame.probe_adaptive_input.length;
+      const sourceY = [];
       const hiddenY = [];
+      if (sourceCount <= 1) {{
+        sourceY.push(0.0);
+      }} else {{
+        for (let i = 0; i < sourceCount; i++) {{
+          sourceY.push(0.9 - (1.8 * i / (sourceCount - 1)));
+        }}
+      }}
       if (hiddenCount <= 1) {{
         hiddenY.push(0.0);
       }} else {{
         for (let i = 0; i < hiddenCount; i++) {{
-          hiddenY.push(0.85 - (1.7 * i / (hiddenCount - 1)));
+          hiddenY.push(0.9 - (1.8 * i / (hiddenCount - 1)));
         }}
       }}
-      const nodeX = [-1.0, -1.0];
-      const nodeY = [0.35, -0.35];
-      const nodeText = ["x1", "x2"];
-      const nodeValues = [payload.phase_b_test_points_x[0], payload.phase_b_test_points_y[0]];
+      const nodeX = [];
+      const nodeY = [];
+      const nodeText = [];
+      const nodeValues = [];
+
+      for (let i = 0; i < sourceCount; i++) {{
+        nodeX.push(-1.0);
+        nodeY.push(sourceY[i]);
+        nodeText.push("p" + (i + 1));
+        nodeValues.push(frame.probe_adaptive_input[i] ?? 0.0);
+      }}
 
       for (let i = 0; i < hiddenCount; i++) {{
         nodeX.push(0.0);
@@ -969,15 +1001,15 @@ def write_interactive_hardest_mode_html(
         ...inputHidden.flat().map((v) => Math.abs(v)),
         ...hiddenOutput.map((v) => Math.abs(v))
       );
-      for (let inputIndex = 0; inputIndex < 2; inputIndex++) {{
+      for (let inputIndex = 0; inputIndex < sourceCount; inputIndex++) {{
         for (let h = 0; h < hiddenCount; h++) {{
           const w = inputHidden[inputIndex][h];
           edgeTraces.push({{
             x: [-1.0, 0.0],
-            y: [inputIndex === 0 ? 0.35 : -0.35, hiddenY[h]],
+            y: [sourceY[inputIndex], hiddenY[h]],
             mode: "lines",
             hoverinfo: "text",
-            text: ["w_in[" + (inputIndex + 1) + "->h" + (h + 1) + "]=" + w.toFixed(4)],
+            text: ["w_pre[" + (inputIndex + 1) + "->h" + (h + 1) + "]=" + w.toFixed(4)],
             line: {{
               color: w >= 0 ? "#2874c8" : "#c45b58",
               width: 1 + 5 * Math.abs(w) / maxAbsWeight
@@ -1025,7 +1057,7 @@ def write_interactive_hardest_mode_html(
         title: {{text: "Circadian Internals Graph (nodes + edge weights)"}},
         margin: {{l: 20, r: 20, t: 42, b: 20}},
         xaxis: {{visible: false, range: [-1.25, 1.25]}},
-        yaxis: {{visible: false, range: [-1.0, 1.0]}},
+        yaxis: {{visible: false, range: [-1.1, 1.1]}},
         paper_bgcolor: "#ffffff",
         plot_bgcolor: "#ffffff"
       }};

@@ -149,41 +149,60 @@ class CircadianPredictiveCodingNetwork:
         circadian_config: CircadianConfig | None = None,
         min_hidden_dim: int = 4,
         max_hidden_dim: int | None = None,
+        hidden_dims: list[int] | tuple[int, ...] | None = None,
     ) -> None:
-        if input_dim <= 0 or hidden_dim <= 0:
-            raise ValueError("input_dim and hidden_dim must be positive")
+        resolved_hidden_dims = self._resolve_hidden_dims(
+            hidden_dim=hidden_dim,
+            hidden_dims=hidden_dims,
+        )
+        adaptive_hidden_dim = resolved_hidden_dims[-1]
+        pre_hidden_dims = resolved_hidden_dims[:-1]
+        if input_dim <= 0:
+            raise ValueError("input_dim must be positive")
         if min_hidden_dim <= 0:
             raise ValueError("min_hidden_dim must be positive")
-        if min_hidden_dim > hidden_dim:
+        if min_hidden_dim > adaptive_hidden_dim:
             raise ValueError("min_hidden_dim cannot exceed initial hidden_dim")
 
         config = circadian_config or CircadianConfig()
         self._validate_config(config)
         self.config = config
 
-        self.max_hidden_dim = max_hidden_dim if max_hidden_dim is not None else max(hidden_dim * 4, 16)
-        if self.max_hidden_dim < hidden_dim:
+        self.max_hidden_dim = max_hidden_dim if max_hidden_dim is not None else max(adaptive_hidden_dim * 4, 16)
+        if self.max_hidden_dim < adaptive_hidden_dim:
             raise ValueError("max_hidden_dim cannot be smaller than initial hidden_dim")
 
         rng = np.random.default_rng(seed)
         self._rng = np.random.default_rng(seed + 10_001)
-        self.weight_input_hidden = rng.normal(0.0, 0.5, size=(input_dim, hidden_dim))
-        self.bias_hidden = np.zeros((1, hidden_dim), dtype=np.float64)
-        self.weight_hidden_output = rng.normal(0.0, 0.5, size=(hidden_dim, 1))
-        self.bias_output = np.zeros((1, 1), dtype=np.float64)
+        self._pre_hidden_weights: list[Array] = []
+        self._pre_hidden_biases: list[Array] = []
+        previous_dim = input_dim
+        for layer_dim in pre_hidden_dims:
+            self._pre_hidden_weights.append(
+                rng.normal(0.0, 0.5, size=(previous_dim, layer_dim))
+            )
+            self._pre_hidden_biases.append(np.zeros((1, layer_dim), dtype=np.float64))
+            previous_dim = layer_dim
 
-        self._hidden_chemical = np.zeros(hidden_dim, dtype=np.float64)
-        self._hidden_chemical_fast = np.zeros(hidden_dim, dtype=np.float64)
-        self._hidden_chemical_slow = np.zeros(hidden_dim, dtype=np.float64)
-        self._neuron_age = np.zeros(hidden_dim, dtype=np.float64)
-        self._traffic_sum = np.zeros(hidden_dim, dtype=np.float64)
-        self._importance_ema = np.zeros(hidden_dim, dtype=np.float64)
+        self.weight_input_hidden = rng.normal(0.0, 0.5, size=(previous_dim, adaptive_hidden_dim))
+        self.bias_hidden = np.zeros((1, adaptive_hidden_dim), dtype=np.float64)
+        self.weight_hidden_output = rng.normal(0.0, 0.5, size=(adaptive_hidden_dim, 1))
+        self.bias_output = np.zeros((1, 1), dtype=np.float64)
+        self.hidden_dims = tuple(resolved_hidden_dims)
+        self.pre_hidden_dims = tuple(pre_hidden_dims)
+
+        self._hidden_chemical = np.zeros(adaptive_hidden_dim, dtype=np.float64)
+        self._hidden_chemical_fast = np.zeros(adaptive_hidden_dim, dtype=np.float64)
+        self._hidden_chemical_slow = np.zeros(adaptive_hidden_dim, dtype=np.float64)
+        self._neuron_age = np.zeros(adaptive_hidden_dim, dtype=np.float64)
+        self._traffic_sum = np.zeros(adaptive_hidden_dim, dtype=np.float64)
+        self._importance_ema = np.zeros(adaptive_hidden_dim, dtype=np.float64)
         self._traffic_steps = 0
         self._min_hidden_dim = min_hidden_dim
-        self._prune_ttl = np.zeros(hidden_dim, dtype=np.int32)
-        self._prune_marked = np.zeros(hidden_dim, dtype=bool)
-        self._split_cooldown = np.zeros(hidden_dim, dtype=np.int32)
-        self._prune_cooldown = np.zeros(hidden_dim, dtype=np.int32)
+        self._prune_ttl = np.zeros(adaptive_hidden_dim, dtype=np.int32)
+        self._prune_marked = np.zeros(adaptive_hidden_dim, dtype=bool)
+        self._split_cooldown = np.zeros(adaptive_hidden_dim, dtype=np.int32)
+        self._prune_cooldown = np.zeros(adaptive_hidden_dim, dtype=np.int32)
 
         self._epoch_count = 0
         self._epochs_since_sleep = 0
@@ -238,7 +257,10 @@ class CircadianPredictiveCodingNetwork:
         self._decay_cooldowns()
         self._apply_prune_decay_step()
 
-        hidden_linear_prior = input_batch @ self.weight_input_hidden + self.bias_hidden
+        pre_hidden_linears, pre_hidden_activations, adaptive_input = self._forward_pre_hidden(
+            input_batch
+        )
+        hidden_linear_prior = adaptive_input @ self.weight_input_hidden + self.bias_hidden
         hidden_prior = tanh(hidden_linear_prior)
         hidden_state = hidden_prior.copy()
 
@@ -263,8 +285,9 @@ class CircadianPredictiveCodingNetwork:
         grad_output_bias = np.sum(output_term, axis=0, keepdims=True) / sample_count
 
         hidden_prior_gradient = (-hidden_error) * tanh_derivative_from_linear(hidden_linear_prior)
-        grad_input_hidden = (input_batch.T @ hidden_prior_gradient) / sample_count
+        grad_input_hidden = (adaptive_input.T @ hidden_prior_gradient) / sample_count
         grad_hidden_bias = np.sum(hidden_prior_gradient, axis=0, keepdims=True) / sample_count
+        pre_hidden_delta = hidden_prior_gradient @ self.weight_input_hidden.T
 
         self._update_chemical_layer(hidden_state)
         reward_scale = self._compute_reward_scale(output_error)
@@ -281,6 +304,23 @@ class CircadianPredictiveCodingNetwork:
         self.bias_output -= effective_learning_rate * grad_output_bias
         self.weight_input_hidden -= effective_learning_rate * gated_input_hidden
         self.bias_hidden -= effective_learning_rate * gated_hidden_bias
+        if self._pre_hidden_weights:
+            running_delta = pre_hidden_delta
+            for layer_index in range(len(self._pre_hidden_weights) - 1, -1, -1):
+                local_delta = running_delta * tanh_derivative_from_linear(
+                    pre_hidden_linears[layer_index]
+                )
+                previous_activation = (
+                    input_batch
+                    if layer_index == 0
+                    else pre_hidden_activations[layer_index - 1]
+                )
+                grad_pre_weight = (previous_activation.T @ local_delta) / sample_count
+                grad_pre_bias = np.sum(local_delta, axis=0, keepdims=True) / sample_count
+                if layer_index > 0:
+                    running_delta = local_delta @ self._pre_hidden_weights[layer_index].T
+                self._pre_hidden_weights[layer_index] -= effective_learning_rate * grad_pre_weight
+                self._pre_hidden_biases[layer_index] -= effective_learning_rate * grad_pre_bias
 
         self._record_hidden_traffic(hidden_state)
         energy = self._compute_energy(
@@ -376,7 +416,8 @@ class CircadianPredictiveCodingNetwork:
         )
 
     def predict_proba(self, input_batch: Array) -> Array:
-        hidden_linear = input_batch @ self.weight_input_hidden + self.bias_hidden
+        _, _, adaptive_input = self._forward_pre_hidden(input_batch)
+        hidden_linear = adaptive_input @ self.weight_input_hidden + self.bias_hidden
         hidden_activation = tanh(hidden_linear)
         output_linear = hidden_activation @ self.weight_hidden_output + self.bias_output
         return sigmoid(output_linear)
@@ -440,6 +481,17 @@ class CircadianPredictiveCodingNetwork:
         split_indices, prune_indices = self._indices_from_proposals(proposals)
         self._split_neurons(split_indices)
         self._schedule_or_prune(prune_indices)
+
+    def _forward_pre_hidden(self, input_batch: Array) -> tuple[list[Array], list[Array], Array]:
+        pre_hidden_linears: list[Array] = []
+        pre_hidden_activations: list[Array] = []
+        activation = input_batch
+        for layer_weight, layer_bias in zip(self._pre_hidden_weights, self._pre_hidden_biases):
+            hidden_linear = activation @ layer_weight + layer_bias
+            activation = tanh(hidden_linear)
+            pre_hidden_linears.append(hidden_linear)
+            pre_hidden_activations.append(activation)
+        return pre_hidden_linears, pre_hidden_activations, activation
 
     def _compute_energy(self, output_prediction: Array, target_batch: Array, hidden_error: Array) -> float:
         bce = self._binary_cross_entropy(output_prediction, target_batch)
@@ -919,6 +971,9 @@ class CircadianPredictiveCodingNetwork:
     def _apply_homeostatic_downscaling(self) -> None:
         scale_factor = self.config.homeostatic_downscale_factor
         if abs(scale_factor - 1.0) > 1e-12:
+            for layer_index in range(len(self._pre_hidden_weights)):
+                self._pre_hidden_weights[layer_index] *= scale_factor
+                self._pre_hidden_biases[layer_index] *= scale_factor
             self.weight_input_hidden *= scale_factor
             self.weight_hidden_output *= scale_factor
             self.bias_hidden *= scale_factor
@@ -1019,6 +1074,23 @@ class CircadianPredictiveCodingNetwork:
             if positive_index >= len(positive) and negative_index >= len(negative):
                 break
         return selected
+
+    def _resolve_hidden_dims(
+        self,
+        hidden_dim: int,
+        hidden_dims: list[int] | tuple[int, ...] | None,
+    ) -> list[int]:
+        if hidden_dims is None:
+            if hidden_dim <= 0:
+                raise ValueError("hidden_dim must be positive")
+            return [hidden_dim]
+
+        resolved = [int(value) for value in hidden_dims]
+        if not resolved:
+            raise ValueError("hidden_dims cannot be empty")
+        if any(value <= 0 for value in resolved):
+            raise ValueError("all hidden_dims values must be positive")
+        return resolved
 
     def _validate_config(self, config: CircadianConfig) -> None:
         if not (0.0 <= config.chemical_decay <= 1.0):

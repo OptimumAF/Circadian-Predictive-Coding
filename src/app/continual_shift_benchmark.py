@@ -32,6 +32,7 @@ class ContinualShiftConfig:
     phase_b_translation_y: float = -0.7
 
     hidden_dim: int = 12
+    hidden_dims: tuple[int, ...] | None = None
     phase_a_epochs: int = 110
     phase_b_epochs: int = 80
 
@@ -180,6 +181,7 @@ def format_continual_shift_benchmark(result: ContinualShiftBenchmarkResult) -> s
         (
             "Setup: "
             f"hidden_dim={config.hidden_dim}, "
+            f"hidden_dims={list(config.hidden_dims) if config.hidden_dims is not None else [config.hidden_dim]}, "
             f"phaseA_epochs={config.phase_a_epochs}, phaseB_epochs={config.phase_b_epochs}, "
             f"phaseA_noise={config.phase_a_noise_scale:.2f}, phaseB_noise={config.phase_b_noise_scale:.2f}"
         ),
@@ -256,17 +258,25 @@ def _run_single_seed(config: ContinualShiftConfig, seed: int) -> ContinualShiftS
     )
     phase_b = _build_phase_b_dataset(config=config, seed=seed + 101)
 
-    backprop_model = BackpropMLP(input_dim=2, hidden_dim=config.hidden_dim, seed=seed)
+    resolved_hidden_dims = list(config.hidden_dims) if config.hidden_dims is not None else None
+    backprop_model = BackpropMLP(
+        input_dim=2,
+        hidden_dim=config.hidden_dim,
+        seed=seed,
+        hidden_dims=resolved_hidden_dims,
+    )
     predictive_coding_model = PredictiveCodingNetwork(
         input_dim=2,
         hidden_dim=config.hidden_dim,
         seed=seed + 1,
+        hidden_dims=resolved_hidden_dims,
     )
     circadian_model = CircadianPredictiveCodingNetwork(
         input_dim=2,
         hidden_dim=config.hidden_dim,
         seed=seed + 2,
         circadian_config=config.circadian_config,
+        hidden_dims=resolved_hidden_dims,
     )
 
     sleep_event_count = 0
@@ -553,6 +563,13 @@ def _validate_config(config: ContinualShiftConfig) -> None:
         raise ValueError("phase noise scales must be positive")
     if config.hidden_dim <= 0:
         raise ValueError("hidden_dim must be positive")
+    if config.hidden_dims is not None:
+        if len(config.hidden_dims) == 0:
+            raise ValueError("hidden_dims cannot be empty")
+        if any(hidden <= 0 for hidden in config.hidden_dims):
+            raise ValueError("all hidden_dims values must be positive")
+        if config.hidden_dim != config.hidden_dims[-1]:
+            raise ValueError("hidden_dim must match the last value in hidden_dims")
     if config.phase_a_epochs <= 0 or config.phase_b_epochs <= 0:
         raise ValueError("phase epochs must be positive")
     if config.backprop_learning_rate <= 0.0:

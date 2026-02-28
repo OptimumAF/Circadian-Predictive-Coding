@@ -29,6 +29,7 @@ class ProfileDefaults:
     phase_a_epochs: int
     phase_b_epochs: int
     hidden_dim: int
+    hidden_dims: tuple[int, ...] | None
     phase_a_noise_scale: float
     phase_b_noise_scale: float
     phase_b_rotation_degrees: float
@@ -60,6 +61,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--phase-a-epochs", type=int, default=None)
     parser.add_argument("--phase-b-epochs", type=int, default=None)
     parser.add_argument("--hidden-dim", type=int, default=None)
+    parser.add_argument(
+        "--hidden-dims",
+        type=str,
+        default="",
+        help="Optional comma-separated hidden-layer widths (e.g. 24,24,24).",
+    )
     parser.add_argument("--phase-a-noise-scale", type=float, default=None)
     parser.add_argument("--phase-b-noise-scale", type=float, default=None)
     parser.add_argument("--phase-b-rotation-degrees", type=float, default=None)
@@ -87,6 +94,12 @@ def main() -> None:
             else _build_hardest_case_circadian_config()
         )
     )
+    cli_hidden_dims = _parse_optional_hidden_dims(args.hidden_dims)
+    selected_hidden_dims = (
+        cli_hidden_dims
+        if cli_hidden_dims is not None
+        else profile_defaults.hidden_dims
+    )
     config = ContinualShiftConfig(
         sample_count_phase_a=_resolve_optional_int(
             args.sample_count_phase_a, profile_defaults.sample_count_phase_a
@@ -100,6 +113,7 @@ def main() -> None:
         phase_a_epochs=_resolve_optional_int(args.phase_a_epochs, profile_defaults.phase_a_epochs),
         phase_b_epochs=_resolve_optional_int(args.phase_b_epochs, profile_defaults.phase_b_epochs),
         hidden_dim=_resolve_optional_int(args.hidden_dim, profile_defaults.hidden_dim),
+        hidden_dims=selected_hidden_dims,
         phase_a_noise_scale=_resolve_optional_float(
             args.phase_a_noise_scale, profile_defaults.phase_a_noise_scale
         ),
@@ -179,6 +193,7 @@ def _build_profile_defaults(profile: str) -> ProfileDefaults:
             phase_a_epochs=120,
             phase_b_epochs=180,
             hidden_dim=24,
+            hidden_dims=(24, 24, 24),
             phase_a_noise_scale=0.8,
             phase_b_noise_scale=1.45,
             phase_b_rotation_degrees=68.0,
@@ -194,6 +209,7 @@ def _build_profile_defaults(profile: str) -> ProfileDefaults:
         phase_a_epochs=110,
         phase_b_epochs=80,
         hidden_dim=12,
+        hidden_dims=None,
         phase_a_noise_scale=0.8,
         phase_b_noise_scale=1.0,
         phase_b_rotation_degrees=40.0,
@@ -221,6 +237,15 @@ def _parse_int_list(raw_values: str) -> list[int]:
     if not items:
         raise ValueError("Expected at least one integer seed.")
     return [int(item) for item in items]
+
+
+def _parse_optional_hidden_dims(raw_values: str) -> tuple[int, ...] | None:
+    if not raw_values.strip():
+        return None
+    values = _parse_int_list(raw_values)
+    if any(value <= 0 for value in values):
+        raise ValueError("hidden_dims values must be positive")
+    return tuple(values)
 
 
 if __name__ == "__main__":

@@ -30,6 +30,12 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--samples", type=int, default=settings.dataset_size, help="Number of samples.")
     parser.add_argument("--epochs", type=int, default=settings.epoch_count, help="Training epochs.")
     parser.add_argument("--hidden-dim", type=int, default=12, help="Hidden layer width.")
+    parser.add_argument(
+        "--hidden-dims",
+        type=str,
+        default="",
+        help="Optional comma-separated hidden-layer widths (for multi-hidden-layer models).",
+    )
     parser.add_argument("--noise", type=float, default=0.8, help="Dataset noise scale.")
     parser.add_argument(
         "--noise-levels",
@@ -236,11 +242,15 @@ def main() -> None:
         replay_inference_steps=arguments.replay_inference_steps,
         replay_inference_learning_rate=arguments.replay_inference_learning_rate,
     )
+    hidden_dims = None
+    if arguments.hidden_dims.strip():
+        hidden_dims = tuple(_parse_int_list(arguments.hidden_dims))
 
     config = ExperimentConfig(
         sample_count=arguments.samples,
         noise_scale=arguments.noise,
         hidden_dim=arguments.hidden_dim,
+        hidden_dims=hidden_dims,
         epoch_count=arguments.epochs,
         circadian_sleep_interval=arguments.sleep_interval,
         circadian_force_sleep=(not arguments.respect_adaptive_sleep_trigger),

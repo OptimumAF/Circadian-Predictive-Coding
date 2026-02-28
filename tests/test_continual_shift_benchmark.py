@@ -71,3 +71,11 @@ def test_should_fail_for_invalid_phase_b_train_fraction() -> None:
             config=ContinualShiftConfig(phase_b_train_fraction=1.2),
             seeds=[7],
         )
+
+
+def test_should_fail_when_hidden_dim_does_not_match_hidden_dims_tail() -> None:
+    with pytest.raises(ValueError, match="hidden_dim must match the last value in hidden_dims"):
+        run_continual_shift_benchmark(
+            config=ContinualShiftConfig(hidden_dim=8, hidden_dims=(12, 10)),
+            seeds=[7],
+        )

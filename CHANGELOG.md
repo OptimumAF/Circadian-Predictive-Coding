@@ -62,6 +62,7 @@ for versioning even while in research-stage development.
 - Added hardest-case dynamics GIF (training progression + inference decision-map evolution) and surfaced it near the top of README and docs dashboard.
 - Added an interactive Plotly hardest-case dynamics page with playback controls and circadian internals visualization (node/edge weights, chemical/plasticity state) on the docs dashboard.
 - Increased hardest-case difficulty substantially (higher drift/noise, lower phase-B train fraction, longer training horizon) and raised hidden-layer width in hardest-case runs for all three models.
+- Added multi-hidden-layer support across NumPy baseline models (backprop, predictive coding, and circadian with an adaptive top hidden layer plus trainable pre-hidden stack).
 - Refreshed README benchmark section with a latest master verification run on 2026-02-28 and added raw output artifact under `docs/benchmarks/`.
 - Repositioned repository messaging to Circadian Predictive Coding as the primary focus.
 - Updated `README.md` with:

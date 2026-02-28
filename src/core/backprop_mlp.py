@@ -1,4 +1,4 @@
-"""A simple one-hidden-layer MLP trained with backpropagation."""
+"""A configurable multi-hidden-layer MLP trained with backpropagation."""
 
 from __future__ import annotations
 
@@ -7,11 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-from src.core.activations import (
-    sigmoid,
-    tanh,
-    tanh_derivative_from_linear,
-)
+from src.core.activations import sigmoid, tanh, tanh_derivative_from_linear
 from src.core.neuron_adaptation import LayerTraffic, NeuronChangeProposal
 
 Array = NDArray[np.float64]
@@ -27,40 +23,81 @@ class BackpropTrainResult:
 class BackpropMLP:
     """Binary classification MLP optimized with gradient descent."""
 
-    def __init__(self, input_dim: int, hidden_dim: int, seed: int) -> None:
-        if input_dim <= 0 or hidden_dim <= 0:
-            raise ValueError("input_dim and hidden_dim must be positive")
+    def __init__(
+        self,
+        input_dim: int,
+        hidden_dim: int,
+        seed: int,
+        hidden_dims: list[int] | tuple[int, ...] | None = None,
+    ) -> None:
+        resolved_hidden_dims = self._resolve_hidden_dims(
+            hidden_dim=hidden_dim,
+            hidden_dims=hidden_dims,
+        )
+        if input_dim <= 0:
+            raise ValueError("input_dim must be positive")
 
         rng = np.random.default_rng(seed)
-        self.weight_input_hidden = rng.normal(0.0, 0.5, size=(input_dim, hidden_dim))
-        self.bias_hidden = np.zeros((1, hidden_dim), dtype=np.float64)
-        self.weight_hidden_output = rng.normal(0.0, 0.5, size=(hidden_dim, 1))
+        self._hidden_weights: list[Array] = []
+        self._hidden_biases: list[Array] = []
+
+        previous_dim = input_dim
+        for layer_dim in resolved_hidden_dims:
+            self._hidden_weights.append(
+                rng.normal(0.0, 0.5, size=(previous_dim, layer_dim))
+            )
+            self._hidden_biases.append(np.zeros((1, layer_dim), dtype=np.float64))
+            previous_dim = layer_dim
+
+        self.weight_hidden_output = rng.normal(0.0, 0.5, size=(previous_dim, 1))
         self.bias_output = np.zeros((1, 1), dtype=np.float64)
 
-        self._traffic_sum = np.zeros(hidden_dim, dtype=np.float64)
+        # Backward-compatible aliases for single-hidden-layer consumers.
+        self.weight_input_hidden = self._hidden_weights[0]
+        self.bias_hidden = self._hidden_biases[0]
+        self.hidden_dims = tuple(resolved_hidden_dims)
+
+        self._traffic_sums = [
+            np.zeros(layer_dim, dtype=np.float64) for layer_dim in resolved_hidden_dims
+        ]
         self._traffic_steps = 0
 
     def train_epoch(self, input_batch: Array, target_batch: Array, learning_rate: float) -> BackpropTrainResult:
         if learning_rate <= 0.0:
             raise ValueError("learning_rate must be positive")
 
-        hidden_linear, hidden_activation, output_activation = self._forward(input_batch)
+        hidden_linears, hidden_activations, output_activation = self._forward(input_batch)
         sample_count = float(input_batch.shape[0])
 
         output_grad = (output_activation - target_batch) / sample_count
-        grad_hidden_output = hidden_activation.T @ output_grad
+        grad_hidden_output = hidden_activations[-1].T @ output_grad
         grad_output_bias = np.sum(output_grad, axis=0, keepdims=True)
 
-        hidden_grad = (output_grad @ self.weight_hidden_output.T) * tanh_derivative_from_linear(hidden_linear)
-        grad_input_hidden = input_batch.T @ hidden_grad
-        grad_hidden_bias = np.sum(hidden_grad, axis=0, keepdims=True)
+        hidden_deltas: list[Array] = [np.zeros_like(activation) for activation in hidden_activations]
+        hidden_deltas[-1] = (output_grad @ self.weight_hidden_output.T) * tanh_derivative_from_linear(
+            hidden_linears[-1]
+        )
+        for layer_index in range(len(hidden_deltas) - 2, -1, -1):
+            next_weight = self._hidden_weights[layer_index + 1]
+            hidden_deltas[layer_index] = (
+                hidden_deltas[layer_index + 1] @ next_weight.T
+            ) * tanh_derivative_from_linear(hidden_linears[layer_index])
+
+        grad_hidden_weights: list[Array] = []
+        grad_hidden_biases: list[Array] = []
+        previous_activation = input_batch
+        for layer_index, layer_delta in enumerate(hidden_deltas):
+            grad_hidden_weights.append(previous_activation.T @ layer_delta)
+            grad_hidden_biases.append(np.sum(layer_delta, axis=0, keepdims=True))
+            previous_activation = hidden_activations[layer_index]
 
         self.weight_hidden_output -= learning_rate * grad_hidden_output
         self.bias_output -= learning_rate * grad_output_bias
-        self.weight_input_hidden -= learning_rate * grad_input_hidden
-        self.bias_hidden -= learning_rate * grad_hidden_bias
+        for layer_index in range(len(self._hidden_weights)):
+            self._hidden_weights[layer_index] -= learning_rate * grad_hidden_weights[layer_index]
+            self._hidden_biases[layer_index] -= learning_rate * grad_hidden_biases[layer_index]
 
-        self._record_hidden_traffic(hidden_activation)
+        self._record_hidden_traffic(hidden_activations)
         loss = self._binary_cross_entropy(output_activation, target_batch)
         return BackpropTrainResult(loss=loss)
 
@@ -77,11 +114,19 @@ class BackpropMLP:
         return float(np.mean(prediction == target_batch))
 
     def get_layer_traffic(self) -> list[LayerTraffic]:
-        if self._traffic_steps == 0:
-            mean_traffic = self._traffic_sum.copy()
-        else:
-            mean_traffic = self._traffic_sum / float(self._traffic_steps)
-        return [LayerTraffic(layer_name="hidden", mean_abs_activation=mean_traffic)]
+        traffic_layers: list[LayerTraffic] = []
+        for layer_index, traffic_sum in enumerate(self._traffic_sums):
+            if self._traffic_steps == 0:
+                mean_traffic = traffic_sum.copy()
+            else:
+                mean_traffic = traffic_sum / float(self._traffic_steps)
+            traffic_layers.append(
+                LayerTraffic(
+                    layer_name=f"hidden_{layer_index}",
+                    mean_abs_activation=mean_traffic,
+                )
+            )
+        return traffic_layers
 
     def apply_neuron_proposals(self, proposals: list[NeuronChangeProposal]) -> None:
         for proposal in proposals:
@@ -90,12 +135,19 @@ class BackpropMLP:
                     "Dynamic neuron changes are not implemented yet for BackpropMLP."
                 )
 
-    def _forward(self, input_batch: Array) -> tuple[Array, Array, Array]:
-        hidden_linear = input_batch @ self.weight_input_hidden + self.bias_hidden
-        hidden_activation = tanh(hidden_linear)
-        output_linear = hidden_activation @ self.weight_hidden_output + self.bias_output
+    def _forward(self, input_batch: Array) -> tuple[list[Array], list[Array], Array]:
+        hidden_linears: list[Array] = []
+        hidden_activations: list[Array] = []
+        activation = input_batch
+        for layer_weight, layer_bias in zip(self._hidden_weights, self._hidden_biases):
+            hidden_linear = activation @ layer_weight + layer_bias
+            hidden_activation = tanh(hidden_linear)
+            hidden_linears.append(hidden_linear)
+            hidden_activations.append(hidden_activation)
+            activation = hidden_activation
+        output_linear = activation @ self.weight_hidden_output + self.bias_output
         output_activation = sigmoid(output_linear)
-        return hidden_linear, hidden_activation, output_activation
+        return hidden_linears, hidden_activations, output_activation
 
     def _binary_cross_entropy(self, predictions: Array, targets: Array) -> float:
         epsilon = 1e-8
@@ -103,7 +155,24 @@ class BackpropMLP:
         loss = -(targets * np.log(clipped) + (1.0 - targets) * np.log(1.0 - clipped))
         return float(np.mean(loss))
 
-    def _record_hidden_traffic(self, hidden_activation: Array) -> None:
-        self._traffic_sum += np.mean(np.abs(hidden_activation), axis=0)
+    def _record_hidden_traffic(self, hidden_activations: list[Array]) -> None:
+        for layer_index, activation in enumerate(hidden_activations):
+            self._traffic_sums[layer_index] += np.mean(np.abs(activation), axis=0)
         self._traffic_steps += 1
 
+    def _resolve_hidden_dims(
+        self,
+        hidden_dim: int,
+        hidden_dims: list[int] | tuple[int, ...] | None,
+    ) -> list[int]:
+        if hidden_dims is None:
+            if hidden_dim <= 0:
+                raise ValueError("hidden_dim must be positive")
+            return [hidden_dim]
+
+        resolved = [int(value) for value in hidden_dims]
+        if not resolved:
+            raise ValueError("hidden_dims cannot be empty")
+        if any(value <= 0 for value in resolved):
+            raise ValueError("all hidden_dims values must be positive")
+        return resolved

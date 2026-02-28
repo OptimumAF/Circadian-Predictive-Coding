@@ -22,6 +22,7 @@ class ExperimentConfig:
     sample_count: int = 400
     noise_scale: float = 0.8
     hidden_dim: int = 12
+    hidden_dims: tuple[int, ...] | None = None
     epoch_count: int = 160
     backprop_learning_rate: float = 0.12
     pc_learning_rate: float = 0.05
@@ -79,15 +80,25 @@ def run_experiment(
         seed=config.random_seed,
     )
 
-    backprop_model = BackpropMLP(input_dim=2, hidden_dim=config.hidden_dim, seed=config.random_seed)
+    resolved_hidden_dims = list(config.hidden_dims) if config.hidden_dims is not None else None
+    backprop_model = BackpropMLP(
+        input_dim=2,
+        hidden_dim=config.hidden_dim,
+        seed=config.random_seed,
+        hidden_dims=resolved_hidden_dims,
+    )
     predictive_coding_model = PredictiveCodingNetwork(
-        input_dim=2, hidden_dim=config.hidden_dim, seed=config.random_seed + 1
+        input_dim=2,
+        hidden_dim=config.hidden_dim,
+        seed=config.random_seed + 1,
+        hidden_dims=resolved_hidden_dims,
     )
     circadian_model = CircadianPredictiveCodingNetwork(
         input_dim=2,
         hidden_dim=config.hidden_dim,
         seed=config.random_seed + 2,
         circadian_config=config.circadian_config,
+        hidden_dims=resolved_hidden_dims,
     )
 
     backprop_losses: list[float] = []

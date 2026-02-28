@@ -147,6 +147,7 @@ def _run_scenario(
             sample_count=base_config.sample_count,
             noise_scale=noise_scale,
             hidden_dim=base_config.hidden_dim,
+            hidden_dims=base_config.hidden_dims,
             epoch_count=base_config.epoch_count,
             backprop_learning_rate=base_config.backprop_learning_rate,
             pc_learning_rate=base_config.pc_learning_rate,
