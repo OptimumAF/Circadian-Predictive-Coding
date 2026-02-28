@@ -1,0 +1,10 @@
+Continual Shift Benchmark
+-------------------------
+Phase A trains on base distribution; phase B trains on shifted/rotated distribution.
+Seeds: [3, 7, 11, 19, 23, 31, 37]
+Phase B transform: rotation=40.0 deg, translation=(0.90, -0.70)
+Phase B train fraction: 0.14
+
+Backprop: A_pre=0.975+/-0.012, A_post=0.960+/-0.022, B_post=0.933+/-0.026, retention=0.985+/-0.026, balanced=0.946+/-0.016
+Predictive coding: A_pre=0.970+/-0.016, A_post=0.967+/-0.016, B_post=0.927+/-0.024, retention=0.997+/-0.020, balanced=0.947+/-0.008
+Circadian predictive coding: A_pre=0.975+/-0.015, A_post=0.968+/-0.009, B_post=0.930+/-0.023, retention=0.993+/-0.008, balanced=0.949+/-0.010, sleep_events=5.00, splits=5.00, prunes=0.00, hidden_end=17.00

@@ -27,6 +27,25 @@ def generate_two_cluster_dataset(
     test_ratio: float = 0.2,
 ) -> DatasetSplit:
     """Create a deterministic two-cluster binary classification dataset."""
+    return generate_two_cluster_dataset_with_transform(
+        sample_count=sample_count,
+        noise_scale=noise_scale,
+        seed=seed,
+        test_ratio=test_ratio,
+    )
+
+
+def generate_two_cluster_dataset_with_transform(
+    sample_count: int,
+    noise_scale: float,
+    seed: int,
+    test_ratio: float = 0.2,
+    class_zero_center: tuple[float, float] = (-1.2, -1.0),
+    class_one_center: tuple[float, float] = (1.2, 1.0),
+    rotation_degrees: float = 0.0,
+    translation: tuple[float, float] = (0.0, 0.0),
+) -> DatasetSplit:
+    """Create a deterministic two-cluster dataset with optional affine transform."""
     if sample_count < 20:
         raise ValueError("sample_count must be at least 20")
     if noise_scale <= 0.0:
@@ -37,10 +56,22 @@ def generate_two_cluster_dataset(
     rng = np.random.default_rng(seed)
     class_size = sample_count // 2
 
-    class_zero = rng.normal(loc=(-1.2, -1.0), scale=noise_scale, size=(class_size, 2))
-    class_one = rng.normal(loc=(1.2, 1.0), scale=noise_scale, size=(class_size, 2))
+    class_zero = rng.normal(loc=class_zero_center, scale=noise_scale, size=(class_size, 2))
+    class_one = rng.normal(loc=class_one_center, scale=noise_scale, size=(class_size, 2))
 
     input_data = np.vstack([class_zero, class_one]).astype(np.float64)
+    if abs(rotation_degrees) > 1e-12:
+        radians = np.deg2rad(rotation_degrees)
+        rotation_matrix = np.array(
+            [
+                [np.cos(radians), -np.sin(radians)],
+                [np.sin(radians), np.cos(radians)],
+            ],
+            dtype=np.float64,
+        )
+        input_data = input_data @ rotation_matrix.T
+    input_data += np.array(translation, dtype=np.float64)
+
     target_data = np.concatenate(
         [np.zeros(class_size, dtype=np.float64), np.ones(class_size, dtype=np.float64)]
     ).reshape(-1, 1)
@@ -56,4 +87,3 @@ def generate_two_cluster_dataset(
         test_input=input_data[split_index:],
         test_target=target_data[split_index:],
     )
-

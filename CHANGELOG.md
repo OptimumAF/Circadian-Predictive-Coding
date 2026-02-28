@@ -46,6 +46,11 @@ for versioning even while in research-stage development.
   - `.github/CODEOWNERS`
   - `docs/model-card.md`
   - `docs/figures/README.md`
+- Continual-shift comparison benchmark for retention vs adaptation:
+  - `src/app/continual_shift_benchmark.py`
+  - `scripts/run_continual_shift_benchmark.py`
+  - `tests/test_continual_shift_benchmark.py`
+  - shifted/rotated dataset support in `src/infra/datasets.py`
 
 ### Changed
 

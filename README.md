@@ -164,6 +164,12 @@ Toy baseline with review-driven circadian controls:
 python predictive_coding_experiment.py --adaptive-sleep-trigger --adaptive-sleep-budget --reward-modulated-learning --reward-scale-min 0.8 --reward-scale-max 1.4
 ```
 
+Continual shift stress test (retention vs adaptation):
+
+```powershell
+python scripts/run_continual_shift_benchmark.py --profile strength-case --seeds 3,7,11,19,23,31,37
+```
+
 ResNet benchmark (all 3 models):
 
 ```powershell
