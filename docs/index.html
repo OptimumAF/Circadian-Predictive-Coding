@@ -109,6 +109,20 @@
       background: #fff;
     }
 
+    .hero-visual {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      box-shadow: 0 4px 14px rgba(30, 36, 48, 0.05);
+    }
+
+    .hero-caption {
+      margin: 8px 8px 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
     .footer {
       margin-top: 18px;
       color: var(--muted);
@@ -147,6 +161,14 @@
         <p class="label">Current Dataset Profile</p>
         <p class="value">CIFAR-100 Multi-seed Summary</p>
       </article>
+    </section>
+
+    <section class="section">
+      <h2>Hardest-Case Dynamics (Training + Inference)</h2>
+      <img class="hero-visual" src="figures/hardest_mode_dynamics.gif" alt="Hardest-case training and inference dynamics GIF" />
+      <p class="hero-caption">
+        Left: training progression and phase-B inference accuracy over time. Right: circadian inference decision map with correct/incorrect overlays during hardest-case drift.
+      </p>
     </section>
 
     <section class="section">

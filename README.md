@@ -34,6 +34,10 @@ flowchart LR
     H --> A
 ```
 
+### Hardest-Case Dynamics (Train + Inference)
+
+![Hardest-Case Dynamics](docs/figures/hardest_mode_dynamics.gif)
+
 ## Core Idea
 
 The circadian algorithm models wake and sleep phases:
