@@ -36,3 +36,29 @@ jobs:
 
       - name: Test
         run: pytest -q
+
+  torch-cpu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          # The CPU index supplies matching Torch and torchvision wheels without CUDA dependencies.
+          python -m pip install -r requirements-resnet.txt --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Verify CPU backend
+        run: |
+          python -c "import torch, torchvision; assert torch.version.cuda is None, 'Expected CPU-only Torch wheel'; print('Torch', torch.__version__, 'torchvision', torchvision.__version__)"
+
+      - name: Test Torch suites
+        run: pytest -q -ra tests/test_resnet50_variants.py tests/test_resnet50_benchmark.py tests/test_matched_head_benchmark.py tests/test_matched_head_capacity.py tests/test_isolated_head_memory.py tests/test_matched_head_tuning.py tests/test_repeated_head_confirmation.py tests/test_process_memory.py

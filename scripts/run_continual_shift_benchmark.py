@@ -12,6 +12,8 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.app.continual_shift_benchmark import (
+    CONTINUAL_LEGACY_PROTOCOL,
+    CONTINUAL_VALIDATION_PROTOCOL,
     ContinualShiftConfig,
     format_continual_shift_benchmark,
     run_continual_shift_benchmark,
@@ -45,6 +47,11 @@ def build_parser() -> argparse.ArgumentParser:
         description="Run phase-A/phase-B continual-shift benchmark for all three models."
     )
     parser.add_argument("--seeds", type=str, default="3,7,11,19,23,31,37")
+    parser.add_argument(
+        "--protocol-id", choices=[CONTINUAL_VALIDATION_PROTOCOL, CONTINUAL_LEGACY_PROTOCOL],
+        default=CONTINUAL_VALIDATION_PROTOCOL,
+    )
+    parser.add_argument("--validation-fraction", type=float, default=0.20)
     parser.add_argument(
         "--profile",
         type=str,
@@ -82,6 +89,9 @@ def main() -> None:
     """Run CLI entrypoint."""
     parser = build_parser()
     args = parser.parse_args()
+    output_path = Path(args.output_file) if args.output_file else None
+    if output_path is not None and output_path.exists():
+        raise FileExistsError(f"Continual benchmark output already exists: {output_path}")
 
     seeds = _parse_int_list(args.seeds)
     profile_defaults = _build_profile_defaults(args.profile)
@@ -101,6 +111,8 @@ def main() -> None:
         else profile_defaults.hidden_dims
     )
     config = ContinualShiftConfig(
+        protocol_id=args.protocol_id,
+        validation_fraction=args.validation_fraction,
         sample_count_phase_a=_resolve_optional_int(
             args.sample_count_phase_a, profile_defaults.sample_count_phase_a
         ),
@@ -141,9 +153,9 @@ def main() -> None:
     result = run_continual_shift_benchmark(config=config, seeds=seeds)
     formatted = format_continual_shift_benchmark(result)
     print(formatted)
-    if args.output_file:
-        output_path = Path(args.output_file)
-        output_path.write_text(formatted + "\n", encoding="utf-8")
+    if output_path is not None:
+        with output_path.open("x", encoding="utf-8") as output_file:
+            output_file.write(formatted + "\n")
 
 
 def _build_strength_case_circadian_config() -> CircadianConfig:

@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 
 import numpy as np
 
+from src.app.comparison_scope import NumpyComparisonScope, scope_for_hidden_dims
 from src.app.experiment_runner import ExperimentConfig, ExperimentResult, run_experiment
 
 
@@ -19,6 +21,7 @@ class AggregateModelStats:
     std_final_metric: float
     mean_epoch_80pct_progress: float
     std_epoch_80pct_progress: float
+    training_metric_id: str
 
 
 @dataclass(frozen=True)
@@ -34,6 +37,7 @@ class AggregateCircadianStats:
     mean_sleep_splits: float
     mean_sleep_prunes: float
     mean_hidden_dim_end: float
+    training_metric_id: str
 
 
 @dataclass(frozen=True)
@@ -45,6 +49,7 @@ class ScenarioComparison:
     backprop: AggregateModelStats
     predictive_coding: AggregateModelStats
     circadian_predictive_coding: AggregateCircadianStats
+    split_hashes_by_seed: dict[int, dict[str, str]]
 
 
 @dataclass(frozen=True)
@@ -53,6 +58,8 @@ class InDepthComparisonResult:
 
     seeds: list[int]
     scenario_reports: list[ScenarioComparison]
+    protocol_id: str
+    comparison_scope: NumpyComparisonScope
 
 
 def run_indepth_comparison(
@@ -72,9 +79,20 @@ def run_indepth_comparison(
     scenario_reports: list[ScenarioComparison] = []
     for noise in noise_levels:
         run_results = _run_scenario(base_config=base_config, seeds=seeds, noise_scale=noise)
-        scenario_reports.append(_aggregate_scenario(noise_scale=noise, run_results=run_results))
+        scenario_reports.append(
+            _aggregate_scenario(noise_scale=noise, run_results=run_results, seeds=seeds)
+        )
 
-    return InDepthComparisonResult(seeds=list(seeds), scenario_reports=scenario_reports)
+    return InDepthComparisonResult(
+        seeds=list(seeds),
+        scenario_reports=scenario_reports,
+        protocol_id=base_config.protocol_id,
+        comparison_scope=scope_for_hidden_dims(
+            base_config.hidden_dims
+            if base_config.hidden_dims is not None
+            else (base_config.hidden_dim,)
+        ),
+    )
 
 
 def format_indepth_comparison_result(result: InDepthComparisonResult) -> str:
@@ -83,6 +101,14 @@ def format_indepth_comparison_result(result: InDepthComparisonResult) -> str:
         "In-Depth Model Comparison",
         "-------------------------",
         "Models: Backprop, Predictive Coding, Circadian Predictive Coding",
+        f"Protocol: {result.protocol_id}",
+        f"Comparison scope: {result.comparison_scope.scope_id}. {result.comparison_scope.description}",
+        (
+            "Learning rules: "
+            f"Backprop={result.comparison_scope.backprop_algorithm_id}, "
+            f"PC={result.comparison_scope.predictive_algorithm_id}, "
+            f"Circadian={result.comparison_scope.circadian_algorithm_id}"
+        ),
         f"Seeds: {result.seeds}",
         "",
     ]
@@ -90,6 +116,7 @@ def format_indepth_comparison_result(result: InDepthComparisonResult) -> str:
         lines.extend(
             [
                 f"Scenario noise={scenario.noise_scale:.2f}, runs={scenario.run_count}",
+                f"Split hashes by seed: {scenario.split_hashes_by_seed}",
                 (
                     "Backprop: "
                     + _format_aggregate_line(
@@ -99,6 +126,7 @@ def format_indepth_comparison_result(result: InDepthComparisonResult) -> str:
                         scenario.backprop.std_final_metric,
                         scenario.backprop.mean_epoch_80pct_progress,
                         scenario.backprop.std_epoch_80pct_progress,
+                        scenario.backprop.training_metric_id,
                     )
                 ),
                 (
@@ -110,6 +138,7 @@ def format_indepth_comparison_result(result: InDepthComparisonResult) -> str:
                         scenario.predictive_coding.std_final_metric,
                         scenario.predictive_coding.mean_epoch_80pct_progress,
                         scenario.predictive_coding.std_epoch_80pct_progress,
+                        scenario.predictive_coding.training_metric_id,
                     )
                 ),
                 (
@@ -121,6 +150,7 @@ def format_indepth_comparison_result(result: InDepthComparisonResult) -> str:
                         scenario.circadian_predictive_coding.std_final_metric,
                         scenario.circadian_predictive_coding.mean_epoch_80pct_progress,
                         scenario.circadian_predictive_coding.std_epoch_80pct_progress,
+                        scenario.circadian_predictive_coding.training_metric_id,
                     )
                     + ", "
                     + (
@@ -145,6 +175,8 @@ def _run_scenario(
     for seed in seeds:
         scenario_config = ExperimentConfig(
             sample_count=base_config.sample_count,
+            protocol_id=base_config.protocol_id,
+            validation_fraction=base_config.validation_fraction,
             noise_scale=noise_scale,
             hidden_dim=base_config.hidden_dim,
             hidden_dims=base_config.hidden_dims,
@@ -166,7 +198,9 @@ def _run_scenario(
     return scenario_results
 
 
-def _aggregate_scenario(noise_scale: float, run_results: list[ExperimentResult]) -> ScenarioComparison:
+def _aggregate_scenario(
+    noise_scale: float, run_results: list[ExperimentResult], seeds: list[int],
+) -> ScenarioComparison:
     backprop_accuracies = [run.backprop.test_accuracy for run in run_results]
     predictive_accuracies = [run.predictive_coding.test_accuracy for run in run_results]
     circadian_accuracies = [run.circadian_predictive_coding.test_accuracy for run in run_results]
@@ -192,15 +226,22 @@ def _aggregate_scenario(noise_scale: float, run_results: list[ExperimentResult])
     return ScenarioComparison(
         noise_scale=noise_scale,
         run_count=len(run_results),
+        split_hashes_by_seed={
+            seed: run.split_hashes for seed, run in zip(seeds, run_results)
+        },
         backprop=_aggregate_model(
             accuracies=backprop_accuracies,
             final_metrics=backprop_finals,
             progress_epochs=backprop_progress_epochs,
+            training_metric_id=_single_training_metric_id(run.backprop.training_metric_id for run in run_results),
         ),
         predictive_coding=_aggregate_model(
             accuracies=predictive_accuracies,
             final_metrics=predictive_finals,
             progress_epochs=predictive_progress_epochs,
+            training_metric_id=_single_training_metric_id(
+                run.predictive_coding.training_metric_id for run in run_results
+            ),
         ),
         circadian_predictive_coding=AggregateCircadianStats(
             mean_test_accuracy=float(np.mean(circadian_accuracies)),
@@ -212,6 +253,9 @@ def _aggregate_scenario(noise_scale: float, run_results: list[ExperimentResult])
             mean_sleep_splits=float(np.mean(circadian_splits)),
             mean_sleep_prunes=float(np.mean(circadian_prunes)),
             mean_hidden_dim_end=float(np.mean(circadian_hidden_ends)),
+            training_metric_id=_single_training_metric_id(
+                run.circadian_predictive_coding.training_metric_id for run in run_results
+            ),
         ),
     )
 
@@ -220,6 +264,7 @@ def _aggregate_model(
     accuracies: list[float],
     final_metrics: list[float],
     progress_epochs: list[int],
+    training_metric_id: str,
 ) -> AggregateModelStats:
     return AggregateModelStats(
         mean_test_accuracy=float(np.mean(accuracies)),
@@ -228,7 +273,15 @@ def _aggregate_model(
         std_final_metric=float(np.std(final_metrics)),
         mean_epoch_80pct_progress=float(np.mean(progress_epochs)),
         std_epoch_80pct_progress=float(np.std(progress_epochs)),
+        training_metric_id=training_metric_id,
     )
+
+
+def _single_training_metric_id(metric_ids: Iterable[str]) -> str:
+    unique = set(metric_ids)
+    if len(unique) != 1:
+        raise ValueError("Cannot aggregate different training metric definitions")
+    return unique.pop()
 
 
 def _epoch_for_80pct_progress(metric_history: list[float]) -> int:
@@ -257,9 +310,10 @@ def _format_aggregate_line(
     std_metric: float,
     mean_epoch: float,
     std_epoch: float,
+    training_metric_id: str,
 ) -> str:
     return (
         f"acc={mean_accuracy:.3f}+/-{std_accuracy:.3f}, "
-        f"final_metric={mean_metric:.4f}+/-{std_metric:.4f}, "
+        f"training_metric[{training_metric_id}]={mean_metric:.4f}+/-{std_metric:.4f}, "
         f"epoch_80pct={mean_epoch:.1f}+/-{std_epoch:.1f}"
     )

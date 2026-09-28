@@ -19,11 +19,15 @@ if str(REPO_ROOT) not in sys.path:
 from src.app.resnet50_benchmark import (  # noqa: E402
     ModelSpeedReport,
     ResNet50BenchmarkConfig,
+    VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+    VISION_SEEDED_UNMATCHED_PROTOCOL,
+    VISION_VALIDATION_UNMATCHED_PROTOCOL,
     run_resnet50_benchmark,
 )
 
 
 CORE_METRICS: tuple[str, ...] = (
+    "validation_accuracy",
     "test_accuracy",
     "final_cross_entropy",
     "train_seconds",
@@ -57,6 +61,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Comma-separated seed list.",
     )
     parser.add_argument(
+        "--protocol-id",
+        choices=[
+            VISION_SEEDED_UNMATCHED_PROTOCOL,
+            VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+            VISION_VALIDATION_UNMATCHED_PROTOCOL,
+        ],
+        default=VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+    )
+    parser.add_argument(
         "--dataset-name",
         choices=["synthetic", "cifar10", "cifar100"],
         default="cifar100",
@@ -66,6 +79,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dataset-no-download", dest="dataset_download", action="store_false")
     parser.set_defaults(dataset_download=True)
     parser.add_argument("--dataset-train-subset-size", type=int, default=0)
+    parser.add_argument("--dataset-validation-subset-size", type=int, default=1000)
+    parser.add_argument("--dataset-guard-subset-size", type=int, default=1000)
     parser.add_argument("--dataset-test-subset-size", type=int, default=0)
     parser.add_argument("--dataset-num-workers", type=int, default=0)
     parser.add_argument(
@@ -84,6 +99,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument("--classes", type=int, default=None)
     parser.add_argument("--train-samples", type=int, default=2500)
+    parser.add_argument("--validation-samples", type=int, default=64)
+    parser.add_argument("--guard-samples", type=int, default=64)
     parser.add_argument("--test-samples", type=int, default=700)
     parser.add_argument("--image-size", type=int, default=96)
     parser.add_argument("--batch-size", type=int, default=64)
@@ -152,6 +169,9 @@ def build_base_config(args: argparse.Namespace) -> ResNet50BenchmarkConfig:
 
     return ResNet50BenchmarkConfig(
         train_samples=args.train_samples,
+        protocol_id=args.protocol_id,
+        validation_samples=args.validation_samples,
+        guard_samples=args.guard_samples,
         test_samples=args.test_samples,
         num_classes=resolve_num_classes(args.dataset_name, args.classes),
         image_size=args.image_size,
@@ -160,6 +180,8 @@ def build_base_config(args: argparse.Namespace) -> ResNet50BenchmarkConfig:
         dataset_data_root=args.dataset_root,
         dataset_download=args.dataset_download,
         dataset_train_subset_size=args.dataset_train_subset_size,
+        dataset_validation_subset_size=args.dataset_validation_subset_size,
+        dataset_guard_subset_size=args.dataset_guard_subset_size,
         dataset_test_subset_size=args.dataset_test_subset_size,
         dataset_num_workers=args.dataset_num_workers,
         dataset_use_augmentation=args.dataset_use_augmentation,
@@ -180,11 +202,17 @@ def report_to_row(seed: int, report: ModelSpeedReport) -> dict[str, Any]:
     return {
         "seed": seed,
         "model_name": report.model_name,
+        "benchmark_track": report.benchmark_track,
+        "backbone_trainable": report.backbone_trainable,
+        "backbone_pretraining": report.backbone_pretraining,
+        "head_type": report.head_type,
         "final_metric_name": report.final_metric_name,
         "final_metric_value": float(report.final_metric_value),
+        "validation_accuracy": float(report.validation_accuracy),
         "test_accuracy": float(report.test_accuracy),
         "final_cross_entropy": _optional_float(report.final_cross_entropy),
         "final_energy": _optional_float(report.final_energy),
+        "training_energy_id": report.training_energy_id,
         "train_seconds": float(report.train_seconds),
         "train_samples_per_second": float(report.train_samples_per_second),
         "mean_train_step_ms": float(report.mean_train_step_ms),
@@ -220,6 +248,14 @@ def aggregate_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "seed_count": len(model_rows),
             "final_metric_name": model_rows[0]["final_metric_name"],
         }
+        for metadata in (
+            "benchmark_track", "backbone_trainable", "backbone_pretraining", "head_type",
+            "training_energy_id",
+        ):
+            metadata_values = {row[metadata] for row in model_rows}
+            if len(metadata_values) != 1:
+                raise ValueError(f"Cannot aggregate mixed {metadata} for {model_name}.")
+            summary[metadata] = model_rows[0][metadata]
         for metric in CORE_METRICS:
             values = [float(r[metric]) for r in model_rows]
             summary[f"{metric}_mean"] = float(np.mean(values))
@@ -238,7 +274,8 @@ def aggregate_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def compute_efficiency_winner(summary_rows: list[dict[str, Any]]) -> str:
-    acc_values = [float(row["test_accuracy_mean"]) for row in summary_rows]
+    _require_one_track(summary_rows)
+    acc_values = [float(row["validation_accuracy_mean"]) for row in summary_rows]
     train_values = [float(row["train_samples_per_second_mean"]) for row in summary_rows]
     infer_values = [float(row["inference_samples_per_second_mean"]) for row in summary_rows]
     acc_norm = normalize(acc_values)
@@ -267,64 +304,114 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         raise ValueError("rows must be non-empty.")
     fieldnames = list(rows[0].keys())
-    with path.open("w", encoding="utf-8", newline="") as handle:
+    with path.open("x", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 
 
 def best_by_metric(summary_rows: list[dict[str, Any]], metric: str) -> str:
+    _require_one_track(summary_rows)
     return str(max(summary_rows, key=lambda row: float(row[metric]))["model_name"])
+
+
+def _require_one_track(rows: list[dict[str, Any]]) -> None:
+    if not rows or any("benchmark_track" not in row for row in rows):
+        raise ValueError("Ranking requires an explicit benchmark_track for every result.")
+    tracks = {row["benchmark_track"] for row in rows}
+    if len(tracks) != 1:
+        raise ValueError("Cannot rank results from different benchmark tracks.")
+
+
+def validation_selection_rows(summary_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Expose only declared selection metrics to winner calculations."""
+    fields = (
+        "model_name", "benchmark_track", "validation_accuracy_mean", "train_samples_per_second_mean",
+        "inference_samples_per_second_mean",
+    )
+    return [{field: row[field] for field in fields} for row in summary_rows]
 
 
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
+    output_prefix = Path(args.output_prefix)
+    json_path = output_prefix.with_suffix(".json")
+    per_seed_csv_path = output_prefix.with_name(f"{output_prefix.name}_per_seed.csv")
+    summary_csv_path = output_prefix.with_name(f"{output_prefix.name}_summary.csv")
+    for output_path in (json_path, per_seed_csv_path, summary_csv_path):
+        if output_path.exists():
+            raise FileExistsError(f"Multi-seed output already exists: {output_path}")
     seeds = parse_seed_list(args.seeds)
     base = build_base_config(args)
 
     per_seed_rows: list[dict[str, Any]] = []
+    split_hashes_by_seed: dict[str, dict[str, str]] = {}
+    trained_model_hashes_by_seed: dict[str, dict[str, str]] = {}
     for index, seed in enumerate(seeds, start=1):
         config = replace(base, seed=seed)
         print(f"[{index}/{len(seeds)}] running seed={seed}")
         result = run_resnet50_benchmark(config)
+        split_hashes_by_seed[str(seed)] = result.split_hashes
+        if result.trained_model_hashes is not None:
+            trained_model_hashes_by_seed[str(seed)] = result.trained_model_hashes
         for report in result.reports:
             row = report_to_row(seed=seed, report=report)
             per_seed_rows.append(row)
             print(
-                f"  {row['model_name']}: acc={row['test_accuracy']:.4f} "
+                f"  {row['model_name']}: validation_acc={row['validation_accuracy']:.4f} "
+                f"test_acc={row['test_accuracy']:.4f} "
                 f"train_sps={row['train_samples_per_second']:.1f} "
                 f"infer_sps={row['inference_samples_per_second']:.1f}"
             )
 
     summary_rows = aggregate_rows(per_seed_rows)
-    best_efficiency_model = compute_efficiency_winner(summary_rows)
+    selection_rows = validation_selection_rows(summary_rows)
+    best_efficiency_model = compute_efficiency_winner(selection_rows)
     winners = {
-        "best_accuracy_model": best_by_metric(summary_rows, "test_accuracy_mean"),
-        "best_train_speed_model": best_by_metric(summary_rows, "train_samples_per_second_mean"),
+        "best_accuracy_model": best_by_metric(selection_rows, "validation_accuracy_mean"),
+        "best_train_speed_model": best_by_metric(selection_rows, "train_samples_per_second_mean"),
         "best_inference_speed_model": best_by_metric(
-            summary_rows, "inference_samples_per_second_mean"
+            selection_rows, "inference_samples_per_second_mean"
         ),
         "best_balanced_model": best_efficiency_model,
     }
-
-    output_prefix = Path(args.output_prefix)
-    json_path = output_prefix.with_suffix(".json")
-    per_seed_csv_path = output_prefix.with_name(f"{output_prefix.name}_per_seed.csv")
-    summary_csv_path = output_prefix.with_name(f"{output_prefix.name}_summary.csv")
+    scores_by_model = {
+        row["model_name"]: row["balanced_score"] for row in selection_rows
+    }
+    for row in summary_rows:
+        row["balanced_score"] = scores_by_model[row["model_name"]]
 
     payload = {
+        "protocol_id": base.protocol_id,
+        "comparison_status": "unmatched reference; validation winners are descriptive only",
         "dataset": {
             "name": base.dataset_name,
             "root": base.dataset_data_root,
             "download": base.dataset_download,
             "train_subset_size": base.dataset_train_subset_size,
+            "validation_subset_size": base.dataset_validation_subset_size,
+            "guard_subset_size": (
+                base.dataset_guard_subset_size
+                if base.protocol_id in {
+                    VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+                    VISION_SEEDED_UNMATCHED_PROTOCOL,
+                } else 0
+            ),
             "test_subset_size": base.dataset_test_subset_size,
             "num_workers": base.dataset_num_workers,
             "use_augmentation": base.dataset_use_augmentation,
             "difficulty": base.dataset_difficulty,
             "noise_std": base.dataset_noise_std,
             "train_samples": base.train_samples,
+            "validation_samples": base.validation_samples,
+            "guard_samples": (
+                base.guard_samples
+                if base.protocol_id in {
+                    VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+                    VISION_SEEDED_UNMATCHED_PROTOCOL,
+                } else 0
+            ),
             "test_samples": base.test_samples,
             "num_classes": base.num_classes,
             "image_size": base.image_size,
@@ -342,11 +429,14 @@ def main() -> None:
             "seeds": list(seeds),
         },
         "winners": winners,
+        "split_hashes_by_seed": split_hashes_by_seed,
+        "trained_model_hashes_by_seed": trained_model_hashes_by_seed,
         "summary": summary_rows,
         "per_seed": per_seed_rows,
     }
 
-    json_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    with json_path.open("x", encoding="utf-8") as output_file:
+        output_file.write(json.dumps(payload, indent=2))
     write_csv(per_seed_csv_path, per_seed_rows)
     write_csv(summary_csv_path, summary_rows)
 

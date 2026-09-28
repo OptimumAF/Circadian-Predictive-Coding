@@ -8,9 +8,16 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.core.activations import sigmoid, tanh, tanh_derivative_from_linear
+from src.core.dimension_validation import require_positive_integer_dimension
 from src.core.neuron_adaptation import LayerTraffic, NeuronChangeProposal
+from src.core.training_validation import (
+    require_finite_training_arrays,
+    validate_binary_training_batch,
+    validate_positive_finite_learning_rate,
+)
 
 Array = NDArray[np.float64]
+NUMPY_BACKPROP_LOSS_ID = "numpy_binary_bce_preupdate_v1"
 
 
 @dataclass(frozen=True)
@@ -30,12 +37,12 @@ class BackpropMLP:
         seed: int,
         hidden_dims: list[int] | tuple[int, ...] | None = None,
     ) -> None:
+        input_dim = require_positive_integer_dimension(input_dim, "input_dim")
         resolved_hidden_dims = self._resolve_hidden_dims(
             hidden_dim=hidden_dim,
             hidden_dims=hidden_dims,
         )
-        if input_dim <= 0:
-            raise ValueError("input_dim must be positive")
+        self.input_dim = input_dim
 
         rng = np.random.default_rng(seed)
         self._hidden_weights: list[Array] = []
@@ -63,10 +70,17 @@ class BackpropMLP:
         self._traffic_steps = 0
 
     def train_epoch(self, input_batch: Array, target_batch: Array, learning_rate: float) -> BackpropTrainResult:
-        if learning_rate <= 0.0:
-            raise ValueError("learning_rate must be positive")
+        validate_positive_finite_learning_rate(learning_rate)
+        validate_binary_training_batch(input_batch, target_batch, self.input_dim)
+        require_finite_training_arrays(
+            [*self._hidden_weights, *self._hidden_biases, self.weight_hidden_output, self.bias_output],
+            "model parameter before training",
+        )
 
-        hidden_linears, hidden_activations, output_activation = self._forward(input_batch)
+        hidden_linears, hidden_activations, output_linear, output_activation = self._forward(input_batch)
+        require_finite_training_arrays(
+            [*hidden_linears, output_linear, output_activation], "intermediate logits during training"
+        )
         sample_count = float(input_batch.shape[0])
 
         output_grad = (output_activation - target_batch) / sample_count
@@ -91,18 +105,44 @@ class BackpropMLP:
             grad_hidden_biases.append(np.sum(layer_delta, axis=0, keepdims=True))
             previous_activation = hidden_activations[layer_index]
 
-        self.weight_hidden_output -= learning_rate * grad_hidden_output
-        self.bias_output -= learning_rate * grad_output_bias
-        for layer_index in range(len(self._hidden_weights)):
-            self._hidden_weights[layer_index] -= learning_rate * grad_hidden_weights[layer_index]
-            self._hidden_biases[layer_index] -= learning_rate * grad_hidden_biases[layer_index]
-
-        self._record_hidden_traffic(hidden_activations)
         loss = self._binary_cross_entropy(output_activation, target_batch)
+        if not np.isfinite(loss):
+            raise FloatingPointError("nonfinite training diagnostic")
+        require_finite_training_arrays(
+            [grad_hidden_output, grad_output_bias, *grad_hidden_weights, *grad_hidden_biases],
+            "training gradient",
+        )
+        with np.errstate(over="ignore", invalid="ignore"):
+            new_hidden_output = self.weight_hidden_output - learning_rate * grad_hidden_output
+            new_output_bias = self.bias_output - learning_rate * grad_output_bias
+            new_hidden_weights = [
+                weight - learning_rate * gradient
+                for weight, gradient in zip(self._hidden_weights, grad_hidden_weights)
+            ]
+            new_hidden_biases = [
+                bias - learning_rate * gradient
+                for bias, gradient in zip(self._hidden_biases, grad_hidden_biases)
+            ]
+            new_traffic = [
+                traffic + np.mean(np.abs(activation), axis=0)
+                for traffic, activation in zip(self._traffic_sums, hidden_activations)
+            ]
+        require_finite_training_arrays(
+            [new_hidden_output, new_output_bias, *new_hidden_weights, *new_hidden_biases],
+            "parameter update",
+        )
+        require_finite_training_arrays(new_traffic, "traffic update")
+        np.copyto(self.weight_hidden_output, new_hidden_output)
+        np.copyto(self.bias_output, new_output_bias)
+        for old, new in zip(self._hidden_weights, new_hidden_weights):
+            np.copyto(old, new)
+        for old, new in zip(self._hidden_biases, new_hidden_biases):
+            np.copyto(old, new)
+        self._record_hidden_traffic(hidden_activations)
         return BackpropTrainResult(loss=loss)
 
     def predict_proba(self, input_batch: Array) -> Array:
-        _, _, output_activation = self._forward(input_batch)
+        _, _, _, output_activation = self._forward(input_batch)
         return output_activation
 
     def predict_label(self, input_batch: Array) -> Array:
@@ -135,7 +175,7 @@ class BackpropMLP:
                     "Dynamic neuron changes are not implemented yet for BackpropMLP."
                 )
 
-    def _forward(self, input_batch: Array) -> tuple[list[Array], list[Array], Array]:
+    def _forward(self, input_batch: Array) -> tuple[list[Array], list[Array], Array, Array]:
         hidden_linears: list[Array] = []
         hidden_activations: list[Array] = []
         activation = input_batch
@@ -147,7 +187,7 @@ class BackpropMLP:
             activation = hidden_activation
         output_linear = activation @ self.weight_hidden_output + self.bias_output
         output_activation = sigmoid(output_linear)
-        return hidden_linears, hidden_activations, output_activation
+        return hidden_linears, hidden_activations, output_linear, output_activation
 
     def _binary_cross_entropy(self, predictions: Array, targets: Array) -> float:
         epsilon = 1e-8
@@ -165,14 +205,14 @@ class BackpropMLP:
         hidden_dim: int,
         hidden_dims: list[int] | tuple[int, ...] | None,
     ) -> list[int]:
+        require_positive_integer_dimension(hidden_dim, "hidden_dim")
         if hidden_dims is None:
-            if hidden_dim <= 0:
-                raise ValueError("hidden_dim must be positive")
             return [hidden_dim]
 
-        resolved = [int(value) for value in hidden_dims]
+        resolved = [
+            require_positive_integer_dimension(value, f"hidden_dims[{index}]")
+            for index, value in enumerate(hidden_dims)
+        ]
         if not resolved:
             raise ValueError("hidden_dims cannot be empty")
-        if any(value <= 0 for value in resolved):
-            raise ValueError("all hidden_dims values must be positive")
         return resolved

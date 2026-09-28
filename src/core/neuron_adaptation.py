@@ -28,6 +28,24 @@ class NeuronChangeProposal:
     remove_indices: tuple[int, ...] = ()
 
 
+@dataclass(frozen=True)
+class NeuronLineageSnapshot:
+    """Active adaptive-neuron IDs and stable birth-parent references."""
+
+    neuron_ids: tuple[int, ...]
+    parent_ids: tuple[int | None, ...]
+    next_neuron_id: int
+
+
+@dataclass(frozen=True)
+class PruneOutcome:
+    """Stable IDs requested, marked for delayed removal, and actually removed."""
+
+    proposed_neuron_ids: tuple[int, ...] = ()
+    scheduled_neuron_ids: tuple[int, ...] = ()
+    removed_neuron_ids: tuple[int, ...] = ()
+
+
 class NeuronAdaptationPolicy(Protocol):
     """Policy contract for future add/remove neuron decisions."""
 

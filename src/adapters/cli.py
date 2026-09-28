@@ -8,7 +8,13 @@ from src.app.indepth_comparison import (
     format_indepth_comparison_result,
     run_indepth_comparison,
 )
-from src.app.experiment_runner import ExperimentConfig, format_experiment_result, run_experiment
+from src.app.experiment_runner import (
+    TOY_LEGACY_PROTOCOL,
+    TOY_VALIDATION_PROTOCOL,
+    ExperimentConfig,
+    format_experiment_result,
+    run_experiment,
+)
 from src.config.settings import load_settings_from_env
 from src.core.circadian_predictive_coding import CircadianConfig
 
@@ -28,6 +34,11 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help="baseline: single run, indepth: aggregate over multiple seeds/noise levels.",
     )
     parser.add_argument("--samples", type=int, default=settings.dataset_size, help="Number of samples.")
+    parser.add_argument(
+        "--protocol-id", choices=[TOY_VALIDATION_PROTOCOL, TOY_LEGACY_PROTOCOL],
+        default=TOY_VALIDATION_PROTOCOL,
+    )
+    parser.add_argument("--validation-fraction", type=float, default=0.20)
     parser.add_argument("--epochs", type=int, default=settings.epoch_count, help="Training epochs.")
     parser.add_argument("--hidden-dim", type=int, default=12, help="Hidden layer width.")
     parser.add_argument(
@@ -248,6 +259,8 @@ def main() -> None:
 
     config = ExperimentConfig(
         sample_count=arguments.samples,
+        protocol_id=arguments.protocol_id,
+        validation_fraction=arguments.validation_fraction,
         noise_scale=arguments.noise,
         hidden_dim=arguments.hidden_dim,
         hidden_dims=hidden_dims,

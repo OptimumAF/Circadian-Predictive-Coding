@@ -6,6 +6,9 @@ import argparse
 
 from src.app.resnet50_benchmark import (
     ResNet50BenchmarkConfig,
+    VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+    VISION_SEEDED_UNMATCHED_PROTOCOL,
+    VISION_VALIDATION_UNMATCHED_PROTOCOL,
     format_resnet50_benchmark_result,
     run_resnet50_benchmark,
 )
@@ -17,6 +20,17 @@ def build_argument_parser() -> argparse.ArgumentParser:
         description="Benchmark Backprop, Predictive Coding, and Circadian Predictive Coding on ResNet-50."
     )
     parser.add_argument("--train-samples", type=int, default=2000)
+    parser.add_argument(
+        "--protocol-id",
+        choices=[
+            VISION_SEEDED_UNMATCHED_PROTOCOL,
+            VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+            VISION_VALIDATION_UNMATCHED_PROTOCOL,
+        ],
+        default=VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+    )
+    parser.add_argument("--validation-samples", type=int, default=64)
+    parser.add_argument("--guard-samples", type=int, default=64)
     parser.add_argument("--test-samples", type=int, default=500)
     parser.add_argument(
         "--classes",
@@ -37,6 +51,8 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dataset-no-download", dest="dataset_download", action="store_false")
     parser.set_defaults(dataset_download=True)
     parser.add_argument("--dataset-train-subset-size", type=int, default=0)
+    parser.add_argument("--dataset-validation-subset-size", type=int, default=1000)
+    parser.add_argument("--dataset-guard-subset-size", type=int, default=1000)
     parser.add_argument("--dataset-test-subset-size", type=int, default=0)
     parser.add_argument("--dataset-num-workers", type=int, default=0)
     parser.add_argument(
@@ -67,7 +83,7 @@ def build_argument_parser() -> argparse.ArgumentParser:
         "--eval-batches",
         type=int,
         default=2,
-        help="Per-epoch evaluation batch count for early-stop/rollback checks; 0 uses full test loader.",
+        help="Per-epoch validation batch count for early-stop checks; 0 uses full validation loader.",
     )
     parser.add_argument("--inference-batches", type=int, default=50)
     parser.add_argument("--warmup-batches", type=int, default=10)
@@ -168,6 +184,12 @@ def build_argument_parser() -> argparse.ArgumentParser:
         default=2,
         help="Evaluation batches used only for pre/post sleep rollback checks; 0 inherits --eval-batches.",
     )
+    parser.add_argument(
+        "--circ-sleep-rollback-cooldown-epochs",
+        type=int,
+        default=None,
+        help="Completed epochs to pause after a rejected sleep; default 0 for legacy, 1 for components. A positive value also requires a new wake batch before retry.",
+    )
     parser.add_argument("--circ-min-hidden-dim", type=int, default=384)
     parser.add_argument("--circ-max-hidden-dim", type=int, default=640)
     parser.add_argument("--circ-chemical-decay", type=float, default=0.995)
@@ -218,6 +240,13 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--circ-max-prune-per-sleep", type=int, default=1)
     parser.add_argument("--circ-split-noise-scale", type=float, default=0.01)
     parser.add_argument("--circ-sleep-reset-factor", type=float, default=0.45)
+    parser.add_argument(
+        "--circ-sleep-mode", choices=("legacy", "components", "disabled"), default="legacy"
+    )
+    parser.add_argument("--circ-disable-chemical-reset", action="store_true")
+    parser.add_argument("--circ-disable-homeostasis", action="store_true")
+    parser.add_argument("--circ-disable-split", action="store_true")
+    parser.add_argument("--circ-disable-prune", action="store_true")
     parser.add_argument("--circ-homeostatic-downscale-factor", type=float, default=1.0)
     parser.add_argument("--circ-homeostasis-target-input-norm", type=float, default=0.0)
     parser.add_argument("--circ-homeostasis-target-output-norm", type=float, default=0.0)
@@ -245,6 +274,9 @@ def main() -> None:
 
     config = ResNet50BenchmarkConfig(
         train_samples=args.train_samples,
+        protocol_id=args.protocol_id,
+        validation_samples=args.validation_samples,
+        guard_samples=args.guard_samples,
         test_samples=args.test_samples,
         num_classes=num_classes,
         image_size=args.image_size,
@@ -253,6 +285,8 @@ def main() -> None:
         dataset_data_root=args.dataset_root,
         dataset_download=args.dataset_download,
         dataset_train_subset_size=args.dataset_train_subset_size,
+        dataset_validation_subset_size=args.dataset_validation_subset_size,
+        dataset_guard_subset_size=args.dataset_guard_subset_size,
         dataset_test_subset_size=args.dataset_test_subset_size,
         dataset_num_workers=args.dataset_num_workers,
         dataset_use_augmentation=args.dataset_use_augmentation,
@@ -299,6 +333,7 @@ def main() -> None:
         circadian_sleep_rollback_tolerance=args.circ_sleep_rollback_tolerance,
         circadian_sleep_rollback_metric=args.circ_sleep_rollback_metric,
         circadian_sleep_rollback_eval_batches=args.circ_sleep_rollback_eval_batches,
+        circadian_sleep_rollback_cooldown_epochs=args.circ_sleep_rollback_cooldown_epochs,
         circadian_min_hidden_dim=args.circ_min_hidden_dim,
         circadian_max_hidden_dim=args.circ_max_hidden_dim,
         circadian_chemical_decay=args.circ_chemical_decay,
@@ -359,6 +394,11 @@ def main() -> None:
         circadian_max_prune_per_sleep=args.circ_max_prune_per_sleep,
         circadian_split_noise_scale=args.circ_split_noise_scale,
         circadian_sleep_reset_factor=args.circ_sleep_reset_factor,
+        circadian_sleep_mode=args.circ_sleep_mode,
+        circadian_sleep_enable_chemical_reset=not args.circ_disable_chemical_reset,
+        circadian_sleep_enable_homeostasis=not args.circ_disable_homeostasis,
+        circadian_sleep_enable_split=not args.circ_disable_split,
+        circadian_sleep_enable_prune=not args.circ_disable_prune,
         circadian_homeostatic_downscale_factor=args.circ_homeostatic_downscale_factor,
         circadian_homeostasis_target_input_norm=args.circ_homeostasis_target_input_norm,
         circadian_homeostasis_target_output_norm=args.circ_homeostasis_target_output_norm,

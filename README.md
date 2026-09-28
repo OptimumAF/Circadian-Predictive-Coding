@@ -38,6 +38,24 @@ flowchart LR
 
 ![Hardest-Case Dynamics](docs/figures/hardest_mode_dynamics.gif)
 
+This checked-in animation is historical. Its generator scored phase-B test
+labels at intermediate epochs, and its original execution settings are not
+fully recoverable. New runs of `scripts/generate_hardest_mode_dynamics.py`
+default to protocol `validation_dynamics_v1`: they reserve deterministic
+phase-local validation splits, plot intermediate phase-B **validation**
+metrics, and score final test only after training. The default output names
+include `validation_v1`, so the historical figures are not overwritten. The
+explicit `--protocol-id legacy_test_informed_v0` option preserves the earlier
+test-informed behavior for reproduction and also uses distinct output names.
+The validation dynamics protocol is an offline visualization: it shows
+phase-B validation data during phase A, but those scores do not control
+training or sleep. It does not establish a strict-online continual protocol.
+New dynamics figures and interactive payloads label their NumPy algorithm
+versions and descriptive comparison scope. The default three-hidden-layer
+comparison uses unmatched PC and circadian update rules, so its plotted
+ranking does not isolate a circadian mechanism. The checked-in historical
+animation remains unchanged.
+
 Interactive version (Plotly, with internals replay):
 
 - [Hardest-Case Dynamics Interactive](https://optimumaf.github.io/Circadian-Predictive-Coding/figures/interactive_hardest_mode_dynamics.html)
@@ -60,7 +78,101 @@ This lets model capacity adapt over time instead of staying fixed.
 - Function-preserving split behavior and guarded sleep rollback
 - Multi-seed benchmark runner with JSON/CSV output
 
+Sleep defaults to `legacy` budget-gated behavior. Set
+`sleep_mode="components"` in a NumPy or Torch circadian config to run
+enabled consolidation even with zero split/prune budgets, and use its
+component switches for ablations. `sleep_mode="disabled"` makes sleep a
+true no-op. NumPy supports replay during sleep; the Torch head does not.
+The vision CLI exposes `--circ-sleep-mode` and `--circ-disable-*` switches.
+See [ADR-0033](docs/adr/ADR-0033-independent-sleep-components.md).
+
+After a guarded sleep rejection, `components` mode waits one completed
+epoch and at least one new successful wake batch before another due sleep
+attempt. `legacy` keeps its prior no-cooldown schedule. Set
+`--circ-sleep-rollback-cooldown-epochs N` to override either mode (zero
+disables the retry gate). Reports include the resolved cooldown, actual
+sleep attempts, and due attempts suppressed by cooldown. See
+[ADR-0051](docs/adr/ADR-0051-sleep-rollback-retry-gate.md).
+
+An interval schedules a sleep attempt after that many completed runner
+epochs. In component mode, adaptive-ready sleep can also be attempted
+between intervals; a forced periodic call bypasses the adaptive check.
+Disabled mode schedules no attempts. See
+[ADR-0034](docs/adr/ADR-0034-sleep-attempt-scheduling.md).
+
+Runners pass completed epochs separately from each model's wake-batch
+clock. `get_sleep_clocks()` reports successful wake batches/examples,
+replay updates, and performed events; NumPy replay does not advance the
+wake clock. See [ADR-0035](docs/adr/ADR-0035-typed-sleep-clocks.md).
+
+Component-mode adaptive sleep restarts its plateau window after an actual
+hidden-width change and uses the minimum structural budget scale while
+the new-width window fills. Legacy mode keeps its original history rule.
+See [ADR-0036](docs/adr/ADR-0036-width-sensitive-sleep-history.md).
+
+NumPy circadian models can copy and restore their full model-owned state
+in memory with `snapshot_state()` and `restore_state(saved)`, including
+replay and local random state. This is a correctness primitive for later
+guard rollback and checkpoint work. Core sleep and guarded vision sleep
+now restore rejected or invalid events; durable checkpoints remain open.
+See [ADR-0037](docs/adr/ADR-0037-numpy-in-memory-full-snapshot.md) and
+[ADR-0049](docs/adr/ADR-0049-atomic-core-sleep.md).
+
+Torch circadian heads also copy and restore their in-memory adaptive state,
+including the model-owned noisy-split generator. The current ResNet sleep
+guard still snapshots the head; see
+[ADR-0038](docs/adr/ADR-0038-torch-head-snapshot-rng.md).
+
+For a Torch circadian classifier, `snapshot_full_state()` and
+`restore_full_state(saved)` additionally copy the backbone's parameters,
+buffers, and train/eval modes. This explicit in-memory API leaves the
+head-only sleep guard unchanged; see
+[ADR-0039](docs/adr/ADR-0039-classifier-full-state-boundary.md).
+
+NumPy external neuron proposals now reject invalid or over-budget
+structural requests before changing the model. Explicit prune requests
+take precedence over overlapping split candidates; see
+[ADR-0040](docs/adr/ADR-0040-numpy-external-proposal-preflight.md).
+
+Built-in NumPy sleep proposals are likewise checked together before
+structural mutation; overlapping prune requests take precedence and
+pending gradual prunes count toward minimum-width protection. See
+[ADR-0041](docs/adr/ADR-0041-numpy-builtin-structural-preflight.md).
+
+Torch built-in sleep also checks structural proposals before changing the
+live head. A detached candidate preserves its existing post-split prune
+selection, including eligible new children; see
+[ADR-0042](docs/adr/ADR-0042-torch-post-split-preflight.md).
+
+NumPy and Torch adaptive neurons expose persistent IDs and split-parent
+references through `get_neuron_lineage()`. Pruning changes positions while
+surviving IDs stay stable; see
+[ADR-0043](docs/adr/ADR-0043-numpy-neuron-lineage.md) and
+[ADR-0044](docs/adr/ADR-0044-torch-neuron-lineage.md).
+Executed sleep results also retain immutable lineage before and after
+the event, so removed IDs remain identifiable even when positions shift;
+see [ADR-0045](docs/adr/ADR-0045-sleep-event-lineage.md).
+
+Isolated single and repeated splits conserve the represented function
+within float64/float32 tolerance when other sleep components are off.
+Seeded noisy splits retain outgoing-row conservation; see
+[ADR-0046](docs/adr/ADR-0046-isolated-split-conservation.md).
+
+Executed sleep results now separate stable IDs requested for pruning,
+marked for gradual removal, and actually removed. NumPy wake results
+also report delayed finalization. Existing `pruned_indices` and runner
+`total_prunes` counts retain their historical request meaning; see
+[ADR-0048](docs/adr/ADR-0048-prune-outcome-timeline.md).
+
 ## Visual Results
+
+The figures and result tables below are historical snapshots. The reviewed
+vision runner used test labels for early stopping and sleep rollback, and its
+backprop/PC heads and backbone states were not matched. The source CSV for
+several charts is absent. See [historical benchmark provenance](docs/historical-benchmark-provenance.md)
+before interpreting a ranking; these outputs are not corrected-protocol
+results. The [development plan](DEVELOPMENT_PLAN.md) tracks the validation and
+matched-baseline work.
 
 ### Multi-seed CIFAR-100 Snapshot (3 seeds, subset benchmark)
 
@@ -103,9 +215,10 @@ Note: GitHub README pages do not execute custom JavaScript, so Plotly interactiv
 | PredictiveCodingResNet50 | 0.723 | 2093.4 | 4839.0 | fixed head |
 | CircadianPredictiveCodingResNet50 | 0.734 | 2059.9 | 4831.4 | hidden 384->394, splits=12, prunes=2, rollbacks=7 |
 
-### Latest master verification run (single-seed subset, 2026-02-28)
+### Historical master verification run (single-seed subset, 2026-02-28)
 
-Command:
+Recorded historical command (running it on the current code will use a new
+validation holdout and need not reproduce the table):
 
 ```powershell
 python resnet50_benchmark.py --dataset-name cifar100 --classes 100 --dataset-train-subset-size 20000 --dataset-test-subset-size 5000 --epochs 12 --device cuda --target-accuracy -1 --backprop-freeze-backbone --backbone-weights imagenet
@@ -185,6 +298,45 @@ Toy baseline:
 python predictive_coding_experiment.py
 ```
 
+The NumPy toy API can record and reverse model execution order for a small
+reproducibility check:
+
+```python
+from src.app.experiment_runner import ExperimentConfig, run_experiment
+
+result = run_experiment(ExperimentConfig(
+    sample_count=80, epoch_count=6,
+    model_order=("circadian_predictive_coding", "predictive_coding", "backprop"),
+))
+print(result.training_order, result.split_hashes)
+```
+
+The default order and `toy_validation_v1` data roles remain the same.
+
+The toy API can resume all three NumPy models from a trusted local file,
+including a partial model-order epoch or a sleep with structural replay:
+
+```python
+from src.app.experiment_runner import ExperimentConfig, run_experiment
+from src.infra.circadian_checkpoint_files import TrustedLocalToyCheckpointStore
+
+store = TrustedLocalToyCheckpointStore("local-toy.checkpoint")
+run_experiment(ExperimentConfig(epoch_count=6), checkpoint_store=store)
+# After an interrupted run, use the same config and store:
+result = run_experiment(
+    ExperimentConfig(epoch_count=6),
+    checkpoint_store=store,
+    resume_from_checkpoint=True,
+)
+```
+
+The file binds the training and validation arrays, every runner setting,
+the model order, progress counters, and the NumPy/Python random streams.
+Only the stateless default adaptation policy is supported for this durable
+route. Do not load a pickle checkpoint from an untrusted source. Final-test
+scoring still occurs after training. See
+[ADR-0055](docs/adr/ADR-0055-toy-runner-file-resume.md).
+
 Toy baseline with review-driven circadian controls:
 
 ```powershell
@@ -197,11 +349,87 @@ Continual shift stress test (retention vs adaptation):
 python scripts/run_continual_shift_benchmark.py --profile strength-case --seeds 3,7,11,19,23,31,37
 ```
 
+For a small continual order check through the Python API:
+
+```python
+from src.app.continual_shift_benchmark import (
+    ContinualShiftConfig, run_continual_shift_benchmark,
+)
+
+result = run_continual_shift_benchmark(
+    ContinualShiftConfig(
+        sample_count_phase_a=80, sample_count_phase_b=80,
+        phase_a_epochs=3, phase_b_epochs=3,
+        model_order=("circadian_predictive_coding", "predictive_coding", "backprop"),
+    ),
+    seeds=[13],
+)
+print(result.seed_results[0].training_order)
+```
+
+The default order and corrected/legacy data roles are unchanged. This is a
+local reproducibility check; it does not make the continual protocol
+strict-online.
+
+The continual Python API also accepts a trusted local checkpoint. It binds
+the ordered seed list, both training phases, completed seed reports, and the
+phase-A model copies used for retention scoring:
+
+```python
+from src.infra.circadian_checkpoint_files import TrustedLocalContinualCheckpointStore
+
+config = ContinualShiftConfig(phase_a_epochs=3, phase_b_epochs=3)
+seeds = [13, 17]
+store = TrustedLocalContinualCheckpointStore("local-continual.checkpoint")
+run_continual_shift_benchmark(config, seeds, checkpoint_store=store)
+# After an interrupted run, reuse the same config, seeds, and store:
+result = run_continual_shift_benchmark(
+    config, seeds, checkpoint_store=store, resume_from_checkpoint=True
+)
+```
+
+The file is a checksummed pickle and must come from a trusted local run.
+Each seed's final tests are scored only after both phases finish; their
+content is bound when that seed result is committed. Checkpoint file work
+adds runtime overhead and is outside the scientific compute comparison.
+The CLI has no checkpoint flag. Whole-image and device/memory resume remain
+open under P3.9; see [ADR-0056](docs/adr/ADR-0056-continual-runner-file-resume.md).
+
 Hardest continual-shift stress test (expanded hidden capacity + very heavy drift):
 
 ```powershell
 python scripts/run_continual_shift_benchmark.py --profile hardest-case --seeds 3,7,11,19,23,31,37
 ```
+
+The toy and continual commands now default to `toy_validation_v1` and
+`continual_validation_v1`. Each reserves 20% of the original NumPy training
+split for validation and reports split hashes; the phase-B training fraction
+is applied after that reservation. This changes training-set sizes relative
+to historical runs. Use `--protocol-id toy_legacy_train_test_v0` on the toy
+command or `--protocol-id continual_legacy_train_test_v0` on the continual
+command to reproduce the former train/test routing. The continual output
+command refuses to overwrite an existing file. Validation data in these
+small NumPy runners are descriptive; their current sleep decisions use only
+training-derived state. A strict-online continual protocol remains open.
+New toy, in-depth, and continual outputs also report NumPy algorithm IDs
+and comparison scope without changing their evaluation protocol IDs.
+One-hidden runs are descriptive because model seeds and controls differ;
+multi-hidden runs additionally use unmatched PC and circadian update rules.
+See the [NumPy scope contract](docs/evaluation-protocols.md#numpy-algorithm-and-comparison-scope).
+
+The [cross-backend fixture](docs/evaluation-protocols.md#cross-backend-numerical-fixture)
+maps a NumPy binary output to a Torch two-class output and confirms a
+one-step hidden/chemistry boundary. It also finds a factor-two difference
+in the equal-rate output-margin update, so the production trainers are not
+declared numerically identical.
+
+NumPy binary training calls now reject malformed, empty, nonfinite, or
+out-of-range batches before changing model state; finite soft labels in
+`[0,1]` remain accepted. The [input contract](docs/adr/ADR-0026-numpy-binary-training-input-contract.md)
+describes the boundary.
+
+Torch PC/circadian heads likewise reject malformed feature or class-index
+batches before changing adaptive state; see the [Torch input contract](docs/adr/ADR-0027-torch-head-training-input-contract.md).
 
 ResNet benchmark (all 3 models):
 
@@ -209,17 +437,277 @@ ResNet benchmark (all 3 models):
 python resnet50_benchmark.py --dataset-name cifar100 --classes 100 --dataset-train-subset-size 20000 --dataset-test-subset-size 5000 --epochs 12 --device cuda
 ```
 
+The vision runner defaults to `vision_guard_separated_unmatched_v2`. It uses
+disjoint training, guard, outer validation, and final test roles. Epoch
+stopping and sleep rollback use guard labels; outer validation is measured
+after training and used for tuning selection. The synthetic guard is an
+independent generated set (`--guard-samples`, default 64). CIFAR reserves
+`--dataset-guard-subset-size` examples (default 1,000) from the official
+training source in addition to the 1,000 outer validation examples; both
+holdouts use deterministic evaluation transforms. With a full CIFAR training
+source, reserving the guard reduces the training count. Split hashes appear
+in the report. `--protocol-id vision_validation_unmatched_v1` reproduces the
+previous corrected route in which stopping, rollback, and selection shared
+validation examples. Both current routes still compare unmatched heads and
+backbone states, so their accuracy deltas are descriptive. Neither route is
+the older test-informed historical protocol. The [evaluation protocol
+contract](docs/evaluation-protocols.md) records label timing and guard cost.
+
+Use `--protocol-id vision_guard_separated_seeded_unmatched_v3` for the
+order-controlled image-level reference. It keeps the four split roles and
+resets each model's initialization, training shuffle, and augmentation
+streams; results record training order and trained-model hashes. A budgeted
+CPU forward/reverse check matched state hashes and metrics within `1e-7`.
+The v2 default remains available unchanged for reproduction. v3 still uses
+unmatched heads and separately initialized backbones, so its deltas remain
+descriptive. A local two-worker stochastic-image fixture replayed Torch,
+NumPy, and Python draws; CIFAR-transform and GPU reproducibility remain open.
+The internal v3 training loader can also resume a bounded epoch/batch cursor
+with zero or two workers, preserving the subsequent augmentation and process
+draws (ADR-0057). The Python runner can persist the complete seeded v3 CPU
+run, including all three models and mid-wake/pre-/post-sleep circadian state:
+
+```python
+from src.app.resnet50_benchmark import (
+    ResNet50BenchmarkConfig,
+    VISION_SEEDED_UNMATCHED_PROTOCOL,
+    run_resnet50_benchmark,
+)
+from src.infra.circadian_checkpoint_files import TrustedLocalVisionCheckpointStore
+
+config = ResNet50BenchmarkConfig(
+    protocol_id=VISION_SEEDED_UNMATCHED_PROTOCOL,
+    device="cpu", train_samples=8, guard_samples=8, validation_samples=8,
+    test_samples=8, image_size=32, batch_size=4, epochs=1,
+    target_accuracy=None, inference_batches=1, warmup_batches=0,
+    backprop_freeze_backbone=True,
+    predictive_head_hidden_dim=16, circadian_head_hidden_dim=16,
+    circadian_min_hidden_dim=16, circadian_max_hidden_dim=32,
+)
+store = TrustedLocalVisionCheckpointStore("local-vision.checkpoint")
+run_resnet50_benchmark(config, checkpoint_store=store)
+# After an interrupted run, reuse the same config and trusted local file:
+result = run_resnet50_benchmark(
+    config, checkpoint_store=store, resume_from_checkpoint=True
+)
+```
+
+The checkpoint binds train, guard, and validation content plus config and
+model order. It does not score final test until all training completes. Do not
+load a pickle file from an untrusted source. File writes and loader replay add
+wall time but do not count as active circadian training time. The older v1/v2
+unmatched protocols and CUDA checkpoint route remain open; they reject a
+checkpoint request before training. See [ADR-0058](docs/adr/ADR-0058-seeded-vision-runner-file-resume.md).
+
+The circadian-policy and Pareto tuning scripts write outer-validation-only
+candidate reports with split hashes and validation inference speed. They use
+separate guard examples for repeated sleep decisions and never score candidate
+trials on final test data. A selected configuration still needs a separate,
+frozen final-test confirmation. The matched-representation routes below use
+a separate protocol and are not pooled with these reference results.
+
+A staged two-head fixed-feature gate is available through
+`src.app.matched_head_benchmark.run_two_head_fixed_feature_benchmark`.
+It caches one frozen ResNet representation and trains equally initialized
+backprop MLP and PC heads on the same feature batches. Its protocol is
+`vision_two_head_fixed_feature_v1`; the result records backbone, feature,
+and initialization hashes. `backbone_weights=none` is a random-feature
+control, and the reported head training time excludes feature extraction.
+The three-head route, `run_three_head_fixed_feature_benchmark`, adds a
+circadian head with the same starting tensors and feature bank. It requires
+the predictive and circadian hidden widths to match; sleep and rollback use
+only inner guard examples. The existing `BackpropResNet50` report is the
+legacy **linear-head reference** and remains in its separate unmatched
+protocol. Fixed-feature head times exclude backbone extraction. Reports also
+count wake batches, per-batch latent relaxation iterations, repeated guard
+example evaluations, sleep calls, and replay examples (zero in this track).
+A reversed three-head CPU run reproduces adaptive-state hashes and metrics
+at a declared absolute tolerance of `1e-7`; broader random-stream audits
+remain open. Initial hashes compare parameter tensors; trained hashes also
+cover PC traffic and circadian adaptive/structural RNG state.
+The ordinary CPU fixed-epoch three-head route can persist and resume its
+circadian head from a trusted local file. Pass
+`checkpoint_store=TrustedLocalCircadianCheckpointStore(path)` to
+`run_three_head_fixed_feature_benchmark`; on a later invocation pass the
+same store and `resume_from_checkpoint=True`. Import the store from
+`src.infra.circadian_checkpoint_files`. It checks cached training-role
+features, runner config, initial head, batch cursor, sleep stage, and
+report counters before restoration. Do not load a pickle checkpoint from
+an untrusted source. Fixed-epoch checkpoint and resume timing includes
+persistence work and should not be used for equal-time head comparisons.
+The CPU wall-time route also accepts the same store arguments; it carries
+remaining active training seconds across resume and excludes file I/O
+from that deadline. Its active-time report is separate from end-to-end
+elapsed time. CUDA, memory, and capacity checkpoint modes remain open
+under P3.9b2; see
+[ADR-0053](docs/adr/ADR-0053-fixed-feature-circadian-file-resume.md) and
+[ADR-0054](docs/adr/ADR-0054-fixed-feature-wall-time-resume.md).
+The [fairness budget contract](docs/evaluation-protocols.md#fairness-budget-contract-p18-in-progress)
+defines fixed-data, wall-time, and capacity/memory scopes. Call
+`run_three_head_fixed_feature_wall_time_benchmark` with
+`wall_time_budget_seconds` for the versioned per-head deadline route.
+Set `target_accuracy=None` and an epoch safety cap high enough for all
+heads to reach the deadline. Reports include completed/partial work,
+stop reason, and deadline overrun; the runner fails before final test if
+the epoch cap ends a head early. The [decision record](docs/adr/ADR-0013-matched-head-wall-time-budget.md)
+defines its timing scope. Full capacity and repeated confirmation remain open.
+Pass `measure_memory=True` to either three-head route for a separately
+versioned memory-enabled protocol. Reports then include sampled process RSS
+start/observed peak and sample count on Windows/Linux, with PyTorch allocator
+peaks for CUDA runs. Default runs retain their prior protocol IDs and timing
+behavior. These values include shared in-process state and can miss transient
+allocations; [ADR-0014](docs/adr/ADR-0014-observed-memory-telemetry.md)
+records the limits. The isolated observation below has a separate scope.
+
+`run_three_head_fixed_width_capacity_benchmark` adds a separate
+`vision_three_head_fixed_width_capacity_memory_v1` control. It requires
+the backprop, PC, and circadian heads to start with equal widths and
+parameter counts; circadian minimum and maximum widths equal the initial
+width. Scheduled forced sleep and guard rollback remain active. The route
+checks unchanged head parameter counts, no splits/prunes, and a guarded
+sleep attempt before final test, and records the invariant in
+`result.capacity_control`. It always reports observed memory separately
+from cached `feature_bytes`. Sequential process RSS is still affected by
+shared state and order, so repeated confirmation remains open.
+[ADR-0016](docs/adr/ADR-0016-fixed-width-capacity-control.md) records
+the control scope.
+
+`src.app.isolated_head_memory.run_process_isolated_fixed_width_memory`
+adds the `vision_three_head_fixed_width_process_memory_v1` observation.
+Each head trains alone in a fresh spawned process using the same frozen
+train, guard, and validation feature hashes and initial tensors. The parent
+verifies those hashes before returning. Each report separates setup RSS,
+cached feature bytes, and trainer RSS/CUDA allocator observations. This
+memory-only route never opens final test. The local gate requires an
+explicit CPU/CUDA device, synthetic data, and zero loader workers. It does
+not establish a memory winner; imports precede the setup RSS window and
+the observed peaks can miss brief allocations. Run its fixed tiny CPU
+check with `python scripts/run_isolated_head_memory_smoke.py`. See
+[ADR-0017](docs/adr/ADR-0017-process-isolated-head-memory.md).
+
+`src.app.matched_head_tuning.run_matched_head_tuning` adds a bounded
+validation-selected search for the three frozen shared-feature heads. Give
+each head the same candidate count and seed tuple. It caches train, guard,
+and outer-validation features once per seed, records every attempt in
+`result.attempts`, full successful configs and guard/validation work in
+`result.trials`, and selects each head by mean
+validation accuracy. Only then does it read final test for the selected
+heads; `result.confirmations` is separate from the trial ledger. Candidates
+may change only their own learning rates, inference steps, or backprop
+momentum. The route caps candidate-by-seed trials at eight per head and is
+for correctness checks before larger experiments. It does not establish a
+head-family ranking; repeated confirmation work remains open.
+[ADR-0015](docs/adr/ADR-0015-matched-head-tuning-ledger.md)
+records the selection and test-sealing rules.
+
+`src.app.practical_backprop_benchmark.run_practical_backprop_benchmark`
+provides the separate `vision_end_to_end_backprop_v1` practical track with a
+trainable ResNet and linear head. Pass a guarded `ResNet50BenchmarkConfig` with
+`backprop_freeze_backbone=False`. Both tracks report backbone trainability,
+pretraining, head type, and parameter counts. The practical result is not a
+learning-rule attribution baseline; fairness budgets and larger experiments
+remain open.
+
+For a budgeted local check:
+
+```python
+from src.app.matched_head_benchmark import run_two_head_fixed_feature_benchmark
+from src.app.resnet50_benchmark import ResNet50BenchmarkConfig
+
+result = run_two_head_fixed_feature_benchmark(
+    ResNet50BenchmarkConfig(
+        train_samples=8, guard_samples=8, validation_samples=8,
+        test_samples=8, num_classes=3, image_size=32, batch_size=4,
+        epochs=1, device="cpu", backprop_freeze_backbone=True,
+        predictive_head_hidden_dim=16, predictive_inference_steps=2,
+        target_accuracy=None,
+    )
+)
+print(result.protocol_id, result.feature_hashes)
+```
+
+For an equal-trial tuning check, start with a guarded frozen-backbone config
+whose predictive and circadian widths match and `target_accuracy=None`:
+
+```python
+from dataclasses import replace
+from src.app.matched_head_tuning import HeadTuningCandidate, run_matched_head_tuning
+from src.app.resnet50_benchmark import ResNet50BenchmarkConfig
+
+base = ResNet50BenchmarkConfig(
+    train_samples=8, guard_samples=8, validation_samples=8, test_samples=8,
+    num_classes=3, image_size=32, batch_size=4, epochs=1, seed=47,
+    device="cpu", target_accuracy=None, backprop_freeze_backbone=True,
+    predictive_head_hidden_dim=16, circadian_head_hidden_dim=16,
+    circadian_min_hidden_dim=16, circadian_max_hidden_dim=16,
+    predictive_inference_steps=1, circadian_inference_steps=1,
+    circadian_sleep_interval=0, circadian_use_adaptive_sleep_trigger=False,
+)
+
+fields = {
+    "backprop_mlp": "backprop_learning_rate",
+    "predictive_coding": "predictive_learning_rate",
+    "circadian_predictive_coding": "circadian_learning_rate",
+}
+candidates = {
+    head: (
+        HeadTuningCandidate("a", base),
+        HeadTuningCandidate("b", replace(base, **{field: getattr(base, field) * 0.8})),
+    )
+    for head, field in fields.items()
+}
+result = run_matched_head_tuning(base, candidates, seeds=(47,), candidates_per_head=2)
+print(result.trials_per_head, len(result.attempts), result.selections)
+```
+
+The same small `base` can exercise the fixed-width control by enabling a
+guarded sleep at epoch one:
+
+```python
+from src.app.matched_head_benchmark import run_three_head_fixed_width_capacity_benchmark
+
+capacity = run_three_head_fixed_width_capacity_benchmark(replace(
+    base, circadian_sleep_interval=1, circadian_force_sleep=True,
+    circadian_sleep_warmup_steps=0,
+))
+print(capacity.protocol_id, capacity.capacity_control)
+```
+
+For a predeclared three-seed local CPU confirmation of validation-selected,
+fixed-width heads:
+
+```powershell
+python scripts/run_repeated_confirmation_smoke.py
+```
+
+The script writes selection and manifest JSON before reading any final-test
+labels, then writes every fixed-data, wall-time, and process-isolated memory
+result under `artifacts/`. It refuses to overwrite those files. The run uses
+tiny synthetic random features and is a reproducibility check, not a model
+ranking. Its original seed-53/59/61 fixed-data accuracies tie across heads;
+under the separate 0.05-second wall-time budget the circadian head scores
+lower than both baselines. See `docs/adr/ADR-0018-predeclared-repeated-head-confirmation.md`
+for the scope and limitations.
+
 Multi-seed benchmark export:
 
 ```powershell
 python scripts/run_multiseed_resnet_benchmark.py --dataset-name cifar100 --seeds 7,13,29 --dataset-train-subset-size 20000 --dataset-test-subset-size 5000 --epochs 12 --device cuda --output-prefix benchmark_multiseed_cifar100
 ```
 
-Regenerate README charts:
+Generate protocol-labeled charts in a new directory:
 
 ```powershell
-python scripts/generate_readme_figures.py --summary-csv benchmark_multiseed_cifar100_summary.csv --output-dir docs/figures
+python scripts/generate_readme_figures.py --summary-csv benchmark_multiseed_cifar100_summary.csv
 ```
+
+The figure generator verifies the CSV against its paired
+`benchmark_multiseed_cifar100.json`, then writes under
+`docs/figures/<protocol-id>/` with a provenance manifest. It refuses to
+overwrite any existing chart. The checked-in README figures remain historical;
+their missing source CSV prevents verified regeneration from this checkout.
+For an unversioned CSV from outside this checkout, use the explicit
+`--legacy-unversioned` flag; the output is labeled `historical_unknown_v0`.
 
 Deploy dashboard via GitHub Pages:
 
@@ -245,6 +733,7 @@ pytest -q
 - Governance: [GOVERNANCE.md](GOVERNANCE.md)
 - Support process: [SUPPORT.md](SUPPORT.md)
 - Model Card: [docs/model-card.md](docs/model-card.md)
+- Learning mathematics: [docs/learning-mathematics.md](docs/learning-mathematics.md)
 - Review Notes: [docs/circadian-model-review-notes.md](docs/circadian-model-review-notes.md)
 
 ## Citation

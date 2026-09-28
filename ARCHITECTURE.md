@@ -15,7 +15,7 @@ The repository is designed to evolve Circadian Predictive Coding as the main alg
 - `src/app`
   - Use-case orchestration for experiment runs and benchmark workflows
 - `src/infra`
-  - Dataset and dataloader construction only
+  - Dataset/dataloader construction and trusted local checkpoint files
 - `src/adapters`
   - User-facing CLI parsing and text formatting
 - `src/config`
@@ -55,14 +55,30 @@ core must not depend on app/infra/adapters.
 
 1. `infra.datasets` creates deterministic two-cluster data
 2. `app.experiment_runner` trains all three toy models
+   - `app.toy_checkpoint` validates run identity and model-order progress;
+     `infra.circadian_checkpoint_files` stores the trusted payload
 3. `adapters.cli` exposes baseline and in-depth modes
+
+### Continual shift
+
+1. `infra.datasets` regenerates phase-A and phase-B roles per seed
+2. `app.continual_shift_benchmark` trains both phases, freezes A-only
+   state, and scores final tests after each seed finishes training
+3. `app.continual_checkpoint` validates seed/phase progress and committed
+   reports; `infra.circadian_checkpoint_files` persists its trusted payload
 
 ### ResNet benchmark
 
 1. `infra.vision_datasets` creates synthetic or torchvision dataloaders
-2. `app.resnet50_benchmark` runs all three models with aligned evaluation metrics
-3. `adapters.resnet_benchmark_cli` exposes benchmark configuration
-4. `scripts/run_multiseed_resnet_benchmark.py` aggregates cross-seed results
+2. `app.seeded_vision_loader` reconstructs v3 train order and augmentation
+   streams from a logical epoch/batch cursor (ADR-0057)
+3. `app.vision_checkpoint` binds v3 runner/model state and exact development
+   data; `infra.circadian_checkpoint_files` persists a trusted local file
+   (ADR-0058)
+4. `app.resnet50_benchmark` runs all three models with aligned evaluation
+   metrics and resumes the seeded CPU path before final-test scoring
+5. `adapters.resnet_benchmark_cli` exposes benchmark configuration
+6. `scripts/run_multiseed_resnet_benchmark.py` aggregates cross-seed results
 
 ## Design Decisions
 

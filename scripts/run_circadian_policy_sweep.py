@@ -14,7 +14,8 @@ if str(REPO_ROOT) not in sys.path:
 
 from src.app.resnet50_benchmark import (  # noqa: E402
     ResNet50BenchmarkConfig,
-    _benchmark_circadian,
+    _training_loaders,
+    benchmark_validation_candidate,
     _resolve_device,
     _set_seed,
 )
@@ -24,11 +25,16 @@ from src.infra.vision_datasets import (  # noqa: E402
 )
 from src.shared.torch_runtime import require_torch  # noqa: E402
 
+OUTPUT_PATH = Path("benchmark_circadian_policy_sweep_guard_selection_v2_results.json")
+
 
 def main() -> None:
+    if OUTPUT_PATH.exists():
+        raise FileExistsError(f"Sweep output already exists: {OUTPUT_PATH}")
     torch = require_torch()
     base = ResNet50BenchmarkConfig(
         train_samples=2500,
+        validation_samples=700,
         test_samples=700,
         num_classes=10,
         image_size=96,
@@ -91,6 +97,8 @@ def main() -> None:
     loaders = build_synthetic_vision_dataloaders(
         SyntheticVisionDatasetConfig(
             train_samples=base.train_samples,
+            validation_samples=base.validation_samples,
+            guard_samples=base.guard_samples,
             test_samples=base.test_samples,
             num_classes=base.num_classes,
             image_size=base.image_size,
@@ -105,7 +113,10 @@ def main() -> None:
     trials: list[dict[str, Any]] = []
     for index, override in enumerate(candidates, start=1):
         config = replace(base, **override)
-        report = _benchmark_circadian(torch=torch, device=device, loaders=loaders, config=config)
+        report = benchmark_validation_candidate(
+            variant="circadian", torch=torch, device=device,
+            loaders=_training_loaders(loaders), config=config,
+        )
         row = {
             "trial": index,
             "params": override,
@@ -114,52 +125,44 @@ def main() -> None:
         trials.append(row)
         print(
             f"circadian-policy {index}/{len(candidates)} "
-            f"acc={report.test_accuracy:.4f} train_sps={report.train_samples_per_second:.1f} "
+            f"validation_acc={report.validation_accuracy:.4f} "
+            f"train_sps={report.train_samples_per_second:.1f} "
             f"infer_sps={report.inference_samples_per_second:.1f} "
             f"hidden={report.circadian_hidden_dim_start}->{report.circadian_hidden_dim_end} "
             f"split={report.circadian_total_splits} prune={report.circadian_total_prunes} "
             f"rollback={report.circadian_total_rollbacks}"
         )
 
-    scores = compute_balanced_scores(trials)
-    for trial, score in zip(trials, scores):
-        trial["report"]["balanced_score"] = score
-
     output: dict[str, Any] = {
         "dataset": {
             "difficulty": base.dataset_difficulty,
             "noise_std": base.dataset_noise_std,
             "train_samples": base.train_samples,
+            "validation_samples": base.validation_samples,
+            "guard_samples": base.guard_samples,
             "test_samples": base.test_samples,
             "classes": base.num_classes,
             "image_size": base.image_size,
             "device": str(device),
             "epochs": base.epochs,
+            "seed": base.seed,
             "backbone_weights": base.backbone_weights,
+            "split_hashes": dict(loaders.split_hashes),
         },
-        "trials": trials,
-        "top10_by_accuracy": sorted(
-            trials,
-            key=lambda row: (
-                row["report"]["test_accuracy"],
-                row["report"]["train_samples_per_second"],
-            ),
-            reverse=True,
-        )[:10],
-        "top10_by_balanced_score": sorted(
-            trials,
-            key=lambda row: row["report"]["balanced_score"],
-            reverse=True,
-        )[:10],
-        "best_accuracy": best_from_trials(trials, key="test_accuracy"),
-        "best_train_speed": best_from_trials(trials, key="train_samples_per_second"),
-        "best_inference_speed": best_from_trials(trials, key="inference_samples_per_second"),
-        "best_balanced": best_from_trials(trials, key="balanced_score"),
+        "selection_metric": "validation_accuracy",
+        "protocol_id": base.protocol_id,
+        "final_test_usage": "none",
+        "final_test_confirmation": "pending",
+        "inference_split": "validation",
+        **summarize_trials(trials),
     }
-    output_path = Path("benchmark_circadian_policy_sweep_results.json")
-    output_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
-    print(f"Wrote {output_path}")
-    print("Best accuracy:", output["best_accuracy"]["report"]["test_accuracy"])
+    with OUTPUT_PATH.open("x", encoding="utf-8") as output_file:
+        output_file.write(json.dumps(output, indent=2))
+    print(f"Wrote {OUTPUT_PATH}")
+    print(
+        "Best validation accuracy:",
+        output["best_validation_accuracy"]["report"]["validation_accuracy"],
+    )
     print("Best balanced:", output["best_balanced"]["report"]["balanced_score"])
 
 
@@ -277,12 +280,15 @@ def build_candidates(base: ResNet50BenchmarkConfig) -> list[dict[str, Any]]:
 def report_to_dict(report: Any) -> dict[str, Any]:
     return {
         "model_name": report.model_name,
+        "benchmark_track": report.benchmark_track,
+        "backbone_trainable": report.backbone_trainable,
+        "backbone_pretraining": report.backbone_pretraining,
+        "head_type": report.head_type,
         "epochs_ran": report.epochs_ran,
-        "final_metric_name": report.final_metric_name,
-        "final_metric_value": report.final_metric_value,
-        "final_cross_entropy": report.final_cross_entropy,
+        "validation_cross_entropy": report.validation_cross_entropy,
         "final_energy": report.final_energy,
-        "test_accuracy": report.test_accuracy,
+        "training_energy_id": report.training_energy_id,
+        "validation_accuracy": report.validation_accuracy,
         "train_seconds": report.train_seconds,
         "train_samples_per_second": report.train_samples_per_second,
         "mean_train_step_ms": report.mean_train_step_ms,
@@ -299,8 +305,36 @@ def report_to_dict(report: Any) -> dict[str, Any]:
     }
 
 
+def summarize_trials(trials: list[dict[str, Any]]) -> dict[str, Any]:
+    scores = compute_balanced_scores(trials)
+    for trial, score in zip(trials, scores):
+        trial["report"]["balanced_score"] = score
+
+    return {
+        "trials": trials,
+        "top10_by_validation_accuracy": sorted(
+            trials,
+            key=lambda row: (
+                row["report"]["validation_accuracy"],
+                row["report"]["train_samples_per_second"],
+            ),
+            reverse=True,
+        )[:10],
+        "top10_by_balanced_score": sorted(
+            trials,
+            key=lambda row: row["report"]["balanced_score"],
+            reverse=True,
+        )[:10],
+        "best_validation_accuracy": best_from_trials(trials, key="validation_accuracy"),
+        "best_train_speed": best_from_trials(trials, key="train_samples_per_second"),
+        "best_inference_speed": best_from_trials(trials, key="inference_samples_per_second"),
+        "best_balanced": best_from_trials(trials, key="balanced_score"),
+    }
+
+
 def compute_balanced_scores(trials: list[dict[str, Any]]) -> list[float]:
-    accuracies = [trial["report"]["test_accuracy"] for trial in trials]
+    # Candidate reports contain validation metrics only.
+    accuracies = [trial["report"]["validation_accuracy"] for trial in trials]
     train_speeds = [trial["report"]["train_samples_per_second"] for trial in trials]
     inference_speeds = [trial["report"]["inference_samples_per_second"] for trial in trials]
 

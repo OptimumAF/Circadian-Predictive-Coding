@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import csv
 from dataclasses import dataclass
+from hashlib import sha256
 import json
 from pathlib import Path
 from typing import Callable
@@ -51,6 +52,23 @@ MODEL_COLORS = {
     "PredictiveCodingResNet50": (61, 157, 86),
     "CircadianPredictiveCodingResNet50": (189, 102, 36),
 }
+FIGURE_FILENAMES = (
+    "benchmark_overview_compact.png",
+    "interactive_benchmark_overview.html",
+    "benchmark_accuracy.png",
+    "benchmark_train_speed.png",
+    "benchmark_inference_latency_p95.png",
+    "interactive_benchmark_accuracy.html",
+    "interactive_benchmark_train_speed.html",
+    "interactive_benchmark_inference_latency_p95.html",
+    "circadian_sleep_dynamics.gif",
+    "provenance.json",
+)
+VISION_PROTOCOLS = {
+    "vision_validation_unmatched_v1",
+    "vision_guard_separated_unmatched_v2",
+    "vision_guard_separated_seeded_unmatched_v3",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -64,8 +82,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="docs/figures",
-        help="Directory to write figure artifacts.",
+        default=None,
+        help="Directory to write new artifacts; default is docs/figures/<protocol-id>.",
+    )
+    parser.add_argument(
+        "--result-json", type=str, default=None,
+        help="Paired multi-seed JSON manifest; inferred from the summary CSV by default.",
+    )
+    parser.add_argument(
+        "--legacy-unversioned", action="store_true",
+        help="Explicitly render a CSV without a manifest as historical_unknown_v0.",
     )
     parser.add_argument(
         "--sleep-cycles",
@@ -103,6 +129,8 @@ def load_summary_rows(path: Path) -> list[SummaryRow]:
         reader = csv.DictReader(handle)
         for raw in reader:
             model_name = str(raw["model_name"])
+            if model_name not in MODEL_ORDER or model_name in rows_by_model:
+                raise ValueError(f"Unexpected or duplicate model in summary CSV: {model_name}")
             rows_by_model[model_name] = SummaryRow(
                 model_name=model_name,
                 test_accuracy_mean=float(raw["test_accuracy_mean"]),
@@ -115,6 +143,55 @@ def load_summary_rows(path: Path) -> list[SummaryRow]:
     if missing:
         raise ValueError(f"Missing models in summary CSV: {missing}")
     return [rows_by_model[name] for name in MODEL_ORDER]
+
+
+def load_figure_source(
+    summary_path: Path, result_path: Path | None, legacy_unversioned: bool,
+) -> tuple[list[SummaryRow], str, Path | None]:
+    """Require a paired protocol manifest unless legacy uncertainty is explicit."""
+    rows = load_summary_rows(summary_path)
+    if legacy_unversioned:
+        if result_path is not None:
+            raise ValueError("--legacy-unversioned cannot be combined with --result-json.")
+        return rows, "historical_unknown_v0", None
+
+    if result_path is None:
+        stem = summary_path.stem
+        if not stem.endswith("_summary"):
+            raise ValueError("Cannot infer result JSON: summary CSV stem must end in _summary.")
+        result_path = summary_path.with_name(f"{stem.removesuffix('_summary')}.json")
+    if not result_path.exists():
+        raise FileNotFoundError(f"Paired result JSON does not exist: {result_path}")
+    payload = json.loads(result_path.read_text(encoding="utf-8"))
+    protocol_id = payload.get("protocol_id")
+    if protocol_id not in VISION_PROTOCOLS:
+        raise ValueError(f"Unsupported or missing vision protocol ID: {protocol_id}")
+    if payload.get("dataset", {}).get("name") != "cifar100":
+        raise ValueError("README benchmark figures require a CIFAR-100 result manifest.")
+    manifest_rows = payload.get("summary")
+    if not isinstance(manifest_rows, list):
+        raise ValueError("Result JSON has no summary rows to verify the CSV.")
+    by_name = {row.get("model_name"): row for row in manifest_rows}
+    if len(manifest_rows) != len(MODEL_ORDER) or set(by_name) != set(MODEL_ORDER):
+        raise ValueError("Result JSON summary must contain each expected model exactly once.")
+    for row in rows:
+        matched = by_name.get(row.model_name)
+        if matched is None or any(
+            float(matched[field]) != getattr(row, field)
+            for field in (
+                "test_accuracy_mean", "train_samples_per_second_mean",
+                "inference_latency_p95_ms_mean", "balanced_score",
+            )
+        ):
+            raise ValueError(f"Summary CSV does not match result JSON for {row.model_name}.")
+    return rows, str(protocol_id), result_path
+
+
+def preflight_figure_outputs(output_dir: Path) -> None:
+    for name in FIGURE_FILENAMES:
+        path = output_dir / name
+        if path.exists():
+            raise FileExistsError(f"Figure output already exists: {path}")
 
 
 def draw_bar_chart(
@@ -182,7 +259,7 @@ def draw_bar_chart(
 
     draw.text(
         (50, height - 42),
-        "Source: benchmark_multiseed_cifar100_summary.csv",
+        "Source: input summary; see provenance.json",
         fill=(120, 124, 132),
         font=font_body,
     )
@@ -447,7 +524,7 @@ def draw_compact_overview_chart(
 
     draw.text(
         (34, height - 24),
-        "Source: benchmark_multiseed_cifar100_summary.csv",
+        "Source: input summary; see provenance.json",
         fill=(118, 122, 131),
         font=font_body,
     )
@@ -683,8 +760,16 @@ def draw_circadian_gif(
 def main() -> None:
     args = parse_args()
     summary_path = Path(args.summary_csv)
-    output_dir = Path(args.output_dir)
-    rows = load_summary_rows(summary_path)
+    rows, protocol_id, result_path = load_figure_source(
+        summary_path,
+        Path(args.result_json) if args.result_json is not None else None,
+        args.legacy_unversioned,
+    )
+    output_dir = (
+        Path(args.output_dir) if args.output_dir is not None
+        else Path("docs/figures") / protocol_id
+    )
+    preflight_figure_outputs(output_dir)
     specs = default_metric_specs()
     specs_by_title = {spec.title: spec for spec in specs}
 
@@ -768,6 +853,18 @@ def main() -> None:
         splits=args.splits,
         prunes=args.prunes,
     )
+    provenance = {
+        "protocol_id": protocol_id,
+        "summary_csv": str(summary_path),
+        "summary_sha256": sha256(summary_path.read_bytes()).hexdigest(),
+        "result_json": str(result_path) if result_path is not None else None,
+        "result_sha256": sha256(result_path.read_bytes()).hexdigest()
+        if result_path is not None else None,
+        "figures": list(FIGURE_FILENAMES[:-1]),
+        "sleep_gif_status": "illustrative, not observed training telemetry",
+    }
+    with (output_dir / "provenance.json").open("x", encoding="utf-8") as output_file:
+        output_file.write(json.dumps(provenance, indent=2))
     print(f"Wrote figures to {output_dir}")
 
 

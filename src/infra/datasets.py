@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from hashlib import sha256
+from types import MappingProxyType
+from typing import Mapping
 
 import numpy as np
 from numpy.typing import NDArray
@@ -18,6 +21,87 @@ class DatasetSplit:
     train_target: Array
     test_input: Array
     test_target: Array
+
+
+@dataclass(frozen=True)
+class LabeledData:
+    """One explicit data role; pass only permitted roles to training code."""
+
+    input: Array
+    target: Array
+
+
+@dataclass(frozen=True)
+class RoleSeparatedDataset:
+    """Deterministic train/validation/final-test roles and content hashes."""
+
+    train: LabeledData
+    validation: LabeledData
+    test: LabeledData
+    split_hashes: Mapping[str, str]
+
+
+def make_role_separated_dataset(
+    train: LabeledData, validation: LabeledData, test: LabeledData,
+) -> RoleSeparatedDataset:
+    """Build a role container after training-only subsampling."""
+    for role, samples in (("train", train), ("validation", validation), ("test", test)):
+        if samples.input.ndim != 2 or samples.target.shape != (samples.input.shape[0], 1):
+            raise ValueError(f"{role} inputs and targets have incompatible shapes")
+        if samples.input.shape[0] == 0:
+            raise ValueError(f"{role} split must be nonempty")
+    hashes = MappingProxyType({
+        "train": _split_hash("train", train),
+        "validation": _split_hash("validation", validation),
+        "test": _split_hash("test", test),
+    })
+    return RoleSeparatedDataset(train=train, validation=validation, test=test, split_hashes=hashes)
+
+
+def split_training_validation(
+    dataset: DatasetSplit, validation_fraction: float, seed: int,
+) -> RoleSeparatedDataset:
+    """Reserve stratified validation examples from an existing training split."""
+    if not 0.0 < validation_fraction < 1.0:
+        raise ValueError("validation_fraction must be in (0, 1)")
+    labels = dataset.train_target.reshape(-1)
+    if labels.shape[0] != dataset.train_input.shape[0]:
+        raise ValueError("training inputs and targets have incompatible shapes")
+    if not np.all(np.isin(labels, [0.0, 1.0])):
+        raise ValueError("training targets must be binary")
+
+    rng = np.random.default_rng(seed)
+    train_indices: list[int] = []
+    validation_indices: list[int] = []
+    for class_label in (0.0, 1.0):
+        class_indices = np.flatnonzero(labels == class_label)
+        if class_indices.size < 2:
+            raise ValueError("each class needs at least two training examples")
+        shuffled = rng.permutation(class_indices)
+        validation_count = max(1, min(class_indices.size - 1,
+                                      round(class_indices.size * validation_fraction)))
+        validation_indices.extend(shuffled[:validation_count].tolist())
+        train_indices.extend(shuffled[validation_count:].tolist())
+
+    # Preserve the original generated order within each role for replay/order audits.
+    train_rows = np.array(sorted(train_indices), dtype=np.int64)
+    validation_rows = np.array(sorted(validation_indices), dtype=np.int64)
+    return make_role_separated_dataset(
+        train=LabeledData(dataset.train_input[train_rows], dataset.train_target[train_rows]),
+        validation=LabeledData(
+            dataset.train_input[validation_rows], dataset.train_target[validation_rows]
+        ),
+        test=LabeledData(dataset.test_input, dataset.test_target),
+    )
+
+
+def _split_hash(role: str, samples: LabeledData) -> str:
+    digest = sha256(role.encode("utf-8"))
+    for values in (samples.input, samples.target):
+        canonical = np.ascontiguousarray(values, dtype="<f8")
+        digest.update(np.asarray(canonical.shape, dtype="<i8").tobytes())
+        digest.update(canonical.tobytes())
+    return digest.hexdigest()
 
 
 def generate_two_cluster_dataset(
