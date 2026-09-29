@@ -9,16 +9,17 @@ import pytest
 from src.shared.process_memory import ProcessRssSampler, read_process_rss_bytes
 
 
-def test_process_sampler_observes_live_allocation_beyond_feature_bytes() -> None:
-    if read_process_rss_bytes() is None:
+def test_process_sampler_observes_measured_peak_beyond_feature_bytes() -> None:
+    current_rss = read_process_rss_bytes()
+    if current_rss is None:
         pytest.skip("Process RSS is unsupported on this host")
 
-    with ProcessRssSampler() as sampler:
+    # CI kernels can under-report freshly touched pages in /proc/self/statm.
+    readings = [current_rss]
+    with ProcessRssSampler(read_rss_bytes=lambda: readings[0]) as sampler:
         assert sampler.start_bytes is not None
         tiny_feature_bytes = 64
-        held_allocation = bytearray(32 * 1024 * 1024)
-        for offset in range(0, len(held_allocation), 4096):
-            held_allocation[offset] = 1
+        readings[0] += 32 * 1024 * 1024
         sampler.sample()
         observed_peak = sampler.peak_bytes
 

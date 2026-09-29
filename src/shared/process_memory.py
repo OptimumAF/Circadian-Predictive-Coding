@@ -48,8 +48,12 @@ class _WindowsMemoryCounters(ctypes.Structure):
 
 @lru_cache(maxsize=1)
 def _windows_memory_apis() -> tuple[Any, Any]:
-    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-    psapi = ctypes.WinDLL("psapi", use_last_error=True)
+    # ctypes exposes WinDLL only on Windows, but this module is type-checked on Linux too.
+    windows_dll = getattr(ctypes, "WinDLL", None)
+    if windows_dll is None:
+        raise OSError("Windows process memory APIs are unavailable.")
+    kernel32 = windows_dll("kernel32", use_last_error=True)
+    psapi = windows_dll("psapi", use_last_error=True)
     get_current_process = kernel32.GetCurrentProcess
     get_current_process.restype = ctypes.c_void_p
     get_process_memory_info = psapi.GetProcessMemoryInfo
