@@ -101,8 +101,8 @@ heuristic is in scope for this fixed protocol.
 ## P4.8b1 observed train-only schedule
 
 The two ignored local opportunity artifacts,
-`data/trigger-replay-v14-opportunities.json` and
-`data/trigger-replay-v14-opportunities-repeat.json`, are byte-identical
+`data/trigger-replay-v14-opportunities-verified.json` and
+`data/trigger-replay-v14-opportunities-verified-repeat.json`, are byte-identical
 at SHA-256
 `1c30e960aa2dee65a862434fb584e12eaa31bd14a71cb73b3eb919f9dfa5d168`.
 The fixed manifest digest is
