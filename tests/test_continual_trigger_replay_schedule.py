@@ -193,7 +193,8 @@ def test_should_reject_mutated_arrived_train_before_buffer_mutation(change: str)
 
 def test_should_never_read_guard_or_outer_values(monkeypatch: pytest.MonkeyPatch) -> None:
     manifest = fixed_trigger_replay_manifest()
-    original_build = arrived._build_phase_a_roles
+    original_a = arrived._build_phase_a_roles
+    original_b = arrived._build_phase_b_roles
 
     class SealedDecisionRole:
         @property
@@ -204,12 +205,24 @@ def test_should_never_read_guard_or_outer_values(monkeypatch: pytest.MonkeyPatch
         def target(self) -> Any:
             raise AssertionError("decision label opened")
 
-    def sealed_roles(*args: Any, **kwargs: Any) -> Any:
+    def sealed_roles(build: Any, *args: Any, **kwargs: Any) -> Any:
         sealed = cast(LabeledData, SealedDecisionRole())
-        return replace(original_build(*args, **kwargs), inner_guard=sealed, outer_selection=sealed)
+        return replace(build(*args, **kwargs), inner_guard=sealed, outer_selection=sealed)
 
-    monkeypatch.setattr(arrived, "_build_phase_a_roles", sealed_roles)
+    monkeypatch.setattr(
+        arrived,
+        "_build_phase_a_roles",
+        lambda *args, **kwargs: sealed_roles(original_a, *args, **kwargs),
+    )
+    monkeypatch.setattr(
+        arrived,
+        "_build_phase_b_roles",
+        lambda *args, **kwargs: sealed_roles(original_b, *args, **kwargs),
+    )
     session = TriggerReplayScheduleSession(manifest, seed=47)
+    for _ in range(12):
+        assert session.complete_wake_epoch(manifest, source_role="train").selected_ids
+    session.arrive_phase_b(manifest)
     assert session.complete_wake_epoch(manifest, source_role="train").selected_ids
 
 
