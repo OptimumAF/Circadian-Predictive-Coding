@@ -4593,3 +4593,78 @@ were not modified.
   next-seed interruption/resume sentinels that keep seed 17's final labels
   sealed until seed 19 finishes, and reject tampered development state
   before another update.
+
+## 2026-09-28 — P1.3c3b2b unscored v5 checkpoint continuation
+
+- Completed task ID: **P1.3c3b2b**. **P1.3c3b2c**, parent **P1.3c3b2**,
+  **P1.3c3b**, **P1.3c3**, **P1.3c4**, and **P1.3c** remain unchecked.
+  Started on dirty `master` at `704886b1e39159726271294c7475d9e4cdf6910e`.
+  During the session the shared checkout moved to
+  `codex/research-protocols-and-resume`: code/docs entered `e1fec1b`,
+  followed by the plan in `15dcf81`. This log entry is the remaining
+  working-tree change. Unrelated Python 3.14, CUDA, and other user
+  changes were preserved.
+- Starting canary: the new v5 checkpoint source-seal test failed twice at
+  the old explicit rejection. Added format-5 `unscored_seeds` records with
+  detached trained baseline/circadian states and arrived development
+  digests/hashes. Every active and terminal v5 checkpoint leaves completed
+  report, development-result, and test-digest fields empty; it never stores
+  test hashes, scores, or held-out arrays. Resume validates prior seed
+  identities, model progress, circadian wake/replay provenance, and the
+  active phase before another update. The terminal unscored checkpoint
+  repeats scoring without retraining. V1–v4 retain their existing payload
+  and checkpoint routes.
+- Evidence: two-seed source-field sentinels keep final tests closed until
+  both seeds train in either model order. Sixteen A/B and later-seed
+  interruption/resume cases cover wake, before-sleep, after-sleep, seed
+  boundaries, and terminal completion. Each gives the ordinary v5 report,
+  runs only remaining Backprop updates, and matches uninterrupted saved
+  model fields and replay rows. Whole-object pickle hashes initially
+  differed in eight cases because object alias encoding changed across
+  restore; field-wise model/RNG/snapshot and row-wise replay comparisons
+  showed equal training state. Two prior-state tamper cases, one changed
+  development role, one forged future-seed replay, and two changed
+  setting/seed-list cases all reject before another update or source read.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_global_test_seal.py -q -k checkpoint_resume
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_global_test_seal.py -q
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_global_test_seal.py tests/test_continual_final_label_seal.py tests/test_continual_bounded_replay.py tests/test_continual_phase_local_schedule.py tests/test_continual_phase_label_arrival.py tests/test_continual_checkpoint_resume.py tests/test_continual_shift_benchmark.py -q
+  .\.venv\Scripts\python.exe -m pytest -q
+  .\.venv\Scripts\python.exe -m pytest --collect-only -q
+  .\.venv\Scripts\ruff.exe check .
+  .\.venv\Scripts\python.exe -m mypy src tests scripts
+  .\.venv\Scripts\ruff.exe format --check src/app/continual_checkpoint.py src/app/continual_shift_benchmark.py tests/test_continual_global_test_seal.py
+  git -c core.safecrlf=false diff --check
+  ```
+
+  The expanded interruption test passed **16** after semantic state
+  comparison; the v5 test file passed **31**. The seven-file continual set
+  passed **104**, and the final full CPU suite exited 0 with **860**
+  collected tests and no skips shown. Ruff, mypy (**133 source files**),
+  touched-file format, and diff checks passed. An initial format check
+  found one layout change; `ruff format src/app/continual_shift_benchmark.py`
+  fixed it before the final gates. The initial whole-object pickle-hash
+  test failed **8/12** before comparison was corrected without changing
+  the training implementation or acceptance target.
+- Experiment artifacts and skipped work: no new persistent experiment
+  result or sweep; checkpoint files were temporary pytest artifacts and
+  one temporary diagnostic comparison. No full CUDA suite or
+  representative-scale fairness experiment was run for this NumPy
+  checkpoint boundary. The CLI has no continual checkpoint flag, so the
+  documented Python API was used. Earlier negative circadian results and
+  their artifacts were untouched.
+- Plan changes and rationale: checked b2b only after the full resume and
+  static gates. ADR-0072, README, evaluation protocol, and app/infra
+  module docs describe format 5 and its trusted-file boundary; ADR-0071
+  now points to the later checkpoint increment. A single declared config
+  is bound by digest, but no candidate setting search, disjoint inner
+  guard/outer selection, or label/task arrival ledger exists. Thus b2c,
+  b2/b/c3/c, and c4 remain open. No external blocker was found.
+- Exact next action: add a failing two-phase canary that assigns separate
+  stable train, inner-guard, outer-selection, and final-test IDs/hashes;
+  records source/label release and per-method task information; and
+  raises if guard or selection opens an unarrived role. Then implement
+  the smallest v5-only role split and decision wiring, with final-test
+  access still after all candidate settings freeze.
