@@ -1,5 +1,6 @@
 # NumPy 2.5 stubs use Python 3.12 type-alias syntax; keep mypy's Python 3.11 target parseable.
 numpy>=1.26,<2.5
+Pillow>=10.0,<13.0
 pytest>=8.0,<10.0
 ruff>=0.5,<1.0
 mypy>=1.10,<2.0
