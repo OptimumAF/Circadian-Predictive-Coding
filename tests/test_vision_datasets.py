@@ -163,6 +163,54 @@ def test_should_reserve_validation_from_full_cifar_train_source(
     _assert_disjoint_ids(loaders.sample_ids)
 
 
+def test_should_build_development_roles_without_opening_cifar_final_source(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.infra import vision_datasets
+
+    final_constructions = 0
+
+    class FakeCifar:
+        def __init__(self, root: str, train: bool, download: bool, transform: Any) -> None:
+            nonlocal final_constructions
+            del root, download, transform
+            if not train:
+                final_constructions += 1
+                raise AssertionError("final CIFAR source constructed during development probe")
+
+        def __len__(self) -> int:
+            return 20
+
+    monkeypatch.setattr(
+        vision_datasets,
+        "require_torchvision_datasets",
+        lambda: SimpleNamespace(CIFAR10=FakeCifar, CIFAR100=FakeCifar),
+    )
+    loaders = build_torchvision_vision_dataloaders(
+        TorchVisionDatasetConfig(
+            dataset_name="cifar10",
+            train_subset_size=7,
+            validation_subset_size=5,
+            guard_subset_size=4,
+            test_subset_size=4,
+            image_size=32,
+            batch_size=4,
+            seed=23,
+        ),
+        include_final_test=False,
+    )
+
+    assert final_constructions == 0
+    assert set(loaders.sample_ids) == set(loaders.split_hashes) == {
+        "train",
+        "guard",
+        "validation",
+    }
+    _assert_disjoint_ids(loaders.sample_ids)
+    with pytest.raises(RuntimeError, match="final test is unavailable"):
+        iter(loaders.test_loader)
+
+
 def _assert_disjoint_ids(sample_ids: Any) -> None:
     roles = tuple(sample_ids)
     for first_index, first_role in enumerate(roles):

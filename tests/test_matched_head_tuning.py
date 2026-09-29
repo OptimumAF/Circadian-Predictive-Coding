@@ -113,6 +113,122 @@ def _install_sealed_loaders(
     return state
 
 
+def test_should_build_a_development_bank_without_requesting_final_source(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    features = torch.zeros((2, 5))
+    labels = torch.tensor([0, 1], dtype=torch.long)
+    roles = {name: object() for name in ("train", "guard", "validation")}
+    requested: list[bool] = []
+
+    class DevelopmentLoaders:
+        train_loader = roles["train"]
+        guard_loader = roles["guard"]
+        validation_loader = roles["validation"]
+        split_hashes = {name: name for name in roles}
+        num_classes = 2
+
+        @property
+        def test_loader(self) -> Any:
+            raise AssertionError("development bank requested final loader")
+
+    def build_loaders(config: Any, *, include_final_test: bool = True) -> Any:
+        del config
+        requested.append(include_final_test)
+        return DevelopmentLoaders()
+
+    monkeypatch.setattr(tuning.matched, "_build_benchmark_loaders", build_loaders)
+    monkeypatch.setattr(
+        tuning.matched,
+        "_build_resnet50_backbone",
+        lambda **kwargs: (torch.nn.Identity(), 5),
+    )
+    monkeypatch.setattr(
+        tuning.matched,
+        "_materialize_role_features",
+        lambda *args: ((features, labels),),
+    )
+
+    bank = tuning._build_seed_bank(
+        torch, torch.device("cpu"), _base_config(), include_final_test=False
+    )
+
+    assert requested == [False]
+    assert set(bank.split_hashes) == set(roles)
+
+
+def test_should_select_cifar_candidates_without_constructing_final_source(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from PIL import Image
+    from types import SimpleNamespace
+
+    from src.infra import vision_datasets
+
+    final_constructions = 0
+
+    class FakeCifar:
+        def __init__(self, root: str, train: bool, download: bool, transform: Any) -> None:
+            nonlocal final_constructions
+            del root, download
+            if not train:
+                final_constructions += 1
+                raise AssertionError("selection constructed the CIFAR final source")
+            self.transform = transform
+
+        def __len__(self) -> int:
+            return 30
+
+        def __getitem__(self, index: int) -> tuple[Any, int]:
+            return self.transform(Image.new("RGB", (32, 32), color=(index, 0, 0))), index % 10
+
+    monkeypatch.setattr(
+        vision_datasets,
+        "require_torchvision_datasets",
+        lambda: SimpleNamespace(CIFAR10=FakeCifar, CIFAR100=FakeCifar),
+    )
+    monkeypatch.setattr(
+        tuning.matched,
+        "_build_resnet50_backbone",
+        lambda **kwargs: (
+            torch.nn.Sequential(torch.nn.Flatten(), torch.nn.Linear(3 * 32 * 32, 5)),
+            5,
+        ),
+    )
+    config = replace(
+        _base_config(),
+        dataset_name="cifar10",
+        num_classes=10,
+        dataset_download=False,
+        dataset_train_subset_size=8,
+        dataset_guard_subset_size=4,
+        dataset_validation_subset_size=4,
+        dataset_test_subset_size=4,
+    )
+
+    observed: list[tuple[str, bool]] = []
+    result = tuning.run_matched_head_tuning(
+        config,
+        _candidates(config),
+        seeds=(47,),
+        candidates_per_head=2,
+        confirm_test=False,
+        development_only_source=True,
+        attempt_observer=lambda attempt, trial: observed.append(
+            (attempt.status, trial is not None)
+        ),
+    )
+
+    assert final_constructions == 0
+    assert len(result.attempts) == len(result.trials) == 6
+    assert len(result.selections) == 3
+    assert not result.confirmations
+    assert observed == [("started", False), ("complete", True)] * 6
+    assert all(
+        set(trial.split_hashes) == {"train", "guard", "validation"} for trial in result.trials
+    )
+
+
 def test_equal_trial_ledger_seals_test_until_selection(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

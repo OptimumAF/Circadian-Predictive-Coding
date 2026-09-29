@@ -9,6 +9,39 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- Fixed v14 train-only all-opportunity shared replay schedule for future
+  full-stack periodic/adaptive/no-sleep controls; exact v9 periodic
+  parity, sealed roles, and repeatable local JSON without model scores
+  (ADR-0116).
+- Fixed v13 NumPy sleep-trigger timing comparison across stationary noisy
+  and axis-shift streams: globally sealed periodic, unchanged adaptive,
+  and no-sleep arms with equal wake work/capacity, deterministic local
+  JSON, and a zero-event adaptive result at its defaults (ADR-0115).
+- Fixed v12 NumPy/CPU-Torch 32-cell structural comparison with independent
+  wake modulation, importance-history reward weighting, and importance
+  score factors; globally sealed final roles, equal work/change caps,
+  deterministic local JSON, and no observed history-weighting benefit
+  in this bounded run (ADR-0114).
+- Read-only NumPy/CPU-Torch structural rank audit separating the existing
+  reward-weighted importance history from ordinary importance scoring
+  and wake learning-rate changes; no new ranking heuristic (ADR-0113).
+- Fixed v11 NumPy/CPU-Torch matched difficulty comparison with 24 globally
+  sealed clean, label-flip, and feature-outlier trials, equal work, local
+  deterministic JSON, and a null modulation result (ADR-0112).
+- Fixed train-only NumPy/CPU-Torch difficulty-signal audit for clean,
+  label-flipped, and feature-outlier rows; no training heuristic selected
+  (`docs/difficulty-modulation-audit.md`).
+- Phase-budget regression coverage for NumPy typed structural proposals;
+  separated request parsing, eligibility, and ranking while preserving
+  Torch's distinct post-split planner (ADR-0110).
+- Opt-in NumPy `wake_only_adaptive_v1` replay side-effect policy and a
+  globally sealed eight-trial matched-control ablation; the fixed result
+  is null for side-effect choice and retains the baseline advantage
+  (ADR-0109).
+- Versioned NumPy matched replay controls with one train-only FIFO or
+  seeded bottom-k schedule for circadian, predictive coding, and backprop;
+  guarded applied-work accounting and a globally sealed fixed two-seed
+  outcome artifact (ADRs 0106–0108).
 - Review-driven circadian updates in NumPy and ResNet circadian cores:
   - optional reward-modulated wake learning (`use_reward_modulated_learning`)
   - optional adaptive sleep budget scaling (`use_adaptive_sleep_budget`)

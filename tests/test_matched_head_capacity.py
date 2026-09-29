@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import fields
+from dataclasses import asdict, fields
 from dataclasses import replace
+import json
 import random
 from types import SimpleNamespace
 from typing import Any
@@ -231,12 +232,20 @@ def test_fixed_width_capacity_checkpoint_preserves_guarded_sleep_and_final_test(
     stage: str,
     reject: bool,
 ) -> None:
-    config = _fixed_width_config()
-    monkeypatch.setattr(
-        benchmark,
-        "_compute_rollback_delta",
-        lambda **kwargs: 1.0 if reject else 0.0,
-    )
+    config = replace(_fixed_width_config(), circadian_sleep_rollback_eval_batches=1)
+    original_evaluate = benchmark._evaluate_head
+    guard_calls = 0
+
+    def evaluate(
+        torch_module: Any, device: Any, predict: Any, batches: Any, limit: Any, **kwargs: Any
+    ) -> tuple[float, float]:
+        nonlocal guard_calls
+        if limit == 1 and isinstance(predict.__self__, CircadianPredictiveCodingHead):
+            guard_calls += 1
+            return (0.7, 1.0) if reject and guard_calls % 2 == 0 else (0.8, 0.5)
+        return original_evaluate(torch_module, device, predict, batches, limit, **kwargs)
+
+    monkeypatch.setattr(benchmark, "_evaluate_head", evaluate)
     random.seed(811)
     np.random.seed(812)
     torch.manual_seed(813)
@@ -272,6 +281,7 @@ def test_fixed_width_capacity_checkpoint_preserves_guarded_sleep_and_final_test(
     monkeypatch.setattr(benchmark, "_build_benchmark_loaders", build)
     monkeypatch.setattr(benchmark, "_verify_fixed_width_capacity", verify_capacity)
     store = TrustedLocalCircadianCheckpointStore(tmp_path / "capacity.ckpt")
+    guard_calls = 0
     random.seed(811)
     np.random.seed(812)
     torch.manual_seed(813)
@@ -296,6 +306,13 @@ def test_fixed_width_capacity_checkpoint_preserves_guarded_sleep_and_final_test(
         strict=True,
     ):
         for field in fields(actual):
+            if field.name == "sleep_events":
+                left = [asdict(event) for event in actual.sleep_events]
+                right = [asdict(event) for event in expected.sleep_events]
+                for event in (*left, *right):
+                    event.pop("durations")
+                assert left == right
+                continue
             if field.name != "train_seconds":
                 assert getattr(actual, field.name) == getattr(expected, field.name)
         assert actual.process_rss_peak_observed_bytes is None
@@ -303,6 +320,99 @@ def test_fixed_width_capacity_checkpoint_preserves_guarded_sleep_and_final_test(
     assert resumed.circadian.total_rollbacks == int(reject)
     assert resumed.circadian.total_splits == resumed.circadian.total_prunes == 0
     assert (random.random(), float(np.random.random()), float(torch.rand(()))) == expected_draw
+
+
+@pytest.mark.parametrize("checkpoint_memory", [False, True])
+def test_fixed_width_error_history_resumes_before_final_test(
+    tmp_path: Any, monkeypatch: pytest.MonkeyPatch, checkpoint_memory: bool
+) -> None:
+    config = replace(_fixed_width_config(), circadian_sleep_rollback_eval_batches=1)
+    original_evaluate = benchmark._evaluate_head
+    failure = {"enabled": False, "guard_calls": 0}
+
+    def evaluate(
+        torch_module: Any, device: Any, predict: Any, batches: Any, limit: Any, **kwargs: Any
+    ) -> tuple[float, float]:
+        if limit == 1 and isinstance(predict.__self__, CircadianPredictiveCodingHead):
+            failure["guard_calls"] += 1
+            if failure["enabled"] and failure["guard_calls"] == 2:
+                failure["enabled"] = False
+                raise RuntimeError("post guard failed")
+        return original_evaluate(torch_module, device, predict, batches, limit, **kwargs)
+
+    monkeypatch.setattr(benchmark, "_evaluate_head", evaluate)
+    control = benchmark.run_three_head_fixed_width_capacity_benchmark(
+        config,
+        checkpoint_memory=checkpoint_memory,
+        checkpoint_store=TrustedLocalCircadianCheckpointStore(tmp_path / "control.ckpt"),
+    )
+    original_build = benchmark._build_benchmark_loaders
+    final_allowed = False
+    final_reads = 0
+
+    class SealedTestLoader:
+        def __init__(self, wrapped: Any) -> None:
+            self.wrapped = wrapped
+
+        def __iter__(self) -> Any:
+            nonlocal final_reads
+            if not final_allowed:
+                raise AssertionError("fixed-width error opened final test before resume")
+            final_reads += 1
+            return iter(self.wrapped)
+
+    def build(config: ResNet50BenchmarkConfig) -> Any:
+        loaders = original_build(config)
+        return replace(loaders, test_loader=SealedTestLoader(loaders.test_loader))
+
+    monkeypatch.setattr(benchmark, "_build_benchmark_loaders", build)
+    store = TrustedLocalCircadianCheckpointStore(tmp_path / "error.ckpt")
+    failure["enabled"] = True
+    failure["guard_calls"] = 0
+    with pytest.raises(RuntimeError, match="post guard failed"):
+        benchmark.run_three_head_fixed_width_capacity_benchmark(
+            config, checkpoint_store=store, checkpoint_memory=checkpoint_memory
+        )
+    assert final_reads == 0
+    saved = store.load()
+    assert saved.combined.position.stage == "before_sleep"
+    assert saved.progress.sleep_attempts == 1
+    assert [event.reason for event in saved.sleep_events] == ["inner_guard_post_exception"]
+    assert bool(saved.memory_segments) == checkpoint_memory
+
+    final_allowed = True
+    resumed = benchmark.run_three_head_fixed_width_capacity_benchmark(
+        config,
+        checkpoint_store=store,
+        resume_from_checkpoint=True,
+        checkpoint_memory=checkpoint_memory,
+    )
+    assert final_reads == 1
+    assert resumed.capacity_control == control.capacity_control
+    assert resumed.initial_head_hashes == control.initial_head_hashes
+    assert resumed.trained_head_hashes == control.trained_head_hashes
+    assert resumed.circadian.sleep_attempts == control.circadian.sleep_attempts + 1
+    assert [event.outcome for event in resumed.circadian.sleep_events] == [
+        "error",
+        control.circadian.sleep_events[0].outcome,
+    ]
+    for actual, expected in zip(
+        (resumed.backprop, resumed.predictive_coding, resumed.circadian),
+        (control.backprop, control.predictive_coding, control.circadian),
+        strict=True,
+    ):
+        assert actual.validation_accuracy == expected.validation_accuracy
+        assert actual.test_accuracy == expected.test_accuracy
+        assert actual.test_cross_entropy == expected.test_cross_entropy
+        assert actual.seen_samples == expected.seen_samples
+    actual_sleep, expected_sleep = (
+        asdict(resumed.circadian.sleep_events[-1]),
+        asdict(control.circadian.sleep_events[0]),
+    )
+    actual_sleep.pop("durations")
+    expected_sleep.pop("durations")
+    assert actual_sleep == expected_sleep
+    json.dumps(asdict(resumed), allow_nan=False)
 
 
 def test_capacity_checkpoint_rejects_ordinary_fixed_feature_file(

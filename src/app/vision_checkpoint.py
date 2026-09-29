@@ -25,6 +25,7 @@ from src.core.resnet50_variants import (
 from src.app.seeded_vision_loader import SeededEpochLoaderState
 from src.app.shared_vision_loader import SharedEpochLoaderState
 from src.app.sleep_schedule import SleepRollbackCooldownState
+from src.core.sleep_telemetry import SleepEventTelemetry
 
 
 @dataclass(frozen=True)
@@ -75,6 +76,8 @@ class VisionRunnerCheckpoint:
     torch_cpu_random_state: Any
     active_circadian: VisionCircadianProgress | None = None
     shared_train_generator_state: Any | None = None
+    torch_cuda_device: str | None = None
+    torch_cuda_random_state: Any | None = None
 
 
 @dataclass(frozen=True)
@@ -99,6 +102,8 @@ class VisionCircadianProgress:
     final_energy: float
     step_times_ms: tuple[float, ...]
     elapsed_seconds: float
+    outer_entry_torch_cuda_state: Any | None = None
+    sleep_events: tuple[SleepEventTelemetry, ...] = ()
 
 
 class VisionCheckpointStore(Protocol):
@@ -120,6 +125,7 @@ class VisionCircadianCheckpointContext:
     completed_outcomes: tuple[Any, ...]
     completed_hashes: tuple[str, ...]
     outer_entry_torch_state: Any
+    outer_entry_torch_cuda_state: Any | None = None
     resume_checkpoint: VisionRunnerCheckpoint | None = None
 
 
@@ -381,10 +387,11 @@ def capture_vision_checkpoint(
     torch: Any,
     active_circadian: VisionCircadianProgress | None = None,
     shared_train_generator_state: Any | None = None,
+    cuda_device: str | None = None,
 ) -> VisionRunnerCheckpoint:
     """Capture complete model-boundary progress and process RNG."""
     return VisionRunnerCheckpoint(
-        format_version=1,
+        format_version=2,
         protocol_id=config.protocol_id,
         config_digest=vision_config_digest(config, training_order),
         data_digest=data_digest,
@@ -401,6 +408,10 @@ def capture_vision_checkpoint(
             if shared_train_generator_state is not None
             else None
         ),
+        torch_cuda_device=cuda_device,
+        torch_cuda_random_state=(
+            torch.cuda.get_rng_state(cuda_device).clone() if cuda_device is not None else None
+        ),
     )
 
 
@@ -412,12 +423,13 @@ def validate_vision_checkpoint(
     training_order: tuple[str, ...],
     torch: Any,
     shared_train_loader: bool = False,
+    cuda_device: str | None = None,
 ) -> None:
     """Reject incompatible model-boundary files before restoring process state."""
     if (
         not isinstance(checkpoint, VisionRunnerCheckpoint)
         or type(checkpoint.format_version) is not int
-        or checkpoint.format_version != 1
+        or checkpoint.format_version != 2
     ):
         raise ValueError("incompatible vision checkpoint format")
     if (
@@ -461,6 +473,22 @@ def validate_vision_checkpoint(
             torch.Generator(device="cpu").set_state(shared_state.detach().clone())
         elif shared_state is not None:
             raise ValueError("unexpected shared train-loader generator state")
+        saved_cuda_device = getattr(checkpoint, "torch_cuda_device", None)
+        cuda_state = getattr(checkpoint, "torch_cuda_random_state", None)
+        if cuda_device is None:
+            if saved_cuda_device is not None or cuda_state is not None:
+                raise ValueError("unexpected CUDA process RNG state")
+        else:
+            if saved_cuda_device != cuda_device:
+                raise ValueError("incompatible CUDA checkpoint device")
+            if (
+                cuda_state is None
+                or not torch.is_tensor(cuda_state)
+                or cuda_state.dtype != torch.uint8
+                or cuda_state.device.type != "cpu"
+            ):
+                raise ValueError("invalid CUDA process RNG state")
+            torch.Generator(device=cuda_device).set_state(cuda_state.detach().clone())
     except (TypeError, ValueError, RuntimeError) as exc:
         raise ValueError("incompatible vision checkpoint process RNG") from exc
 
@@ -470,3 +498,8 @@ def restore_vision_process_rng(checkpoint: VisionRunnerCheckpoint, torch: Any) -
     random.setstate(deepcopy(checkpoint.python_random_state))
     np.random.set_state(deepcopy(checkpoint.numpy_random_state))
     torch.set_rng_state(checkpoint.torch_cpu_random_state.detach().clone())
+    cuda_device = getattr(checkpoint, "torch_cuda_device", None)
+    if cuda_device is not None:
+        cuda_state = checkpoint.torch_cuda_random_state
+        assert cuda_state is not None
+        torch.cuda.set_rng_state(cuda_state.detach().clone(), cuda_device)

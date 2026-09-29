@@ -20,6 +20,7 @@ from src.app.numpy_checkpoint_validation import (
 )
 from src.core.backprop_mlp import BackpropMLP
 from src.core.predictive_coding import PredictiveCodingNetwork
+from src.core.sleep_telemetry import SleepEventTelemetry
 import numpy as np
 
 
@@ -37,6 +38,7 @@ class ToyRunnerCheckpoint:
     total_splits: int
     total_prunes: int
     hidden_dim_start: int
+    sleep_events: tuple[SleepEventTelemetry, ...]
     combined: CircadianRunCheckpoint
 
 
@@ -76,7 +78,7 @@ def validate_toy_checkpoint(
     if (
         not isinstance(checkpoint, ToyRunnerCheckpoint)
         or type(checkpoint.format_version) is not int
-        or checkpoint.format_version != 1
+        or checkpoint.format_version != 2
     ):
         raise ValueError("incompatible toy checkpoint format")
     if checkpoint.runner_config_digest != config_digest or checkpoint.data_digest != data_digest:
@@ -108,6 +110,20 @@ def validate_toy_checkpoint(
         expected_lengths = (completed, completed, completed)
     else:
         raise ValueError("incompatible toy checkpoint stage")
+    expected_events = completed - int(position.stage == "before_sleep")
+    if (
+        type(checkpoint.sleep_events) is not tuple
+        or len(checkpoint.sleep_events) != expected_events
+        or any(
+            not isinstance(event, SleepEventTelemetry)
+            or event.format_version != 1
+            or event.completed_epoch != index
+            or event.wake_batches != index
+            or event.guard is not None
+            for index, event in enumerate(checkpoint.sleep_events, start=1)
+        )
+    ):
+        raise ValueError("incompatible toy checkpoint sleep event history")
     if (
         not isinstance(checkpoint.losses, tuple)
         or len(checkpoint.losses) != 3

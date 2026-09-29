@@ -1,6 +1,6 @@
 """Combine model, runner retry, and caller RNG state for a seeded resume.
 
-This in-memory boundary accepts a NumPy circadian network or a CPU Torch
+This in-memory boundary accepts a NumPy circadian network or a Torch
 circadian head. Runners supply their protocol, configuration, data identity,
 and progress; durable storage and data-order replay belong to the runners.
 """
@@ -65,6 +65,8 @@ class CircadianRunCheckpoint:
     python_random_state: Any
     numpy_random_state: Any
     torch_cpu_random_state: Any | None
+    torch_cuda_device: str | None = None
+    torch_cuda_random_state: Any | None = None
 
 
 def capture_circadian_checkpoint(
@@ -81,7 +83,10 @@ def capture_circadian_checkpoint(
     _validate_identity(model, position, protocol_id, config, data_digest)
     if retry is not None and not isinstance(retry, SleepRollbackCooldown):
         raise TypeError("checkpoint retry state must use SleepRollbackCooldown")
-    torch_state = require_torch().get_rng_state().clone() if backend == "torch_head" else None
+    torch = require_torch() if backend.startswith("torch_head") else None
+    torch_state = torch.get_rng_state().clone() if torch is not None else None
+    cuda_device = _cuda_device(model) if backend == "torch_head_cuda" else None
+    cuda_state = require_torch().cuda.get_rng_state(cuda_device).clone() if cuda_device else None
     return CircadianRunCheckpoint(
         format_version=1,
         backend=backend,
@@ -94,6 +99,8 @@ def capture_circadian_checkpoint(
         python_random_state=deepcopy(random.getstate()),
         numpy_random_state=deepcopy(np.random.get_state()),
         torch_cpu_random_state=torch_state,
+        torch_cuda_device=cuda_device,
+        torch_cuda_random_state=cuda_state,
     )
 
 
@@ -138,7 +145,11 @@ def restore_circadian_checkpoint(
             raise ValueError("incompatible checkpoint retry state presence")
         SleepRollbackCooldown(retry.cooldown_epochs).restore_state(retry_state)
 
-    _validate_random_state(checkpoint, backend)
+    _validate_random_state(
+        checkpoint,
+        backend,
+        expected_cuda_device=_cuda_device(model) if backend == "torch_head_cuda" else None,
+    )
     # Why this: a temporary model catches malformed topology or RNG state
     # before the first live model or runner value is changed.
     candidate = object.__new__(type(model))
@@ -153,10 +164,15 @@ def restore_circadian_checkpoint(
         retry.restore_state(retry_state)
     random.setstate(deepcopy(checkpoint.python_random_state))
     np.random.set_state(deepcopy(checkpoint.numpy_random_state))
-    if backend == "torch_head":
+    if backend.startswith("torch_head"):
         torch_state = checkpoint.torch_cpu_random_state
         assert torch_state is not None
         require_torch().set_rng_state(torch_state.detach().clone())
+    if backend == "torch_head_cuda":
+        cuda_state = checkpoint.torch_cuda_random_state
+        cuda_device = checkpoint.torch_cuda_device
+        assert cuda_state is not None and cuda_device is not None
+        require_torch().cuda.set_rng_state(cuda_state.detach().clone(), cuda_device)
     return checkpoint.position
 
 
@@ -164,9 +180,12 @@ def _model_backend(model: CircadianCheckpointModel) -> str:
     if isinstance(model, CircadianPredictiveCodingNetwork):
         return "numpy"
     if isinstance(model, CircadianPredictiveCodingHead):
-        if str(model.device) != "cpu":
-            raise ValueError("checkpoint Torch head must use a CPU device")
-        return "torch_head"
+        device = model.weight_feature_hidden.device
+        if device.type == "cpu":
+            return "torch_head"
+        if device.type == "cuda":
+            return "torch_head_cuda"
+        raise ValueError("checkpoint Torch head must use a CPU or CUDA device")
     raise TypeError("checkpoint model must be a circadian NumPy network or Torch head")
 
 
@@ -222,17 +241,46 @@ def _config_digest(config: Any) -> str:
     return sha256(encoded).hexdigest()
 
 
-def _validate_random_state(checkpoint: CircadianRunCheckpoint, backend: str) -> None:
+def _cuda_device(model: CircadianCheckpointModel) -> str:
+    assert isinstance(model, CircadianPredictiveCodingHead)
+    # Why this: a configured "cuda" alias can point to a different index later.
+    return str(model.weight_feature_hidden.device)
+
+
+def _validate_random_state(
+    checkpoint: CircadianRunCheckpoint,
+    backend: str,
+    *,
+    expected_cuda_device: str | None,
+) -> None:
     try:
         random.Random().setstate(deepcopy(checkpoint.python_random_state))
         np.random.RandomState().set_state(deepcopy(checkpoint.numpy_random_state))
-        if backend == "torch_head":
+        if backend.startswith("torch_head"):
             torch = require_torch()
             state = checkpoint.torch_cpu_random_state
-            if not isinstance(state, torch.Tensor) or state.dtype != torch.uint8:
+            if (
+                not isinstance(state, torch.Tensor)
+                or state.dtype != torch.uint8
+                or state.device.type != "cpu"
+            ):
                 raise ValueError("invalid Torch CPU RNG state")
             torch.Generator(device="cpu").set_state(state.detach().clone())
         elif checkpoint.torch_cpu_random_state is not None:
             raise ValueError("unexpected Torch CPU RNG state")
+        cuda_state = getattr(checkpoint, "torch_cuda_random_state", None)
+        cuda_device = getattr(checkpoint, "torch_cuda_device", None)
+        if backend == "torch_head_cuda":
+            if cuda_device != expected_cuda_device:
+                raise ValueError("incompatible checkpoint CUDA device")
+            if (
+                not isinstance(cuda_state, torch.Tensor)
+                or cuda_state.dtype != torch.uint8
+                or cuda_state.device.type != "cpu"
+            ):
+                raise ValueError("invalid Torch CUDA RNG state")
+            torch.Generator(device=cuda_device).set_state(cuda_state.detach().clone())
+        elif cuda_device is not None or cuda_state is not None:
+            raise ValueError("unexpected Torch CUDA RNG state")
     except (TypeError, ValueError, RuntimeError) as exc:
         raise ValueError("incompatible checkpoint process random state") from exc

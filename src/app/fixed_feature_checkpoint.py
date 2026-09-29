@@ -16,6 +16,7 @@ from typing import Any, Protocol
 from src.app.circadian_checkpoint import CircadianResumePosition, CircadianRunCheckpoint
 from src.app.sleep_schedule import SleepRollbackCooldownState
 from src.app.resnet50_benchmark import ResNet50BenchmarkConfig
+from src.core.sleep_telemetry import SleepEventTelemetry
 from src.shared.process_memory import ProcessRssSegment
 
 
@@ -36,8 +37,20 @@ class FixedFeatureCircadianProgress:
 
 
 @dataclass(frozen=True)
+class CudaAllocatorSegment:
+    """One process/device invocation's allocator baseline and high-water marks."""
+
+    pid: int
+    device: str
+    allocated_start_bytes: int
+    reserved_start_bytes: int
+    allocated_peak_bytes: int
+    reserved_peak_bytes: int
+
+
+@dataclass(frozen=True)
 class FixedFeatureCircadianCheckpoint:
-    """One trusted-file payload for a CPU fixed-feature circadian head."""
+    """One trusted-file payload for a fixed-feature circadian head."""
 
     format_version: int
     protocol_id: str
@@ -47,7 +60,9 @@ class FixedFeatureCircadianCheckpoint:
     split_hashes: tuple[tuple[str, str], ...]
     progress: FixedFeatureCircadianProgress
     combined: CircadianRunCheckpoint
+    sleep_events: tuple[SleepEventTelemetry, ...] = ()
     memory_segments: tuple[ProcessRssSegment, ...] = ()
+    cuda_allocator_segments: tuple[CudaAllocatorSegment, ...] = ()
 
 
 class FixedFeatureCheckpointStore(Protocol):
@@ -99,15 +114,18 @@ def validate_fixed_feature_checkpoint(
     feature_hashes: tuple[tuple[str, str], ...],
     split_hashes: tuple[tuple[str, str], ...],
     batch_sizes: tuple[int, ...],
+    guard_batch_sizes: tuple[int, ...],
     epochs: int,
     initial_width: int,
+    config: ResNet50BenchmarkConfig,
     memory_sample_interval_seconds: float | None = None,
+    cuda_memory_device: str | None = None,
 ) -> FixedFeatureCircadianProgress:
     """Check runner identity and counters before restoring the live head."""
     if (
         not isinstance(checkpoint, FixedFeatureCircadianCheckpoint)
         or type(checkpoint.format_version) is not int
-        or checkpoint.format_version != 1
+        or checkpoint.format_version != 2
     ):
         raise ValueError("incompatible fixed-feature checkpoint format")
     if (
@@ -131,6 +149,21 @@ def validate_fixed_feature_checkpoint(
         )
     ):
         raise ValueError("incompatible fixed-feature checkpoint memory segments")
+    cuda_segments = getattr(checkpoint, "cuda_allocator_segments", None)
+    if cuda_memory_device is None:
+        if cuda_segments != ():
+            raise ValueError("incompatible fixed-feature checkpoint CUDA allocator segments")
+    elif (
+        not isinstance(cuda_segments, tuple)
+        or not cuda_segments
+        or not isinstance(memory_segments, tuple)
+        or len(cuda_segments) != len(memory_segments)
+        or any(
+            not _valid_cuda_segment(segment, cuda_memory_device) or segment.pid != rss.pid
+            for segment, rss in zip(cuda_segments, memory_segments, strict=True)
+        )
+    ):
+        raise ValueError("incompatible fixed-feature checkpoint CUDA allocator segments")
     progress = checkpoint.progress
     if not isinstance(progress, FixedFeatureCircadianProgress):
         raise ValueError("incompatible fixed-feature checkpoint progress")
@@ -191,7 +224,248 @@ def validate_fixed_feature_checkpoint(
         or position.wake_batches != expected_batches
     ):
         raise ValueError("incompatible fixed-feature checkpoint batch or report counters")
+    _validate_sleep_events(
+        checkpoint.sleep_events,
+        position=position,
+        progress=progress,
+        retry_state=retry_state,
+        batches_per_epoch=len(batch_sizes),
+        guard_hash=dict(feature_hashes)["guard"],
+        selected_guard_batch_sizes=(
+            guard_batch_sizes[: config.circadian_sleep_rollback_eval_batches]
+            if config.circadian_sleep_rollback_eval_batches > 0
+            else guard_batch_sizes
+        ),
+        config=config,
+    )
     return progress
+
+
+def _validate_sleep_events(
+    events: object,
+    *,
+    position: CircadianResumePosition,
+    progress: FixedFeatureCircadianProgress,
+    retry_state: SleepRollbackCooldownState,
+    batches_per_epoch: int,
+    guard_hash: str,
+    selected_guard_batch_sizes: tuple[int, ...],
+    config: ResNet50BenchmarkConfig,
+) -> None:
+    """Bind resolved and failed attempts to a retryable cursor before restore."""
+    expected_resolved = position.completed_epoch - int(position.stage == "before_sleep")
+    if type(events) is not tuple or any(type(event) is not SleepEventTelemetry for event in events):
+        raise ValueError("incompatible fixed-feature checkpoint sleep history")
+    due_triggers = {"periodic", "adaptive", "periodic_and_adaptive"}
+    assert isinstance(events, tuple)
+    resolved = 0
+    for event in events:
+        epoch = resolved + 1
+        if (
+            event.completed_epoch != epoch
+            or event.wake_batches != epoch * batches_per_epoch
+            or epoch > position.completed_epoch
+        ):
+            raise ValueError("incompatible fixed-feature checkpoint sleep event clock or order")
+        _validate_sleep_event_contract(event)
+        _validate_sleep_event_decision(
+            event,
+            config=config,
+            guard_hash=guard_hash,
+            selected_guard_batch_sizes=selected_guard_batch_sizes,
+        )
+        if event.outcome != "error":
+            resolved += 1
+            if resolved > expected_resolved:
+                raise ValueError("incompatible fixed-feature checkpoint resolved sleep history")
+    if resolved != expected_resolved or (
+        position.stage != "before_sleep" and events and events[-1].outcome == "error"
+    ):
+        raise ValueError("incompatible fixed-feature checkpoint sleep cursor history")
+    attempts = sum(event.trigger_reason in due_triggers for event in events)
+    rollbacks = sum(event.outcome == "rolled_back" for event in events)
+    suppressions = sum(event.trigger_reason == "cooldown_suppressed" for event in events)
+    guard_examples = sum(
+        event.guard.examples_scored
+        for event in events
+        if event.outcome != "error" and event.guard is not None
+    )
+    splits = sum(len(event.changes.applied_split_pairs) for event in events)
+    prunes = sum(len(event.changes.applied_removed_prune_ids) for event in events)
+    if (
+        progress.sleep_attempts != attempts
+        or progress.total_rollbacks != rollbacks
+        or progress.rollback_guard_examples != guard_examples
+        or progress.total_splits != splits
+        or progress.total_prunes != prunes
+        or retry_state.suppressed_due_attempts != suppressions
+    ):
+        raise ValueError("incompatible fixed-feature checkpoint sleep counters")
+
+
+def _validate_sleep_event_contract(event: SleepEventTelemetry) -> None:
+    """Recheck invariants bypassed when a trusted pickle rehydrates a dataclass."""
+    try:
+        event.budgets.__post_init__()
+        event.changes.__post_init__()
+        event.replay.__post_init__()
+        event.durations.__post_init__()
+        for chemistry in (
+            event.chemistry_before,
+            event.chemistry_proposed,
+            event.chemistry_final,
+        ):
+            chemistry.__post_init__()
+            for summary in (chemistry.primary, chemistry.fast, chemistry.slow):
+                summary.__post_init__()
+        if event.guard is not None:
+            event.guard.__post_init__()
+        event.__post_init__()
+    except (AssertionError, AttributeError, TypeError, ValueError) as error:
+        raise ValueError("incompatible fixed-feature checkpoint sleep event facts") from error
+
+
+def _validate_sleep_event_decision(
+    event: SleepEventTelemetry,
+    *,
+    config: ResNet50BenchmarkConfig,
+    guard_hash: str,
+    selected_guard_batch_sizes: tuple[int, ...],
+) -> None:
+    epoch = event.completed_epoch
+    assert epoch is not None
+    periodic_due = (
+        config.circadian_sleep_mode != "disabled"
+        and config.circadian_sleep_interval > 0
+        and epoch % config.circadian_sleep_interval == 0
+    )
+    allowed_triggers = (
+        {"disabled"}
+        if config.circadian_sleep_mode == "disabled"
+        else {"periodic", "periodic_and_adaptive", "cooldown_suppressed"}
+        if periodic_due
+        else {"adaptive", "not_due", "cooldown_suppressed"}
+    )
+    if event.trigger_reason not in allowed_triggers:
+        raise ValueError("incompatible fixed-feature checkpoint sleep trigger")
+    absent_guard_reason = {
+        "disabled": "sleep_disabled",
+        "not_due": "schedule_not_due",
+        "cooldown_suppressed": "rollback_cooldown",
+    }.get(event.trigger_reason)
+    if absent_guard_reason is not None:
+        if (
+            event.outcome != "skipped"
+            or event.reason != absent_guard_reason
+            or event.guard is not None
+        ):
+            raise ValueError("incompatible fixed-feature checkpoint sleep skip")
+        return
+    guard = event.guard
+    if guard is not None and (
+        not config.circadian_enable_sleep_rollback
+        or guard.role != "inner_guard"
+        or guard.role_hash != guard_hash
+        or guard.metric_name != config.circadian_sleep_rollback_metric
+        or guard.tolerance != config.circadian_sleep_rollback_tolerance
+    ):
+        raise ValueError("incompatible fixed-feature checkpoint sleep guard role or metric")
+    guard_examples_per_pass = sum(selected_guard_batch_sizes)
+    if event.outcome == "error":
+        _validate_failed_sleep_event(event, config, selected_guard_batch_sizes)
+        return
+    if config.circadian_enable_sleep_rollback:
+        if guard is None or guard.examples_scored != 2 * guard_examples_per_pass:
+            raise ValueError("incompatible fixed-feature checkpoint completed guard exposure")
+        reason = {"accepted": "guard_accepted", "rolled_back": "guard_rejected"}.get(event.outcome)
+        if reason is None:
+            if event.outcome != "skipped" or event.reason not in {
+                "warmup",
+                "zero_structural_budget",
+                "adaptive_not_due",
+            }:
+                raise ValueError("incompatible fixed-feature checkpoint guarded sleep outcome")
+        elif event.reason != reason:
+            raise ValueError("incompatible fixed-feature checkpoint guarded sleep reason")
+    elif (
+        guard is not None
+        or (event.outcome == "applied" and event.reason != "core_executed")
+        or (
+            event.outcome == "skipped"
+            and event.reason not in {"warmup", "zero_structural_budget", "adaptive_not_due"}
+        )
+        or event.outcome not in {"applied", "skipped"}
+    ):
+        raise ValueError("incompatible fixed-feature checkpoint unguarded sleep outcome")
+
+
+def _validate_failed_sleep_event(
+    event: SleepEventTelemetry,
+    config: ResNet50BenchmarkConfig,
+    selected_guard_batch_sizes: tuple[int, ...],
+) -> None:
+    guard = event.guard
+    if not config.circadian_enable_sleep_rollback:
+        if (
+            guard is not None
+            or event.reason != "sleep_core_exception"
+            or _has_completed_core_proposal(event)
+        ):
+            raise ValueError("incompatible fixed-feature checkpoint unguarded sleep error")
+        return
+    guard_examples_per_pass = sum(selected_guard_batch_sizes)
+    prefix_counts = {0}
+    scored = 0
+    for batch_size in selected_guard_batch_sizes:
+        scored += batch_size
+        prefix_counts.add(scored)
+    expected_counts = {
+        "inner_guard_pre_exception": prefix_counts,
+        "inner_guard_pre_nonfinite": {guard_examples_per_pass},
+        "sleep_core_exception": {guard_examples_per_pass},
+        "inner_guard_post_exception": {
+            guard_examples_per_pass + prefix for prefix in prefix_counts
+        },
+        "inner_guard_post_nonfinite": {2 * guard_examples_per_pass},
+        "inner_guard_delta_exception": {2 * guard_examples_per_pass},
+    }.get(event.reason)
+    if guard is None or expected_counts is None or guard.examples_scored not in expected_counts:
+        raise ValueError("incompatible fixed-feature checkpoint sleep error exposure")
+    has_pre_score = event.reason not in {"inner_guard_pre_exception", "inner_guard_pre_nonfinite"}
+    has_post_score = event.reason == "inner_guard_delta_exception"
+    if (
+        (guard.pre_accuracy is not None) != has_pre_score
+        or (guard.post_accuracy is not None) != has_post_score
+        or (guard.pre_cross_entropy is not None) != has_pre_score
+        or (guard.post_cross_entropy is not None) != has_post_score
+        or (
+            event.reason
+            in {"inner_guard_pre_exception", "inner_guard_pre_nonfinite", "sleep_core_exception"}
+            and _has_completed_core_proposal(event)
+        )
+    ):
+        raise ValueError("incompatible fixed-feature checkpoint partial sleep error facts")
+
+
+def _has_completed_core_proposal(event: SleepEventTelemetry) -> bool:
+    """A pre/core exception cannot claim a core result it never returned."""
+    changes = event.changes
+    budgets = event.budgets
+    return bool(
+        budgets.split_limit
+        or budgets.prune_limit
+        or budgets.replay_update_limit
+        or budgets.time_limit_seconds is not None
+        or changes.proposed_split_pairs
+        or changes.proposed_prune_ids
+        or changes.proposed_scheduled_prune_ids
+        or changes.proposed_removed_prune_ids
+        or event.replay.proposed_examples
+        or event.replay.proposed_updates
+        or event.proposed_width != event.before_width
+        or event.chemistry_proposed != event.chemistry_before
+        or event.durations.core_seconds
+    )
 
 
 def _valid_memory_segment(segment: object, interval_seconds: float) -> bool:
@@ -207,4 +481,25 @@ def _valid_memory_segment(segment: object, interval_seconds: float) -> bool:
         and segment.sample_count >= 1
         and type(segment.interval_seconds) is float
         and segment.interval_seconds == interval_seconds
+    )
+
+
+def _valid_cuda_segment(segment: object, device: str) -> bool:
+    if not isinstance(segment, CudaAllocatorSegment):
+        return False
+    values = (
+        segment.allocated_start_bytes,
+        segment.reserved_start_bytes,
+        segment.allocated_peak_bytes,
+        segment.reserved_peak_bytes,
+    )
+    return (
+        type(segment.pid) is int
+        and segment.pid > 0
+        and segment.device == device
+        and all(type(value) is int and value >= 0 for value in values)
+        and segment.allocated_peak_bytes >= segment.allocated_start_bytes
+        and segment.reserved_peak_bytes >= segment.reserved_start_bytes
+        and segment.reserved_start_bytes >= segment.allocated_start_bytes
+        and segment.reserved_peak_bytes >= segment.allocated_peak_bytes
     )

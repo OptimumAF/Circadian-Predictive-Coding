@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, fields, replace
 from math import isfinite
-from typing import Any
+from typing import Any, Callable
 
 from src.app import matched_head_benchmark as matched
 from src.app.resnet50_benchmark import (
@@ -164,10 +164,18 @@ def run_matched_head_tuning(
     seeds: tuple[int, ...],
     candidates_per_head: int,
     confirm_test: bool = True,
+    development_only_source: bool = False,
+    attempt_observer: Callable[[HeadTuningAttempt, HeadTuningTrial | None], None] | None = None,
 ) -> MatchedHeadTuningResult:
     """Run equal-trial selection; optionally defer every final-test read."""
     if type(confirm_test) is not bool:
         raise ValueError("confirm_test must be a boolean.")
+    if type(development_only_source) is not bool:
+        raise ValueError("development_only_source must be a boolean.")
+    if development_only_source and (
+        confirm_test or base_config.dataset_name not in {"cifar10", "cifar100"}
+    ):
+        raise ValueError("development-only selection requires CIFAR and confirm_test=False")
     _validate_tuning_request(base_config, candidates, seeds, candidates_per_head)
     torch = require_torch()
     device = _resolve_device(torch, base_config.device)
@@ -178,12 +186,23 @@ def run_matched_head_tuning(
     for seed in seeds:
         seed_config = replace(base_config, seed=seed)
         _set_seed(torch, seed)
-        bank = _build_seed_bank(torch, device, seed_config)
+        bank = (
+            _build_seed_bank(torch, device, seed_config, include_final_test=False)
+            if development_only_source
+            else _build_seed_bank(torch, device, seed_config)
+        )
         banks[seed] = bank
         initial_hash: str | None = None
         for head_name in HEAD_NAMES:
             for candidate in candidates[head_name]:
                 config = replace(candidate.config, seed=seed)
+                if attempt_observer is not None:
+                    attempt_observer(
+                        HeadTuningAttempt(
+                            head_name, candidate.candidate_id, seed, config, "started"
+                        ),
+                        None,
+                    )
                 try:
                     outcome, trial = _run_candidate_trial(
                         torch,
@@ -205,6 +224,8 @@ def run_matched_head_tuning(
                             f"{type(error).__name__}: {error}",
                         )
                     )
+                    if attempt_observer is not None:
+                        attempt_observer(attempts[-1], None)
                     raise MatchedHeadTuningError(
                         "Matched-head tuning trial failed before final test.",
                         tuple(attempts),
@@ -222,6 +243,8 @@ def run_matched_head_tuning(
                 initial_hash = trial.initial_head_hash
                 trained[(head_name, candidate.candidate_id, seed)] = outcome
                 trials.append(trial)
+                if attempt_observer is not None:
+                    attempt_observer(attempts[-1], trial)
 
     frozen_trials = tuple(trials)
     try:
@@ -438,8 +461,16 @@ def _build_seed_bank(
     torch: Any,
     device: Any,
     config: ResNet50BenchmarkConfig,
+    *,
+    include_final_test: bool = True,
 ) -> _SeedBank:
-    loaders = matched._build_benchmark_loaders(config)
+    if type(include_final_test) is not bool:
+        raise ValueError("include_final_test must be a boolean")
+    loaders = (
+        matched._build_benchmark_loaders(config)
+        if include_final_test
+        else matched._build_benchmark_loaders(config, include_final_test=False)
+    )
     if "guard" not in loaders.split_hashes or loaders.guard_loader is loaders.validation_loader:
         raise ValueError("Tuning requires a distinct guard loader.")
     backbone, feature_dim = matched._build_resnet50_backbone(

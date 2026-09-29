@@ -53,3 +53,9 @@ reports, and next process draws. Corrupt file, changed role data, malformed
 cursor, mismatched shared generator, and a valid but wrong replay entry state
 reject before a training update and preserve caller RNG. The development log
 records exact commands, test counts, and the full quality gate.
+
+## Subsequent decision
+
+ADR-0086 verifies actual-device v1/v2 CUDA continuation alongside v3. The
+CPU-only scope statement above records the evidence available when this
+decision was made.

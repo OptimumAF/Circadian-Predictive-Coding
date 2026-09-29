@@ -14,13 +14,19 @@ import pickle
 import tempfile
 
 from src.app.fixed_feature_checkpoint import FixedFeatureCircadianCheckpoint
+from src.app.continual_arrived_checkpoint import ArrivedRunnerCheckpoint
+from src.app.continual_arrived_selection_checkpoint import ArrivedSelectionCheckpoint
 from src.app.continual_checkpoint import ContinualRunnerCheckpoint
+from src.app.continual_replay_policy_checkpoint import ReplayPolicyRunnerCheckpoint
 from src.app.toy_checkpoint import ToyRunnerCheckpoint
 from src.app.vision_checkpoint import VisionRunnerCheckpoint
 
 _MAGIC = b"CIRCADIAN_FIXED_FEATURE_CHECKPOINT_V1\n"
 _TOY_MAGIC = b"CIRCADIAN_TOY_CHECKPOINT_V1\n"
 _CONTINUAL_MAGIC = b"CIRCADIAN_CONTINUAL_CHECKPOINT_V1\n"
+_ARRIVED_CONTINUAL_MAGIC = b"CIRCADIAN_ARRIVED_CONTINUAL_CHECKPOINT_V6\n"
+_ARRIVED_SELECTION_MAGIC = b"CIRCADIAN_ARRIVED_SELECTION_CHECKPOINT_V7\n"
+_REPLAY_POLICY_MAGIC = b"CIRCADIAN_REPLAY_POLICY_CHECKPOINT_V9\n"
 _VISION_MAGIC = b"CIRCADIAN_VISION_CHECKPOINT_V1\n"
 
 
@@ -76,6 +82,60 @@ class TrustedLocalContinualCheckpointStore:
         if not isinstance(checkpoint, ContinualRunnerCheckpoint):
             raise TypeError("checkpoint payload must be ContinualRunnerCheckpoint")
         _save_payload(self.path, _CONTINUAL_MAGIC, checkpoint)
+
+
+class TrustedLocalArrivedCheckpointStore:
+    """Persist only the separately typed v6 continual checkpoint."""
+
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
+
+    def load(self) -> ArrivedRunnerCheckpoint:
+        checkpoint = _load_payload(self.path, _ARRIVED_CONTINUAL_MAGIC)
+        if not isinstance(checkpoint, ArrivedRunnerCheckpoint):
+            raise ValueError("v6 checkpoint file payload type is incompatible")
+        return checkpoint
+
+    def save(self, checkpoint: ArrivedRunnerCheckpoint) -> None:
+        if not isinstance(checkpoint, ArrivedRunnerCheckpoint):
+            raise TypeError("checkpoint payload must be ArrivedRunnerCheckpoint")
+        _save_payload(self.path, _ARRIVED_CONTINUAL_MAGIC, checkpoint)
+
+
+class TrustedLocalArrivedSelectionCheckpointStore:
+    """Persist one v7 candidate-manifest transaction as a trusted local file."""
+
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
+
+    def load(self) -> ArrivedSelectionCheckpoint:
+        checkpoint = _load_payload(self.path, _ARRIVED_SELECTION_MAGIC)
+        if not isinstance(checkpoint, ArrivedSelectionCheckpoint):
+            raise ValueError("v7 selection checkpoint payload type is incompatible")
+        return checkpoint
+
+    def save(self, checkpoint: ArrivedSelectionCheckpoint) -> None:
+        if not isinstance(checkpoint, ArrivedSelectionCheckpoint):
+            raise TypeError("checkpoint payload must be ArrivedSelectionCheckpoint")
+        _save_payload(self.path, _ARRIVED_SELECTION_MAGIC, checkpoint)
+
+
+class TrustedLocalReplayPolicyCheckpointStore:
+    """Persist only the separate v8 policy comparison's format-9 cursor."""
+
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
+
+    def load(self) -> ReplayPolicyRunnerCheckpoint:
+        checkpoint = _load_payload(self.path, _REPLAY_POLICY_MAGIC)
+        if type(checkpoint) is not ReplayPolicyRunnerCheckpoint:
+            raise ValueError("v8 policy checkpoint payload type is incompatible")
+        return checkpoint
+
+    def save(self, checkpoint: ReplayPolicyRunnerCheckpoint) -> None:
+        if type(checkpoint) is not ReplayPolicyRunnerCheckpoint:
+            raise TypeError("checkpoint payload must be ReplayPolicyRunnerCheckpoint")
+        _save_payload(self.path, _REPLAY_POLICY_MAGIC, checkpoint)
 
 
 class TrustedLocalVisionCheckpointStore:

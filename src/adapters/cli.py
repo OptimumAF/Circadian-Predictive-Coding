@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 from src.app.indepth_comparison import (
     format_indepth_comparison_result,
@@ -17,6 +18,7 @@ from src.app.experiment_runner import (
 )
 from src.config.settings import load_settings_from_env
 from src.core.circadian_predictive_coding import CircadianConfig
+from src.infra.toy_result_files import write_toy_result_json
 
 
 def build_argument_parser() -> argparse.ArgumentParser:
@@ -33,10 +35,19 @@ def build_argument_parser() -> argparse.ArgumentParser:
         default="baseline",
         help="baseline: single run, indepth: aggregate over multiple seeds/noise levels.",
     )
-    parser.add_argument("--samples", type=int, default=settings.dataset_size, help="Number of samples.")
     parser.add_argument(
-        "--protocol-id", choices=[TOY_VALIDATION_PROTOCOL, TOY_LEGACY_PROTOCOL],
+        "--samples", type=int, default=settings.dataset_size, help="Number of samples."
+    )
+    parser.add_argument(
+        "--protocol-id",
+        choices=[TOY_VALIDATION_PROTOCOL, TOY_LEGACY_PROTOCOL],
         default=TOY_VALIDATION_PROTOCOL,
+    )
+    parser.add_argument(
+        "--json-result",
+        type=str,
+        default=None,
+        help="Write the completed baseline comparison and sleep events to a new local JSON file.",
     )
     parser.add_argument("--validation-fraction", type=float, default=0.20)
     parser.add_argument("--epochs", type=int, default=settings.epoch_count, help="Training epochs.")
@@ -224,6 +235,11 @@ def main() -> None:
     """Run experiment from command line."""
     parser = build_argument_parser()
     arguments = parser.parse_args()
+    if arguments.json_result is not None:
+        if arguments.mode != "baseline":
+            parser.error("--json-result is supported only for --mode baseline")
+        if Path(arguments.json_result).exists():
+            raise FileExistsError(f"toy JSON result already exists: {arguments.json_result}")
 
     circadian_config = CircadianConfig(
         use_adaptive_thresholds=arguments.adaptive_thresholds,
@@ -273,6 +289,8 @@ def main() -> None:
     )
     if arguments.mode == "baseline":
         result = run_experiment(config=config)
+        if arguments.json_result is not None:
+            write_toy_result_json(result, arguments.json_result)
         print(format_experiment_result(result))
         return
 

@@ -69,3 +69,8 @@ controlled-clock case verifies the cumulative active wall-time budget while
 two RSS segments are collected. `tests/test_process_memory.py` checks the
 sampler snapshot contract. The development log records exact commands and
 quality-gate outcomes.
+
+## Subsequent decision
+
+ADR-0085 adds CUDA allocator segments beside this RSS contract. It does not
+change the CPU protocol IDs or the meaning of the RSS observations.

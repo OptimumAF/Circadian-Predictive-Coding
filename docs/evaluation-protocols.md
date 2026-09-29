@@ -4,17 +4,21 @@
 
 | Protocol | Wake inputs | Repeated decisions | Outer selection | Final reporting |
 |---|---|---|---|---|
+| `vision_three_head_fixed_width_capacity_cuda_checkpoint_memory_v2` | Same fixed-width frozen CUDA feature bank and trusted device-bound checkpoint | Same forced guarded sleep/rollback and unchanged parameter count | Disjoint validation; checkpoint file carries no final test | Test after capacity verification; per-process RSS and CUDA allocator segments, with max absolute peaks and no common circadian start |
 | `vision_three_head_fixed_width_capacity_checkpoint_memory_v1` | Same fixed-width frozen feature bank and trusted CPU checkpoint; the circadian head may span processes | Same forced guarded sleep/rollback and unchanged parameter count | Disjoint validation after each head; checkpoint file carries no final test | Test after all heads and capacity verification; typed per-process RSS segments and maximum absolute observed RSS, with no common circadian start value |
-| `vision_three_head_fixed_width_capacity_checkpoint_v1` | Same fixed-width frozen feature bank and trusted CPU checkpoint | Same forced guarded sleep/rollback and unchanged parameter count | Disjoint validation after each head | Test after all heads and capacity verification; no RSS or allocator claim |
+| `vision_three_head_fixed_width_capacity_checkpoint_v1` | Same fixed-width frozen feature bank and trusted CPU or CUDA checkpoint | Same forced guarded sleep/rollback and unchanged parameter count | Disjoint validation after each head | Test after all heads and capacity verification; no RSS or allocator claim |
 | `vision_three_head_fixed_width_process_memory_v1` | Each head in a fresh spawned process rebuilding the same frozen train/guard/validation feature roles | Same scheduled fixed-width sleep and disjoint guard rollback policy | Validation runs inside each measured trainer window; no candidate selection | No final-test loader access or test score; reports setup RSS, pretrain RSS, trainer RSS/CUDA peaks, hashes, and feature bytes |
 | `vision_three_head_fixed_width_cifar10_process_memory_v2` | Same isolated fixed-width control on a complete local CIFAR-10 cache; zero loader workers and `download=False` | Same scheduled sleep, rollback, and unchanged parameter count | Same validation-only trainer window; identical split/feature/backbone/initial hashes checked across child processes | No final-test loader access or test score; per-child setup/trainer RSS is descriptive process telemetry |
 | `vision_three_head_fixed_width_capacity_memory_v1` | One frozen feature bank, equal fixed head width and parameter count throughout, same epoch cap | Scheduled forced circadian sleep with disjoint guard rollback; no structural split/prune capacity | Disjoint validation after each head trains | Capacity invariant checked before final test; test after all heads train, with separate observed RSS/CUDA fields |
 | `vision_matched_head_equal_trial_tuning_v1` | One frozen feature bank per declared seed, equal candidate count and seed set for all three heads | Disjoint guard for stopping checks and circadian sleep/rollback; target-accuracy stopping disabled | Mean validation accuracy across all declared seeds, deterministic first-candidate tie break; trial ledger records full config, hashes, guard and validation counts, work, and no test metric | Open test once per seed only after all selections are fixed; score selected heads only and keep confirmations separate from trials |
 | `vision_three_head_fixed_feature_wall_time_memory_v2` | Same wall-time matched inputs/deadlines with opt-in RSS/CUDA sampling | Same disjoint guard and sleep decisions | Disjoint validation inside memory sampling, outside time budget | Test after all deadlines; separate telemetry protocol ID |
+| `vision_three_head_fixed_feature_wall_time_cuda_checkpoint_memory_v2` | Same CUDA matched inputs with trusted device-bound checkpoint and per-process RSS/allocator observations | Same guarded decisions and cumulative active deadline across resume | Disjoint validation inside measured trainer invocation | Test after all deadlines; max absolute RSS/allocated/reserved peaks across segments, with file I/O excluded from active deadline |
 | `vision_three_head_fixed_feature_wall_time_checkpoint_memory_v1` | Same CPU wall-time matched inputs/deadlines with trusted checkpoint and per-process RSS observations | Same guarded decisions and cumulative active deadline across resume | Disjoint validation inside measured trainer invocation | Test after all deadlines; per-process RSS segments and absolute observed peak, with file I/O excluded from active deadline |
 | `vision_three_head_fixed_feature_wall_time_v1` | One cached train feature bank, common per-head deadline | Disjoint guard stopping checks and circadian sleep/rollback inside each deadline | Disjoint validation after each head trains | Test after all three deadlines; reject epoch caps reached before deadline |
 | `vision_three_head_fixed_feature_memory_v1` | Same epoch-limited matched inputs with opt-in RSS/CUDA sampling | Same disjoint guard and sleep decisions | Disjoint validation inside memory sampling | Test after all three heads train; separate telemetry protocol ID |
+| `vision_three_head_fixed_feature_cuda_checkpoint_memory_v2` | Same CUDA fixed-epoch feature bank and trusted device-bound checkpoint | Same guarded decisions with restored process CUDA RNG and head-local split generator | Disjoint validation inside measured trainer invocation | Test after all heads train; per-process RSS/allocator segments and max absolute peaks |
 | `vision_three_head_fixed_feature_checkpoint_memory_v1` | Same CPU fixed-epoch feature bank with trusted checkpoint and per-process RSS observations | Same guard and circadian sleep/rollback decisions | Disjoint validation inside measured trainer invocation | Test after all heads train; per-process RSS segments and absolute observed peak |
+| `vision_three_head_fixed_feature_v1` with a CUDA checkpoint | Same frozen feature bank and trusted device-bound checkpoint | Same guard and circadian sleep/rollback decisions with restored process CUDA RNG and head-local split generator | Disjoint validation after each head; no checkpointed memory telemetry | Test after all heads train; actual-device wake/accepted/rejected continuation is verified |
 | `vision_three_head_fixed_feature_v1` | One cached train feature bank, epoch cap | Disjoint guard stopping checks and circadian sleep/rollback | Disjoint validation after each head trains | Test after all three heads train |
 | `vision_two_head_fixed_feature_v1` | One cached train feature bank, epoch cap | Disjoint guard stopping checks | Disjoint validation after both heads train | Test after both heads train |
 | `vision_guard_separated_seeded_unmatched_v3` | Training loader with reset shuffle/augmentation streams per model and epoch | Separate labeled guard: epoch stopping and sleep rollback | Disjoint validation, measured after each candidate trains | Test after all models train; training order and model-state hashes recorded |
@@ -24,8 +28,21 @@
 | `continual_phase_arrival_v2` | Current phase's training split; Phase B source is constructed after Phase A training, including in trusted-file resume | Training-derived sleep state with the reviewed full A+B schedule; no held-out guard | Phase-local validation is descriptive | Both final tests after Phase B; Phase A/B checkpoints bind only arrived development roles, with test hashes bound after training |
 | `continual_phase_local_schedule_v3` | Current phase's training split; Phase B source arrives after Phase A, including in trusted-file resume | Phase A sleep uses only the Phase A epoch horizon; Phase B uses its arrived full horizon; no held-out guard | Phase-local validation is descriptive | Both final tests after Phase B; checkpoint format 3 binds only arrived development roles before scoring |
 | `continual_bounded_replay_v4` | Current phase's training split; Phase B source arrives after Phase A, including in trusted-file resume | V3 phase-local A schedule; component sleep replays only content-identified observed rows under declared example/array-byte caps | Phase-local validation is descriptive | Both final tests after Phase B; format 4 validates active/frozen replay provenance before resume, and each seed reports retained IDs/count/bytes at A and B |
+| `continual_global_test_seal_v5` | V4 arrived training/replay roles under one fixed config across predeclared seeds | Training-derived sleep state; one validation role remains descriptive | No candidate selection | Every final test is opened only after all configured seeds train; format 5 persists unscored states |
+| `continual_arrived_roles_v6` | Phase-local train only; Phase B source after all Phase A models; original B row IDs retained after exposure cap | Arrived inner guard accepts or rolls back circadian sleep | Outer rows are disjoint and released but unused; no setting selection | Final fields released after all predeclared seeds train; format 6 resumes A/B model and sleep transactions after arrived role/access/replay preflight |
+| `continual_arrived_outer_selection_v7` | Same arrived four-role source and training rule as v6 for every predeclared candidate/seed | Same inner-only guard with fixed sleep/replay work budget across candidates | A/B outer roles score every completed candidate; the fixed mean balanced objective chooses one candidate independently per method, with first-declared tie break | Ordinary and format-7 checkpointed routes freeze the full candidate manifest, all trials, and choices before any final field release; only selected models are finally scored |
 | `continual_validation_v1` | Current phase's training split and its permitted replay; validated model order recorded | Training-derived sleep state; no held-out guard | Phase-local validation is descriptive | Both phases' final tests after phase B training |
 | `validation_dynamics_v1` | Phase-local training splits | Training-derived state; validation only drives an offline plot | No selection in the plotter | Final test after the last training/sleep event |
+
+Trusted unmatched-vision checkpointing retains the v1/v2/v3 protocol IDs,
+training order rules, guard roles, metrics, and final-test timing. On CUDA,
+the file binds the selected canonical device and its process RNG; the full
+circadian classifier snapshot owns the local split generator. Seeded v3 also
+stores the CUDA stream at entry to its model-local RNG fork, while v1/v2 keep
+their shared CPU loader-generator cursor. Preflight rejects incompatible
+device or stream state before live restoration. Bounded RTX 3080 synthetic
+fixtures verify wake and accepted/rejected continuation plus a fresh-process
+wake restart; ADR-0086 gives the scope and limits.
 
 The vision guard is held-out labeled data, not retained wake-training data.
 Its labels are available at the start of the offline vision run. Synthetic
@@ -177,6 +194,135 @@ state is rejected before an update. Inner guard/outer-selection roles,
 selection across settings, and an arrival ledger are still absent. V5
 is not full strict-online evidence (ADR-0071–0072).
 
+The four-role source contract in `src/infra/continual_roles.py`
+deterministically separates phase-local train, inner guard, and outer
+selection roles and predeclares final IDs without opening final source
+fields. The opt-in ordinary `continual_arrived_roles_v6` runner uses that
+contract when each phase arrives. It trains on train rows only and accepts
+or rolls back circadian sleep using only the arrived inner guard. It records
+actual runner release and access events, guard decisions, and per-method
+available phase information. After all configured seeds train under one
+fixed setting, it releases final fields and produces descriptive scores.
+Phase B's exposure fraction is applied before role splitting while stable
+IDs retain original source positions. The generator can allocate final
+arrays before release; the source-field sentinels prove the runner does not
+open them early. Its distinct format-6 route saves unscored completed seeds
+and active wake, before-sleep, after-sleep, and A/B arrival transactions.
+Resume checks only arrived development roles, replay, model progress, and
+the event cursor before another update (ADR-0073–0076).
+
+The separate ordinary `continual_arrived_outer_selection_v7` route takes
+two to four ordered candidates and at most eight candidate-seed trials
+per method. Only backprop, PC, and circadian learning rates may vary;
+data/role splits, model order, inference work, epoch counts, guard policy,
+sleep schedule, and replay caps stay fixed. Each method has a distinct
+rate for every candidate and the same seed count. After every candidate
+and seed finishes training, it measures Phase A pre/post and Phase B post
+accuracy on the disjoint arrived outer roles. The fixed choice metric is
+the seed mean of `0.5 * (A post + B post)`; the first declared candidate
+wins an exact tie. It records all trials, training-role examples seen,
+two guard evaluations per attempted sleep, outer example exposures,
+arrived role IDs/hashes, access/guard/task events, and circadian replay
+retention. These counts describe work; equal candidate counts and fixed
+settings do not imply equal runtime or sleep work. The ordered candidate
+manifest, complete trial ledger, and three independent choices are
+digested into a freeze record before any final source field opens. Only
+the selected model for each method receives final scoring. The ordinary
+route retains candidate states in memory. Its distinct format-7 trusted
+checkpoint stores full ordered candidate configs/seeds, completed unscored
+v6 states and outer trial/exposure rows, and the active v6 transaction.
+Resume checks the run header before source access, rehydrates and validates
+all completed candidates and their recomputed outer trials before another
+update, then validates the active v6 cursor. A saved frozen choice must
+equal recomputed selection before final release. No final value, hash, or
+score enters the file. The fixed P1.3c4 confirmation saves its complete
+candidate/order/seed/objective/work request before final access and checks
+ordinary against A- and B-interrupted format-7 execution in both model
+orders. Its ignored JSON retains all 12 outer trials and two final seed
+rows per order, full role/work/replay ledgers, state digests, and signed
+circadian-minus-baseline outcomes. The seed-17 final balanced scores were
+0.95/0.70/0.00 and seed-19 scores were 0.15/0.50/0.35 for
+backprop/PC/circadian. Both orders and resumes matched; the circadian
+method lost to PC on both seeds. This tiny synthetic confirmation validates
+the protocol boundary and does not establish a representative model
+ranking (ADR-0077–0079).
+
+The separate ordinary `continual_replay_policy_comparison_v8` path fixes
+one v6 arrived-role configuration, ordered seeds, FIFO and seeded bottom-k
+retention, and one manifest digest before source access. Both policies see
+the same A/B role hashes, baseline states, count/array-byte caps, wake
+epochs, sleep schedule, and replay-step limit. All policy/seed models train
+before any A/B final-test source field opens. Public results retain all
+scores, retained IDs/bytes, observed duplicate IDs, distinct successfully
+applied replay IDs, actual replay updates, and role/guard/sleep ledgers.
+The audit's observed/exposed ID memory is outside the retained-array byte
+cap. A fixed tiny two-seed run kept all four rows and found different
+retention/exposure IDs but identical balanced scores for the two policies;
+no winner is chosen. Format-9 trusted local continuation saves a prefix of
+completed unscored policy/seed trials and at most one active A/B cursor.
+Resume validates the manifest before source access and recomputes arrived
+role, duplicate-ID, replay-update, and model/sleep provenance before another
+update or final release. Active wake, before-sleep, and after-sleep trials
+continue without repeated wake work in both model orders. Replay-capable
+PC/backprop controls remain P4.4 (ADRs 0103–0105).
+
+P4.4a starts a separate `continual_matched_replay_schedule_v9` protocol.
+Its shared buffer applies FIFO or seeded bottom-k to the same arrived train
+rows under the same example and copied-array byte caps. A fixed
+`newest_retained_v1` sampler chooses one ordered set at each forced periodic
+sleep boundary, independent of model predictions and class balancing. The
+plan assigns those IDs to circadian, PC, and backprop and separately records
+planned replay examples, optimizer updates, and PC/circadian inference
+iterations. It opens B only after the declared A schedule and reads no
+guard, outer-selection, or final-test values. The two-seed local artifact is
+a schedule correctness check with no model updates, scores, or ranking;
+actual matched replay controls remain P4.4 (ADR-0106).
+
+P4.4b uses the same fixed manifest in a separate
+`continual_matched_replay_training_v9` train-only runner. Before each
+periodic sleep, it compares the circadian buffer's retained IDs/bytes,
+ordered IDs, selected IDs, and copied row contents with the shared
+schedule. The arrived inner guard determines whether circadian replay is
+committed. PC and backprop get detached copies only after acceptance; a
+rejected or failed sleep cannot leave an unmatched baseline replay call.
+The trace distinguishes applied examples, optimizer calls, and PC versus
+circadian inference iterations, and verifies that replay does not advance
+wake clocks or refill memory. Its fixed two-seed/two-policy artifact has
+no final scores or ranking (ADR-0107).
+
+P4.4c binds both policies and both seeds in one
+`continual_matched_replay_outcomes_v9` manifest. Every train-only trial
+finishes before final-role access. A fresh schedule audit checks role,
+selection, retention, applied-work, exposure, and clock facts before the
+global release. All A/B final roles are then released and their IDs and
+content hashes compared across policies before scoring starts. The
+existing continual-shift metrics are applied to all three methods for
+every fixed policy/seed. The local artifact omits volatile sleep durations
+only; it retains all scores and work. The two-seed fixture is too small
+for a broad ranking and must not drive new seed or metric selection
+(ADR-0108).
+
+P4.3a audits historical replay side effects independently of the P4.4 outcome
+artifact. Historical NumPy replay updates chemistry,
+importance/traffic, reward baseline, cooldowns, and pending-prune TTL,
+but not wake age, wake counts, or energy history. Its chemical variance
+can change adaptive sleep readiness. These are observed mechanisms,
+not a tuned explanation for the negative matched result. P4.3b added a
+versioned opt-in wake-only policy and retained the null side-effect
+ablation under matched baseline work (ADR-0109).
+
+P4.6a is a train-only signal probe of reward-named difficulty scaling.
+The existing rule computes a clipped mean-absolute-error/EMA ratio, not
+reinforcement reward. Fixed clean, one-label-flip, and one-feature-outlier
+rows show that either corruption reaches the historical 1.5 cap in
+NumPy and CPU Torch. A diagnostic 0.5 per-row error clip produces a 1.375
+ratio for the corruptions; a constructed same-row post-update BCE
+improvement is largest on the outlier and is not available for choosing
+the current update. The unmodulated control remains at 1.0. These signal
+observations are not held-out accuracy or forgetting comparisons; P4.6b
+must freeze matched training and evaluation roles before any outcome
+claim or new heuristic (see `docs/difficulty-modulation-audit.md`).
+
 ## Training-energy diagnostic contract
 
 The NumPy PC/circadian `energy` histories and Torch PC/circadian
@@ -262,7 +408,7 @@ tagged separately in `docs/historical-benchmark-provenance.md`. The v1 vision
 ID above refers to the first corrected validation route, not that historical
 test-informed path.
 
-## Fairness budget contract (P1.8 in progress)
+## Fairness budget contract (P1.8 scoped confirmation complete)
 
 Report three comparisons separately. For a **fixed-data/epoch** comparison,
 use the same split and feature hashes, batch order, epoch cap, and stopping
@@ -314,6 +460,21 @@ parameter counts, unchanged circadian width, no splits/prunes, and at least
 one guarded sleep attempt before reading final test. `capacity_control`
 records the invariant and the route always samples observed memory. This is
 a small fixed-data/epoch control, not a peak-memory attribution result.
+
+Checkpointed CUDA memory uses the separate v2 protocol IDs above. After
+shared feature/head setup, each head-training invocation synchronizes its
+device, reads allocated and reserved starts, and resets the PyTorch allocator
+peaks once. A checkpoint reads peaks just before saving; an interrupted
+process contributes only its last committed observation. The completing
+process contributes its final observation. The circadian report retains
+PID/device-tagged allocator and 5 ms RSS segments, takes maximum absolute
+allocated, reserved, and observed RSS peaks across segments, and has no
+single aggregate start. Each baseline has one segment in the completing
+process. This is descriptive allocator and process telemetry, not total GPU
+use or memory attributable to an individual head. Save work after a pre-save
+snapshot requires a later boundary to be observed. ADR-0061 defines the RSS
+scope and ADR-0085 defines the CUDA boundary and validation contract.
+
 The process-isolated route now starts one child per head, checks matching
 split, feature, backbone, initialization, and capacity hashes/counts, and
 does not access final test. Its setup RSS window starts after Torch import
@@ -418,8 +579,61 @@ utilization was 51% after the run, so intervening background load cannot be
 ruled out for wall-time interpretation. The training role is still only
 1,024 32-pixel examples. This is a retained negative circadian result at a
 limited local scale, not a general architecture ranking. ADR-0064 records
-the device and quiet-window decisions; P1.8 remains open for representative
-scale and environment-limited inference.
+the device and quiet-window decisions; the later P1.8 larger-subset study
+addresses a separate frozen-feature scope below.
+
+P1.8o's separate development-only feature probe uses an opt-in loader
+that never constructs the CIFAR `train=False` source, omits final IDs and
+hashes, and raises if its final loader is used. The default loader and old
+benchmark outputs retain their behavior. The predeclared 224-pixel CUDA
+probe used seed 173 and 4,096/512/512 train/guard/outer-validation roles;
+the three quiet readings were 3%/1%/1% utilization with at least 8,139 MiB free.
+It processed 128/16/16 batches in 9.522 seconds with zero final source
+constructions/iterations. Observed worker RSS peaked at 1,555,025,920
+bytes and the worker CUDA allocator at 447,518,208 allocated and
+660,602,880 reserved bytes. These are feature-setup scopes, not matched
+head training memory. The saved future request scales to 224-pixel
+16,384/2,048/2,048 development roles and fixes equal-trial selection,
+confirmation seeds, final role size, and separate scope limits before
+new final access. Its ~33.84-second per-seed feature projection is a
+cost estimate. The unchanged request then ran its six seed-179 candidates
+under the saved 180-second cap in 47.551 seconds. A physical CIFAR
+`train=False` construction trap and unavailable final loader kept final
+labels inaccessible; zero final constructions, iterations, and scores were
+recorded. Each attempt has a durable start/completion journal event, and
+the complete six-trial result verifies shared role/feature/backbone/initial
+hashes and equal fixed candidate configs. Outer accuracies for a/b were
+0.8662109375/0.865234375 (backprop), 0.77734375/0.75732421875
+(predictive), and 0.716796875/0.67236328125 (circadian); all three chose
+a. The negative circadian comparison was retained without retuning. A
+digest-checked manifest froze separate confirmation seeds 181/191/193
+and the 240/240/600-second fixed-data/wall-time/isolated-memory limits,
+with a 1,080-second total. The subsequent bounded confirmation used that
+exact freeze (ADR-0080–0083).
+
+P1.8p2's first gate restores the exact saved result, journal, and manifest
+bytes before even source hashing. It checks the unchanged study request,
+probe, archive, and weights; all six trial and 12 journal rows; zero final
+access; the original quiet selection readings; both manifest digests; and
+the already frozen three confirmation budgets. A read-only preflight
+passed on the local artifacts before final access (ADR-0082).
+
+The representative confirmation's own quiet gate read 2%/3%/8% GPU
+utilization with at least 8,199 MiB free. All three frozen scopes finished:
+142.232 seconds fixed-data, 178.568 seconds wall-time, and 356.843 seconds
+fresh-child memory, totaling 677.735 seconds. A separate typed audit found
+nine complete fixed-data training/test rows, nine five-second deadline heads,
+and nine different memory-child PIDs. It verified per-seed role/feature/
+backbone/initial/capacity identity, fixed-data work, deadline overshoot,
+relaxation, guard, sleep and replay counts, plus separately scoped RSS/CUDA
+allocator telemetry. Fixed-data mean final accuracy was 0.8793 backprop,
+0.7749 predictive, and 0.7087 circadian. Wall-time means were 0.8934,
+0.8757, and 0.8040. Per-seed values and population dispersion are saved in
+`data/cifar-representative-confirmation-v1-result.json`. The negative
+circadian outcome was retained with no post-test setting change. These are
+matched shared-feature heads on a 16,384-example CIFAR-10 training subset
+with 224-pixel inputs and a frozen pretrained ResNet-50; they do not rank
+full-data or trainable-backbone models (ADR-0083).
 
 Give each candidate family the same declared tuning trial count and outer
 validation access. Preserve all tested seeds and negative results; use final
@@ -440,9 +654,9 @@ features are materialized after selections are frozen, once per seed, and
 only selected heads are confirmed. These equal search counts do not equalize
 compute within a trial; the work ledger exposes that difference. The bounded
 route retains all trained candidates in memory until confirmation and is a
-correctness gate, not a scalable search engine. Larger-data confirmation
-at a more representative scale and real CUDA memory evidence remain open under P1.8; no general head-family ranking
-is established here.
+correctness gate, not a scalable search engine. The scoped 224-pixel CUDA
+confirmation above supplies larger-subset and real-device memory evidence;
+no general head-family ranking is established here.
 
 Sleep-component ablations are opt-in and must record the selected mode
 and switches alongside the existing protocol ID. In `legacy`, toy and
@@ -485,3 +699,16 @@ when too few values are present. These routes must not be pooled when
 comparing trigger rates. The controlled fixture shows a diagnostic
 shift caused solely by the width divisor, not an accuracy change or a
 circadian advantage. ADR-0036 records the boundary.
+
+The fixed NumPy replay side-effect ablation uses the v9 arrived-role,
+prediction-independent matched schedule, retention caps, seeds, guard,
+replay update counts, and existing final metrics. Its v10 manifest adds
+historical versus `wake_only_adaptive_v1` as an explicit factor. Every
+trial is trained and its applied row IDs/work and PC/backprop states are
+checked before any final A/B role is released. The opt-in core policy
+leaves chemistry, structural usage/progress, supervised-error baseline,
+and wake clocks unchanged during replay; the wrapper still records a
+successful sleep event. The fixed two-seed comparison gives unchanged
+balanced aggregates across side-effect policies, with circadian below
+the matched baselines. This null observation is retained without changing
+seeds, metrics, or the historical v9 artifact (ADR-0109).

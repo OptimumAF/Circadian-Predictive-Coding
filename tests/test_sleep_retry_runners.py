@@ -12,6 +12,7 @@ torch = pytest.importorskip("torch")
 
 from src.app import matched_head_benchmark, resnet50_benchmark  # noqa: E402
 from src.app.resnet50_benchmark import ResNet50BenchmarkConfig  # noqa: E402
+from src.app.torch_sleep_decisions import describe_guarded_torch_sleep_decision  # noqa: E402
 from src.core.resnet50_variants import (  # noqa: E402
     CircadianHeadConfig,
     CircadianPredictiveCodingHead,
@@ -113,7 +114,7 @@ def _run_schedule(
 
     def guarded_head_sleep(
         head: CircadianPredictiveCodingHead, epoch: int, force_sleep: bool
-    ) -> tuple[Any, bool]:
+    ) -> tuple[Any, bool, Any]:
         before = head.snapshot_state()
         attempted_states.append((epoch, before))
         event = head.sleep_event(
@@ -121,13 +122,17 @@ def _run_schedule(
         )
         if reject:
             head.restore_state(before)
-            return type(event)(
-                old_hidden_dim=head.hidden_dim,
-                new_hidden_dim=head.hidden_dim,
-                split_indices=(),
-                pruned_indices=(),
-            ), True
-        return event, False
+            return (
+                type(event)(
+                    old_hidden_dim=head.hidden_dim,
+                    new_hidden_dim=head.hidden_dim,
+                    split_indices=(),
+                    pruned_indices=(),
+                ),
+                True,
+                event,
+            )
+        return event, False, event
 
     if backend == "matched":
         head = _head()
@@ -139,15 +144,32 @@ def _run_schedule(
             matched_head_benchmark, "_evaluate_head", lambda *args, **kwargs: (0.8, 0.5)
         )
 
-        def guarded(*args: Any) -> tuple[Any, bool]:
-            return guarded_head_sleep(head, args[5], args[6])
+        def guarded(*args: Any, **kwargs: Any) -> tuple[Any, bool]:
+            result, rolled_back, core = guarded_head_sleep(head, args[5], args[6])
+            telemetry = describe_guarded_torch_sleep_decision(
+                kwargs["decision"],
+                core,
+                completed_epoch=args[5],
+                guard_role_hash=kwargs["guard_role_hash"],
+                pre_accuracy=0.8,
+                post_accuracy=0.7 if rolled_back else 0.8,
+                pre_cross_entropy=0.5,
+                post_cross_entropy=1.0 if rolled_back else 0.5,
+                metric_name=config.circadian_sleep_rollback_metric,
+                tolerance=config.circadian_sleep_rollback_tolerance,
+                guard_examples=1,
+                accepted=not rolled_back,
+                attempt_seconds=1.0,
+            )
+            return replace(result, telemetry=telemetry), rolled_back
 
         monkeypatch.setattr(matched_head_benchmark, "_guarded_sleep_event", guarded)
         features = torch.tensor([[0.2, -0.3, 0.1], [-0.1, 0.4, 0.5]])
         targets = torch.tensor([1, 0], dtype=torch.long)
         train = ((features, targets),) if wake_batches_per_epoch else ()
+        guard_batches = ((features[:1], targets[:1]),)
         outcome = matched_head_benchmark._train_circadian_head(
-            torch, torch.device("cpu"), head, train, (), (), config
+            torch, torch.device("cpu"), head, train, guard_batches, (), config
         )
     else:
         monkeypatch.setattr(
@@ -159,16 +181,35 @@ def _run_schedule(
             resnet50_benchmark, "_compute_pc_metrics", lambda *args, **kwargs: (0.8, 0.5)
         )
 
-        def guarded(*args: Any) -> tuple[Any, bool]:
+        def guarded(*args: Any, **kwargs: Any) -> tuple[Any, bool]:
             model = args[2]
-            return guarded_head_sleep(model.head, args[5], args[6])
+            result, rolled_back, core = guarded_head_sleep(model.head, args[5], args[6])
+            telemetry = describe_guarded_torch_sleep_decision(
+                kwargs["decision"],
+                core,
+                completed_epoch=args[5],
+                guard_role_hash=kwargs["guard_role_hash"],
+                pre_accuracy=0.8,
+                post_accuracy=0.7 if rolled_back else 0.8,
+                pre_cross_entropy=0.5,
+                post_cross_entropy=1.0 if rolled_back else 0.5,
+                metric_name=config.circadian_sleep_rollback_metric,
+                tolerance=config.circadian_sleep_rollback_tolerance,
+                guard_examples=1,
+                accepted=not rolled_back,
+                attempt_seconds=0.0,
+            )
+            return replace(result, telemetry=telemetry), rolled_back
 
         monkeypatch.setattr(resnet50_benchmark, "_guarded_circadian_sleep_event", guarded)
         images = torch.zeros((2, 3, 8, 8))
         targets = torch.tensor([1, 0], dtype=torch.long)
         train_loader = [(images, targets)] if wake_batches_per_epoch else []
         loaders = resnet50_benchmark._TrainingLoaders(
-            train_loader=train_loader, guard_loader=[], validation_loader=[], num_classes=2
+            train_loader=train_loader,
+            guard_loader=[(images[:1], targets[:1])],
+            validation_loader=[],
+            num_classes=2,
         )
         outcome = resnet50_benchmark._train_circadian(torch, torch.device("cpu"), loaders, config)
         head = outcome.model.head
@@ -359,3 +400,11 @@ def test_public_report_exposes_resolved_policy_and_suppression_count(
             assert result.circadian_sleep_attempts == 1
             assert result.circadian_sleep_cooldown_suppressions == 3
             assert result.circadian_sleep_retry_cooldown_epochs == 1
+            assert [event.outcome for event in result.sleep_events] == [
+                "rolled_back",
+                "skipped",
+                "skipped",
+                "skipped",
+            ]
+            assert [event.reason for event in result.sleep_events[1:]] == ["rollback_cooldown"] * 3
+            assert all(event.guard is None for event in result.sleep_events[1:])

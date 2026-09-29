@@ -62,6 +62,16 @@ class VisionDataLoaders:
     split_hashes: Mapping[str, str]
 
 
+class _UnavailableFinalTestLoader:
+    """Fail if a development-only loader is accidentally used for scoring."""
+
+    def __iter__(self) -> Any:
+        raise RuntimeError("final test is unavailable in this development-only loader")
+
+    def __len__(self) -> int:
+        raise RuntimeError("final test is unavailable in this development-only loader")
+
+
 class SyntheticPatternDataset:
     """Synthetic task with adjustable difficulty and class overlap."""
 
@@ -390,8 +400,12 @@ def build_synthetic_vision_dataloaders(config: SyntheticVisionDatasetConfig) -> 
     )
 
 
-def build_torchvision_vision_dataloaders(config: TorchVisionDatasetConfig) -> VisionDataLoaders:
+def build_torchvision_vision_dataloaders(
+    config: TorchVisionDatasetConfig, *, include_final_test: bool = True
+) -> VisionDataLoaders:
     """Create role-separated dataloaders backed by torchvision datasets."""
+    if type(include_final_test) is not bool:
+        raise ValueError("include_final_test must be a boolean")
     if config.dataset_name not in {"cifar10", "cifar100"}:
         raise ValueError("dataset_name must be one of: cifar10, cifar100.")
     if config.batch_size <= 0:
@@ -444,11 +458,15 @@ def build_torchvision_vision_dataloaders(config: TorchVisionDatasetConfig) -> Vi
     # Both held-out roles use the same deterministic source view, avoiding
     # another in-memory CIFAR copy while keeping their indices disjoint.
     guard_dataset = validation_dataset if config.guard_subset_size > 0 else None
-    test_dataset = dataset_class(
-        root=config.data_root,
-        train=False,
-        download=config.download,
-        transform=test_transform,
+    test_dataset = (
+        dataset_class(
+            root=config.data_root,
+            train=False,
+            download=config.download,
+            transform=test_transform,
+        )
+        if include_final_test
+        else None
     )
 
     total_train_size = len(train_dataset)
@@ -489,16 +507,18 @@ def build_torchvision_vision_dataloaders(config: TorchVisionDatasetConfig) -> Vi
     if guard_dataset is not None:
         guard_dataset = torch.utils.data.Subset(guard_dataset, guard_indices)
 
-    if config.test_subset_size > 0:
-        test_dataset = _select_subset(
-            dataset=test_dataset,
-            subset_size=config.test_subset_size,
-            seed=config.seed + 1,
-            torch_module=torch,
-        )
-        test_indices = test_dataset.indices
-    else:
-        test_indices = range(len(test_dataset))
+    test_indices: Any = ()
+    if test_dataset is not None:
+        if config.test_subset_size > 0:
+            test_dataset = _select_subset(
+                dataset=test_dataset,
+                subset_size=config.test_subset_size,
+                seed=config.seed + 1,
+                torch_module=torch,
+            )
+            test_indices = test_dataset.indices
+        else:
+            test_indices = range(len(test_dataset))
 
     loader_generator = torch.Generator()
     loader_generator.manual_seed(config.seed + 2)
@@ -524,20 +544,27 @@ def build_torchvision_vision_dataloaders(config: TorchVisionDatasetConfig) -> Vi
         )
         if guard_dataset is not None else validation_loader
     )
-    test_loader = torch.utils.data.DataLoader(
-        test_dataset,
-        batch_size=config.batch_size,
-        shuffle=False,
-        num_workers=config.num_workers,
-        pin_memory=False,
+    test_loader = (
+        torch.utils.data.DataLoader(
+            test_dataset,
+            batch_size=config.batch_size,
+            shuffle=False,
+            num_workers=config.num_workers,
+            pin_memory=False,
+        )
+        if test_dataset is not None
+        else _UnavailableFinalTestLoader()
     )
 
     num_classes = 100 if config.dataset_name == "cifar100" else 10
     sample_ids = {
         "train": tuple(f"{config.dataset_name}/train/{index}" for index in train_indices),
         "validation": tuple(f"{config.dataset_name}/train/{index}" for index in validation_indices),
-        "test": tuple(f"{config.dataset_name}/test/{index}" for index in test_indices),
     }
+    if test_dataset is not None:
+        sample_ids["test"] = tuple(
+            f"{config.dataset_name}/test/{index}" for index in test_indices
+        )
     if guard_dataset is not None:
         sample_ids["guard"] = tuple(
             f"{config.dataset_name}/train/{index}" for index in guard_indices

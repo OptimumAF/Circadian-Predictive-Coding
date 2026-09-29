@@ -105,6 +105,17 @@ clock. `get_sleep_clocks()` reports successful wake batches/examples,
 replay updates, and performed events; NumPy replay does not advance the
 wake clock. See [ADR-0035](docs/adr/ADR-0035-typed-sleep-clocks.md).
 
+NumPy and Torch `sleep_event()` results now include `telemetry` with resolved
+core budgets, stable split/prune IDs, chemical summaries, widths, duration,
+and an applied or skipped reason. NumPy counts exact replay examples and
+updates; Torch reports zero replay. Timing is excluded from sleep-result
+equality and model snapshots. The toy NumPy runner now attaches one typed
+decision per epoch, including unscheduled and disabled epochs, to its report
+and checkpoint. Guarded runner outcomes remain in development; see
+[ADR-0088](docs/adr/ADR-0088-numpy-core-sleep-facts.md),
+[ADR-0089](docs/adr/ADR-0089-torch-core-sleep-facts.md), and
+[ADR-0090](docs/adr/ADR-0090-toy-sleep-event-history.md).
+
 Component-mode adaptive sleep restarts its plateau window after an actual
 hidden-width change and uses the minimum structural budget scale while
 the new-width window fills. Legacy mode keeps its original history rule.
@@ -133,6 +144,11 @@ NumPy external neuron proposals now reject invalid or over-budget
 structural requests before changing the model. Explicit prune requests
 take precedence over overlapping split candidates; see
 [ADR-0040](docs/adr/ADR-0040-numpy-external-proposal-preflight.md).
+The same typed policy proposal is checked against the active phase's
+split/prune budget: a request for both actions is rejected when either
+budget is zero, and can run in a phase that permits both. Scoring,
+candidate selection, budget checks, and tensor mutation stay separate;
+Torch retains its different post-split prune planner (ADR-0110).
 
 Built-in NumPy sleep proposals are likewise checked together before
 structural mutation; overlapping prune requests take precedence and
@@ -318,6 +334,17 @@ print(result.training_order, result.split_hashes)
 
 The default order and `toy_validation_v1` data roles remain the same.
 
+For a local JSON result with the complete typed sleep decision sequence:
+
+```powershell
+python predictive_coding_experiment.py --samples 80 --epochs 4 --json-result toy-result.json
+```
+
+The file is written only after training and final-test scoring and must not
+already exist. `result.circadian_sleep.events` and the JSON `circadian_sleep.events`
+contain one record for each epoch; `event_count` retains the legacy meaning
+of sleep events that changed topology. The toy route has no sleep guard.
+
 The toy API can resume all three NumPy models from a trusted local file,
 including a partial model-order epoch or a sleep with structural replay:
 
@@ -337,6 +364,10 @@ result = run_experiment(
 
 The file binds the training and validation arrays, every runner setting,
 the model order, progress counters, and the NumPy/Python random streams.
+It also saves the complete typed sleep-event history at wake and sleep
+boundaries. This runner payload is now version 2; older version-1 toy
+checkpoints are rejected before restoring or training because they cannot
+recover the missing earlier decisions.
 Only the stateless default adaptation policy is supported for this durable
 route. Do not load a pickle checkpoint from an untrusted source. Final-test
 scoring still occurs after training. See
@@ -348,11 +379,99 @@ Toy baseline with review-driven circadian controls:
 python predictive_coding_experiment.py --adaptive-sleep-trigger --adaptive-sleep-budget --reward-modulated-learning --reward-scale-min 0.8 --reward-scale-max 1.4
 ```
 
+The reward-named switch uses supervised mean absolute output error
+relative to an EMA baseline; it does not observe an environmental reward.
+The [fixed signal audit](docs/difficulty-modulation-audit.md) shows that
+one flipped label or feature outlier can saturate its update factor.
+Clipped error and constructed loss improvement are diagnostic comparisons
+only. Run the fixed, globally sealed NumPy/CPU-Torch learning comparison:
+
+```powershell
+New-Item -ItemType Directory -Force data | Out-Null
+.\.venv\Scripts\python.exe -m scripts.run_difficulty_matched_comparison --result data/difficulty-modulation-v11-result.json
+```
+
+Use a new result path for each run; the adapter refuses overwrite. The
+[v11 comparison](docs/difficulty-modulation-comparison.md) records all
+24 clean/label-flip/feature-outlier trials, equal work, train-only signals,
+and held-out accuracy/forgetting. Modulation changed actual scales but no
+matched accuracy or forgetting pair on this fixed small budget; no new
+heuristic was selected (ADR-0112).
+
+The [structural rank audit](docs/structural-reward-ranking-audit.md)
+checks the existing reward-weighted importance EMA at fixed neuron
+state and one-change caps in both backends. A changing reward factor can
+switch split/prune candidate IDs, while a constant factor leaves the
+normalized rank unchanged. The follow-up [v12 structural comparison](docs/structural-ranking-comparison.md)
+separates wake scaling, reward weighting of importance history, and use
+of importance in ranking. Run its train-only gate before the complete
+locally sealed comparison, writing each result to a new path:
+
+```powershell
+New-Item -ItemType Directory -Force data | Out-Null
+.\.venv\Scripts\python.exe -m scripts.run_structural_rank_comparison --train-only --result data/structural-ranking-v12-train.json
+.\.venv\Scripts\python.exe -m scripts.run_structural_rank_comparison --result data/structural-ranking-v12-result.json
+```
+
+All 32 fixed cells used equal within-backend work and one split/prune
+event. Reward weighting of importance history changed no selected ID or
+held-out accuracy/forgetting pair in this small run. Existing importance
+scoring changed two prune choices without consistent benefit. No new
+reward-ranking heuristic was selected (ADR-0114); the documented weak
+learning in some cells limits broader claims.
+
+The [fixed v13 sleep-trigger timing study](docs/sleep-trigger-comparison.md)
+compares periodic, unchanged adaptive, and no-sleep controls on
+stationary noisy and axis-shifted A→B streams. It keeps model width and
+wake work fixed, with chemical-reset-only component sleep. Write each
+artifact to a new local path:
+
+```powershell
+New-Item -ItemType Directory -Force data | Out-Null
+.\.venv\Scripts\python.exe -m scripts.run_sleep_trigger_comparison --train-only --result data/sleep-trigger-v13-train.json
+.\.venv\Scripts\python.exe -m scripts.run_sleep_trigger_comparison --result data/sleep-trigger-v13-result.json
+```
+
+Use unused filenames when repeating either command; the adapter refuses
+to overwrite an existing artifact.
+
+All twelve trials passed train-only preflight before final release.
+Periodic sleep executed four times per trial; adaptive executed zero
+times under its unchanged thresholds and matched the no-sleep control.
+Periodic outcomes were mixed across seeds and metrics. No new trigger
+rule was selected, and the broader sleep-component study remains open
+(ADR-0115).
+
+The [fixed v14 full-stack trigger protocol](docs/full-stack-trigger-comparison.md)
+first records the same prediction-independent replay supply at every
+arrived train-only wake epoch for both new seeds. It binds capacity and
+guard budgets before model training. Its periodic subset exactly matches
+the existing v9 replay schedule; no v14 model outcomes have been scored.
+To reproduce this schedule to a new local file:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_schedule --result data/trigger-replay-v14-opportunities-new.json
+```
+
+The adapter refuses to overwrite an existing artifact. Applying replay
+only after accepted guarded sleep and globally sealed scoring remains
+P4.8b2 (ADR-0116).
+
 Continual shift stress test (retention vs adaptation):
 
 ```powershell
 python scripts/run_continual_shift_benchmark.py --profile strength-case --seeds 3,7,11,19,23,31,37
 ```
+
+For a local JSON artifact of a completed v0–v5 continual result, add
+`--json-result continual-result.json`. It contains one typed circadian sleep
+decision per completed phase A/B epoch for each seed, including skipped
+epochs. These historical routes do not pass an inner sleep guard, so their
+event `guard` is `null`; arrived v6 now records its own inner-guard history,
+while v7 selection propagation remains under development. The existing
+`--output-file` continues to write the human
+summary, and neither file is overwritten. See
+[ADR-0091](docs/adr/ADR-0091-historical-continual-sleep-history.md).
 
 For a small continual order check through the Python API:
 
@@ -395,11 +514,17 @@ result = run_continual_shift_benchmark(
 ```
 
 The file is a checksummed pickle and must come from a trusted local run.
+The v0–v5 checkpoint now carries a separate sleep-history extension version
+and complete typed events. Older files without that extension are rejected
+before restoration because earlier decisions cannot be reconstructed from
+aggregate counters. The protocol IDs and their existing main checkpoint
+format numbers remain the same.
 Each seed's final tests are scored only after both phases finish; their
 content is bound when that seed result is committed. Checkpoint file work
 adds runtime overhead and is outside the scientific compute comparison.
-The CLI has no checkpoint flag. Whole-image and device/memory resume remain
-open under P3.9; see [ADR-0056](docs/adr/ADR-0056-continual-runner-file-resume.md).
+The CLI has no checkpoint flag. Fixed-feature and whole-image resume use
+their separate runner APIs; see
+[ADR-0056](docs/adr/ADR-0056-continual-runner-file-resume.md).
 
 For a checkpoint that does not construct Phase B until Phase A finishes,
 use `ContinualShiftConfig(protocol_id="continual_phase_arrival_v2", ...)`
@@ -438,7 +563,14 @@ content IDs, example count, and copied input/label array bytes at both
 phase boundaries. Its deterministic hash retention can keep an uneven
 phase mix. It does not yet supply guard/outer-selection arrival or a
 full label ledger, so its scores are not full strict-online evidence.
-See [ADR-0068](docs/adr/ADR-0068-continual-bounded-observed-replay.md).
+See [ADR-0068](docs/adr/ADR-0068-continual-bounded-observed-replay.md)
+and the [fixed-data replay-retention audit](docs/replay-retention-audit.md)
+for actual legacy batch/example/byte counts, priority aging, and A→B
+content-ID survival under the current policies.
+The NumPy core also has opt-in bounded `recent_fifo` and seeded bottom-k
+`seeded_reservoir` retention controls for local comparison. They are not
+selected by the existing v4 runner or CLI; see the
+[core module example](docs/modules/core.md) and [ADR-0102](docs/adr/ADR-0102-opt-in-bounded-replay-policies.md).
 In both v4 execution paths, final-test roles are hashed and scored only
 after Phase B training ends. The v4 splitter also defers reading the
 source's test fields until that boundary. The synthetic generator still
@@ -459,6 +591,249 @@ selection, and label-arrival reporting remain open; these scores are
 descriptive rather than full strict-online evidence. See
 [ADR-0071](docs/adr/ADR-0071-continual-run-level-test-seal.md) and
 [ADR-0072](docs/adr/ADR-0072-continual-unscored-checkpoints.md).
+
+The four-role source splitter in `src/infra/continual_roles.py` declares
+separate phase-local train, inner-guard, and outer-selection identities and
+defers final-test field reads to an explicit release call. The opt-in
+ordinary Python runner `continual_arrived_roles_v6` uses those roles and
+checks each attempted circadian sleep on the arrived inner guard. It
+records role access, source/label release, guard decisions, and each
+method's available phase information; final tests are released after all
+configured seeds train. Run its fixed two-seed audit smoke from the
+repository root:
+
+```powershell
+python -m scripts.run_continual_arrived_smoke
+```
+
+Each v6 per-seed circadian report and the smoke JSON now includes one typed
+sleep decision per phase A/B epoch. Attempted events include the inner-guard
+role hash, pre/post accuracy, tolerance, scored-example count, core proposal,
+and total attempt duration. Cross-entropy is absent because this guard does
+not evaluate it. A rejected event keeps proposed structure and replay work
+but records no applied changes after restoration. A failed guard or core
+attempt restores the model, records known facts with an `error` reason, and
+raises. A successful retry keeps that failed event followed by the final
+decision for the same epoch. The existing guard ledger and all-seed
+final-test release rules still apply. V7 selection propagation remains
+open; see [ADR-0092](docs/adr/ADR-0092-arrived-guarded-sleep-history.md)
+and [ADR-0093](docs/adr/ADR-0093-arrived-failed-sleep-attempts.md).
+
+Ordinary v6 raises on sleep errors by default. For a bounded local retry of
+typed guard/core failures, use `sleep_error_retries=1` with
+`run_continual_arrived_benchmark(config, [17, 19], sleep_error_retries=1)`.
+The retry repeats only the restored sleep attempt, not wake training. If
+the limit is exhausted, the original exception still raises. Checkpointed
+runs use the explicit resume call below and do not combine it with local
+retries.
+
+V6 changes training data and is not score-equivalent to v5. For trusted
+local checkpoint recovery through the Python API, pass a
+`TrustedLocalArrivedCheckpointStore(path)` as `checkpoint_store`, then
+repeat the same config and seed list with `resume_from_checkpoint=True`.
+With a fixed `ContinualArrivedRolesConfig` named `config`:
+
+```python
+from src.app.continual_arrived_benchmark import run_continual_arrived_benchmark
+from src.infra.circadian_checkpoint_files import TrustedLocalArrivedCheckpointStore
+
+store = TrustedLocalArrivedCheckpointStore("local-arrived-v6.checkpoint")
+run_continual_arrived_benchmark(config, [17, 19], checkpoint_store=store)
+result = run_continual_arrived_benchmark(
+    config, [17, 19], checkpoint_store=store, resume_from_checkpoint=True
+)
+```
+
+Format 6 stores unscored completed seeds and the active A/B model, role,
+guard, and event cursor after each model or sleep transaction. Its versioned
+sleep-history extension validates active and completed attempts, including
+multiple errors at a retryable `before_sleep` epoch, and their phase role
+binding before restoration. Resume also validates arrived
+development roles and replay provenance before the next
+update; final tests remain sealed until all seeds finish. The outer role
+is reserved but no setting search exists in this v6 API, so its scores are
+descriptive. See
+[ADR-0073](docs/adr/ADR-0073-continual-four-role-source-contract.md),
+[ADR-0074](docs/adr/ADR-0074-ordinary-arrived-role-guard.md),
+[ADR-0075](docs/adr/ADR-0075-arrived-continual-unscored-seeds.md), and
+[ADR-0076](docs/adr/ADR-0076-arrived-continual-active-transactions.md).
+
+The separate ordinary `continual_arrived_outer_selection_v7` Python API
+predeclares two to four equal-work configurations, changing only each
+method's learning rate. It trains every candidate and seed before scoring
+the disjoint A/B outer roles, selects one setting per method by mean outer
+balanced accuracy, and freezes all three choices before opening any final
+source field. An exact tie chooses the first declared candidate. The
+result retains the full candidate configs, every method/candidate/seed
+trial, role IDs/hashes and access events, guard/outer exposure counts,
+replay retention, the selection digest, and selected final scores. At most
+eight candidate-seed trials per method are allowed. Run the fixed tiny
+two-candidate example from the repository root:
+
+```powershell
+python -m scripts.run_continual_arrived_selection_smoke
+```
+
+`candidate_sleep_histories` exposes the typed phase A/B sleep attempts for
+every candidate and seed. The selected final seed metric carries the history
+of its chosen circadian candidate. Each circadian trial also carries that
+history and a digest bound to the candidate's role ledger; baseline trials
+have empty sleep histories. The freeze carries a separate digest of the
+ordered candidate/seed histories. The local example prints these fields in
+strict JSON. Measured durations are excluded from report equality, and the
+original outer trial and choice digests still describe only score/work
+facts. Ordinary v7 may opt into a nonnegative bounded
+`sleep_error_retries` value; checkpointed v7 records a failed attempt and
+requires an explicit later resume.
+
+For a trusted local candidate-manifest checkpoint, use the distinct
+format-8 store. With an ordered tuple of `ArrivedSelectionCandidate`
+values named `candidates`:
+
+```python
+from src.app.continual_arrived_selection import run_arrived_outer_selection
+from src.infra.circadian_checkpoint_files import TrustedLocalArrivedSelectionCheckpointStore
+
+store = TrustedLocalArrivedSelectionCheckpointStore("local-selection-v8.checkpoint")
+run_arrived_outer_selection(candidates, [17, 19], checkpoint_store=store)
+result = run_arrived_outer_selection(
+    candidates, [17, 19], checkpoint_store=store, resume_from_checkpoint=True
+)
+```
+
+Format 8 stores the ordered candidate configs/seeds, unscored completed
+models, all outer trial and exposure rows, a nested active v6 transaction,
+and the frozen choice. It validates the manifest, arrived development
+roles, replay, event cursor, trial/choice, and independent sleep-history
+provenance against recomputation before another update or final release.
+Earlier format-7 files are rejected because they lack that provenance.
+Final values, hashes, and scores
+stay outside the file. Use the single-setting v6 store only for the v6
+API. The example's final scores are descriptive synthetic results; bounded
+strict-online confirmation is available as a separate fixed local study.
+Prepare its ignored request first, then run the unchanged request from the
+repository root:
+
+```powershell
+python -m scripts.run_continual_arrived_confirmation prepare --request data/continual_arrived_confirmation_v1_request.json
+python -m scripts.run_continual_arrived_confirmation run --request data/continual_arrived_confirmation_v1_request.json --result data/continual_arrived_confirmation_v1_result.json --checkpoint-dir data/continual_arrived_confirmation_v1_checkpoints
+```
+
+The runner refuses changed requests and existing result/checkpoint paths. It
+uses the fixed two-candidate, two-seed, one-epoch-per-phase fixture, runs
+both model orders, interrupts and resumes A/B wake checkpoints, asserts the
+final source seal and state/order equality, and saves every outer trial and
+signed final-score difference. Run it once per fresh artifact path. This is
+a tiny synthetic protocol check, not a representative accuracy ranking. See
+[ADR-0077](docs/adr/ADR-0077-arrived-outer-selection-before-final-release.md)
+through [ADR-0079](docs/adr/ADR-0079-bounded-strict-online-confirmation.md).
+
+The separate ordinary `continual_replay_policy_comparison_v8` API fixes one
+arrived v6 role/training configuration, ordered seeds, and FIFO plus seeded
+bottom-k reservoir policies before any source access. It trains every
+policy/seed before opening either phase's final-test source fields. The local
+result keeps all scores, role IDs/hashes and access events, policy identity,
+declared replay caps, retained IDs/bytes at A and B, duplicate wake IDs,
+distinct applied replay IDs, actual replay updates, and baseline state
+hashes. Run the small fixed two-seed comparison from the repository root:
+
+```powershell
+python -m scripts.run_continual_replay_policy_smoke --result data/continual_replay_policy_v8_smoke.json
+```
+
+The writer refuses an existing result path. The checked local artifact has
+different retained/exposed IDs but identical balanced scores for FIFO and
+reservoir on both seeds; it is a tiny synthetic null result, not a policy
+ranking. The audit's observed/exposed ID sets are reporting memory outside
+the retained-array byte cap. The earlier v6/v7 config and checkpoint formats
+keep their original meaning (ADR-0103). Replay-capable PC/backprop controls
+remain P4.4.
+
+For trusted local continuation inside an active A/B trial or after a
+completed v8 policy/seed trial, use its separate format-9 store with a fixed
+`manifest`:
+
+```python
+from src.app.continual_replay_policy_comparison import run_replay_policy_comparison
+from src.infra.circadian_checkpoint_files import TrustedLocalReplayPolicyCheckpointStore
+
+store = TrustedLocalReplayPolicyCheckpointStore("local-replay-policy-v9.checkpoint")
+run_replay_policy_comparison(manifest, checkpoint_store=store)
+result = run_replay_policy_comparison(
+    manifest, checkpoint_store=store, resume_from_checkpoint=True
+)
+```
+
+The file binds the full policy/seed manifest, completed unscored trials, and
+at most one active A/B cursor. Resume checks the policy, model order, arrived
+development roles, model/sleep progress, retention, duplicate and
+replay-exposure provenance before another update or final release. A saved
+wake, before-sleep, or after-sleep cursor resumes only its remaining work;
+the final-test fields remain sealed until all trials finish (ADRs 0104–0105).
+Only load a checkpoint file from a trusted local source because it contains
+pickle.
+For the fixed local example, write a fresh checkpointed result and then
+verify terminal resume into a second new result path:
+
+```powershell
+python -m scripts.run_continual_replay_policy_smoke --checkpoint data/continual_replay_policy_v9_terminal.ckpt --result data/continual_replay_policy_v9_fresh.json
+python -m scripts.run_continual_replay_policy_smoke --checkpoint data/continual_replay_policy_v9_terminal.ckpt --resume --result data/continual_replay_policy_v9_resumed.json
+```
+
+For the matched replay-control track, a separate schedule-only v9
+protocol plans the same retained rows and newest-retained selection for
+circadian, PC, and backprop. It requires unprioritized periodic replay and
+keeps Phase B closed until the Phase A schedule completes. The plan records
+selected content IDs, both retention caps, and separate planned optimizer
+and inference work. Run its bounded two-seed FIFO/reservoir check:
+
+```powershell
+python -m scripts.run_continual_matched_replay_schedule_smoke --result data/continual_matched_replay_schedule_v9_smoke.json
+```
+
+This artifact has no model training or scores. The separate train-only v9
+runner now applies the same selected rows to PC and backprop after each
+accepted circadian sleep. It checks retained IDs, order, caps, selected
+contents, wake clocks, and no-refill behavior, and reports applied examples,
+optimizer calls, and distinct PC/circadian inference iterations. A rejected
+or failed guarded sleep leaves the baselines without replay. Run the fixed,
+unscored two-seed/two-policy trace locally:
+
+```powershell
+python -m scripts.run_continual_matched_replay_training_smoke --result data/continual_matched_replay_training_v9_smoke.json
+```
+
+The train-only trace contains no outcomes. A separate v9 outcome runner
+finishes both policies and both seeds, audits their applied work, releases
+the same A/B final roles across policies, and scores all three methods
+using the existing continual-shift metrics. Run the fixed local comparison:
+
+```powershell
+python -m scripts.run_continual_matched_replay_outcomes --result data/continual_matched_replay_outcomes_v9_smoke.json
+```
+
+This two-seed NumPy result is a bounded comparison, not a general model
+ranking. Its JSON keeps every policy/seed score and separate replay work.
+Circadian's aggregate balanced score is lower than both baselines under
+both policies in this fixed run. No seed, baseline, metric, or guard
+tolerance was changed in response (ADRs 0107–0108).
+
+The [NumPy replay side-effect audit](docs/replay-side-effect-audit.md)
+records which adaptive states replay currently advances and which clocks
+remain wake-only. The opt-in `wake_only_adaptive_v1` policy keeps those
+adaptive states fixed during replay while still updating weights and
+train-row exposure. Historical runs remain the default. Run the fixed
+two-seed, two-retention-policy ablation locally:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_continual_replay_side_effect_ablation --result data/continual_replay_side_effect_ablation_v10_resolved.json
+```
+
+The v10 runner trains and audits all eight trials before final scoring.
+Historical rows equal v9; the wake-only policy leaves this small study's
+balanced scores unchanged (circadian 0.20, PC 0.625, backprop 0.65/0.70).
+It does not select a policy or change the existing v9 result. See
+[ADR-0109](docs/adr/ADR-0109-opt-in-replay-side-effect-policy.md).
 
 Hardest continual-shift stress test (expanded hidden capacity + very heavy drift):
 
@@ -557,15 +932,39 @@ result = run_resnet50_benchmark(
 )
 ```
 
+Each unmatched-vision circadian report carries typed `sleep_events` for
+scheduling decisions; baseline reports carry empty histories. A
+guarded event records its selected accuracy or cross-entropy delta, both
+measured scores, exact scored examples, attempt time, and the core proposal
+even when the guard rolls it back. The v1 protocol labels its repeated
+validation guard as `validation`; v2/v3 label the disjoint guard as
+`inner_guard`. The role hash names the selected split, while the checkpoint's
+development-data digest binds the underlying examples. Format-2 trusted
+vision checkpoints preserve the ordered history across completed and active
+CPU/CUDA cursors and reject incompatible format-1 files. A failed pre-guard,
+core, or post-guard attempt records a typed error with completed guard-batch
+exposure and any returned proposal, restores the head and process random
+streams, and re-raises. Explicit resume retries sleep in the same epoch
+without repeating wake; checkpoint preflight rejects malformed error history
+before restore. The same typed history and process/head random-stream
+continuation have been checked with `.venv-cuda` on an RTX 3080 across
+v1/v2/v3 accepted, rejected, and failed attempts (ADR-0098–0100).
+
 The checkpoint binds train, guard, and validation content plus config and
 model order. It does not score final test until all training completes. Do not
 load a pickle file from an untrusted source. File writes and loader replay add
 wall time but do not count as active circadian training time. The same Python
-API also accepts the older v1/v2 unmatched protocols on CPU and resumes their
-original shared loader stream; v1 still aliases validation as its guard.
-The CUDA checkpoint route remains unverified. See
+API also accepts the older v1/v2 unmatched protocols on CPU or CUDA and
+resumes their original shared loader stream; v1 still aliases validation as
+its guard. On CUDA, set `device="cuda:0"` and use a CUDA-capable Torch runtime.
+The file binds that device's process CUDA stream and the circadian head's
+local split generator. Seeded v3 also retains the outer CUDA stream restored
+when its model-local RNG fork exits. A bounded RTX 3080 gate verifies wake,
+accepted/rejected sleep, preflight rejection, and one fresh-process resume
+with a small synthetic classifier; it is not a full ResNet performance run. See
 [ADR-0058](docs/adr/ADR-0058-seeded-vision-runner-file-resume.md) and
-[ADR-0059](docs/adr/ADR-0059-shared-vision-loader-resume.md).
+[ADR-0059](docs/adr/ADR-0059-shared-vision-loader-resume.md), plus
+[ADR-0086](docs/adr/ADR-0086-cuda-unmatched-vision-checkpoint.md).
 
 For a bounded actual-CIFAR loader check, place a complete torchvision CIFAR-10
 cache under `data/cifar-10-batches-py` and run
@@ -606,27 +1005,53 @@ A reversed three-head CPU run reproduces adaptive-state hashes and metrics
 at a declared absolute tolerance of `1e-7`; broader random-stream audits
 remain open. Initial hashes compare parameter tensors; trained hashes also
 cover PC traffic and circadian adaptive/structural RNG state.
-The ordinary CPU fixed-epoch three-head route can persist and resume its
+The ordinary CPU or CUDA fixed-epoch three-head route can persist and resume its
 circadian head from a trusted local file. Pass
 `checkpoint_store=TrustedLocalCircadianCheckpointStore(path)` to
 `run_three_head_fixed_feature_benchmark`; on a later invocation pass the
 same store and `resume_from_checkpoint=True`. Import the store from
-`src.infra.circadian_checkpoint_files`. It checks cached training-role
+`src.infra.circadian_checkpoint_files`. For CUDA, use `device="cuda:0"`
+with the CUDA environment. It checks cached training-role
 features, runner config, initial head, batch cursor, sleep stage, and
 report counters before restoration. Do not load a pickle checkpoint from
 an untrusted source. Fixed-epoch checkpoint and resume timing includes
 persistence work and should not be used for equal-time head comparisons.
-The CPU wall-time route also accepts the same store arguments; it carries
+The circadian head report includes typed `sleep_events` with the scheduled
+trigger, core proposal, inner-guard scores and exact completed-pass exposure,
+selected rollback delta, retained changes, and attempt duration. Backprop
+and ordinary PC reports have empty histories. The trusted fixed-feature
+checkpoint uses format 2 to carry completed and failed attempts across resume;
+older format-1 files must be regenerated. Its guard role hash covers the
+cached guard feature/label batches. A `null` sleep time limit means no
+per-sleep cap; the wall-time route's per-head deadline is reported separately.
+Failed guarded calls still raise after restoring the head and process random
+streams. With a trusted local checkpoint store, each failed attempt is saved
+at a retryable `before_sleep` cursor; an explicit resume preserves the error
+event and retries that epoch's sleep without repeating wake training. Error
+records include completed guard-batch exposure, known pre/post scores, and a
+completed core proposal when one exists. The historical guard-exposure
+counter continues to count completed two-pass decisions only. Accepted,
+rejected, and failed CUDA checkpoint histories, local JSON, process/head
+random streams, and allocator-memory modes have been checked on an RTX 3080
+(ADR-0096/0097/0100).
+The CPU or CUDA wall-time route also accepts the same store arguments; it carries
 remaining active training seconds across resume and excludes file I/O
 from that deadline. Its active-time report is separate from end-to-end
-elapsed time. On CPU, `measure_memory=True` can accompany a checkpoint store
-on the fixed-epoch or wall-time route. This selects a distinct protocol with
-per-process RSS segments; the original memory protocols keep their existing
-meaning. CUDA checkpoint continuation remains open under P3.9b2. See
+elapsed time. On CPU or CUDA, `measure_memory=True` can accompany a checkpoint
+store on the fixed-epoch or wall-time route. CPU uses distinct checkpoint
+protocols with per-process RSS segments. CUDA uses distinct device-specific
+checkpoint-memory protocols with both RSS and PyTorch allocator segments.
+Each CUDA segment records its PID, device, allocated/reserved starts, and
+absolute peaks; the circadian report takes the maximum absolute peak across
+the saved and completing processes, with no aggregate start. Baselines have
+one segment from the completing process. The original memory protocols keep
+their existing meaning. See
 [ADR-0053](docs/adr/ADR-0053-fixed-feature-circadian-file-resume.md) and
 [ADR-0054](docs/adr/ADR-0054-fixed-feature-wall-time-resume.md), plus
-[ADR-0061](docs/adr/ADR-0061-checkpointed-cpu-rss-segments.md) for RSS scope.
-The [fairness budget contract](docs/evaluation-protocols.md#fairness-budget-contract-p18-in-progress)
+[ADR-0061](docs/adr/ADR-0061-checkpointed-cpu-rss-segments.md) for RSS scope
+and [ADR-0084](docs/adr/ADR-0084-cuda-fixed-feature-checkpoint-rng.md) for
+CUDA RNG state, plus [ADR-0085](docs/adr/ADR-0085-cuda-checkpoint-allocator-segments.md)
+for allocator boundaries. The [fairness budget contract](docs/evaluation-protocols.md#fairness-budget-contract-p18-scoped-confirmation-complete)
 defines fixed-data, wall-time, and capacity/memory scopes. Call
 `run_three_head_fixed_feature_wall_time_benchmark` with
 `wall_time_budget_seconds` for the versioned per-head deadline route.
@@ -634,8 +1059,8 @@ Set `target_accuracy=None` and an epoch safety cap high enough for all
 heads to reach the deadline. Reports include completed/partial work,
 stop reason, and deadline overrun; the runner fails before final test if
 the epoch cap ends a head early. The [decision record](docs/adr/ADR-0013-matched-head-wall-time-budget.md)
-defines its timing scope. Larger-data and real-CUDA fairness confirmation
-remain open.
+defines its timing scope. The later scoped real-CUDA confirmation is
+reported below.
 Pass `measure_memory=True` to either three-head route for a separately
 versioned memory-enabled protocol. Reports then include sampled process RSS
 start/observed peak and sample count on Windows/Linux, with PyTorch allocator
@@ -655,12 +1080,13 @@ sleep attempt before final test, and records the invariant in
 memory separately from cached `feature_bytes`. Passing a trusted local
 `TrustedLocalCircadianCheckpointStore` through `checkpoint_store=store` selects
 `vision_three_head_fixed_width_capacity_checkpoint_v1`; resume with the same
-store and `resume_from_checkpoint=True`. This CPU path checks the same
+store and `resume_from_checkpoint=True`. This CPU or CUDA path checks the same
 capacity and guarded-sleep invariants but sets `memory_telemetry_enabled=False`
 and leaves RSS/allocator fields empty. Pass `checkpoint_memory=True` with the
 same store to opt into the separate CPU
-`vision_three_head_fixed_width_capacity_checkpoint_memory_v1` protocol. Resume
-with both flags. The checkpoint records per-invocation RSS observations; the
+`vision_three_head_fixed_width_capacity_checkpoint_memory_v1` or CUDA
+`vision_three_head_fixed_width_capacity_cuda_checkpoint_memory_v2` protocol.
+Resume with both flags. The checkpoint records per-invocation RSS observations; the
 result lists PID, start, observed peak, and sample count for each segment.
 The circadian aggregate peak is the maximum absolute observed RSS across
 segments, with sample counts summed and no single aggregate start value.
@@ -816,8 +1242,8 @@ overwrite results or failure records. The retained `artifacts/benchmark_cifar_v2
 files include the first synthetic-only-memory failure and successful retry.
 With 32 training and 16 final-test examples per seed, a random frozen
 backbone, and one epoch, the observed scores are descriptive pipeline evidence.
-The separately predeclared pretrained CPU/CUDA continuations are described
-below; representative-scale fairness work remains open (P1.8). See
+The separately predeclared pretrained CPU/CUDA continuations and later
+larger-subset confirmation are described below. See
 [ADR-0062](docs/adr/ADR-0062-local-cifar-matched-confirmation.md).
 
 To budget the next larger-data study without reading test labels, run
@@ -896,6 +1322,65 @@ utilization after completion, so background activity during timing remains
 an environment limit. The 1,024-example, 32-pixel setting is also limited;
 no general architecture ranking is claimed. See
 [ADR-0064](docs/adr/ADR-0064-cuda-evaluation-gates.md).
+
+For the next larger matched study, first measure development feature cost
+without constructing the CIFAR final-test source. The probe has fixed
+224-pixel, 4,096/512/512 train/guard/validation roles, a quiet GPU gate,
+and a 120-second worker timeout. From the repository root:
+
+```powershell
+.\.venv-cuda\Scripts\python.exe -m scripts.profile_cifar_representative_feasibility prepare
+.\.venv-cuda\Scripts\python.exe -m scripts.profile_cifar_representative_feasibility run
+.\.venv-cuda\Scripts\python.exe -m scripts.prepare_cifar_representative_study
+.\.venv-cuda\Scripts\python.exe -m scripts.run_cifar_representative_selection run
+```
+
+Each command refuses to overwrite its ignored `data/` artifact. The local
+probe took 9.522 seconds and recorded 128/16/16 feature batches, source and
+feature hashes, 1.56 GB observed worker RSS, and a 448 MB CUDA allocator
+peak. The preparation command saved a 224-pixel matched-study request with
+16,384/2,048/2,048 development roles, 4,096 reserved final examples, one
+equal two-candidate grid, fixed selection/confirmation seeds, and separate
+fixed-data, wall-time, and isolated-memory budgets. The last command restored
+that exact request and selected six seed-179 candidates in 47.551 seconds
+under a quiet GPU gate and 180-second cap. It saved a result, durable attempt
+journal, and digest-checked confirmation manifest under ignored `data/`
+paths. It constructed no CIFAR final source, exposed no final label, and
+computed no final score. The selected candidate is `a` for each head; outer
+accuracies were 0.8662 backprop, 0.7773 predictive, and 0.7168 circadian.
+These are validation scores on a subset with a frozen backbone, not final
+accuracy. The later confirmation used only the frozen seeds 181/191/193. See
+[ADR-0080](docs/adr/ADR-0080-development-only-feature-feasibility.md) and
+[ADR-0081](docs/adr/ADR-0081-frozen-representative-validation-selection.md).
+
+To verify the unchanged saved request, source files, six trials, attempt
+journal, and both manifest digests without final-test access:
+
+```powershell
+.\.venv-cuda\Scripts\python.exe -m scripts.restore_cifar_representative_selection --preflight
+```
+
+The read-only preflight does not load CIFAR examples or score final test.
+The one-shot bounded confirmation command was:
+
+```powershell
+.\.venv-cuda\Scripts\python.exe -m scripts.run_cifar_representative_confirmation run
+```
+
+It saved `data/cifar-representative-confirmation-v1-result.json` and the
+per-scope ignored artifacts. Exact-artifact restore, a 2%/3%/8% quiet GPU
+gate, 240/240/600-second scope caps, and a 1,080-second total cap were
+enforced. Fixed-data, wall-time, and fresh-child memory completed in
+142.232, 178.568, and 356.843 seconds (677.735 seconds total). The three
+fixed-data mean final accuracies were 0.8793 backprop, 0.7749 predictive
+coding, and 0.7087 circadian; five-second wall-time means were 0.8934,
+0.8757, and 0.8040. Every head had 32,954 parameters, and nine separate
+memory-child processes reported RSS and CUDA allocator peaks. Per-seed scores,
+dispersion, work, and memory scopes are in the result. The circadian result
+was lower without retuning. This is a frozen-feature comparison on a
+16,384-example CIFAR-10 training subset, not an end-to-end or full-data
+ranking. See [ADR-0082](docs/adr/ADR-0082-restore-selection-before-representative-confirmation.md)
+and [ADR-0083](docs/adr/ADR-0083-bounded-representative-matched-confirmation.md).
 
 Multi-seed benchmark export:
 

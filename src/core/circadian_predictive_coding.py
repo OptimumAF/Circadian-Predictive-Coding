@@ -8,6 +8,7 @@ from dataclasses import dataclass, field as dataclass_field, fields
 from hashlib import sha256
 from math import isfinite
 from numbers import Integral
+from time import perf_counter
 from typing import Any, Self
 
 import numpy as np
@@ -26,7 +27,21 @@ from src.core.neuron_adaptation import (
     PruneOutcome,
 )
 from src.core.predictive_coding import PredictiveCodingTrainResult
+from src.core.replay_retention import (
+    DEFAULT_REPLAY_RETENTION_POLICY,
+    ReplayExposureSnapshot,
+    ReplayRetentionPolicy,
+)
 from src.core.sleep_clocks import SleepClockSnapshot, SleepEpochProgress
+from src.core.sleep_telemetry import (
+    ChemicalSummaries,
+    ChemicalSummary,
+    SleepBudgets,
+    SleepDurations,
+    SleepEventTelemetry,
+    SleepReplayUsage,
+    SleepStructuralChanges,
+)
 from src.core.training_validation import (
     require_finite_training_arrays,
     validate_binary_training_batch,
@@ -48,6 +63,16 @@ class ReplaySnapshot:
     positive_fraction: float
 
 
+def _summarize_chemical(values: Array) -> ChemicalSummary:
+    """Copy only scalar statistics from an aligned NumPy chemical vector."""
+    return ChemicalSummary(
+        count=int(values.size),
+        minimum=float(np.min(values)),
+        mean=float(np.mean(values)),
+        maximum=float(np.max(values)),
+    )
+
+
 @dataclass(frozen=True)
 class ReplayRetentionBudget:
     """Hard limits on unique labeled examples held for optional sleep replay."""
@@ -60,6 +85,9 @@ class ReplayRetentionBudget:
             raise ValueError("replay example budget must be a positive integer")
         if type(self.max_bytes) is not int or self.max_bytes <= 0:
             raise ValueError("replay byte budget must be a positive integer")
+
+
+WAKE_ONLY_REPLAY_SIDE_EFFECT_POLICY = "wake_only_adaptive_v1"
 
 
 @dataclass(frozen=True)
@@ -223,6 +251,7 @@ class SleepEventResult:
     lineage_before: NeuronLineageSnapshot | None = None
     lineage_after: NeuronLineageSnapshot | None = None
     prune_outcome: PruneOutcome | None = None
+    telemetry: SleepEventTelemetry | None = dataclass_field(default=None, compare=False)
 
 
 @dataclass(frozen=True)
@@ -346,10 +375,14 @@ class CircadianPredictiveCodingNetwork:
             sleep_events=self._sleep_events,
         )
 
-    def configure_replay_retention(self, budget: ReplayRetentionBudget) -> None:
+    def configure_replay_retention(
+        self, budget: ReplayRetentionBudget, *, policy: ReplayRetentionPolicy | None = None
+    ) -> None:
         """Enable per-example retention before the first wake update."""
         if not isinstance(budget, ReplayRetentionBudget):
             raise TypeError("replay retention requires a ReplayRetentionBudget")
+        if policy is not None and type(policy) is not ReplayRetentionPolicy:
+            raise TypeError("replay retention policy must be a ReplayRetentionPolicy")
         if (
             self._epoch_count != 0
             or self._replay_memory
@@ -359,7 +392,34 @@ class CircadianPredictiveCodingNetwork:
         # Why this: keep historical batch-snapshot state/checkpoints unchanged
         # unless a versioned caller explicitly selects bounded retention.
         self._replay_retention_budget = budget
+        if policy is not None and policy != DEFAULT_REPLAY_RETENTION_POLICY:
+            self._replay_retention_policy = policy
+            # Why this: exposure reporting is an explicit v8 policy cost. Old
+            # bounded and batch-snapshot checkpoint field sets stay identical.
+            self._replay_observed_ids: set[str] = set()
+            self._replay_duplicate_ids: set[str] = set()
+            self._replay_duplicate_occurrences = 0
+            self._replay_exposed_ids: set[str] = set()
+            self._replay_exposure_updates = 0
         self._replay_memory = deque()
+
+    def configure_replay_side_effect_policy(self, policy: str) -> None:
+        """Opt into wake-only adaptive state for replay before any wake update."""
+        if policy != WAKE_ONLY_REPLAY_SIDE_EFFECT_POLICY or type(policy) is not str:
+            raise ValueError("unsupported replay side-effect policy")
+        if (
+            self._epoch_count != 0
+            or self._replay_memory
+            or hasattr(self, "_replay_side_effect_policy")
+        ):
+            raise ValueError("replay side-effect policy must be configured once before training")
+        # Why this: historical models retain their original snapshot field
+        # set and config digest; only versioned callers add the policy field.
+        self._replay_side_effect_policy = policy
+
+    def get_replay_side_effect_policy(self) -> str:
+        """Name the active replay side-effect contract."""
+        return getattr(self, "_replay_side_effect_policy", "historical")
 
     def get_replay_retention(self) -> ReplayRetentionSnapshot:
         """Describe the bounded labeled examples currently held for replay."""
@@ -377,6 +437,37 @@ class CircadianPredictiveCodingNetwork:
             retained_bytes=sum(
                 item.input_batch.nbytes + item.target_batch.nbytes for item in self._replay_memory
             ),
+        )
+
+    def preview_unprioritized_replay_ids(self, replay_count: int) -> tuple[str, ...]:
+        """Expose the exact retained-order selection before a matched sleep."""
+        if not hasattr(self, "_replay_retention_policy") or self.config.replay_prioritized:
+            raise ValueError("replay ID preview requires an explicit unprioritized policy")
+        if type(replay_count) is not int or replay_count <= 0:
+            raise ValueError("replay ID preview count must be positive")
+        return tuple(
+            replay_sample_id(item.input_batch, item.target_batch)
+            for item in self._select_replay_snapshots(replay_count)
+        )
+
+    def get_replay_retained_order_ids(self) -> tuple[str, ...]:
+        """Expose bounded buffer order for a prediction-free replay preflight."""
+        if not hasattr(self, "_replay_retention_policy"):
+            raise ValueError("replay order requires an explicit retention policy")
+        return tuple(
+            replay_sample_id(item.input_batch, item.target_batch) for item in self._replay_memory
+        )
+
+    def get_replay_exposure(self) -> ReplayExposureSnapshot:
+        """Describe distinct observed and applied replay IDs for a selected policy."""
+        if not hasattr(self, "_replay_retention_policy"):
+            raise ValueError("replay exposure requires an explicit retention policy")
+        return ReplayExposureSnapshot(
+            observed_ids=tuple(sorted(self._replay_observed_ids)),
+            duplicate_ids=tuple(sorted(self._replay_duplicate_ids)),
+            duplicate_occurrences=self._replay_duplicate_occurrences,
+            exposed_ids=tuple(sorted(self._replay_exposed_ids)),
+            replay_updates=self._replay_exposure_updates,
         )
 
     def get_neuron_lineage(self) -> NeuronLineageSnapshot:
@@ -425,6 +516,10 @@ class CircadianPredictiveCodingNetwork:
         restored = deepcopy(snapshot.state)
         if restored.keys() != self.__dict__.keys():
             raise ValueError("Circadian snapshot fields are incompatible")
+        if restored.get("_replay_side_effect_policy") != getattr(
+            self, "_replay_side_effect_policy", None
+        ):
+            raise ValueError("Circadian snapshot replay side-effect policy is incompatible")
         if (
             restored["input_dim"] != snapshot.input_dim
             or restored["hidden_dims"] != snapshot.initial_hidden_dims
@@ -441,6 +536,8 @@ class CircadianPredictiveCodingNetwork:
             or not isinstance(candidate._replay_memory, deque)
             or getattr(candidate, "_replay_retention_budget", None)
             != getattr(self, "_replay_retention_budget", None)
+            or getattr(candidate, "_replay_retention_policy", None)
+            != getattr(self, "_replay_retention_policy", None)
             or candidate._replay_memory.maxlen
             != (
                 None
@@ -458,6 +555,15 @@ class CircadianPredictiveCodingNetwork:
                 or len(set(retained.sample_ids)) != retained.example_count
             ):
                 raise ValueError("Circadian snapshot replay exceeds its observed budget")
+        if hasattr(self, "_replay_retention_policy"):
+            try:
+                exposure = candidate.get_replay_exposure()
+            except (AttributeError, TypeError, ValueError) as error:
+                raise ValueError("Circadian snapshot replay exposure is incompatible") from error
+            if exposure.replay_updates > candidate._replay_updates or not set(
+                retained.sample_ids
+            ).issubset(exposure.observed_ids):
+                raise ValueError("Circadian snapshot replay exposure is inconsistent")
         self.__dict__.clear()
         self.__dict__.update(restored)
 
@@ -637,7 +743,13 @@ class CircadianPredictiveCodingNetwork:
     ) -> float:
 
         initial_hidden_dim = self.hidden_dim
-        self._apply_prune_decay_step()
+        wake_only_replay = (
+            not update_epoch_state
+            and not store_replay_snapshot
+            and self.get_replay_side_effect_policy() == WAKE_ONLY_REPLAY_SIDE_EFFECT_POLICY
+        )
+        if not wake_only_replay:
+            self._apply_prune_decay_step()
 
         pre_hidden_linears, pre_hidden_activations, adaptive_input = self._forward_pre_hidden(
             input_batch
@@ -708,10 +820,15 @@ class CircadianPredictiveCodingNetwork:
             self._last_reward_scale,
         )
         try:
-            self._update_chemical_layer(hidden_state)
-            reward_scale = self._compute_reward_scale(output_error)
-            self._last_reward_scale = reward_scale
-            self._update_importance_ema(grad_hidden_output, reward_scale=reward_scale)
+            if wake_only_replay:
+                # Why this: mutating then restoring adaptive state would still
+                # train against a replay-modified plasticity gate.
+                reward_scale = self._compute_reward_scale(output_error, update_baseline=False)
+            else:
+                self._update_chemical_layer(hidden_state)
+                reward_scale = self._compute_reward_scale(output_error)
+                self._last_reward_scale = reward_scale
+                self._update_importance_ema(grad_hidden_output, reward_scale=reward_scale)
             plasticity = self.get_plasticity_state()
 
             gated_input_hidden = grad_input_hidden * plasticity[np.newaxis, :]
@@ -784,7 +901,8 @@ class CircadianPredictiveCodingNetwork:
             ) = adaptive_before
             raise
 
-        self._decay_cooldowns()
+        if not wake_only_replay:
+            self._decay_cooldowns()
         np.copyto(self.weight_hidden_output, new_hidden_output)
         np.copyto(self.bias_output, new_output_bias)
         np.copyto(self.weight_input_hidden, new_input_hidden)
@@ -793,7 +911,8 @@ class CircadianPredictiveCodingNetwork:
             np.copyto(old, new)
         for old, new in zip(self._pre_hidden_biases, new_pre_biases):
             np.copyto(old, new)
-        self._record_hidden_traffic(hidden_state)
+        if not wake_only_replay:
+            self._record_hidden_traffic(hidden_state)
         if update_epoch_state:
             self._epoch_count += 1
             self._wake_examples += int(input_batch.shape[0])
@@ -840,19 +959,20 @@ class CircadianPredictiveCodingNetwork:
                 raise ValueError("epoch_progress cannot be combined with current_step/total_steps")
             current_step = epoch_progress.completed_epochs
             total_steps = epoch_progress.total_epochs
+        started_at = perf_counter()
         if self.config.sleep_mode == "disabled":
-            return SleepEventResult(
-                old_hidden_dim=self.hidden_dim,
-                new_hidden_dim=self.hidden_dim,
-                split_indices=(),
-                pruned_indices=(),
+            return self._skipped_sleep_result(
+                trigger_reason="disabled",
+                reason="sleep_disabled",
+                started_at=started_at,
+                completed_epoch=current_step,
             )
         if not force_sleep and not self.should_trigger_sleep():
-            return SleepEventResult(
-                old_hidden_dim=self.hidden_dim,
-                new_hidden_dim=self.hidden_dim,
-                split_indices=(),
-                pruned_indices=(),
+            return self._skipped_sleep_result(
+                trigger_reason="not_due",
+                reason="adaptive_not_due",
+                started_at=started_at,
+                completed_epoch=current_step,
             )
         split_budget, prune_budget, should_skip = self._resolve_sleep_budgets(
             current_step=current_step,
@@ -861,23 +981,30 @@ class CircadianPredictiveCodingNetwork:
         if should_skip or (
             self.config.sleep_mode == "legacy" and split_budget <= 0 and prune_budget <= 0
         ):
-            return SleepEventResult(
-                old_hidden_dim=self.hidden_dim,
-                new_hidden_dim=self.hidden_dim,
-                split_indices=(),
-                pruned_indices=(),
+            return self._skipped_sleep_result(
+                trigger_reason="budget_skipped",
+                reason="warmup" if should_skip else "zero_structural_budget",
+                started_at=started_at,
+                completed_epoch=current_step,
+                split_budget=split_budget,
+                prune_budget=prune_budget,
             )
 
         if self.config.sleep_mode == "components":
             split_budget = split_budget if self.config.sleep_enable_split else 0
             prune_budget = prune_budget if self.config.sleep_enable_prune else 0
 
+        before_chemistry = self._chemical_summaries()
         snapshot = self.snapshot_state()
         try:
             return self._execute_sleep_event(
                 adaptation_policy=adaptation_policy,
                 split_budget=split_budget,
                 prune_budget=prune_budget,
+                before_chemistry=before_chemistry,
+                completed_epoch=current_step,
+                trigger_reason="forced" if force_sleep else "adaptive",
+                started_at=started_at,
             )
         except Exception:
             self.restore_state(snapshot)
@@ -889,6 +1016,10 @@ class CircadianPredictiveCodingNetwork:
         adaptation_policy: NeuronAdaptationPolicy | None,
         split_budget: int,
         prune_budget: int,
+        before_chemistry: ChemicalSummaries,
+        completed_epoch: int | None,
+        trigger_reason: str,
+        started_at: float,
     ) -> SleepEventResult:
         old_hidden_dim = self.hidden_dim
         split_indices: tuple[int, ...]
@@ -912,13 +1043,21 @@ class CircadianPredictiveCodingNetwork:
         lineage_before = self.get_neuron_lineage()
         proposed_ids = tuple(lineage_before.neuron_ids[index] for index in pruned_indices)
         self._split_neurons(split_indices)
+        split_lineage = self.get_neuron_lineage()
+        split_pairs = tuple(
+            (lineage_before.neuron_ids[index], child_id)
+            for index, child_id in zip(
+                split_indices, split_lineage.neuron_ids[old_hidden_dim:], strict=True
+            )
+        )
         self._schedule_or_prune(pruned_indices)
         pending_ids = set(self.get_pending_prune_ids())
         scheduled_ids = tuple(value for value in proposed_ids if value in pending_ids)
         if self.config.sleep_mode == "legacy" or self.config.sleep_enable_homeostasis:
             self._apply_homeostatic_downscaling()
+        replay_examples = replay_updates = 0
         if self.config.sleep_mode == "legacy" or self.config.sleep_enable_replay:
-            self._run_replay_consolidation()
+            replay_examples, replay_updates = self._run_replay_consolidation()
 
         # Sleep partially clears chemistry after consolidation to reset plasticity gate.
         if self.config.sleep_mode == "legacy" or self.config.sleep_enable_chemical_reset:
@@ -934,6 +1073,21 @@ class CircadianPredictiveCodingNetwork:
         active_ids = set(lineage_after.neuron_ids)
         removed_ids = tuple(value for value in lineage_before.neuron_ids if value not in active_ids)
         self._validate_sleep_post_state()
+        telemetry = self._executed_sleep_telemetry(
+            before_chemistry=before_chemistry,
+            before_width=old_hidden_dim,
+            split_pairs=split_pairs,
+            proposed_prune_ids=proposed_ids,
+            scheduled_prune_ids=scheduled_ids,
+            removed_prune_ids=removed_ids,
+            split_budget=split_budget,
+            prune_budget=prune_budget,
+            replay_examples=replay_examples,
+            replay_updates=replay_updates,
+            completed_epoch=completed_epoch,
+            trigger_reason=trigger_reason,
+            started_at=started_at,
+        )
         return SleepEventResult(
             old_hidden_dim=old_hidden_dim,
             new_hidden_dim=self.hidden_dim,
@@ -943,6 +1097,111 @@ class CircadianPredictiveCodingNetwork:
             lineage_before=lineage_before,
             lineage_after=lineage_after,
             prune_outcome=PruneOutcome(proposed_ids, scheduled_ids, removed_ids),
+            telemetry=telemetry,
+        )
+
+    def _chemical_summaries(self) -> ChemicalSummaries:
+        return ChemicalSummaries(
+            primary=_summarize_chemical(self._hidden_chemical),
+            fast=_summarize_chemical(self._hidden_chemical_fast),
+            slow=_summarize_chemical(self._hidden_chemical_slow),
+        )
+
+    def get_sleep_chemical_summaries(self) -> ChemicalSummaries:
+        """Return read-only chemistry facts for a runner's unscheduled epoch."""
+        return self._chemical_summaries()
+
+    def _skipped_sleep_result(
+        self,
+        *,
+        trigger_reason: str,
+        reason: str,
+        started_at: float,
+        completed_epoch: int | None,
+        split_budget: int = 0,
+        prune_budget: int = 0,
+    ) -> SleepEventResult:
+        chemistry = self._chemical_summaries()
+        duration = max(0.0, perf_counter() - started_at)
+        telemetry = SleepEventTelemetry(
+            format_version=1,
+            trigger_reason=trigger_reason,
+            outcome="skipped",
+            reason=reason,
+            completed_epoch=completed_epoch,
+            wake_batches=self._epoch_count,
+            budgets=SleepBudgets(split_budget, prune_budget, 0, None),
+            changes=SleepStructuralChanges((), (), (), (), (), (), ()),
+            before_width=self.hidden_dim,
+            proposed_width=self.hidden_dim,
+            final_width=self.hidden_dim,
+            guard=None,
+            replay=SleepReplayUsage(0, 0, 0, 0),
+            chemistry_before=chemistry,
+            chemistry_proposed=chemistry,
+            chemistry_final=chemistry,
+            durations=SleepDurations(duration, duration),
+        )
+        return SleepEventResult(
+            old_hidden_dim=self.hidden_dim,
+            new_hidden_dim=self.hidden_dim,
+            split_indices=(),
+            pruned_indices=(),
+            telemetry=telemetry,
+        )
+
+    def _executed_sleep_telemetry(
+        self,
+        *,
+        before_chemistry: ChemicalSummaries,
+        before_width: int,
+        split_pairs: tuple[tuple[int, int], ...],
+        proposed_prune_ids: tuple[int, ...],
+        scheduled_prune_ids: tuple[int, ...],
+        removed_prune_ids: tuple[int, ...],
+        split_budget: int,
+        prune_budget: int,
+        replay_examples: int,
+        replay_updates: int,
+        completed_epoch: int | None,
+        trigger_reason: str,
+        started_at: float,
+    ) -> SleepEventTelemetry:
+        chemistry_after = self._chemical_summaries()
+        duration = max(0.0, perf_counter() - started_at)
+        replay_limit = (
+            min(self.config.replay_steps, len(self._replay_memory))
+            if self.config.sleep_mode == "legacy" or self.config.sleep_enable_replay
+            else 0
+        )
+        return SleepEventTelemetry(
+            format_version=1,
+            trigger_reason=trigger_reason,
+            outcome="applied",
+            reason="core_executed",
+            completed_epoch=completed_epoch,
+            wake_batches=self._epoch_count,
+            budgets=SleepBudgets(split_budget, prune_budget, replay_limit, None),
+            changes=SleepStructuralChanges(
+                split_pairs,
+                split_pairs,
+                proposed_prune_ids,
+                scheduled_prune_ids,
+                removed_prune_ids,
+                scheduled_prune_ids,
+                removed_prune_ids,
+            ),
+            before_width=before_width,
+            proposed_width=self.hidden_dim,
+            final_width=self.hidden_dim,
+            guard=None,
+            replay=SleepReplayUsage(
+                replay_examples, replay_updates, replay_examples, replay_updates
+            ),
+            chemistry_before=before_chemistry,
+            chemistry_proposed=chemistry_after,
+            chemistry_final=chemistry_after,
+            durations=SleepDurations(duration, duration),
         )
 
     def _validate_sleep_post_state(self) -> None:
@@ -1096,7 +1355,7 @@ class CircadianPredictiveCodingNetwork:
         decay = self.config.importance_ema_decay
         self._importance_ema = decay * self._importance_ema + (1.0 - decay) * importance
 
-    def _compute_reward_scale(self, output_error: Array) -> float:
+    def _compute_reward_scale(self, output_error: Array, *, update_baseline: bool = True) -> float:
         if not self.config.use_reward_modulated_learning:
             return 1.0
 
@@ -1110,8 +1369,9 @@ class CircadianPredictiveCodingNetwork:
 
         # Why this: update baseline after computing ratio so scale reflects
         # current surprise against past performance, not a blended present.
-        decay = self.config.reward_baseline_decay
-        self._reward_error_ema = decay * float(baseline) + (1.0 - decay) * batch_error
+        if update_baseline:
+            decay = self.config.reward_baseline_decay
+            self._reward_error_ema = decay * float(baseline) + (1.0 - decay) * batch_error
         return reward_scale
 
     def _update_chemical_layer(self, hidden_state: Array) -> None:
@@ -1449,6 +1709,16 @@ class CircadianPredictiveCodingNetwork:
         split_budget: int | None = None,
         prune_budget: int | None = None,
     ) -> tuple[tuple[int, ...], tuple[int, ...]]:
+        add_count, remove_indices = self._parse_proposal_requests(proposals)
+        eligible = self._eligible_proposal_split_sources(
+            add_count, remove_indices, split_budget=split_budget, prune_budget=prune_budget
+        )
+        split_indices = self._rank_proposal_split_sources(eligible, add_count)
+        return split_indices, tuple(sorted(remove_indices))
+
+    def _parse_proposal_requests(
+        self, proposals: list[NeuronChangeProposal]
+    ) -> tuple[int, set[int]]:
         add_count = 0
         remove_indices: set[int] = set()
         for proposal in proposals:
@@ -1465,7 +1735,16 @@ class CircadianPredictiveCodingNetwork:
                 if index in remove_indices:
                     raise ValueError("proposal remove indices must be unique")
                 remove_indices.add(index)
+        return add_count, remove_indices
 
+    def _eligible_proposal_split_sources(
+        self,
+        add_count: int,
+        remove_indices: set[int],
+        *,
+        split_budget: int | None,
+        prune_budget: int | None,
+    ) -> NDArray[np.int64]:
         split_cap = self._resolve_structural_budget(self.config.max_split_per_sleep, 1.0)
         prune_cap = self._resolve_structural_budget(self.config.max_prune_per_sleep, 1.0)
         if split_budget is not None:
@@ -1501,18 +1780,20 @@ class CircadianPredictiveCodingNetwork:
         )
         if add_count > len(eligible):
             raise ValueError("proposal has too few eligible split sources")
+        return eligible
+
+    def _rank_proposal_split_sources(
+        self, eligible: NDArray[np.int64], add_count: int
+    ) -> tuple[int, ...]:
         if add_count == 0:
-            return (), tuple(sorted(remove_indices))
+            return ()
         split_threshold, _ = self._resolve_split_prune_thresholds()
         split_threshold += self.config.split_hysteresis_margin
         scores = self._compute_split_scores()
         ranked = eligible[np.argsort(scores[eligible])[::-1]]
         preferred = ranked[self._hidden_chemical[ranked] >= split_threshold]
         fallback = ranked[self._hidden_chemical[ranked] < split_threshold]
-        split_indices = tuple(
-            int(index) for index in np.concatenate((preferred, fallback))[:add_count]
-        )
-        return split_indices, tuple(sorted(remove_indices))
+        return tuple(int(index) for index in np.concatenate((preferred, fallback))[:add_count])
 
     def _split_neurons(self, split_indices: tuple[int, ...]) -> None:
         if not split_indices:
@@ -1722,6 +2003,7 @@ class CircadianPredictiveCodingNetwork:
     def _store_replay_snapshot(self, input_batch: Array, target_batch: Array) -> None:
         budget = getattr(self, "_replay_retention_budget", None)
         if budget is not None:
+            policy = getattr(self, "_replay_retention_policy", DEFAULT_REPLAY_RETENTION_POLICY)
             predictions = self.predict_proba(input_batch)
             retained = {
                 replay_sample_id(item.input_batch, item.target_batch): item
@@ -1730,10 +2012,17 @@ class CircadianPredictiveCodingNetwork:
             for index in range(input_batch.shape[0]):
                 input_row = input_batch[index : index + 1].copy()
                 target_row = target_batch[index : index + 1].copy()
+                sample_id = replay_sample_id(input_row, target_row)
+                if hasattr(self, "_replay_retention_policy"):
+                    if sample_id in self._replay_observed_ids:
+                        self._replay_duplicate_ids.add(sample_id)
+                        self._replay_duplicate_occurrences += 1
+                    self._replay_observed_ids.add(sample_id)
                 sample_bytes = input_row.nbytes + target_row.nbytes
                 if sample_bytes > budget.max_bytes:
                     continue
-                sample_id = replay_sample_id(input_row, target_row)
+                if policy.name == "recent_fifo":
+                    retained.pop(sample_id, None)
                 retained[sample_id] = ReplaySnapshot(
                     input_batch=input_row,
                     target_batch=target_row,
@@ -1748,9 +2037,9 @@ class CircadianPredictiveCodingNetwork:
                     )
                     > budget.max_bytes
                 ):
-                    # Why this: smallest stable content hashes form a bounded,
-                    # order-independent sample of observed A and B examples.
-                    del retained[max(retained)]
+                    # Why this: both limits apply to the same retained rows;
+                    # only eviction order differs between declared policies.
+                    del retained[policy.eviction_id(retained)]
             self._replay_memory = deque(retained.values())
             return
         if self.config.replay_memory_size <= 0:
@@ -1767,12 +2056,14 @@ class CircadianPredictiveCodingNetwork:
             )
         )
 
-    def _run_replay_consolidation(self) -> None:
+    def _run_replay_consolidation(self) -> tuple[int, int]:
         if self.config.replay_steps <= 0 or len(self._replay_memory) == 0:
-            return
+            return 0, 0
 
         replay_count = min(self.config.replay_steps, len(self._replay_memory))
         replay_snapshots = self._select_replay_snapshots(replay_count)
+        examples = 0
+        updates = 0
         for snapshot in replay_snapshots:
             self._run_training_step(
                 input_batch=snapshot.input_batch,
@@ -1784,6 +2075,18 @@ class CircadianPredictiveCodingNetwork:
                 store_replay_snapshot=False,
             )
             self._replay_updates += 1
+            if hasattr(self, "_replay_retention_policy"):
+                for index in range(snapshot.input_batch.shape[0]):
+                    self._replay_exposed_ids.add(
+                        replay_sample_id(
+                            snapshot.input_batch[index : index + 1],
+                            snapshot.target_batch[index : index + 1],
+                        )
+                    )
+                self._replay_exposure_updates += 1
+            examples += int(snapshot.input_batch.shape[0])
+            updates += 1
+        return examples, updates
 
     def _select_replay_snapshots(self, replay_count: int) -> list[ReplaySnapshot]:
         if replay_count <= 0:

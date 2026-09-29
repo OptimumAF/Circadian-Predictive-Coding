@@ -3,15 +3,25 @@
 from __future__ import annotations
 
 from copy import copy, deepcopy
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, field as dataclass_field, fields
 from math import isfinite
 from numbers import Integral
+from time import perf_counter
 from typing import Self
 from typing import Any
 
 from src.core.dimension_validation import require_positive_integer_dimension
 from src.core.neuron_adaptation import NeuronLineageSnapshot, PruneOutcome
 from src.core.sleep_clocks import SleepClockSnapshot, SleepEpochProgress
+from src.core.sleep_telemetry import (
+    ChemicalSummaries,
+    ChemicalSummary,
+    SleepBudgets,
+    SleepDurations,
+    SleepEventTelemetry,
+    SleepReplayUsage,
+    SleepStructuralChanges,
+)
 from src.shared.torch_runtime import require_torch, require_torchvision_models
 
 TORCH_PC_ENERGY_ID = "torch_pc_half_mean_output_error_sq_plus_half_mean_hidden_error_sq_v1"
@@ -126,6 +136,17 @@ class SleepEventResult:
     lineage_before: NeuronLineageSnapshot | None = None
     lineage_after: NeuronLineageSnapshot | None = None
     prune_outcome: PruneOutcome | None = None
+    telemetry: SleepEventTelemetry | None = dataclass_field(default=None, compare=False)
+
+
+def _summarize_torch_chemical(values: Any) -> ChemicalSummary:
+    """Extract scalar statistics after selected-device tensor work completes."""
+    return ChemicalSummary(
+        count=int(values.numel()),
+        minimum=float(values.min().item()),
+        mean=float(values.mean().item()),
+        maximum=float(values.max().item()),
+    )
 
 
 @dataclass(frozen=True)
@@ -364,7 +385,9 @@ class PredictiveCodingHead:
         hidden_linear_prior = features @ self.weight_feature_hidden + self.bias_hidden
         hidden_prior = torch.tanh(hidden_linear_prior)
         hidden_state = hidden_prior.clone()
-        target_one_hot = functional.one_hot(targets, num_classes=self.num_classes).to(features.dtype)
+        target_one_hot = functional.one_hot(targets, num_classes=self.num_classes).to(
+            features.dtype
+        )
 
         for _ in range(inference_steps):
             output_logits = hidden_state @ self.weight_hidden_output + self.bias_output
@@ -392,7 +415,9 @@ class PredictiveCodingHead:
         new_feature_hidden = self.weight_feature_hidden - learning_rate * grad_feature_hidden
         new_hidden_bias = self.bias_hidden - learning_rate * grad_hidden_bias
         new_traffic = self._traffic_sum + torch.mean(torch.abs(hidden_state), dim=0)
-        energy = 0.5 * (torch.mean(output_error * output_error) + torch.mean(hidden_error * hidden_error))
+        energy = 0.5 * (
+            torch.mean(output_error * output_error) + torch.mean(hidden_error * hidden_error)
+        )
         energy_value = self._require_finite_training_update(
             [new_hidden_output, new_output_bias, new_feature_hidden, new_hidden_bias, new_traffic],
             energy,
@@ -657,6 +682,10 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             sleep_events=self._sleep_events,
         )
 
+    def get_sleep_chemical_summaries(self) -> ChemicalSummaries:
+        """Expose immutable chemistry facts for runner decisions that skip core sleep."""
+        return self._chemical_summaries()
+
     def train_step(
         self,
         features: Any,
@@ -675,7 +704,9 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         hidden_linear_prior = features @ self.weight_feature_hidden + self.bias_hidden
         hidden_prior = torch.tanh(hidden_linear_prior)
         hidden_state = hidden_prior.clone()
-        target_one_hot = functional.one_hot(targets, num_classes=self.num_classes).to(features.dtype)
+        target_one_hot = functional.one_hot(targets, num_classes=self.num_classes).to(
+            features.dtype
+        )
 
         for _ in range(inference_steps):
             output_logits = hidden_state @ self.weight_hidden_output + self.bias_output
@@ -718,9 +749,13 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             grad_hidden_bias = grad_hidden_bias * plasticity[None, :]
             effective_learning_rate = learning_rate * reward_scale
 
-            new_hidden_output = self.weight_hidden_output - effective_learning_rate * grad_hidden_output
+            new_hidden_output = (
+                self.weight_hidden_output - effective_learning_rate * grad_hidden_output
+            )
             new_output_bias = self.bias_output - effective_learning_rate * grad_output_bias
-            new_feature_hidden = self.weight_feature_hidden - effective_learning_rate * grad_feature_hidden
+            new_feature_hidden = (
+                self.weight_feature_hidden - effective_learning_rate * grad_feature_hidden
+            )
             new_hidden_bias = self.bias_hidden - effective_learning_rate * grad_hidden_bias
             new_traffic = self._traffic_sum + torch.mean(torch.abs(hidden_state), dim=0)
             new_age = self._neuron_age + 1.0
@@ -785,19 +820,20 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
                 raise ValueError("epoch_progress cannot be combined with current_step/total_steps")
             current_step = epoch_progress.completed_epochs
             total_steps = epoch_progress.total_epochs
+        started_at = perf_counter()
         if self.config.sleep_mode == "disabled":
-            return SleepEventResult(
-                old_hidden_dim=self.hidden_dim,
-                new_hidden_dim=self.hidden_dim,
-                split_indices=(),
-                pruned_indices=(),
+            return self._skipped_sleep_result(
+                trigger_reason="disabled",
+                reason="sleep_disabled",
+                started_at=started_at,
+                completed_epoch=current_step,
             )
         if not force_sleep and not self.should_trigger_sleep():
-            return SleepEventResult(
-                old_hidden_dim=self.hidden_dim,
-                new_hidden_dim=self.hidden_dim,
-                split_indices=(),
-                pruned_indices=(),
+            return self._skipped_sleep_result(
+                trigger_reason="not_due",
+                reason="adaptive_not_due",
+                started_at=started_at,
+                completed_epoch=current_step,
             )
         split_budget, prune_budget, should_skip = self._resolve_sleep_budgets(
             current_step=current_step,
@@ -806,30 +842,56 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         if should_skip or (
             self.config.sleep_mode == "legacy" and split_budget <= 0 and prune_budget <= 0
         ):
-            return SleepEventResult(
-                old_hidden_dim=self.hidden_dim,
-                new_hidden_dim=self.hidden_dim,
-                split_indices=(),
-                pruned_indices=(),
+            return self._skipped_sleep_result(
+                trigger_reason="budget_skipped",
+                reason="warmup" if should_skip else "zero_structural_budget",
+                started_at=started_at,
+                completed_epoch=current_step,
+                split_budget=split_budget,
+                prune_budget=prune_budget,
             )
         if self.config.sleep_mode == "components":
             split_budget = split_budget if self.config.sleep_enable_split else 0
             prune_budget = prune_budget if self.config.sleep_enable_prune else 0
 
+        before_chemistry = self._chemical_summaries()
         snapshot = self.snapshot_state()
         try:
-            return self._execute_sleep_event(split_budget=split_budget, prune_budget=prune_budget)
+            return self._execute_sleep_event(
+                split_budget=split_budget,
+                prune_budget=prune_budget,
+                before_chemistry=before_chemistry,
+                completed_epoch=current_step,
+                trigger_reason="forced" if force_sleep else "adaptive",
+                started_at=started_at,
+            )
         except Exception:
             self.restore_state(snapshot)
             raise
 
-    def _execute_sleep_event(self, *, split_budget: int, prune_budget: int) -> SleepEventResult:
+    def _execute_sleep_event(
+        self,
+        *,
+        split_budget: int,
+        prune_budget: int,
+        before_chemistry: ChemicalSummaries,
+        completed_epoch: int | None,
+        trigger_reason: str,
+        started_at: float,
+    ) -> SleepEventResult:
         old_hidden_dim = self.hidden_dim
         split_indices, prune_indices = self._plan_structural_sleep(
             split_budget=split_budget, prune_budget=prune_budget
         )
         lineage_before = self.get_neuron_lineage()
         self._apply_split(split_indices)
+        split_lineage = self.get_neuron_lineage()
+        split_pairs = tuple(
+            (lineage_before.neuron_ids[index], child_id)
+            for index, child_id in zip(
+                split_indices, split_lineage.neuron_ids[old_hidden_dim:], strict=True
+            )
+        )
         proposed_ids = tuple(int(value) for value in self._neuron_ids[list(prune_indices)].tolist())
         self._apply_prune(prune_indices)
         if self.config.sleep_mode == "legacy" or self.config.sleep_enable_homeostasis:
@@ -845,6 +907,17 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self._steps_since_sleep = 0
         self._sleep_events += 1
         self._validate_sleep_post_state()
+        telemetry = self._executed_sleep_telemetry(
+            before_chemistry=before_chemistry,
+            before_width=old_hidden_dim,
+            split_pairs=split_pairs,
+            removed_prune_ids=proposed_ids,
+            split_budget=split_budget,
+            prune_budget=prune_budget,
+            completed_epoch=completed_epoch,
+            trigger_reason=trigger_reason,
+            started_at=started_at,
+        )
         return SleepEventResult(
             old_hidden_dim=old_hidden_dim,
             new_hidden_dim=self.hidden_dim,
@@ -857,6 +930,96 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
                 proposed_neuron_ids=proposed_ids,
                 removed_neuron_ids=proposed_ids,
             ),
+            telemetry=telemetry,
+        )
+
+    def _chemical_summaries(self) -> ChemicalSummaries:
+        return ChemicalSummaries(
+            primary=_summarize_torch_chemical(self._chemical),
+            fast=_summarize_torch_chemical(self._chemical_fast),
+            slow=_summarize_torch_chemical(self._chemical_slow),
+        )
+
+    def _skipped_sleep_result(
+        self,
+        *,
+        trigger_reason: str,
+        reason: str,
+        started_at: float,
+        completed_epoch: int | None,
+        split_budget: int = 0,
+        prune_budget: int = 0,
+    ) -> SleepEventResult:
+        chemistry = self._chemical_summaries()
+        duration = max(0.0, perf_counter() - started_at)
+        telemetry = SleepEventTelemetry(
+            format_version=1,
+            trigger_reason=trigger_reason,
+            outcome="skipped",
+            reason=reason,
+            completed_epoch=completed_epoch,
+            wake_batches=self._traffic_steps,
+            budgets=SleepBudgets(split_budget, prune_budget, 0, None),
+            changes=SleepStructuralChanges((), (), (), (), (), (), ()),
+            before_width=self.hidden_dim,
+            proposed_width=self.hidden_dim,
+            final_width=self.hidden_dim,
+            guard=None,
+            replay=SleepReplayUsage(0, 0, 0, 0),
+            chemistry_before=chemistry,
+            chemistry_proposed=chemistry,
+            chemistry_final=chemistry,
+            durations=SleepDurations(duration, duration),
+        )
+        return SleepEventResult(
+            old_hidden_dim=self.hidden_dim,
+            new_hidden_dim=self.hidden_dim,
+            split_indices=(),
+            pruned_indices=(),
+            telemetry=telemetry,
+        )
+
+    def _executed_sleep_telemetry(
+        self,
+        *,
+        before_chemistry: ChemicalSummaries,
+        before_width: int,
+        split_pairs: tuple[tuple[int, int], ...],
+        removed_prune_ids: tuple[int, ...],
+        split_budget: int,
+        prune_budget: int,
+        completed_epoch: int | None,
+        trigger_reason: str,
+        started_at: float,
+    ) -> SleepEventTelemetry:
+        chemistry_after = self._chemical_summaries()
+        duration = max(0.0, perf_counter() - started_at)
+        return SleepEventTelemetry(
+            format_version=1,
+            trigger_reason=trigger_reason,
+            outcome="applied",
+            reason="core_executed",
+            completed_epoch=completed_epoch,
+            wake_batches=self._traffic_steps,
+            budgets=SleepBudgets(split_budget, prune_budget, 0, None),
+            changes=SleepStructuralChanges(
+                split_pairs,
+                split_pairs,
+                removed_prune_ids,
+                (),
+                removed_prune_ids,
+                (),
+                removed_prune_ids,
+            ),
+            before_width=before_width,
+            proposed_width=self.hidden_dim,
+            final_width=self.hidden_dim,
+            guard=None,
+            replay=SleepReplayUsage(0, 0, 0, 0),
+            chemistry_before=before_chemistry,
+            chemistry_proposed=chemistry_after,
+            chemistry_final=chemistry_after,
+            durations=SleepDurations(duration, duration),
         )
 
     def _validate_sleep_post_state(self) -> None:
@@ -955,9 +1118,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         energy_improvement = recent[0] - recent[-1]
         plateau = energy_improvement <= self.config.sleep_plateau_delta
         chemical_variance = float(self._torch.var(self._chemical).item())
-        high_chemical_variance = (
-            chemical_variance >= self.config.sleep_chemical_variance_threshold
-        )
+        high_chemical_variance = chemical_variance >= self.config.sleep_chemical_variance_threshold
         return plateau and high_chemical_variance
 
     def snapshot_state(self) -> dict[str, Any]:
@@ -965,9 +1126,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             name: getattr(self, attr).detach().clone()
             for name, attr in self._SNAPSHOT_TENSORS.items()
         }
-        state.update(
-            {name: getattr(self, attr) for name, attr in self._SNAPSHOT_COUNTERS.items()}
-        )
+        state.update({name: getattr(self, attr) for name, attr in self._SNAPSHOT_COUNTERS.items()})
         state.update(
             format_version=2,
             feature_dim=self.feature_dim,
@@ -993,8 +1152,14 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         if not isinstance(state, dict) or state.keys() != expected.keys():
             raise ValueError("snapshot fields are incompatible with this Torch head")
         for name in (
-            "format_version", "feature_dim", "num_classes", "min_hidden_dim",
-            "max_hidden_dim", "device", "generator_device", "config",
+            "format_version",
+            "feature_dim",
+            "num_classes",
+            "min_hidden_dim",
+            "max_hidden_dim",
+            "device",
+            "generator_device",
+            "config",
         ):
             if state[name] != expected[name]:
                 raise ValueError(f"snapshot {name} is incompatible with this Torch head")
@@ -1004,7 +1169,11 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         for name, attr in self._SNAPSHOT_TENSORS.items():
             value = state[name]
             reference = expected[name]
-            if not isinstance(value, torch.Tensor) or value.dtype != reference.dtype or value.device != reference.device:
+            if (
+                not isinstance(value, torch.Tensor)
+                or value.dtype != reference.dtype
+                or value.device != reference.device
+            ):
                 raise ValueError(f"snapshot {name} has incompatible dtype or device")
             staged[attr] = value.detach().clone()
         for name, attr in self._SNAPSHOT_COUNTERS.items():
@@ -1090,7 +1259,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         batch_error = float(torch.mean(torch.abs(output_error)).item())
         baseline = batch_error if self._reward_error_ema is None else self._reward_error_ema
         difficulty_ratio = batch_error / max(float(baseline), 1e-8)
-        raw_scale = difficulty_ratio ** self.config.reward_difficulty_exponent
+        raw_scale = difficulty_ratio**self.config.reward_difficulty_exponent
         reward_scale = float(
             max(self.config.reward_scale_min, min(self.config.reward_scale_max, raw_scale))
         )
@@ -1158,9 +1327,9 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         limit = self.config.max_split_per_sleep if max_split_limit is None else max_split_limit
         if limit <= 0:
             return ()
-        candidates = torch.where(
-            (self._chemical >= split_threshold) & (self._split_cooldown <= 0)
-        )[0]
+        candidates = torch.where((self._chemical >= split_threshold) & (self._split_cooldown <= 0))[
+            0
+        ]
         if int(candidates.numel()) == 0:
             return ()
         split_scores = self._compute_split_scores()
@@ -1201,8 +1370,12 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         if not self.config.use_adaptive_thresholds:
             return self.config.split_threshold, self.config.prune_threshold
 
-        split_threshold = float(torch.quantile(self._chemical, self.config.adaptive_split_percentile / 100.0))
-        prune_threshold = float(torch.quantile(self._chemical, self.config.adaptive_prune_percentile / 100.0))
+        split_threshold = float(
+            torch.quantile(self._chemical, self.config.adaptive_split_percentile / 100.0)
+        )
+        prune_threshold = float(
+            torch.quantile(self._chemical, self.config.adaptive_prune_percentile / 100.0)
+        )
         return split_threshold, prune_threshold
 
     def _resolve_sleep_budgets(
@@ -1289,7 +1462,11 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         norm_mix = max(0.0, min(1.0, self.config.split_weight_norm_mix))
         importance_mix = max(0.0, min(1.0, self.config.split_importance_mix))
         chemical_mix = max(0.0, 1.0 - norm_mix - importance_mix)
-        return chemical_mix * chemical_scores + norm_mix * norm_scores + importance_mix * importance_scores
+        return (
+            chemical_mix * chemical_scores
+            + norm_mix * norm_scores
+            + importance_mix * importance_scores
+        )
 
     def _compute_prune_scores(self) -> Any:
         norm_scores = 1.0 - self._normalize_tensor(self._row_norm(self.weight_hidden_output))
@@ -1298,7 +1475,11 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         norm_mix = max(0.0, min(1.0, self.config.prune_weight_norm_mix))
         importance_mix = max(0.0, min(1.0, self.config.prune_importance_mix))
         chemical_mix = max(0.0, 1.0 - norm_mix - importance_mix)
-        return chemical_mix * chemical_scores + norm_mix * norm_scores + importance_mix * importance_scores
+        return (
+            chemical_mix * chemical_scores
+            + norm_mix * norm_scores
+            + importance_mix * importance_scores
+        )
 
     def _row_norm(self, matrix: Any) -> Any:
         torch = self._torch
@@ -1378,10 +1559,14 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             traffic_values.append(torch.zeros((1,), dtype=torch.float32, device=self.device))
             importance_values.append(importance_value.reshape(1))
             split_cooldown_values.append(
-                torch.tensor([self.config.split_cooldown_steps], dtype=torch.int32, device=self.device)
+                torch.tensor(
+                    [self.config.split_cooldown_steps], dtype=torch.int32, device=self.device
+                )
             )
             prune_cooldown_values.append(
-                torch.tensor([self.config.prune_cooldown_steps], dtype=torch.int32, device=self.device)
+                torch.tensor(
+                    [self.config.prune_cooldown_steps], dtype=torch.int32, device=self.device
+                )
             )
 
             self._chemical[index] = chemical_value * 0.5
@@ -1395,11 +1580,17 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self.weight_hidden_output = torch.cat([self.weight_hidden_output] + output_rows, dim=0)
         self.bias_hidden = torch.cat([self.bias_hidden, torch.cat(bias_values, dim=1)], dim=1)
         self._chemical = torch.cat([self._chemical, torch.cat(chemical_values, dim=0)], dim=0)
-        self._chemical_fast = torch.cat([self._chemical_fast, torch.cat(chemical_fast_values, dim=0)], dim=0)
-        self._chemical_slow = torch.cat([self._chemical_slow, torch.cat(chemical_slow_values, dim=0)], dim=0)
+        self._chemical_fast = torch.cat(
+            [self._chemical_fast, torch.cat(chemical_fast_values, dim=0)], dim=0
+        )
+        self._chemical_slow = torch.cat(
+            [self._chemical_slow, torch.cat(chemical_slow_values, dim=0)], dim=0
+        )
         self._neuron_age = torch.cat([self._neuron_age, torch.cat(age_values, dim=0)], dim=0)
         self._traffic_sum = torch.cat([self._traffic_sum, torch.cat(traffic_values, dim=0)], dim=0)
-        self._importance_ema = torch.cat([self._importance_ema, torch.cat(importance_values, dim=0)], dim=0)
+        self._importance_ema = torch.cat(
+            [self._importance_ema, torch.cat(importance_values, dim=0)], dim=0
+        )
         self._split_cooldown = torch.cat(
             [self._split_cooldown, torch.cat(split_cooldown_values, dim=0)], dim=0
         )
@@ -1570,7 +1761,10 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             raise ValueError("prune_min_age_steps must be non-negative.")
         if not (0.0 < config.homeostatic_downscale_factor <= 1.0):
             raise ValueError("homeostatic_downscale_factor must be in (0, 1].")
-        if config.homeostasis_target_input_norm < 0.0 or config.homeostasis_target_output_norm < 0.0:
+        if (
+            config.homeostasis_target_input_norm < 0.0
+            or config.homeostasis_target_output_norm < 0.0
+        ):
             raise ValueError("homeostasis target norms must be non-negative.")
         if not (0.0 < config.homeostasis_strength <= 1.0):
             raise ValueError("homeostasis_strength must be in (0, 1].")

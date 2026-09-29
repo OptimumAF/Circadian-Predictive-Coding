@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from time import perf_counter
 
 from src.app.comparison_scope import NumpyComparisonScope, scope_for_hidden_dims
 from src.app.circadian_checkpoint import (
@@ -12,6 +13,7 @@ from src.app.circadian_checkpoint import (
     restore_circadian_checkpoint,
 )
 from src.app.sleep_schedule import decide_sleep_attempt
+from src.app.numpy_sleep_decisions import describe_unguarded_numpy_sleep_decision
 from src.app.toy_checkpoint import (
     ToyCheckpointStore,
     ToyRunnerCheckpoint,
@@ -32,6 +34,7 @@ from src.core.neuron_adaptation import (
 )
 from src.core.predictive_coding import NUMPY_PC_ENERGY_ID, PredictiveCodingNetwork
 from src.core.sleep_clocks import SleepEpochProgress
+from src.core.sleep_telemetry import SleepEventTelemetry
 from src.infra.datasets import LabeledData, generate_two_cluster_dataset, split_training_validation
 
 TOY_VALIDATION_PROTOCOL = "toy_validation_v1"
@@ -86,6 +89,7 @@ class CircadianSleepSummary:
     hidden_dim_start: int
     hidden_dim_end: int
     sleep_mode: str = "legacy"
+    events: tuple[SleepEventTelemetry, ...] = field(default=(), compare=False)
 
 
 @dataclass(frozen=True)
@@ -259,6 +263,7 @@ def _train_toy_models(
     total_splits = 0
     total_prunes = 0
     hidden_dim_start = circadian_model.hidden_dim
+    sleep_events: list[SleepEventTelemetry] = []
 
     data_digest = toy_data_digest(train_data, validation_data) if checkpoint_store else ""
     config_digest = toy_config_digest(config) if checkpoint_store else ""
@@ -294,6 +299,7 @@ def _train_toy_models(
         total_splits = checkpoint.total_splits
         total_prunes = checkpoint.total_prunes
         hidden_dim_start = checkpoint.hidden_dim_start
+        sleep_events = list(checkpoint.sleep_events)
         if position.stage == "wake":
             start_epoch = position.completed_epoch + 1
             start_model_index = position.next_batch_index
@@ -347,6 +353,7 @@ def _train_toy_models(
                     total_splits,
                     total_prunes,
                     hidden_dim_start,
+                    sleep_events,
                     completed_epoch=epoch_index - 1,
                     stage="wake",
                     next_model_index=model_index + 1,
@@ -366,6 +373,7 @@ def _train_toy_models(
                 total_splits,
                 total_prunes,
                 hidden_dim_start,
+                sleep_events,
                 completed_epoch=epoch_index,
                 stage="before_sleep",
                 next_model_index=0,
@@ -386,10 +394,20 @@ def _train_toy_models(
         )
         if decision.attempted:
             sleep_policy = policy if config.circadian_use_policy_for_sleep else None
+            attempt_started_at = perf_counter()
             sleep_result = circadian_model.sleep_event(
                 adaptation_policy=sleep_policy,
                 force_sleep=decision.force_sleep,
                 epoch_progress=SleepEpochProgress(epoch_index, config.epoch_count),
+            )
+            sleep_events.append(
+                describe_unguarded_numpy_sleep_decision(
+                    circadian_model,
+                    decision,
+                    completed_epoch=epoch_index,
+                    result=sleep_result,
+                    attempt_seconds=perf_counter() - attempt_started_at,
+                )
             )
             # Why this: legacy reports counted topology changes, while the
             # component route counts consolidation-only events as sleep.
@@ -405,6 +423,12 @@ def _train_toy_models(
                 sleep_event_count += 1
                 total_splits += len(sleep_result.split_indices)
                 total_prunes += len(sleep_result.pruned_indices)
+        else:
+            sleep_events.append(
+                describe_unguarded_numpy_sleep_decision(
+                    circadian_model, decision, completed_epoch=epoch_index
+                )
+            )
 
         if checkpoint_store is not None:
             _save_toy_checkpoint(
@@ -420,6 +444,7 @@ def _train_toy_models(
                 total_splits,
                 total_prunes,
                 hidden_dim_start,
+                sleep_events,
                 completed_epoch=epoch_index,
                 stage="after_sleep",
                 next_model_index=0,
@@ -455,6 +480,7 @@ def _train_toy_models(
             hidden_dim_start=hidden_dim_start,
             hidden_dim_end=circadian_model.hidden_dim,
             sleep_mode=circadian_model.config.sleep_mode,
+            events=tuple(sleep_events),
         ),
     )
 
@@ -472,6 +498,7 @@ def _save_toy_checkpoint(
     total_splits: int,
     total_prunes: int,
     hidden_dim_start: int,
+    sleep_events: list[SleepEventTelemetry],
     *,
     completed_epoch: int,
     stage: str,
@@ -486,7 +513,7 @@ def _save_toy_checkpoint(
     )
     store.save(
         ToyRunnerCheckpoint(
-            format_version=1,
+            format_version=2,
             runner_config_digest=config_digest,
             data_digest=data_digest,
             backprop_model=deepcopy(backprop),
@@ -496,6 +523,7 @@ def _save_toy_checkpoint(
             total_splits=total_splits,
             total_prunes=total_prunes,
             hidden_dim_start=hidden_dim_start,
+            sleep_events=tuple(sleep_events),
             combined=capture_circadian_checkpoint(
                 circadian,
                 retry=None,

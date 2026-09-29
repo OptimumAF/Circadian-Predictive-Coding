@@ -22,7 +22,10 @@ from src.app.resnet50_benchmark import (
     run_resnet50_benchmark,
 )
 from src.core.resnet50_variants import CircadianPredictiveCodingHead, PredictiveCodingHead
-from src.infra.vision_datasets import SyntheticVisionDatasetConfig, build_synthetic_vision_dataloaders
+from src.infra.vision_datasets import (
+    SyntheticVisionDatasetConfig,
+    build_synthetic_vision_dataloaders,
+)
 
 
 class StochasticImageDataset:
@@ -34,10 +37,14 @@ class StochasticImageDataset:
     def __getitem__(self, index: int) -> tuple[Any, int]:
         import torch
 
-        channels = torch.tensor([
-            float(index), float(torch.rand(())),
-            float(np.random.random()), random.random(),
-        ])
+        channels = torch.tensor(
+            [
+                float(index),
+                float(torch.rand(())),
+                float(np.random.random()),
+                random.random(),
+            ]
+        )
         return channels[:, None, None].expand(4, 4, 4).clone(), index % 3
 
 
@@ -45,9 +52,12 @@ class TorchvisionViewDataset:
     """Picklable, asymmetric tensor images with stochastic torchvision views."""
 
     def __init__(self) -> None:
-        self.transform = transforms.Compose([
-            transforms.RandomHorizontalFlip(), transforms.RandomCrop((6, 7)),
-        ])
+        self.transform = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomCrop((6, 7)),
+            ]
+        )
 
     def __len__(self) -> int:
         return 8
@@ -103,7 +113,9 @@ def test_should_run_resnet50_benchmark_and_return_three_reports() -> None:
         assert report.backbone_pretraining == "none"
         assert report.backbone_trainable is False
         assert report.head_type in {
-            "linear", "predictive_coding", "circadian_predictive_coding",
+            "linear",
+            "predictive_coding",
+            "circadian_predictive_coding",
         }
         assert report.train_seconds >= 0.0
         assert report.train_samples_per_second >= 0.0
@@ -116,28 +128,50 @@ def test_should_run_resnet50_benchmark_and_return_three_reports() -> None:
         assert report.final_cross_entropy is not None
         if report.model_name != "BackpropResNet50":
             assert report.final_energy is not None
-            assert report.training_energy_id == "torch_pc_half_mean_output_error_sq_plus_half_mean_hidden_error_sq_v1"
+            assert (
+                report.training_energy_id
+                == "torch_pc_half_mean_output_error_sq_plus_half_mean_hidden_error_sq_v1"
+            )
         else:
             assert report.training_energy_id is None
-    assert "last training diagnostic [torch_pc_half_mean_output_error_sq_plus_half_mean_hidden_error_sq_v1]" in formatted
+    assert (
+        "last training diagnostic [torch_pc_half_mean_output_error_sq_plus_half_mean_hidden_error_sq_v1]"
+        in formatted
+    )
 
 
 def test_seeded_unmatched_reference_is_invariant_to_model_order_on_cpu() -> None:
     config = ResNet50BenchmarkConfig(
         protocol_id=VISION_SEEDED_UNMATCHED_PROTOCOL,
-        train_samples=8, guard_samples=8, validation_samples=8, test_samples=8,
-        num_classes=3, image_size=32, batch_size=4, epochs=1, seed=73,
-        device="cpu", target_accuracy=None, inference_batches=1, warmup_batches=0,
-        backprop_freeze_backbone=True, backbone_weights="none",
-        predictive_head_hidden_dim=16, predictive_inference_steps=2,
-        circadian_head_hidden_dim=16, circadian_min_hidden_dim=16,
-        circadian_max_hidden_dim=32, circadian_inference_steps=2,
-        circadian_sleep_interval=1, circadian_force_sleep=True,
+        train_samples=8,
+        guard_samples=8,
+        validation_samples=8,
+        test_samples=8,
+        num_classes=3,
+        image_size=32,
+        batch_size=4,
+        epochs=1,
+        seed=73,
+        device="cpu",
+        target_accuracy=None,
+        inference_batches=1,
+        warmup_batches=0,
+        backprop_freeze_backbone=True,
+        backbone_weights="none",
+        predictive_head_hidden_dim=16,
+        predictive_inference_steps=2,
+        circadian_head_hidden_dim=16,
+        circadian_min_hidden_dim=16,
+        circadian_max_hidden_dim=32,
+        circadian_inference_steps=2,
+        circadian_sleep_interval=1,
+        circadian_force_sleep=True,
         circadian_sleep_warmup_steps=0,
     )
     forward = run_resnet50_benchmark(config)
     reverse = run_resnet50_benchmark(
-        config, model_order=("circadian", "predictive", "backprop"),
+        config,
+        model_order=("circadian", "predictive", "backprop"),
     )
 
     assert forward.training_order == ("backprop", "predictive", "circadian")
@@ -147,7 +181,8 @@ def test_seeded_unmatched_reference_is_invariant_to_model_order_on_cpu() -> None
     assert reverse.trained_model_hashes is not None
     assert forward.trained_model_hashes == reverse.trained_model_hashes
     assert set(forward.trained_model_hashes) == {
-        "BackpropResNet50", "PredictiveCodingResNet50",
+        "BackpropResNet50",
+        "PredictiveCodingResNet50",
         "CircadianPredictiveCodingResNet50",
     }
     assert "Trained model hashes:" in format_resnet50_benchmark_result(forward)
@@ -155,31 +190,39 @@ def test_seeded_unmatched_reference_is_invariant_to_model_order_on_cpu() -> None
     reverse_reports = {report.model_name: report for report in reverse.reports}
     for name in forward_reports:
         assert forward_reports[name].validation_accuracy == pytest.approx(
-            reverse_reports[name].validation_accuracy, abs=1e-7,
+            reverse_reports[name].validation_accuracy,
+            abs=1e-7,
         )
         assert forward_reports[name].test_accuracy == pytest.approx(
-            reverse_reports[name].test_accuracy, abs=1e-7,
+            reverse_reports[name].test_accuracy,
+            abs=1e-7,
         )
         assert forward_reports[name].final_cross_entropy == pytest.approx(
-            reverse_reports[name].final_cross_entropy, abs=1e-7,
+            reverse_reports[name].final_cross_entropy,
+            abs=1e-7,
         )
 
 
 def test_seeded_reference_rejects_invalid_execution_order_before_loading_data() -> None:
     config = replace(
-        ResNet50BenchmarkConfig(), protocol_id=VISION_SEEDED_UNMATCHED_PROTOCOL,
+        ResNet50BenchmarkConfig(),
+        protocol_id=VISION_SEEDED_UNMATCHED_PROTOCOL,
     )
     with pytest.raises(ValueError, match="permutation"):
         run_resnet50_benchmark(
-            config, model_order=("backprop", "backprop", "predictive"),
+            config,
+            model_order=("backprop", "backprop", "predictive"),
         )
 
 
 def test_trained_model_hash_covers_adaptive_state_and_structural_rng() -> None:
     torch = pytest.importorskip("torch")
     circadian_head = CircadianPredictiveCodingHead(
-        feature_dim=4, hidden_dim=16, num_classes=3,
-        device=torch.device("cpu"), seed=73,
+        feature_dim=4,
+        hidden_dim=16,
+        num_classes=3,
+        device=torch.device("cpu"),
+        seed=73,
     )
     circadian = SimpleNamespace(backbone=torch.nn.Identity(), head=circadian_head)
     initial = resnet50_benchmark._hash_trained_model(circadian)
@@ -190,8 +233,11 @@ def test_trained_model_hash_covers_adaptive_state_and_structural_rng() -> None:
     assert resnet50_benchmark._hash_trained_model(circadian) != chemical_changed
 
     predictive_head = PredictiveCodingHead(
-        feature_dim=4, hidden_dim=16, num_classes=3,
-        device=torch.device("cpu"), seed=73,
+        feature_dim=4,
+        hidden_dim=16,
+        num_classes=3,
+        device=torch.device("cpu"),
+        seed=73,
     )
     predictive = SimpleNamespace(backbone=torch.nn.Identity(), head=predictive_head)
     initial_predictive = resnet50_benchmark._hash_trained_model(predictive)
@@ -211,15 +257,15 @@ def test_seeded_epoch_loader_replays_shuffle_and_random_views() -> None:
 
     generator = torch.Generator().manual_seed(3)
     loader = torch.utils.data.DataLoader(
-        RandomViewDataset(), batch_size=2, shuffle=True, generator=generator,
+        RandomViewDataset(),
+        batch_size=2,
+        shuffle=True,
+        generator=generator,
     )
 
     def collect_epochs() -> list[list[Any]]:
         replay = resnet50_benchmark._SeededEpochTrainLoader(torch, loader, 79)
-        return [
-            [images.clone() for images, _ in replay]
-            for _ in range(2)
-        ]
+        return [[images.clone() for images, _ in replay] for _ in range(2)]
 
     before = torch.random.get_rng_state().clone()
     first = collect_epochs()
@@ -235,8 +281,11 @@ def test_seeded_epoch_loader_replays_shuffle_and_random_views() -> None:
 def test_seeded_epoch_loader_replays_multiworker_stochastic_images() -> None:
     torch = pytest.importorskip("torch")
     loader = torch.utils.data.DataLoader(
-        StochasticImageDataset(), batch_size=2, shuffle=True,
-        num_workers=2, generator=torch.Generator().manual_seed(3),
+        StochasticImageDataset(),
+        batch_size=2,
+        shuffle=True,
+        num_workers=2,
+        generator=torch.Generator().manual_seed(3),
     )
 
     def collect_epochs() -> list[list[Any]]:
@@ -259,8 +308,11 @@ def test_seeded_epoch_loader_replays_multiworker_stochastic_images() -> None:
 def test_seeded_epoch_loader_replays_torchvision_transforms_with_workers() -> None:
     torch = pytest.importorskip("torch")
     loader = torch.utils.data.DataLoader(
-        TorchvisionViewDataset(), batch_size=2, shuffle=True,
-        num_workers=2, generator=torch.Generator().manual_seed(3),
+        TorchvisionViewDataset(),
+        batch_size=2,
+        shuffle=True,
+        num_workers=2,
+        generator=torch.Generator().manual_seed(3),
     )
 
     def collect_epochs() -> list[list[Any]]:
@@ -434,13 +486,27 @@ def test_seeded_reference_keeps_final_loader_sealed_until_all_models_train(
     monkeypatch.setattr(resnet50_benchmark, "_train_seeded_variant", train)
     config = ResNet50BenchmarkConfig(
         protocol_id=VISION_SEEDED_UNMATCHED_PROTOCOL,
-        train_samples=8, guard_samples=8, validation_samples=8, test_samples=8,
-        num_classes=3, image_size=32, batch_size=4, epochs=1, seed=79,
-        device="cpu", target_accuracy=None, inference_batches=1, warmup_batches=0,
-        backprop_freeze_backbone=True, predictive_head_hidden_dim=16,
-        predictive_inference_steps=2, circadian_head_hidden_dim=16,
-        circadian_min_hidden_dim=16, circadian_max_hidden_dim=32,
-        circadian_inference_steps=2, circadian_sleep_interval=0,
+        train_samples=8,
+        guard_samples=8,
+        validation_samples=8,
+        test_samples=8,
+        num_classes=3,
+        image_size=32,
+        batch_size=4,
+        epochs=1,
+        seed=79,
+        device="cpu",
+        target_accuracy=None,
+        inference_batches=1,
+        warmup_batches=0,
+        backprop_freeze_backbone=True,
+        predictive_head_hidden_dim=16,
+        predictive_inference_steps=2,
+        circadian_head_hidden_dim=16,
+        circadian_min_hidden_dim=16,
+        circadian_max_hidden_dim=32,
+        circadian_inference_steps=2,
+        circadian_sleep_interval=0,
     )
     result = run_resnet50_benchmark(config)
 
@@ -452,21 +518,40 @@ def test_seeded_validation_candidate_uses_train_and_guard_roles_only() -> None:
     torch = pytest.importorskip("torch")
     config = ResNet50BenchmarkConfig(
         protocol_id=VISION_SEEDED_UNMATCHED_PROTOCOL,
-        train_samples=8, guard_samples=8, validation_samples=8, test_samples=8,
-        num_classes=3, image_size=32, batch_size=4, epochs=1, seed=83,
-        device="cpu", target_accuracy=None, inference_batches=1, warmup_batches=0,
+        train_samples=8,
+        guard_samples=8,
+        validation_samples=8,
+        test_samples=8,
+        num_classes=3,
+        image_size=32,
+        batch_size=4,
+        epochs=1,
+        seed=83,
+        device="cpu",
+        target_accuracy=None,
+        inference_batches=1,
+        warmup_batches=0,
         backprop_freeze_backbone=True,
     )
     loaders = build_synthetic_vision_dataloaders(
         SyntheticVisionDatasetConfig(
-            train_samples=8, guard_samples=8, validation_samples=8,
-            test_samples=8, num_classes=3, image_size=32, batch_size=4, seed=83,
+            train_samples=8,
+            guard_samples=8,
+            validation_samples=8,
+            test_samples=8,
+            num_classes=3,
+            image_size=32,
+            batch_size=4,
+            seed=83,
         )
     )
 
     report = benchmark_validation_candidate(
-        variant="backprop", torch=torch, device=torch.device("cpu"),
-        loaders=resnet50_benchmark._training_loaders(loaders), config=config,
+        variant="backprop",
+        torch=torch,
+        device=torch.device("cpu"),
+        loaders=resnet50_benchmark._training_loaders(loaders),
+        config=config,
     )
 
     assert report.model_name == "BackpropResNet50"
@@ -522,8 +607,12 @@ def test_should_reject_unknown_vision_protocol() -> None:
 def test_should_keep_explicit_legacy_vision_split_route() -> None:
     config = ResNet50BenchmarkConfig(
         protocol_id=VISION_VALIDATION_UNMATCHED_PROTOCOL,
-        train_samples=8, validation_samples=8, test_samples=8,
-        num_classes=3, image_size=32, batch_size=4,
+        train_samples=8,
+        validation_samples=8,
+        test_samples=8,
+        num_classes=3,
+        image_size=32,
+        batch_size=4,
     )
     loaders = resnet50_benchmark._build_benchmark_loaders(config)
 
@@ -535,17 +624,34 @@ def test_should_keep_explicit_legacy_vision_split_route() -> None:
 def test_validation_candidate_cannot_read_final_test_loader(variant: str) -> None:
     torch = pytest.importorskip("torch")
     config = ResNet50BenchmarkConfig(
-        train_samples=8, validation_samples=8, test_samples=8,
-        num_classes=3, image_size=32, batch_size=4, epochs=1, seed=17,
-        device="cpu", target_accuracy=None, inference_batches=1,
-        evaluation_batches=1, warmup_batches=0,
-        predictive_head_hidden_dim=32, circadian_head_hidden_dim=32,
-        circadian_min_hidden_dim=16, circadian_max_hidden_dim=64,
+        train_samples=8,
+        validation_samples=8,
+        test_samples=8,
+        num_classes=3,
+        image_size=32,
+        batch_size=4,
+        epochs=1,
+        seed=17,
+        device="cpu",
+        target_accuracy=None,
+        inference_batches=1,
+        evaluation_batches=1,
+        warmup_batches=0,
+        predictive_head_hidden_dim=32,
+        circadian_head_hidden_dim=32,
+        circadian_min_hidden_dim=16,
+        circadian_max_hidden_dim=64,
     )
     loaders = build_synthetic_vision_dataloaders(
         SyntheticVisionDatasetConfig(
-            train_samples=8, validation_samples=8, guard_samples=8, test_samples=8,
-            num_classes=3, image_size=32, batch_size=4, seed=17,
+            train_samples=8,
+            validation_samples=8,
+            guard_samples=8,
+            test_samples=8,
+            num_classes=3,
+            image_size=32,
+            batch_size=4,
+            seed=17,
         )
     )
 
@@ -560,8 +666,11 @@ def test_validation_candidate_cannot_read_final_test_loader(variant: str) -> Non
             raise AssertionError("Candidate evaluation accessed the final test loader")
 
     report = benchmark_validation_candidate(
-        variant=variant, torch=torch, device=torch.device("cpu"),
-        loaders=resnet50_benchmark._training_loaders(SealedLoaders()), config=config,
+        variant=variant,
+        torch=torch,
+        device=torch.device("cpu"),
+        loaders=resnet50_benchmark._training_loaders(SealedLoaders()),
+        config=config,
     )
     assert 0 <= report.validation_accuracy <= 1
     assert report.validation_cross_entropy >= 0
@@ -589,15 +698,22 @@ def test_should_use_disjoint_guard_for_stopping_and_sleep_rollback(
     original_backprop = resnet50_benchmark._compute_backprop_metrics
     original_pc = resnet50_benchmark._compute_pc_metrics
 
-    def check_backprop(torch_module: object, model: object, loader: object,
-                       device: object, max_batches: int | None) -> tuple[float, float]:
+    def check_backprop(
+        torch_module: object, model: object, loader: object, device: object, max_batches: int | None
+    ) -> tuple[float, float]:
         observed.append(("backprop", loader, max_batches))
         return original_backprop(torch_module, model, loader, device, max_batches)
 
-    def check_pc(torch_module: object, model: object, loader: object,
-                 device: object, max_batches: int | None) -> tuple[float, float]:
+    def check_pc(
+        torch_module: object,
+        model: object,
+        loader: object,
+        device: object,
+        max_batches: int | None,
+        **kwargs: Any,
+    ) -> tuple[float, float]:
         observed.append(("pc", loader, max_batches))
-        return original_pc(torch_module, model, loader, device, max_batches)
+        return original_pc(torch_module, model, loader, device, max_batches, **kwargs)
 
     monkeypatch.setattr(resnet50_benchmark, "_compute_backprop_metrics", check_backprop)
     monkeypatch.setattr(resnet50_benchmark, "_compute_pc_metrics", check_pc)
@@ -629,10 +745,12 @@ def test_should_use_disjoint_guard_for_stopping_and_sleep_rollback(
 
     assert result.split_hashes == dict(loaders.split_hashes)
     assert len(observed) == 11
-    assert all(loader is loaders.guard_loader for _, loader, batches in observed
-               if batches is not None)
-    assert all(loader is not loaders.test_loader or batches is None
-               for _, loader, batches in observed)
+    assert all(
+        loader is loaders.guard_loader for _, loader, batches in observed if batches is not None
+    )
+    assert all(
+        loader is not loaders.test_loader or batches is None for _, loader, batches in observed
+    )
     assert sum(loader is loaders.test_loader for _, loader, _ in observed) == 3
     assert sum(loader is loaders.validation_loader for _, loader, _ in observed) == 3
     assert sum(loader is loaders.guard_loader for _, loader, _ in observed) == 5
@@ -714,9 +832,7 @@ def test_should_keep_circadian_state_when_outer_labels_change(
             )
         )
         changed_dataset = getattr(loaders, f"{changed_role}_loader").dataset
-        changed_dataset.labels = (
-            changed_dataset.labels + shift
-        ) % config.num_classes
+        changed_dataset.labels = (changed_dataset.labels + shift) % config.num_classes
         resnet50_benchmark._set_seed(torch, config.seed)
         report = resnet50_benchmark._benchmark_circadian(
             torch=torch, device=torch.device("cpu"), loaders=loaders, config=config
@@ -749,7 +865,10 @@ def test_should_keep_circadian_state_when_outer_labels_change(
 )
 @pytest.mark.parametrize("changed_role", ["validation", "test"])
 def test_other_vision_models_ignore_outer_labels_during_training(
-    variant: str, class_name: str, changed_role: str, monkeypatch: pytest.MonkeyPatch,
+    variant: str,
+    class_name: str,
+    changed_role: str,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     torch = pytest.importorskip("torch")
     original_class = getattr(resnet50_benchmark, class_name)
@@ -762,46 +881,69 @@ def test_other_vision_models_ignore_outer_labels_during_training(
 
     monkeypatch.setattr(resnet50_benchmark, class_name, capture_model)
     config = ResNet50BenchmarkConfig(
-        train_samples=8, validation_samples=8, test_samples=8,
-        num_classes=3, image_size=32, batch_size=4, epochs=1, seed=31,
-        device="cpu", target_accuracy=None, evaluation_batches=1,
-        inference_batches=1, warmup_batches=0, backprop_freeze_backbone=True,
+        train_samples=8,
+        validation_samples=8,
+        test_samples=8,
+        num_classes=3,
+        image_size=32,
+        batch_size=4,
+        epochs=1,
+        seed=31,
+        device="cpu",
+        target_accuracy=None,
+        evaluation_batches=1,
+        inference_batches=1,
+        warmup_batches=0,
+        backprop_freeze_backbone=True,
         predictive_head_hidden_dim=32,
     )
 
     def run_with_shift(shift: int) -> tuple[Any, dict[str, Any]]:
         loaders = build_synthetic_vision_dataloaders(
             SyntheticVisionDatasetConfig(
-                train_samples=8, validation_samples=8, guard_samples=8, test_samples=8,
-                num_classes=3, image_size=32, batch_size=4, seed=31,
+                train_samples=8,
+                validation_samples=8,
+                guard_samples=8,
+                test_samples=8,
+                num_classes=3,
+                image_size=32,
+                batch_size=4,
+                seed=31,
             )
         )
         changed_dataset = getattr(loaders, f"{changed_role}_loader").dataset
-        changed_dataset.labels = (
-            changed_dataset.labels + shift
-        ) % config.num_classes
+        changed_dataset.labels = (changed_dataset.labels + shift) % config.num_classes
         resnet50_benchmark._set_seed(torch, config.seed)
         report = getattr(resnet50_benchmark, f"_benchmark_{variant}")(
-            torch=torch, device=torch.device("cpu"), loaders=loaders, config=config,
+            torch=torch,
+            device=torch.device("cpu"),
+            loaders=loaders,
+            config=config,
         )
         model = created_models[-1]
         state = {
-            f"backbone.{key}": value.clone()
-            for key, value in model.backbone.state_dict().items()
+            f"backbone.{key}": value.clone() for key, value in model.backbone.state_dict().items()
         }
         if variant == "backprop":
-            state.update({
-                f"classifier.{key}": value.clone()
-                for key, value in model.classifier.state_dict().items()
-            })
+            state.update(
+                {
+                    f"classifier.{key}": value.clone()
+                    for key, value in model.classifier.state_dict().items()
+                }
+            )
         else:
-            state.update({
-                name: getattr(model.head, name).clone()
-                for name in (
-                    "weight_feature_hidden", "bias_hidden", "weight_hidden_output",
-                    "bias_output", "_traffic_sum",
-                )
-            })
+            state.update(
+                {
+                    name: getattr(model.head, name).clone()
+                    for name in (
+                        "weight_feature_hidden",
+                        "bias_hidden",
+                        "weight_hidden_output",
+                        "bias_output",
+                        "_traffic_sum",
+                    )
+                }
+            )
             state["traffic_steps"] = model.head._traffic_steps
         return report, state
 
@@ -859,8 +1001,7 @@ def test_should_keep_final_loader_sealed_until_every_model_is_trained(
         fake_train("CircadianPredictiveCodingResNet50"),
     )
 
-    def fake_finalize(torch: Any, device: Any, outcome: Any,
-                      test_loader: Any, config: Any) -> Any:
+    def fake_finalize(torch: Any, device: Any, outcome: Any, test_loader: Any, config: Any) -> Any:
         del torch, device, config
         assert list(test_loader) == []
         return outcome

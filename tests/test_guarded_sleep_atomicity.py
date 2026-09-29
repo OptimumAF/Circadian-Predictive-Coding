@@ -225,10 +225,17 @@ def test_vision_runner_counts_rollback_outside_head_state(monkeypatch: pytest.Mo
         resnet50_benchmark, "CircadianPredictiveCodingResNet50Classifier", FakeClassifier
     )
     scores = iter([(0.8, 0.5), (0.7, 1.0), (0.8, 0.5), (0.8, 0.5)])
+
+    def score(*args: Any, **kwargs: Any) -> tuple[float, float]:
+        on_examples_scored = kwargs.get("on_examples_scored")
+        if on_examples_scored is not None:
+            on_examples_scored(2)
+        return next(scores)
+
     monkeypatch.setattr(
         resnet50_benchmark,
         "_compute_pc_metrics",
-        lambda *args, **kwargs: next(scores),
+        score,
     )
     images = torch.zeros((2, 3, 8, 8))
     labels = torch.tensor([1, 0], dtype=torch.long)

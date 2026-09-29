@@ -21,6 +21,7 @@ from src.app.numpy_checkpoint_validation import (
 from src.core.backprop_mlp import BackpropMLP
 from src.core.circadian_predictive_coding import CircadianNetworkSnapshot
 from src.core.predictive_coding import PredictiveCodingNetwork
+from src.core.sleep_telemetry import SleepEventTelemetry
 
 
 @dataclass
@@ -47,6 +48,7 @@ class ContinualUnscoredSeed:
     split_hashes: tuple[tuple[str, str], ...]
     state: ContinualRunnerState
     circadian_final: CircadianNetworkSnapshot
+    sleep_events: tuple[SleepEventTelemetry, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -67,6 +69,8 @@ class ContinualRunnerCheckpoint:
     state: ContinualRunnerState
     combined: CircadianRunCheckpoint
     unscored_seeds: tuple[ContinualUnscoredSeed, ...] = ()
+    sleep_event_history_version: int = 1
+    sleep_events: tuple[SleepEventTelemetry, ...] = ()
 
 
 class ContinualCheckpointStore(Protocol):
@@ -144,6 +148,7 @@ def validate_continual_checkpoint(
         not isinstance(checkpoint, ContinualRunnerCheckpoint)
         or type(checkpoint.format_version) is not int
         or checkpoint.format_version != expected_format_version
+        or vars(checkpoint).get("sleep_event_history_version") != 1
     ):
         raise ValueError("incompatible continual checkpoint format")
     if (
@@ -253,6 +258,8 @@ def validate_continual_checkpoint(
         state.sleep_event_count > completed_global or state.hidden_dim_start != hidden_dims[-1]
     ):
         raise ValueError("incompatible continual checkpoint counters")
+    expected_events = position.completed_epoch - int(position.stage == "before_sleep")
+    validate_continual_sleep_events(checkpoint.sleep_events, expected_events)
     if not isinstance(state.backprop_model, BackpropMLP) or not isinstance(
         state.predictive_model, PredictiveCodingNetwork
     ):
@@ -294,3 +301,23 @@ def validate_continual_checkpoint(
         if not counters_match:
             raise ValueError("incompatible continual checkpoint completed counters")
     return position
+
+
+def validate_continual_sleep_events(
+    events: list[SleepEventTelemetry] | tuple[SleepEventTelemetry, ...],
+    expected_epochs: int,
+) -> None:
+    """Require one unguarded historical event per finished global epoch."""
+    if (
+        type(events) not in {list, tuple}
+        or len(events) != expected_epochs
+        or any(
+            not isinstance(event, SleepEventTelemetry)
+            or event.format_version != 1
+            or event.completed_epoch != index
+            or event.wake_batches != index
+            or event.guard is not None
+            for index, event in enumerate(events, start=1)
+        )
+    ):
+        raise ValueError("incompatible continual checkpoint sleep event history")

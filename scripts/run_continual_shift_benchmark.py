@@ -25,6 +25,7 @@ from src.app.continual_shift_benchmark import (
     run_continual_shift_benchmark,
 )
 from src.core.circadian_predictive_coding import CircadianConfig
+from src.infra.local_result_json import write_local_result_json
 
 
 @dataclass(frozen=True)
@@ -99,6 +100,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--replay-max-bytes", type=int, default=None)
     parser.add_argument("--sleep-mode", choices=["components"], default=None)
     parser.add_argument("--output-file", type=str, default="")
+    parser.add_argument("--json-result", type=str, default="")
     return parser
 
 
@@ -109,6 +111,11 @@ def main() -> None:
     output_path = Path(args.output_file) if args.output_file else None
     if output_path is not None and output_path.exists():
         raise FileExistsError(f"Continual benchmark output already exists: {output_path}")
+    json_path = Path(args.json_result) if args.json_result else None
+    if json_path is not None and json_path.exists():
+        raise FileExistsError(f"Continual JSON result already exists: {json_path}")
+    if json_path is not None and json_path == output_path:
+        parser.error("--json-result and --output-file must be different paths")
 
     seeds = _parse_int_list(args.seeds)
     profile_defaults = _build_profile_defaults(args.profile)
@@ -200,6 +207,8 @@ def main() -> None:
     if output_path is not None:
         with output_path.open("x", encoding="utf-8") as output_file:
             output_file.write(formatted + "\n")
+    if json_path is not None:
+        write_local_result_json(result, json_path)
 
 
 def _build_strength_case_circadian_config() -> CircadianConfig:

@@ -12,8 +12,10 @@ from dataclasses import dataclass, field, replace
 from hashlib import sha256
 from json import dumps
 from math import isfinite
+from os import getpid
 from time import perf_counter
 from typing import Any, Callable
+
 
 from src.app.circadian_checkpoint import (
     CircadianResumePosition,
@@ -21,6 +23,7 @@ from src.app.circadian_checkpoint import (
     restore_circadian_checkpoint,
 )
 from src.app.fixed_feature_checkpoint import (
+    CudaAllocatorSegment,
     FixedFeatureCheckpointStore,
     FixedFeatureCircadianCheckpoint,
     FixedFeatureCircadianProgress,
@@ -40,9 +43,20 @@ from src.app.resnet50_benchmark import (
     _validate_benchmark_config,
 )
 from src.app.sleep_schedule import (
+    SleepAttemptDecision,
     SleepRollbackCooldown,
     decide_sleep_attempt,
     resolve_rollback_cooldown_epochs,
+)
+from src.app.torch_sleep_decisions import (
+    describe_failed_torch_sleep_decision,
+    describe_guarded_torch_sleep_decision,
+    describe_skipped_torch_sleep_decision,
+    describe_unguarded_torch_sleep_decision,
+)
+from src.app.torch_sleep_transaction import (
+    capture_torch_sleep_process_random,
+    restore_torch_sleep_process_random,
 )
 from src.core.resnet50_variants import (
     BackpropMLPHead,
@@ -51,6 +65,7 @@ from src.core.resnet50_variants import (
     _build_resnet50_backbone,
 )
 from src.core.sleep_clocks import SleepEpochProgress
+from src.core.sleep_telemetry import SleepEventTelemetry
 from src.shared.process_memory import ProcessRssSampler, ProcessRssSegment
 from src.shared.torch_runtime import require_torch, sync_device
 
@@ -74,7 +89,17 @@ THREE_HEAD_FIXED_FEATURE_WALL_TIME_CHECKPOINT_MEMORY_PROTOCOL = (
 THREE_HEAD_FIXED_WIDTH_CAPACITY_CHECKPOINT_MEMORY_PROTOCOL = (
     "vision_three_head_fixed_width_capacity_checkpoint_memory_v1"
 )
+THREE_HEAD_FIXED_FEATURE_CUDA_CHECKPOINT_MEMORY_PROTOCOL = (
+    "vision_three_head_fixed_feature_cuda_checkpoint_memory_v2"
+)
+THREE_HEAD_FIXED_FEATURE_WALL_TIME_CUDA_CHECKPOINT_MEMORY_PROTOCOL = (
+    "vision_three_head_fixed_feature_wall_time_cuda_checkpoint_memory_v2"
+)
+THREE_HEAD_FIXED_WIDTH_CAPACITY_CUDA_CHECKPOINT_MEMORY_PROTOCOL = (
+    "vision_three_head_fixed_width_capacity_cuda_checkpoint_memory_v2"
+)
 CHECKPOINT_MEMORY_SCOPE = "committed_head_training_segments_absolute_process_rss"
+CHECKPOINT_CUDA_MEMORY_SCOPE = "committed_head_training_segments_absolute_rss_cuda_allocator"
 FROZEN_SHARED_REPRESENTATION_TRACK = "frozen_shared_representation"
 PROCESS_RSS_SAMPLE_INTERVAL_SECONDS = 0.005
 _HEAD_TENSOR_NAMES = (
@@ -122,6 +147,8 @@ class FixedFeatureHeadReport:
     cuda_allocated_start_bytes: int | None = None
     cuda_allocated_peak_bytes: int | None = None
     cuda_reserved_peak_bytes: int | None = None
+    cuda_allocator_segments: tuple[CudaAllocatorSegment, ...] = ()
+    sleep_events: tuple[SleepEventTelemetry, ...] = field(default=(), compare=False)
 
 
 @dataclass(frozen=True)
@@ -191,6 +218,8 @@ class _TrainedHead:
     cuda_allocated_start_bytes: int | None = None
     cuda_allocated_peak_bytes: int | None = None
     cuda_reserved_peak_bytes: int | None = None
+    cuda_allocator_segments: tuple[CudaAllocatorSegment, ...] = ()
+    sleep_events: tuple[SleepEventTelemetry, ...] = field(default=(), compare=False)
 
 
 def run_two_head_fixed_feature_benchmark(
@@ -307,8 +336,6 @@ def _run_fixed_feature_benchmark(
     torch = require_torch()
     _set_seed(torch, config.seed)
     device = _resolve_device(torch, config.device)
-    if checkpoint_store is not None and str(device) != "cpu":
-        raise ValueError("checkpoint store currently requires a CPU device")
     loaders = _build_benchmark_loaders(config)
     if "guard" not in loaders.split_hashes or loaders.guard_loader is loaders.validation_loader:
         raise ValueError("Fixed-feature route requires a distinct guard loader.")
@@ -409,10 +436,15 @@ def _run_fixed_feature_benchmark(
             time_budget_seconds,
         ),
     }
-    checkpoint_memory_trainer: Callable[[ProcessRssSampler], _TrainedHead] | None = None
+    checkpoint_memory_trainer: (
+        Callable[[ProcessRssSampler, tuple[int, int] | None], _TrainedHead] | None
+    ) = None
     if circadian_head is not None:
 
-        def train_circadian(memory_sampler: ProcessRssSampler | None = None) -> _TrainedHead:
+        def train_circadian(
+            memory_sampler: ProcessRssSampler | None = None,
+            cuda_segment_start: tuple[int, int] | None = None,
+        ) -> _TrainedHead:
             assert circadian_head is not None
             if checkpoint_store is not None:
                 return _train_circadian_head(
@@ -429,7 +461,9 @@ def _run_fixed_feature_benchmark(
                     split_hashes=dict(loaders.split_hashes),
                     checkpoint_protocol_id=(
                         _resolve_checkpoint_memory_protocol(
-                            time_budget_seconds, fixed_width_capacity_control
+                            time_budget_seconds,
+                            fixed_width_capacity_control,
+                            cuda=str(device).startswith("cuda"),
                         )
                         if measure_memory
                         else (
@@ -439,6 +473,7 @@ def _run_fixed_feature_benchmark(
                         )
                     ),
                     memory_sampler=memory_sampler,
+                    cuda_segment_start=cuda_segment_start,
                 )
             return _train_circadian_head(
                 torch,
@@ -461,7 +496,9 @@ def _run_fixed_feature_benchmark(
             and name == "circadian_predictive_coding"
         ):
             assert checkpoint_memory_trainer is not None
-            trained[name] = _train_with_checkpoint_memory_telemetry(checkpoint_memory_trainer)
+            trained[name] = _train_with_checkpoint_memory_telemetry(
+                torch, device, checkpoint_memory_trainer
+            )
         elif measure_memory:
             trained[name] = _train_with_memory_telemetry(
                 torch, device, trainers[name], report_segment=checkpoint_store is not None
@@ -533,7 +570,9 @@ def _run_fixed_feature_benchmark(
     }
     if checkpoint_store is not None and measure_memory:
         result_protocol_id = _resolve_checkpoint_memory_protocol(
-            time_budget_seconds, fixed_width_capacity_control
+            time_budget_seconds,
+            fixed_width_capacity_control,
+            cuda=str(device).startswith("cuda"),
         )
     elif fixed_width_capacity_control:
         result_protocol_id = (
@@ -568,7 +607,13 @@ def _run_fixed_feature_benchmark(
         wall_time_budget_seconds=time_budget_seconds,
         memory_telemetry_enabled=measure_memory,
         memory_observation_scope=(
-            CHECKPOINT_MEMORY_SCOPE if checkpoint_store is not None and measure_memory else None
+            (
+                CHECKPOINT_CUDA_MEMORY_SCOPE
+                if str(device).startswith("cuda")
+                else CHECKPOINT_MEMORY_SCOPE
+            )
+            if checkpoint_store is not None and measure_memory
+            else None
         ),
         process_rss_sample_interval_seconds=(
             PROCESS_RSS_SAMPLE_INTERVAL_SECONDS if measure_memory else None
@@ -689,28 +734,56 @@ def _resolve_fixed_feature_protocol(
 
 
 def _resolve_checkpoint_memory_protocol(
-    time_budget_seconds: float | None, fixed_width_capacity_control: bool
+    time_budget_seconds: float | None, fixed_width_capacity_control: bool, *, cuda: bool = False
 ) -> str:
     if fixed_width_capacity_control:
-        return THREE_HEAD_FIXED_WIDTH_CAPACITY_CHECKPOINT_MEMORY_PROTOCOL
+        return (
+            THREE_HEAD_FIXED_WIDTH_CAPACITY_CUDA_CHECKPOINT_MEMORY_PROTOCOL
+            if cuda
+            else THREE_HEAD_FIXED_WIDTH_CAPACITY_CHECKPOINT_MEMORY_PROTOCOL
+        )
     if time_budget_seconds is not None:
-        return THREE_HEAD_FIXED_FEATURE_WALL_TIME_CHECKPOINT_MEMORY_PROTOCOL
-    return THREE_HEAD_FIXED_FEATURE_CHECKPOINT_MEMORY_PROTOCOL
+        return (
+            THREE_HEAD_FIXED_FEATURE_WALL_TIME_CUDA_CHECKPOINT_MEMORY_PROTOCOL
+            if cuda
+            else THREE_HEAD_FIXED_FEATURE_WALL_TIME_CHECKPOINT_MEMORY_PROTOCOL
+        )
+    return (
+        THREE_HEAD_FIXED_FEATURE_CUDA_CHECKPOINT_MEMORY_PROTOCOL
+        if cuda
+        else THREE_HEAD_FIXED_FEATURE_CHECKPOINT_MEMORY_PROTOCOL
+    )
 
 
 def _train_with_checkpoint_memory_telemetry(
-    trainer: Callable[[ProcessRssSampler], _TrainedHead],
+    torch: Any,
+    device: Any,
+    trainer: Callable[[ProcessRssSampler, tuple[int, int] | None], _TrainedHead],
 ) -> _TrainedHead:
     with ProcessRssSampler(interval_seconds=PROCESS_RSS_SAMPLE_INTERVAL_SECONDS) as sampler:
         sampler.snapshot()  # Fail before training when this host has no RSS reader.
-        outcome = trainer(sampler)
+        cuda_start = _begin_cuda_allocator_segment(torch, device)
+        outcome = trainer(sampler, cuda_start)
+        sampler.sample()
+        cuda_final = _snapshot_cuda_allocator_segment(torch, device, cuda_start)
     segments = (*outcome.process_rss_segments, sampler.snapshot())
+    cuda_segments = (*outcome.cuda_allocator_segments, cuda_final) if cuda_final is not None else ()
     return replace(
         outcome,
         process_rss_start_bytes=None,
         process_rss_peak_observed_bytes=max(segment.peak_bytes for segment in segments),
         process_rss_samples=sum(segment.sample_count for segment in segments),
         process_rss_segments=segments,
+        cuda_allocated_start_bytes=None,
+        cuda_allocated_peak_bytes=(
+            max(segment.allocated_peak_bytes for segment in cuda_segments)
+            if cuda_segments
+            else None
+        ),
+        cuda_reserved_peak_bytes=(
+            max(segment.reserved_peak_bytes for segment in cuda_segments) if cuda_segments else None
+        ),
+        cuda_allocator_segments=cuda_segments,
     )
 
 
@@ -721,7 +794,16 @@ def _train_with_memory_telemetry(
     *,
     report_segment: bool = False,
 ) -> _TrainedHead:
-    cuda_start = _reset_cuda_memory_peak(torch, device)
+    cuda_segment_start = (
+        _begin_cuda_allocator_segment(torch, device)
+        if report_segment and str(device).startswith("cuda")
+        else None
+    )
+    cuda_start = (
+        cuda_segment_start[0]
+        if cuda_segment_start is not None
+        else _reset_cuda_memory_peak(torch, device)
+    )
     with ProcessRssSampler(interval_seconds=PROCESS_RSS_SAMPLE_INTERVAL_SECONDS) as sampler:
         if report_segment:
             sampler.snapshot()
@@ -730,6 +812,20 @@ def _train_with_memory_telemetry(
         cuda_peak, cuda_reserved_peak = _read_cuda_memory_peak(torch, device)
         sampler.sample()
     segments = (sampler.snapshot(),) if report_segment else ()
+    cuda_segment = (
+        CudaAllocatorSegment(
+            pid=getpid(),
+            device=str(torch.device(device)),
+            allocated_start_bytes=cuda_segment_start[0],
+            reserved_start_bytes=cuda_segment_start[1],
+            allocated_peak_bytes=cuda_peak,
+            reserved_peak_bytes=cuda_reserved_peak,
+        )
+        if cuda_segment_start is not None
+        and cuda_peak is not None
+        and cuda_reserved_peak is not None
+        else None
+    )
     return replace(
         outcome,
         process_rss_start_bytes=sampler.start_bytes,
@@ -739,6 +835,33 @@ def _train_with_memory_telemetry(
         cuda_allocated_start_bytes=cuda_start,
         cuda_allocated_peak_bytes=cuda_peak,
         cuda_reserved_peak_bytes=cuda_reserved_peak,
+        cuda_allocator_segments=(cuda_segment,) if cuda_segment is not None else (),
+    )
+
+
+def _begin_cuda_allocator_segment(torch: Any, device: Any) -> tuple[int, int] | None:
+    if not str(device).startswith("cuda"):
+        return None
+    sync_device(torch, device)
+    allocated = int(torch.cuda.memory_allocated(device))
+    reserved = int(torch.cuda.memory_reserved(device))
+    torch.cuda.reset_peak_memory_stats(device)
+    return allocated, reserved
+
+
+def _snapshot_cuda_allocator_segment(
+    torch: Any, device: Any, start: tuple[int, int] | None
+) -> CudaAllocatorSegment | None:
+    if start is None:
+        return None
+    sync_device(torch, device)
+    return CudaAllocatorSegment(
+        pid=getpid(),
+        device=str(torch.device(device)),
+        allocated_start_bytes=start[0],
+        reserved_start_bytes=start[1],
+        allocated_peak_bytes=int(torch.cuda.max_memory_allocated(device)),
+        reserved_peak_bytes=int(torch.cuda.max_memory_reserved(device)),
     )
 
 
@@ -996,11 +1119,25 @@ def _train_circadian_head(
     split_hashes: dict[str, str] | None = None,
     checkpoint_protocol_id: str | None = None,
     memory_sampler: ProcessRssSampler | None = None,
+    cuda_segment_start: tuple[int, int] | None = None,
 ) -> _TrainedHead:
     if resume_from_checkpoint and checkpoint_store is None:
         raise ValueError("resume_from_checkpoint requires a fixed-feature checkpoint store")
-    if checkpoint_store is not None and str(device) != "cpu":
-        raise ValueError("checkpoint store currently requires a CPU device")
+    if checkpoint_store is not None:
+        requested_device = torch.device(device)
+        head_device = head.weight_feature_hidden.device
+        requested_index = requested_device.index
+        if requested_device.type == "cuda" and requested_index is None:
+            requested_index = torch.cuda.current_device()
+        if requested_device.type != head_device.type or (
+            requested_device.type == "cuda" and requested_index != head_device.index
+        ):
+            raise ValueError("checkpoint head/device mismatch")
+        if memory_sampler is not None and requested_device.type == "cuda":
+            if cuda_segment_start is None:
+                raise ValueError("CUDA checkpoint memory requires an allocator start")
+        elif cuda_segment_start is not None:
+            raise ValueError("CUDA allocator start requires checkpoint memory on CUDA")
     retry = SleepRollbackCooldown(
         resolve_rollback_cooldown_epochs(
             config.circadian_sleep_mode, config.circadian_sleep_rollback_cooldown_epochs
@@ -1009,10 +1146,13 @@ def _train_circadian_head(
     initial_width = head.hidden_dim
     initial_head_hash = _hash_head(head) if checkpoint_store is not None else ""
     progress = FixedFeatureCircadianProgress(initial_width=initial_width)
+    sleep_events: list[SleepEventTelemetry] = []
+    guard_role_hash = _hash_batches(guard)
     protocol_id = checkpoint_protocol_id or _resolve_fixed_feature_protocol(
         True, time_budget_seconds, False
     )
     previous_memory_segments: tuple[ProcessRssSegment, ...] = ()
+    previous_cuda_segments: tuple[CudaAllocatorSegment, ...] = ()
     feature_hashes = (
         (
             ("train", _hash_batches(train)),
@@ -1045,14 +1185,22 @@ def _train_circadian_head(
             feature_hashes=feature_hashes,
             split_hashes=split_hash_pairs,
             batch_sizes=tuple(int(labels.shape[0]) for _, labels in train),
+            guard_batch_sizes=tuple(int(labels.shape[0]) for _, labels in guard),
             epochs=config.epochs,
             initial_width=initial_width,
+            config=config,
             memory_sample_interval_seconds=(
                 PROCESS_RSS_SAMPLE_INTERVAL_SECONDS if memory_sampler is not None else None
             ),
+            cuda_memory_device=(
+                str(head.weight_feature_hidden.device) if cuda_segment_start is not None else None
+            ),
         )
+        sleep_events = list(saved.sleep_events)
         if memory_sampler is not None:
             previous_memory_segments = saved.memory_segments
+        if cuda_segment_start is not None:
+            previous_cuda_segments = saved.cuda_allocator_segments
         resume_position = restore_circadian_checkpoint(
             head,
             saved.combined,
@@ -1081,13 +1229,18 @@ def _train_circadian_head(
         if checkpoint_store is None:
             return
         memory_segments = previous_memory_segments
+        cuda_segments = previous_cuda_segments
         if memory_sampler is not None:
             memory_sampler.sample()
             memory_segments = (*memory_segments, memory_sampler.snapshot())
+        if cuda_segment_start is not None:
+            cuda_snapshot = _snapshot_cuda_allocator_segment(torch, device, cuda_segment_start)
+            assert cuda_snapshot is not None
+            cuda_segments = (*cuda_segments, cuda_snapshot)
         before_save = now()
         checkpoint_store.save(
             FixedFeatureCircadianCheckpoint(
-                format_version=1,
+                format_version=2,
                 protocol_id=protocol_id,
                 runner_config_digest=runner_digest,
                 initial_head_hash=initial_head_hash,
@@ -1104,7 +1257,9 @@ def _train_circadian_head(
                     config=head.config,
                     data_digest=data_digest,
                 ),
+                sleep_events=tuple(sleep_events),
                 memory_segments=memory_segments,
+                cuda_allocator_segments=cuda_segments,
             )
         )
         if time_budget_seconds is not None:
@@ -1173,6 +1328,15 @@ def _train_circadian_head(
             )
             if attempted:
                 progress = replace(progress, sleep_attempts=progress.sleep_attempts + 1)
+
+                def record_failed_sleep(failed: SleepEventTelemetry) -> None:
+                    # Why this: a failed attempt is durable while the restored
+                    # before-sleep cursor remains explicitly retryable.
+                    sleep_events.append(failed)
+                    save_checkpoint(
+                        CircadianResumePosition(epoch, "before_sleep", progress.wake_batches)
+                    )
+
                 event, rolled_back = _guarded_sleep_event(
                     torch,
                     device,
@@ -1181,7 +1345,12 @@ def _train_circadian_head(
                     config,
                     epoch,
                     sleep_decision.force_sleep,
+                    decision=sleep_decision,
+                    guard_role_hash=guard_role_hash,
+                    on_error=record_failed_sleep,
                 )
+                assert event.telemetry is not None
+                sleep_events.append(event.telemetry)
                 rollback_examples = (
                     2
                     * _count_evaluated_examples(guard, config.circadian_sleep_rollback_eval_batches)
@@ -1199,6 +1368,15 @@ def _train_circadian_head(
                     retry.record_rejection(
                         completed_epochs=epoch, wake_batches=progress.wake_batches
                     )
+            else:
+                sleep_events.append(
+                    describe_skipped_torch_sleep_decision(
+                        head,
+                        sleep_decision,
+                        completed_epoch=epoch,
+                        cooldown_suppressed=sleep_decision.attempted,
+                    )
+                )
             save_checkpoint(CircadianResumePosition(epoch, "after_sleep", progress.wake_batches))
             if attempted and _deadline_reached(
                 torch, device, start, remaining_budget_seconds, active_now
@@ -1253,6 +1431,8 @@ def _train_circadian_head(
         total_prunes=progress.total_prunes,
         total_rollbacks=progress.total_rollbacks,
         process_rss_segments=previous_memory_segments,
+        cuda_allocator_segments=previous_cuda_segments,
+        sleep_events=tuple(sleep_events),
     )
 
 
@@ -1264,34 +1444,63 @@ def _guarded_sleep_event(
     config: ResNet50BenchmarkConfig,
     epoch: int,
     force_sleep: bool,
+    *,
+    decision: SleepAttemptDecision | None = None,
+    guard_role_hash: str | None = None,
+    on_error: Callable[[SleepEventTelemetry], None] | None = None,
 ) -> tuple[Any, bool]:
-    snapshot = None
-    pre_accuracy = pre_cross_entropy = 0.0
-    if config.circadian_enable_sleep_rollback:
-        snapshot = head.snapshot_state()
+    attempt_started = perf_counter()
+    snapshot = head.snapshot_state()
+    process_random = capture_torch_sleep_process_random(torch, device)
+    guarded = config.circadian_enable_sleep_rollback
+    guard_examples = _count_evaluated_examples(guard, config.circadian_sleep_rollback_eval_batches)
+    pre_accuracy: float | None = None
+    pre_cross_entropy: float | None = None
+    post_accuracy: float | None = None
+    post_cross_entropy: float | None = None
+    core_result: Any = None
+    examples_scored = 0
+    stage = "inner_guard_pre" if guarded else "sleep_core"
+
+    def record_scored_batch(count: int) -> None:
+        nonlocal examples_scored
+        examples_scored += count
+
     try:
-        if snapshot is not None:
-            pre_accuracy, pre_cross_entropy = _evaluate_head(
+        if guarded:
+            pass_start = examples_scored
+            accuracy, cross_entropy = _evaluate_head(
                 torch,
                 device,
                 head.predict_logits,
                 guard,
                 config.circadian_sleep_rollback_eval_batches,
+                on_examples_scored=record_scored_batch,
             )
-            _require_finite_guard_scores(pre_accuracy, pre_cross_entropy)
-        event = head.sleep_event(
+            examples_scored = pass_start + guard_examples
+            _require_finite_guard_scores(accuracy, cross_entropy)
+            pre_accuracy, pre_cross_entropy = accuracy, cross_entropy
+        stage = "sleep_core"
+        core_result = head.sleep_event(
             force_sleep=force_sleep,
             epoch_progress=SleepEpochProgress(epoch, config.epochs),
         )
-        if snapshot is not None:
-            post_accuracy, post_cross_entropy = _evaluate_head(
+        if guarded:
+            stage = "inner_guard_post"
+            pass_start = examples_scored
+            accuracy, cross_entropy = _evaluate_head(
                 torch,
                 device,
                 head.predict_logits,
                 guard,
                 config.circadian_sleep_rollback_eval_batches,
+                on_examples_scored=record_scored_batch,
             )
-            _require_finite_guard_scores(post_accuracy, post_cross_entropy)
+            examples_scored = pass_start + guard_examples
+            _require_finite_guard_scores(accuracy, cross_entropy)
+            post_accuracy, post_cross_entropy = accuracy, cross_entropy
+            stage = "inner_guard_delta"
+            assert pre_accuracy is not None and pre_cross_entropy is not None
             rollback_delta = _compute_rollback_delta(
                 metric_name=config.circadian_sleep_rollback_metric,
                 pre_accuracy=pre_accuracy,
@@ -1301,19 +1510,100 @@ def _guarded_sleep_event(
             )
             if not isfinite(rollback_delta):
                 raise FloatingPointError("nonfinite guard rollback delta")
-    except Exception:
-        if snapshot is not None:
-            head.restore_state(snapshot)
+    except Exception as error:
+        head.restore_state(snapshot)
+        restore_torch_sleep_process_random(torch, device, process_random)
+        if decision is not None and on_error is not None:
+            reason = (
+                f"{stage}_nonfinite"
+                if stage in {"inner_guard_pre", "inner_guard_post"}
+                and isinstance(error, FloatingPointError)
+                else f"{stage}_exception"
+            )
+            if reason == "sleep_core_exception" or guarded:
+                on_error(
+                    describe_failed_torch_sleep_decision(
+                        head,
+                        decision,
+                        completed_epoch=epoch,
+                        guard_role_hash=guard_role_hash if guarded else None,
+                        metric_name=config.circadian_sleep_rollback_metric,
+                        tolerance=config.circadian_sleep_rollback_tolerance,
+                        pre_accuracy=pre_accuracy,
+                        pre_cross_entropy=pre_cross_entropy,
+                        post_accuracy=post_accuracy,
+                        post_cross_entropy=post_cross_entropy,
+                        examples_scored=examples_scored,
+                        reason=reason,
+                        attempt_seconds=perf_counter() - attempt_started,
+                        result=core_result,
+                    )
+                )
         raise
 
-    if snapshot is not None and rollback_delta > config.circadian_sleep_rollback_tolerance:
+    event = core_result
+    if guarded and rollback_delta > config.circadian_sleep_rollback_tolerance:
         head.restore_state(snapshot)
-        return type(event)(
+        rejected = type(event)(
             old_hidden_dim=head.hidden_dim,
             new_hidden_dim=head.hidden_dim,
             split_indices=(),
             pruned_indices=(),
-        ), True
+        )
+        if decision is not None:
+            assert guard_role_hash is not None
+            assert pre_accuracy is not None and pre_cross_entropy is not None
+            assert post_accuracy is not None and post_cross_entropy is not None
+            rejected = replace(
+                rejected,
+                telemetry=describe_guarded_torch_sleep_decision(
+                    decision,
+                    event,
+                    completed_epoch=epoch,
+                    guard_role_hash=guard_role_hash,
+                    pre_accuracy=pre_accuracy,
+                    post_accuracy=post_accuracy,
+                    pre_cross_entropy=pre_cross_entropy,
+                    post_cross_entropy=post_cross_entropy,
+                    metric_name=config.circadian_sleep_rollback_metric,
+                    tolerance=config.circadian_sleep_rollback_tolerance,
+                    guard_examples=_count_evaluated_examples(
+                        guard, config.circadian_sleep_rollback_eval_batches
+                    ),
+                    accepted=False,
+                    attempt_seconds=perf_counter() - attempt_started,
+                ),
+            )
+        return rejected, True
+    if decision is not None:
+        if guarded:
+            assert pre_accuracy is not None and pre_cross_entropy is not None
+            assert post_accuracy is not None and post_cross_entropy is not None
+            telemetry = describe_guarded_torch_sleep_decision(
+                decision,
+                event,
+                completed_epoch=epoch,
+                guard_role_hash=guard_role_hash or _hash_batches(guard),
+                pre_accuracy=pre_accuracy,
+                post_accuracy=post_accuracy,
+                pre_cross_entropy=pre_cross_entropy,
+                post_cross_entropy=post_cross_entropy,
+                metric_name=config.circadian_sleep_rollback_metric,
+                tolerance=config.circadian_sleep_rollback_tolerance,
+                guard_examples=_count_evaluated_examples(
+                    guard, config.circadian_sleep_rollback_eval_batches
+                ),
+                accepted=True,
+                attempt_seconds=perf_counter() - attempt_started,
+            )
+        else:
+            telemetry = describe_unguarded_torch_sleep_decision(
+                decision,
+                event,
+                completed_epoch=epoch,
+                attempt_seconds=perf_counter() - attempt_started,
+            )
+        event = replace(event, telemetry=telemetry)
     return event, False
 
 
@@ -1323,6 +1613,8 @@ def _evaluate_head(
     forward_logits: Callable[[Any], Any],
     batches: FeatureBatches,
     max_batches: int | None,
+    *,
+    on_examples_scored: Callable[[int], None] | None = None,
 ) -> tuple[float, float]:
     correct = 0
     total = 0
@@ -1340,6 +1632,8 @@ def _evaluate_head(
             )
             correct += int((torch.argmax(logits, dim=1) == labels).sum().item())
             total += int(labels.shape[0])
+            if on_examples_scored is not None:
+                on_examples_scored(int(labels.shape[0]))
             if max_batches is not None and max_batches > 0 and index + 1 >= max_batches:
                 break
     return correct / total, loss_total / total
@@ -1409,6 +1703,8 @@ def _finalize_head(
         cuda_allocated_start_bytes=trained.cuda_allocated_start_bytes,
         cuda_allocated_peak_bytes=trained.cuda_allocated_peak_bytes,
         cuda_reserved_peak_bytes=trained.cuda_reserved_peak_bytes,
+        cuda_allocator_segments=trained.cuda_allocator_segments,
+        sleep_events=trained.sleep_events,
     )
 
 

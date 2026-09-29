@@ -194,10 +194,20 @@ def test_capacity_memory_checkpoint_reports_both_process_segments(tmp_path: Path
 def test_capacity_memory_resume_preserves_learning_and_final_test_order(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, stage: str, reject: bool
 ) -> None:
-    config = _config()
-    monkeypatch.setattr(
-        benchmark, "_compute_rollback_delta", lambda **kwargs: 1.0 if reject else 0.0
-    )
+    config = replace(_config(), circadian_sleep_rollback_eval_batches=1)
+    original_evaluate = benchmark._evaluate_head
+    guard_calls = 0
+
+    def evaluate(
+        torch_module: Any, device: Any, predict: Any, batches: Any, limit: Any, **kwargs: Any
+    ) -> tuple[float, float]:
+        nonlocal guard_calls
+        if limit == 1 and isinstance(predict.__self__, CircadianPredictiveCodingHead):
+            guard_calls += 1
+            return (0.7, 1.0) if reject and guard_calls % 2 == 0 else (0.8, 0.5)
+        return original_evaluate(torch_module, device, predict, batches, limit, **kwargs)
+
+    monkeypatch.setattr(benchmark, "_evaluate_head", evaluate)
     random.seed(831)
     np.random.seed(832)
     torch.manual_seed(833)
@@ -234,6 +244,7 @@ def test_capacity_memory_resume_preserves_learning_and_final_test_order(
     monkeypatch.setattr(benchmark, "_build_benchmark_loaders", build)
     monkeypatch.setattr(benchmark, "_verify_fixed_width_capacity", verify)
     store = TrustedLocalCircadianCheckpointStore(tmp_path / "interrupted.ckpt")
+    guard_calls = 0
     random.seed(831)
     np.random.seed(832)
     torch.manual_seed(833)
@@ -258,6 +269,13 @@ def test_capacity_memory_resume_preserves_learning_and_final_test_order(
         strict=True,
     ):
         for field in fields(actual):
+            if field.name == "sleep_events":
+                left = [asdict(event) for event in actual.sleep_events]
+                right = [asdict(event) for event in expected.sleep_events]
+                for event in (*left, *right):
+                    event.pop("durations")
+                assert left == right
+                continue
             if field.name not in {
                 "train_seconds",
                 "process_rss_start_bytes",
@@ -450,7 +468,9 @@ def test_wall_time_memory_resume_keeps_cumulative_active_budget(tmp_path: Path) 
 
         setattr(head, "train_step", timed_step)
         outcome = benchmark._train_with_checkpoint_memory_telemetry(
-            lambda sampler: benchmark._train_circadian_head(
+            torch,
+            device,
+            lambda sampler, _cuda_start: benchmark._train_circadian_head(
                 torch,
                 device,
                 head,
@@ -464,7 +484,7 @@ def test_wall_time_memory_resume_keeps_cumulative_active_budget(tmp_path: Path) 
                 resume_from_checkpoint=resume,
                 checkpoint_protocol_id=benchmark.THREE_HEAD_FIXED_FEATURE_WALL_TIME_CHECKPOINT_MEMORY_PROTOCOL,
                 memory_sampler=sampler,
-            )
+            ),
         )
         return outcome, head
 

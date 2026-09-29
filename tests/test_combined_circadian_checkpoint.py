@@ -354,3 +354,34 @@ def test_incompatible_checkpoint_rejects_before_live_mutation(backend: str, chan
         )
     _same_value(destination.snapshot_state(), before_model)
     assert destination_retry.snapshot_state() == before_retry
+
+
+def test_older_cpu_torch_checkpoint_without_cuda_fields_still_restores() -> None:
+    if torch is None:
+        pytest.skip("Torch is optional")
+    model = _model("torch")
+    retry = SleepRollbackCooldown(1)
+    _wake(model, "torch")
+    position = CircadianResumePosition(1, "before_sleep", model.get_sleep_clocks().wake_batches)
+    saved = capture_circadian_checkpoint(
+        model,
+        retry=retry,
+        position=position,
+        protocol_id="checkpoint_fixture_v1",
+        config=model.config,
+        data_digest=_data_digest("torch"),
+    )
+    object.__delattr__(saved, "torch_cuda_device")
+    object.__delattr__(saved, "torch_cuda_random_state")
+    destination = _model("torch")
+    restored = restore_circadian_checkpoint(
+        destination,
+        saved,
+        retry=SleepRollbackCooldown(1),
+        protocol_id="checkpoint_fixture_v1",
+        config=destination.config,
+        data_digest=_data_digest("torch"),
+        expected_stage="before_sleep",
+    )
+    assert restored == position
+    _same_value(destination.snapshot_state(), model.snapshot_state())

@@ -11,6 +11,7 @@ import pytest
 
 from src.core.circadian_predictive_coding import CircadianConfig, CircadianPredictiveCodingNetwork
 from src.core.neuron_adaptation import LayerTraffic, NeuronChangeProposal
+from src.core.sleep_clocks import SleepEpochProgress
 
 
 def _model(
@@ -144,3 +145,55 @@ def test_policy_budget_rejection_leaves_state_unchanged() -> None:
             adaptation_policy=_FixedPolicy(NeuronChangeProposal("hidden", add_count=3))
         )
     _assert_equal(model.snapshot_state(), before)
+
+
+@pytest.mark.parametrize("completed_epoch", [4, 9])
+def test_policy_proposal_obeys_phase_budget_before_tensor_mutation(
+    completed_epoch: int,
+) -> None:
+    config = CircadianConfig(
+        sleep_mode="components",
+        max_split_per_sleep=1,
+        max_prune_per_sleep=1,
+        sleep_split_only_until_fraction=0.5,
+        sleep_prune_only_after_fraction=0.85,
+        split_noise_scale=0.1,
+    )
+    model = _model(config)
+    policy = _FixedPolicy(NeuronChangeProposal("hidden", add_count=1, remove_indices=(3,)))
+    before = model.snapshot_state()
+
+    with pytest.raises(ValueError, match="proposal exceeds.*budget"):
+        model.sleep_event(
+            adaptation_policy=policy,
+            epoch_progress=SleepEpochProgress(completed_epoch, 10),
+        )
+
+    _assert_equal(model.snapshot_state(), before)
+
+
+def test_policy_proposal_applies_in_middle_phase_under_both_budgets() -> None:
+    config = CircadianConfig(
+        sleep_mode="components",
+        max_split_per_sleep=1,
+        max_prune_per_sleep=1,
+        sleep_split_only_until_fraction=0.5,
+        sleep_prune_only_after_fraction=0.85,
+        split_noise_scale=0.1,
+    )
+    model = _model(config)
+    policy = _FixedPolicy(NeuronChangeProposal("hidden", add_count=1, remove_indices=(3,)))
+    before_ids = model.get_neuron_lineage().neuron_ids
+
+    event = model.sleep_event(
+        adaptation_policy=policy,
+        epoch_progress=SleepEpochProgress(6, 10),
+    )
+
+    assert len(event.split_indices) == 1
+    assert event.pruned_indices == (3,)
+    assert event.split_indices[0] != 3
+    assert event.new_hidden_dim == 4
+    assert event.prune_outcome is not None
+    assert before_ids[3] in event.prune_outcome.removed_neuron_ids
+    model._validate_training_topology()

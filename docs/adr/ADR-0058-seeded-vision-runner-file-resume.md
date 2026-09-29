@@ -54,3 +54,8 @@ sealed final test, and rejection of corrupt files or incompatible data,
 configuration, order, model state, counters, loader cursor, and RNG before
 training or process RNG mutation. The development log records the commands and
 full quality gate. No baseline budget, seed-selection rule, or metric changed.
+
+## Subsequent decision
+
+ADR-0086 adds selected-device CUDA process and seeded-fork outer streams to
+this payload. The original CPU protocol and final-test timing remain intact.

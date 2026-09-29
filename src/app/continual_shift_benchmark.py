@@ -9,6 +9,8 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import dataclass, field, replace
 from collections import deque
+from time import perf_counter
+from typing import Callable
 
 import numpy as np
 
@@ -28,8 +30,14 @@ from src.app.continual_checkpoint import (
     continual_phase_a_data_digest,
     continual_test_digest,
     validate_continual_checkpoint,
+    validate_continual_sleep_events,
 )
 from src.app.numpy_checkpoint_validation import LabeledRole, validate_numpy_baseline_model
+from src.app.numpy_sleep_decisions import (
+    describe_failed_guarded_numpy_sleep_decision,
+    describe_guarded_numpy_sleep_decision,
+    describe_unguarded_numpy_sleep_decision,
+)
 from src.app.sleep_schedule import decide_sleep_attempt
 from src.core.backprop_mlp import BackpropMLP
 from src.core.circadian_predictive_coding import (
@@ -39,10 +47,13 @@ from src.core.circadian_predictive_coding import (
     ReplayRetentionBudget,
     ReplayRetentionSnapshot,
     ReplaySnapshot,
+    SleepEventResult,
     replay_sample_id,
 )
 from src.core.predictive_coding import PredictiveCodingNetwork
+from src.core.replay_retention import ReplayRetentionPolicy
 from src.core.sleep_clocks import SleepEpochProgress
+from src.core.sleep_telemetry import SleepEventTelemetry
 from src.infra.datasets import (
     DatasetSplit,
     LabeledData,
@@ -151,6 +162,7 @@ class CircadianShiftReport:
     total_prunes: int
     hidden_dim_start: int
     hidden_dim_end: int
+    sleep_events: tuple[SleepEventTelemetry, ...] = field(default=(), compare=False)
 
 
 @dataclass(frozen=True)
@@ -266,6 +278,7 @@ class _PendingOrdinarySeed:
     split_hashes: dict[str, str]
     phase_a_roles: RoleSeparatedDataset | None
     phase_b_roles: RoleSeparatedDataset | None
+    sleep_events: tuple[SleepEventTelemetry, ...]
 
 
 @dataclass(frozen=True)
@@ -322,6 +335,7 @@ class _CheckpointContext:
     completed_data_digests: list[str]
     completed_test_digests: list[str]
     unscored_seeds: list[ContinualUnscoredSeed] = field(default_factory=list)
+    sleep_events: list[SleepEventTelemetry] = field(default_factory=list)
 
 
 def run_continual_shift_benchmark(
@@ -485,6 +499,7 @@ def _run_single_seed(config: ContinualShiftConfig, seed: int) -> ContinualShiftS
 
 def _train_single_seed(config: ContinualShiftConfig, seed: int) -> _PendingOrdinarySeed:
     """Train both phases without opening a deferred final-test source."""
+    sleep_events: list[SleepEventTelemetry] = []
     phase_a_source = generate_two_cluster_dataset_with_transform(
         sample_count=config.sample_count_phase_a,
         noise_scale=config.phase_a_noise_scale,
@@ -511,6 +526,7 @@ def _train_single_seed(config: ContinualShiftConfig, seed: int) -> _PendingOrdin
         config=config,
         seed=seed,
         phase_a_train=phase_a_train,
+        on_sleep_event=sleep_events.append,
     )
     if config.protocol_id != CONTINUAL_LEGACY_PROTOCOL:
         phase_b_roles = _build_phase_b_roles(
@@ -531,6 +547,7 @@ def _train_single_seed(config: ContinualShiftConfig, seed: int) -> _PendingOrdin
         config=config,
         phase_b_train=phase_b_train,
         state=state,
+        on_sleep_event=sleep_events.append,
     )
     phase_a_test = (
         phase_a_roles.test
@@ -550,6 +567,7 @@ def _train_single_seed(config: ContinualShiftConfig, seed: int) -> _PendingOrdin
         split_hashes=split_hashes,
         phase_a_roles=phase_a_roles if config.protocol_id != CONTINUAL_LEGACY_PROTOCOL else None,
         phase_b_roles=phase_b_roles if config.protocol_id != CONTINUAL_LEGACY_PROTOCOL else None,
+        sleep_events=tuple(sleep_events),
     )
 
 
@@ -567,6 +585,7 @@ def _score_pending_seed(
         pending.phase_a_test,
         pending.phase_b_test,
         split_hashes,
+        sleep_events=pending.sleep_events,
     )
 
 
@@ -593,6 +612,8 @@ def _score_seed_models(
     phase_a_test: LabeledRole,
     phase_b_test: LabeledRole,
     split_hashes: dict[str, str],
+    *,
+    sleep_events: tuple[SleepEventTelemetry, ...] = (),
 ) -> ContinualShiftSeedResult:
     """Open both held-out roles only after both training phases complete."""
     backprop_model = state.backprop_model
@@ -638,6 +659,7 @@ def _score_seed_models(
             total_prunes=state.total_prunes,
             hidden_dim_start=state.hidden_dim_start,
             hidden_dim_end=circadian_model.hidden_dim,
+            sleep_events=sleep_events,
         ),
     )
     if config.protocol_id not in _BOUNDED_REPLAY_PROTOCOLS:
@@ -791,7 +813,9 @@ def _build_checkpoint_seed_data(config: ContinualShiftConfig, seed: int) -> _Che
 
 
 def _new_checkpoint_models(
-    config: ContinualShiftConfig, seed: int
+    config: ContinualShiftConfig,
+    seed: int,
+    retention_policy: ReplayRetentionPolicy | None = None,
 ) -> tuple[ContinualRunnerState, CircadianPredictiveCodingNetwork]:
     hidden_dims = list(config.hidden_dims) if config.hidden_dims is not None else None
     backprop = BackpropMLP(
@@ -807,7 +831,7 @@ def _new_checkpoint_models(
         circadian_config=config.circadian_config,
         hidden_dims=hidden_dims,
     )
-    _configure_replay_retention(config, circadian)
+    _configure_replay_retention(config, circadian, retention_policy)
     return (
         ContinualRunnerState(
             backprop_model=backprop,
@@ -819,12 +843,15 @@ def _new_checkpoint_models(
 
 
 def _configure_replay_retention(
-    config: ContinualShiftConfig, model: CircadianPredictiveCodingNetwork
+    config: ContinualShiftConfig,
+    model: CircadianPredictiveCodingNetwork,
+    retention_policy: ReplayRetentionPolicy | None = None,
 ) -> None:
     if config.protocol_id in _BOUNDED_REPLAY_PROTOCOLS:
         assert isinstance(config, ContinualBoundedReplayConfig)
         model.configure_replay_retention(
-            ReplayRetentionBudget(config.replay_max_examples, config.replay_max_bytes)
+            ReplayRetentionBudget(config.replay_max_examples, config.replay_max_bytes),
+            policy=retention_policy,
         )
 
 
@@ -911,6 +938,10 @@ def _validate_committed_seed(
         != continual_test_digest(data.phase_a_test, data.phase_b_test)
     ):
         raise ValueError("incompatible continual checkpoint completed seed data")
+    validate_continual_sleep_events(
+        checkpoint.completed_results[index].circadian_predictive_coding.sleep_events,
+        config.phase_a_epochs + config.phase_b_epochs,
+    )
     if config.protocol_id == CONTINUAL_BOUNDED_REPLAY_PROTOCOL:
         assert isinstance(config, ContinualBoundedReplayConfig)
         result = checkpoint.completed_results[index]
@@ -1058,6 +1089,11 @@ def _run_checkpointed_seeds(
             completed_results=results,
             completed_data_digests=data_digests,
             completed_test_digests=test_digests,
+            sleep_events=(
+                list(checkpoint.sleep_events)
+                if checkpoint is not None and index == checkpoint.seed_index
+                else []
+            ),
         )
         if resume_phase != "b":
             _train_checkpoint_phase(
@@ -1095,7 +1131,9 @@ def _run_checkpointed_seeds(
         if config.protocol_id in _PHASE_ARRIVAL_CHECKPOINT_FORMATS:
             data = _bind_checkpoint_final_test_hashes(data)
             context.data = _checkpoint_training_data(data)
-        result = _score_checkpoint_seed(config, seed, state, circadian, data)
+        result = _score_checkpoint_seed(
+            config, seed, state, circadian, data, sleep_events=tuple(context.sleep_events)
+        )
         results.append(result)
         data_digests.append(data.data_digest)
         test_digests.append(continual_test_digest(data.phase_a_test, data.phase_b_test))
@@ -1116,6 +1154,7 @@ def _capture_unscored_seed(
     data: _CheckpointSeedData,
     state: ContinualRunnerState,
     circadian: CircadianPredictiveCodingNetwork,
+    sleep_events: tuple[SleepEventTelemetry, ...],
 ) -> ContinualUnscoredSeed:
     """Commit arrived development identity and trained state without test data."""
     if any("test" in role for role in data.split_hashes):
@@ -1126,6 +1165,7 @@ def _capture_unscored_seed(
         split_hashes=tuple(sorted(data.split_hashes.items())),
         state=deepcopy(state),
         circadian_final=circadian.snapshot_state(),
+        sleep_events=sleep_events,
     )
 
 
@@ -1166,6 +1206,7 @@ def _validate_unscored_seed(
         or state.hidden_dim_start != hidden_dims[-1]
     ):
         raise ValueError("incompatible global unscored trained state")
+    validate_continual_sleep_events(record.sleep_events, total_epochs)
     validate_numpy_baseline_model(state.backprop_model, hidden_dims, total_epochs)
     validate_numpy_baseline_model(state.predictive_model, hidden_dims, total_epochs)
     validate_numpy_baseline_model(state.backprop_after_a, hidden_dims, config.phase_a_epochs)
@@ -1212,7 +1253,16 @@ def _score_global_unscored_seeds(
         bound = _bind_checkpoint_final_test_hashes(data)
         circadian = _new_checkpoint_models(config, seed)[1]
         circadian.restore_state(record.circadian_final)
-        scored.append(_score_checkpoint_seed(config, seed, record.state, circadian, bound))
+        scored.append(
+            _score_checkpoint_seed(
+                config,
+                seed,
+                record.state,
+                circadian,
+                bound,
+                sleep_events=record.sleep_events,
+            )
+        )
     return scored
 
 
@@ -1232,6 +1282,7 @@ def _run_checkpointed_global_seeds(
     if checkpoint is not None and (
         not isinstance(checkpoint, ContinualRunnerCheckpoint)
         or checkpoint.format_version != 5
+        or vars(checkpoint).get("sleep_event_history_version") != 1
         or checkpoint.runner_config_digest != config_digest
         or checkpoint.seeds != ordered_seeds
         or type(checkpoint.seed_index) is not int
@@ -1308,6 +1359,11 @@ def _run_checkpointed_global_seeds(
             completed_data_digests=[],
             completed_test_digests=[],
             unscored_seeds=records,
+            sleep_events=(
+                list(checkpoint.sleep_events)
+                if checkpoint is not None and index == checkpoint.seed_index
+                else []
+            ),
         )
         if resume_phase != "b":
             _train_checkpoint_phase(
@@ -1339,7 +1395,9 @@ def _run_checkpointed_global_seeds(
             resume_position=position if resume_phase == "b" else None,
         )
         assert isinstance(data, _CheckpointSeedData)
-        records.append(_capture_unscored_seed(seed, data, state, circadian))
+        records.append(
+            _capture_unscored_seed(seed, data, state, circadian, tuple(context.sleep_events))
+        )
         _save_continual_checkpoint(
             context,
             state,
@@ -1358,6 +1416,8 @@ def _score_checkpoint_seed(
     state: ContinualRunnerState,
     circadian: CircadianPredictiveCodingNetwork,
     data: _CheckpointSeedData,
+    *,
+    sleep_events: tuple[SleepEventTelemetry, ...],
 ) -> ContinualShiftSeedResult:
     """Rehydrate A-only state solely for post-training held-out scoring."""
     assert state.backprop_after_a is not None
@@ -1378,7 +1438,13 @@ def _score_checkpoint_seed(
         hidden_dim_start=state.hidden_dim_start,
     )
     return _score_seed_models(
-        config, seed, scored, data.phase_a_test, data.phase_b_test, data.split_hashes
+        config,
+        seed,
+        scored,
+        data.phase_a_test,
+        data.phase_b_test,
+        data.split_hashes,
+        sleep_events=sleep_events,
     )
 
 
@@ -1462,6 +1528,7 @@ def _train_checkpoint_phase(
             sleep_event_count=state.sleep_event_count,
             total_splits=state.total_splits,
             total_prunes=state.total_prunes,
+            on_sleep_event=context.sleep_events.append,
         )
         _save_continual_checkpoint(
             context,
@@ -1515,6 +1582,8 @@ def _save_continual_checkpoint(
                 data_digest=context.data.data_digest,
             ),
             unscored_seeds=deepcopy(tuple(context.unscored_seeds)) if global_seal else (),
+            sleep_event_history_version=1,
+            sleep_events=tuple(context.sleep_events),
         )
     )
 
@@ -1524,6 +1593,14 @@ def _train_phase_a_models(
     config: ContinualShiftConfig,
     seed: int,
     phase_a_train: LabeledData,
+    phase_a_guard: LabeledData | None = None,
+    guard_drop_tolerance: float = 0.0,
+    on_model_update: Callable[[str, int], None] | None = None,
+    on_guard_decision: Callable[[int, float, float, bool, bool], None] | None = None,
+    on_sleep_event: Callable[[SleepEventTelemetry], None] | None = None,
+    guard_role_hash: str | None = None,
+    sleep_error_retries: int = 0,
+    retention_policy: ReplayRetentionPolicy | None = None,
 ) -> _ContinualTrainingState:
     """Train phase A without receiving its final-test role."""
     resolved_hidden_dims = list(config.hidden_dims) if config.hidden_dims is not None else None
@@ -1546,7 +1623,7 @@ def _train_phase_a_models(
         circadian_config=config.circadian_config,
         hidden_dims=resolved_hidden_dims,
     )
-    _configure_replay_retention(config, circadian_model)
+    _configure_replay_retention(config, circadian_model, retention_policy)
 
     sleep_event_count = 0
     total_splits = 0
@@ -1562,18 +1639,33 @@ def _train_phase_a_models(
 
     for epoch_index in range(1, config.phase_a_epochs + 1):
         _train_models_one_epoch(
-            config, phase_a_train, backprop_model, predictive_coding_model, circadian_model
-        )
-        sleep_event_count, total_splits, total_prunes = _apply_scheduled_sleep(
-            model=circadian_model,
-            sleep_interval=config.circadian_sleep_interval_phase_a,
+            config,
+            phase_a_train,
+            backprop_model,
+            predictive_coding_model,
+            circadian_model,
             epoch_index=epoch_index,
-            global_epoch=epoch_index,
-            total_epochs=total_epochs,
-            force_sleep=config.circadian_force_sleep,
-            sleep_event_count=sleep_event_count,
-            total_splits=total_splits,
-            total_prunes=total_prunes,
+            on_model_update=on_model_update,
+        )
+        sleep_event_count, total_splits, total_prunes = _run_sleep_with_error_retries(
+            lambda event_sink: _apply_scheduled_sleep(
+                model=circadian_model,
+                sleep_interval=config.circadian_sleep_interval_phase_a,
+                epoch_index=epoch_index,
+                global_epoch=epoch_index,
+                total_epochs=total_epochs,
+                force_sleep=config.circadian_force_sleep,
+                sleep_event_count=sleep_event_count,
+                total_splits=total_splits,
+                total_prunes=total_prunes,
+                guard=phase_a_guard,
+                guard_drop_tolerance=guard_drop_tolerance,
+                on_guard_decision=on_guard_decision,
+                on_sleep_event=event_sink,
+                guard_role_hash=guard_role_hash,
+            ),
+            on_sleep_event,
+            sleep_error_retries,
         )
 
     # Preserve the A-only state without opening test labels while B can still train.
@@ -1599,6 +1691,13 @@ def _train_phase_b_models(
     config: ContinualShiftConfig,
     phase_b_train: LabeledData,
     state: _ContinualTrainingState,
+    phase_b_guard: LabeledData | None = None,
+    guard_drop_tolerance: float = 0.0,
+    on_model_update: Callable[[str, int], None] | None = None,
+    on_guard_decision: Callable[[int, float, float, bool, bool], None] | None = None,
+    on_sleep_event: Callable[[SleepEventTelemetry], None] | None = None,
+    guard_role_hash: str | None = None,
+    sleep_error_retries: int = 0,
 ) -> _ContinualTrainingState:
     """Train phase B without receiving either final-test role."""
     backprop_model = state.backprop_model
@@ -1610,18 +1709,33 @@ def _train_phase_b_models(
     total_epochs = config.phase_a_epochs + config.phase_b_epochs
     for epoch_index in range(1, config.phase_b_epochs + 1):
         _train_models_one_epoch(
-            config, phase_b_train, backprop_model, predictive_coding_model, circadian_model
-        )
-        sleep_event_count, total_splits, total_prunes = _apply_scheduled_sleep(
-            model=circadian_model,
-            sleep_interval=config.circadian_sleep_interval_phase_b,
+            config,
+            phase_b_train,
+            backprop_model,
+            predictive_coding_model,
+            circadian_model,
             epoch_index=epoch_index,
-            global_epoch=config.phase_a_epochs + epoch_index,
-            total_epochs=total_epochs,
-            force_sleep=config.circadian_force_sleep,
-            sleep_event_count=sleep_event_count,
-            total_splits=total_splits,
-            total_prunes=total_prunes,
+            on_model_update=on_model_update,
+        )
+        sleep_event_count, total_splits, total_prunes = _run_sleep_with_error_retries(
+            lambda event_sink: _apply_scheduled_sleep(
+                model=circadian_model,
+                sleep_interval=config.circadian_sleep_interval_phase_b,
+                epoch_index=epoch_index,
+                global_epoch=config.phase_a_epochs + epoch_index,
+                total_epochs=total_epochs,
+                force_sleep=config.circadian_force_sleep,
+                sleep_event_count=sleep_event_count,
+                total_splits=total_splits,
+                total_prunes=total_prunes,
+                guard=phase_b_guard,
+                guard_drop_tolerance=guard_drop_tolerance,
+                on_guard_decision=on_guard_decision,
+                on_sleep_event=event_sink,
+                guard_role_hash=guard_role_hash,
+            ),
+            on_sleep_event,
+            sleep_error_retries,
         )
 
     state.sleep_event_count = sleep_event_count
@@ -1636,10 +1750,15 @@ def _train_models_one_epoch(
     backprop: BackpropMLP,
     predictive: PredictiveCodingNetwork,
     circadian: CircadianPredictiveCodingNetwork,
+    *,
+    epoch_index: int = 0,
+    on_model_update: Callable[[str, int], None] | None = None,
 ) -> None:
     """Apply one shared phase role in the requested model order."""
     for model_name in config.model_order:
         _train_named_model_epoch(config, train, backprop, predictive, circadian, model_name)
+        if on_model_update is not None:
+            on_model_update(model_name, epoch_index)
 
 
 def _train_named_model_epoch(
@@ -1770,6 +1889,36 @@ def _sample_balanced_binary_subset(
     return input_batch[selected_indices], target_batch[selected_indices]
 
 
+def _run_sleep_with_error_retries(
+    attempt_sleep: Callable[[Callable[[SleepEventTelemetry], None] | None], tuple[int, int, int]],
+    on_sleep_event: Callable[[SleepEventTelemetry], None] | None,
+    retry_limit: int,
+) -> tuple[int, int, int]:
+    """Retry only a typed, restored sleep error; default behavior still raises."""
+    if type(retry_limit) is not int or retry_limit < 0:
+        raise ValueError("sleep error retries must be a nonnegative integer")
+    if retry_limit == 0:
+        return attempt_sleep(on_sleep_event)
+    if on_sleep_event is None:
+        raise ValueError("sleep error retries require typed event capture")
+    for attempt_index in range(retry_limit + 1):
+        error_recorded = False
+
+        def record_event(event: SleepEventTelemetry) -> None:
+            nonlocal error_recorded
+            on_sleep_event(event)
+            error_recorded = event.outcome == "error"
+
+        try:
+            return attempt_sleep(record_event)
+        except Exception:
+            # Why this: a guard rejection is a valid decision, while only a
+            # recorded atomic error can be retried without repeating wake work.
+            if not error_recorded or attempt_index == retry_limit:
+                raise
+    raise AssertionError("sleep retry loop did not return or raise")
+
+
 def _apply_scheduled_sleep(
     model: CircadianPredictiveCodingNetwork,
     sleep_interval: int,
@@ -1780,6 +1929,11 @@ def _apply_scheduled_sleep(
     sleep_event_count: int,
     total_splits: int,
     total_prunes: int,
+    guard: LabeledData | None = None,
+    guard_drop_tolerance: float = 0.0,
+    on_guard_decision: Callable[[int, float, float, bool, bool], None] | None = None,
+    on_sleep_event: Callable[[SleepEventTelemetry], None] | None = None,
+    guard_role_hash: str | None = None,
 ) -> tuple[int, int, int]:
     # Why this: corrected component runs can attempt adaptive sleep on any
     # epoch; legacy runs retain their phase-local interval-only schedule.
@@ -1791,14 +1945,107 @@ def _apply_scheduled_sleep(
         adaptive_due=adaptive_due,
         force_periodic=force_sleep,
     )
+    if guard is not None and on_sleep_event is not None and guard_role_hash is None:
+        raise ValueError("guarded sleep event capture requires its role hash")
     if not decision.attempted:
+        if on_sleep_event is not None:
+            on_sleep_event(
+                describe_unguarded_numpy_sleep_decision(
+                    model, decision, completed_epoch=global_epoch
+                )
+            )
         return sleep_event_count, total_splits, total_prunes
 
-    sleep_result = model.sleep_event(
-        adaptation_policy=None,
-        force_sleep=decision.force_sleep,
-        epoch_progress=SleepEpochProgress(global_epoch, total_epochs),
-    )
+    attempt_started_at = perf_counter()
+    saved = model.snapshot_state() if guard is not None else None
+
+    def record_error(
+        reason: str,
+        *,
+        before: float | None,
+        examples_scored: int,
+        result: SleepEventResult | None = None,
+    ) -> None:
+        if on_sleep_event is None or guard is None or guard_role_hash is None:
+            return
+        on_sleep_event(
+            describe_failed_guarded_numpy_sleep_decision(
+                model,
+                decision,
+                completed_epoch=global_epoch,
+                role_hash=guard_role_hash,
+                accuracy_before=before,
+                examples_scored=examples_scored,
+                tolerance=guard_drop_tolerance,
+                reason=reason,
+                attempt_seconds=perf_counter() - attempt_started_at,
+                result=result,
+            )
+        )
+
+    try:
+        before_guard = (
+            model.compute_accuracy(guard.input, guard.target) if guard is not None else None
+        )
+    except Exception:
+        if saved is not None:
+            model.restore_state(saved)
+        record_error("inner_guard_pre_exception", before=None, examples_scored=0)
+        raise
+    if before_guard is not None and not np.isfinite(before_guard):
+        assert saved is not None
+        model.restore_state(saved)
+        record_error("inner_guard_pre_nonfinite", before=None, examples_scored=0)
+        raise ValueError("inner guard accuracy must be finite before sleep")
+    try:
+        sleep_result = model.sleep_event(
+            adaptation_policy=None,
+            force_sleep=decision.force_sleep,
+            epoch_progress=SleepEpochProgress(global_epoch, total_epochs),
+        )
+    except Exception:
+        if saved is not None:
+            model.restore_state(saved)
+        record_error(
+            "sleep_core_exception",
+            before=before_guard,
+            examples_scored=len(guard.input) if guard is not None else 0,
+        )
+        raise
+    try:
+        after_guard = (
+            model.compute_accuracy(guard.input, guard.target) if guard is not None else None
+        )
+    except Exception:
+        if saved is not None:
+            model.restore_state(saved)
+        record_error(
+            "inner_guard_post_exception",
+            before=before_guard,
+            examples_scored=len(guard.input) if guard is not None else 0,
+            result=sleep_result,
+        )
+        raise
+    if after_guard is not None and not np.isfinite(after_guard):
+        assert saved is not None
+        model.restore_state(saved)
+        record_error(
+            "inner_guard_post_nonfinite",
+            before=before_guard,
+            examples_scored=len(guard.input) if guard is not None else 0,
+            result=sleep_result,
+        )
+        raise ValueError("inner guard accuracy must be finite after sleep")
+    if on_sleep_event is not None and guard is None:
+        on_sleep_event(
+            describe_unguarded_numpy_sleep_decision(
+                model,
+                decision,
+                completed_epoch=global_epoch,
+                result=sleep_result,
+                attempt_seconds=perf_counter() - attempt_started_at,
+            )
+        )
     # Why this: retain historical legacy counts while recognizing corrected
     # consolidation-only events without conflating them with topology changes.
     if model.config.sleep_mode == "legacy":
@@ -1809,6 +2056,32 @@ def _apply_scheduled_sleep(
         )
     else:
         performed_sleep = sleep_result.performed
+    if before_guard is not None and after_guard is not None:
+        accepted = after_guard + guard_drop_tolerance >= before_guard
+        if not accepted:
+            assert saved is not None
+            model.restore_state(saved)
+        if on_guard_decision is not None:
+            on_guard_decision(epoch_index, before_guard, after_guard, performed_sleep, accepted)
+        if on_sleep_event is not None:
+            assert guard is not None and guard_role_hash is not None
+            on_sleep_event(
+                describe_guarded_numpy_sleep_decision(
+                    decision,
+                    sleep_result,
+                    completed_epoch=global_epoch,
+                    guard_role_hash=guard_role_hash,
+                    accuracy_before=before_guard,
+                    accuracy_after=after_guard,
+                    tolerance=guard_drop_tolerance,
+                    guard_examples=len(guard.input),
+                    accepted=accepted,
+                    attempt_seconds=perf_counter() - attempt_started_at,
+                    model=model,
+                )
+            )
+        if not accepted:
+            return sleep_event_count, total_splits, total_prunes
     if not performed_sleep:
         return sleep_event_count, total_splits, total_prunes
     return (
