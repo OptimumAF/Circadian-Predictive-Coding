@@ -51,7 +51,7 @@ from src.core.resnet50_variants import (
     _build_resnet50_backbone,
 )
 from src.core.sleep_clocks import SleepEpochProgress
-from src.shared.process_memory import ProcessRssSampler
+from src.shared.process_memory import ProcessRssSampler, ProcessRssSegment
 from src.shared.torch_runtime import require_torch, sync_device
 
 TWO_HEAD_FIXED_FEATURE_PROTOCOL = "vision_two_head_fixed_feature_v1"
@@ -62,6 +62,19 @@ THREE_HEAD_FIXED_FEATURE_WALL_TIME_MEMORY_PROTOCOL = (
     "vision_three_head_fixed_feature_wall_time_memory_v2"
 )
 THREE_HEAD_FIXED_WIDTH_CAPACITY_MEMORY_PROTOCOL = "vision_three_head_fixed_width_capacity_memory_v1"
+THREE_HEAD_FIXED_WIDTH_CAPACITY_CHECKPOINT_PROTOCOL = (
+    "vision_three_head_fixed_width_capacity_checkpoint_v1"
+)
+THREE_HEAD_FIXED_FEATURE_CHECKPOINT_MEMORY_PROTOCOL = (
+    "vision_three_head_fixed_feature_checkpoint_memory_v1"
+)
+THREE_HEAD_FIXED_FEATURE_WALL_TIME_CHECKPOINT_MEMORY_PROTOCOL = (
+    "vision_three_head_fixed_feature_wall_time_checkpoint_memory_v1"
+)
+THREE_HEAD_FIXED_WIDTH_CAPACITY_CHECKPOINT_MEMORY_PROTOCOL = (
+    "vision_three_head_fixed_width_capacity_checkpoint_memory_v1"
+)
+CHECKPOINT_MEMORY_SCOPE = "committed_head_training_segments_absolute_process_rss"
 FROZEN_SHARED_REPRESENTATION_TRACK = "frozen_shared_representation"
 PROCESS_RSS_SAMPLE_INTERVAL_SECONDS = 0.005
 _HEAD_TENSOR_NAMES = (
@@ -105,6 +118,7 @@ class FixedFeatureHeadReport:
     process_rss_start_bytes: int | None = None
     process_rss_peak_observed_bytes: int | None = None
     process_rss_samples: int = 0
+    process_rss_segments: tuple[ProcessRssSegment, ...] = ()
     cuda_allocated_start_bytes: int | None = None
     cuda_allocated_peak_bytes: int | None = None
     cuda_reserved_peak_bytes: int | None = None
@@ -130,6 +144,7 @@ class TwoHeadFixedFeatureResult:
     predictive_coding: FixedFeatureHeadReport
     wall_time_budget_seconds: float | None = field(default=None, kw_only=True)
     memory_telemetry_enabled: bool = field(default=False, kw_only=True)
+    memory_observation_scope: str | None = field(default=None, kw_only=True)
     process_rss_sample_interval_seconds: float | None = field(default=None, kw_only=True)
 
 
@@ -172,6 +187,7 @@ class _TrainedHead:
     process_rss_start_bytes: int | None = None
     process_rss_peak_observed_bytes: int | None = None
     process_rss_samples: int = 0
+    process_rss_segments: tuple[ProcessRssSegment, ...] = ()
     cuda_allocated_start_bytes: int | None = None
     cuda_allocated_peak_bytes: int | None = None
     cuda_reserved_peak_bytes: int | None = None
@@ -215,15 +231,23 @@ def run_three_head_fixed_feature_benchmark(
 
 def run_three_head_fixed_width_capacity_benchmark(
     config: ResNet50BenchmarkConfig,
+    *,
+    checkpoint_store: FixedFeatureCheckpointStore | None = None,
+    resume_from_checkpoint: bool = False,
+    checkpoint_memory: bool = False,
 ) -> ThreeHeadFixedFeatureResult:
-    """Compare equal-width heads with guarded sleep and observed memory."""
+    """Compare equal-width heads; checkpoint memory requires explicit opt-in."""
     _validate_fixed_width_capacity_config(config)
+    if checkpoint_memory and checkpoint_store is None:
+        raise ValueError("checkpoint_memory requires a fixed-feature checkpoint store")
     result = _run_fixed_feature_benchmark(
         config,
         include_circadian=True,
         model_order=None,
-        measure_memory=True,
+        measure_memory=checkpoint_store is None or checkpoint_memory,
         fixed_width_capacity_control=True,
+        checkpoint_store=checkpoint_store,
+        resume_from_checkpoint=resume_from_checkpoint,
     )
     assert isinstance(result, ThreeHeadFixedFeatureResult)
     return result
@@ -271,10 +295,8 @@ def _run_fixed_feature_benchmark(
 ) -> TwoHeadFixedFeatureResult:
     if resume_from_checkpoint and checkpoint_store is None:
         raise ValueError("resume_from_checkpoint requires a fixed-feature checkpoint store")
-    if checkpoint_store is not None and (
-        not include_circadian or measure_memory or fixed_width_capacity_control
-    ):
-        raise ValueError("checkpoint store currently requires a CPU route without memory telemetry")
+    if checkpoint_store is not None and not include_circadian:
+        raise ValueError("checkpoint store currently requires the three-head route")
     training_order = _resolve_training_order(model_order, include_circadian)
     _validate_benchmark_config(config)
     if config.protocol_id != VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL:
@@ -387,9 +409,10 @@ def _run_fixed_feature_benchmark(
             time_budget_seconds,
         ),
     }
+    checkpoint_memory_trainer: Callable[[ProcessRssSampler], _TrainedHead] | None = None
     if circadian_head is not None:
 
-        def train_circadian() -> _TrainedHead:
+        def train_circadian(memory_sampler: ProcessRssSampler | None = None) -> _TrainedHead:
             assert circadian_head is not None
             if checkpoint_store is not None:
                 return _train_circadian_head(
@@ -404,6 +427,18 @@ def _run_fixed_feature_benchmark(
                     checkpoint_store=checkpoint_store,
                     resume_from_checkpoint=resume_from_checkpoint,
                     split_hashes=dict(loaders.split_hashes),
+                    checkpoint_protocol_id=(
+                        _resolve_checkpoint_memory_protocol(
+                            time_budget_seconds, fixed_width_capacity_control
+                        )
+                        if measure_memory
+                        else (
+                            THREE_HEAD_FIXED_WIDTH_CAPACITY_CHECKPOINT_PROTOCOL
+                            if fixed_width_capacity_control
+                            else None
+                        )
+                    ),
+                    memory_sampler=memory_sampler,
                 )
             return _train_circadian_head(
                 torch,
@@ -417,14 +452,22 @@ def _run_fixed_feature_benchmark(
             )
 
         trainers["circadian_predictive_coding"] = train_circadian
-    trained = {
-        name: (
-            _train_with_memory_telemetry(torch, device, trainers[name])
-            if measure_memory
-            else trainers[name]()
-        )
-        for name in training_order
-    }
+        checkpoint_memory_trainer = train_circadian
+    trained: dict[str, _TrainedHead] = {}
+    for name in training_order:
+        if (
+            measure_memory
+            and checkpoint_store is not None
+            and name == "circadian_predictive_coding"
+        ):
+            assert checkpoint_memory_trainer is not None
+            trained[name] = _train_with_checkpoint_memory_telemetry(checkpoint_memory_trainer)
+        elif measure_memory:
+            trained[name] = _train_with_memory_telemetry(
+                torch, device, trainers[name], report_segment=checkpoint_store is not None
+            )
+        else:
+            trained[name] = trainers[name]()
     if time_budget_seconds is not None and any(
         outcome.stop_reason != "deadline" for outcome in trained.values()
     ):
@@ -488,16 +531,22 @@ def _run_fixed_feature_benchmark(
         "validation": validation_batches,
         "test": test_batches,
     }
-    common = dict(
-        protocol_id=(
+    if checkpoint_store is not None and measure_memory:
+        result_protocol_id = _resolve_checkpoint_memory_protocol(
+            time_budget_seconds, fixed_width_capacity_control
+        )
+    elif fixed_width_capacity_control:
+        result_protocol_id = (
             THREE_HEAD_FIXED_WIDTH_CAPACITY_MEMORY_PROTOCOL
-            if fixed_width_capacity_control
-            else _resolve_fixed_feature_protocol(
-                include_circadian,
-                time_budget_seconds,
-                measure_memory,
-            )
-        ),
+            if measure_memory
+            else THREE_HEAD_FIXED_WIDTH_CAPACITY_CHECKPOINT_PROTOCOL
+        )
+    else:
+        result_protocol_id = _resolve_fixed_feature_protocol(
+            include_circadian, time_budget_seconds, measure_memory
+        )
+    common = dict(
+        protocol_id=result_protocol_id,
         source_protocol_id=config.protocol_id,
         benchmark_track=FROZEN_SHARED_REPRESENTATION_TRACK,
         backbone_trainable=False,
@@ -518,6 +567,9 @@ def _run_fixed_feature_benchmark(
         ),
         wall_time_budget_seconds=time_budget_seconds,
         memory_telemetry_enabled=measure_memory,
+        memory_observation_scope=(
+            CHECKPOINT_MEMORY_SCOPE if checkpoint_store is not None and measure_memory else None
+        ),
         process_rss_sample_interval_seconds=(
             PROCESS_RSS_SAMPLE_INTERVAL_SECONDS if measure_memory else None
         ),
@@ -636,22 +688,54 @@ def _resolve_fixed_feature_protocol(
     return TWO_HEAD_FIXED_FEATURE_PROTOCOL
 
 
+def _resolve_checkpoint_memory_protocol(
+    time_budget_seconds: float | None, fixed_width_capacity_control: bool
+) -> str:
+    if fixed_width_capacity_control:
+        return THREE_HEAD_FIXED_WIDTH_CAPACITY_CHECKPOINT_MEMORY_PROTOCOL
+    if time_budget_seconds is not None:
+        return THREE_HEAD_FIXED_FEATURE_WALL_TIME_CHECKPOINT_MEMORY_PROTOCOL
+    return THREE_HEAD_FIXED_FEATURE_CHECKPOINT_MEMORY_PROTOCOL
+
+
+def _train_with_checkpoint_memory_telemetry(
+    trainer: Callable[[ProcessRssSampler], _TrainedHead],
+) -> _TrainedHead:
+    with ProcessRssSampler(interval_seconds=PROCESS_RSS_SAMPLE_INTERVAL_SECONDS) as sampler:
+        sampler.snapshot()  # Fail before training when this host has no RSS reader.
+        outcome = trainer(sampler)
+    segments = (*outcome.process_rss_segments, sampler.snapshot())
+    return replace(
+        outcome,
+        process_rss_start_bytes=None,
+        process_rss_peak_observed_bytes=max(segment.peak_bytes for segment in segments),
+        process_rss_samples=sum(segment.sample_count for segment in segments),
+        process_rss_segments=segments,
+    )
+
+
 def _train_with_memory_telemetry(
     torch: Any,
     device: Any,
     trainer: Callable[[], _TrainedHead],
+    *,
+    report_segment: bool = False,
 ) -> _TrainedHead:
     cuda_start = _reset_cuda_memory_peak(torch, device)
     with ProcessRssSampler(interval_seconds=PROCESS_RSS_SAMPLE_INTERVAL_SECONDS) as sampler:
+        if report_segment:
+            sampler.snapshot()
         outcome = trainer()
         sync_device(torch, device)
         cuda_peak, cuda_reserved_peak = _read_cuda_memory_peak(torch, device)
         sampler.sample()
+    segments = (sampler.snapshot(),) if report_segment else ()
     return replace(
         outcome,
         process_rss_start_bytes=sampler.start_bytes,
         process_rss_peak_observed_bytes=sampler.peak_bytes,
         process_rss_samples=sampler.sample_count,
+        process_rss_segments=segments,
         cuda_allocated_start_bytes=cuda_start,
         cuda_allocated_peak_bytes=cuda_peak,
         cuda_reserved_peak_bytes=cuda_reserved_peak,
@@ -910,6 +994,8 @@ def _train_circadian_head(
     checkpoint_store: FixedFeatureCheckpointStore | None = None,
     resume_from_checkpoint: bool = False,
     split_hashes: dict[str, str] | None = None,
+    checkpoint_protocol_id: str | None = None,
+    memory_sampler: ProcessRssSampler | None = None,
 ) -> _TrainedHead:
     if resume_from_checkpoint and checkpoint_store is None:
         raise ValueError("resume_from_checkpoint requires a fixed-feature checkpoint store")
@@ -923,7 +1009,10 @@ def _train_circadian_head(
     initial_width = head.hidden_dim
     initial_head_hash = _hash_head(head) if checkpoint_store is not None else ""
     progress = FixedFeatureCircadianProgress(initial_width=initial_width)
-    protocol_id = _resolve_fixed_feature_protocol(True, time_budget_seconds, False)
+    protocol_id = checkpoint_protocol_id or _resolve_fixed_feature_protocol(
+        True, time_budget_seconds, False
+    )
+    previous_memory_segments: tuple[ProcessRssSegment, ...] = ()
     feature_hashes = (
         (
             ("train", _hash_batches(train)),
@@ -958,7 +1047,12 @@ def _train_circadian_head(
             batch_sizes=tuple(int(labels.shape[0]) for _, labels in train),
             epochs=config.epochs,
             initial_width=initial_width,
+            memory_sample_interval_seconds=(
+                PROCESS_RSS_SAMPLE_INTERVAL_SECONDS if memory_sampler is not None else None
+            ),
         )
+        if memory_sampler is not None:
+            previous_memory_segments = saved.memory_segments
         resume_position = restore_circadian_checkpoint(
             head,
             saved.combined,
@@ -986,6 +1080,10 @@ def _train_circadian_head(
         nonlocal checkpoint_pause_seconds
         if checkpoint_store is None:
             return
+        memory_segments = previous_memory_segments
+        if memory_sampler is not None:
+            memory_sampler.sample()
+            memory_segments = (*memory_segments, memory_sampler.snapshot())
         before_save = now()
         checkpoint_store.save(
             FixedFeatureCircadianCheckpoint(
@@ -1006,6 +1104,7 @@ def _train_circadian_head(
                     config=head.config,
                     data_digest=data_digest,
                 ),
+                memory_segments=memory_segments,
             )
         )
         if time_budget_seconds is not None:
@@ -1153,6 +1252,7 @@ def _train_circadian_head(
         total_splits=progress.total_splits,
         total_prunes=progress.total_prunes,
         total_rollbacks=progress.total_rollbacks,
+        process_rss_segments=previous_memory_segments,
     )
 
 
@@ -1305,6 +1405,7 @@ def _finalize_head(
         process_rss_start_bytes=trained.process_rss_start_bytes,
         process_rss_peak_observed_bytes=trained.process_rss_peak_observed_bytes,
         process_rss_samples=trained.process_rss_samples,
+        process_rss_segments=trained.process_rss_segments,
         cuda_allocated_start_bytes=trained.cuda_allocated_start_bytes,
         cuda_allocated_peak_bytes=trained.cuda_allocated_peak_bytes,
         cuda_reserved_peak_bytes=trained.cuda_reserved_peak_bytes,

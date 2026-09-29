@@ -3302,3 +3302,1369 @@ were not modified.
   seed/order/metric semantics. If an exact cursor cannot be reconstructed,
   record that invariant and leave b2 unchecked; run CUDA evidence on an
   actual CUDA host.
+
+## 2026-09-28 — P3.9c2b2a older unmatched vision CPU continuation
+
+- Repository state: `master` remains at reviewed commit
+  `8793c49ee4f9f8b07649e8db6571ed53746a9a06`. The existing dirty
+  checkout and unrelated user changes remain intact. No commit, reset,
+  download, final-test experiment artifact, or sweep.
+- Completed task ID: **P3.9c2b2a**. The trusted unmatched vision file route
+  now resumes v1 and v2 on CPU. It carries the shared DataLoader generator
+  across completed models. During circadian training a separate no-reseed
+  cursor captures the shared sampler's epoch-entry/current states and
+  process augmentation streams, replays completed logical batches, checks
+  the sampler position, and restores streams before the next update. The
+  ordinary v1/v2 loops retain their historical shared RNG behavior; v1
+  still aliases validation as guard and v2 uses its distinct guard. The
+  full classifier, retry gate, report counters, development-role content,
+  and final-test boundary use the existing trusted runner checkpoint.
+- Commands and outcomes: `.\.venv\Scripts\pytest.exe -q -x
+  tests/test_vision_checkpoint_resume.py -k
+  earlier_vision_file_resume_preserves_shared_loader` first failed on the
+  explicit seeded-only error, then passed both v1/v2 cases after storing
+  and restoring the shared generator. The active guarded-sleep fixture
+  first failed because the older route had no in-epoch save, then passed
+  eight wake/pre-/accepted-/rejected-sleep cases after the shared cursor.
+  The focused checkpoint file passed **41** cases; the combined
+  `tests/test_vision_checkpoint_resume.py
+  tests/test_resnet50_benchmark.py` command passed. Final
+  `.\.venv\Scripts\pytest.exe -ra` passed **767 in 166.30 s, 0 skipped**.
+  `.\.venv\Scripts\mypy.exe src tests scripts` passed **114 files**;
+  `.\.venv\Scripts\ruff.exe check .`,
+  `.\.venv\Scripts\ruff.exe format --check` on the shared loader,
+  vision checkpoint, and changed test file, plus
+  `git -c core.safecrlf=false diff --check` passed. A first mypy run caught
+  optional-state narrowing in the new cursor; it was fixed before the
+  final gate.
+- Artifacts and evidence: `src/app/shared_vision_loader.py`,
+  `src/app/vision_checkpoint.py`, `src/app/resnet50_benchmark.py`,
+  `tests/test_vision_checkpoint_resume.py`, and ADR-0059. Tests compare
+  ordinary and resumed v1/v2 model hashes and reports, next process draws,
+  sealed final test, eight guarded-sleep interruption cases, zero- and
+  two-worker stochastic Torch/NumPy/Python views, and six changed-data,
+  checksum, cursor, and shared-generator rejection cases. A valid but
+  wrong replay entry state rejects without a training update or caller RNG
+  change. Pytest owns its temporary checkpoint files; no persistent
+  experimental ranking or selected seed was produced.
+- Plan changes: split P3.9c2b2 into verified older-protocol CPU work
+  P3.9c2b2a and CUDA-specific P3.9c2b2b. This follows the observed shared
+  loader semantics and the CPU-only runtime. Checked only b2a. b2b, b2,
+  b, c2, c, and P3.9 retain their original parent acceptance. README,
+  architecture, app module docs, and ADR-0058 now point to ADR-0059.
+  No baseline budget, learning rule, seed selection, metric, or final-test
+  timing policy changed.
+- Skipped tests and blockers: pytest skipped none. `.\.venv\Scripts\python.exe
+  -c "import torch; print(torch.__version__, torch.cuda.is_available())"`
+  returned `2.14.0+cpu False`. CUDA continuation needs an actual CUDA
+  host. P3.9b2b fixed-feature memory/capacity semantics remain unverified;
+  larger P1.7/P1.8 evidence remains open.
+- Exact next action: inspect `_run_three_head_fixed_feature_benchmark`,
+  `_train_with_memory_telemetry`, and `_verify_fixed_width_capacity` in
+  `src/app/matched_head_benchmark.py`. Define how process RSS and CUDA
+  allocator peaks combine across resumed segments before exposing a memory
+  report, then add a bounded CPU fixed-width capacity checkpoint fixture
+  that checks unchanged head parameters, forced guarded sleep, and sealed
+  final test. Leave CUDA tasks unchecked until run on suitable hardware.
+
+## 2026-09-28 — P3.9b2b1 capacity-only CPU checkpoint continuation
+
+- Repository state: the checkout is now `master` at
+  `704886b1e39159726271294c7475d9e4cdf6910e` (“Add research controls
+  and resumable experiments”), advanced externally from reviewed commit
+  `8793c49ee4f9f8b07649e8db6571ed53746a9a06`. Existing uncommitted
+  v1/v2 continuation and unrelated user changes were preserved. No commit,
+  reset, download, seed sweep, or scientific ranking was made.
+- Completed task ID: **P3.9b2b1**. An opt-in trusted checkpoint on the
+  public fixed-width capacity runner uses the distinct
+  `vision_three_head_fixed_width_capacity_checkpoint_v1` protocol. It
+  reuses the CPU fixed-feature cursor, head, retry, counters, and process
+  RNG while retaining the equal-width, forced guarded-sleep, unchanged
+  parameter count, and pre-final-test capacity checks. Checkpointed results
+  explicitly omit memory telemetry. Without a store, the existing
+  `vision_three_head_fixed_width_capacity_memory_v1` behavior is unchanged.
+- Commands and outcomes: `.\.venv\Scripts\pytest.exe -q -x
+  tests/test_matched_head_capacity.py -k capacity_checkpoint` first failed
+  on the absent `checkpoint_store` argument and passed **5 cases** after
+  implementation. The capacity and fixed-feature checkpoint test files
+  passed **39** cases together. `.\.venv\Scripts\pytest.exe -ra` passed
+  **772 in 175.58 s, 0 skipped**. After tightening the test loader seal
+  to cover resumed capacity verification and checking rejection in both
+  protocol directions, `.\.venv\Scripts\pytest.exe -q -x
+  tests/test_matched_head_capacity.py` passed **20 cases**. The final
+  `.\.venv\Scripts\ruff.exe check .` passed; `.\.venv\Scripts\mypy.exe
+  src tests scripts` passed **114 files**. After formatting the changed
+  source file, `.\.venv\Scripts\ruff.exe format --check
+  src/app/matched_head_benchmark.py tests/test_matched_head_capacity.py`
+  passed; Ruff lint passed again.
+  `git -c core.safecrlf=false diff --check` passed after the plan and log
+  updates.
+- Artifacts and evidence: `src/app/matched_head_benchmark.py`,
+  `tests/test_matched_head_capacity.py`, README, architecture and app
+  module docs, and ADR-0060. Four public-route interruption fixtures stop
+  after a wake batch, before sleep, and after accepted or rejected sleep.
+  Each compares uninterrupted versus resumed trained-head hashes,
+  non-timing reports, initial/capacity metadata, sleep and rollback counts,
+  and next Python/NumPy/Torch draws. A sealed loader rejects final-test
+  access until resumed capacity verification finishes. Both protocol
+  crossing directions reject before head restoration. The original
+  memory-enabled capacity test still checks sampled RSS fields. Pytest
+  owns the temporary checkpoint files; no durable experiment result or
+  final-test ranking was produced.
+- Plan changes: split P3.9b2b into capacity-only CPU continuation b1 and
+  resumed memory/CUDA evidence b2. The existing checkpoint records no
+  process segment peaks, so labeling the final process's sampled RSS as a
+  whole-run peak would weaken the memory report. Checked b1 only after its
+  acceptance gate; b2b2, b2b, b2, b, and P3.9 remain unchecked. The
+  original memory-enabled route, baseline budgets, metrics, seeds, and
+  learning rules were not changed.
+- Skipped tests and blockers: pytest skipped none. CUDA random-state
+  continuation still requires an actual CUDA host; the installed Torch
+  runtime reports `2.14.0+cpu` with CUDA unavailable. CPU process-memory
+  contract and process-isolated observation remain unblocked work.
+- Exact next action: define P3.9b2b2's per-process RSS baseline, sample
+  interval, segment data stored in the checkpoint, and aggregation rule.
+  Add a bounded actual process-restart fixture that checks observations
+  from both segments before exposing resumed memory telemetry. Keep CUDA
+  branches open until measured on a CUDA host.
+
+## 2026-09-28 — P3.9b2b2a checkpointed CPU RSS segments
+
+- Repository state: `master` remains at
+  `704886b1e39159726271294c7475d9e4cdf6910e`. All earlier dirty
+  checkout work, including the uncommitted v1/v2 vision continuation and
+  capacity-only checkpoint, was preserved. No reset, commit, network data
+  fetch, seed selection, baseline tuning, or experiment sweep occurred.
+- Completed task ID: **P3.9b2b2a**. CPU checkpoint-memory runs now use
+  distinct fixed-epoch, wall-time, and fixed-width capacity protocol IDs.
+  `ProcessRssSegment` captures PID, trainer-entry RSS, observed peak, sample
+  count, and 5 ms interval. At every saved circadian boundary the payload
+  carries prior segments plus the current observation. The completed report
+  has a tuple of segments and an aggregate maximum absolute observed RSS;
+  circadian aggregate start is `None`, and sample counts sum. Each baseline
+  head has one completed-invocation segment. The old no-store memory
+  protocols and default capacity-only checkpoint retain their behavior.
+  CPU CUDA allocator fields remain empty. ADR-0061 defines scope and
+  measurement limits.
+- Commands and outcomes: `.\.venv\Scripts\pytest.exe -q -x
+  tests/test_checkpoint_memory_resume.py` first failed because the public
+  capacity route lacked `checkpoint_memory`; after implementation its
+  initial two-process case passed. The focused five-file command
+  (`tests/test_checkpoint_memory_resume.py`,
+  `tests/test_matched_head_capacity.py`,
+  `tests/test_fixed_feature_checkpoint_resume.py`,
+  `tests/test_process_memory.py`, `tests/test_isolated_head_memory.py`)
+  passed **55** cases. A typo naming nonexistent
+  `tests/test_matched_head_memory.py` made an earlier collection command
+  exit 1; the corrected command passed. Initial mypy found a test-only
+  dynamic-method assignment, fixed with `setattr`; Ruff formatting was
+  applied. `.\.venv\Scripts\pytest.exe -ra` passed **782 in 229.96 s,
+  0 skipped** after the final source change. A later test-only old-file
+  compatibility case passed, and final `.\.venv\Scripts\pytest.exe -q -x
+  tests/test_checkpoint_memory_resume.py` passed **10** cases.
+  `.\.venv\Scripts\ruff.exe check .` passed;
+  `.\.venv\Scripts\mypy.exe src tests scripts` passed **115 files**;
+  `.\.venv\Scripts\ruff.exe format --check` on the six changed Python
+  files and `git -c core.safecrlf=false diff --check` passed.
+- Artifacts and evidence: `src/shared/process_memory.py`,
+  `src/app/fixed_feature_checkpoint.py`,
+  `src/app/matched_head_benchmark.py`,
+  `tests/test_checkpoint_memory_resume.py`,
+  `tests/test_process_memory.py`,
+  `tests/test_fixed_feature_checkpoint_resume.py`, README, architecture,
+  evaluation protocols, app module docs, and ADR-0061. Two independent local Python processes
+  verify the saved and resumed PIDs/segments, maximum/sum aggregation,
+  and one segment per baseline. Wake/accepted/rejected cases compare
+  learning hashes, non-timing reports, process draws, and final-test
+  isolation with uninterrupted checkpoint-memory runs. Corrupt segment
+  values and cross-protocol files reject before saved head/process-RNG
+  restoration. A controlled-clock wall-time case retains the 5.0 s
+  active budget; a simulated older capacity file without the optional
+  field still resumes. Pytest owns all temporary checkpoint files.
+  No durable scientific ranking or selected seed was produced.
+- Plan changes: split P3.9b2b2 into CPU RSS task b2b2a and actual-host
+  CUDA allocator/RNG task b2b2b before implementation. One-process
+  start/peak fields could not honestly represent resumed absolute RSS;
+  typed segments preserve each process baseline, and the aggregate is
+  descriptive only. Checked b2b2a after the gate. b2b2b, b2b2, b2b,
+  b2, b, and P3.9 remain unchecked; P1.7/P1.8 fairness work is the next
+  unblocked priority. No learning rule, baseline budget, metric, guard
+  decision, or final-test selection policy changed.
+- Skipped tests and blockers: the full suite skipped none. The local
+  runtime remains `torch 2.14.0+cpu` with CUDA unavailable; CUDA peak and
+  random-stream continuation require an actual CUDA host. Actual CIFAR
+  loader evidence and larger-data fairness confirmation remain open.
+- Exact next action: inspect `src/infra/vision_datasets.py`,
+  `src/app/resnet50_benchmark.py`, and the local dataset cache for P1.7.
+  If CIFAR data are already present, add a bounded reverse-order CPU
+  loader fixture without downloading or sweeping. Otherwise document
+  the cache condition and audit strict-online replay/structural-noise
+  streams next. Keep P1.7/P1.8 and CUDA branches unchecked until verified.
+
+## 2026-09-28 — P1.7e actual CIFAR loader preparation remains open
+
+- Repository state: the same `master` checkout and earlier uncommitted
+  changes remain intact. `data/` is gitignored and initially absent;
+  `data/cifar-10-batches-py` and `data/cifar-100-python` were absent. The
+  local C: drive reported 362,168,508,416 free bytes before the attempt.
+- Completed task IDs: none in this P1.7e increment. P3.9b2b2a above is
+  complete, but P1.7e and parent P1.7/P1.8 remain unchecked.
+- Commands and outcomes: `rg -n` on `src/infra/vision_datasets.py`,
+  `src/app/resnet50_benchmark.py`, and relevant tests located the real
+  torchvision CIFAR path and seeded v3 loader. `Test-Path` checks for the
+  configured cache returned false. `.\.venv\Scripts\python.exe -c
+  "from torchvision.datasets import CIFAR10; data=CIFAR10(root='data',
+  train=True, download=True); print('CIFAR10 train count', len(data))"`
+  started the official archive download, reached about **5.8%**, and was
+  interrupted within the local time budget (exit 1). The incomplete
+  `data/cifar-10-python.tar.gz` was 9,961,472 bytes and was removed after
+  verifying its resolved path stayed under this workspace. No model
+  experiment ran on actual CIFAR data. A first
+  `.\.venv\Scripts\python.exe scripts/verify_cifar_loader_order.py
+  --data-root data` failed because the script did not add the repository
+  root to `sys.path`; after that fix it failed early with the intended
+  “Complete CIFAR-10 cache required” message and attempted no download.
+  `.\.venv\Scripts\pytest.exe -q -x
+  tests/test_verify_cifar_loader_order.py` passed **1** bounded FakeData
+  stochastic-view case with zero/two-worker forward/reverse order and
+  sealed held-out roles. Initial mypy found the script under both a
+  top-level and `scripts.` module name; adding `scripts/__init__.py`
+  resolved this. Final `.\.venv\Scripts\ruff.exe check .` passed,
+  `.\.venv\Scripts\mypy.exe src tests scripts` passed **118 files**, and
+  `.\.venv\Scripts\ruff.exe format --check` on the three new Python
+  files passed. `git -c core.safecrlf=false diff --check` passed after
+  the final plan and documentation edits. The preceding P3.9b2b2a full
+  gate remains **782/0
+  skipped**, run before this standalone verifier was added.
+- Artifacts and evidence: no dataset artifact was retained. New
+  `scripts/verify_cifar_loader_order.py`, `scripts/__init__.py`, and
+  `tests/test_verify_cifar_loader_order.py` provide a cache-gated local
+  verifier; its fake-source pass validates the harness only. Source
+  inspection confirms the loader uses the real CIFAR dataset class,
+  seeded split indices and train sampler, separate deterministic
+  guard/validation transforms, and disjoint role IDs. The documented
+  strict-online contract is future work; the current continual runner is
+  labeled offline. Its ordinary path creates phase-B roles after phase-A
+  training; checkpoint preparation can pre-materialize both phases but
+  does not claim strict-online label timing. This read-only audit is not
+  evidence of real-CIFAR reproducibility.
+- Plan changes: added P1.7e before the acquisition attempt to keep the
+  actual-data gate explicit. Its acceptance remains unchanged and open.
+  The attempted download changed no seeds, metrics, baseline settings,
+  model order, or scientific result. No sweep or selection was launched.
+- Skipped tests and blockers: the focused verifier test skipped none; the
+  official download throughput did not meet the bounded local time
+  budget; a complete trusted archive is needed to execute P1.7e. CUDA
+  numerical and checkpoint evidence also require hardware unavailable
+  on this host. P1.7e is unfinished, not marked complete or scientifically
+  negative.
+- Exact next action: obtain a complete trusted CIFAR-10 archive with a
+  stated time/byte budget, then run
+  `python scripts/verify_cifar_loader_order.py --data-root data` and add a
+  bounded real-loader final-test seal. Keep P1.7/P1.8 and CUDA branches
+  unchecked until their own gates pass.
+
+## 2026-09-28 — P1.7e actual CIFAR-10 CPU loader and training seal
+
+- Repository state: `master` at `704886b1e39159726271294c7475d9e4cdf6910e`;
+  all earlier uncommitted research changes were preserved. The new dataset and
+  JSON reports are under gitignored `data/`; no baseline, seed-selection,
+  metric, or unrelated file was changed.
+- Completed task IDs: **P1.7e**. P1.7 and P1.8 parents stay unchecked, as do
+  actual CUDA and strict-online continual branches.
+- Data acquisition and failures: torchvision's local `CIFAR10` declares
+  `https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz` and MD5
+  `c58f30108f718f92721af3b95e74349a`. After the previous official-source
+  transfer stalled, the [Zenodo CIFAR-10 archive](https://zenodo.org/records/10089977)
+  exposed the same 170,498,071-byte archive and MD5. Local `requests.head`
+  checks returned HTTP 200/170,498,071 bytes for Zenodo, Brainchip, and Paddle;
+  a bounded 1 MiB range probe favored Zenodo (2.61 s versus 2.89 s and
+  15.44 s). A one-off eight-worker, 8 MiB-range downloader completed all
+  170,498,071 bytes in 45.9 s, inside its 150 s wall budget. Whole-file MD5
+  matched torchvision exactly before the archive was renamed to
+  `data/cifar-10-python.tar.gz`. The first extraction guard rejected the
+  archive's harmless root directory entry; a corrected path/member guard
+  passed. Python 3.11 `tarfile.extractall(filter='data')` raised an unsupported
+  keyword error; explicit regular-file/directory/path validation then safely
+  extracted all nine members into `data/cifar-10-batches-py`.
+- Experiment commands and outcome: `.\.venv\Scripts\python.exe
+  scripts/verify_cifar_loader_order.py --data-root data --seed 73` exited 0.
+  `.\.venv\Scripts\python.exe scripts/verify_cifar_loader_order.py
+  --data-root data --seed 73 --check-training-seal >
+  data\cifar-loader-seed73.json` exited 0. Both used
+  `vision_guard_separated_seeded_unmatched_v3`, CPU, `download=False`, seed 73,
+  8 train/4 guard/4 outer-validation/4 final-test examples, batch size 4,
+  32-pixel images, and stochastic horizontal flip. Zero and two workers had
+  identical role hashes and train IDs. Within **each** worker setting, all
+  three forward and reversed model-order runs had exactly the same two
+  shuffled batches and image/label tensor hashes. Zero versus two workers
+  produced different stochastic view hashes, so cross-worker tensor identity
+  is not asserted. All role ID sets were pairwise disjoint. The optional
+  one-epoch real ResNet CPU pass used the random-feature control and opened
+  the final-test loader six times only after backprop, PC, and circadian
+  training completed; it emitted no model-ranking report. Final-test CIFAR
+  dataset construction still occurs before training, while the training
+  interface excludes that loader and no test batch is iterated before all
+  models complete.
+- Artifacts: ignored `data/cifar-10-python.tar.gz` (170,498,071 bytes),
+  `data/cifar-10-batches-py/`, `data/cifar-loader-seed73.json` (2,295 bytes),
+  and `data/cifar-loader-seed73-repeat.json` (1,860 bytes). The JSON retains exact
+  train-batch IDs/view hashes, role hashes/counts, training order, three
+  trained-model state hashes, and six post-training test iterations. Source
+  code/test changes are `scripts/verify_cifar_loader_order.py` and
+  `tests/test_verify_cifar_loader_order.py`; README and plan describe the
+  optional real-training mode.
+- Tests and static gates: the initial new seal unit test failed because its
+  stub was not a dataclass and mypy rejected a statically typed stub call;
+  both were corrected. The focused verifier file passed **2** tests.
+  `.\.venv\Scripts\ruff.exe check .` passed;
+  `.\.venv\Scripts\mypy.exe src tests scripts` passed **118 files**;
+  `.\.venv\Scripts\ruff.exe format --check` on the two verifier Python
+  files and `git -c core.safecrlf=false diff --check` passed.
+  `.\.venv\Scripts\pytest.exe -ra` passed **785 in 229.97 s, 0 skipped**.
+  A separate fresh-process command,
+  `.\.venv\Scripts\python.exe scripts/verify_cifar_loader_order.py
+  --data-root data --seed 73 > data\cifar-loader-seed73-repeat.json`,
+  exited 0; comparing the entire loader report JSON with the training-seal
+  run (excluding its extra training field) passed exact equality for both
+  worker settings. No backend test was skipped in the full suite.
+- Plan changes and limits: P1.7e is checked only after real-data loader and
+  training-seal evidence. P1.7 remains open for actual CUDA numerical/order
+  evidence; P1.8 remains open for larger-data matched-budget and real CUDA
+  evidence. This check makes no fairness or performance claim. No model
+  sweep, tuning, or final-test-based selection occurred. The local venv uses
+  CPU-only Torch despite an NVIDIA card being present; a CUDA-enabled
+  runtime and its own gates are required for CUDA claims. No tests were
+  intentionally skipped in the focused run.
+- Exact next action: inspect the shared-feature matched-head CIFAR path and
+  write a predeclared, bounded CPU CIFAR-10 fairness confirmation task with
+  equal validation trial counts, fixed seed(s), separate work/memory scopes,
+  and final-test timing; then run its smallest validation-only gate before
+  opening final test. Preserve all present archive and JSON evidence.
+
+## 2026-09-28 — P1.8h, P1.8i1, P1.8i real-CIFAR matched budgets
+
+- Repository state: same `master` commit
+  `704886b1e39159726271294c7475d9e4cdf6910e`, with all earlier dirty
+  work retained. New experiment JSON files are ignored under `artifacts/`
+  and `data/`. No existing baseline, metric, seed, or final-test selection
+  rule was changed after test access.
+- Completed task IDs: **P1.8h** and **P1.8i1**; P1.8i completed after the
+  unchanged-manifest retry and final gate recorded below. P1.8 parent remains
+  unchecked for a justified larger-data comparison and actual CUDA evidence.
+- Predeclaration and selection: added
+  `scripts/run_cifar_matched_validation.py` for one local MD5-verified
+  CIFAR-10 selection, seed 73, 32/16/16/16 train/guard/validation/test,
+  one CPU epoch, frozen random ResNet features, fixed head width 16, and
+  two equal optimization candidates per head (base rate and 0.8× rate).
+  The sealed `test_loader` had zero iterations during six validation trials.
+  The initial `.\.venv\Scripts\python.exe
+  scripts/run_cifar_matched_validation.py` exited 1 only at manifest
+  creation: `create_confirmation_manifest` requires 3–4 distinct
+  confirmation seeds, while the request had 83/89. The first request and
+  completed selection remain as
+  `artifacts/benchmark_cifar_{request,selection}_smoke.json`; no final-test
+  batch had been opened. We added seed 97 solely to satisfy that pre-existing
+  invariant, before inspecting any test score, and versioned the output
+  names. The identical selection command then exited 0 in 8.16 s total,
+  reporting 5.42 s selection time. It saved request, selection, and manifest
+  at `artifacts/benchmark_cifar_v2_{request,selection,manifest}_smoke.json`.
+  All six attempts completed; two trials/head shared exact split, feature,
+  backbone, and initial-head hashes, with 8 wake batches/32 samples each.
+  PC/circadian each reported 16 relaxation steps; circadian's one guarded
+  sleep raised guard exposures to 24 versus 8 for each baseline. Validation
+  chose `a/a/a`. The saved manifest digest
+  `eea8a7e0817b32684b0c0d778a0b4d1bbabf24f1aae7204f8bb6ec926b11fb02`
+  was independently recomputed from JSON, and its saved selection digest
+  matched. It fixes confirmation seeds 83/89/97, metrics accuracy and
+  cross-entropy, fixed-data epoch, 0.05 s per-head wall time, and
+  process-isolated fixed-width memory. No test score informed the choices.
+- First exact-manifest confirmation: added a pure typed
+  `restore_confirmation_manifest` with field and digest checks, plus
+  `scripts/run_cifar_matched_confirmation.py`. A new test initially failed
+  because restoration did not exist, then passed with JSON-list and
+  tamper-rejection coverage. The first `.\.venv\Scripts\python.exe
+  scripts/run_cifar_matched_confirmation.py` exited 1 after 15.19 s because
+  `isolated_head_memory.py` rejected nonsynthetic data. Fixed-data and
+  wall-time final-test computations had occurred in memory, but no complete
+  result was saved; `artifacts/benchmark_cifar_v2_failure_smoke.json`
+  retains the exact error. We did not alter the frozen manifest, candidate,
+  seed, metric, scope, or baseline to address it.
+- Process-isolated correction: an acceptance test for local CIFAR first
+  failed at the synthetic-only guard. `isolated_head_memory.py` now keeps
+  synthetic protocol v1 and allows only local CIFAR-10 with
+  `dataset_download=False` and zero workers under distinct protocol
+  `vision_three_head_fixed_width_cifar10_process_memory_v2`. Unsafe
+  requests fail before spawn. `repeated_head_confirmation.py` checks the
+  protocol appropriate to the declared dataset. The existing final-test
+  property sentinel still forbids test-loader access in the measured
+  worker; the parent verifies role, backbone, feature, initial-head, and
+  fixed-capacity identity. `.\.venv\Scripts\python.exe
+  scripts/verify_cifar_isolated_memory.py` exited 0 on seed 83, spawning
+  three distinct PIDs, matching all development-role/hash/capacity fields,
+  and writing `data/cifar-memory-seed83.json`. All three heads had 32,954
+  unchanged parameters and 524,800 cached development-feature bytes;
+  observed trainer RSS peaks were about 755 MB per child, including runtime,
+  backbone, and cache.
+- Completed exact-manifest retry: `.\.venv\Scripts\python.exe
+  scripts/run_cifar_matched_confirmation.py` exited 0 in **58.91 s**, under
+  the predeclared 240 s local limit. It preserved the first failure and
+  wrote `artifacts/benchmark_cifar_v2_result_retry2_smoke.json` (199,864
+  bytes). The result includes 9/9 fixed-data training/test rows, three
+  wall-time runs (all nine heads reached `deadline`), and three three-child
+  isolated-memory reports with matching per-seed identities and 32,954
+  unchanged parameters. Fixed-data test-accuracy means across seeds
+  83/89/97 were **0.125 backprop, 0.104 PC, 0.104 circadian**; wall-time
+  means were **0.125, 0.146, 0.125**. This retained result shows no
+  circadian advantage. One wall-time seed observed 148/85/40 wake batches
+  and 0/170/80 relaxation steps for backprop/PC/circadian, illustrating why
+  equal time is reported separately from equal epochs. Mean observed
+  trainer RSS peaks were about 754.4/754.6/755.6 MB in that order; these
+  process observations are not attributable head memory. With only 16
+  final-test examples per seed and a random frozen backbone, accuracy is
+  descriptive pipeline evidence, not a scientific ranking.
+- Commands and quality gates: focused
+  `.\.venv\Scripts\pytest.exe -q -x tests/test_matched_head_tuning.py
+  tests/test_repeated_head_confirmation.py` passed **13** before the
+  memory extension; `.\.venv\Scripts\pytest.exe -q -x
+  tests/test_isolated_head_memory.py tests/test_repeated_head_confirmation.py`
+  passed **10** after it. Initial failing red tests and the two experiment
+  failures are retained above. `.\.venv\Scripts\ruff.exe check .`,
+  `.\.venv\Scripts\mypy.exe src tests scripts` (**121 files**),
+  `.\.venv\Scripts\ruff.exe format --check` on nine changed Python files,
+  and `git -c core.safecrlf=false diff --check` passed.
+  `.\.venv\Scripts\pytest.exe -ra` then passed **787 in 215.58 s,
+  0 skipped**. No targeted test intentionally skipped a backend.
+- Plan and documentation: split the actual-CIFAR fairness work into
+  selection P1.8h, confirmation P1.8i, and the discovered isolated-memory
+  capability P1.8i1. Added ADR-0062; README, evaluation protocols, and app
+  module docs distinguish synthetic v1 from local-CIFAR v2. Parent P1.8
+  remains open; P1.7 CUDA and strict-online continual work are also open.
+- Exact next action: P1.8i is now checked after the full quality gate.
+  Measure fixed-feature extraction throughput on the verified CIFAR cache,
+  inspect local pretrained-backbone availability, then predeclare a
+  larger-data CPU matched-head protocol with realistic role sizes and a
+  local time limit before running any new final-test comparison. Do not
+  adjust the saved 83/89/97 result or interpret this tiny random-feature
+  run as a general benchmark.
+
+## 2026-09-28 — P1.8j pretrained CIFAR development-feature cost gate
+
+- Repository state: same `master` checkout at
+  `704886b1e39159726271294c7475d9e4cdf6910e`; earlier working-tree
+  changes and ignored experiment files remain intact.
+- Completed task IDs: **P1.8j**. P1.8 parent, P1.7 CUDA evidence, and the
+  unrelated strict-online continual study remain open.
+- Commands and outcome: a read-only local check of
+  `torchvision.models.ResNet50_Weights.IMAGENET1K_V2.url` and Torch's
+  checkpoint cache found
+  `resnet50-11ad3fa6.pth` (102,540,417 bytes) already present; no network
+  request or new dependency was needed. The saved P1.8h selection ledger's
+  six `train_seconds` values summed to 0.038 s, indicating that feature
+  setup dominates this tiny route. Before execution, P1.8j fixed seed 101,
+  128/64/64 train/guard/validation examples, 16-image batches, 32-pixel
+  inputs, CPU, and a 60 s setup limit. `.\.venv\Scripts\python.exe
+  scripts/profile_cifar_feature_setup.py` exited 0 and measured **1.875 s**
+  for the full pretrained development-feature bank. A sealed test loader
+  was never iterated; no head trained and no accuracy was computed.
+- Artifacts: ignored `data/cifar-feature-profile-seed101-request.json`
+  (5,069 bytes) was written before setup, and
+  `data/cifar-feature-profile-seed101-result.json` (1,105 bytes) retains
+  the 102,540,417-byte weight source and SHA-256
+  `11ad3fa62ca79e40addfd354a8ec4b7c75143b3038b8d2a807fbc68deab379ca`,
+  backbone hash `be8306b3...e5ae9`, all three split/feature hashes,
+  128/64/64 role counts, and 1,049,600/524,800/524,800 cached feature
+  bytes. No failure artifact was created. `scripts/profile_cifar_feature_setup.py`
+  is the reusable cache-gated, sealed development-only entry point.
+- Validation and skipped tests: `.\.venv\Scripts\ruff.exe check .`,
+  `.\.venv\Scripts\mypy.exe src tests scripts` (**122 files**),
+  `.\.venv\Scripts\ruff.exe format --check
+  scripts/profile_cifar_feature_setup.py`, and
+  `git -c core.safecrlf=false diff --check` passed. The immediately prior
+  full suite passed **787/0 skipped** after the core changes; this later
+  standalone profiler changed no core behavior and was itself executed on
+  real cached data. No test was intentionally skipped for this task.
+- Plan changes and limits: P1.8j was added before the measurement and
+  checked only after the sealed pretrained run and static gates. The
+  1.875 s observation is a local setup cost for one small role bank, not
+  a throughput guarantee for larger data or a fair model comparison.
+  P1.8 remains unchecked; no model ranking, seed selection, metric change,
+  or final-test access occurred in this step.
+- Exact next action: use the saved pretrained setup time and hashes to
+  predeclare a larger-data CIFAR matched-head CPU study with fixed role
+  sizes, independent validation-selection and confirmation seeds, equal
+  candidate counts, fixed-data/wall-time/isolated-memory scopes, and a
+  local wall limit. Run its validation-only, final-test-sealed stage first;
+  do not revise the prior seed-83/89/97 result based on new scores.
+
+## 2026-09-28 — P1.8k/l frozen pretrained-CIFAR matched budgets
+
+- Repository state: `master` at
+  `704886b1e39159726271294c7475d9e4cdf6910e`. The existing dirty
+  checkout and unrelated user changes were preserved. This increment adds
+  two standalone scripts and ADR-0063, and updates the plan, README,
+  evaluation protocol, and this log. No core learning rule or previous
+  random-feature artifact changed.
+- Completed task IDs: **P1.8k and P1.8l**. Parent P1.8, P1.7 CUDA evidence,
+  strict-online continual timing, and CUDA checkpoint branches remain open.
+  The 1.875 s no-score setup probe justified one bounded 1024/256/256/512
+  train/guard/validation/test role study, not a larger sweep. Before any
+  new final-test access, the plan fixed CPU, 32-pixel inputs, batch 32,
+  one fixed-data epoch, frozen ImageNet ResNet-50 V2, width 16, selection
+  seed 113, two equal base/0.8× learning-rate candidates per head,
+  confirmation seeds 127/131/137, a 0.5 s per-head deadline, and separate
+  process-isolated memory. Selection/confirmation local limits were
+  120/480 s.
+- Commands and selection outcome: `.\.venv\Scripts\ruff.exe format
+  scripts/run_cifar_pretrained_validation.py` left the file unchanged;
+  focused `.\.venv\Scripts\pytest.exe -q -x
+  tests/test_matched_head_tuning.py tests/test_repeated_head_confirmation.py`
+  passed 14/0 skipped. `.\.venv\Scripts\python.exe -c "import subprocess,
+  sys; subprocess.run([sys.executable,
+  'scripts/run_cifar_pretrained_validation.py'], check=True, timeout=125)"`
+  exited 0. The script verified CIFAR archive MD5
+  `c58f30108f718f92721af3b95e74349a` and the 102,540,417-byte
+  ImageNet V2 checkpoint SHA-256
+  `11ad3fa62ca79e40addfd354a8ec4b7c75143b3038b8d2a807fbc68deab379ca`,
+  wrote the request before training, and finished six equal validation
+  trials in **3.89 s**. All trials saw 1,024 wake examples/32 batches and
+  shared one train/guard/validation split, feature, backbone, and initial
+  head hash. The circadian trials recorded a forced sleep attempt and
+  additional guard work; no replay examples were used. The final-test
+  sentinel observed **zero** iterations, and the selection held zero test
+  confirmations. Outer validation selected `a/a/a`. Saved selection JSON
+  matched the manifest's source digest; typed restoration preserved
+  manifest digest
+  `fd101a509411bfcfc2304e76b71edf9a3c47b7b44d7865204db0ab46d3a6fb70`.
+- Confirmation preflight and outcome: a separate read-only preflight
+  restored that manifest, checked the request/selection/selected configs,
+  and rehashed both local inputs before any final-test read. Then
+  `.\.venv\Scripts\python.exe -c "import subprocess, sys;
+  subprocess.run([sys.executable,
+  'scripts/run_cifar_pretrained_confirmation.py'], check=True,
+  timeout=485)"` exited 0. The unchanged manifest completed in **100.11 s**
+  with 9/9 fixed-data training/test rows, three wall-time reports with
+  all nine heads stopping at `deadline`, and three three-child memory
+  reports under `vision_three_head_fixed_width_cifar10_process_memory_v2`.
+  An independent JSON audit found matching per-seed split/feature/backbone/
+  initial hashes and unchanged capacity in every child, distinct PIDs,
+  and observed trainer RSS samples. Deadline work differed as reported:
+  across seeds backprop completed 32/40/41 epochs, PC 16/16/16, and
+  circadian 9/12/9; latent relaxation, guard exposures, sleep attempts,
+  examples, and overshoot remain in the JSON. Work is not inferred from
+  equal wall time.
+- Results retained without adjustment: one-epoch fixed-data mean accuracy
+  was **0.4056 backprop, 0.1777 PC, 0.1523 circadian**; population SD was
+  0.0526, 0.0412, 0.0380. Equal-wall-time means were **0.5788, 0.5072,
+  0.3893**; population SD was 0.0171, 0.0179, 0.0254. The circadian head
+  did not lead either scope. Per-seed scores, cross-entropy, work, and
+  observed process RSS are retained. Process RSS includes runtime,
+  backbone, feature bank, and sampler costs; it is not head-only memory.
+  These 32-pixel, 1,024-example, CPU-only results do not establish a
+  general head ranking. No seed, metric, baseline, or scope changed after
+  final-test access.
+- Experiment artifacts: ignored
+  `artifacts/benchmark_cifar_pretrained_v1_request_smoke.json` (38,231
+  bytes), `_selection_smoke.json` (77,735 bytes), `_manifest_smoke.json`
+  (21,136 bytes), and `_result_smoke.json` (200,662 bytes). No failure
+  artifact was created. The previous `benchmark_cifar_v2` request,
+  failure, and result artifacts remain untouched. The scripts refuse
+  overwrites and do not download data or weights.
+- Validation and skipped tests: full `.\.venv\Scripts\pytest.exe -q`
+  passed, with a separate collection hook confirming **787 tests** and
+  no failure or skip markers. `.\.venv\Scripts\ruff.exe check .` passed;
+  `.\.venv\Scripts\mypy.exe src tests scripts` passed on **124 files**;
+  `.\.venv\Scripts\ruff.exe format --check
+  scripts/run_cifar_pretrained_validation.py
+  scripts/run_cifar_pretrained_confirmation.py` passed (**2 files**);
+  `git -c core.safecrlf=false diff --check` passed. A broader
+  `ruff format --check src tests scripts` failed because **43 pre-existing
+  files** would be reformatted; no unrelated formatting was applied.
+  No tests were intentionally skipped. No CUDA experiment or full-data
+  sweep was run in this CPU session.
+- Plan changes and blockers: P1.8k/l were added before selection, then
+  checked only after their separate evidence gates. ADR-0063 and protocol
+  docs record why this size and its limits. Read-only feasibility checks
+  found NVIDIA GeForce RTX 3080 (10,240 MiB, driver 610.88) and ample local
+  disk, but the verified `.venv` has `torch 2.14.0+cpu`, CUDA build `None`,
+  and `torch.cuda.is_available()` false. Thus actual CUDA numerical,
+  timing, and memory evidence is still blocked by the environment, not
+  claimed from CPU results. P1.7/P1.8 stay unchecked.
+- Exact next action: create an isolated CUDA-capable Torch environment
+  without modifying the verified CPU `.venv`; run a tiny device smoke and
+  then predeclare a device-specific order/reproducibility and matched-head
+  manifest with numerical tolerance and a local time limit before any CUDA
+  final-test access. Preserve this CPU negative result unchanged.
+
+## 2026-09-28 — P1.7 CUDA isolation and P1.8m frozen CUDA selection
+
+- Repository state: `master` still at
+  `704886b1e39159726271294c7475d9e4cdf6910e`; the existing dirty
+  checkout, previous CPU study artifacts, and unrelated user changes remain
+  intact. This increment adds gitignored `.venv-cuda/`, four standalone
+  scripts, ADR-0064, and protocol/README/plan updates. No core learning
+  rule, previous selection, or prior negative score changed.
+- Completed task IDs: **P1.7f, P1.7g, aggregate P1.7, and P1.8m**.
+  **P1.8n and P1.8 parent remain unchecked.** Strict-online continual
+  label timing and separate CUDA checkpoint branches also remain open.
+- CUDA environment commands and outcome: `py -3.11 -m venv .venv-cuda` and
+  `.\.venv-cuda\Scripts\python.exe -m pip install --no-input -r
+  requirements.txt` exited 0. One 15-minute-capped pip attempt installed
+  pinned `torch==2.14.0+cu130` (official 1,990.6 MB Windows wheel) and
+  `torchvision==0.29.0+cu130` (6.4 MB) from
+  `https://download.pytorch.org/whl/cu130`, without changing `.venv`.
+  [PyTorch's 2.14 release](https://pytorch.org/blog/pytorch-2-14-release-blog/)
+  lists CUDA 13.0 among its binary builds, and its
+  [wheel index](https://download.pytorch.org/whl/cu130/torch/)
+  contains the Python 3.11 Windows build. `pip check` found no broken
+  requirements. The original `.venv` still reports Torch 2.14.0+cpu,
+  torchvision 0.29.0+cpu, and CUDA unavailable.
+- P1.7f smoke and retained failure: the first
+  `.\.venv-cuda\Scripts\python.exe -c "import subprocess,sys;
+  subprocess.run([sys.executable,'scripts/verify_cuda_environment.py'],
+  check=True,timeout=65)"` failed before compute because
+  `torch.cuda.reset_peak_memory_stats(device)` rejected an uninitialized
+  device argument. The original request/failure JSON remains. A minimal
+  CUDA context/device-0 diagnostic succeeded; the script then changed
+  only allocator instrumentation and used versioned `retry1` artifact
+  names with the same seed 109 and synthetic operations. Retry completed
+  in **0.781 s** with finite convolution gradients and untrained ResNet-50
+  logits, saved three SHA-256 output digests, and observed CUDA 13.0,
+  cuDNN 92400, RTX 3080 capability 8.6, **112,169,984** peak allocated
+  and **146,800,640** peak reserved bytes. No CIFAR role was accessed.
+- P1.7g predeclaration and outcome: the plan fixed actual local CIFAR-10
+  seed 149, 8/4/4/4 role sizes, zero workers, augmentation on, random
+  frozen unmatched v3 backbones, one epoch, width 16, two inference
+  steps, forced sleep, forward/reverse model orders, deterministic CUDA,
+  `CUBLAS_WORKSPACE_CONFIG=:4096:8`, exact state/role hashes, `1e-6`
+  absolute metric tolerance, and 120 s per process before execution.
+  `.\.venv-cuda\Scripts\python.exe scripts/verify_cuda_vision_order.py`
+  exited 0: fresh forward/reverse CUDA processes took 3.594/3.453 s;
+  train/guard/validation/test hashes and all three trained-model hashes
+  matched exactly. All nine per-model validation accuracy, test accuracy,
+  and final cross-entropy deltas were **0.0**. Each order opened final
+  test six times only after all three models finished and made one forced
+  circadian sleep attempt. Neither tiny CUDA order made a structural split;
+  the prior CPU P1.7c/d gates cover noisy splits and prioritized replay.
+  This is an unmatched reproducibility check, not a head ranking.
+- P1.8m predeclaration and outcome: only after P1.7g passed, the plan fixed
+  a separate frozen-shared-pretrained CUDA selection using the CPU study's
+  1024/256/256/512 roles, batch 32, width 16, one epoch, equal base/0.8×
+  learning-rate grids, seed 151, and confirmation seeds 157/163/167 with
+  fixed-data, 0.5 s/head wall-time, and isolated-memory scopes. The
+  120 s capped `.\.venv-cuda\Scripts\python.exe -c "import subprocess,
+  sys; subprocess.run([sys.executable,
+  'scripts/run_cifar_pretrained_cuda_validation.py'],check=True,
+  timeout=125)"` exited 0. Six trials completed in **3.438 s**, shared
+  train/guard/validation, feature, backbone, and initial-head hashes,
+  and recorded 1,024 wake examples/32 batches each with separate
+  relaxation, guard, and sleep work. The sealed final test had zero
+  iterations, and selection contains zero test confirmations. Outer
+  validation selected `a/a/a`. Request, selection, and typed-round-trip
+  manifest were saved before any CUDA final-test access. The selection
+  source digest matches the manifest's `source_selection_digest`; the
+  manifest digest is
+  `2965701512685175572f46b7499e8a28d462a32fe64a7f4f73d8c39a0e500062`.
+- P1.8n preparation and deferred launch: the new confirmation script's
+  `--preflight` restored that exact manifest and rehashed the archive and
+  pretrained checkpoint with **zero** final-test reads. A first external
+  three-reading observation found GPU utilization 24%/30%/27%. The formal
+  480 s capped launch attempted the predeclared quiet gate and saved
+  `artifacts/benchmark_cifar_pretrained_cuda_v1_deferred_20260929T022905846254Z_smoke.json`
+  (UTC timestamp, 651 bytes) with utilization **30%/27%/37%** and free
+  memory 5,867/5,861/5,785 MiB. It exited 2 by design before calling
+  confirmation, with **zero** final-test iterations. No result or failure
+  artifact exists. The selected candidates, seeds, metrics, wall budget,
+  and manifest remain unchanged; no GPU matched-head score is claimed.
+- Artifacts: ignored `data/cuda-env-seed109-{request,failure}.json` and
+  `data/cuda-env-seed109-retry1-{request,result}.json` preserve the initial
+  telemetry issue and successful device smoke. Ignored
+  `data/cuda-vision-order-seed149-{request,forward,reverse,result}.json`
+  preserve the actual CUDA raw order reports and comparison. Ignored
+  `artifacts/benchmark_cifar_pretrained_cuda_v1_{request,selection,manifest}_smoke.json`
+  are 38,378/77,742/21,140 bytes; the busy-GPU deferral is separate.
+- Validation and skipped tests: focused CUDA
+  `.\.venv-cuda\Scripts\pytest.exe -q -x tests/test_resnet50_benchmark.py`
+  passed **32/0 skipped**. Full original CPU
+  `.\.venv\Scripts\pytest.exe -q` passed, with collection confirming
+  **787 tests** and no failure/skip markers. `.\.venv\Scripts\ruff.exe
+  check .` passed; `.\.venv\Scripts\mypy.exe src tests scripts` passed
+  on **128 files**; `ruff format --check` passed for all four new CUDA
+  scripts; `git -c core.safecrlf=false diff --check` passed. The
+  repository-wide formatter debt of 43 older files was not changed; that
+  optional broad format check was not rerun. No full CUDA-environment
+  suite or matched CUDA final-test experiment was run.
+- Plan changes and limits: P1.7f/g and P1.8m were added before their
+  respective device/model/selection runs and checked only after evidence.
+  Aggregate P1.7 is now checked because the corrected CPU routes cover
+  replay, noisy structure, data views, and model order, while the actual
+  CIFAR CUDA reversal met exact state and declared numerical tolerance.
+  ADR-0064 explains why CUDA runtime, order, validation selection, and
+  wall-time confirmation are distinct gates. P1.8n and parent P1.8 stay
+  unchecked; 32-pixel/limited-data and busy-GPU timing cannot support a
+  general fairness ranking. Legacy v1/v2 reproduction streams and
+  strict-online continual label timing remain separately scoped.
+- Exact next action: when three GPU readings five seconds apart each show
+  at most 10% utilization and at least 5 GiB free, run
+  `.\.venv-cuda\Scripts\python.exe
+  scripts/run_cifar_pretrained_cuda_confirmation.py` from the unchanged
+  saved manifest under an external 485 s process cap, then audit all nine
+  fixed-data, nine wall-time, and nine isolated-memory reports. While the
+  GPU remains busy, implement the first strict-online continual phase-A
+  label-access sentinel as a separate evaluation-isolation increment.
+
+## 2026-09-28 — P1.3a continual future-phase label-arrival canary
+
+- Repository state: `master` at
+  `704886b1e39159726271294c7475d9e4cdf6910e`; the existing dirty
+  checkout and all ignored experimental artifacts were preserved. A
+  concurrent change to `.github/workflows/ci.yml` (adding Python 3.14 to
+  its matrix) appeared during this increment; it was not edited here.
+- Completed task ID: **P1.3a**. **P1.3b, P1.8n, and P1.8 parent remain
+  unchecked.** This is a measured label-arrival gate, not a strict-online
+  result or a change to the offline benchmark.
+- Inspection: `_run_single_seed` constructs Phase B roles only after
+  `_train_phase_a_models` returns. `_build_checkpoint_seed_data` constructs
+  both phase roles before checkpointed training because v1's
+  `continual_data_digest` binds them together. A training-helper-only
+  sentinel would miss that early source access.
+- Implemented `tests/test_continual_phase_label_arrival.py`: a Phase B source
+  canary rejects construction before every Phase A model completes. Both
+  ordinary model orders made two Phase A updates per model before the single
+  Phase B source request. The same canary raised in the checkpoint route
+  **before any Phase A training or checkpoint write**, retaining the
+  negative access result as a passing expected-rejection assertion. The
+  existing final-test sentinel test covers both ordinary model orders.
+- Commands and outcomes: `.\.venv\Scripts\pytest.exe -q
+  tests/test_continual_phase_label_arrival.py
+  tests/test_continual_shift_benchmark.py
+  tests/test_continual_checkpoint_resume.py` passed **34 tests**.
+  `.\.venv\Scripts\pytest.exe -q` exited 0; collection counted **790 tests
+  in 65 files**, with no skips in the run output. `.\.venv\Scripts\ruff.exe
+  check .` passed. `.\.venv\Scripts\mypy.exe src tests scripts` passed on
+  **129 files**. `ruff format --check` passed for the new canary and four
+  CUDA scripts after formatting one line in the new test.
+  `git -c core.safecrlf=false diff --check` passed. No CUDA full suite or
+  P1.8n final-test confirmation was run in this increment.
+- GPU condition: a read-only `nvidia-smi
+  --query-gpu=utilization.gpu,memory.free,memory.used
+  --format=csv,noheader,nounits` sample returned **71%** utilization and
+  **4,307 MiB** free. It did not meet P1.8n's quiet gate, so its frozen
+  manifest and prior deferral artifact remain untouched; no final-test
+  batch was read.
+- Artifacts: no new experiment JSON. The prior ignored CUDA validation,
+  environment/order reports, and busy-GPU deferral remain at their recorded
+  paths. This increment added only the source-controlled canary, ADR-0065,
+  and protocol/plan/log documentation.
+- Plan change and rationale: split a small P1.3a availability audit from
+  P1.3b phase-specific checkpoint identity. The observed checkpoint
+  prefetch requires a versioned data-digest and resume design; silently
+  treating the existing corrected route as strict-online would weaken the
+  label-arrival contract. The reviewed offline protocol and saved scores
+  were not modified.
+- Blockers: P1.8n needs three five-second-apart GPU readings at most 10%
+  utilization and at least 5 GiB free. P1.3b needs a phase-A-only identity
+  that preserves tamper detection and exact Phase A/B recovery; the current
+  v1 checkpoint binds both phases before A. Neither blocks the other.
+- Exact next action: while the GPU is busy, inspect
+  `src/app/continual_checkpoint.py` and `_run_checkpointed_seeds` together,
+  then add a failing Phase A checkpoint/resume canary that rejects Phase B
+  source access before implementing a versioned phase-specific identity.
+  Once P1.8n's separate quiet gate passes, run its unchanged saved CUDA
+  manifest and audit all three frozen budget scopes.
+
+## 2026-09-28 — P1.8n frozen CUDA matched-head confirmation
+
+- Completed task ID: **P1.8n**. The parent **P1.8 remains unchecked** for
+  representative scale and environment-limited timing interpretation.
+  The earlier busy-GPU deferral and all frozen selection artifacts were
+  preserved. No seed, candidate, metric, or wall budget changed.
+- Preflight: `.\.venv-cuda\Scripts\python.exe
+  scripts/run_cifar_pretrained_cuda_confirmation.py --preflight` exited 0,
+  restored manifest digest
+  `2965701512685175572f46b7499e8a28d462a32fe64a7f4f73d8c39a0e500062`,
+  rehashed the saved archive and pretrained checkpoint, and reported zero
+  final-test iterations. No result/failure file existed before launch.
+- Launch: `.\.venv-cuda\Scripts\python.exe -c "import subprocess,sys;
+  subprocess.run([sys.executable,
+  'scripts/run_cifar_pretrained_cuda_confirmation.py'],check=True,
+  timeout=485)"` exited 0. The three five-second-apart gate readings were
+  **3%/3%/2% utilization** with **7,763/7,757/7,807 MiB free**. The frozen
+  run completed in **98.172 s**, below the 480 s internal and 485 s
+  external caps. Its post-run reading was 51% utilization and 6,442 MiB
+  free. Background load during the run is therefore not ruled out for the
+  0.5 s wall-time comparisons.
+- Result: ignored
+  `artifacts/benchmark_cifar_pretrained_cuda_v1_result_smoke.json` is
+  **210,337 bytes**, SHA-256
+  `41f4b4c1e430ec4561f2a9abbb339828c07e80eb804f0b0e1a176978cf83f9fe`.
+  It retains 9/9 complete one-epoch fixed-data training/test rows, 9/9
+  wall-time heads stopped at `deadline` with work/overshoot, and nine
+  distinct process-memory child PIDs. Every child retained **32,954**
+  head parameters and recorded CUDA allocator peaks and sampled train RSS
+  separately. The prior ignored deferred artifact remains; no failure
+  artifact was created.
+- Independent audit: an initial inline Python assertion compared full
+  fixed-data training-role hash dictionaries to wall-time reports and
+  failed because only the latter include final-test hashes. The corrected
+  audit compared train/guard/validation roles across all scopes, test
+  hashes between confirmation and wall-time rows, and per-seed backbone,
+  initial-head, selected candidate, trained-head/test row, capacity, PID,
+  deadline, finite metric, GPU/RSS, quiet spacing, and manifest integrity
+  invariants. It exited 0 with nine fixed rows, nine deadline heads, and
+  nine distinct children. The first assertion was an audit-scope mistake,
+  not an experiment failure; the raw result and manifest were untouched.
+- Predeclared test-accuracy summaries: fixed-data means were **0.4492
+  backprop, 0.1816 PC, 0.1595 circadian**; wall-time means were **0.5944,
+  0.4095, 0.2708**. Per-seed values, population standard deviations,
+  cross-entropy, work, and overshoot remain in the result. The circadian
+  model did not lead either accuracy scope. These negative results were
+  retained without retuning or seed changes.
+- Tests and skipped tests: no new source-code test was required for this
+  exact-manifest experiment. The preceding full CPU suite passed 790/0
+  skipped, with Ruff and mypy passing; the independent result audit passed.
+  A full CUDA pytest suite and a larger-scale CIFAR study were not run.
+- Plan/documentation changes: checked P1.8n only after the independent
+  audit; updated the plan, README, and evaluation protocol with the
+  result and its environmental limits. P1.8 remains unchecked, since
+  1,024 training images at 32 pixels and possible background GPU load do
+  not prove a general fairness ranking.
+- Exact next action: implement P1.3b's versioned phase-specific continual
+  checkpoint identity, starting with a failing Phase A resume canary that
+  rejects any Phase B source access. Preserve v1 offline recovery and
+  final-test sealing. Separately predeclare a representative-scale P1.8
+  follow-up only after its data and device budget is justified.
+
+## 2026-09-28 — P1.3b versioned continual phase-arrival checkpoints
+
+- Completed task ID: **P1.3b**. **P1.3c and P1.8 parent remain unchecked.**
+  The new route is phase-source isolation within an offline schedule; it is
+  not reported as a full strict-online experiment.
+- Test-first evidence: the new Phase A interruption/resume canary initially
+  failed with `Unknown continual benchmark protocol:
+  continual_phase_arrival_v2`. A later final-test seal check caught a
+  premature held-out hash at the Phase B boundary; production code now
+  defers both final-test validation and hashing until both phases train.
+  The existing v1 early-Phase-B canary remains a passing negative control.
+- Implementation: opt-in `continual_phase_arrival_v2` writes format-2
+  checkpoints. A fresh or resumed Phase A builds only Phase A roles and a
+  namespaced train/validation digest. Phase B source construction and the
+  combined development digest occur after Phase A training; its checkpoint
+  carries only four arrived train/validation role hashes. Final-test hashes
+  enter the completed report/checkpoint after Phase B training. The
+  checkpoint training context exposes only training roles plus identity,
+  never final-test objects. `hash_test=False` in the infra role builder
+  preserves all default v1 hashing behavior. The new CLI protocol choice is
+  opt-in; v1 and legacy defaults/checkpoints remain supported.
+- Behavioral verification: the new test file exercises fresh Phase A and
+  Phase A resume in both model orders with a future-Phase-B source canary;
+  changed Phase A/B development roles fail before an update; both Phase A
+  and Phase B interruptions resume to matching reports, baseline model
+  states, circadian state/replay content, and sleep counters. A two-seed
+  checkpoint resumes the second seed without retraining the first. A
+  held-out sentinel rejects final-test role hashing/reads during either
+  training phase and verifies the training context has no test objects.
+  The old v1 checkpoint tests still pass. The corrected role test-hash
+  comparison is delayed, while the generator itself still materializes
+  Phase A test data as part of the seeded source.
+- Commands and outcomes: `.\.venv\Scripts\python.exe -m pytest -q
+  tests/test_continual_phase_label_arrival.py
+  tests/test_continual_checkpoint_resume.py
+  tests/test_continual_shift_benchmark.py
+  tests/test_split_function_preservation.py -x` passed **44**. Full
+  `.\.venv\Scripts\python.exe -m pytest -q` exited 0; collection counted
+  **796 tests in 65 files**, with no skips in the run output.
+  `.\.venv\Scripts\ruff.exe check .` passed, and
+  `.\.venv\Scripts\python.exe -m mypy src tests scripts` passed on **129
+  files**. `ruff format --check` passed for the five touched Python files;
+  `git -c core.safecrlf=false diff --check` passed. A tiny local
+  `.\.venv\Scripts\python.exe scripts/run_continual_shift_benchmark.py
+  --protocol-id continual_phase_arrival_v2 --profile baseline --seeds 7
+  --sample-count-phase-a 40 --sample-count-phase-b 40 --phase-a-epochs 2
+  --phase-b-epochs 2 --hidden-dim 4 --hidden-dims 4
+  --sleep-interval-phase-a 0 --sleep-interval-phase-b 0` smoke exited 0
+  and reported the v2 protocol. Its scores are descriptive and were not
+  used to choose settings.
+- Artifacts and skipped work: no new experiment JSON or large sweep. Pytest
+  used temporary local checkpoint files only. The earlier 210,337-byte
+  P1.8n CUDA result and busy-GPU deferral remain untouched. A full CUDA
+  pytest suite and a representative-scale fairness run were not repeated
+  for this NumPy checkpoint change.
+- Documentation/plan changes: added ADR-0066, updated the README,
+  `docs/modules/app.md`, and evaluation protocol table. Checked P1.3b only
+  after source-arrival, tamper, continuation, held-out, CLI, and quality
+  gates. Added unchecked P1.3c to preserve the missing strict-online
+  requirements: Phase A schedule cannot depend on the future B horizon,
+  replay needs a declared count/byte budget, and guard/outer-selection
+  arrival plus label/retention reporting need an explicit contract. The
+  reviewed v1 and new v2 outputs are versioned separately.
+- Repository state: the branch remains at
+  `704886b1e39159726271294c7475d9e4cdf6910e`, with prior dirty work
+  preserved. Concurrent unrelated edits in `.github/workflows/ci.yml` and
+  `requirements.txt` were not modified here.
+- Exact next action: split P1.3c into an initial train-only schedule gate,
+  then add a failing test for an opt-in strict-online route showing that a
+  change to the future Phase B duration cannot change Phase A sleep
+  decisions or trained state. Preserve v1/v2 offline results, and leave
+  P1.3c unchecked until replay, guard, label-arrival, reporting, and
+  bounded confirmation criteria all pass.
+
+## 2026-09-28 — Python 3.14 environment upgrade
+
+- Installed standalone Python 3.14.7 from the Python Software Foundation
+  with WinGet. The Python launcher now defaults to 3.14.7 and a normal PATH
+  resolves `python` to that install. Python 3.11 and 3.13 remain installed so
+  older environments can still be reproduced.
+- Promoted Python 3.14.7 environments to `.venv` (CPU Torch 2.14.0),
+  `gpu-venv` (CUDA 13.0 Torch 2.14.0), and `.venv-cuda` (same CUDA package
+  set). Moved the original three Python 3.11 environments to ignored
+  `*-py311-snapshot` folders; their interpreters and package sets remain
+  usable with direct `python.exe -m ...` invocations.
+- Added Python 3.14 to the CI matrix. Limited NumPy to `<2.5` because NumPy
+  2.5.3's stubs use Python 3.12 type-alias syntax, which failed the existing
+  mypy Python 3.11 target. NumPy 2.4.6 has CPython 3.14 wheels and passes the
+  same type check.
+- Validation: `pip check` passed in all three active environments; CPU and
+  CUDA environments have identical non-Torch package inventories; a CUDA
+  convolution forward/backward produced finite gradients on the RTX 3080.
+  Ruff passed, mypy passed on 129 files, and the stable Python 3.14 CPU run
+  passed **790 tests, 0 skipped, in 253.07 s**. An earlier run overlapped
+  replacing NumPy and had one stochastic-loader failure; the full rerun after
+  package installation completed passed.
+
+## 2026-09-28 — session handoff after P1.8n and P1.3b
+
+- Completed task IDs this session: **P1.8n** (frozen matched CUDA
+  confirmation) and **P1.3b** (opt-in phase-arrival checkpoint identity).
+  Full **P1.8** and **P1.3c** remain unchecked.
+- Final commands/outcomes: `.\.venv\Scripts\python.exe -m pytest -q`
+  exited 0 with **796 collected tests in 65 files** and no skips shown;
+  `.\.venv\Scripts\ruff.exe check .`, `.\.venv\Scripts\python.exe -m mypy
+  src tests scripts` (129 files), touched-file `ruff format --check`, and
+  `git -c core.safecrlf=false diff --check` passed. The v2 tiny CLI smoke
+  and the independent nine-row/nine-head/nine-child CUDA JSON audit passed.
+  The active `.venv` and `.venv-cuda` interpreters currently report Python
+  **3.14.7**; the separately recorded environment upgrade was preserved.
+- Experiment artifacts: ignored
+  `artifacts/benchmark_cifar_pretrained_cuda_v1_result_smoke.json`
+  (210,337 bytes, SHA-256
+  `41f4b4c1e430ec4561f2a9abbb339828c07e80eb804f0b0e1a176978cf83f9fe`)
+  and the earlier busy-GPU deferral. No P1.3b score artifact or sweep was
+  created. The CUDA result retains the negative circadian accuracy result;
+  no metric, seed, or selected candidate changed.
+- Skipped work and limits: no full CUDA pytest suite, no representative
+  image-scale fairness run, and no strict-online result. The v2 phase
+  isolation route still uses the known full A+B sleep schedule and lacks
+  replay/guard/selection arrival reporting. Post-confirmation GPU load was
+  51%, limiting interpretation of wall-time results.
+- Plan changes: checked P1.8n and P1.3b on their acceptance evidence;
+  added unchecked P1.3c for the full strict-online contract. Parent P1.8
+  remains unchecked for representative scale. Existing dirty work,
+  including the separate Python 3.14 CI/dependency changes, was preserved.
+- Exact next action: add an initial P1.3c schedule-isolation subtask and a
+  failing test for an opt-in strict-online route proving that changing only
+  the future Phase B epoch count cannot alter any Phase A sleep decision or
+  trained Phase A state. Keep v1/v2 offline behavior intact, then continue
+  with declared replay memory, label-arrival/guard roles, and reporting.
+
+## 2026-09-28 — P1.3c1 Phase A schedule isolation
+
+- Completed task ID: **P1.3c1**. Parent **P1.3c** and new substeps
+  **P1.3c2–c4** remain unchecked. The original P1.3c criteria were not
+  weakened. Read `AGENTS.md`, the full living plan, and this log; reconciled
+  the dirty `master` checkout at `704886b1e39159726271294c7475d9e4cdf6910e`
+  with the prior P1.8n/P1.3b handoff. Preserved unrelated Python 3.14
+  CI/dependency edits and all prior user work.
+- Why this increment: both ordinary and checkpointed Phase A trainers passed
+  `phase_a_epochs + phase_b_epochs` to progress-sensitive sleep. Core sleep
+  uses completed/total progress to choose split/prune budgets. A tiny fixed
+  seed-17, two-epoch A fixture with forced sleep exposed the real effect:
+  under v2, B durations 1 and 7 made A sleep totals 3 and 9; the second A
+  sleep made zero versus one split, with different trained state. This is a
+  negative isolation result for v2, retained without changing its behavior.
+- Added opt-in `continual_phase_local_schedule_v3` and checkpoint format 3.
+  Its Phase A sleep receives only the A horizon in ordinary and checkpointed
+  paths. It inherits v2's phase-arrival role boundary; B remains available
+  only after A, when its own A+B sleep horizon is known. The v1/v2 defaults,
+  schedule, data flow, and checkpoint format remain unchanged. ADR-0067,
+  README, app-module docs, and the evaluation-protocol table describe the
+  limited v3 claim. V3 is not labeled a full strict-online study.
+- Test-first and validation commands/outcomes: the new focused file first
+  failed four v3 cases on unknown protocol (the two v2 controls passed).
+  After implementation, `python -m pytest tests/test_continual_phase_local_schedule.py
+  tests/test_continual_phase_label_arrival.py tests/test_continual_checkpoint_resume.py
+  tests/test_continual_shift_benchmark.py -q` passed **48/48**. The v3
+  fixture retained identical A sleep progress, structural indices, and
+  hashes of all three trained models across B durations 1/7 in both model
+  orders and both ordinary/checkpointed routes. Interrupting at the final
+  A `after_sleep` file checkpoint confirmed format 3, only A train/validation
+  hashes, no Phase B source construction, and exact continuation versus an
+  uninterrupted checkpointed run; final reports also matched ordinary
+  execution. The v2 control retained its full-horizon sensitivity.
+- Full quality gate: `.\.venv\Scripts\python.exe -m pytest -q` exited 0;
+  collection counted **804 tests**, with no skips shown. `ruff check .`,
+  `python -m mypy src tests scripts` (**130 files**), touched-file
+  `ruff format --check`, and `git -c core.safecrlf=false diff --check` all
+  passed. The tiny v3 CLI smoke (seed 17, 40 examples/phase, A2/B1) exited
+  0 and printed the v3 protocol. Its backprop/PC/circadian balanced scores
+  were 1.000/0.750/0.000; these are smoke outputs, not a selected ranking.
+- Experiment artifacts: no new persistent score artifact or sweep. Tests
+  used temporary trusted checkpoint files only. The earlier frozen CUDA
+  confirmation JSON and its negative circadian outcome remain untouched.
+  Skipped a full CUDA pytest run and representative-scale fairness study;
+  neither is needed to validate this NumPy schedule boundary. No seeds,
+  metrics, or baseline tuning were changed to favor circadian.
+- Plan changes: split P1.3c into c1 schedule isolation, c2 replay budget,
+  c3 guard/role/label arrival, and c4 full bounded confirmation. Checked c1
+  only after the adversarial test, checkpoint continuation, focused/full
+  tests, static checks, and CLI smoke. The v3 config/checkpoint identity
+  still knows future B settings, and retained replay IDs/bytes and
+  guard/selection arrival are unreported. These are open P1.3c2–c4 work,
+  not accepted strict-online evidence. P1.8 representative-scale fairness
+  and the separate P3.9 CUDA branches also remain open.
+- Exact next action: inspect NumPy circadian replay capture/selection and
+  continual training interfaces. Add a failing v3 test that prevents
+  replay from selecting unobserved/future-phase examples and enforces a
+  declared retained-example count and byte cap at A→B and after checkpoint
+  resume. Keep v1/v2 replay unchanged, then implement P1.3c2.
+
+## 2026-09-28 — P1.3c2 observed-example replay budget
+
+- Completed task ID: **P1.3c2**. Parent **P1.3c** and substeps **P1.3c3–c4**
+  remain unchecked. Rechecked the dirty `master` checkout at
+  `704886b1e39159726271294c7475d9e4cdf6910e`, the current plan/log,
+  and the actual replay/checkpoint code. All unrelated user changes,
+  including Python 3.14 environment files and the frozen CUDA result,
+  were preserved.
+- Starting finding: NumPy `_store_replay_snapshot` copied the entire wake
+  training batch into each deque entry. `replay_memory_size` therefore
+  capped batches, not examples or bytes. There was no retained-ID or
+  phase-boundary memory report. The first test file failed import on the
+  missing bounded route, then passed after implementation.
+- Added opt-in `continual_bounded_replay_v4` with a separate dataclass
+  config/result and checkpoint format 4. V1/v2/v3 dataclass shapes,
+  config digests, and historical whole-batch replay remain unchanged.
+  V4 requires explicit positive example/byte caps, enabled replay, and
+  component sleep. The NumPy core stores unique observed labeled rows
+  by the smallest stable SHA-256 content hashes, limited by both caps.
+  The report records declared caps and actual retained IDs/count/array
+  bytes after A and after B. Bytes cover copied NumPy input and target
+  arrays, excluding Python/deque and checkpoint overhead. ADR-0068,
+  README, app/core-module docs, and the evaluation protocol explain the
+  deterministic selection rule and possible uneven phase mix.
+- Validation: `python -m pytest tests/test_continual_bounded_replay.py -q`
+  passed **13/13**. Independent fixtures made the example limit bind at
+  4/240 bytes and the byte limit bind at 10/48 bytes; legacy core replay
+  still retained one whole batch. Instrumented sleep selection in both
+  model orders used only arrived training content IDs. Ordinary and A/B
+  resumed checkpoint reports matched, including retained IDs/count/bytes.
+  Format-4 preflight rejected a future B train row in Phase A, a B
+  validation row in the active B buffer, and a B row in frozen A state,
+  all before another backprop update. A two-seed resume rejected a forged
+  prior-seed retained-ID report and recovered when the original file was
+  used. Phase A/B source arrival and final-test sealing inherit the
+  previously tested v2/v3 path.
+- A first tiny v4 CLI diagnostic used the legacy sleep mode and reported
+  zero performed sleeps despite retained examples. That exposed a
+  misleading configuration; v4 now requires explicit component sleep.
+  The corrected tiny CLI smoke (`--profile strength-case --protocol-id
+  continual_bounded_replay_v4 --sleep-mode components
+  --replay-max-examples 4 --replay-max-bytes 96 --seeds 17`, with 40
+  samples/phase and A2/B2) exited 0, performed four component sleeps,
+  and reported 4 examples/96 bytes at both boundaries. Its descriptive
+  balanced scores were backprop 1.000, PC 0.750, circadian 0.000;
+  this negative tiny outcome was retained without selecting a seed,
+  tuning a baseline, or calling it a strict-online ranking.
+- Full quality gate: `.\.venv\Scripts\python.exe -m pytest -q` exited 0;
+  collection counted **817 tests**, with no skips shown. `ruff check .`,
+  `python -m mypy src tests scripts` (**131 files**), touched-file
+  `ruff format --check`, and `git -c core.safecrlf=false diff --check`
+  passed. The focused continual/core set also passed before the full run.
+  No full CUDA pytest run or representative-scale fairness study was
+  attempted for this NumPy replay increment.
+- Experiment artifacts: no persistent new result or sweep. Tests used
+  temporary trusted checkpoint files; the CLI smoke printed to stdout.
+  The earlier CUDA JSON and negative result were not modified.
+- Plan changes: checked P1.3c2 only after independent caps, provenance,
+  checkpoint/resume, reporting, CLI, and full quality gates. V4 remains
+  partial: inner guard/outer selection arrival, source/label timing and
+  task-information ledger, final-test perturbation/state invariance, and
+  bounded A→B confirmation remain under P1.3c3–c4 and parent c.
+  P1.8 representative-scale fairness and separate P3.9 CUDA branches
+  also remain open; no new external blocker was found.
+- Exact next action: inspect v4 role construction and scoring boundaries,
+  then add a failing sentinel test that identifies which Phase A/B labels
+  and guard/outer-selection roles are visible at each decision point.
+  Introduce disjoint, arrival-stamped roles and a final-test label
+  perturbation/state check without changing v1/v2/v3 offline outputs.
+
+## 2026-09-28 — P1.3c3a final-test label seal
+
+- Completed task ID: **P1.3c3a**. Parent **P1.3c3** and substep
+  **P1.3c3b**, **P1.3c4**, and parent **P1.3c** remain unchecked.
+  Continued on dirty `master` at `704886b1e39159726271294c7475d9e4cdf6910e`;
+  preserved unrelated user changes, including the Python 3.14 environment
+  files and existing CUDA experiment records.
+- Inspection found that checkpointed v4 already requested `hash_test=False`
+  during Phase A/B role construction, but ordinary v4 used the splitter
+  default and hashed held-out labels before training. A new raising role and
+  hash sentinel failed in both ordinary model orders before Phase A updates;
+  both checkpointed orders passed. This was a real access-timing gap even
+  though the prior label-perturbation check showed no state change.
+- Ordinary v4 now constructs A/B roles without held-out hashes, then binds
+  both test hashes after all three models finish Phase B. V1/v2/v3 ordinary
+  behavior and checkpointed behavior retain their prior routes. New tests
+  exercise ordinary/checkpointed execution in both model orders: the final
+  role raises on early input or label access, test hashing raises until B
+  training finishes, and both hashes appear at reporting. Perturbing only
+  the two final-test target arrays changes their hashes and backprop test
+  accuracy, while six final/frozen trained-state hashes, sleep progress and
+  structural decisions, replay selections, and four development-role hashes
+  remain identical. Replay selection was nonempty in the fixture.
+- Commands and outcomes from the workspace root (using `.venv` executables):
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_final_label_seal.py tests/test_continual_bounded_replay.py -q
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_final_label_seal.py tests/test_continual_bounded_replay.py tests/test_continual_phase_local_schedule.py tests/test_continual_phase_label_arrival.py tests/test_continual_checkpoint_resume.py tests/test_continual_shift_benchmark.py -q
+  .\.venv\Scripts\python.exe -m pytest -q
+  .\.venv\Scripts\python.exe -m pytest --collect-only -q
+  .\.venv\Scripts\ruff.exe check .
+  .\.venv\Scripts\python.exe -m mypy src tests scripts
+  .\.venv\Scripts\ruff.exe format --check src/app/continual_shift_benchmark.py tests/test_continual_final_label_seal.py
+  git -c core.safecrlf=false diff --check
+  .\.venv\Scripts\python.exe scripts/run_continual_shift_benchmark.py --profile strength-case --protocol-id continual_bounded_replay_v4 --sleep-mode components --replay-max-examples 4 --replay-max-bytes 96 --seeds 17 --sample-count-phase-a 40 --sample-count-phase-b 40 --phase-a-epochs 2 --phase-b-epochs 2 --sleep-interval-phase-a 1 --sleep-interval-phase-b 1
+  ```
+
+  The two focused test commands passed **21** and **69**. Full pytest
+  exited 0; collection counted **825 tests**, with no skips shown. Ruff,
+  mypy (**132 source files**), touched-file format, and diff checks passed.
+  The recorded tiny v4 CLI invocation exited 0; four component sleeps
+  retained 4/96 at both boundaries. Its descriptive balanced scores were
+  backprop 0.850, PC 0.600, circadian 0.450. This invocation used the
+  printed strength-case defaults apart from the listed small-run flags;
+  it does not replace the separate P1.3c2 smoke or constitute a ranking.
+  No seed, baseline, or metric was changed to improve the negative result.
+- Skipped work and artifacts: no new persistent experiment artifact or
+  sweep; the CLI report was stdout and test checkpoints used temporary
+  directories. No full CUDA pytest run or representative-scale fairness
+  study was attempted for this NumPy access-timing increment. Prior CUDA
+  result and busy-GPU deferral artifacts were untouched.
+- Plan changes and rationale: split P1.3c3 into c3a (final-test access seal)
+  and c3b (physical role/label arrival and decision boundaries) because the
+  ordinary early hash could be fixed and verified independently. Checked
+  c3a only after its red/green sentinel, perturbation, focused/full/static
+  gates, and smoke. ADR-0069, README, app-module docs, and evaluation
+  protocol explain the narrower result. Subsequent inspection found that
+  the source generator still creates held-out labels and the splitter
+  carries their array reference before training. The first c3a wording
+  overclaimed “every read”; its recorded acceptance is now explicitly the
+  runner's role validation/hash/score boundary, while physical release is
+  an unchanged parent requirement assigned to open c3b. V4 also has no
+  disjoint inner guard/outer selection arrival ledger or declared task
+  information. These are unfinished c3b acceptance criteria, not accepted
+  strict-online evidence. P1.8 representative-scale fairness and P3.9 CUDA
+  branches remain separate open work; no new external blocker was found.
+- Exact next action: inspect v4 phase source generation and role
+  construction, add a failing source/label sentinel plus disjoint
+  train/inner-guard/outer-selection role test with stable IDs/hashes and
+  recorded arrival, then implement the versioned P1.3c3b contract while
+  preserving the v4 final-test seal and v1/v2/v3 offline outputs.
+
+## 2026-09-28 — P1.3c3b1 source-field release
+
+- Completed task ID: **P1.3c3b1**. Parent **P1.3c3b**, substep
+  **P1.3c3b2**, **P1.3c3**, **P1.3c4**, and **P1.3c** remain unchecked.
+  Worked on dirty `master` at `704886b1e39159726271294c7475d9e4cdf6910e`;
+  unrelated user changes and earlier CUDA artifacts were preserved.
+- Inspection found that `split_training_validation(hash_test=False)` still
+  read `DatasetSplit.test_input` and `test_target` to package a held-out
+  role. A new source-level sentinel raised on the first test-input field
+  request before Phase A training in **all four** ordinary/checkpointed ×
+  model-order v4 cases. This was a distinct gap from the runner-level hash
+  and role seal closed in P1.3c3a.
+- Added `DeferredFinalTestRole` in `src/infra/datasets.py` and an explicit
+  `defer_test_access` splitter option, valid only with `hash_test=False`.
+  V4 A/B source splitters request it in both paths; v1/v2/v3 keep the
+  previous default. The reference resolves source test input and target
+  only when final hashing/scoring occurs after each seed's B training.
+  The sentinel now passes in both paths/orders and separately counts
+  post-training input and label reads. Existing v4 A/B interruption and
+  resume checks still match ordinary/uninterrupted results. The exact
+  small CLI smoke repeated its prior balanced scores (backprop 0.850,
+  PC 0.600, circadian 0.450) and 4-example/96-array-byte retention at
+  both boundaries with four component sleeps. No seed, metric, or baseline
+  was changed to force a circadian advantage.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_final_label_seal.py -q -k releases_source
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_final_label_seal.py tests/test_continual_bounded_replay.py tests/test_dataset_roles.py -q
+  .\.venv\Scripts\python.exe -m pytest -q
+  .\.venv\Scripts\python.exe -m pytest --collect-only -q
+  .\.venv\Scripts\ruff.exe check .
+  .\.venv\Scripts\python.exe -m mypy src tests scripts
+  .\.venv\Scripts\ruff.exe format --check src/infra/datasets.py src/app/continual_shift_benchmark.py tests/test_continual_final_label_seal.py
+  git -c core.safecrlf=false diff --check
+  .\.venv\Scripts\python.exe scripts/run_continual_shift_benchmark.py --profile strength-case --protocol-id continual_bounded_replay_v4 --sleep-mode components --replay-max-examples 4 --replay-max-bytes 96 --seeds 17 --sample-count-phase-a 40 --sample-count-phase-b 40 --phase-a-epochs 2 --phase-b-epochs 2 --sleep-interval-phase-a 1 --sleep-interval-phase-b 1
+  ```
+
+  The first command failed **4/4** before implementation at the intended
+  source field. The focused three-file command passed **28** after the
+  fix. Full pytest exited 0; collection counted **829 tests**, with no
+  skips shown. Ruff, mypy (**132 files**), touched-file format, and diff
+  checks passed. The final source sentinel assertion was strengthened to
+  count inputs and labels independently, and the focused suite was rerun
+  green before the final full/static gates.
+- Experiment artifacts and skipped work: no new persistent result or
+  sweep; the CLI report was stdout and test checkpoints were temporary.
+  No full CUDA suite or representative-scale fairness experiment was run
+  for this NumPy source boundary.
+- Plan changes and rationale: split c3b into checked b1 (per-seed source
+  field release) and open b2 (global setting freeze, disjoint inner guard
+  and outer selection, IDs/hashes, label/task ledger). ADR-0070, README,
+  evaluation protocol, and app/infra module docs describe the opt-in
+  reference and its scope. The generator still allocates test arrays at
+  phase construction; a completed seed is scored before later seeds
+  train. Thus the parent final-test and role-arrival criteria remain open.
+  No external blocker was found.
+- Exact next action: add a two-seed source/label sentinel that raises if
+  seed 17's final test is opened before seed 19 and all settings finish;
+  record the current failure, then design a versioned run-level freeze
+  with disjoint arriving train/inner-guard/outer-selection roles and
+  explicit IDs, hashes, label times, and per-method task information.
+
+## 2026-09-28 — P1.3c3b2a all-seed ordinary final-test seal
+
+- Completed task ID: **P1.3c3b2a**. **P1.3c3b2b–c**, parent **P1.3c3b2**,
+  **P1.3c3b**, **P1.3c3**, **P1.3c4**, and **P1.3c** remain unchecked.
+  Continued on dirty `master` at `704886b1e39159726271294c7475d9e4cdf6910e`;
+  unrelated Python 3.14, CUDA, and other user changes were preserved.
+- Starting evidence: a two-seed source sentinel showed v4 opens seed 17's
+  final-test input while seed 19 has not begun training. The v5 tests
+  initially failed because the new config/route did not exist; after
+  implementation, the same source sentinel passed in both model orders.
+- Added opt-in `continual_global_test_seal_v5` with a distinct frozen
+  config. The ordinary runner retains each seed's trained A/B models and
+  deferred final-test roles, then binds hashes and scores only after every
+  configured seed finishes. It inherits v4's phase-local sleep and
+  observed-example replay caps. A v5 checkpoint request fails before
+  source loading, since v4 format-4 `seed_complete` stores scored results
+  and cannot represent pending unscored trained seeds. V1–v4 paths remain
+  available; a fixed two-seed fixture produced exactly equal v4/v5
+  per-seed reports and aggregate in both model orders. Perturbing only
+  seed 17's final labels changed its test hash but left both serialized
+  trained seed states and seed 19's entire report identical.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_global_test_seal.py -q
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_global_test_seal.py tests/test_continual_final_label_seal.py tests/test_continual_bounded_replay.py tests/test_continual_phase_local_schedule.py tests/test_continual_phase_label_arrival.py tests/test_continual_checkpoint_resume.py tests/test_continual_shift_benchmark.py -q
+  .\.venv\Scripts\python.exe -m pytest -q
+  .\.venv\Scripts\ruff.exe check .
+  .\.venv\Scripts\python.exe -m mypy src tests scripts
+  .\.venv\Scripts\ruff.exe format --check src/app/continual_shift_benchmark.py scripts/run_continual_shift_benchmark.py tests/test_continual_global_test_seal.py
+  git -c core.safecrlf=false diff --check
+  .\.venv\Scripts\python.exe scripts/run_continual_shift_benchmark.py --profile strength-case --protocol-id continual_global_test_seal_v5 --sleep-mode components --replay-max-examples 4 --replay-max-bytes 96 --seeds 17,19 --sample-count-phase-a 40 --sample-count-phase-b 40 --phase-a-epochs 2 --phase-b-epochs 2 --sleep-interval-phase-a 1 --sleep-interval-phase-b 1 --hidden-dim 4
+  ```
+
+  The first v5 test run had **2 failures** on the absent config while its
+  v4 negative canary passed. After implementation, the v5 test file
+  passed **8**, the seven-file continual set passed **81**, and the
+  full CPU suite passed **837** with zero skips shown. Ruff, mypy
+  (**133 source files**), touched-file format, and diff checks passed.
+  The tiny two-seed CLI exited 0 with four sleeps per seed and 4/96
+  retained at both boundaries. Descriptive balanced means were backprop
+  0.575, PC 0.650, circadian 0.250; the negative circadian result was
+  retained without selecting seeds, retuning baselines, or changing metrics.
+- Experiment artifacts and skipped work: no new persistent output or
+  sweep; the CLI report was stdout and checkpoints in tests were temporary.
+  Full CUDA pytest and representative-scale fairness work were not run for
+  this NumPy access boundary. Earlier artifacts were untouched.
+- Plan changes and rationale: split P1.3c3b2 into checked b2a (ordinary
+  all-seed access seal), open b2b (versioned unscored-state checkpoint),
+  and open b2c (disjoint arrived guard/outer roles, setting selection, IDs,
+  hashes, label/task timing). ADR-0071, README, app docs, and evaluation
+  protocol document the new route and pending-model memory cost. A single
+  frozen config across seeds is narrower than all candidate settings;
+  b2/b/c3/c parent criteria are unchanged. No external blocker was found.
+- Exact next action: inspect v4's `seed_complete` transaction and define
+  a separate v5 checkpoint format storing unscored completed seed states
+  and development digests without final-test hashes. Add two-seed A/B and
+  next-seed interruption/resume sentinels that keep seed 17's final labels
+  sealed until seed 19 finishes, and reject tampered development state
+  before another update.
+
+## 2026-09-28 — P1.3c3b2b unscored v5 checkpoint continuation
+
+- Completed task ID: **P1.3c3b2b**. **P1.3c3b2c**, parent **P1.3c3b2**,
+  **P1.3c3b**, **P1.3c3**, **P1.3c4**, and **P1.3c** remain unchecked.
+  Started on dirty `master` at `704886b1e39159726271294c7475d9e4cdf6910e`.
+  During the session the shared checkout moved to
+  `codex/research-protocols-and-resume`: code/docs entered `e1fec1b`,
+  followed by the plan in `15dcf81`. This log entry is the remaining
+  working-tree change. Unrelated Python 3.14, CUDA, and other user
+  changes were preserved.
+- Starting canary: the new v5 checkpoint source-seal test failed twice at
+  the old explicit rejection. Added format-5 `unscored_seeds` records with
+  detached trained baseline/circadian states and arrived development
+  digests/hashes. Every active and terminal v5 checkpoint leaves completed
+  report, development-result, and test-digest fields empty; it never stores
+  test hashes, scores, or held-out arrays. Resume validates prior seed
+  identities, model progress, circadian wake/replay provenance, and the
+  active phase before another update. The terminal unscored checkpoint
+  repeats scoring without retraining. V1–v4 retain their existing payload
+  and checkpoint routes.
+- Evidence: two-seed source-field sentinels keep final tests closed until
+  both seeds train in either model order. Sixteen A/B and later-seed
+  interruption/resume cases cover wake, before-sleep, after-sleep, seed
+  boundaries, and terminal completion. Each gives the ordinary v5 report,
+  runs only remaining Backprop updates, and matches uninterrupted saved
+  model fields and replay rows. Whole-object pickle hashes initially
+  differed in eight cases because object alias encoding changed across
+  restore; field-wise model/RNG/snapshot and row-wise replay comparisons
+  showed equal training state. Two prior-state tamper cases, one changed
+  development role, one forged future-seed replay, and two changed
+  setting/seed-list cases all reject before another update or source read.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_global_test_seal.py -q -k checkpoint_resume
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_global_test_seal.py -q
+  .\.venv\Scripts\python.exe -m pytest tests/test_continual_global_test_seal.py tests/test_continual_final_label_seal.py tests/test_continual_bounded_replay.py tests/test_continual_phase_local_schedule.py tests/test_continual_phase_label_arrival.py tests/test_continual_checkpoint_resume.py tests/test_continual_shift_benchmark.py -q
+  .\.venv\Scripts\python.exe -m pytest -q
+  .\.venv\Scripts\python.exe -m pytest --collect-only -q
+  .\.venv\Scripts\ruff.exe check .
+  .\.venv\Scripts\python.exe -m mypy src tests scripts
+  .\.venv\Scripts\ruff.exe format --check src/app/continual_checkpoint.py src/app/continual_shift_benchmark.py tests/test_continual_global_test_seal.py
+  git -c core.safecrlf=false diff --check
+  ```
+
+  The expanded interruption test passed **16** after semantic state
+  comparison; the v5 test file passed **31**. The seven-file continual set
+  passed **104**, and the final full CPU suite exited 0 with **860**
+  collected tests and no skips shown. Ruff, mypy (**133 source files**),
+  touched-file format, and diff checks passed. An initial format check
+  found one layout change; `ruff format src/app/continual_shift_benchmark.py`
+  fixed it before the final gates. The initial whole-object pickle-hash
+  test failed **8/12** before comparison was corrected without changing
+  the training implementation or acceptance target.
+- Experiment artifacts and skipped work: no new persistent experiment
+  result or sweep; checkpoint files were temporary pytest artifacts and
+  one temporary diagnostic comparison. No full CUDA suite or
+  representative-scale fairness experiment was run for this NumPy
+  checkpoint boundary. The CLI has no continual checkpoint flag, so the
+  documented Python API was used. Earlier negative circadian results and
+  their artifacts were untouched.
+- Plan changes and rationale: checked b2b only after the full resume and
+  static gates. ADR-0072, README, evaluation protocol, and app/infra
+  module docs describe format 5 and its trusted-file boundary; ADR-0071
+  now points to the later checkpoint increment. A single declared config
+  is bound by digest, but no candidate setting search, disjoint inner
+  guard/outer selection, or label/task arrival ledger exists. Thus b2c,
+  b2/b/c3/c, and c4 remain open. No external blocker was found.
+- Exact next action: add a failing two-phase canary that assigns separate
+  stable train, inner-guard, outer-selection, and final-test IDs/hashes;
+  records source/label release and per-method task information; and
+  raises if guard or selection opens an unarrived role. Then implement
+  the smallest v5-only role split and decision wiring, with final-test
+  access still after all candidate settings freeze.

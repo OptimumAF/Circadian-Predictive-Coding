@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, fields, replace
 from pathlib import Path
 import sys
 
@@ -12,8 +12,14 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.app.continual_shift_benchmark import (
+    CONTINUAL_BOUNDED_REPLAY_PROTOCOL,
+    CONTINUAL_GLOBAL_SEAL_PROTOCOL,
     CONTINUAL_LEGACY_PROTOCOL,
+    CONTINUAL_PHASE_ARRIVAL_PROTOCOL,
+    CONTINUAL_PHASE_LOCAL_SCHEDULE_PROTOCOL,
     CONTINUAL_VALIDATION_PROTOCOL,
+    ContinualBoundedReplayConfig,
+    ContinualGlobalSealConfig,
     ContinualShiftConfig,
     format_continual_shift_benchmark,
     run_continual_shift_benchmark,
@@ -48,7 +54,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--seeds", type=str, default="3,7,11,19,23,31,37")
     parser.add_argument(
-        "--protocol-id", choices=[CONTINUAL_VALIDATION_PROTOCOL, CONTINUAL_LEGACY_PROTOCOL],
+        "--protocol-id",
+        choices=[
+            CONTINUAL_VALIDATION_PROTOCOL,
+            CONTINUAL_LEGACY_PROTOCOL,
+            CONTINUAL_PHASE_ARRIVAL_PROTOCOL,
+            CONTINUAL_PHASE_LOCAL_SCHEDULE_PROTOCOL,
+            CONTINUAL_BOUNDED_REPLAY_PROTOCOL,
+            CONTINUAL_GLOBAL_SEAL_PROTOCOL,
+        ],
         default=CONTINUAL_VALIDATION_PROTOCOL,
     )
     parser.add_argument("--validation-fraction", type=float, default=0.20)
@@ -81,6 +95,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--phase-b-translation-y", type=float, default=None)
     parser.add_argument("--sleep-interval-phase-a", type=int, default=None)
     parser.add_argument("--sleep-interval-phase-b", type=int, default=None)
+    parser.add_argument("--replay-max-examples", type=int, default=None)
+    parser.add_argument("--replay-max-bytes", type=int, default=None)
+    parser.add_argument("--sleep-mode", choices=["components"], default=None)
     parser.add_argument("--output-file", type=str, default="")
     return parser
 
@@ -106,9 +123,7 @@ def main() -> None:
     )
     cli_hidden_dims = _parse_optional_hidden_dims(args.hidden_dims)
     selected_hidden_dims = (
-        cli_hidden_dims
-        if cli_hidden_dims is not None
-        else profile_defaults.hidden_dims
+        cli_hidden_dims if cli_hidden_dims is not None else profile_defaults.hidden_dims
     )
     config = ContinualShiftConfig(
         protocol_id=args.protocol_id,
@@ -149,6 +164,35 @@ def main() -> None:
         ),
         circadian_config=circadian_config,
     )
+    if args.protocol_id in {CONTINUAL_BOUNDED_REPLAY_PROTOCOL, CONTINUAL_GLOBAL_SEAL_PROTOCOL}:
+        if args.replay_max_examples is None or args.replay_max_bytes is None:
+            parser.error("bounded replay requires --replay-max-examples and --replay-max-bytes")
+        if circadian_config.replay_steps <= 0:
+            parser.error("bounded replay requires a profile with replay_steps > 0")
+        if args.sleep_mode != "components":
+            parser.error("bounded replay requires --sleep-mode components")
+        # Why this: v1/v2/v3 keep their original dataclass shape and saved
+        # config digest; only opt-in bounded routes add retention limits.
+        base_fields = {
+            item.name: getattr(config, item.name) for item in fields(ContinualShiftConfig)
+        }
+        base_fields["circadian_config"] = replace(circadian_config, sleep_mode="components")
+        bounded_config_type = (
+            ContinualGlobalSealConfig
+            if args.protocol_id == CONTINUAL_GLOBAL_SEAL_PROTOCOL
+            else ContinualBoundedReplayConfig
+        )
+        config = bounded_config_type(
+            **base_fields,
+            replay_max_examples=args.replay_max_examples,
+            replay_max_bytes=args.replay_max_bytes,
+        )
+    elif (
+        args.replay_max_examples is not None
+        or args.replay_max_bytes is not None
+        or args.sleep_mode is not None
+    ):
+        parser.error("replay budget and sleep-mode flags require a bounded replay protocol")
 
     result = run_continual_shift_benchmark(config=config, seeds=seeds)
     formatted = format_continual_shift_benchmark(result)

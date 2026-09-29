@@ -32,38 +32,71 @@ class LabeledData:
 
 
 @dataclass(frozen=True)
+class DeferredFinalTestRole:
+    """Carry a source reference without releasing final-test arrays early."""
+
+    _source: DatasetSplit
+
+    @property
+    def input(self) -> Array:
+        return self._source.test_input
+
+    @property
+    def target(self) -> Array:
+        return self._source.test_target
+
+
+@dataclass(frozen=True)
 class RoleSeparatedDataset:
     """Deterministic train/validation/final-test roles and content hashes."""
 
     train: LabeledData
     validation: LabeledData
-    test: LabeledData
+    test: LabeledData | DeferredFinalTestRole
     split_hashes: Mapping[str, str]
 
 
 def make_role_separated_dataset(
-    train: LabeledData, validation: LabeledData, test: LabeledData,
+    train: LabeledData,
+    validation: LabeledData,
+    test: LabeledData | DeferredFinalTestRole,
+    *,
+    hash_test: bool = True,
 ) -> RoleSeparatedDataset:
-    """Build a role container after training-only subsampling."""
+    """Build roles, optionally deferring final-test validation and hashing."""
+    if type(hash_test) is not bool:
+        raise ValueError("hash_test must be a bool")
     for role, samples in (("train", train), ("validation", validation), ("test", test)):
+        if role == "test" and not hash_test:
+            continue  # Why this: later-phase training must not inspect held-out labels.
         if samples.input.ndim != 2 or samples.target.shape != (samples.input.shape[0], 1):
             raise ValueError(f"{role} inputs and targets have incompatible shapes")
         if samples.input.shape[0] == 0:
             raise ValueError(f"{role} split must be nonempty")
-    hashes = MappingProxyType({
+    hashes = {
         "train": _split_hash("train", train),
         "validation": _split_hash("validation", validation),
-        "test": _split_hash("test", test),
-    })
-    return RoleSeparatedDataset(train=train, validation=validation, test=test, split_hashes=hashes)
+    }
+    if hash_test:
+        hashes["test"] = _split_hash("test", test)
+    return RoleSeparatedDataset(
+        train=train, validation=validation, test=test, split_hashes=MappingProxyType(hashes)
+    )
 
 
 def split_training_validation(
-    dataset: DatasetSplit, validation_fraction: float, seed: int,
+    dataset: DatasetSplit,
+    validation_fraction: float,
+    seed: int,
+    *,
+    hash_test: bool = True,
+    defer_test_access: bool = False,
 ) -> RoleSeparatedDataset:
     """Reserve stratified validation examples from an existing training split."""
     if not 0.0 < validation_fraction < 1.0:
         raise ValueError("validation_fraction must be in (0, 1)")
+    if type(defer_test_access) is not bool or (defer_test_access and hash_test):
+        raise ValueError("defer_test_access requires hash_test=False")
     labels = dataset.train_target.reshape(-1)
     if labels.shape[0] != dataset.train_input.shape[0]:
         raise ValueError("training inputs and targets have incompatible shapes")
@@ -78,8 +111,9 @@ def split_training_validation(
         if class_indices.size < 2:
             raise ValueError("each class needs at least two training examples")
         shuffled = rng.permutation(class_indices)
-        validation_count = max(1, min(class_indices.size - 1,
-                                      round(class_indices.size * validation_fraction)))
+        validation_count = max(
+            1, min(class_indices.size - 1, round(class_indices.size * validation_fraction))
+        )
         validation_indices.extend(shuffled[:validation_count].tolist())
         train_indices.extend(shuffled[validation_count:].tolist())
 
@@ -91,11 +125,16 @@ def split_training_validation(
         validation=LabeledData(
             dataset.train_input[validation_rows], dataset.train_target[validation_rows]
         ),
-        test=LabeledData(dataset.test_input, dataset.test_target),
+        # Why this: a sealed source may withhold held-out values until every
+        # training decision has completed; carrying its reference is safe.
+        test=DeferredFinalTestRole(dataset)
+        if defer_test_access
+        else LabeledData(dataset.test_input, dataset.test_target),
+        hash_test=hash_test,
     )
 
 
-def _split_hash(role: str, samples: LabeledData) -> str:
+def _split_hash(role: str, samples: LabeledData | DeferredFinalTestRole) -> str:
     digest = sha256(role.encode("utf-8"))
     for values in (samples.input, samples.target):
         canonical = np.ascontiguousarray(values, dtype="<f8")

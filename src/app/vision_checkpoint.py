@@ -23,6 +23,7 @@ from src.core.resnet50_variants import (
     PredictiveCodingResNet50Classifier,
 )
 from src.app.seeded_vision_loader import SeededEpochLoaderState
+from src.app.shared_vision_loader import SharedEpochLoaderState
 from src.app.sleep_schedule import SleepRollbackCooldownState
 
 
@@ -84,7 +85,7 @@ class VisionCircadianProgress:
     completed_epoch: int
     next_batch_index: int
     classifier_state: CircadianClassifierSnapshot
-    loader_state: SeededEpochLoaderState
+    loader_state: SeededEpochLoaderState | SharedEpochLoaderState
     retry_state: SleepRollbackCooldownState
     outer_entry_torch_state: Any
     initial_hidden_dim: int
@@ -451,7 +452,11 @@ def validate_vision_checkpoint(
         torch.Generator(device="cpu").set_state(state.detach().clone())
         shared_state = checkpoint.shared_train_generator_state
         if shared_train_loader:
-            if not torch.is_tensor(shared_state) or shared_state.dtype != torch.uint8:
+            if (
+                shared_state is None
+                or not torch.is_tensor(shared_state)
+                or shared_state.dtype != torch.uint8
+            ):
                 raise ValueError("invalid shared train-loader generator state")
             torch.Generator(device="cpu").set_state(shared_state.detach().clone())
         elif shared_state is not None:

@@ -16,6 +16,10 @@ from src.app.seeded_vision_loader import (
     SeededEpochLoaderState,
     SeededEpochTrainLoader as _SeededEpochTrainLoader,
 )
+from src.app.shared_vision_loader import (
+    SharedEpochLoaderState,
+    SharedEpochTrainLoader as _SharedEpochTrainLoader,
+)
 from src.app.vision_checkpoint import (
     VisionCheckpointStore,
     VisionCircadianCheckpointContext,
@@ -417,6 +421,12 @@ def _run_checkpointed_resnet50_benchmark(
             or loaders.guard_loader is loaders.validation_loader
         ):
             raise ValueError("guard-separated vision checkpoint requires a distinct guard split")
+        if seeded_protocol:
+            _SeededEpochTrainLoader(
+                torch, loaders.train_loader, config.seed + 3_001
+            ).snapshot_state()
+        else:
+            _SharedEpochTrainLoader(torch, loaders.train_loader).snapshot_state()
         data_digest = vision_development_data_digest(loaders)
         if saved is not None:
             validate_vision_checkpoint(
@@ -445,10 +455,9 @@ def _run_checkpointed_resnet50_benchmark(
     legacy_trainers = {
         "backprop": _train_backprop,
         "predictive": _train_predictive,
-        "circadian": _train_circadian,
     }
     for name in training_order[len(outcomes):]:
-        if seeded_protocol and name == "circadian":
+        if name == "circadian":
             preceding = tuple(
                 snapshot_completed_vision_outcome(item, training_order[index])
                 for index, item in enumerate(outcomes)
@@ -465,9 +474,21 @@ def _run_checkpointed_resnet50_benchmark(
                 ),
                 resume_checkpoint=active,
             )
-            outcome = _train_seeded_variant(
-                name, torch, device, training_loaders, config, checkpoint_context=context
-            )
+            if seeded_protocol:
+                outcome = _train_seeded_variant(
+                    name, torch, device, training_loaders, config,
+                    checkpoint_context=context,
+                )
+            else:
+                shared_loaders = replace(
+                    training_loaders,
+                    train_loader=_SharedEpochTrainLoader(
+                        torch, training_loaders.train_loader
+                    ),
+                )
+                outcome = _train_circadian(
+                    torch, device, shared_loaders, config, checkpoint_context=context
+                )
         elif seeded_protocol:
             outcome = _train_seeded_variant(name, torch, device, training_loaders, config)
         else:
@@ -1173,18 +1194,37 @@ def _preflight_active_circadian(
     ):
         raise ValueError("incompatible vision checkpoint circadian report")
     expected_loader_epoch = progress.completed_epoch
+    loader_state_type = (
+        SeededEpochLoaderState
+        if config.protocol_id == VISION_SEEDED_UNMATCHED_PROTOCOL
+        else SharedEpochLoaderState
+    )
     if (
-        not isinstance(progress.loader_state, SeededEpochLoaderState)
+        not isinstance(progress.loader_state, loader_state_type)
         or not isinstance(progress.retry_state, SleepRollbackCooldownState)
         or progress.loader_state.epoch != expected_loader_epoch
         or progress.loader_state.next_batch_index != prefix
     ):
         raise ValueError("incompatible vision checkpoint loader cursor")
-    replay_loader = _SeededEpochTrainLoader(torch, train_loader, config.seed + 3_001)
     try:
-        replay_loader.restore_state(progress.loader_state)
+        if config.protocol_id == VISION_SEEDED_UNMATCHED_PROTOCOL:
+            if not isinstance(progress.loader_state, SeededEpochLoaderState):
+                raise ValueError("incompatible seeded vision checkpoint loader state")
+            _SeededEpochTrainLoader(
+                torch, train_loader, config.seed + 3_001
+            ).restore_state(progress.loader_state)
+        else:
+            if not isinstance(progress.loader_state, SharedEpochLoaderState):
+                raise ValueError("incompatible shared vision checkpoint loader state")
+            _SharedEpochTrainLoader(torch, train_loader).restore_state(
+                progress.loader_state
+            )
     except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
         raise ValueError("incompatible vision checkpoint loader state") from exc
+    if config.protocol_id != VISION_SEEDED_UNMATCHED_PROTOCOL and not torch.equal(
+        progress.loader_state.generator_state, checkpoint.shared_train_generator_state
+    ):
+        raise ValueError("incompatible vision checkpoint shared loader state")
     retry = SleepRollbackCooldown(resolve_rollback_cooldown_epochs(
         config.circadian_sleep_mode, config.circadian_sleep_rollback_cooldown_epochs
     ))
@@ -1305,6 +1345,10 @@ def _train_circadian(
             completed_hashes=checkpoint_context.completed_hashes,
             torch=torch,
             active_circadian=progress,
+            shared_train_generator_state=(
+                loaders.train_loader.loader.generator.get_state()
+                if config.protocol_id != VISION_SEEDED_UNMATCHED_PROTOCOL else None
+            ),
         ))
         checkpoint_pause += perf_counter() - pause_start
 

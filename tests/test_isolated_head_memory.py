@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import replace
 from os import getpid
+from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -121,6 +123,47 @@ def test_invalid_request_is_rejected_before_spawning(monkeypatch: pytest.MonkeyP
         )
     with pytest.raises(ValueError, match="timeout"):
         isolated.run_process_isolated_fixed_width_memory(_config(), timeout_seconds=0)
+
+
+def test_local_cifar_memory_has_distinct_protocol_and_rejects_unsafe_inputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cache = tmp_path / "cifar-10-batches-py"
+    cache.mkdir()
+    (cache / "data_batch_1").touch()
+    (cache / "test_batch").touch()
+    config = replace(
+        _config(),
+        dataset_name="cifar10",
+        dataset_data_root=str(tmp_path),
+        dataset_download=False,
+        dataset_num_workers=0,
+        num_classes=10,
+    )
+    spawned: list[str] = []
+
+    def run_one(candidate: Any, head_name: str, timeout: float) -> Any:
+        assert candidate == config
+        assert timeout == 5.0
+        spawned.append(head_name)
+        return SimpleNamespace(head_name=head_name)
+
+    monkeypatch.setattr(isolated, "_run_one_head_process", run_one)
+    monkeypatch.setattr(isolated, "_verify_isolated_reports", lambda reports: None)
+    result = isolated.run_process_isolated_fixed_width_memory(config, timeout_seconds=5.0)
+    assert result.protocol_id == isolated.PROCESS_ISOLATED_CIFAR_MEMORY_PROTOCOL
+    assert spawned == list(isolated.HEAD_NAMES)
+
+    for invalid in (
+        replace(config, dataset_download=True),
+        replace(config, dataset_num_workers=2),
+        replace(config, dataset_name="cifar100"),
+        replace(config, dataset_data_root=str(tmp_path / "missing")),
+    ):
+        spawned.clear()
+        with pytest.raises((ValueError, FileNotFoundError)):
+            isolated.run_process_isolated_fixed_width_memory(invalid, timeout_seconds=5.0)
+        assert spawned == []
 
 
 def test_parent_rejects_mismatched_feature_hashes(monkeypatch: pytest.MonkeyPatch) -> None:

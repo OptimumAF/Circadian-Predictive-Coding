@@ -12,6 +12,7 @@ from hashlib import sha256
 from json import dumps
 from math import isfinite
 from statistics import mean, pstdev
+from typing import Any, Mapping
 
 from src.app import isolated_head_memory as isolated
 from src.app import matched_head_benchmark as matched
@@ -129,6 +130,48 @@ def create_confirmation_manifest(
         manifest_digest="",
     )
     return replace(manifest, manifest_digest=_manifest_digest(manifest))
+
+
+def restore_confirmation_manifest(value: Mapping[str, Any]) -> RepeatedConfirmationManifest:
+    """Rebuild and validate a persisted manifest before any final-test access."""
+    expected = {field.name for field in fields(RepeatedConfirmationManifest)}
+    config_fields = {field.name for field in fields(ResNet50BenchmarkConfig)}
+    if not isinstance(value, Mapping) or set(value) != expected:
+        raise ValueError("Malformed confirmation manifest fields")
+    try:
+        if set(value["base_config"]) != config_fields:
+            raise ValueError("Malformed confirmation base config fields")
+        selected = []
+        for item in value["selected_heads"]:
+            if set(item) != {"head_name", "candidate_id", "config"}:
+                raise ValueError("Malformed selected-head fields")
+            if set(item["config"]) != config_fields:
+                raise ValueError("Malformed selected-head config fields")
+            selected.append(
+                SelectedHeadConfiguration(
+                    head_name=item["head_name"],
+                    candidate_id=item["candidate_id"],
+                    config=ResNet50BenchmarkConfig(**item["config"]),
+                )
+            )
+        manifest = RepeatedConfirmationManifest(
+            protocol_id=value["protocol_id"],
+            source_selection_protocol_id=value["source_selection_protocol_id"],
+            source_selection_digest=value["source_selection_digest"],
+            selection_seeds=tuple(value["selection_seeds"]),
+            confirmation_seeds=tuple(value["confirmation_seeds"]),
+            base_config=ResNet50BenchmarkConfig(**value["base_config"]),
+            selected_heads=tuple(selected),
+            metric_names=tuple(value["metric_names"]),
+            scopes=tuple(value["scopes"]),
+            wall_time_budget_seconds=value["wall_time_budget_seconds"],
+            wall_time_epoch_cap=value["wall_time_epoch_cap"],
+            manifest_digest=value["manifest_digest"],
+        )
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError("Malformed confirmation manifest payload") from error
+    _validate_manifest(manifest)
+    return manifest
 
 
 def run_repeated_confirmation(
@@ -358,7 +401,8 @@ def _verify_memory_pair(
     report: isolated.ProcessIsolatedMemoryResult,
 ) -> None:
     reference = next(row for row in fixed_data.trials if row.seed == seed)
-    if report.protocol_id != isolated.PROCESS_ISOLATED_FIXED_WIDTH_MEMORY_PROTOCOL:
+    expected_protocol = isolated.memory_protocol_for_dataset(report.config)
+    if report.protocol_id != expected_protocol:
         raise AssertionError("Capacity-memory scope used the wrong protocol.")
     for head in report.reports.values():
         if head.backbone_hash != reference.backbone_hash:

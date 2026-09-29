@@ -39,6 +39,17 @@ class ContinualRunnerState:
 
 
 @dataclass(frozen=True)
+class ContinualUnscoredSeed:
+    """Format-5 trained state and arrived-role identity, without test data."""
+
+    seed: int
+    data_digest: str
+    split_hashes: tuple[tuple[str, str], ...]
+    state: ContinualRunnerState
+    circadian_final: CircadianNetworkSnapshot
+
+
+@dataclass(frozen=True)
 class ContinualRunnerCheckpoint:
     """One seed/phase transaction and the reports already committed."""
 
@@ -55,6 +66,7 @@ class ContinualRunnerCheckpoint:
     completed_test_digests: tuple[str, ...]
     state: ContinualRunnerState
     combined: CircadianRunCheckpoint
+    unscored_seeds: tuple[ContinualUnscoredSeed, ...] = ()
 
 
 class ContinualCheckpointStore(Protocol):
@@ -94,6 +106,17 @@ def continual_data_digest(
     )
 
 
+def continual_phase_a_data_digest(
+    phase_a_train: LabeledRole,
+    phase_a_validation: LabeledRole | None,
+) -> str:
+    """Bind only arrived Phase A development roles for v2 checkpoints."""
+    return digest_labeled_roles(
+        "numpy_continual_phase_a_development_roles_v2",
+        (("phase_a_train", phase_a_train), ("phase_a_validation", phase_a_validation)),
+    )
+
+
 def continual_test_digest(phase_a_test: LabeledRole, phase_b_test: LabeledRole) -> str:
     """Bind completed results only after both phases have finished."""
     return digest_labeled_roles(
@@ -114,12 +137,13 @@ def validate_continual_checkpoint(
     phase_a_epochs: int,
     phase_b_epochs: int,
     hidden_dims: tuple[int, ...],
+    expected_format_version: int = 1,
 ) -> CircadianResumePosition:
     """Check identity, progress, counters, and baseline state before restore."""
     if (
         not isinstance(checkpoint, ContinualRunnerCheckpoint)
         or type(checkpoint.format_version) is not int
-        or checkpoint.format_version != 1
+        or checkpoint.format_version != expected_format_version
     ):
         raise ValueError("incompatible continual checkpoint format")
     if (
@@ -132,13 +156,32 @@ def validate_continual_checkpoint(
     if type(checkpoint.seed_index) is not int or not 0 <= checkpoint.seed_index < len(seeds):
         raise ValueError("incompatible continual checkpoint seed cursor")
     completed_count = checkpoint.seed_index + int(checkpoint.phase == "seed_complete")
-    if (
+    if expected_format_version == 5:
+        if (
+            not isinstance(checkpoint.completed_results, list)
+            or len(checkpoint.completed_results) != 0
+            or not isinstance(checkpoint.completed_data_digests, tuple)
+            or len(checkpoint.completed_data_digests) != 0
+            or not isinstance(checkpoint.completed_test_digests, tuple)
+            or len(checkpoint.completed_test_digests) != 0
+            or not isinstance(checkpoint.unscored_seeds, tuple)
+            or len(checkpoint.unscored_seeds) != completed_count
+            or any(
+                not isinstance(item, ContinualUnscoredSeed)
+                or item.seed != seeds[index]
+                or any("test" in role for role, _ in item.split_hashes)
+                for index, item in enumerate(checkpoint.unscored_seeds)
+            )
+        ):
+            raise ValueError("incompatible continual checkpoint unscored seed states")
+    elif (
         not isinstance(checkpoint.completed_results, list)
         or len(checkpoint.completed_results) != completed_count
         or not isinstance(checkpoint.completed_data_digests, tuple)
         or len(checkpoint.completed_data_digests) != completed_count
         or not isinstance(checkpoint.completed_test_digests, tuple)
         or len(checkpoint.completed_test_digests) != completed_count
+        or bool(getattr(checkpoint, "unscored_seeds", ()))
         or any(
             getattr(result, "seed", None) != seeds[index]
             or getattr(result, "training_order", None) != model_order
@@ -230,13 +273,24 @@ def validate_continual_checkpoint(
         validate_numpy_baseline_model(state.backprop_after_a, hidden_dims, phase_a_epochs)
         validate_numpy_baseline_model(state.predictive_after_a, hidden_dims, phase_a_epochs)
     if checkpoint.phase == "seed_complete":
-        result = checkpoint.completed_results[-1]
-        report = getattr(result, "circadian_predictive_coding", None)
-        if (
-            getattr(report, "sleep_event_count", None) != state.sleep_event_count
-            or getattr(report, "total_splits", None) != state.total_splits
-            or getattr(report, "total_prunes", None) != state.total_prunes
-            or getattr(report, "hidden_dim_start", None) != state.hidden_dim_start
-        ):
+        if expected_format_version == 5:
+            completed_state = checkpoint.unscored_seeds[-1].state
+            counters_match = (
+                isinstance(completed_state, ContinualRunnerState)
+                and completed_state.sleep_event_count == state.sleep_event_count
+                and completed_state.total_splits == state.total_splits
+                and completed_state.total_prunes == state.total_prunes
+                and completed_state.hidden_dim_start == state.hidden_dim_start
+            )
+        else:
+            result = checkpoint.completed_results[-1]
+            report = getattr(result, "circadian_predictive_coding", None)
+            counters_match = (
+                getattr(report, "sleep_event_count", None) == state.sleep_event_count
+                and getattr(report, "total_splits", None) == state.total_splits
+                and getattr(report, "total_prunes", None) == state.total_prunes
+                and getattr(report, "hidden_dim_start", None) == state.hidden_dim_start
+            )
+        if not counters_match:
             raise ValueError("incompatible continual checkpoint completed counters")
     return position

@@ -1,8 +1,9 @@
 """Sample process resident memory for local benchmark telemetry.
 
 Inputs are the current process and an optional RSS reader. Outputs are a
-start value and an observed high-water RSS within a context. This module
-does not attribute memory to a model or replace a process-isolated profiler.
+start value, an observed high-water RSS, and a typed invocation snapshot.
+This module does not attribute memory to a model or replace a process-isolated
+profiler.
 """
 
 from __future__ import annotations
@@ -10,11 +11,24 @@ from __future__ import annotations
 import ctypes
 import os
 import sys
+from dataclasses import dataclass
 from functools import lru_cache
 from math import isfinite
+from os import getpid
 from threading import Event, Lock, Thread
 from types import TracebackType
 from typing import Any, Callable
+
+
+@dataclass(frozen=True)
+class ProcessRssSegment:
+    """One invocation's observed absolute RSS, starting at the trainer boundary."""
+
+    pid: int
+    start_bytes: int
+    peak_bytes: int
+    sample_count: int
+    interval_seconds: float
 
 
 class _WindowsMemoryCounters(ctypes.Structure):
@@ -34,8 +48,12 @@ class _WindowsMemoryCounters(ctypes.Structure):
 
 @lru_cache(maxsize=1)
 def _windows_memory_apis() -> tuple[Any, Any]:
-    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-    psapi = ctypes.WinDLL("psapi", use_last_error=True)
+    # ctypes exposes WinDLL only on Windows, but this module is type-checked on Linux too.
+    windows_dll = getattr(ctypes, "WinDLL", None)
+    if windows_dll is None:
+        raise OSError("Windows process memory APIs are unavailable.")
+    kernel32 = windows_dll("kernel32", use_last_error=True)
+    psapi = windows_dll("psapi", use_last_error=True)
     get_current_process = kernel32.GetCurrentProcess
     get_current_process.restype = ctypes.c_void_p
     get_process_memory_info = psapi.GetProcessMemoryInfo
@@ -99,6 +117,19 @@ class ProcessRssSampler:
                 self.peak_bytes = value if self.peak_bytes is None else max(self.peak_bytes, value)
                 self.sample_count += 1
         return value
+
+    def snapshot(self) -> ProcessRssSegment:
+        """Capture a consistent observation through the latest explicit sample."""
+        with self._lock:
+            if self.start_bytes is None or self.peak_bytes is None or self.sample_count < 1:
+                raise RuntimeError("Process RSS is unavailable for checkpoint telemetry.")
+            return ProcessRssSegment(
+                pid=getpid(),
+                start_bytes=self.start_bytes,
+                peak_bytes=self.peak_bytes,
+                sample_count=self.sample_count,
+                interval_seconds=self.interval_seconds,
+            )
 
     def __enter__(self) -> ProcessRssSampler:
         self.sample()

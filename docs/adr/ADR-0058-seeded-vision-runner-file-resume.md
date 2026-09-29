@@ -28,10 +28,9 @@ the circadian active training duration; resumed wall time is not expected to
 equal uninterrupted wall time. The file is local trusted pickle and its checksum
 detects accidental corruption, not hostile modification.
 
-The file route is currently limited to the seeded v3 unmatched protocol on CPU.
-The v1/v2 routes and CUDA continuation reject before training. Their support
-and device-specific evidence remain open under P3.9c2b2/P3.9; this decision
-does not alter their ordinary, non-checkpointed runs.
+At this decision point the file route was limited to seeded v3 on CPU. The
+later ADR-0059 adds CPU v1/v2 continuation while retaining their original
+shared streams. CUDA device-specific evidence remains open under P3.9c2b2b.
 
 ## Alternatives and consequences
 
