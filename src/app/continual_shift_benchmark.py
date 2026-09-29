@@ -7,7 +7,8 @@ so evaluating phase-A retention after phase-B drift is a direct strength test.
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from collections import deque
 
 import numpy as np
 
@@ -21,15 +22,25 @@ from src.app.continual_checkpoint import (
     ContinualCheckpointStore,
     ContinualRunnerCheckpoint,
     ContinualRunnerState,
+    ContinualUnscoredSeed,
     continual_config_digest,
     continual_data_digest,
+    continual_phase_a_data_digest,
     continual_test_digest,
     validate_continual_checkpoint,
 )
-from src.app.numpy_checkpoint_validation import LabeledRole
+from src.app.numpy_checkpoint_validation import LabeledRole, validate_numpy_baseline_model
 from src.app.sleep_schedule import decide_sleep_attempt
 from src.core.backprop_mlp import BackpropMLP
-from src.core.circadian_predictive_coding import CircadianConfig, CircadianPredictiveCodingNetwork
+from src.core.circadian_predictive_coding import (
+    CircadianConfig,
+    CircadianNetworkSnapshot,
+    CircadianPredictiveCodingNetwork,
+    ReplayRetentionBudget,
+    ReplayRetentionSnapshot,
+    ReplaySnapshot,
+    replay_sample_id,
+)
 from src.core.predictive_coding import PredictiveCodingNetwork
 from src.core.sleep_clocks import SleepEpochProgress
 from src.infra.datasets import (
@@ -43,7 +54,23 @@ from src.infra.datasets import (
 
 CONTINUAL_VALIDATION_PROTOCOL = "continual_validation_v1"
 CONTINUAL_LEGACY_PROTOCOL = "continual_legacy_train_test_v0"
+CONTINUAL_PHASE_ARRIVAL_PROTOCOL = "continual_phase_arrival_v2"
+CONTINUAL_PHASE_LOCAL_SCHEDULE_PROTOCOL = "continual_phase_local_schedule_v3"
+CONTINUAL_BOUNDED_REPLAY_PROTOCOL = "continual_bounded_replay_v4"
+CONTINUAL_GLOBAL_SEAL_PROTOCOL = "continual_global_test_seal_v5"
 CONTINUAL_MODEL_ORDER = ("backprop", "predictive_coding", "circadian_predictive_coding")
+_BOUNDED_REPLAY_PROTOCOLS = frozenset(
+    {CONTINUAL_BOUNDED_REPLAY_PROTOCOL, CONTINUAL_GLOBAL_SEAL_PROTOCOL}
+)
+_PHASE_ARRIVAL_CHECKPOINT_FORMATS = {
+    CONTINUAL_PHASE_ARRIVAL_PROTOCOL: 2,
+    CONTINUAL_PHASE_LOCAL_SCHEDULE_PROTOCOL: 3,
+    CONTINUAL_BOUNDED_REPLAY_PROTOCOL: 4,
+    CONTINUAL_GLOBAL_SEAL_PROTOCOL: 5,
+}
+_PHASE_LOCAL_SCHEDULE_PROTOCOLS = frozenset(
+    {CONTINUAL_PHASE_LOCAL_SCHEDULE_PROTOCOL, *_BOUNDED_REPLAY_PROTOCOLS}
+)
 
 
 @dataclass(frozen=True)
@@ -83,6 +110,22 @@ class ContinualShiftConfig:
     model_order: tuple[str, ...] = CONTINUAL_MODEL_ORDER
 
 
+@dataclass(frozen=True, kw_only=True)
+class ContinualBoundedReplayConfig(ContinualShiftConfig):
+    """Opt-in observed-example replay limits without changing v1/v2 config identity."""
+
+    protocol_id: str = CONTINUAL_BOUNDED_REPLAY_PROTOCOL
+    replay_max_examples: int
+    replay_max_bytes: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class ContinualGlobalSealConfig(ContinualBoundedReplayConfig):
+    """Opt-in all-seed final-test release; guard/selection roles remain open."""
+
+    protocol_id: str = CONTINUAL_GLOBAL_SEAL_PROTOCOL
+
+
 @dataclass(frozen=True)
 class ModelShiftReport:
     """Per-model metrics for one seed run."""
@@ -120,6 +163,23 @@ class ContinualShiftSeedResult:
     circadian_predictive_coding: CircadianShiftReport
     split_hashes: dict[str, str]
     training_order: tuple[str, ...] = CONTINUAL_MODEL_ORDER
+
+
+@dataclass(frozen=True)
+class ContinualReplayRetentionReport:
+    """Declared cap and actual retained content IDs at both phase boundaries."""
+
+    budget_examples: int
+    budget_bytes: int
+    phase_a: ReplayRetentionSnapshot
+    phase_b: ReplayRetentionSnapshot
+
+
+@dataclass(frozen=True, kw_only=True)
+class ContinualBoundedReplaySeedResult(ContinualShiftSeedResult):
+    """Versioned replay report attached only to bounded-replay results."""
+
+    replay_retention: ContinualReplayRetentionReport
 
 
 @dataclass(frozen=True)
@@ -196,17 +256,56 @@ class _ContinualTrainingState:
 
 
 @dataclass(frozen=True)
-class _CheckpointSeedData:
-    """Both development roles plus tests sealed from the training helpers."""
+class _PendingOrdinarySeed:
+    """Trained seed held without final-test access until the run is frozen."""
+
+    seed: int
+    state: _ContinualTrainingState
+    phase_a_test: LabeledRole
+    phase_b_test: LabeledRole
+    split_hashes: dict[str, str]
+    phase_a_roles: RoleSeparatedDataset | None
+    phase_b_roles: RoleSeparatedDataset | None
+
+
+@dataclass(frozen=True)
+class _CheckpointPhaseAData:
+    """Only arrived Phase A roles, with final test sealed from training."""
 
     phase_a_train: LabeledData
     phase_a_validation: LabeledData | None
     phase_a_test: LabeledRole
+    split_hashes: dict[str, str]
+    data_digest: str
+
+
+@dataclass(frozen=True)
+class _CheckpointSeedData(_CheckpointPhaseAData):
+    """Both development phases, available at or after Phase B arrival."""
+
     phase_b_train: LabeledData
     phase_b_validation: LabeledData | None
     phase_b_test: LabeledRole
+
+
+@dataclass(frozen=True)
+class _CheckpointTrainingData:
+    """Only roles and identity needed by checkpointed training helpers."""
+
+    phase_a_train: LabeledData
+    phase_b_train: LabeledData | None
     split_hashes: dict[str, str]
     data_digest: str
+
+
+def _checkpoint_training_data(data: _CheckpointPhaseAData) -> _CheckpointTrainingData:
+    """Exclude final tests from the context passed into training."""
+    return _CheckpointTrainingData(
+        phase_a_train=data.phase_a_train,
+        phase_b_train=data.phase_b_train if isinstance(data, _CheckpointSeedData) else None,
+        split_hashes=data.split_hashes,
+        data_digest=data.data_digest,
+    )
 
 
 @dataclass
@@ -218,10 +317,11 @@ class _CheckpointContext:
     seeds: tuple[int, ...]
     config_digest: str
     seed_index: int
-    data: _CheckpointSeedData
+    data: _CheckpointTrainingData
     completed_results: list[ContinualShiftSeedResult]
     completed_data_digests: list[str]
     completed_test_digests: list[str]
+    unscored_seeds: list[ContinualUnscoredSeed] = field(default_factory=list)
 
 
 def run_continual_shift_benchmark(
@@ -238,7 +338,17 @@ def run_continual_shift_benchmark(
     if resume_from_checkpoint and checkpoint_store is None:
         raise ValueError("resume_from_checkpoint requires a checkpoint store")
 
-    if checkpoint_store is None:
+    if config.protocol_id == CONTINUAL_GLOBAL_SEAL_PROTOCOL:
+        if checkpoint_store is None:
+            # Why this: no seed may expose final labels while a later seed
+            # can still train or make a sleep/replay decision.
+            pending = [_train_single_seed(config=config, seed=seed) for seed in seeds]
+            seed_results = [_score_pending_seed(config, item) for item in pending]
+        else:
+            seed_results = _run_checkpointed_global_seeds(
+                config, seeds, checkpoint_store, resume_from_checkpoint
+            )
+    elif checkpoint_store is None:
         seed_results = [_run_single_seed(config=config, seed=seed) for seed in seeds]
     else:
         seed_results = _run_checkpointed_seeds(
@@ -352,21 +462,42 @@ def format_continual_shift_benchmark(result: ContinualShiftBenchmarkResult) -> s
             )
         ),
     ]
+    if config.protocol_id in _BOUNDED_REPLAY_PROTOCOLS:
+        for seed_result in result.seed_results:
+            assert isinstance(seed_result, ContinualBoundedReplaySeedResult)
+            retained = seed_result.replay_retention
+            lines.append(
+                f"Replay retained seed={seed_result.seed}: "
+                f"budget={retained.budget_examples} examples/{retained.budget_bytes} bytes; "
+                f"A={retained.phase_a.example_count} examples/"
+                f"{retained.phase_a.retained_bytes} bytes IDs={retained.phase_a.sample_ids}; "
+                f"B={retained.phase_b.example_count} examples/"
+                f"{retained.phase_b.retained_bytes} bytes IDs={retained.phase_b.sample_ids}"
+            )
     return "\n".join(lines)
 
 
 def _run_single_seed(config: ContinualShiftConfig, seed: int) -> ContinualShiftSeedResult:
+    if config.protocol_id == CONTINUAL_GLOBAL_SEAL_PROTOCOL:
+        raise ValueError("global-test-seal v5 must train all seeds before scoring")
+    return _score_pending_seed(config, _train_single_seed(config, seed))
+
+
+def _train_single_seed(config: ContinualShiftConfig, seed: int) -> _PendingOrdinarySeed:
+    """Train both phases without opening a deferred final-test source."""
     phase_a_source = generate_two_cluster_dataset_with_transform(
         sample_count=config.sample_count_phase_a,
         noise_scale=config.phase_a_noise_scale,
         seed=seed,
         test_ratio=config.test_ratio,
     )
-    if config.protocol_id == CONTINUAL_VALIDATION_PROTOCOL:
+    if config.protocol_id != CONTINUAL_LEGACY_PROTOCOL:
         phase_a_roles = split_training_validation(
             phase_a_source,
             validation_fraction=config.validation_fraction,
             seed=seed + 17,
+            hash_test=config.protocol_id not in _BOUNDED_REPLAY_PROTOCOLS,
+            defer_test_access=config.protocol_id in _BOUNDED_REPLAY_PROTOCOLS,
         )
         phase_a_train = phase_a_roles.train
         split_hashes = {
@@ -381,8 +512,13 @@ def _run_single_seed(config: ContinualShiftConfig, seed: int) -> ContinualShiftS
         seed=seed,
         phase_a_train=phase_a_train,
     )
-    if config.protocol_id == CONTINUAL_VALIDATION_PROTOCOL:
-        phase_b_roles = _build_phase_b_roles(config=config, seed=seed + 101)
+    if config.protocol_id != CONTINUAL_LEGACY_PROTOCOL:
+        phase_b_roles = _build_phase_b_roles(
+            config=config,
+            seed=seed + 101,
+            hash_test=config.protocol_id not in _BOUNDED_REPLAY_PROTOCOLS,
+            defer_test_access=config.protocol_id in _BOUNDED_REPLAY_PROTOCOLS,
+        )
         phase_b_train = phase_b_roles.train
         split_hashes.update(
             {f"phase_b_{role}": digest for role, digest in phase_b_roles.split_hashes.items()}
@@ -398,15 +534,56 @@ def _run_single_seed(config: ContinualShiftConfig, seed: int) -> ContinualShiftS
     )
     phase_a_test = (
         phase_a_roles.test
-        if config.protocol_id == CONTINUAL_VALIDATION_PROTOCOL
+        if config.protocol_id != CONTINUAL_LEGACY_PROTOCOL
         else LabeledData(phase_a_source.test_input, phase_a_source.test_target)
     )
     phase_b_test = (
         phase_b_roles.test
-        if config.protocol_id == CONTINUAL_VALIDATION_PROTOCOL
+        if config.protocol_id != CONTINUAL_LEGACY_PROTOCOL
         else LabeledData(phase_b_source.test_input, phase_b_source.test_target)
     )
-    return _score_seed_models(config, seed, state, phase_a_test, phase_b_test, split_hashes)
+    return _PendingOrdinarySeed(
+        seed=seed,
+        state=state,
+        phase_a_test=phase_a_test,
+        phase_b_test=phase_b_test,
+        split_hashes=split_hashes,
+        phase_a_roles=phase_a_roles if config.protocol_id != CONTINUAL_LEGACY_PROTOCOL else None,
+        phase_b_roles=phase_b_roles if config.protocol_id != CONTINUAL_LEGACY_PROTOCOL else None,
+    )
+
+
+def _score_pending_seed(
+    config: ContinualShiftConfig, pending: _PendingOrdinarySeed
+) -> ContinualShiftSeedResult:
+    split_hashes = dict(pending.split_hashes)
+    if config.protocol_id in _BOUNDED_REPLAY_PROTOCOLS:
+        assert pending.phase_a_roles is not None and pending.phase_b_roles is not None
+        split_hashes.update(_final_test_hashes(pending.phase_a_roles, pending.phase_b_roles))
+    return _score_seed_models(
+        config,
+        pending.seed,
+        pending.state,
+        pending.phase_a_test,
+        pending.phase_b_test,
+        split_hashes,
+    )
+
+
+def _final_test_hashes(
+    phase_a_roles: RoleSeparatedDataset,
+    phase_b_roles: RoleSeparatedDataset,
+) -> dict[str, str]:
+    """Bind held-out role content only after both phases finish training."""
+    hashes: dict[str, str] = {}
+    for name, roles in (("phase_a", phase_a_roles), ("phase_b", phase_b_roles)):
+        bound = make_role_separated_dataset(
+            train=roles.train,
+            validation=roles.validation,
+            test=roles.test,
+        )
+        hashes[f"{name}_test"] = bound.split_hashes["test"]
+    return hashes
 
 
 def _score_seed_models(
@@ -442,7 +619,7 @@ def _score_seed_models(
     )
     circadian_post_b = circadian_model.compute_accuracy(phase_b_test.input, phase_b_test.target)
 
-    return ContinualShiftSeedResult(
+    scored = ContinualShiftSeedResult(
         seed=seed,
         split_hashes=split_hashes,
         training_order=config.model_order,
@@ -462,6 +639,104 @@ def _score_seed_models(
             hidden_dim_start=state.hidden_dim_start,
             hidden_dim_end=circadian_model.hidden_dim,
         ),
+    )
+    if config.protocol_id not in _BOUNDED_REPLAY_PROTOCOLS:
+        return scored
+    assert isinstance(config, ContinualBoundedReplayConfig)
+    return ContinualBoundedReplaySeedResult(
+        seed=scored.seed,
+        backprop=scored.backprop,
+        predictive_coding=scored.predictive_coding,
+        circadian_predictive_coding=scored.circadian_predictive_coding,
+        split_hashes=scored.split_hashes,
+        training_order=scored.training_order,
+        replay_retention=ContinualReplayRetentionReport(
+            budget_examples=config.replay_max_examples,
+            budget_bytes=config.replay_max_bytes,
+            phase_a=circadian_after_a.get_replay_retention(),
+            phase_b=circadian_model.get_replay_retention(),
+        ),
+    )
+
+
+def _build_checkpoint_phase_a_data(
+    config: ContinualShiftConfig, seed: int
+) -> _CheckpointPhaseAData:
+    """Build only arrived data so Phase A resume cannot inspect Phase B."""
+    source = generate_two_cluster_dataset_with_transform(
+        sample_count=config.sample_count_phase_a,
+        noise_scale=config.phase_a_noise_scale,
+        seed=seed,
+        test_ratio=config.test_ratio,
+    )
+    roles = split_training_validation(
+        source,
+        validation_fraction=config.validation_fraction,
+        seed=seed + 17,
+        hash_test=False,
+        defer_test_access=config.protocol_id in _BOUNDED_REPLAY_PROTOCOLS,
+    )
+    return _CheckpointPhaseAData(
+        phase_a_train=roles.train,
+        phase_a_validation=roles.validation,
+        phase_a_test=roles.test,
+        split_hashes={
+            f"phase_a_{name}": roles.split_hashes[name] for name in ("train", "validation")
+        },
+        data_digest=continual_phase_a_data_digest(roles.train, roles.validation),
+    )
+
+
+def _complete_checkpoint_seed_data(
+    config: ContinualShiftConfig, seed: int, phase_a: _CheckpointPhaseAData
+) -> _CheckpointSeedData:
+    """Bind Phase B only after arrival, then use the existing full digest."""
+    phase_b_roles = _build_phase_b_roles(
+        config=config,
+        seed=seed + 101,
+        hash_test=False,
+        defer_test_access=config.protocol_id in _BOUNDED_REPLAY_PROTOCOLS,
+    )
+    return _CheckpointSeedData(
+        phase_a_train=phase_a.phase_a_train,
+        phase_a_validation=phase_a.phase_a_validation,
+        phase_a_test=phase_a.phase_a_test,
+        phase_b_train=phase_b_roles.train,
+        phase_b_validation=phase_b_roles.validation,
+        phase_b_test=phase_b_roles.test,
+        split_hashes={
+            **phase_a.split_hashes,
+            **{f"phase_b_{name}": digest for name, digest in phase_b_roles.split_hashes.items()},
+        },
+        data_digest=continual_data_digest(
+            phase_a.phase_a_train,
+            phase_a.phase_a_validation,
+            phase_b_roles.train,
+            phase_b_roles.validation,
+        ),
+    )
+
+
+def _bind_checkpoint_final_test_hashes(data: _CheckpointSeedData) -> _CheckpointSeedData:
+    """Bind held-out roles only after both phases finish or for completed seeds."""
+    assert data.phase_a_validation is not None and data.phase_b_validation is not None
+    phase_a_roles = make_role_separated_dataset(
+        train=data.phase_a_train,
+        validation=data.phase_a_validation,
+        test=LabeledData(data.phase_a_test.input, data.phase_a_test.target),
+    )
+    phase_b_roles = make_role_separated_dataset(
+        train=data.phase_b_train,
+        validation=data.phase_b_validation,
+        test=LabeledData(data.phase_b_test.input, data.phase_b_test.target),
+    )
+    return replace(
+        data,
+        split_hashes={
+            **data.split_hashes,
+            "phase_a_test": phase_a_roles.split_hashes["test"],
+            "phase_b_test": phase_b_roles.split_hashes["test"],
+        },
     )
 
 
@@ -532,6 +807,7 @@ def _new_checkpoint_models(
         circadian_config=config.circadian_config,
         hidden_dims=hidden_dims,
     )
+    _configure_replay_retention(config, circadian)
     return (
         ContinualRunnerState(
             backprop_model=backprop,
@@ -542,10 +818,90 @@ def _new_checkpoint_models(
     )
 
 
+def _configure_replay_retention(
+    config: ContinualShiftConfig, model: CircadianPredictiveCodingNetwork
+) -> None:
+    if config.protocol_id in _BOUNDED_REPLAY_PROTOCOLS:
+        assert isinstance(config, ContinualBoundedReplayConfig)
+        model.configure_replay_retention(
+            ReplayRetentionBudget(config.replay_max_examples, config.replay_max_bytes)
+        )
+
+
+def _observed_replay_ids(train: LabeledData) -> set[str]:
+    return {
+        replay_sample_id(train.input[index : index + 1], train.target[index : index + 1])
+        for index in range(train.input.shape[0])
+    }
+
+
+def _validate_replay_snapshot_provenance(
+    snapshot: CircadianNetworkSnapshot,
+    *,
+    budget: ReplayRetentionBudget,
+    observed_ids: set[str],
+) -> None:
+    """Reject a saved future example before restore or another wake update."""
+    if not isinstance(snapshot, CircadianNetworkSnapshot):
+        raise ValueError("incompatible replay observed-example snapshot")
+    memory = snapshot.state.get("_replay_memory")
+    if (
+        snapshot.state.get("_replay_retention_budget") != budget
+        or not isinstance(memory, deque)
+        or memory.maxlen is not None
+    ):
+        raise ValueError("incompatible replay observed-example budget")
+    retained_ids: set[str] = set()
+    retained_bytes = 0
+    for item in memory:
+        if not isinstance(item, ReplaySnapshot):
+            raise ValueError("incompatible replay observed-example snapshot")
+        try:
+            sample_id = replay_sample_id(item.input_batch, item.target_batch)
+        except (AttributeError, ValueError) as error:
+            raise ValueError("incompatible replay observed-example row") from error
+        if (
+            item.input_batch.shape[1] != 2
+            or item.input_batch.dtype != np.float64
+            or item.target_batch.dtype != np.float64
+            or not np.all(np.isfinite(item.input_batch))
+            or not np.isin(item.target_batch, (0.0, 1.0)).all()
+            or sample_id not in observed_ids
+            or sample_id in retained_ids
+        ):
+            raise ValueError("incompatible replay observed training examples")
+        retained_ids.add(sample_id)
+        retained_bytes += item.input_batch.nbytes + item.target_batch.nbytes
+    if len(retained_ids) > budget.max_examples or retained_bytes > budget.max_bytes:
+        raise ValueError("incompatible replay observed-example budget")
+
+
+def _validate_checkpoint_replay_provenance(
+    checkpoint: ContinualRunnerCheckpoint,
+    data: _CheckpointPhaseAData,
+    config: ContinualBoundedReplayConfig,
+) -> None:
+    budget = ReplayRetentionBudget(config.replay_max_examples, config.replay_max_bytes)
+    phase_a_ids = _observed_replay_ids(data.phase_a_train)
+    observed_ids = set(phase_a_ids)
+    if isinstance(data, _CheckpointSeedData):
+        observed_ids.update(_observed_replay_ids(data.phase_b_train))
+    active_snapshot = checkpoint.combined.model_state
+    if not isinstance(active_snapshot, CircadianNetworkSnapshot):
+        raise ValueError("incompatible replay observed-example snapshot")
+    _validate_replay_snapshot_provenance(active_snapshot, budget=budget, observed_ids=observed_ids)
+    if checkpoint.phase != "a":
+        frozen = checkpoint.state.circadian_after_a
+        if frozen is None:
+            raise ValueError("incompatible replay observed Phase A state")
+        _validate_replay_snapshot_provenance(frozen, budget=budget, observed_ids=phase_a_ids)
+
+
 def _validate_committed_seed(
     checkpoint: ContinualRunnerCheckpoint,
     index: int,
     data: _CheckpointSeedData,
+    config: ContinualShiftConfig,
 ) -> None:
     """A resumed aggregate cannot reuse a result from changed data."""
     if (
@@ -555,6 +911,36 @@ def _validate_committed_seed(
         != continual_test_digest(data.phase_a_test, data.phase_b_test)
     ):
         raise ValueError("incompatible continual checkpoint completed seed data")
+    if config.protocol_id == CONTINUAL_BOUNDED_REPLAY_PROTOCOL:
+        assert isinstance(config, ContinualBoundedReplayConfig)
+        result = checkpoint.completed_results[index]
+        if not isinstance(result, ContinualBoundedReplaySeedResult):
+            raise ValueError("incompatible replay observed completed seed report")
+        retained = result.replay_retention
+        if not isinstance(retained, ContinualReplayRetentionReport):
+            raise ValueError("incompatible replay observed completed seed report")
+        if (
+            retained.budget_examples != config.replay_max_examples
+            or retained.budget_bytes != config.replay_max_bytes
+        ):
+            raise ValueError("incompatible replay observed completed seed budget")
+        phase_a_ids = _observed_replay_ids(data.phase_a_train)
+        phase_b_ids = phase_a_ids | _observed_replay_ids(data.phase_b_train)
+        for snapshot, observed_ids, role in (
+            (retained.phase_a, phase_a_ids, data.phase_a_train),
+            (retained.phase_b, phase_b_ids, data.phase_b_train),
+        ):
+            bytes_per_row = role.input[:1].nbytes + role.target[:1].nbytes
+            if (
+                not isinstance(snapshot, ReplayRetentionSnapshot)
+                or snapshot.example_count != len(snapshot.sample_ids)
+                or snapshot.example_count > config.replay_max_examples
+                or snapshot.retained_bytes != snapshot.example_count * bytes_per_row
+                or snapshot.retained_bytes > config.replay_max_bytes
+                or len(set(snapshot.sample_ids)) != snapshot.example_count
+                or not set(snapshot.sample_ids).issubset(observed_ids)
+            ):
+                raise ValueError("incompatible replay observed completed seed report")
 
 
 def _run_checkpointed_seeds(
@@ -597,9 +983,21 @@ def _run_checkpointed_seeds(
     data_digests = list(checkpoint.completed_data_digests) if checkpoint is not None else []
     test_digests = list(checkpoint.completed_test_digests) if checkpoint is not None else []
     for index, seed in enumerate(seeds):
-        data = _build_checkpoint_seed_data(config, seed)
+        if config.protocol_id in _PHASE_ARRIVAL_CHECKPOINT_FORMATS:
+            phase_a_data = _build_checkpoint_phase_a_data(config, seed)
+            data: _CheckpointPhaseAData = phase_a_data
+            if checkpoint is not None and (
+                index < checkpoint.seed_index
+                or (index == checkpoint.seed_index and checkpoint.phase != "a")
+            ):
+                data = _complete_checkpoint_seed_data(config, seed, phase_a_data)
+                if index < checkpoint.seed_index or checkpoint.phase == "seed_complete":
+                    data = _bind_checkpoint_final_test_hashes(data)
+        else:
+            data = _build_checkpoint_seed_data(config, seed)
         if checkpoint is not None and index < checkpoint.seed_index:
-            _validate_committed_seed(checkpoint, index, data)
+            assert isinstance(data, _CheckpointSeedData)
+            _validate_committed_seed(checkpoint, index, data, config)
             continue
         if checkpoint is not None and index == checkpoint.seed_index:
             position = validate_continual_checkpoint(
@@ -613,9 +1011,16 @@ def _run_checkpointed_seeds(
                 phase_a_epochs=config.phase_a_epochs,
                 phase_b_epochs=config.phase_b_epochs,
                 hidden_dims=config.hidden_dims or (config.hidden_dim,),
+                expected_format_version=_PHASE_ARRIVAL_CHECKPOINT_FORMATS.get(
+                    config.protocol_id, 1
+                ),
             )
+            if config.protocol_id == CONTINUAL_BOUNDED_REPLAY_PROTOCOL:
+                assert isinstance(config, ContinualBoundedReplayConfig)
+                _validate_checkpoint_replay_provenance(checkpoint, data, config)
             if checkpoint.phase == "seed_complete":
-                _validate_committed_seed(checkpoint, index, data)
+                assert isinstance(data, _CheckpointSeedData)
+                _validate_committed_seed(checkpoint, index, data, config)
             state, circadian = _new_checkpoint_models(config, seed)
             if checkpoint.phase in {"b", "seed_complete"}:
                 frozen = checkpoint.state.circadian_after_a
@@ -649,7 +1054,7 @@ def _run_checkpointed_seeds(
             seeds=ordered_seeds,
             config_digest=config_digest,
             seed_index=index,
-            data=data,
+            data=_checkpoint_training_data(data),
             completed_results=results,
             completed_data_digests=data_digests,
             completed_test_digests=test_digests,
@@ -665,6 +1070,11 @@ def _run_checkpointed_seeds(
             state.backprop_after_a = deepcopy(state.backprop_model)
             state.predictive_after_a = deepcopy(state.predictive_model)
             state.circadian_after_a = circadian.snapshot_state()
+            if config.protocol_id in _PHASE_ARRIVAL_CHECKPOINT_FORMATS:
+                # Why this: the first B checkpoint must bind the newly arrived
+                # B roles, while every A checkpoint remains A-only.
+                data = _complete_checkpoint_seed_data(config, seed, data)
+                context.data = _checkpoint_training_data(data)
             _save_continual_checkpoint(
                 context,
                 state,
@@ -681,6 +1091,10 @@ def _run_checkpointed_seeds(
             phase="b",
             resume_position=position if resume_phase == "b" else None,
         )
+        assert isinstance(data, _CheckpointSeedData)
+        if config.protocol_id in _PHASE_ARRIVAL_CHECKPOINT_FORMATS:
+            data = _bind_checkpoint_final_test_hashes(data)
+            context.data = _checkpoint_training_data(data)
         result = _score_checkpoint_seed(config, seed, state, circadian, data)
         results.append(result)
         data_digests.append(data.data_digest)
@@ -695,6 +1109,247 @@ def _run_checkpointed_seeds(
             next_model_index=0,
         )
     return results
+
+
+def _capture_unscored_seed(
+    seed: int,
+    data: _CheckpointSeedData,
+    state: ContinualRunnerState,
+    circadian: CircadianPredictiveCodingNetwork,
+) -> ContinualUnscoredSeed:
+    """Commit arrived development identity and trained state without test data."""
+    if any("test" in role for role in data.split_hashes):
+        raise ValueError("unscored seed cannot contain final-test hashes")
+    return ContinualUnscoredSeed(
+        seed=seed,
+        data_digest=data.data_digest,
+        split_hashes=tuple(sorted(data.split_hashes.items())),
+        state=deepcopy(state),
+        circadian_final=circadian.snapshot_state(),
+    )
+
+
+def _validate_unscored_seed(
+    record: ContinualUnscoredSeed,
+    data: _CheckpointSeedData,
+    config: ContinualGlobalSealConfig,
+    seed: int,
+) -> None:
+    """Reject changed development roles or saved models before another update."""
+    if (
+        not isinstance(record, ContinualUnscoredSeed)
+        or record.seed != seed
+        or record.data_digest != data.data_digest
+        or record.split_hashes != tuple(sorted(data.split_hashes.items()))
+        or any("test" in role for role, _ in record.split_hashes)
+        or not isinstance(record.state, ContinualRunnerState)
+    ):
+        raise ValueError("incompatible global unscored development data")
+    state = record.state
+    hidden_dims = config.hidden_dims or (config.hidden_dim,)
+    total_epochs = config.phase_a_epochs + config.phase_b_epochs
+    if (
+        not isinstance(state.backprop_after_a, BackpropMLP)
+        or not isinstance(state.predictive_after_a, PredictiveCodingNetwork)
+        or not isinstance(state.circadian_after_a, CircadianNetworkSnapshot)
+        or not isinstance(record.circadian_final, CircadianNetworkSnapshot)
+        or any(
+            type(value) is not int or value < 0
+            for value in (
+                state.sleep_event_count,
+                state.total_splits,
+                state.total_prunes,
+                state.hidden_dim_start,
+            )
+        )
+        or state.sleep_event_count > total_epochs
+        or state.hidden_dim_start != hidden_dims[-1]
+    ):
+        raise ValueError("incompatible global unscored trained state")
+    validate_numpy_baseline_model(state.backprop_model, hidden_dims, total_epochs)
+    validate_numpy_baseline_model(state.predictive_model, hidden_dims, total_epochs)
+    validate_numpy_baseline_model(state.backprop_after_a, hidden_dims, config.phase_a_epochs)
+    validate_numpy_baseline_model(state.predictive_after_a, hidden_dims, config.phase_a_epochs)
+    budget = ReplayRetentionBudget(config.replay_max_examples, config.replay_max_bytes)
+    phase_a_ids = _observed_replay_ids(data.phase_a_train)
+    _validate_replay_snapshot_provenance(
+        state.circadian_after_a, budget=budget, observed_ids=phase_a_ids
+    )
+    _validate_replay_snapshot_provenance(
+        record.circadian_final,
+        budget=budget,
+        observed_ids=phase_a_ids | _observed_replay_ids(data.phase_b_train),
+    )
+    candidate_a = _new_checkpoint_models(config, seed)[1]
+    try:
+        candidate_a.restore_state(state.circadian_after_a)
+    except (AssertionError, KeyError, TypeError, ValueError) as error:
+        raise ValueError("incompatible global unscored Phase A state") from error
+    if candidate_a.get_sleep_clocks().wake_batches != config.phase_a_epochs:
+        raise ValueError("incompatible global unscored Phase A wake progress")
+    candidate = _new_checkpoint_models(config, seed)[1]
+    try:
+        candidate.restore_state(record.circadian_final)
+    except (AssertionError, KeyError, TypeError, ValueError) as error:
+        raise ValueError("incompatible global unscored circadian state") from error
+    if candidate.get_sleep_clocks().wake_batches != total_epochs:
+        raise ValueError("incompatible global unscored wake progress")
+
+
+def _score_global_unscored_seeds(
+    config: ContinualGlobalSealConfig,
+    seeds: list[int],
+    records: list[ContinualUnscoredSeed],
+) -> list[ContinualShiftSeedResult]:
+    """Open final tests only after every declared seed has a trained state."""
+    if len(records) != len(seeds):
+        raise ValueError("global final-test scoring requires every trained seed")
+    scored: list[ContinualShiftSeedResult] = []
+    for seed, record in zip(seeds, records, strict=True):
+        phase_a = _build_checkpoint_phase_a_data(config, seed)
+        data = _complete_checkpoint_seed_data(config, seed, phase_a)
+        _validate_unscored_seed(record, data, config, seed)
+        bound = _bind_checkpoint_final_test_hashes(data)
+        circadian = _new_checkpoint_models(config, seed)[1]
+        circadian.restore_state(record.circadian_final)
+        scored.append(_score_checkpoint_seed(config, seed, record.state, circadian, bound))
+    return scored
+
+
+def _run_checkpointed_global_seeds(
+    config: ContinualShiftConfig,
+    seeds: list[int],
+    store: ContinualCheckpointStore,
+    resume: bool,
+) -> list[ContinualShiftSeedResult]:
+    """Persist unscored v5 seeds, then release final tests after the last seed."""
+    assert isinstance(config, ContinualGlobalSealConfig)
+    if any(type(seed) is not int for seed in seeds):
+        raise ValueError("checkpoint seed list must contain Python integers")
+    ordered_seeds = tuple(seeds)
+    config_digest = continual_config_digest(config, ordered_seeds)
+    checkpoint = store.load() if resume else None
+    if checkpoint is not None and (
+        not isinstance(checkpoint, ContinualRunnerCheckpoint)
+        or checkpoint.format_version != 5
+        or checkpoint.runner_config_digest != config_digest
+        or checkpoint.seeds != ordered_seeds
+        or type(checkpoint.seed_index) is not int
+        or not 0 <= checkpoint.seed_index < len(seeds)
+        or checkpoint.phase not in {"a", "b", "seed_complete"}
+        or not isinstance(checkpoint.unscored_seeds, tuple)
+        or len(checkpoint.unscored_seeds)
+        != checkpoint.seed_index + int(checkpoint.phase == "seed_complete")
+    ):
+        raise ValueError("incompatible global checkpoint config or seed list")
+    records = list(deepcopy(checkpoint.unscored_seeds)) if checkpoint is not None else []
+    for index, seed in enumerate(seeds):
+        phase_a = _build_checkpoint_phase_a_data(config, seed)
+        data: _CheckpointPhaseAData = phase_a
+        if checkpoint is not None and (
+            index < checkpoint.seed_index
+            or (index == checkpoint.seed_index and checkpoint.phase != "a")
+        ):
+            data = _complete_checkpoint_seed_data(config, seed, phase_a)
+        if checkpoint is not None and index < checkpoint.seed_index:
+            assert isinstance(data, _CheckpointSeedData)
+            _validate_unscored_seed(records[index], data, config, seed)
+            continue
+        if checkpoint is not None and index == checkpoint.seed_index:
+            position = validate_continual_checkpoint(
+                checkpoint,
+                config_digest=config_digest,
+                seeds=ordered_seeds,
+                data_digest=data.data_digest,
+                split_hashes=tuple(sorted(data.split_hashes.items())),
+                protocol_id=config.protocol_id,
+                model_order=config.model_order,
+                phase_a_epochs=config.phase_a_epochs,
+                phase_b_epochs=config.phase_b_epochs,
+                hidden_dims=config.hidden_dims or (config.hidden_dim,),
+                expected_format_version=5,
+            )
+            _validate_checkpoint_replay_provenance(checkpoint, data, config)
+            if checkpoint.phase == "seed_complete":
+                assert isinstance(data, _CheckpointSeedData)
+                _validate_unscored_seed(records[index], data, config, seed)
+                continue
+            state, circadian = _new_checkpoint_models(config, seed)
+            if checkpoint.phase == "b":
+                frozen = checkpoint.state.circadian_after_a
+                assert frozen is not None
+                candidate = _new_checkpoint_models(config, seed)[1]
+                candidate.restore_state(frozen)
+                if candidate.get_sleep_clocks().wake_batches != config.phase_a_epochs:
+                    raise ValueError("incompatible global checkpoint Phase A wake state")
+            state = deepcopy(checkpoint.state)
+            restore_circadian_checkpoint(
+                circadian,
+                checkpoint.combined,
+                retry=None,
+                protocol_id=config.protocol_id,
+                config=circadian.config,
+                data_digest=data.data_digest,
+                expected_stage=position.stage,
+            )
+            resume_phase = checkpoint.phase
+        else:
+            state, circadian = _new_checkpoint_models(config, seed)
+            position = None
+            resume_phase = None
+        context = _CheckpointContext(
+            config=config,
+            store=store,
+            seeds=ordered_seeds,
+            config_digest=config_digest,
+            seed_index=index,
+            data=_checkpoint_training_data(data),
+            completed_results=[],
+            completed_data_digests=[],
+            completed_test_digests=[],
+            unscored_seeds=records,
+        )
+        if resume_phase != "b":
+            _train_checkpoint_phase(
+                context,
+                state,
+                circadian,
+                phase="a",
+                resume_position=position if resume_phase == "a" else None,
+            )
+            state.backprop_after_a = deepcopy(state.backprop_model)
+            state.predictive_after_a = deepcopy(state.predictive_model)
+            state.circadian_after_a = circadian.snapshot_state()
+            data = _complete_checkpoint_seed_data(config, seed, data)
+            context.data = _checkpoint_training_data(data)
+            _save_continual_checkpoint(
+                context,
+                state,
+                circadian,
+                phase="b",
+                phase_epoch_completed=0,
+                stage="after_sleep",
+                next_model_index=0,
+            )
+        _train_checkpoint_phase(
+            context,
+            state,
+            circadian,
+            phase="b",
+            resume_position=position if resume_phase == "b" else None,
+        )
+        assert isinstance(data, _CheckpointSeedData)
+        records.append(_capture_unscored_seed(seed, data, state, circadian))
+        _save_continual_checkpoint(
+            context,
+            state,
+            circadian,
+            phase="seed_complete",
+            phase_epoch_completed=config.phase_b_epochs,
+            stage="after_sleep",
+            next_model_index=0,
+        )
+    return _score_global_unscored_seeds(config, seeds, records)
 
 
 def _score_checkpoint_seed(
@@ -743,6 +1398,8 @@ def _train_checkpoint_phase(
         interval = config.circadian_sleep_interval_phase_a
         train = context.data.phase_a_train
     else:
+        if context.data.phase_b_train is None:
+            raise ValueError("Phase B training requires arrived Phase B roles")
         epoch_count = config.phase_b_epochs
         offset = config.phase_a_epochs
         interval = config.circadian_sleep_interval_phase_b
@@ -796,7 +1453,11 @@ def _train_checkpoint_phase(
             sleep_interval=interval,
             epoch_index=epoch,
             global_epoch=offset + epoch,
-            total_epochs=config.phase_a_epochs + config.phase_b_epochs,
+            total_epochs=(
+                config.phase_a_epochs
+                if phase == "a" and config.protocol_id in _PHASE_LOCAL_SCHEDULE_PROTOCOLS
+                else config.phase_a_epochs + config.phase_b_epochs
+            ),
             force_sleep=config.circadian_force_sleep,
             sleep_event_count=state.sleep_event_count,
             total_splits=state.total_splits,
@@ -823,6 +1484,7 @@ def _save_continual_checkpoint(
     stage: str,
     next_model_index: int,
 ) -> None:
+    global_seal = context.config.protocol_id == CONTINUAL_GLOBAL_SEAL_PROTOCOL
     offset = 0 if phase == "a" else context.config.phase_a_epochs
     position = CircadianResumePosition(
         completed_epoch=offset + phase_epoch_completed,
@@ -832,7 +1494,7 @@ def _save_continual_checkpoint(
     )
     context.store.save(
         ContinualRunnerCheckpoint(
-            format_version=1,
+            format_version=_PHASE_ARRIVAL_CHECKPOINT_FORMATS.get(context.config.protocol_id, 1),
             runner_config_digest=context.config_digest,
             seeds=context.seeds,
             seed_index=context.seed_index,
@@ -840,9 +1502,9 @@ def _save_continual_checkpoint(
             phase_epoch_completed=phase_epoch_completed,
             data_digest=context.data.data_digest,
             split_hashes=tuple(sorted(context.data.split_hashes.items())),
-            completed_results=deepcopy(context.completed_results),
-            completed_data_digests=tuple(context.completed_data_digests),
-            completed_test_digests=tuple(context.completed_test_digests),
+            completed_results=[] if global_seal else deepcopy(context.completed_results),
+            completed_data_digests=() if global_seal else tuple(context.completed_data_digests),
+            completed_test_digests=() if global_seal else tuple(context.completed_test_digests),
             state=deepcopy(state),
             combined=capture_circadian_checkpoint(
                 circadian,
@@ -852,6 +1514,7 @@ def _save_continual_checkpoint(
                 config=circadian.config,
                 data_digest=context.data.data_digest,
             ),
+            unscored_seeds=deepcopy(tuple(context.unscored_seeds)) if global_seal else (),
         )
     )
 
@@ -883,12 +1546,19 @@ def _train_phase_a_models(
         circadian_config=config.circadian_config,
         hidden_dims=resolved_hidden_dims,
     )
+    _configure_replay_retention(config, circadian_model)
 
     sleep_event_count = 0
     total_splits = 0
     total_prunes = 0
     hidden_dim_start = circadian_model.hidden_dim
-    total_epochs = config.phase_a_epochs + config.phase_b_epochs
+    # Why this: an unarrived phase cannot set Phase A's progress-dependent
+    # split/prune budget. Reviewed v1/v2 routes retain their full-run horizon.
+    total_epochs = (
+        config.phase_a_epochs
+        if config.protocol_id in _PHASE_LOCAL_SCHEDULE_PROTOCOLS
+        else config.phase_a_epochs + config.phase_b_epochs
+    )
 
     for epoch_index in range(1, config.phase_a_epochs + 1):
         _train_models_one_epoch(
@@ -1024,11 +1694,19 @@ def _build_phase_b_dataset(config: ContinualShiftConfig, seed: int) -> DatasetSp
     )
 
 
-def _build_phase_b_roles(config: ContinualShiftConfig, seed: int) -> RoleSeparatedDataset:
+def _build_phase_b_roles(
+    config: ContinualShiftConfig,
+    seed: int,
+    *,
+    hash_test: bool = True,
+    defer_test_access: bool = False,
+) -> RoleSeparatedDataset:
     full_phase_b = split_training_validation(
         _generate_phase_b_source(config, seed),
         validation_fraction=config.validation_fraction,
         seed=seed + 37,
+        hash_test=hash_test,
+        defer_test_access=defer_test_access,
     )
     train_count = full_phase_b.train.input.shape[0]
     subset_count = max(8, int(train_count * config.phase_b_train_fraction))
@@ -1042,6 +1720,7 @@ def _build_phase_b_roles(config: ContinualShiftConfig, seed: int) -> RoleSeparat
         train=LabeledData(subset_input, subset_target),
         validation=full_phase_b.validation,
         test=full_phase_b.test,
+        hash_test=hash_test,
     )
 
 
@@ -1242,8 +1921,39 @@ def _validate_config(config: ContinualShiftConfig) -> None:
         or set(config.model_order) != set(CONTINUAL_MODEL_ORDER)
     ):
         raise ValueError("model_order must be a permutation of the three continual models")
-    if config.protocol_id not in (CONTINUAL_VALIDATION_PROTOCOL, CONTINUAL_LEGACY_PROTOCOL):
+    if config.protocol_id not in (
+        CONTINUAL_VALIDATION_PROTOCOL,
+        CONTINUAL_LEGACY_PROTOCOL,
+        CONTINUAL_PHASE_ARRIVAL_PROTOCOL,
+        CONTINUAL_PHASE_LOCAL_SCHEDULE_PROTOCOL,
+        CONTINUAL_BOUNDED_REPLAY_PROTOCOL,
+        CONTINUAL_GLOBAL_SEAL_PROTOCOL,
+    ):
         raise ValueError(f"Unknown continual benchmark protocol: {config.protocol_id}")
+    if config.protocol_id in _BOUNDED_REPLAY_PROTOCOLS:
+        expected = (
+            ContinualGlobalSealConfig
+            if config.protocol_id == CONTINUAL_GLOBAL_SEAL_PROTOCOL
+            else ContinualBoundedReplayConfig
+        )
+        if type(config) is not expected:
+            if config.protocol_id == CONTINUAL_BOUNDED_REPLAY_PROTOCOL:
+                raise ValueError("bounded replay config is required for the v4 protocol")
+            raise ValueError("global-test-seal config is required for the v5 protocol")
+        assert isinstance(config, ContinualBoundedReplayConfig)
+        if (
+            type(config.replay_max_examples) is not int
+            or config.replay_max_examples <= 0
+            or type(config.replay_max_bytes) is not int
+            or config.replay_max_bytes < 24
+        ):
+            raise ValueError("replay example/byte budget must be positive and fit one row")
+        if config.circadian_config.replay_steps <= 0:
+            raise ValueError("bounded replay requires replay_steps > 0")
+        if config.circadian_config.sleep_mode != "components":
+            raise ValueError("bounded replay requires components sleep mode")
+    elif isinstance(config, ContinualBoundedReplayConfig):
+        raise ValueError("bounded replay config requires its matching protocol")
     if not 0.0 < config.validation_fraction < 1.0:
         raise ValueError("validation_fraction must be in (0, 1)")
     if config.sample_count_phase_a < 20:

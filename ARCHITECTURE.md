@@ -72,13 +72,22 @@ core must not depend on app/infra/adapters.
 1. `infra.vision_datasets` creates synthetic or torchvision dataloaders
 2. `app.seeded_vision_loader` reconstructs v3 train order and augmentation
    streams from a logical epoch/batch cursor (ADR-0057)
-3. `app.vision_checkpoint` binds v3 runner/model state and exact development
+3. `app.shared_vision_loader` replays the v1/v2 shared sampler without
+   reseeding or changing their ordinary process streams (ADR-0059)
+4. `app.vision_checkpoint` binds runner/model state and exact development
    data; `infra.circadian_checkpoint_files` persists a trusted local file
-   (ADR-0058)
-4. `app.resnet50_benchmark` runs all three models with aligned evaluation
-   metrics and resumes the seeded CPU path before final-test scoring
-5. `adapters.resnet_benchmark_cli` exposes benchmark configuration
-6. `scripts/run_multiseed_resnet_benchmark.py` aggregates cross-seed results
+   (ADR-0058–0059)
+5. `app.resnet50_benchmark` runs all three models with aligned evaluation
+   metrics and resumes CPU unmatched protocols before final-test scoring
+6. `adapters.resnet_benchmark_cli` exposes benchmark configuration
+7. `scripts/run_multiseed_resnet_benchmark.py` aggregates cross-seed results
+
+The fixed-feature matched runner has separate CPU checkpoint protocols. The
+capacity-only route verifies equal head width and guarded sleep without a
+memory claim (ADR-0060). Explicit checkpoint-memory routes store per-process
+RSS segments in the fixed-feature payload and expose maximum observed absolute
+RSS across committed segments; the original memory-enabled protocols retain
+their scope (ADR-0061). CUDA checkpoint evidence remains open.
 
 ## Design Decisions
 

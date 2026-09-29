@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import asdict, replace
+import json
 from typing import Any
 
 import pytest
@@ -108,6 +109,26 @@ def test_manifest_freezes_validation_selection_without_final_test(
     repeated._validate_manifest(manifest)
     with pytest.raises(ValueError, match="changed after freezing"):
         repeated._validate_manifest(replace(manifest, confirmation_seeds=(53, 59, 67)))
+
+
+def test_saved_manifest_restores_and_rejects_changed_seed_before_confirmation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    selection = _selection(monkeypatch)
+    manifest = repeated.create_confirmation_manifest(
+        selection,
+        confirmation_seeds=(53, 59, 61),
+        wall_time_budget_seconds=0.05,
+        wall_time_epoch_cap=1000,
+    )
+    saved = json.loads(json.dumps(asdict(manifest)))
+    assert repeated.restore_confirmation_manifest(saved) == manifest
+    changed = {**saved, "confirmation_seeds": [53, 59, 67]}
+    with pytest.raises(ValueError, match="changed after freezing"):
+        repeated.restore_confirmation_manifest(changed)
+    incomplete = {**saved, "base_config": {"seed": 47}}
+    with pytest.raises(ValueError, match="Malformed"):
+        repeated.restore_confirmation_manifest(incomplete)
 
 
 def test_manifest_rejects_test_informed_or_overlap_selection(

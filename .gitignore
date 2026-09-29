@@ -1,4 +1,9 @@
 .venv/
+.venv-py311-snapshot/
+.venv-cuda/
+.venv-cuda-py311-snapshot/
+/gpu-venv/
+gpu-venv-py311-snapshot/
 __pycache__/
 *.py[cod]
 .mypy_cache/

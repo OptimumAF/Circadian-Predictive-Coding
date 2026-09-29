@@ -291,7 +291,9 @@ def test_earlier_vision_file_resume_preserves_shared_loader_across_models(
         method_name = f"_train_{name}"
         original_train = getattr(vision, method_name)
 
-        def train(*args: Any, _name: str = name, _original: Any = original_train, **kwargs: Any) -> Any:
+        def train(
+            *args: Any, _name: str = name, _original: Any = original_train, **kwargs: Any
+        ) -> Any:
             outcome = _original(*args, **kwargs)
             trained.append((_name, vision._hash_trained_model(outcome.model)))
             return outcome
@@ -336,7 +338,9 @@ def test_earlier_vision_file_resume_preserves_shared_loader_across_models(
     assert [name for name, _ in trained] == ["backprop"]
     _ = (random.random(), np.random.random(), torch.rand(()))
     resumed = vision.run_resnet50_benchmark(
-        config, checkpoint_store=store, resume_from_checkpoint=True,
+        config,
+        checkpoint_store=store,
+        resume_from_checkpoint=True,
     )
     assert [name for name, _ in trained] == ["backprop", "predictive", "circadian"]
     assert resumed.split_hashes == control.split_hashes
@@ -392,22 +396,181 @@ def test_earlier_vision_file_resume_across_guarded_sleep_matches_uninterrupted(
         vision.run_resnet50_benchmark(
             config,
             checkpoint_store=InterruptAtActiveStage(
-                store, stage, 0 if stage == "wake" else 1,
+                store,
+                stage,
+                0 if stage == "wake" else 1,
             ),
         )
     resumed = vision.run_resnet50_benchmark(
-        config, checkpoint_store=store, resume_from_checkpoint=True,
+        config,
+        checkpoint_store=store,
+        resume_from_checkpoint=True,
     )
     assert resumed.split_hashes == control.split_hashes
     assert resumed.trained_model_hashes == control.trained_model_hashes
     _same_learning_reports(resumed, control)
     circadian = next(
-        report for report in resumed.reports
+        report
+        for report in resumed.reports
         if report.model_name == "CircadianPredictiveCodingResNet50"
     )
     assert circadian.circadian_sleep_attempts > 0
-    assert circadian.circadian_total_rollbacks > 0 if reject else circadian.circadian_total_splits > 0
+    assert (
+        circadian.circadian_total_rollbacks > 0 if reject else circadian.circadian_total_splits > 0
+    )
     assert (random.random(), float(np.random.random()), float(torch.rand(()))) == expected_draw
+
+
+@pytest.mark.parametrize(
+    ("protocol", "workers"),
+    [
+        (VISION_VALIDATION_UNMATCHED_PROTOCOL, 0),
+        (VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL, 2),
+    ],
+)
+def test_earlier_vision_file_resume_replays_shared_augmented_loader(
+    tmp_path: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    tiny_vision_backbone: None,
+    protocol: str,
+    workers: int,
+) -> None:
+    config = replace(_config(), protocol_id=protocol)
+    original_build = vision._build_benchmark_loaders
+
+    def build(config: ResNet50BenchmarkConfig) -> Any:
+        loaders = original_build(config)
+        train_loader = torch.utils.data.DataLoader(
+            StochasticVisionDataset(loaders.train_loader.dataset),
+            batch_size=config.batch_size,
+            shuffle=True,
+            num_workers=workers,
+            generator=torch.Generator().manual_seed(99),
+        )
+        return replace(loaders, train_loader=train_loader)
+
+    monkeypatch.setattr(vision, "_build_benchmark_loaders", build)
+    random.seed(941)
+    np.random.seed(942)
+    torch.manual_seed(943)
+    control = vision.run_resnet50_benchmark(
+        config,
+        checkpoint_store=TrustedLocalVisionCheckpointStore(tmp_path / "control.ckpt"),
+    )
+    expected_draw = (random.random(), float(np.random.random()), float(torch.rand(())))
+
+    store = TrustedLocalVisionCheckpointStore(tmp_path / "vision.ckpt")
+    random.seed(941)
+    np.random.seed(942)
+    torch.manual_seed(943)
+    with pytest.raises(InterruptedAfterSave):
+        vision.run_resnet50_benchmark(
+            config,
+            checkpoint_store=InterruptAtActiveStage(store, "wake", 0),
+        )
+    resumed = vision.run_resnet50_benchmark(
+        config,
+        checkpoint_store=store,
+        resume_from_checkpoint=True,
+    )
+    assert resumed.trained_model_hashes == control.trained_model_hashes
+    _same_learning_reports(resumed, control)
+    assert (random.random(), float(np.random.random()), float(torch.rand(()))) == expected_draw
+
+
+@pytest.mark.parametrize(
+    ("protocol", "damage"),
+    [
+        (VISION_VALIDATION_UNMATCHED_PROTOCOL, "shared"),
+        (VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL, "cursor"),
+        (VISION_VALIDATION_UNMATCHED_PROTOCOL, "replay"),
+        (VISION_VALIDATION_UNMATCHED_PROTOCOL, "data"),
+        (VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL, "data"),
+        (VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL, "checksum"),
+    ],
+)
+def test_earlier_vision_file_resume_rejects_incompatible_state_before_training(
+    tmp_path: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    tiny_vision_backbone: None,
+    protocol: str,
+    damage: str,
+) -> None:
+    config = replace(_sleep_config(), protocol_id=protocol)
+    store = TrustedLocalVisionCheckpointStore(tmp_path / "vision.ckpt")
+    with pytest.raises(InterruptedAfterSave):
+        vision.run_resnet50_benchmark(
+            config,
+            checkpoint_store=InterruptAtActiveStage(store, "wake", 0),
+        )
+    saved = store.load()
+    active = saved.active_circadian
+    assert active is not None
+    if damage == "shared":
+        store.save(
+            replace(
+                saved,
+                shared_train_generator_state=torch.Generator().manual_seed(99).get_state(),
+            )
+        )
+    elif damage == "cursor":
+        store.save(
+            replace(
+                saved,
+                active_circadian=replace(
+                    active,
+                    loader_state=replace(active.loader_state, next_batch_index=0),
+                ),
+            )
+        )
+    elif damage == "replay":
+        store.save(
+            replace(
+                saved,
+                active_circadian=replace(
+                    active,
+                    loader_state=replace(
+                        active.loader_state,
+                        epoch_entry_generator_state=(
+                            torch.Generator().manual_seed(999).get_state()
+                        ),
+                    ),
+                ),
+            )
+        )
+    elif damage == "data":
+        original_build = vision._build_benchmark_loaders
+
+        def changed_data(config: ResNet50BenchmarkConfig) -> Any:
+            loaders = original_build(config)
+            labels = loaders.guard_loader.dataset.labels
+            labels[0] = (labels[0] + 1) % config.num_classes
+            return loaders
+
+        monkeypatch.setattr(vision, "_build_benchmark_loaders", changed_data)
+    else:
+        path = tmp_path / "vision.ckpt"
+        content = path.read_bytes()
+        path.write_bytes(content[:-1] + bytes([content[-1] ^ 1]))
+
+    if damage != "replay":
+        monkeypatch.setattr(
+            vision,
+            "_train_circadian",
+            lambda *args, **kwargs: pytest.fail("training began before shared-stream preflight"),
+        )
+    before_python = random.getstate()
+    before_numpy = np.random.get_state()
+    before_torch = torch.get_rng_state().clone()
+    with pytest.raises(ValueError, match="checkpoint"):
+        vision.run_resnet50_benchmark(
+            config,
+            checkpoint_store=store,
+            resume_from_checkpoint=True,
+        )
+    assert random.getstate() == before_python
+    np.testing.assert_equal(np.random.get_state(), before_numpy)
+    assert torch.equal(torch.get_rng_state(), before_torch)
 
 
 def test_vision_file_resume_rejects_changed_development_data_before_training(

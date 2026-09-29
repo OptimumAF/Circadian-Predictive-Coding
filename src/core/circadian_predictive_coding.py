@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import deque
 from copy import deepcopy
 from dataclasses import dataclass, field as dataclass_field, fields
+from hashlib import sha256
 from math import isfinite
 from numbers import Integral
 from typing import Any, Self
@@ -45,6 +46,41 @@ class ReplaySnapshot:
     target_batch: Array
     priority: float
     positive_fraction: float
+
+
+@dataclass(frozen=True)
+class ReplayRetentionBudget:
+    """Hard limits on unique labeled examples held for optional sleep replay."""
+
+    max_examples: int
+    max_bytes: int
+
+    def __post_init__(self) -> None:
+        if type(self.max_examples) is not int or self.max_examples <= 0:
+            raise ValueError("replay example budget must be a positive integer")
+        if type(self.max_bytes) is not int or self.max_bytes <= 0:
+            raise ValueError("replay byte budget must be a positive integer")
+
+
+@dataclass(frozen=True)
+class ReplayRetentionSnapshot:
+    """Content IDs and array storage actually retained at a phase boundary."""
+
+    sample_ids: tuple[str, ...]
+    example_count: int
+    retained_bytes: int
+
+
+def replay_sample_id(input_row: Array, target_row: Array) -> str:
+    """Identify one observed labeled row without exposing its raw values."""
+    if input_row.ndim != 2 or input_row.shape[0] != 1 or target_row.shape != (1, 1):
+        raise ValueError("replay sample ID requires one input and one target row")
+    digest = sha256(b"numpy_labeled_replay_row_v1")
+    for values in (input_row, target_row):
+        canonical = np.ascontiguousarray(values, dtype="<f8")
+        digest.update(np.asarray(canonical.shape, dtype="<i8").tobytes())
+        digest.update(canonical.tobytes())
+    return digest.hexdigest()
 
 
 @dataclass(frozen=True)
@@ -243,8 +279,12 @@ class CircadianPredictiveCodingNetwork:
         self._validate_config(config)
         self.config = config
 
-        self.max_hidden_dim = max_hidden_dim if max_hidden_dim is not None else max(adaptive_hidden_dim * 4, 16)
-        self.max_hidden_dim = require_positive_integer_dimension(self.max_hidden_dim, "max_hidden_dim")
+        self.max_hidden_dim = (
+            max_hidden_dim if max_hidden_dim is not None else max(adaptive_hidden_dim * 4, 16)
+        )
+        self.max_hidden_dim = require_positive_integer_dimension(
+            self.max_hidden_dim, "max_hidden_dim"
+        )
         if self.max_hidden_dim < adaptive_hidden_dim:
             raise ValueError("max_hidden_dim cannot be smaller than initial hidden_dim")
 
@@ -254,9 +294,7 @@ class CircadianPredictiveCodingNetwork:
         self._pre_hidden_biases: list[Array] = []
         previous_dim = input_dim
         for layer_dim in pre_hidden_dims:
-            self._pre_hidden_weights.append(
-                rng.normal(0.0, 0.5, size=(previous_dim, layer_dim))
-            )
+            self._pre_hidden_weights.append(rng.normal(0.0, 0.5, size=(previous_dim, layer_dim)))
             self._pre_hidden_biases.append(np.zeros((1, layer_dim), dtype=np.float64))
             previous_dim = layer_dim
 
@@ -291,9 +329,7 @@ class CircadianPredictiveCodingNetwork:
         self._energy_history: list[float] = []
         self._reward_error_ema: float | None = None
         self._last_reward_scale = 1.0
-        self._replay_memory: deque[ReplaySnapshot] = deque(
-            maxlen=self.config.replay_memory_size
-        )
+        self._replay_memory: deque[ReplaySnapshot] = deque(maxlen=self.config.replay_memory_size)
 
     @property
     def hidden_dim(self) -> int:
@@ -310,13 +346,44 @@ class CircadianPredictiveCodingNetwork:
             sleep_events=self._sleep_events,
         )
 
+    def configure_replay_retention(self, budget: ReplayRetentionBudget) -> None:
+        """Enable per-example retention before the first wake update."""
+        if not isinstance(budget, ReplayRetentionBudget):
+            raise TypeError("replay retention requires a ReplayRetentionBudget")
+        if (
+            self._epoch_count != 0
+            or self._replay_memory
+            or hasattr(self, "_replay_retention_budget")
+        ):
+            raise ValueError("replay retention must be configured once before training")
+        # Why this: keep historical batch-snapshot state/checkpoints unchanged
+        # unless a versioned caller explicitly selects bounded retention.
+        self._replay_retention_budget = budget
+        self._replay_memory = deque()
+
+    def get_replay_retention(self) -> ReplayRetentionSnapshot:
+        """Describe the bounded labeled examples currently held for replay."""
+        if not hasattr(self, "_replay_retention_budget"):
+            raise ValueError("replay retention budget is not configured")
+        ids = tuple(
+            sorted(
+                replay_sample_id(item.input_batch, item.target_batch)
+                for item in self._replay_memory
+            )
+        )
+        return ReplayRetentionSnapshot(
+            sample_ids=ids,
+            example_count=len(ids),
+            retained_bytes=sum(
+                item.input_batch.nbytes + item.target_batch.nbytes for item in self._replay_memory
+            ),
+        )
+
     def get_neuron_lineage(self) -> NeuronLineageSnapshot:
         """Return active IDs; a parent ID remains meaningful after its prune."""
         return NeuronLineageSnapshot(
             neuron_ids=tuple(int(value) for value in self._neuron_ids),
-            parent_ids=tuple(
-                None if value < 0 else int(value) for value in self._parent_ids
-            ),
+            parent_ids=tuple(None if value < 0 else int(value) for value in self._parent_ids),
             next_neuron_id=self._next_neuron_id,
         )
 
@@ -372,9 +439,25 @@ class CircadianPredictiveCodingNetwork:
         if (
             not isinstance(candidate._rng, np.random.Generator)
             or not isinstance(candidate._replay_memory, deque)
-            or candidate._replay_memory.maxlen != self.config.replay_memory_size
+            or getattr(candidate, "_replay_retention_budget", None)
+            != getattr(self, "_replay_retention_budget", None)
+            or candidate._replay_memory.maxlen
+            != (
+                None
+                if hasattr(self, "_replay_retention_budget")
+                else self.config.replay_memory_size
+            )
         ):
             raise ValueError("Circadian snapshot replay or RNG state is incompatible")
+        if hasattr(self, "_replay_retention_budget"):
+            retained = candidate.get_replay_retention()
+            budget = self._replay_retention_budget
+            if (
+                retained.example_count > budget.max_examples
+                or retained.retained_bytes > budget.max_bytes
+                or len(set(retained.sample_ids)) != retained.example_count
+            ):
+                raise ValueError("Circadian snapshot replay exceeds its observed budget")
         self.__dict__.clear()
         self.__dict__.update(restored)
 
@@ -469,7 +552,11 @@ class CircadianPredictiveCodingNetwork:
             if bias.shape != (1, previous_width):
                 raise ValueError("model topology has incompatible pre-hidden bias width")
         input_weight = self.weight_input_hidden
-        if input_weight.ndim != 2 or input_weight.shape[0] != previous_width or input_weight.shape[1] <= 0:
+        if (
+            input_weight.ndim != 2
+            or input_weight.shape[0] != previous_width
+            or input_weight.shape[1] <= 0
+        ):
             raise ValueError("model topology has incompatible adaptive input width")
         width = input_weight.shape[1]
         if (
@@ -632,9 +719,13 @@ class CircadianPredictiveCodingNetwork:
             gated_hidden_bias = grad_hidden_bias * plasticity[np.newaxis, :]
             effective_learning_rate = learning_rate * reward_scale
             with np.errstate(over="ignore", invalid="ignore"):
-                new_hidden_output = self.weight_hidden_output - effective_learning_rate * gated_hidden_output
+                new_hidden_output = (
+                    self.weight_hidden_output - effective_learning_rate * gated_hidden_output
+                )
                 new_output_bias = self.bias_output - effective_learning_rate * grad_output_bias
-                new_input_hidden = self.weight_input_hidden - effective_learning_rate * gated_input_hidden
+                new_input_hidden = (
+                    self.weight_input_hidden - effective_learning_rate * gated_input_hidden
+                )
                 new_hidden_bias = self.bias_hidden - effective_learning_rate * gated_hidden_bias
                 new_pre_weights = list(self._pre_hidden_weights)
                 new_pre_biases = list(self._pre_hidden_biases)
@@ -651,10 +742,12 @@ class CircadianPredictiveCodingNetwork:
                     if layer_index > 0:
                         running_delta = local_delta @ self._pre_hidden_weights[layer_index].T
                     new_pre_weights[layer_index] = (
-                        self._pre_hidden_weights[layer_index] - effective_learning_rate * grad_pre_weight
+                        self._pre_hidden_weights[layer_index]
+                        - effective_learning_rate * grad_pre_weight
                     )
                     new_pre_biases[layer_index] = (
-                        self._pre_hidden_biases[layer_index] - effective_learning_rate * grad_pre_bias
+                        self._pre_hidden_biases[layer_index]
+                        - effective_learning_rate * grad_pre_bias
                     )
                 new_traffic = self._traffic_sum + np.mean(np.abs(hidden_state), axis=0)
                 new_age = self._neuron_age + 1.0
@@ -730,9 +823,7 @@ class CircadianPredictiveCodingNetwork:
         energy_improvement = recent[0] - recent[-1]
         plateau = energy_improvement <= self.config.sleep_plateau_delta
         chemical_variance = float(np.var(self._hidden_chemical))
-        high_chemical_variance = (
-            chemical_variance >= self.config.sleep_chemical_variance_threshold
-        )
+        high_chemical_variance = chemical_variance >= self.config.sleep_chemical_variance_threshold
         return plateau and high_chemical_variance
 
     def sleep_event(
@@ -938,9 +1029,7 @@ class CircadianPredictiveCodingNetwork:
         age_component = self._normalize_vector_zero_base(self._neuron_age)
         importance_component = self._normalize_vector_zero_base(self._importance_ema)
         importance_mix = np.clip(self.config.plasticity_importance_mix, 0.0, 1.0)
-        stability = (
-            importance_mix * importance_component + (1.0 - importance_mix) * age_component
-        )
+        stability = importance_mix * importance_component + (1.0 - importance_mix) * age_component
         span = self.config.plasticity_sensitivity_max - self.config.plasticity_sensitivity_min
         return self.config.plasticity_sensitivity_min + span * stability
 
@@ -979,7 +1068,9 @@ class CircadianPredictiveCodingNetwork:
             pre_hidden_activations.append(activation)
         return pre_hidden_linears, pre_hidden_activations, activation
 
-    def _compute_energy(self, output_prediction: Array, target_batch: Array, hidden_error: Array) -> float:
+    def _compute_energy(
+        self, output_prediction: Array, target_batch: Array, hidden_error: Array
+    ) -> float:
         bce = self._binary_cross_entropy(output_prediction, target_batch)
         hidden_penalty = 0.5 * float(np.mean(np.square(hidden_error)))
         return bce + hidden_penalty
@@ -1012,7 +1103,7 @@ class CircadianPredictiveCodingNetwork:
         batch_error = float(np.mean(np.abs(output_error)))
         baseline = batch_error if self._reward_error_ema is None else self._reward_error_ema
         difficulty_ratio = batch_error / max(float(baseline), 1e-8)
-        raw_scale = difficulty_ratio ** self.config.reward_difficulty_exponent
+        raw_scale = difficulty_ratio**self.config.reward_difficulty_exponent
         reward_scale = float(
             np.clip(raw_scale, self.config.reward_scale_min, self.config.reward_scale_max)
         )
@@ -1116,7 +1207,9 @@ class CircadianPredictiveCodingNetwork:
         _, prune_threshold = self._resolve_split_prune_thresholds()
         prune_threshold -= self.config.prune_hysteresis_margin
         # Pending gradual prunes already reserve slots above the minimum width.
-        removable = self.hidden_dim - self._min_hidden_dim - int(np.count_nonzero(self._prune_marked))
+        removable = (
+            self.hidden_dim - self._min_hidden_dim - int(np.count_nonzero(self._prune_marked))
+        )
         if removable <= 0 or self.config.max_prune_per_sleep <= 0:
             return ()
         limit = self.config.max_prune_per_sleep if max_prune_limit is None else max_prune_limit
@@ -1175,7 +1268,9 @@ class CircadianPredictiveCodingNetwork:
         for label, indices in (("split", split_indices), ("prune", prune_indices)):
             if any(type(index) is not int or not 0 <= index < self.hidden_dim for index in indices):
                 raise ValueError(f"built-in {label} index is out of range")
-        if len(set(split_indices)) != len(split_indices) or len(set(prune_indices)) != len(prune_indices):
+        if len(set(split_indices)) != len(split_indices) or len(set(prune_indices)) != len(
+            prune_indices
+        ):
             raise ValueError("built-in split or prune indices must be unique")
         if set(split_indices) & set(prune_indices):
             raise ValueError("built-in split and prune indices must not overlap")
@@ -1414,7 +1509,9 @@ class CircadianPredictiveCodingNetwork:
         ranked = eligible[np.argsort(scores[eligible])[::-1]]
         preferred = ranked[self._hidden_chemical[ranked] >= split_threshold]
         fallback = ranked[self._hidden_chemical[ranked] < split_threshold]
-        split_indices = tuple(int(index) for index in np.concatenate((preferred, fallback))[:add_count])
+        split_indices = tuple(
+            int(index) for index in np.concatenate((preferred, fallback))[:add_count]
+        )
         return split_indices, tuple(sorted(remove_indices))
 
     def _split_neurons(self, split_indices: tuple[int, ...]) -> None:
@@ -1623,6 +1720,39 @@ class CircadianPredictiveCodingNetwork:
         return matrix * scale[:, np.newaxis]
 
     def _store_replay_snapshot(self, input_batch: Array, target_batch: Array) -> None:
+        budget = getattr(self, "_replay_retention_budget", None)
+        if budget is not None:
+            predictions = self.predict_proba(input_batch)
+            retained = {
+                replay_sample_id(item.input_batch, item.target_batch): item
+                for item in self._replay_memory
+            }
+            for index in range(input_batch.shape[0]):
+                input_row = input_batch[index : index + 1].copy()
+                target_row = target_batch[index : index + 1].copy()
+                sample_bytes = input_row.nbytes + target_row.nbytes
+                if sample_bytes > budget.max_bytes:
+                    continue
+                sample_id = replay_sample_id(input_row, target_row)
+                retained[sample_id] = ReplaySnapshot(
+                    input_batch=input_row,
+                    target_batch=target_row,
+                    priority=float(np.abs(predictions[index, 0] - target_row[0, 0])),
+                    positive_fraction=float(target_row[0, 0]),
+                )
+                while (
+                    len(retained) > budget.max_examples
+                    or sum(
+                        item.input_batch.nbytes + item.target_batch.nbytes
+                        for item in retained.values()
+                    )
+                    > budget.max_bytes
+                ):
+                    # Why this: smallest stable content hashes form a bounded,
+                    # order-independent sample of observed A and B examples.
+                    del retained[max(retained)]
+            self._replay_memory = deque(retained.values())
+            return
         if self.config.replay_memory_size <= 0:
             return
         output_prediction = self.predict_proba(input_batch)

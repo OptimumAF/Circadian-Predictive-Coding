@@ -75,6 +75,17 @@ does not advance its wake clock, and Torch has no replay. Historical
 config names have the precise units recorded in ADR-0035; model-owned
 state snapshots are described below.
 
+NumPy `configure_replay_retention(ReplayRetentionBudget)` enables an
+opt-in, pretraining per-example buffer. It leaves the historical
+`replay_memory_size` batch-snapshot policy unchanged for models that do
+not opt in. The bounded buffer retains unique labeled rows by the
+smallest stable content hashes and enforces both copied-array bytes and
+example count. `get_replay_retention()` returns IDs, count, and actual
+array bytes for a phase report; `restore_state()` checks the declared
+budget and both caps. The app validates role provenance at checkpoint
+resume (ADR-0068). This core API does not open validation/test roles or
+decide when phase data arrive.
+
 For opt-in `components` mode, a real adaptive-width change clears the
 plateau/budget diagnostic history. This includes split/prune sleep,
 NumPy delayed-prune finalization, and external NumPy proposals. An

@@ -16,6 +16,7 @@ from typing import Any, Protocol
 from src.app.circadian_checkpoint import CircadianResumePosition, CircadianRunCheckpoint
 from src.app.sleep_schedule import SleepRollbackCooldownState
 from src.app.resnet50_benchmark import ResNet50BenchmarkConfig
+from src.shared.process_memory import ProcessRssSegment
 
 
 @dataclass(frozen=True)
@@ -46,6 +47,7 @@ class FixedFeatureCircadianCheckpoint:
     split_hashes: tuple[tuple[str, str], ...]
     progress: FixedFeatureCircadianProgress
     combined: CircadianRunCheckpoint
+    memory_segments: tuple[ProcessRssSegment, ...] = ()
 
 
 class FixedFeatureCheckpointStore(Protocol):
@@ -99,6 +101,7 @@ def validate_fixed_feature_checkpoint(
     batch_sizes: tuple[int, ...],
     epochs: int,
     initial_width: int,
+    memory_sample_interval_seconds: float | None = None,
 ) -> FixedFeatureCircadianProgress:
     """Check runner identity and counters before restoring the live head."""
     if (
@@ -115,6 +118,19 @@ def validate_fixed_feature_checkpoint(
         or checkpoint.split_hashes != split_hashes
     ):
         raise ValueError("incompatible fixed-feature checkpoint config or features")
+    memory_segments = getattr(checkpoint, "memory_segments", None)
+    if memory_sample_interval_seconds is None:
+        if memory_segments != ():
+            raise ValueError("incompatible fixed-feature checkpoint memory segments")
+    elif (
+        not isinstance(memory_segments, tuple)
+        or not memory_segments
+        or any(
+            not _valid_memory_segment(segment, memory_sample_interval_seconds)
+            for segment in memory_segments
+        )
+    ):
+        raise ValueError("incompatible fixed-feature checkpoint memory segments")
     progress = checkpoint.progress
     if not isinstance(progress, FixedFeatureCircadianProgress):
         raise ValueError("incompatible fixed-feature checkpoint progress")
@@ -176,3 +192,19 @@ def validate_fixed_feature_checkpoint(
     ):
         raise ValueError("incompatible fixed-feature checkpoint batch or report counters")
     return progress
+
+
+def _valid_memory_segment(segment: object, interval_seconds: float) -> bool:
+    return (
+        isinstance(segment, ProcessRssSegment)
+        and type(segment.pid) is int
+        and segment.pid > 0
+        and type(segment.start_bytes) is int
+        and segment.start_bytes >= 0
+        and type(segment.peak_bytes) is int
+        and segment.peak_bytes >= segment.start_bytes
+        and type(segment.sample_count) is int
+        and segment.sample_count >= 1
+        and type(segment.interval_seconds) is float
+        and segment.interval_seconds == interval_seconds
+    )

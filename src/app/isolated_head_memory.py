@@ -12,6 +12,7 @@ from math import isfinite
 from multiprocessing import get_context
 from multiprocessing.connection import Connection
 from os import getpid
+from pathlib import Path
 from typing import Any
 
 from src.app import matched_head_benchmark as matched
@@ -30,6 +31,7 @@ from src.shared.process_memory import ProcessRssSampler
 from src.shared.torch_runtime import require_torch
 
 PROCESS_ISOLATED_FIXED_WIDTH_MEMORY_PROTOCOL = "vision_three_head_fixed_width_process_memory_v1"
+PROCESS_ISOLATED_CIFAR_MEMORY_PROTOCOL = "vision_three_head_fixed_width_cifar10_process_memory_v2"
 HEAD_NAMES = ("backprop_mlp", "predictive_coding", "circadian_predictive_coding")
 ROLES = ("train", "guard", "validation")
 
@@ -84,23 +86,35 @@ def run_process_isolated_fixed_width_memory(
         raise ValueError("timeout_seconds must be positive finite seconds.")
     if config.device not in {"cpu", "cuda"}:
         raise ValueError("Process-isolated memory requires an explicit cpu or cuda device.")
-    if config.dataset_name != "synthetic" or config.dataset_num_workers != 0:
-        raise ValueError(
-            "The local process-isolated gate requires synthetic data and zero workers."
-        )
+    protocol_id = memory_protocol_for_dataset(config)
     reports = {
         head_name: _run_one_head_process(config, head_name, timeout_seconds)
         for head_name in HEAD_NAMES
     }
     _verify_isolated_reports(reports)
     return ProcessIsolatedMemoryResult(
-        protocol_id=PROCESS_ISOLATED_FIXED_WIDTH_MEMORY_PROTOCOL,
+        protocol_id=protocol_id,
         source_protocol_id=config.protocol_id,
         benchmark_track=matched.FROZEN_SHARED_REPRESENTATION_TRACK,
         memory_scope="setup_and_trainer_observed_process_rss",
         config=config,
         reports=reports,
     )
+
+
+def memory_protocol_for_dataset(config: ResNet50BenchmarkConfig) -> str:
+    if config.dataset_num_workers != 0:
+        raise ValueError("Process-isolated memory requires zero data workers")
+    if config.dataset_name == "synthetic":
+        return PROCESS_ISOLATED_FIXED_WIDTH_MEMORY_PROTOCOL
+    if config.dataset_name != "cifar10":
+        raise ValueError("Process-isolated memory supports synthetic or local CIFAR-10")
+    if config.dataset_download:
+        raise ValueError("Process-isolated CIFAR-10 memory forbids implicit download")
+    cache = Path(config.dataset_data_root) / "cifar-10-batches-py"
+    if not (cache / "data_batch_1").is_file() or not (cache / "test_batch").is_file():
+        raise FileNotFoundError(f"Process-isolated CIFAR-10 cache missing at {cache}")
+    return PROCESS_ISOLATED_CIFAR_MEMORY_PROTOCOL
 
 
 def _run_one_head_process(

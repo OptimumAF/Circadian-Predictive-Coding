@@ -273,10 +273,15 @@ scripts/      # Reproducible benchmark scripts
 ## Quickstart
 
 ```powershell
-python -m venv .venv
+py -3.14 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
+
+The current local environments use Python 3.14.7. The original Python 3.11
+environments are retained as ignored `*-py311-snapshot` folders for reproducing
+older runs. CI continues checking Python 3.11, 3.12, and 3.14; the project’s
+minimum syntax and type-check target remains Python 3.11.
 
 Optional torch benchmark dependencies:
 
@@ -371,9 +376,10 @@ The default order and corrected/legacy data roles are unchanged. This is a
 local reproducibility check; it does not make the continual protocol
 strict-online.
 
-The continual Python API also accepts a trusted local checkpoint. It binds
-the ordered seed list, both training phases, completed seed reports, and the
-phase-A model copies used for retention scoring:
+The continual Python API also accepts a trusted local checkpoint. The
+default v1 route binds the ordered seed list, both training phases,
+completed seed reports, and the phase-A model copies used for retention
+scoring:
 
 ```python
 from src.infra.circadian_checkpoint_files import TrustedLocalContinualCheckpointStore
@@ -394,6 +400,65 @@ content is bound when that seed result is committed. Checkpoint file work
 adds runtime overhead and is outside the scientific compute comparison.
 The CLI has no checkpoint flag. Whole-image and device/memory resume remain
 open under P3.9; see [ADR-0056](docs/adr/ADR-0056-continual-runner-file-resume.md).
+
+For a checkpoint that does not construct Phase B until Phase A finishes,
+use `ContinualShiftConfig(protocol_id="continual_phase_arrival_v2", ...)`
+with the same Python checkpoint API and a new trusted checkpoint path. Its
+version-2 Phase A file binds only Phase A development roles; the Phase B
+file adds Phase B development roles and the combined digest. Final-test
+hashes are bound only after both training phases finish. The old v1 checkpoint
+route and default remain available. The CLI also accepts
+`--protocol-id continual_phase_arrival_v2` for runs without checkpointing.
+This route still knows the full A+B sleep schedule and does not report a
+retained-memory or label-arrival ledger, so it is not a strict-online result.
+See [ADR-0066](docs/adr/ADR-0066-continual-phase-arrival-checkpoints.md).
+
+For the next opt-in schedule-isolation increment, use
+`ContinualShiftConfig(protocol_id="continual_phase_local_schedule_v3", ...)`
+or `--protocol-id continual_phase_local_schedule_v3`. It inherits v2's
+phase-arrival boundary and uses checkpoint format 3. Phase A sleep uses
+only the Phase A epoch horizon, so changing the configured Phase B duration
+does not change Phase A sleep decisions. Phase B uses its arrived A+B
+horizon. This partial route still lacks the declared replay budget,
+guard/selection arrival rules, and label/retention ledger required for a
+strict-online result. See [ADR-0067](docs/adr/ADR-0067-continual-phase-local-schedule.md).
+
+For bounded observed-example replay, opt in to
+`ContinualBoundedReplayConfig(replay_max_examples=4, replay_max_bytes=96, ...)`
+with `CircadianConfig(sleep_mode="components", replay_steps=1, ...)`.
+For a small local CLI smoke:
+
+```powershell
+python scripts/run_continual_shift_benchmark.py --profile strength-case --protocol-id continual_bounded_replay_v4 --sleep-mode components --replay-max-examples 4 --replay-max-bytes 96 --seeds 17 --sample-count-phase-a 40 --sample-count-phase-b 40 --phase-a-epochs 2 --phase-b-epochs 2 --hidden-dim 4
+```
+
+V4 inherits the phase-local schedule and
+phase-arrival boundary, uses checkpoint format 4, and reports retained
+content IDs, example count, and copied input/label array bytes at both
+phase boundaries. Its deterministic hash retention can keep an uneven
+phase mix. It does not yet supply guard/outer-selection arrival or a
+full label ledger, so its scores are not full strict-online evidence.
+See [ADR-0068](docs/adr/ADR-0068-continual-bounded-observed-replay.md).
+In both v4 execution paths, final-test roles are hashed and scored only
+after Phase B training ends. The v4 splitter also defers reading the
+source's test fields until that boundary. The synthetic generator still
+constructs their arrays earlier, and each seed is scored before later
+seeds train. Global setting freeze and separate guard/outer selection
+roles remain open; see [ADR-0069](docs/adr/ADR-0069-continual-final-label-seal.md)
+and [ADR-0070](docs/adr/ADR-0070-defer-continual-source-test-release.md).
+
+For an opt-in run that waits for every configured seed
+before any final-test read, use `ContinualGlobalSealConfig(...)` or the
+CLI protocol `continual_global_test_seal_v5` with the same replay flags.
+V5 holds pending model states in memory until scoring, so memory grows
+with the seed count. The Python checkpoint API uses format 5 to persist
+trained, unscored seed states; after interruption, resume with the same
+config, seed list, and trusted local store. The saved file has no
+final-test hashes or scores. Guard and outer-selection roles, setting
+selection, and label-arrival reporting remain open; these scores are
+descriptive rather than full strict-online evidence. See
+[ADR-0071](docs/adr/ADR-0071-continual-run-level-test-seal.md) and
+[ADR-0072](docs/adr/ADR-0072-continual-unscored-checkpoints.md).
 
 Hardest continual-shift stress test (expanded hidden capacity + very heavy drift):
 
@@ -495,9 +560,25 @@ result = run_resnet50_benchmark(
 The checkpoint binds train, guard, and validation content plus config and
 model order. It does not score final test until all training completes. Do not
 load a pickle file from an untrusted source. File writes and loader replay add
-wall time but do not count as active circadian training time. The older v1/v2
-unmatched protocols and CUDA checkpoint route remain open; they reject a
-checkpoint request before training. See [ADR-0058](docs/adr/ADR-0058-seeded-vision-runner-file-resume.md).
+wall time but do not count as active circadian training time. The same Python
+API also accepts the older v1/v2 unmatched protocols on CPU and resumes their
+original shared loader stream; v1 still aliases validation as its guard.
+The CUDA checkpoint route remains unverified. See
+[ADR-0058](docs/adr/ADR-0058-seeded-vision-runner-file-resume.md) and
+[ADR-0059](docs/adr/ADR-0059-shared-vision-loader-resume.md).
+
+For a bounded actual-CIFAR loader check, place a complete torchvision CIFAR-10
+cache under `data/cifar-10-batches-py` and run
+`python scripts/verify_cifar_loader_order.py --data-root data`. The script
+sets `download=False`, uses seed 73 and eight training examples, compares
+zero- and two-worker seeded train views under forward/reversed model order,
+and checks disjoint role IDs. It does not train or score final test by default.
+Add `--check-training-seal` for one tiny CPU epoch with all three model families;
+this checks that the real final-test loader is iterated only after training.
+The verified local run used the 170,498,071-byte CIFAR-10 archive with MD5
+`c58f30108f718f92721af3b95e74349a`; its ignored JSON evidence is at
+`data/cifar-loader-seed73.json`. This is a loader/isolation check on a random
+feature control, not an accuracy comparison (P1.7e).
 
 The circadian-policy and Pareto tuning scripts write outer-validation-only
 candidate reports with split hashes and validation inference speed. They use
@@ -538,10 +619,13 @@ persistence work and should not be used for equal-time head comparisons.
 The CPU wall-time route also accepts the same store arguments; it carries
 remaining active training seconds across resume and excludes file I/O
 from that deadline. Its active-time report is separate from end-to-end
-elapsed time. CUDA, memory, and capacity checkpoint modes remain open
-under P3.9b2; see
+elapsed time. On CPU, `measure_memory=True` can accompany a checkpoint store
+on the fixed-epoch or wall-time route. This selects a distinct protocol with
+per-process RSS segments; the original memory protocols keep their existing
+meaning. CUDA checkpoint continuation remains open under P3.9b2. See
 [ADR-0053](docs/adr/ADR-0053-fixed-feature-circadian-file-resume.md) and
-[ADR-0054](docs/adr/ADR-0054-fixed-feature-wall-time-resume.md).
+[ADR-0054](docs/adr/ADR-0054-fixed-feature-wall-time-resume.md), plus
+[ADR-0061](docs/adr/ADR-0061-checkpointed-cpu-rss-segments.md) for RSS scope.
 The [fairness budget contract](docs/evaluation-protocols.md#fairness-budget-contract-p18-in-progress)
 defines fixed-data, wall-time, and capacity/memory scopes. Call
 `run_three_head_fixed_feature_wall_time_benchmark` with
@@ -550,7 +634,8 @@ Set `target_accuracy=None` and an epoch safety cap high enough for all
 heads to reach the deadline. Reports include completed/partial work,
 stop reason, and deadline overrun; the runner fails before final test if
 the epoch cap ends a head early. The [decision record](docs/adr/ADR-0013-matched-head-wall-time-budget.md)
-defines its timing scope. Full capacity and repeated confirmation remain open.
+defines its timing scope. Larger-data and real-CUDA fairness confirmation
+remain open.
 Pass `measure_memory=True` to either three-head route for a separately
 versioned memory-enabled protocol. Reports then include sampled process RSS
 start/observed peak and sample count on Windows/Linux, with PyTorch allocator
@@ -566,20 +651,45 @@ parameter counts; circadian minimum and maximum widths equal the initial
 width. Scheduled forced sleep and guard rollback remain active. The route
 checks unchanged head parameter counts, no splits/prunes, and a guarded
 sleep attempt before final test, and records the invariant in
-`result.capacity_control`. It always reports observed memory separately
-from cached `feature_bytes`. Sequential process RSS is still affected by
-shared state and order, so repeated confirmation remains open.
+`result.capacity_control`. Without a checkpoint store it reports observed
+memory separately from cached `feature_bytes`. Passing a trusted local
+`TrustedLocalCircadianCheckpointStore` through `checkpoint_store=store` selects
+`vision_three_head_fixed_width_capacity_checkpoint_v1`; resume with the same
+store and `resume_from_checkpoint=True`. This CPU path checks the same
+capacity and guarded-sleep invariants but sets `memory_telemetry_enabled=False`
+and leaves RSS/allocator fields empty. Pass `checkpoint_memory=True` with the
+same store to opt into the separate CPU
+`vision_three_head_fixed_width_capacity_checkpoint_memory_v1` protocol. Resume
+with both flags. The checkpoint records per-invocation RSS observations; the
+result lists PID, start, observed peak, and sample count for each segment.
+The circadian aggregate peak is the maximum absolute observed RSS across
+segments, with sample counts summed and no single aggregate start value.
+Baseline heads each have one segment from the completing invocation. Sampling
+starts after shared feature setup, repeats every 5 ms plus checkpoint/finish
+samples, and covers training, guard/validation, and checkpoint persistence.
+An interrupted segment contributes observations through its last saved
+checkpoint. RSS includes shared process state, may miss brief allocations,
+and does not attribute bytes to a head; checkpoint overhead and baseline
+retraining make this a descriptive recovery report, not a fair memory ranking.
+CUDA allocator fields remain empty on CPU. Sequential process RSS is still
+affected by shared state and order; the process-isolated scope below provides
+a separate descriptive observation.
 [ADR-0016](docs/adr/ADR-0016-fixed-width-capacity-control.md) records
-the control scope.
+the control scope; [ADR-0060](docs/adr/ADR-0060-capacity-checkpoint-without-memory-claim.md)
+records the capacity-only resume boundary, and ADR-0061 records the RSS contract.
 
 `src.app.isolated_head_memory.run_process_isolated_fixed_width_memory`
-adds the `vision_three_head_fixed_width_process_memory_v1` observation.
+adds the synthetic `vision_three_head_fixed_width_process_memory_v1` and
+local-CIFAR `vision_three_head_fixed_width_cifar10_process_memory_v2`
+observations.
 Each head trains alone in a fresh spawned process using the same frozen
 train, guard, and validation feature hashes and initial tensors. The parent
 verifies those hashes before returning. Each report separates setup RSS,
 cached feature bytes, and trainer RSS/CUDA allocator observations. This
 memory-only route never opens final test. The local gate requires an
-explicit CPU/CUDA device, synthetic data, and zero loader workers. It does
+explicit CPU/CUDA device and zero loader workers. CIFAR-10 also requires a
+complete local cache with `dataset_download=False`; unsupported datasets
+and implicit downloads fail before spawning. It does
 not establish a memory winner; imports precede the setup RSS window and
 the observed peaks can miss brief allocations. Run its fixed tiny CPU
 check with `python scripts/run_isolated_head_memory_smoke.py`. See
@@ -596,7 +706,7 @@ heads; `result.confirmations` is separate from the trial ledger. Candidates
 may change only their own learning rates, inference steps, or backprop
 momentum. The route caps candidate-by-seed trials at eight per head and is
 for correctness checks before larger experiments. It does not establish a
-head-family ranking; repeated confirmation work remains open.
+head-family ranking; larger-data confirmation remains open.
 [ADR-0015](docs/adr/ADR-0015-matched-head-tuning-ledger.md)
 records the selection and test-sealing rules.
 
@@ -688,6 +798,104 @@ ranking. Its original seed-53/59/61 fixed-data accuracies tie across heads;
 under the separate 0.05-second wall-time budget the circadian head scores
 lower than both baselines. See `docs/adr/ADR-0018-predeclared-repeated-head-confirmation.md`
 for the scope and limitations.
+
+For the bounded real-CIFAR CPU check, first verify the archive and loader as
+described above, then run:
+
+```powershell
+python scripts/run_cifar_matched_validation.py
+python scripts/verify_cifar_isolated_memory.py
+python scripts/run_cifar_matched_confirmation.py
+```
+
+The validation command saves its request, six equal-trial selection records,
+and a digested manifest before final test. The separate confirmation command
+restores that exact manifest and uses its predeclared seeds 83/89/97 across
+fixed-data, wall-time, and process-isolated memory scopes. It refuses to
+overwrite results or failure records. The retained `artifacts/benchmark_cifar_v2_*_smoke.json`
+files include the first synthetic-only-memory failure and successful retry.
+With 32 training and 16 final-test examples per seed, a random frozen
+backbone, and one epoch, the observed scores are descriptive pipeline evidence.
+The separately predeclared pretrained CPU/CUDA continuations are described
+below; representative-scale fairness work remains open (P1.8). See
+[ADR-0062](docs/adr/ADR-0062-local-cifar-matched-confirmation.md).
+
+To budget the next larger-data study without reading test labels, run
+`python scripts/profile_cifar_feature_setup.py` after caching ImageNet
+ResNet-50 V2 weights. Its one CPU setup uses seed 101 and 128/64/64
+train/guard/validation examples; the local result took 1.875 seconds and
+records weight, backbone, split, and feature hashes in ignored `data/`
+JSON. It trains no heads and does not score test.
+
+For that bounded pretrained continuation, the verified local CIFAR-10 archive
+and the cached ImageNet ResNet-50 V2 checkpoint are required. The scripts
+verify both files and never download them. In order, run:
+
+```powershell
+python scripts/run_cifar_pretrained_validation.py
+python scripts/run_cifar_pretrained_confirmation.py
+```
+
+The first command writes a request before training and seals final test. It
+uses 1,024/256/256/512 train/guard/validation/test examples, selection seed
+113, and two equal optimization candidates per head. The second restores its
+saved manifest for seeds 127/131/137 and separate one-epoch, 0.5-second
+per-head, and isolated-memory scopes. Both scripts refuse to overwrite their
+ignored `artifacts/benchmark_cifar_pretrained_v1_*_smoke.json` records. The
+local confirmation finished in 100.11 seconds. One-epoch mean test accuracy
+was 0.406 backprop, 0.178 PC, and 0.152 circadian; under equal wall-time it
+was 0.579, 0.507, and 0.389. The circadian model did not lead either scope.
+All per-seed scores, work counts, observed process RSS, and dispersion are in
+the result JSON. These 32-pixel, 1,024-example CPU results are limited to the
+declared protocol; the CUDA result is described below, and no full-data
+ranking has been established. See
+[ADR-0063](docs/adr/ADR-0063-pretrained-cifar-matched-budgets.md).
+
+For an isolated local CUDA environment, the verified CPU `.venv` can stay in
+place. The historical P1.7f smoke used Python 3.11; the current local CUDA
+environments use Python 3.14.7 and matching
+[PyTorch 2.14 CUDA 13.0 wheels](https://pytorch.org/blog/pytorch-2-14-release-blog/).
+Create a fresh CUDA environment with:
+
+```powershell
+py -3.14 -m venv .venv-cuda
+.\.venv-cuda\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv-cuda\Scripts\python.exe -m pip install --index-url https://download.pytorch.org/whl/cu130 "torch==2.14.0+cu130" "torchvision==0.29.0+cu130"
+.\.venv-cuda\Scripts\python.exe scripts/verify_cuda_environment.py
+```
+
+The CUDA wheel is about 2 GB. `.venv-cuda/` is ignored by Git. The smoke
+uses synthetic tensors only; its seed-109 retry completed a convolution
+forward/backward and untrained ResNet-50 forward on the local RTX 3080. The
+first telemetry-only failure and successful retry are retained in ignored
+`data/cuda-env-seed109*.json` files. The next gates use the verified local
+CIFAR-10 cache and refuse to overwrite their saved artifacts:
+
+```powershell
+.\.venv-cuda\Scripts\python.exe scripts/verify_cuda_vision_order.py
+.\.venv-cuda\Scripts\python.exe scripts/run_cifar_pretrained_cuda_validation.py
+.\.venv-cuda\Scripts\python.exe scripts/run_cifar_pretrained_cuda_confirmation.py --preflight
+.\.venv-cuda\Scripts\python.exe scripts/run_cifar_pretrained_cuda_confirmation.py
+```
+
+The seed-149 actual-CIFAR order reversal matched all role and trained-model
+hashes exactly, with zero difference in the declared metrics and final test
+sealed through training. The separate seed-151 matched-head selection made
+six equal validation trials, opened no final-test batches, and froze seeds
+157/163/167 in a manifest. The confirmation command requires three GPU
+readings five seconds apart, each at most 10% utilization with at least
+5 GiB free. A busy window writes a deferred JSON record and exits before
+final test. The first launch was deferred at 30%/27%/37% utilization. A later
+unchanged-manifest launch passed at 3%/3%/2% and completed all nine
+fixed-data, nine deadline-limited wall-time, and nine process-isolated memory
+reports in 98.172 seconds. Fixed-data mean accuracy was 0.449 backprop,
+0.182 PC, and 0.160 circadian; wall-time means were 0.594, 0.410, and
+0.271. All per-seed scores, work, overshoot, dispersion, CUDA allocator
+peaks, and observed RSS are in the ignored result JSON. The GPU measured 51%
+utilization after completion, so background activity during timing remains
+an environment limit. The 1,024-example, 32-pixel setting is also limited;
+no general architecture ranking is claimed. See
+[ADR-0064](docs/adr/ADR-0064-cuda-evaluation-gates.md).
 
 Multi-seed benchmark export:
 

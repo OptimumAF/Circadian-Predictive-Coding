@@ -359,7 +359,7 @@ def test_public_matched_route_resumes_before_final_test(
     assert resumed.predictive_coding.test_accuracy == control.predictive_coding.test_accuracy
 
 
-def test_checkpoint_mode_rejects_memory_and_cuda_routes_before_training(
+def test_checkpoint_mode_rejects_cuda_before_training(
     tmp_path: Any, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     config = replace(_config(), predictive_head_hidden_dim=4, backprop_freeze_backbone=True)
@@ -369,10 +369,6 @@ def test_checkpoint_mode_rejects_memory_and_cuda_routes_before_training(
         lambda _config: pytest.fail("checkpoint mode reached data loading"),
     )
     store = TrustedLocalCircadianCheckpointStore(tmp_path / "head.ckpt")
-    with pytest.raises(ValueError, match="without memory telemetry"):
-        matched.run_three_head_fixed_feature_benchmark(
-            config, measure_memory=True, checkpoint_store=store
-        )
     head = _head(config)
     before = head.snapshot_state()
     with pytest.raises(ValueError, match="CPU device"):
@@ -562,10 +558,12 @@ def test_public_wall_time_checkpoint_keeps_final_test_sealed(
     assert forwarded == [(store, False)]
     assert test_opened == [False]
 
-    with pytest.raises(ValueError, match="without memory telemetry"):
+    with pytest.raises(IntentionalInterruption):
         matched.run_three_head_fixed_feature_wall_time_benchmark(
             config,
             wall_time_budget_seconds=0.02,
             measure_memory=True,
             checkpoint_store=store,
         )
+    assert forwarded == [(store, False), (store, False)]
+    assert test_opened == [False]
