@@ -73,7 +73,7 @@ def main() -> None:
     parser.add_argument("--result", required=True, type=Path)
     result_path = parser.parse_args().result
     payload = build_payload()
-    with result_path.open("x", encoding="utf-8") as output:
+    with result_path.open("x", encoding="utf-8", newline="\n") as output:
         output.write(payload)
     print(json.dumps({"result": str(result_path), "sha256": sha256(payload.encode()).hexdigest()}))
 

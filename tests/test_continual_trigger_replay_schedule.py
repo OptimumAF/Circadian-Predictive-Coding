@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from hashlib import sha256
 import json
+from pathlib import Path
+import sys
 from typing import Any, cast
 
 import numpy as np
 import pytest
 
-from scripts.run_continual_trigger_replay_schedule import build_payload
+from scripts.run_continual_trigger_replay_schedule import build_payload, main
 from src.app import continual_arrived_benchmark as arrived
 from src.app.continual_matched_replay_schedule import (
     MatchedReplayScheduleManifest,
@@ -237,3 +240,16 @@ def test_should_repeat_exact_unscored_payload_without_final_fields() -> None:
         for row in parsed["rows"]
         for opportunity in row["opportunities"]
     )
+
+
+def test_should_hash_actual_artifact_bytes_on_windows(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    result = tmp_path / "schedule.json"
+    monkeypatch.setattr(sys, "argv", ["schedule", "--result", str(result)])
+    main()
+    reported = json.loads(capsys.readouterr().out)
+    assert result.read_bytes() == build_payload().encode("utf-8")
+    assert reported["sha256"] == sha256(result.read_bytes()).hexdigest()
+    with pytest.raises(FileExistsError):
+        main()
