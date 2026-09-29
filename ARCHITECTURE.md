@@ -239,7 +239,88 @@ binds seeds, source, trigger arms, replay caps, guard tolerance, and
 structural limits; the periodic subset is checked against v9 without
 changing v9's identity. The `scripts` adapter writes only train-role
 facts to an exclusive local JSON file. Actual guarded training and final
-release remain a separate P4.8b2 app boundary (ADR-0116).
+release are separate P4.8b2 app boundaries (ADR-0116).
+
+The v14 guarded runner is a separate `app` use case: it derives only
+arm-specific sleep scheduling, trains all three NumPy methods on the
+same arrived wake rows, checks core replay retention against each
+all-epoch offer, and commits detached baseline replay after accepted
+guarded circadian sleep. A second `app` study independently rederives
+roles/opportunities and validates all six unscored work and structure
+traces before its `scripts` adapter writes deterministic local JSON.
+This train-only boundary does not release final roles or score models;
+the completed P4.8b2b use case owns the global final-release boundary
+(ADR-0117).
+
+The v14 outcome `app` use case reruns the six-trial preflight, including
+stable structural-ID reconstruction against saved A/B model lineage,
+then releases all twelve final roles and compares within-seed final
+identities before scoring any model. It reports all method metrics,
+applied work/capacity, and signed paired contrasts. A `scripts` adapter
+writes deterministic scored JSON to an exclusive local path; no
+selection or new trigger rule is made (ADR-0118).
+The v14 artifact's NumPy-only scope is recorded in the current
+[backend capability matrix](docs/backend-capability-matrix.md) and a
+hash-bound [result metadata sidecar](docs/result-backend-metadata.json)
+without changing the scored artifact bytes (ADR-0119).
+
+P5.1 adds a pure `core/run_manifest.py` field and identity validator.
+The `app/versioned_v14_run.py` use case binds an already preflighted v14
+study, its scored comparison, and their original-format bytes to that
+contract. `infra/run_environment.py` captures the executing Git/workspace,
+dependency, and CPU facts; `infra/versioned_run_files.py` writes complete
+local JSON files and verifies their hashes and v14 cell/role identities.
+The `scripts/run_versioned_v14_bundle.py` adapter orchestrates one study
+and publishes `manifest.json` last. Dependency direction remains script
+→ app/infra → core, and no historical v14/checkpoint format changes
+(ADR-0120).
+
+P5.2a adds `app/v14_observation_projection.py` as a pure transform of
+the verified raw training/outcome records. It preserves epoch order and
+labels missing wake metrics explicitly. `infra/observation_projection_files.py`
+verifies the completed P5.1 source, writes derived JSONL/CSV beside it,
+and verifies each byte against a fresh derivation. The
+`scripts/project_v14_observations.py` adapter exposes local create/verify
+commands. No app logic depends on infra; the fixed v14 scoring and role
+release paths are unchanged (ADR-0121).
+
+P5.2b passes existing core `train_epoch` return values through
+`app/continual_shift_benchmark.py` and opts in to collection only in
+the v14 runner. `app/wake_diagnostic.py` identifies finite metric,
+definition, and timing facts; `app/v14_measured_observations.py`
+preflights and serializes the full measured grid and derives an
+additive projection. `infra/measured_observation_files.py` binds
+that sidecar to a completed P5.1 bundle, then verifies a distinct
+ten-file measured projection. The two existing scripts expose the
+opt-in commands. The dependency path remains script → app/infra →
+core; final-role release still occurs only in the scorer (ADR-0122).
+
+P5.3a adds `infra/atomic_artifact_directory.py` beneath the P5.1
+and P5.2 file adapters. It stages already validated byte sets,
+records incomplete/failed/canceled publication state outside the
+public path, and renames a complete directory into view. No app or
+core module depends on this infra helper (ADR-0123).
+
+P5.3b adds a pure `app/v14_trial_checkpoint.py` format-10 prefix and
+validation boundary. The `scripts/run_versioned_v14_bundle.py` adapter
+orchestrates the fixed trial runner, app preflight, scoring, and infra
+stores. `infra/circadian_checkpoint_files.py` writes immutable trusted
+checkpoint files; `infra/v14_resume_files.py` atomically replaces a
+hidden run cursor under an OS lock. Checkpoints omit deferred final
+sources. The app reconstructs them from the fixed seed only after the
+whole unscored prefix passes validation, then the existing global
+preflight guards final release. Dependency direction remains script →
+app/infra → core; the original v14 public artifact schema is unchanged
+(ADR-0124).
+
+P5.4 keeps the fixed v14 manifest closed to overrides. For the existing
+configurable continual study, `app/continual_experiment_config.py`
+validates a small allowlist of typed preset overrides and constructs
+the full resolved record. `scripts/run_continual_shift_benchmark.py`
+parses repeatable JSON values, applies them after the preset and legacy
+flags, and writes an exclusive config artifact after a successful run.
+The JSON result embeds the same typed config; no app module imports a
+CLI or filesystem adapter (ADR-0125).
 
 1. Circadian-first with mandatory baseline comparisons
    - Why: improvements are only meaningful when measured against stable references.

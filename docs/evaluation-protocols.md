@@ -712,3 +712,61 @@ successful sleep event. The fixed two-seed comparison gives unchanged
 balanced aggregates across side-effect policies, with circadian below
 the matched baselines. This null observation is retained without changing
 seeds, metrics, or the historical v9 artifact (ADR-0109).
+
+The fixed v14 full-stack trigger study first offers one train-only shared
+replay selection after *every* arrived wake epoch, including epochs when
+adaptive or no-sleep arms will not apply it. The FIFO buffer sees only
+the arrived training role; Phase B arrives after all A wake epochs, and
+the common A/B final roles remain unopened. This separates potential
+row supply from actual guard-committed replay exposure. Six periodic
+subsets per seed match the older v9 schedule exactly; v9's
+periodic-only protocol identity is unchanged. The v14 guarded train-only
+runner now checks exact retained and selected rows before each decision
+and applies PC/backprop replay only after the circadian guard commits an
+event. All six trials are rederived and preflighted without final data.
+Global final release and outcome scoring are handled by the separate
+P4.8b2b gate (ADRs 0116–0118).
+
+The completed v14 outcome route rechecks the six-trial train-only gate,
+including applied structural stable IDs against saved A/B lineage,
+then opens all twelve final A/B roles and compares within-seed IDs and
+content hashes before scoring. Each of the eighteen method outcomes
+and all paired arm contrasts is retained with accuracy, BCE, forgetting,
+replay work, and capacity. Different accepted-event counts are reported
+as different total work; they are not presented as matched compute.
+The adaptive arm attempted no sleep at unchanged thresholds in these
+fixed cells, and no winner or new heuristic was selected (ADR-0118).
+An opt-in P5.1 [versioned run manifest](versioned-run-manifest.md) now
+captures executing source, environment, seed derivations, all four-role
+hashes, and exact payload digests for a fresh v14 run. It leaves the
+fixed v14 result schema and scored bytes unchanged (ADR-0120).
+P5.2a's [observed-record projection](structured-observation-audit.md)
+derives typed epoch, decision, topology, replay, role-access, and final
+rows only after the completed bundle verifies. Its wake rows explicitly
+say per-epoch training metrics were not recorded. The derived CSV uses
+all final method rows without seed/arm selection (ADR-0121).
+P5.2b's opt-in [measured wake sidecar](measured-wake-observations.md)
+now records the returned train-only Backprop loss and two separately
+defined PC energies for every successful method/epoch update. It
+preflights the complete measured work grid before the original global
+final gate and publishes only beside a completed scored bundle. The
+additive JSONL/CSV projection retains every P5.2a and final-only
+record. No new optimization update, role read, metric selection, or
+trigger change is introduced (ADR-0122).
+P5.3a [atomic artifact publication](atomic-artifact-publication.md)
+stages validated run and observation files outside their public
+paths. Verifiers still require the completed manifest; a hidden
+pending/failed/canceled stage is never a scored result (ADR-0123).
+P5.3b [checked trial-prefix resume](v14-checked-resume.md) persists
+only complete unscored seed/arm trials with deferred final sources
+removed. It checks source/config/protocol/capture identity and exact
+checkpoint bytes before another update, then repeats the six-trial
+global preflight before final release. Tests interrupted after trials
+1 and 3 repeat the original train, scored, and measured bytes; no
+baseline, seed, metric, or trigger setting changed (ADR-0124).
+P5.4 [typed continual configuration](configured-continual-experiments.md)
+applies explicit, finite overrides only to the existing configurable
+descriptive continual route. Its resolved artifact records the exact
+config and seeds used, and its completed JSON result embeds the same
+config. The v14 matched result remains fixed and is not reinterpreted
+from these configurable runs (ADR-0125).

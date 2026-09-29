@@ -39,18 +39,19 @@ from src.app.numpy_sleep_decisions import (
     describe_unguarded_numpy_sleep_decision,
 )
 from src.app.sleep_schedule import decide_sleep_attempt
-from src.core.backprop_mlp import BackpropMLP
+from src.core.backprop_mlp import BackpropMLP, BackpropTrainResult
 from src.core.circadian_predictive_coding import (
     CircadianConfig,
     CircadianNetworkSnapshot,
     CircadianPredictiveCodingNetwork,
+    CircadianTrainResult,
     ReplayRetentionBudget,
     ReplayRetentionSnapshot,
     ReplaySnapshot,
     SleepEventResult,
     replay_sample_id,
 )
-from src.core.predictive_coding import PredictiveCodingNetwork
+from src.core.predictive_coding import PredictiveCodingNetwork, PredictiveCodingTrainResult
 from src.core.replay_retention import ReplayRetentionPolicy
 from src.core.sleep_clocks import SleepEpochProgress
 from src.core.sleep_telemetry import SleepEventTelemetry
@@ -1768,16 +1769,16 @@ def _train_named_model_epoch(
     predictive: PredictiveCodingNetwork,
     circadian: CircadianPredictiveCodingNetwork,
     model_name: str,
-) -> None:
-    """Apply one model update so a checkpoint can name the next model."""
+) -> BackpropTrainResult | PredictiveCodingTrainResult | CircadianTrainResult:
+    """Apply one model update and return its already-computed diagnostic."""
     if model_name == "backprop":
-        backprop.train_epoch(
+        return backprop.train_epoch(
             input_batch=train.input,
             target_batch=train.target,
             learning_rate=config.backprop_learning_rate,
         )
     elif model_name == "predictive_coding":
-        predictive.train_epoch(
+        return predictive.train_epoch(
             input_batch=train.input,
             target_batch=train.target,
             learning_rate=config.pc_learning_rate,
@@ -1785,7 +1786,7 @@ def _train_named_model_epoch(
             inference_learning_rate=config.pc_inference_learning_rate,
         )
     else:
-        circadian.train_epoch(
+        return circadian.train_epoch(
             input_batch=train.input,
             target_batch=train.target,
             learning_rate=config.circadian_learning_rate,

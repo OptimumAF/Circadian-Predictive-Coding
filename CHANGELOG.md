@@ -9,6 +9,42 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- Typed, explicit overrides for existing continual-shift presets and
+  an exclusive fully resolved configuration artifact, with unknown,
+  duplicate, nonfinite, and baseline/protocol field rejection before
+  training. The fixed v14 comparison remains unchanged (ADR-0125).
+- Opt-in fixed v14 trial-prefix resume with a typed format-10 trusted
+  checkpoint, hash-bound hidden run-state cursor, sealed final sources,
+  distinct incomplete/failed/canceled states, and exact fresh/resumed
+  raw and measured result parity (ADR-0124).
+- Atomic same-volume publication for completed v14 run bundles and
+  observation sidecars/projections, with hidden incomplete/failed/
+  canceled staging records and no partial public result directory
+  after caught failures (ADR-0123).
+- Opt-in genuine v14 wake metrics from existing NumPy training return
+  values, stored in a separate completed-run sidecar and additive
+  measured JSONL/CSV projection. Two bounded local runs repeat all
+  metric and final data bytes without changing fixed v14 protocols,
+  baselines, or scores (ADR-0122).
+- Opt-in P5.2a versioned projection of verified v14 train-only and scored
+  records into deterministic JSONL and final-row CSV, with exact
+  re-derivation verification and explicit unavailable wake metrics;
+  original v14 results remain byte identical (ADR-0121).
+- Opt-in versioned v14 local run bundle with strict P5.1 provenance schema,
+  execution Git/workspace and environment capture, exact source-role and
+  payload hashes, complete-grid disk verification, and unchanged fixed
+  v14 JSON bytes (ADR-0120).
+- Current NumPy/Torch backend capability matrix and hash-bound v14
+  NumPy-only result metadata sidecar; fixed v14 artifacts remain byte
+  identical and no Torch replay mechanism was added (ADR-0119).
+- Fixed v14 globally sealed full-stack trigger outcomes for all six
+  seed/arm trials and three NumPy methods, with exact matched replay,
+  structural lineage preflight, common final roles, all paired metrics,
+  and deterministic local JSON (ADR-0118).
+- Fixed v14 train-only guarded NumPy runner for periodic, unchanged
+  adaptive, and no-sleep arms with matched replay only after accepted
+  circadian sleep; six-trial preflight and deterministic unscored JSON
+  preserve the final-role seal (ADR-0117).
 - Fixed v14 train-only all-opportunity shared replay schedule for future
   full-stack periodic/adaptive/no-sleep controls; exact v9 periodic
   parity, sealed roles, and repeatable local JSON without model scores

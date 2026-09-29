@@ -7,11 +7,15 @@ so callers must never load checkpoints from untrusted sources.
 
 from __future__ import annotations
 
+import copyreg
 from hashlib import sha256
+from io import BytesIO
 import os
 from pathlib import Path
 import pickle
 import tempfile
+from types import MappingProxyType
+from typing import Any
 
 from src.app.fixed_feature_checkpoint import FixedFeatureCircadianCheckpoint
 from src.app.continual_arrived_checkpoint import ArrivedRunnerCheckpoint
@@ -20,6 +24,7 @@ from src.app.continual_checkpoint import ContinualRunnerCheckpoint
 from src.app.continual_replay_policy_checkpoint import ReplayPolicyRunnerCheckpoint
 from src.app.toy_checkpoint import ToyRunnerCheckpoint
 from src.app.vision_checkpoint import VisionRunnerCheckpoint
+from src.app.v14_trial_checkpoint import V14TrialPrefixCheckpoint
 
 _MAGIC = b"CIRCADIAN_FIXED_FEATURE_CHECKPOINT_V1\n"
 _TOY_MAGIC = b"CIRCADIAN_TOY_CHECKPOINT_V1\n"
@@ -28,6 +33,7 @@ _ARRIVED_CONTINUAL_MAGIC = b"CIRCADIAN_ARRIVED_CONTINUAL_CHECKPOINT_V6\n"
 _ARRIVED_SELECTION_MAGIC = b"CIRCADIAN_ARRIVED_SELECTION_CHECKPOINT_V7\n"
 _REPLAY_POLICY_MAGIC = b"CIRCADIAN_REPLAY_POLICY_CHECKPOINT_V9\n"
 _VISION_MAGIC = b"CIRCADIAN_VISION_CHECKPOINT_V1\n"
+_V14_TRIAL_MAGIC = b"CIRCADIAN_V14_TRIAL_PREFIX_CHECKPOINT_V10\n"
 
 
 class TrustedLocalCircadianCheckpointStore:
@@ -156,6 +162,42 @@ class TrustedLocalVisionCheckpointStore:
         _save_payload(self.path, _VISION_MAGIC, checkpoint)
 
 
+class TrustedLocalV14TrialCheckpointStore:
+    """Write one immutable completed-trial prefix with a format-10 header."""
+
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
+
+    def load(self) -> V14TrialPrefixCheckpoint:
+        checkpoint = _load_payload(self.path, _V14_TRIAL_MAGIC)
+        if type(checkpoint) is not V14TrialPrefixCheckpoint:
+            raise ValueError("v14 trial checkpoint payload type is incompatible")
+        return checkpoint
+
+    def save(self, checkpoint: V14TrialPrefixCheckpoint) -> None:
+        if type(checkpoint) is not V14TrialPrefixCheckpoint:
+            raise TypeError("checkpoint payload must be V14TrialPrefixCheckpoint")
+        if self.path.exists():
+            raise FileExistsError(f"v14 trial checkpoint already exists: {self.path}")
+        # Why this: the sealed role container holds read-only mapping proxies.
+        # Scope the reducer to this checkpoint rather than changing global pickle.
+        buffer = BytesIO()
+        writer = pickle.Pickler(buffer, protocol=pickle.HIGHEST_PROTOCOL)
+        dispatch = copyreg.dispatch_table.copy()
+        dispatch[type(MappingProxyType({}))] = _reduce_mapping_proxy
+        writer.dispatch_table = dispatch
+        writer.dump(checkpoint)
+        _save_serialized_payload(self.path, _V14_TRIAL_MAGIC, buffer.getvalue())
+
+
+def _reduce_mapping_proxy(value: Any) -> tuple[Any, tuple[dict[Any, Any]]]:
+    return _restore_mapping_proxy, (dict(value),)
+
+
+def _restore_mapping_proxy(value: dict[Any, Any]) -> Any:
+    return MappingProxyType(value)
+
+
 def _load_payload(path: Path, magic: bytes) -> object:
     try:
         raw = path.read_bytes()
@@ -178,6 +220,10 @@ def _load_payload(path: Path, magic: bytes) -> object:
 
 def _save_payload(path: Path, magic: bytes, checkpoint: object) -> None:
     payload = pickle.dumps(checkpoint, protocol=pickle.HIGHEST_PROTOCOL)
+    _save_serialized_payload(path, magic, payload)
+
+
+def _save_serialized_payload(path: Path, magic: bytes, payload: bytes) -> None:
     content = magic + sha256(payload).hexdigest().encode("ascii") + b"\n" + payload
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_path = tempfile.mkstemp(

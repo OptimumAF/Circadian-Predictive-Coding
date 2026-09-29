@@ -386,6 +386,56 @@ potential work for each NumPy method. It does not train, decide/guard
 sleep, open decision/final roles, or score; the `scripts` adapter writes
 only those prospective facts to new local JSON (ADR-0116).
 
+`continual_trigger_replay_runner.py` trains one fixed v14 arm on arrived
+A then B roles, preflights circadian retention/selection before each
+guarded sleep decision, and gives PC/backprop the same detached replay
+rows only after acceptance. It records typed events, work, structure,
+and capacity but does not open final roles. The separate
+`continual_trigger_replay_training_study.py` rederives all six train-only
+trials and source/work facts before the `scripts` adapter saves local
+JSON; it does not score or choose an arm (ADR-0117).
+
+`continual_trigger_replay_outcomes.py` rechecks the six-trial train-only
+study, releases and compares all common A/B final roles before any
+prediction, then reports every method's accuracy/BCE/forgetting,
+capacity, work, and paired arm contrast. It does not tune or choose an
+arm, alter historical protocols, or perform file IO; the `scripts`
+adapter saves the fixed local result (ADR-0118).
+
+`versioned_v14_run.py` accepts the fixed study, scored comparison,
+their original-format JSON bytes, and execution facts. It assembles a
+P5.1 manifest with all source-role hashes and exact seed derivations,
+rejecting changed study/payload identities. It does not capture Git,
+write files, select an arm, or resume training (ADR-0120).
+
+`v14_observation_projection.py` converts verified v14 seed-level JSON
+objects into deterministic typed JSONL and final-row CSV bytes. It
+checks cell/epoch order and train-only role access, and marks genuinely
+unrecorded wake metrics unavailable. It does not read files, estimate
+metrics, aggregate seeds, or choose an arm (ADR-0121).
+
+`wake_diagnostic.py` identifies the metric returned by each successful
+NumPy wake update and validates its order, definition, timing, and
+finite value against the six-trial work grid. `v14_measured_observations.py`
+serializes that train-only grid and derives an additive measured
+projection. Neither opens decision/final roles, performs another
+update, or selects a result (ADR-0122).
+
+`v14_trial_checkpoint.py` constructs and validates a typed format-10
+Cartesian prefix of complete unscored v14 trials. It binds source,
+config, protocol, and capture identity; rechecks trial, matched-arm,
+and wake facts; strips deferred final sources before persistence; and
+reconstructs fixed sources only for a full six-trial study. It does
+not read checkpoint files, train, score, or release final roles
+(ADR-0124).
+
+`continual_experiment_config.py` takes an existing typed continual
+preset config and explicit JSON-compatible override values. It rejects
+unknown and type-invalid fields, keeps protocol/baseline/model-order
+identity fixed, applies validated values, and builds a fully resolved
+config record. It does not parse CLI syntax, train, or write files
+(ADR-0125).
+
 - Low-level math routines
 - CLI argument parsing
 - Environment variable parsing

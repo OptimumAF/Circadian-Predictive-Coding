@@ -113,5 +113,88 @@ offered two detached rows at every epoch. All six phase-local periodic
 subsets matched v9's train hash, retention, order, selected IDs, and
 three method-work records exactly for each seed. Source sentinels raised
 on any premature final read; no model trained or final role opened.
-These schedule facts establish supply only, not applied replay or a
-full-stack outcome. P4.8b2 remains open.
+These schedule facts establish supply only. The guarded train-only and
+globally sealed outcome sections below establish applied replay and the
+bounded full-stack result; P4.8b2 is complete for the declared protocol.
+
+## P4.8b2a observed guarded train-only trials
+
+The separate v14 train-only runner used the frozen settings for all six
+seed/arm trials and three NumPy methods. Each method completed 24 full-
+batch wake updates and 1,296 arrived train-row presentations; each PC
+method used 48 latent inference loops and 2,592 example-inference
+iterations at wake. Every trial retained the same 24 offered selections
+within seed. Periodic attempted and accepted six guarded sleeps per
+seed, applying twelve replay row updates per method; adaptive and
+no-sleep attempted none at unchanged readiness thresholds and applied
+zero replay. Periodic seed 47 applied two prunes and finished at width
+six; seed 53 applied three prunes and finished at width five. No split
+was applied. All widths remained within four through 32 and total
+changes within the fixed six-per-action cap. This is train-only
+mechanism evidence, not a model ranking.
+
+`data/trigger-replay-v14-training.json` and its repeat are byte-identical
+ignored local artifacts at on-disk SHA-256
+`174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`.
+They omit nondeterministic durations and contain no final-role values or
+scores. The study independently rederives source roles and the entire
+opportunity stream before accepting the artifact. P4.8b2b subsequently
+released and compared common final roles after a full global preflight;
+its predeclared outcomes appear below.
+
+## P4.8b2b observed fixed outcomes
+
+All six trained trials passed the independent global preflight. All
+twelve A/B final roles were released and compared across arms within
+seed before the first prediction. The two ignored scored artifacts,
+`data/trigger-replay-v14-outcomes.json` and its repeat, are byte-identical
+at on-disk SHA-256
+`ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`.
+The 40-row final roles yield an accuracy step of 0.025. No arm or seed
+was selected from these results.
+
+Each accuracy and BCE cell below is ordered A-after-A / A-after-B /
+B-after-B. `Forget` is A-after-A minus A-after-B; negative values are
+improvement on A. `Balanced` is the mean of A-after-B and B-after-B
+accuracy. `Replay` counts applied optimizer updates for that method;
+all methods also completed 24 wake updates, 1,296 wake presentations,
+and, for both PC methods, 48 wake inference loops and 2,592
+example-inference iterations.
+
+| Seed | Arm | Method | Accuracy A/A · A/B · B/B | BCE A/A · A/B · B/B | Forget | Balanced | Replay | Final params |
+|---:|---|---|---|---|---:|---:|---:|---:|
+| 47 | periodic | backprop | .925 · .950 · .950 | .3112 · .2132 · .2448 | -.025 | .9500 | 12 | 33 |
+| 47 | periodic | PC | .975 · .975 · .875 | .3231 · .2834 · .3495 | .000 | .9250 | 12 | 33 |
+| 47 | periodic | circadian PC | .775 · .900 · .900 | .5689 · .5013 · .4284 | -.125 | .9000 | 12 | 25 |
+| 47 | adaptive | backprop | .925 · .950 · .950 | .3194 · .2225 · .2429 | -.025 | .9500 | 0 | 33 |
+| 47 | adaptive | PC | .975 · .975 · .900 | .3300 · .2927 · .3514 | .000 | .9375 | 0 | 33 |
+| 47 | adaptive | circadian PC | .750 · .875 · .875 | .5857 · .5171 · .4283 | -.125 | .8750 | 0 | 33 |
+| 47 | no sleep | backprop | .925 · .950 · .950 | .3194 · .2225 · .2429 | -.025 | .9500 | 0 | 33 |
+| 47 | no sleep | PC | .975 · .975 · .900 | .3300 · .2927 · .3514 | .000 | .9375 | 0 | 33 |
+| 47 | no sleep | circadian PC | .750 · .875 · .875 | .5857 · .5171 · .4283 | -.125 | .8750 | 0 | 33 |
+| 53 | periodic | backprop | .975 · 1.000 · .900 | .1924 · .1276 · .2615 | -.025 | .9500 | 12 | 33 |
+| 53 | periodic | PC | .000 · .375 · .450 | 1.0213 · .7322 · .7052 | -.375 | .4125 | 12 | 33 |
+| 53 | periodic | circadian PC | .975 · 1.000 · .900 | .3609 · .2787 · .3686 | -.025 | .9500 | 12 | 21 |
+| 53 | adaptive | backprop | .975 · 1.000 · .900 | .1976 · .1325 · .2656 | -.025 | .9500 | 0 | 33 |
+| 53 | adaptive | PC | .000 · .000 · .175 | 1.0692 · .7926 · .7560 | .000 | .0875 | 0 | 33 |
+| 53 | adaptive | circadian PC | .975 · .975 · .900 | .3560 · .2880 · .3825 | .000 | .9375 | 0 | 33 |
+| 53 | no sleep | backprop | .975 · 1.000 · .900 | .1976 · .1325 · .2656 | -.025 | .9500 | 0 | 33 |
+| 53 | no sleep | PC | .000 · .000 · .175 | 1.0692 · .7926 · .7560 | .000 | .0875 | 0 | 33 |
+| 53 | no sleep | circadian PC | .975 · .975 · .900 | .3560 · .2880 · .3825 | .000 | .9375 | 0 | 33 |
+
+The artifact retains all 18 signed contrasts. In the periodic-minus-
+no-sleep pairs, circadian balanced accuracy changes by +.0250 (seed
+47) and +.0125 (seed 53), with eight and twelve fewer final parameters,
+respectively; its B accuracy changes by +.025 and .000. Ordinary PC
+changes by -.0125 and +.3250 balanced accuracy; seed 53 starts at zero
+A-after-A accuracy in both arms, so that large gain is an underlearning
+case. Backprop accuracy is unchanged in both seeds, though BCE changes
+in both directions. Adaptive-minus-no-sleep deltas are exactly zero for
+all methods, metrics, work, and capacity because the unchanged adaptive
+rule attempted no sleep. Periodic adds twelve replay updates per method
+and six accepted guarded sleeps per seed; no rollback occurred. No
+method-wide circadian advantage or new adaptive heuristic is inferred.
+Across these two seeds, periodic circadian balanced accuracy averages
+.925 versus backprop's .950; this descriptive mean is not a selected
+winner or uncertainty estimate. All exact unrounded scores and signed
+deltas remain in the fixed artifact.

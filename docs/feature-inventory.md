@@ -3,6 +3,9 @@
 This inventory describes the fetched baseline at commit
 `8793c49ee4f9f8b07649e8db6571ed53746a9a06`. It records existing behavior
 before the corrected evaluation protocol in [DEVELOPMENT_PLAN.md](../DEVELOPMENT_PLAN.md).
+For the current checkout and v14 NumPy-only result scope, see the
+[backend capability matrix](backend-capability-matrix.md) and its
+[result provenance metadata](result-backend-metadata.json).
 “Implemented and tested” means the named behavior has relevant passing test
 coverage in the Phase 0 environment; it does not establish a scientific
 benefit or parity between backends.

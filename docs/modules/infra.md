@@ -61,6 +61,36 @@
   fields for stationary and axis-shift conditions. Its independent final
   fields are generated only when the app releases their existing four-
   role boundary; it does not schedule sleep or score models (ADR-0115).
+- `run_environment.py` captures commit/dirty/workspace content digests,
+  required Python/NumPy versions, and CPU facts before a versioned run.
+  It reports unavailable Git metadata explicitly and does not read
+  decision/final roles or write results (ADR-0120).
+- `versioned_run_files.py` writes the two fixed v14 JSON payloads once
+  and their completed manifest last, then verifies the saved hashes,
+  protocols, source roles, method cells, and contrasts. It does not
+  train, choose settings, or resume a stopped run (ADR-0120).
+- `observation_projection_files.py` reads only completed verified P5.1
+  bundles, writes an exclusive hash-bound derived directory, and checks
+  exact regeneration from raw seed records. It does not train, score,
+  select, or recover partial writes (ADR-0121).
+- `measured_observation_files.py` verifies the completed P5.1 source,
+  binds canonical wake diagnostics in an exclusive sidecar, and
+  re-derives a separate measured projection from that sidecar and raw
+  results. It neither trains nor independently proves the numeric
+  values or recovers interrupted writes (ADR-0122).
+- `atomic_artifact_directory.py` stages validated bytes in a hidden
+  sibling directory, records incomplete/failed/canceled publication
+  state, and publishes only a complete local directory. It does not
+  validate experiment semantics, resume training, or erase failed
+  stages (ADR-0123).
+- `circadian_checkpoint_files.py` also has a separate immutable
+  format-10 v14 store. A store-local mapping-proxy reducer serializes
+  sealed role maps without changing global pickle behavior; it does
+  not validate trial meaning or read final roles (ADR-0124).
+- `v14_resume_files.py` writes a hidden atomic run-state cursor, exact
+  immutable checkpoint references, and incomplete/failed/canceled/
+  completed status under an OS-released local lock. It does not train,
+  score, or validate the stored trial's scientific facts (ADR-0124).
 
 ## Non-Responsibilities
 

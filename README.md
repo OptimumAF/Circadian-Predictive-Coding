@@ -439,29 +439,124 @@ All twelve trials passed train-only preflight before final release.
 Periodic sleep executed four times per trial; adaptive executed zero
 times under its unchanged thresholds and matched the no-sleep control.
 Periodic outcomes were mixed across seeds and metrics. No new trigger
-rule was selected, and the broader sleep-component study remains open
-(ADR-0115).
+rule was selected. The separate full-stack v14 comparison below
+subsequently addressed the broader sleep components (ADR-0115).
 
 The [fixed v14 full-stack trigger protocol](docs/full-stack-trigger-comparison.md)
 first records the same prediction-independent replay supply at every
 arrived train-only wake epoch for both new seeds. It binds capacity and
 guard budgets before model training. Its periodic subset exactly matches
-the existing v9 replay schedule; no v14 model outcomes have been scored.
+the existing v9 replay schedule. The later guarded and scored v14 gates
+are documented below.
 To reproduce this schedule to a new local file:
 
 ```powershell
 .\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_schedule --result data/trigger-replay-v14-opportunities-new.json
 ```
 
-The adapter refuses to overwrite an existing artifact. Applying replay
-only after accepted guarded sleep and globally sealed scoring remains
-P4.8b2 (ADR-0116).
+The adapter refuses to overwrite an existing artifact. The schedule
+records potential rows; guarded replay and scoring use separate gates
+(ADR-0116).
+
+The fixed v14 train-only guarded runner now trains all three NumPy
+methods for both seeds and all three trigger arms. It checks the shared
+selection before every decision and applies matched PC/backprop replay
+only after circadian sleep passes its inner guard. Write its six-trial
+unscored trace to a new local file:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_training --result data/trigger-replay-v14-training-new.json
+```
+
+The recorded periodic arms accepted six sleeps per seed and pruned two
+or three neurons; unchanged adaptive and no-sleep arms made no sleep
+attempt. After all six train-only trials pass, the fixed v14 outcome
+route releases common final roles and scores every method and contrast:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_outcomes --result data/trigger-replay-v14-outcomes-new.json
+```
+
+The [full result table](docs/full-stack-trigger-comparison.md) retains
+mixed periodic effects, zero adaptive-minus-no-sleep differences, and
+the extra replay work and reduced circadian capacity. No new trigger
+rule was selected (ADRs 0117–0118). The
+[backend capability matrix](docs/backend-capability-matrix.md) and
+[v14 result metadata](docs/result-backend-metadata.json) state that this
+replay comparison uses NumPy only; Torch has no sleep replay in the
+current head (ADR-0119).
+
+For a new run with execution provenance, use the opt-in
+[versioned manifest contract](docs/versioned-run-manifest.md):
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p51-v14-local
+.\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p51-v14-local
+```
+
+This writes an ignored local directory with the unchanged v14 train-only
+and scored JSON plus a validated `manifest.json`. It records the executing
+Git/workspace state, exact source-role hashes, seed derivations, runtime
+versions, CPU hardware, float64 precision, and unmeasured timing scope.
+The run ID must be new; a partial directory cannot pass verification
+(ADR-0120).
+
+To inspect only the observations that v14 actually recorded, derive the
+[P5.2a structured streams](docs/structured-observation-audit.md):
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.project_v14_observations --run artifacts/runs/p51-v14-local
+.\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-run artifacts/runs/p51-v14-local
+```
+
+This adds exclusive JSONL sleep, topology, replay, validation, role,
+and final-result files plus a CSV of final method rows. The raw v14
+files remain unchanged. Wake rows explicitly label per-epoch training
+metrics unavailable because the v14 runner did not record them
+(ADR-0121). For genuine metrics on a **new** bounded v14 run, use the
+[measured wake workflow](docs/measured-wake-observations.md):
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p52-measured-local --capture-wake-diagnostics
+.\.venv\Scripts\python.exe -m scripts.project_v14_observations --run-measured artifacts/runs/p52-measured-local
+.\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-measured-run artifacts/runs/p52-measured-local
+```
+
+Its separate sidecar records the existing train-update returns for
+every method/epoch, and its measured projection adds JSONL and CSV
+without changing fixed v14 outcomes (ADR-0122).
+
+The [P5.3a publication boundary](docs/atomic-artifact-publication.md)
+now stages these local directories under hidden sibling paths and
+makes each complete bundle visible with one same-volume rename.
+Interrupted stages remain labeled for inspection (ADR-0123). The
+[P5.3b checked resume route](docs/v14-checked-resume.md) stores a
+validated unscored trial prefix under a hidden run-state directory:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p53-local --resumable --capture-wake-diagnostics
+.\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p53-local --resume --capture-wake-diagnostics
+```
+
+Resume requires the same source, runtime environment, fixed config,
+protocol, and capture mode. The final roles stay sealed until all six
+trials preflight; an interrupted trial restarts from its beginning.
+The original v14 raw and measured bytes remain unchanged (ADR-0124).
 
 Continual shift stress test (retention vs adaptation):
 
 ```powershell
 python scripts/run_continual_shift_benchmark.py --profile strength-case --seeds 3,7,11,19,23,31,37
 ```
+
+The configurable continual route also accepts repeatable typed
+`--override FIELD=JSON` values after its named profile and existing
+flags. Overrides require `--json-result` or `--resolved-config` so the
+fully resolved settings are saved; unknown keys and changes to model
+order, protocol ID, or baseline learning rates are refused before
+training. See the [configuration workflow](docs/configured-continual-experiments.md)
+(ADR-0125). This historical route is descriptive and does not alter
+the fixed matched v14 comparison.
 
 For a local JSON artifact of a completed v0–v5 continual result, add
 `--json-result continual-result.json`. It contains one typed circadian sleep

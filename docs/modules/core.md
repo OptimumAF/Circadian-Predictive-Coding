@@ -269,3 +269,10 @@ probabilities and observed train labels, returning mean absolute error,
 the fixed 0.5-clipped error, and BCE. It has no data-source dependency and
 does not scale a model update, inspect held-out roles, or replace the
 model's relaxed-state supervised-error signal (ADR-0112).
+
+`run_manifest.py` validates required versioned run fields, complete
+status, Git-known versus explicitly unavailable source identity,
+seed/role hashes, finite resolved config, output paths/protocols, and
+timing scope. It produces stable UTF-8/LF manifest bytes. It accepts
+facts from app/infra and does not inspect Git, train, or write files
+(ADR-0120).

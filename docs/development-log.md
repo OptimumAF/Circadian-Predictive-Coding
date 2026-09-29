@@ -7772,3 +7772,738 @@ were not modified.
   sleep protocol with explicit wake/replay exposure, structural/capacity
   caps, guard decisions, selection roles, and final-role release before
   any full-stack outcome or new trigger heuristic.
+
+## 2026-09-29 — P4.8b1 train-only full-stack trigger replay supply
+
+- Completed task ID: **P4.8b1**. P4.8b2, P4.8b, and P4.8 remain
+  unchecked. The session started on branch
+  `codex/research-protocols-and-resume`, HEAD
+  `ec7634d174e98a83b6623a5cdb3c3960f215c4cb`, with an extensive
+  dirty tree. During validation the checkout changed to `master`, HEAD
+  `5134a17db04d94d4afa26150dfae1939e724a6f4`; commits
+  `7ff2f55`, `5a262e2`, `6f06d86`, and `5134a17` captured the
+  previously dirty work and new schedule files. I did not reset,
+  amend, or overwrite those commits. The remaining local changes are
+  this plan, the evaluation-protocol note, and this log; older ignored
+  artifacts remain. This session reread AGENTS.md, the full plan/current
+  log and handoff, inspected the actual checkout and v9 guarded runner,
+  matched schedule, shared buffer, arrived four-role source, core
+  configuration, and prior ADRs. The reviewed commit remains older than
+  the active checkout; earlier Phase 0 evidence is retained.
+- Before any v14 training or scoring, `docs/full-stack-trigger-comparison.md`
+  froze the shifted arrived A→B source, new seeds 47/53, 12+12 wake
+  epochs, three trigger arms, full component sleep settings, phase-local
+  interval four, unchanged adaptive defaults, FIFO 8-row/192-byte
+  newest-two replay, guard tolerance zero, two replay updates per
+  accepted event per method, and global width/split/prune caps. The
+  v14 schedule then offered prediction-independent potential replay at
+  **every** train-only wake epoch. Each seed had 24 opportunities;
+  phase A had 72 train-role rows per epoch and B had 36. Its six
+  periodic opportunities per phase pair matched the v9 schedule's
+  train hash, sorted retention, retention order, selected IDs, and
+  three method-work records exactly. The buffer retained eight
+  distinct rows/192 bytes and selected two detached copies at each
+  opportunity. No model trained, no decision/final role was opened, and
+  no held-out outcome was observed.
+- Fourteen focused tests cover both seeds, exact v9 parity, B-arrival
+  ordering, final and guard/outer access sentinels, train role and
+  manifest mutation rejection before observation, detached copies,
+  budgets, exact payload repeat, actual file-byte hash, and exclusive
+  output. No relevant CPU tests were skipped. The full suite's 41 skips
+  were actual-device CUDA tests on this CPU host.
+- Commands and outcomes from the workspace root (Windows CPU host):
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_trigger_replay_schedule.py  # exit 0, 14 passed
+  .\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_schedule --result data\trigger-replay-v14-opportunities-verified.json  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_schedule --result data\trigger-replay-v14-opportunities-verified-repeat.json  # exit 0, byte-identical
+  Get-FileHash data\trigger-replay-v14-opportunities-verified.json -Algorithm SHA256  # 1C30E960...5D168, matches adapter output
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0, 1,445 passed, 41 skipped in 283.47 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0, 226 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\continual_trigger_replay_schedule.py scripts\run_continual_trigger_replay_schedule.py tests\test_continual_trigger_replay_schedule.py  # exit 0, three formatted files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- The first writer smoke used Windows text newline translation. Its two
+  ignored preliminary files were byte-identical to each other at on-disk
+  SHA-256 `6f619a13f200bbfdbd6b9e259b102398fa5088a2f6db26091d8fee489bd6a80b`,
+  but the adapter reported the LF payload hash. The writer now pins LF
+  bytes, and a regression checks actual disk bytes and refuses overwrite.
+  The canonical ignored files are
+  `data/trigger-replay-v14-opportunities-verified.json` and its
+  `-repeat.json`, both on-disk SHA-256
+  `1c30e960aa2dee65a862434fb584e12eaa31bd14a71cb73b3eb919f9dfa5d168`.
+  Manifest digest is
+  `22e90b3b3b5312ea52abc956f8ac997a457126bb07a9e03ef0f404079a5a87d0`.
+  The full suite was also run before that one-line writer correction
+  (1,444 passed/41 skipped); the final 1,445-pass run reflects the
+  exact handed-off code and added regression.
+- Files added: `src/app/continual_trigger_replay_schedule.py`,
+  `scripts/run_continual_trigger_replay_schedule.py`,
+  `tests/test_continual_trigger_replay_schedule.py`, comparison document,
+  and ADR-0116. README, architecture, changelog, evaluation protocol,
+  module docs, plan, and this log were updated. Plan amendment split
+  P4.8b into b1 replay-supply feasibility and b2 actual guarded outcomes
+  because v9 explicitly rejects adaptive triggering and only emits
+  periodic boundaries. Original full-stack criteria remain under b2 and
+  parent; no seed, baseline, threshold, metric, or stopping point was
+  selected from results. No new dependency, network experiment, large
+  sweep, or blocker. **Exact next action:** implement a v14 train-only
+  runner above `TriggerReplayScheduleSession`; after each arrived wake
+  update, check core retention/selection against the offered rows,
+  invoke the existing guarded sleep decision for the fixed arm, and
+  replay detached rows to PC/backprop only on accepted events. First
+  test rejected/skipped/no-sleep zero-replay and periodic parity with
+  final-role sentinels; then build the six-trial global preflight and
+  scorer required by P4.8b2.
+
+## 2026-09-29 — P4.8b2 guarded full-stack outcomes and P4.9 backend scope
+
+- Completed task IDs: **P4.8b2a, P4.8b2b, P4.8b2, P4.8b, P4.8,
+  P4.9**. Phase 5 remains open. The checkout stayed on `master` at
+  `5134a17db04d94d4afa26150dfae1939e724a6f4`; tracked v14 docs
+  and untracked v14 code/tests/ADRs are preserved in the working tree.
+  The prior P4.8b1 log records the earlier branch/commit transition.
+  AGENTS.md, the full plan, current log, active checkout, v9 runner,
+  v14 schedule, NumPy/Torch core capabilities, and current artifacts
+  were inspected before the handoff was changed.
+- Before v14 model training or final access, P4.8b2 was split into
+  train-only guard-committed replay (b2a) and complete global final
+  release/outcomes (b2b). The split isolates rollback and no-replay
+  correctness from final scoring; the original b2/b/parent acceptance
+  criteria and frozen seeds, arms, metrics, budgets, and stopping point
+  were retained. New `continual_trigger_replay_runner.py` trains all
+  three NumPy models on each arrived wake epoch, preflights the offered
+  retention/order/selection, and gives detached replay to PC/backprop
+  only after an accepted circadian guarded event. No baseline replay
+  occurs after rollback, skip, no-sleep, or core failure.
+- All six fixed seed/arm trials completed 24 wake updates and 1,296
+  arrived row presentations per method; both PC methods used 48 wake
+  inference loops and 2,592 example-inference iterations. Within a
+  seed, all arms saw the same 24 offered replay selections. Periodic
+  accepted six guarded sleeps per seed, applied twelve exact selected
+  replay rows per method, and pruned two (seed 47) or three (seed 53)
+  neurons. Adaptive and no-sleep attempted zero sleeps and applied zero
+  replay at the unchanged thresholds. All widths stayed within 4–32
+  and the fixed total structural caps; there were no splits or
+  rollbacks. The six-trial train-only preflight rederived role and
+  opportunity identity, event/guard/work/capacity/clock facts, and
+  structural stable-ID lineage without final values.
+- The outcome gate reran that preflight before any final read, released
+  all twelve A/B final roles, compared common within-seed IDs/hashes,
+  and only then scored all 18 method cells and 18 signed contrasts.
+  Forged train state rejects before any final read, and mismatched
+  final hashes reject before a score. All outcomes remain in
+  `docs/full-stack-trigger-comparison.md` and the scored JSON. Adaptive
+  and no-sleep are exactly equal; periodic effects vary by seed and
+  method. Seed-53 ordinary PC has zero A-after-A accuracy in every arm,
+  so its large periodic gain is an underlearning observation. The
+  40-row final roles have 0.025 accuracy resolution. This bounded
+  synthetic study does not establish a general circadian advantage or
+  justify a new adaptive trigger.
+- Local ignored artifacts and repeats, each pair byte-identical:
+  `data/trigger-replay-v14-training.json` and `-repeat.json`, on-disk
+  SHA-256 `174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`;
+  `data/trigger-replay-v14-outcomes.json` and `-repeat.json`, on-disk
+  SHA-256 `ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`.
+  Both writers use exclusive new paths and LF bytes. No large sweep,
+  new dependency, network experiment, or historical protocol change.
+- P4.9 inspected `docs/feature-inventory.md`, current NumPy/Torch
+  config/core/runner capabilities, and the v14 JSON. The new
+  `docs/backend-capability-matrix.md` records shared and distinct
+  features, clocks, structural planners, snapshots, and protocol
+  scope. `docs/result-backend-metadata.json` binds the original v14
+  protocol IDs and file hashes to `array_backend: numpy`, the three
+  method names, and `torch_included: false`. Both local SHA-256 and
+  protocol-ID checks matched the sidecar. The next P5.1 task defines
+  an artifact schema, so no Torch consolidation was required. ADR-0119
+  records why the scored v14 bytes remain unchanged; a future Torch
+  replay experiment needs its own prospective protocol.
+- Commands and outcomes from the workspace root (Windows CPU host):
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_trigger_replay_schedule.py tests\test_continual_trigger_replay_runner.py tests\test_continual_trigger_replay_training_study.py tests\test_continual_trigger_replay_outcomes.py tests\test_continual_matched_replay_runner.py tests\test_continual_matched_replay_outcomes.py  # exit 0, 63 passed in 8.72 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0, 1,469 passed, 41 skipped in 283.12 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0, 234 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\continual_trigger_replay_runner.py src\app\continual_trigger_replay_training_study.py src\app\continual_trigger_replay_outcomes.py scripts\run_continual_trigger_replay_training.py scripts\run_continual_trigger_replay_outcomes.py tests\test_continual_trigger_replay_runner.py tests\test_continual_trigger_replay_training_study.py tests\test_continual_trigger_replay_outcomes.py  # exit 0, eight files already formatted
+  .\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_training --result data\trigger-replay-v14-training.json  # exit 0; repeat to a new -repeat.json matched bytes
+  .\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_outcomes --result data\trigger-replay-v14-outcomes.json  # exit 0; repeat to a new -repeat.json matched bytes
+  Get-FileHash data\trigger-replay-v14-training.json -Algorithm SHA256  # 174ee794...28b324; sidecar matched
+  Get-FileHash data\trigger-replay-v14-outcomes.json -Algorithm SHA256  # ea11fc7c...2501f; sidecar matched
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- No relevant CPU tests were skipped. The 41 full-suite skips require
+  actual-device CUDA on this CPU host. The full suite was run after
+  the final v14 code/lineage preflight changes; later changes were
+  documentation and the metadata sidecar only. Plan changes marked
+  P4.8b2a/b and their parents complete with exact evidence, closed
+  P4.9 on the verified capability record, and moved the handoff to
+  P5.1. README, architecture, changelog, evaluation protocol, module
+  docs, comparison, inventory, ADRs 0117–0119, and plan were updated.
+  **Blockers:** none. **Exact next action:** inspect existing v14 JSON
+  adapters, trusted checkpoint formats, and historical provenance
+  fields; draft the smallest versioned P5.1 run-schema contract with
+  explicit required versus unavailable provenance, then implement and
+  test one opt-in local artifact writer without changing v14 or earlier
+  protocol bytes. Keep P5.1 unchecked until all required schema fields
+  and its validation gate pass.
+
+## 2026-09-29 — P5.1 versioned execution manifest and opt-in v14 bundle
+
+- Completed task IDs: **P5.1a, P5.1b, P5.1**. P5.2–P5.7 remain open.
+  Continued on `master` at HEAD
+  `5134a17db04d94d4afa26150dfae1939e724a6f4`, preserving the
+  existing dirty v14 work and all ignored local results. Rechecked
+  AGENTS.md, the P5.1 plan/handoff and current log, actual checkout,
+  existing v14 adapters, trusted checkpoint store, algorithm IDs,
+  four-role source hashes, and historical provenance gaps. The prior
+  goal turn made progress by completing fixed v14/P4.9 work; this
+  continuation executed the next open task rather than only rewriting
+  the plan.
+- Split P5.1 before implementation into pure schema validation (a)
+  and one opt-in producer/reader (b). The fixed v14 JSON already had
+  protocol/results but lacked execution provenance; trusted pickle
+  checkpoints have a different purpose. The split retained every P5.1
+  field and left P5.2 observation streams and P5.3 interrupted-write
+  recovery open. A red schema test initially failed collection because
+  `src/core/run_manifest.py` did not yet exist; eight schema cases and
+  two environment cases later passed. The schema requires a safe run
+  ID, status, protocol/algorithm IDs, commit and coherent dirty state
+  (or explicit Git unavailability), full resolved config/digest,
+  numeric seed map, source-role hashes, pretrained identity state,
+  Python/NumPy versions, CPU model or reason, float64 precision,
+  determinism, timing scope, and hash-bound output files. It rejects
+  nonfinite/malformed/omitted fields and false completion.
+- `src/infra/run_environment.py` captures Git HEAD, porcelain status,
+  tracked binary diff, and hashes nonignored untracked source contents
+  before training. It records runtime and CPU facts; a fixture verified
+  that changing an untracked file changes the workspace digest even
+  when the status listing stays the same. The v14 adapter captures
+  source again after scoring and refuses publication on drift. The
+  scored study uses the same six train-only trials after repeating the
+  global preflight; train-only serialization occurs before final-role
+  release. Existing v14 train-only and outcome adapter `build_payload()`
+  bytes remain exactly at their earlier SHA-256 values.
+- The new local bundle writer writes `training.json`, `outcomes.json`,
+  and then `manifest.json` under a new ignored
+  `artifacts/runs/<run-id>/` directory. Its reader verifies schema,
+  status, protocol/algorithm IDs, resolved config/digest, file SHA-256,
+  all six ordered seed/arm cells, three method rows, 18 contrasts,
+  development/final role hashes, and directory identity. Tests cover
+  exclusive output before training, final file tamper, missing
+  manifest, a partial cell grid with an updated checksum, and source
+  drift with no published directory. No resume or atomic directory
+  replacement is claimed; those remain P5.3.
+- Two fresh bounded local runs, `artifacts/runs/p51-v14-schema-c/` and
+  `artifacts/runs/p51-v14-schema-d/`, both passed the CLI verifier.
+  Their train-only files repeat SHA-256
+  `174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`;
+  their scored files repeat SHA-256
+  `ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`.
+  Manifest SHA-256 values differ by run ID:
+  `702f5f75c86467a980f2410c77f58976dc428526c89bc7a6453612d95085024c`
+  and `604bee7973fa341645d4d9baf6faa2d426039fe4b273f1f69f5650d4486bde29`.
+  Source provenance and all role hashes are identical across the two
+  fresh runs. The recorded dirty workspace digest is
+  `0bee07214fc072cf32c0ae67fb00466b770c46aa010629b7d52cd882e3aaea2a`;
+  runtime Python 3.14.7, NumPy 2.4.6, Windows 11 CPU with Intel64
+  Family 6 Model 151, float64, no pretrained weights, and no measured
+  timing. Earlier ignored preliminary `p51-v14-schema-a/b` bundles
+  predate the CPU-model field and are not canonical P5.1 evidence.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_run_manifest_schema.py tests\test_run_environment.py tests\test_versioned_v14_run.py tests\test_continual_trigger_replay_outcomes.py tests\test_continual_trigger_replay_training_study.py  # exit 0, 34 passed
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p51-v14-schema-c  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p51-v14-schema-d  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p51-v14-schema-c  # exit 0, completed
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p51-v14-schema-d  # exit 0, completed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0, 1,486 passed, 41 skipped in 287.39 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0, 242 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\core\run_manifest.py src\infra\run_environment.py src\infra\versioned_run_files.py src\app\versioned_v14_run.py scripts\run_versioned_v14_bundle.py tests\test_run_manifest_schema.py tests\test_run_environment.py tests\test_versioned_v14_run.py src\app\continual_trigger_replay_outcomes.py scripts\run_continual_trigger_replay_training.py scripts\run_continual_trigger_replay_outcomes.py  # exit 0, 11 files already formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- The 41 full-suite skips require actual-device CUDA on this CPU host;
+  no relevant CPU test was skipped. Added `src/core/run_manifest.py`,
+  `src/app/versioned_v14_run.py`, two `src/infra/` modules, one script,
+  three test files, `docs/versioned-run-manifest.md`, ADR-0120, and a
+  narrow `/artifacts/runs/` ignore rule. The existing v14 scorer and
+  adapters gained reusable one-study/serialization functions; their
+  historical payload bytes and protocol IDs stayed exact. README,
+  architecture, module docs, evaluation protocol, changelog, plan, and
+  this log were updated. No network experiment, dependency addition,
+  algorithm change, result selection, or large sweep. **Blockers:**
+  none. **Exact next action:** inspect the actual v14 per-epoch
+  opportunity/event fields and scored seed rows; define a versioned
+  JSONL projection from a verified P5.1 bundle for sleep, topology,
+  replay, validation, and final records while retaining raw seed data.
+  Mark missing per-epoch metrics as unavailable until a separately
+  versioned instrumentation path records them; add derived CSV only
+  after the raw-stream and role/hash gates pass. Keep P5.2 unchecked
+  until all its observation types and output formats are verified.
+
+## 2026-09-29 — P5.2a observed v14 streams
+
+- Completed task ID: **P5.2a**. P5.2b and P5.2 parent remain open.
+  Continued on `master` at HEAD
+  `5134a17db04d94d4afa26150dfae1939e724a6f4`, preserving the
+  pre-existing dirty working tree and ignored P5.1 bundles. Re-read
+  AGENTS.md, the full living plan and latest log, then inspected the
+  actual checkout and both completed P5.1 local bundles. This session
+  implemented and validated the next unblocked task after amending
+  the plan; it did not run a new sweep or alter an algorithm.
+- The v14 train-only JSON has six seed/arm rows and 144 ordered
+  opportunities with typed sleep, topology, retention, offered IDs,
+  applied matched replay work, 12 inner-guard decisions, and 516 role
+  accesses. The scored JSON has 18 full method rows. Inspection of
+  `base._train_named_model_epoch` shows it discards each core
+  `train_epoch` return, so no genuine per-epoch loss or energy exists
+  in the saved v14 source. P5.2a wake rows explicitly say
+  `unavailable_not_recorded`; final/guard scores were not repurposed.
+- Added pure `src/app/v14_observation_projection.py` and
+  `src/infra/observation_projection_files.py`, plus a local CLI and
+  tests. The application transform checks all six cells, per-trial
+  epoch ordering, train-role hashes, clock/width/work identity, guard
+  alignment, and the train-only final/outer role seal. It derives
+  deterministic JSONL for wake, sleep, topology, replay, validation,
+  role access, and final method rows, plus final-row CSV. The file
+  boundary first verifies the P5.1 complete source, writes an
+  exclusive `observations-v1/` directory with source/output hash and
+  count metadata last, and verifies exact regeneration. Tests reject
+  a missing file, rehashed forged stream, wrong source directory,
+  and reordered source epochs after their checksum is updated. The
+  raw seed JSON files and frozen v14 train/result SHA-256 values remain
+  unchanged.
+- Local projections of
+  `artifacts/runs/p51-v14-schema-c/observations-v1/` and
+  `artifacts/runs/p51-v14-schema-d/observations-v1/` each verify.
+  Their eight data-file hash maps are identical, while the
+  run-specific source-manifest hashes differ. Counts: 144 wake,
+  144 sleep (12 accepted/132 skipped), 144 topology, 144 replay,
+  12 guard, 516 role-access, 18 final JSONL, and 18 final CSV data
+  rows. Per-opportunity applied replay work totals 72 optimizer
+  updates across methods. Representative SHA-256 values:
+  `wake-epochs.jsonl`
+  `1de24cebd3b04fb1d17482e0dca12fe2fafab5dde57dc3c5f00e7c80efe4a0ae`,
+  `final-results.jsonl`
+  `dbe9b98ea72ee576c04653bf54162e883c26b18f3a1b24bde94a507d06602006`,
+  and `summary.csv`
+  `75c4ac48de3b2e58346e290f81578c2956dd82cfc0040f860797bac640682b3e`.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -q tests/test_v14_observation_projection.py  # red before implementation: missing module; then 5 passed
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --run artifacts/runs/p51-v14-schema-c  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --run artifacts/runs/p51-v14-schema-d  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-run artifacts/runs/p51-v14-schema-c  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-run artifacts/runs/p51-v14-schema-d  # exit 0
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0, 1,491 passed, 41 skipped in 283.79 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_v14_observation_projection.py tests/test_versioned_v14_run.py tests/test_continual_trigger_replay_training_study.py tests/test_continual_trigger_replay_outcomes.py  # exit 0, 29 passed after missing-file test
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0, 246 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/v14_observation_projection.py src/infra/observation_projection_files.py scripts/project_v14_observations.py tests/test_v14_observation_projection.py  # exit 0, four formatted files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- The 41 suite skips require actual-device CUDA on this CPU host;
+  no relevant CPU test was skipped. Added
+  `docs/structured-observation-audit.md`, ADR-0121, and narrow
+  README/architecture/module/evaluation/changelog notes. The plan
+  split P5.2 into a projection (a) and separate genuine metric capture
+  (b) because recorded v14 returns are absent; this preserves the
+  original P5.2 per-epoch acceptance criterion. No baseline, seed,
+  score, metric, or selection rule changed. **Blockers:** none.
+  **Exact next action:** inspect the Backprop, PC, and circadian
+  `train_epoch` result types and all callers of
+  `base._train_named_model_epoch`; write a red test for opt-in capture
+  of one typed pre-update diagnostic per method/phase/epoch under a
+  new observation identity, with matched update counts and the global
+  final-role seal. Keep the historical v14 JSON bytes and P5.2 parent
+  unchanged until measured rows, repeatability, and full gates pass.
+
+## 2026-09-29 — P5.2b real wake diagnostics and measured projection
+
+- Completed task IDs: **P5.2b1, P5.2b2, P5.2b, P5.2**. P5.3–P5.7
+  remain unchecked. Previous goal turn was progress: P5.2a was
+  implemented, fully tested, logged, and checked. This continuation
+  re-read AGENTS.md, the living plan, latest log, and ADR-0121, and
+  inspected the actual checkout before coding. Continued on `master`
+  at HEAD `5134a17db04d94d4afa26150dfae1939e724a6f4` with the
+  pre-existing tracked/untracked changes and ignored local artifacts
+  preserved. No commit or dependency change was made.
+- Inspection found that Backprop returns pre-gradient binary BCE;
+  ordinary PC returns its all-hidden-error energy after latent
+  inference and before the gradient update; circadian PC returns its
+  final-hidden-error energy at the same stage, after possible pending
+  prune decay. The shared `base._train_named_model_epoch` discarded
+  these results at six call sites. It now returns the already-created
+  core result; all historical callers ignore it. Only the fixed v14
+  runner opts in to copying 432 successful train-only returns across
+  seeds 47/53, periodic/adaptive/no-sleep arms, A/B phases, 24 epochs,
+  and three NumPy methods. No extra model update, guard/final read,
+  criterion, seed, or algorithm change was introduced. Study preflight
+  rejects incomplete/misordered/nonfinite/incorrectly defined metric
+  rows before global final release. A direct comparison of default
+  and captured studies passed equal serialized training, model
+  digests, wake work, role audit, and fixed v14 output hashes.
+- Split P5.2b into capture/preflight (b1) and completed-run
+  publication/projection (b2) before implementation; the split
+  preserved all original criteria. `v14_wake_diagnostics_v1` writes
+  canonical 432-row JSONL only after the original v14 scorer has
+  preflighted all six trials, released common final roles, scored
+  them, and published a verified completed P5.1 bundle. The sidecar
+  manifest binds source run ID, source manifest and two raw payload
+  hashes, diagnostic hash/count, and its own observation ID. A
+  distinct `v14_measured_observation_projection_v1` retains all eight
+  P5.2a streams and adds 432-row wake JSONL and direct CSV. The
+  final-only 18-row CSV remains separate. Tests reject missing and
+  changed sidecar files, a rehashed forged projection, nonfinite or
+  wrong-role diagnostics, and a forced global scoring failure before
+  any run directory is published. The manifests are local integrity
+  records, not signed attestation. Atomic replacement and interrupted
+  write recovery remain P5.3.
+- Two bounded local invocations, `artifacts/runs/p52-measured-a/` and
+  `artifacts/runs/p52-measured-b/`, used Python 3.14.7, NumPy 2.4.6,
+  Windows 11 CPU (Intel64 Family 6 Model 151), the fixed v14 seeds
+  47/53 and three arms, with the same source digest
+  `0df280d0305d088e9124ab62b717dc752a1c3437c23b0adf4918a117c5e16039`,
+  configuration, roles, and resolved work. Both raw training files
+  repeat SHA-256
+  `174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`;
+  both scored files repeat
+  `ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`.
+  Both 432-row diagnostic files repeat
+  `2d6b6e4b0bc86a3dc292e7f04ad82816ae698dd43b9e63a5fceb41fe85f49f7c`.
+  Their ten measured projection data-file hash maps are identical;
+  `wake-metrics.csv` is
+  `6eb17df53d18cf48bf48157170fa929bcd8d183744546283640439bdc9760386`.
+  Run-bound P5.1 manifest hashes differ by ID:
+  `41b4f933ded7ec3b7602bf353139a47b21973e45dab6f6b854f3bc7115035d7d`
+  and `36397f8fec580df6a3e56cd6259d2dfd99ce18935fb598d59938d2b53c6d5aad`.
+  Both sidecars and projections verify; the existing negative/mixed
+  method outcomes remain unchanged. These are same-environment
+  repeatability checks, not cross-platform bitwise claims.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_v14_wake_diagnostics.py  # initial red import; then 3 passed after replacing a duration-sensitive assertion with exact serialized comparison
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_v14_measured_observations.py  # initial red import; then 3 passed before final missing-manifest case
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p52-measured-a --capture-wake-diagnostics  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p52-measured-b --capture-wake-diagnostics  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --run-measured artifacts/runs/p52-measured-a  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --run-measured artifacts/runs/p52-measured-b  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-measured-run artifacts/runs/p52-measured-a  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-measured-run artifacts/runs/p52-measured-b  # exit 0
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_v14_wake_diagnostics.py tests/test_v14_measured_observations.py tests/test_v14_observation_projection.py tests/test_versioned_v14_run.py tests/test_continual_trigger_replay_training_study.py tests/test_continual_trigger_replay_outcomes.py  # exit 0, 36 passed after missing-manifest case
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0, 1,498 passed, 41 skipped in 303.47 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0, 251 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/wake_diagnostic.py src/app/v14_measured_observations.py src/app/continual_shift_benchmark.py src/app/continual_trigger_replay_runner.py src/app/continual_trigger_replay_training_study.py src/infra/measured_observation_files.py scripts/run_versioned_v14_bundle.py scripts/project_v14_observations.py tests/test_v14_wake_diagnostics.py tests/test_v14_measured_observations.py  # exit 0, ten formatted files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- The 41 full-suite skips require actual-device CUDA on this CPU
+  host; no relevant NumPy test was skipped. Added two app modules,
+  one infra module, two tests, `docs/measured-wake-observations.md`,
+  ADR-0122, and narrow README/architecture/module/evaluation/
+  changelog notes; extended the two existing CLIs only with opt-in
+  flags. The plan now marks P5.2b1/b2/b and P5.2 complete on their
+  declared NumPy v14 artifact scope. **Blockers:** none. **Exact next
+  action:** inspect P5.1 bundle and P5.2 sidecar/projection write
+  order alongside existing trusted checkpoint stores; split P5.3
+  into interrupted-write state/atomic publication and checked-resume
+  gates before code. Write a failing test for a partially written
+  measured artifact that cannot be mistaken for a completed run,
+  then implement the smallest compatible boundary without altering
+  fixed v14 bytes or experiment settings.
+
+## 2026-09-29 — P5.3a atomic artifact publication
+
+- Completed task ID: **P5.3a**. P5.3b/P5.3 parent and P5.4–P5.7
+  remain open. Previous goal turn was progress: P5.2b1/b2/b and
+  P5.2 parent completed on a fully tested, logged measured route.
+  This continuation re-read AGENTS.md, the full living plan/latest
+  log, ADRs 0120/0122, and inspected the actual checkout. Continued
+  on `master` at HEAD
+  `5134a17db04d94d4afa26150dfae1939e724a6f4`, preserving all
+  prior tracked/untracked work and ignored local artifacts; no commit,
+  dependency, algorithm, metric, baseline, or seed change was made.
+- Audit found that the P5.1 bundle and P5.2 sidecar/projection writers
+  created public directories before all files finished. A missing
+  last manifest was rejected by verifiers but could leave a visible
+  partial path and block the ID. The trusted local checkpoint store
+  already writes checksummed files via temporary file plus
+  `os.replace`, but it does not publish whole artifact directories.
+  Split P5.3 before coding into atomic publication (a) and checked
+  unscored trial-prefix resume (b). The six independent fixed v14
+  trials justify a completed trial as b's persisted unit; an
+  interrupted trial will restart from its beginning. The parent
+  retains checkpoint, hash, run-status, and parity requirements.
+- Added `src/infra/atomic_artifact_directory.py`. It validates local
+  byte-file names, acquires an exclusive target-specific lock,
+  creates a hidden same-parent `.pending.` stage, fsyncs each file
+  and state update, compares staged bytes, removes staging-only
+  state, and renames the complete directory into public view. A
+  caught failure/cancellation leaves the hidden stage with
+  `failed`/`canceled` status and completed-file list; the stage says
+  `incomplete` while writing. The P5.1 bundle and all three P5.2
+  derived writers use it. Public payloads, manifests, protocol IDs,
+  and verifiers remain unchanged. Same-volume rename gives atomic
+  visibility; crash durability of directory metadata and training
+  continuation are not claimed by a.
+- Red test collection initially failed because the helper was
+  missing. Fault injection now covers a second-file write,
+  KeyboardInterrupt, an occupied writer lock, last-manifest writes
+  for the bundle, measured sidecar, measured projection, and original
+  P5.2a projection, plus a final rename failure after all bundle
+  files exist. In every case there is no public completed directory;
+  hidden status identifies failure/cancellation. A fully staged
+  hidden bundle is rejected by the existing P5.1 verifier because
+  its directory ID differs. Retrying from the same validated
+  in-memory inputs succeeds; no failed stage was deleted by code.
+- One bounded local fixed NumPy v14 measured run,
+  `artifacts/runs/p53-atomic-a/`, used Python 3.14.7/NumPy 2.4.6
+  on Windows 11 CPU with seeds 47/53 and the three declared arms.
+  Its source workspace digest was
+  `7bc7e4f765db855318343194f5e6a16996bb1e9da8b07578aa627d1cfd5955a0`,
+  resolved config digest
+  `22e90b3b3b5312ea52abc956f8ac997a457126bb07a9e03ef0f404079a5a87d0`,
+  and completed manifest SHA-256
+  `5c86aac5f90d1a740f8f4c6c10ee4cdb968982a5264103f84d4e3d9223fff22d`.
+  The original train/outcome hashes repeat
+  `174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`/
+  `ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`;
+  the 432-row wake diagnostic hash repeats
+  `2d6b6e4b0bc86a3dc292e7f04ad82816ae698dd43b9e63a5fceb41fe85f49f7c`.
+  Both eight-file and ten-file projections verify with prior data
+  hashes. No pending stage or lock remained after success. Older
+  `p51-v14-schema-c/d` completed bundles still verify.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_atomic_artifact_publication.py  # red import before implementation; then 4 tests passed before final rename case
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_atomic_artifact_publication.py tests/test_versioned_v14_run.py tests/test_v14_observation_projection.py tests/test_v14_measured_observations.py  # exit 0, 21 passed after final rename case
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p53-atomic-a --capture-wake-diagnostics  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --run-measured artifacts/runs/p53-atomic-a  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --run artifacts/runs/p53-atomic-a  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p53-atomic-a  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-measured-run artifacts/runs/p53-atomic-a  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-run artifacts/runs/p53-atomic-a  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p51-v14-schema-c  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p51-v14-schema-d  # exit 0
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0, 1,502 passed, 41 skipped in 290.70 s; final rename test added afterward with focused pass
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0, 253 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/infra/atomic_artifact_directory.py src/infra/versioned_run_files.py src/infra/measured_observation_files.py src/infra/observation_projection_files.py tests/test_atomic_artifact_publication.py  # exit 0, five formatted files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- The 41 full-suite skips require actual-device CUDA on this CPU
+  host; no relevant NumPy test was skipped. Added ADR-0123 and
+  `docs/atomic-artifact-publication.md`, with narrow README,
+  architecture, module, evaluation, manifest, observation, and
+  changelog updates. **Blockers:** none. **Exact next action:**
+  define a typed format-10 v14 unscored trial-prefix checkpoint and
+  run-state identity with source/config/protocol/capture hashes;
+  write a red interruption test after trial 1 and trial 3, then
+  validate checkpoint role/replay/work/cell facts before any resume
+  training or final-role release. Prove fresh/resumed raw, measured,
+  and scored bytes match before checking P5.3b/parent.
+
+## 2026-09-29 — P5.3b checked trial-prefix resume
+
+- Completed task IDs: **P5.3b and P5.3 parent**. Re-read repository
+  instructions, the plan and latest log, inspected the dirty checkout,
+  fixed v14 runner/study/scorer, prior checkpoint store, and P5.3a
+  publication path. Continued on `master` at HEAD
+  `5134a17db04d94d4afa26150dfae1939e724a6f4`. All prior
+  tracked/untracked work and ignored local artifacts were preserved;
+  no commit, dependency, algorithm, seed, baseline, trigger, metric,
+  or scored protocol change was made.
+- Added `src/app/v14_trial_checkpoint.py` for a typed format-10
+  completed Cartesian prefix. Each stored trial passes the existing
+  role, opportunity, replay, work, capacity, structural-lineage, and
+  matched-arm preflight. A partial seed checks its available matched
+  arms. The first file-backed test exposed two real details: arrived
+  roles use unpicklable mapping proxies, and their deferred source
+  references would copy unopened final fields into a checkpoint.
+  The format-10 store now has a local mapping-proxy reducer, and the
+  app strips `_source` from both phases before persistence. Only a
+  complete six-trial prefix reconstructs deterministic source
+  references; the original global preflight still runs before final
+  release. Original runner and default CLI behavior remain available.
+- Added `src/infra/v14_resume_files.py` for an atomically replaced
+  hidden run-state file, immutable checksummed checkpoint files and
+  exact file SHA-256 references, an OS file lock released on process
+  exit, and incomplete/failed/canceled/completed status. The state
+  binds the full captured source/runtime environment, fixed config
+  and protocol hashes, wake-capture mode, and next seed/arm cell.
+  `scripts/run_versioned_v14_bundle.py` now has opt-in `--resumable`
+  and `--resume`; the latter validates state and every stored trial
+  before another training update. It retrains only the interrupted
+  trial or missing suffix, scores only after all six preflight, and
+  refuses to overwrite changed public bytes. If a bundle was already
+  published before a sidecar failure, resume verifies that bundle
+  byte for byte and finishes the missing sidecar. A default fresh
+  run also refuses an ID with an unfinished hidden cursor.
+- New tests stop after trials 1 and 3, assert no public output before
+  six-cell preflight, count only resumed suffix trials, and compare
+  fresh/resumed training, outcome, and measured sidecar bytes. They
+  reject changed source, config, protocol, capture mode, next cell,
+  altered checkpoint bytes, a stale checkpoint reference, and
+  rehashed forged role/replay/work records before training. They
+  exercise incomplete/failed/canceled status, sidecar interruption,
+  and unsafe public overwrite. The first file-backed test was red on
+  `mappingproxy` serialization; its local reducer and final-source
+  removal resolved that actual boundary issue. No final-role score
+  or model selection was used to choose settings.
+- One bounded local fixed NumPy v14 measured CLI run is saved at
+  `artifacts/runs/p53-resume-cli-a/`, with cursor at
+  `artifacts/runs/.p53-resume-cli-a.resume/run-state.json`. It used
+  Windows 11 CPU, Python 3.14.7/NumPy 2.4.6, seeds 47/53, and
+  periodic/adaptive/no-sleep arms. Its recorded workspace/config/
+  protocol SHA-256 values are
+  `41b9914abe981f28098ac33f3502e24886b174f5646ab3c2032b99388281c097`,
+  `22e90b3b3b5312ea52abc956f8ac997a457126bb07a9e03ef0f404079a5a87d0`,
+  and `f9596e86acd7fa5783bacbdafeffadf9ec1682d54b5b14f056d4ffdc9bcb9c12`.
+  Completed manifest SHA-256 is
+  `e0b9abb6425f727975928dffd1bffdfe0a4c1cb4c8298703cfb378c9fb89d775`.
+  Training/outcome/432-row wake metric SHA-256 values repeat the fixed
+  `174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`/
+  `ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`/
+  `2d6b6e4b0bc86a3dc292e7f04ad82816ae698dd43b9e63a5fceb41fe85f49f7c`.
+  The ten-file measured projection was created and verified. A first
+  projection *verify* command failed because that optional derived
+  projection had not yet been created; the create command then exited
+  zero and verify passed. This was command order, not a producer or
+  verifier defect. The completed `--resume` invocation returned the
+  same manifest hash without retraining.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_v14_checked_resume.py tests/test_v14_trial_checkpoint.py  # initial file-backed run red on mappingproxy pickle; final exit 0, 24 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_v14_checked_resume.py tests/test_v14_trial_checkpoint.py tests/test_continual_trigger_replay_training_study.py tests/test_continual_trigger_replay_outcomes.py tests/test_versioned_v14_run.py tests/test_v14_measured_observations.py tests/test_atomic_artifact_publication.py  # exit 0, 57 passed
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p53-resume-cli-a --resumable --capture-wake-diagnostics  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p53-resume-cli-a --resume --capture-wake-diagnostics  # exit 0, same manifest hash
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p53-resume-cli-a  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-measured-run artifacts/runs/p53-resume-cli-a  # first exit 1, projection not yet created; later exit 0
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --run-measured artifacts/runs/p53-resume-cli-a  # exit 0
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0, 1,527 passed, 41 skipped in 495.61 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0, 257 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/v14_trial_checkpoint.py src/app/continual_trigger_replay_training_study.py src/infra/v14_resume_files.py src/infra/circadian_checkpoint_files.py scripts/run_versioned_v14_bundle.py tests/test_v14_checked_resume.py tests/test_v14_trial_checkpoint.py  # exit 0, seven formatted files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- The 41 full-suite skips require an actual CUDA device; relevant
+  NumPy resume tests ran. Added ADR-0124 and
+  `docs/v14-checked-resume.md` plus narrow README, architecture,
+  module, protocol, manifest, atomic-publication, and changelog notes.
+  P5.3b and parent were checked only after exact-byte, CLI, focused,
+  full, and static evidence. Trusted pickle/checksum remains local
+  integrity, not signed attestation; an interrupted trial restarts.
+  **Plan changes:** P5.3 now complete at its declared v14 scope; P5.4
+  becomes active, with its original unknown-key and resolved-config
+  acceptance still open. **Blockers:** none. **Exact next action:**
+  inspect fixed v14 manifest construction, CLI flags, config digest,
+  and existing preset patterns; split P5.4 before code if needed,
+  then add a red unknown-override-key test and a saved resolved-config
+  assertion without changing the default v14 baseline, seeds, or
+  raw result hashes.
+
+## 2026-09-29 — P5.4a/b typed continual configuration
+
+- Completed task IDs: **P5.4a and P5.4b**. P5.4 parent and new P5.4c
+  remain unchecked. The preceding P5.3b/P5.3 turn was progress:
+  checked trial-prefix resume, atomic artifact publication, exact
+  byte parity, and full gates were completed. This continuation
+  re-read AGENTS.md, the full living plan/latest log, and ADR-0124,
+  then inspected the actual checkout and relevant configuration
+  constructors, CLIs, and tests. Continued on `master` at HEAD
+  `5134a17db04d94d4afa26150dfae1939e724a6f4`, with prior dirty
+  tracked/untracked work and ignored artifacts preserved. No commit,
+  dependency, fixed v14 algorithm, seed, baseline, trigger, metric,
+  or scored-protocol change was made.
+- Inspection found `_validate_manifest` intentionally requires exact
+  `fixed_trigger_replay_manifest()` equality, while the v14 bundle
+  binds its original raw hashes. Opening that ID to setting overrides
+  would weaken the completed matched result. The older
+  `run_continual_shift_benchmark` CLI is actually configurable: it
+  already has typed `ContinualShiftConfig` subclasses, three named
+  presets, many optional flags, and a JSON result containing the
+  resolved config. Split P5.4 before code into strict resolver (a)
+  and CLI/artifact wiring (b); after implementation, added c to audit
+  other active entrypoints because a/b alone cannot prove the broad
+  P5.4 parent. This retains every original criterion and leaves the
+  fixed v14 route unchanged.
+- Added `src/app/continual_experiment_config.py`. Its allowlist covers
+  existing data/phase, shared width, noise/transform,
+  validation-fraction, and sleep-interval fields. It rejects unknown
+  and type-invalid values, Python booleans in numeric fields,
+  nonfinite numbers, whole nested circadian config, protocol ID,
+  model order, and baseline learning-rate changes. It applies typed
+  values to the existing dataclass and reruns `_validate_config`.
+  It also builds `continual_resolved_config_v1`, checking that
+  explicit override values match the final config and that the
+  complete record is finite JSON before any training.
+- Extended `scripts/run_continual_shift_benchmark.py` with repeatable
+  `--override FIELD=JSON` and optional `--resolved-config`. Overrides
+  apply after the named profile and old individual flags; duplicate,
+  malformed, and unknown inputs reject before the runner. An explicit
+  override requires `--json-result` or `--resolved-config`. Config,
+  result, and text output paths must be new/distinct. The exclusive
+  resolved record saves preset, seeds, raw explicit overrides, and
+  every actual config field; the existing result JSON embeds the same
+  config. The default no-override CLI output path and old JSON result
+  schema remain intact.
+- New tests initially failed collection on the absent resolver.
+  They now cover empty/default and all three profile defaults,
+  typed successful overrides, unknown/protocol/model-order/baseline
+  keys, bool/nonfinite/wrong-type/range failures, duplicate and
+  malformed CLI input, missing artifact, occupied path, legacy
+  nonfinite flag, and exact resolved-config/result equality in a tiny
+  actual run. Existing continual and v14 focused tests passed.
+- One bounded local descriptive smoke used the `baseline` preset,
+  seed 13, 80 A/B source rows, 0.5 B training fraction, 2+2 epochs,
+  width 4, and explicit 2/1 sleep intervals on Windows 11 CPU,
+  Python 3.14.7, NumPy 2.4.6. Its artifacts are
+  `artifacts/runs/p54-config-smoke-result.json` (SHA-256
+  `3cdc1db5cab4334391ac1983780b9ce604532279109d4f1f9393552db7820d18`)
+  and `artifacts/runs/p54-config-smoke-resolved.json` (SHA-256
+  `de9de7bbc90742f0fc56d5fdef4621e9218fac4f067d4f584996be615bbdc2c0`).
+  A direct disk comparison found identical `config` and `seeds` in
+  both. The result labels itself `continual_validation_v1` and
+  `numpy_shallow_descriptive_v1`; its model scores were not used for
+  selection or a matched-circadian claim. This is one local smoke,
+  not a new hypothesis test or a sweep.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_experiment_config.py  # initial red ModuleNotFoundError; final exit 0, 21 passed after three test-only profile cases
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_experiment_config.py tests/test_continual_shift_benchmark.py tests/test_continual_sleep_telemetry.py tests/test_versioned_v14_run.py tests/test_v14_checked_resume.py  # exit 0, 81 passed before final three profile cases
+  .\.venv\Scripts\python.exe -m scripts.run_continual_shift_benchmark --profile baseline --seeds 13 --sample-count-phase-a 80 --sample-count-phase-b 80 --phase-b-train-fraction 0.5 --override phase_a_epochs=2 --override phase_b_epochs=2 --override hidden_dim=4 --override circadian_sleep_interval_phase_a=2 --override circadian_sleep_interval_phase_b=1 --json-result artifacts/runs/p54-config-smoke-result.json --resolved-config artifacts/runs/p54-config-smoke-resolved.json  # exit 0
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0, 1,545 passed, 41 skipped in 495.35 s; final three test-only profile cases added afterward and passed focused
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0, 259 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_experiment_config.py scripts/run_continual_shift_benchmark.py tests/test_continual_experiment_config.py  # exit 0, three formatted files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- The 41 full-suite skips require an actual CUDA device; no relevant
+  NumPy configuration or v14 test was skipped. Added ADR-0125 and
+  `docs/configured-continual-experiments.md`, with README,
+  architecture, app/adapter module, evaluation protocol, and changelog
+  notes. **Plan changes:** P5.4a/b checked after their evidence;
+  P5.4c added and parent left open for broad active-entrypoint audit,
+  with no original acceptance criterion removed. **Blockers:** none.
+  **Exact next action:** inventory actively documented experiment
+  CLIs and their preset, override, and resolved-config contracts;
+  begin with `scripts/run_versioned_v14_bundle.py`, explicitly declare
+  and test its sole fixed-v14 preset/unknown-input rejection and
+  manifest `resolved_config` identity without opening its frozen
+  settings or changing the original raw hashes.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass, fields, replace
+import json
 from pathlib import Path
 import sys
 
@@ -23,6 +24,10 @@ from src.app.continual_shift_benchmark import (
     ContinualShiftConfig,
     format_continual_shift_benchmark,
     run_continual_shift_benchmark,
+)
+from src.app.continual_experiment_config import (
+    build_resolved_continual_record,
+    resolve_continual_overrides,
 )
 from src.core.circadian_predictive_coding import CircadianConfig
 from src.infra.local_result_json import write_local_result_json
@@ -99,8 +104,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--replay-max-examples", type=int, default=None)
     parser.add_argument("--replay-max-bytes", type=int, default=None)
     parser.add_argument("--sleep-mode", choices=["components"], default=None)
+    parser.add_argument(
+        "--override",
+        action="append",
+        default=[],
+        metavar="FIELD=JSON",
+        help="explicit typed config field override, applied after profile and legacy flags",
+    )
     parser.add_argument("--output-file", type=str, default="")
     parser.add_argument("--json-result", type=str, default="")
+    parser.add_argument("--resolved-config", type=str, default="")
     return parser
 
 
@@ -116,6 +129,21 @@ def main() -> None:
         raise FileExistsError(f"Continual JSON result already exists: {json_path}")
     if json_path is not None and json_path == output_path:
         parser.error("--json-result and --output-file must be different paths")
+    config_path = (
+        Path(getattr(args, "resolved_config", "")) if getattr(args, "resolved_config", "") else None
+    )
+    if config_path is not None and config_path.exists():
+        raise FileExistsError(f"Continual resolved config already exists: {config_path}")
+    requested_paths = [path.resolve() for path in (output_path, json_path, config_path) if path]
+    if len(requested_paths) != len(set(requested_paths)):
+        parser.error("continual output, JSON result, and resolved config paths must differ")
+    raw_overrides = getattr(args, "override", [])
+    if raw_overrides and json_path is None and config_path is None:
+        parser.error("--override requires --json-result or --resolved-config")
+    try:
+        overrides = _parse_overrides(raw_overrides)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     seeds = _parse_int_list(args.seeds)
     profile_defaults = _build_profile_defaults(args.profile)
@@ -201,6 +229,12 @@ def main() -> None:
     ):
         parser.error("replay budget and sleep-mode flags require a bounded replay protocol")
 
+    try:
+        config = resolve_continual_overrides(config, overrides)
+        resolved_record = build_resolved_continual_record(config, seeds, args.profile, overrides)
+    except ValueError as exc:
+        parser.error(str(exc))
+
     result = run_continual_shift_benchmark(config=config, seeds=seeds)
     formatted = format_continual_shift_benchmark(result)
     print(formatted)
@@ -209,6 +243,31 @@ def main() -> None:
             output_file.write(formatted + "\n")
     if json_path is not None:
         write_local_result_json(result, json_path)
+    if config_path is not None:
+        with config_path.open("x", encoding="utf-8", newline="\n") as output:
+            output.write(
+                json.dumps(resolved_record, indent=2, sort_keys=True, allow_nan=False) + "\n"
+            )
+
+
+def _parse_overrides(raw_overrides: list[str]) -> dict[str, object]:
+    """Parse CLI syntax once; app validation owns field names and types."""
+    overrides: dict[str, object] = {}
+    for raw in raw_overrides:
+        name, separator, value = raw.partition("=")
+        if not separator or not name or name != name.strip() or not value:
+            raise ValueError("override must use FIELD=JSON syntax")
+        if name in overrides:
+            raise ValueError(f"duplicate continual override key: {name}")
+        try:
+            overrides[name] = json.loads(value, parse_constant=_reject_nonfinite_override)
+        except (json.JSONDecodeError, ValueError) as exc:
+            raise ValueError(f"override {name} must contain valid finite JSON") from exc
+    return overrides
+
+
+def _reject_nonfinite_override(value: str) -> object:
+    raise ValueError(f"nonfinite override token: {value}")
 
 
 def _build_strength_case_circadian_config() -> CircadianConfig:

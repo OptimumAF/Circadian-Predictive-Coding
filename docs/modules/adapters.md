@@ -33,6 +33,29 @@
 - `scripts/run_continual_trigger_replay_schedule.py` writes fixed v14
   train-only replay opportunities to an exclusive new local JSON path;
   it serializes potential rows/work without model training or scoring
+- `scripts/run_continual_trigger_replay_training.py` writes fixed v14
+  guarded train-only work and typed decision facts for all six trials to
+  an exclusive new local JSON path, omitting durations and final scores
+- `scripts/run_continual_trigger_replay_outcomes.py` writes all globally
+  sealed v14 scored rows and paired contrasts to an exclusive local
+  JSON path without implementing training, role release, or selection
+- `scripts/run_versioned_v14_bundle.py` runs the fixed v14 study once,
+  serializes train-only bytes before the global final gate, and writes
+  or verifies an opt-in local P5.1 bundle. Its opt-in resumable mode
+  validates an unscored format-10 prefix before further training or
+  final release. It does not choose a model or alter v14 metrics
+  (ADRs 0120, 0124).
+- `scripts/project_v14_observations.py` projects or verifies a completed
+  P5.1 bundle in an exclusive local directory. It does not train,
+  score, or choose a result (ADR-0121).
+- Opt-in `--capture-wake-diagnostics` on `run_versioned_v14_bundle.py`
+  and `--run-measured` / `--verify-measured-run` on
+  `project_v14_observations.py` publish genuine train-update metrics
+  only after the completed global scored bundle exists (ADR-0122).
+- `scripts/run_continual_shift_benchmark.py` parses typed repeatable
+  `--override` values for its existing named profiles and optionally
+  writes an exclusive fully resolved config record. The app validates
+  fields before the adapter invokes training (ADR-0125).
 
 ## Inputs / Outputs
 
