@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Callable
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 from pathlib import Path
 import sys
@@ -145,13 +145,38 @@ def parse_args() -> argparse.Namespace:
         default=None,
     )
     parser.add_argument(
-        "--protocol-id", choices=[VALIDATION_PROTOCOL, LEGACY_PROTOCOL],
+        "--protocol-id",
+        choices=[VALIDATION_PROTOCOL, LEGACY_PROTOCOL],
         default=VALIDATION_PROTOCOL,
     )
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--snapshot-interval", type=int, default=4)
     parser.add_argument("--gif-duration-ms", type=int, default=120)
+    parser.add_argument(
+        "--tiny-smoke",
+        action="store_true",
+        help="Use a labeled 40-row, four-epoch CPU fixture; keep the chosen evaluation protocol.",
+    )
     return parser.parse_args()
+
+
+def build_tiny_smoke_config(base: HardestModeConfig) -> HardestModeConfig:
+    """Bound the public visual producer without changing its evaluation route."""
+    # Why this: default 120/180-epoch dynamics are a study, not an output smoke.
+    return replace(
+        base,
+        sample_count_phase_a=40,
+        sample_count_phase_b=40,
+        phase_b_train_fraction=0.5,
+        hidden_dim=4,
+        hidden_dims=(4,),
+        phase_a_epochs=2,
+        phase_b_epochs=2,
+        decision_grid_size=8,
+        latency_repeats=1,
+        sleep_interval_phase_a=1,
+        sleep_interval_phase_b=1,
+    )
 
 
 def build_hardest_circadian_config() -> CircadianConfig:
@@ -905,6 +930,7 @@ def write_interactive_hardest_mode_html(
     split_hashes: dict[str, str] | None = None,
     final_test_accuracy: dict[str, float] | None = None,
     comparison_scope: NumpyComparisonScope | None = None,
+    smoke_config: HardestModeConfig | None = None,
 ) -> None:
     if not snapshots:
         raise ValueError("snapshots cannot be empty.")
@@ -921,6 +947,15 @@ def write_interactive_hardest_mode_html(
         final_test_accuracy=final_test_accuracy,
         comparison_scope=scope,
     )
+    smoke_banner = ""
+    if smoke_config is not None:
+        # Why this: detached HTML must carry the tiny fixture identity too.
+        payload["fixture_id"] = "tiny_smoke_v1"
+        payload["fixture_config"] = asdict(smoke_config)
+        smoke_banner = (
+            '<p class="subtitle">Tiny smoke fixture: 40 rows per phase, '
+            "four total epochs. Descriptive output only.</p>"
+        )
 
     html = f"""<!doctype html>
 <html lang="en">
@@ -1022,6 +1057,7 @@ def write_interactive_hardest_mode_html(
       <h2 style="margin:0 0 6px;">Hardest-Case Dynamics (Interactive)</h2>
       <p class="subtitle">Protocol: {protocol_id}. Intermediate accuracy uses Phase-B {evaluation_split} data; final-test scores are computed after training.</p>
       <p class="subtitle">Comparison scope: {scope.scope_id}. {scope.description}</p>
+      {smoke_banner}
       <p class="subtitle">Final test accuracy (B/P/C): {json.dumps(final_test_accuracy or {})}</p>
       <div class="controls">
         <button id="playBtn" type="button">Play</button>
@@ -1351,6 +1387,8 @@ def main() -> None:
         if args.protocol_id == VALIDATION_PROTOCOL
         else "hardest_mode_legacy_test_informed_v0"
     )
+    if args.tiny_smoke:
+        output_stem += "_tiny_smoke"
     gif_output_path = Path(args.gif_output_path or f"docs/figures/{output_stem}.gif")
     interactive_output_path = Path(
         args.interactive_output_path or f"docs/figures/interactive_{output_stem}.html"
@@ -1364,6 +1402,8 @@ def main() -> None:
         snapshot_interval=args.snapshot_interval,
         gif_duration_ms=args.gif_duration_ms,
     )
+    if args.tiny_smoke:
+        config = build_tiny_smoke_config(config)
     run = collect_hardest_mode_snapshots(config)
     render_hardest_mode_gif(
         snapshots=run.snapshots,
@@ -1388,11 +1428,14 @@ def main() -> None:
         split_hashes=run.split_hashes,
         final_test_accuracy=run.final_test_accuracy,
         comparison_scope=run.comparison_scope,
+        smoke_config=config if args.tiny_smoke else None,
     )
     print(f"Wrote {gif_output_path}")
     print(f"Wrote {interactive_output_path}")
     print(f"Protocol: {run.protocol_id}; intermediate split: {run.evaluation_split}")
     print(f"Comparison scope: {run.comparison_scope.scope_id}. {run.comparison_scope.description}")
+    if args.tiny_smoke:
+        print(f"Fixture: tiny_smoke_v1 {json.dumps(asdict(config), sort_keys=True)}")
     print(f"Final test accuracy: {run.final_test_accuracy}")
 
 

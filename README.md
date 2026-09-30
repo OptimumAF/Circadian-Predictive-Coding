@@ -56,6 +56,12 @@ comparison uses unmatched PC and circadian update rules, so its plotted
 ranking does not isolate a circadian mechanism. The checked-in historical
 animation remains unchanged.
 
+For a bounded output check, add `--tiny-smoke` and point
+`--gif-output-path`/`--interactive-output-path` at new local files. This
+fixed 40-row, four-epoch fixture preserves the chosen validation or explicit
+legacy evaluation route, prints its full config, and uses separate default
+smoke filenames. Its scores describe the tiny fixture only.
+
 Interactive version (Plotly, with internals replay):
 
 - [Hardest-Case Dynamics Interactive](https://optimumaf.github.io/Circadian-Predictive-Coding/figures/interactive_hardest_mode_dynamics.html)
@@ -404,7 +410,8 @@ New-Item -ItemType Directory -Force data | Out-Null
 .\.venv\Scripts\python.exe -m scripts.run_difficulty_matched_comparison --result data/difficulty-modulation-v11-result.json
 ```
 
-Use a new result path for each run; the adapter refuses overwrite. The
+Use a new result path for each run; the adapter rejects an occupied path
+before training and retains its exclusive write. The
 [v11 comparison](docs/difficulty-modulation-comparison.md) records all
 24 clean/label-flip/feature-outlier trials, equal work, train-only signals,
 and held-out accuracy/forgetting. Modulation changed actual scales but no
@@ -432,6 +439,8 @@ held-out accuracy/forgetting pair in this small run. Existing importance
 scoring changed two prune choices without consistent benefit. No new
 reward-ranking heuristic was selected (ADR-0114); the documented weak
 learning in some cells limits broader claims.
+Both v12 CLI modes reject an occupied result path before training and
+report the saved file's SHA-256; exclusive writes remain in place.
 
 The [fixed v13 sleep-trigger timing study](docs/sleep-trigger-comparison.md)
 compares periodic, unchanged adaptive, and no-sleep controls on
@@ -490,6 +499,9 @@ route releases common final roles and scores every method and contrast:
 .\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_outcomes --result data/trigger-replay-v14-outcomes-new.json
 ```
 
+All three fixed v14 raw-output CLIs reject an occupied `--result` before
+scheduling or training; their exclusive writes still protect the final file.
+
 The [full result table](docs/full-stack-trigger-comparison.md) retains
 mixed periodic effects, zero adaptive-minus-no-sleep differences, and
 the extra replay work and reduced circadian capacity. No new trigger
@@ -516,6 +528,10 @@ unknown preset names and setting switches fail before training. The
 complete resolved fixed manifest remains in `manifest.json`.
 The run ID must be new; a partial directory cannot pass verification
 (ADR-0120).
+The [P5.7 reproducibility scope](docs/reproducibility-scope.md) records
+two verified separate-process repeats, exact deterministic payload hashes,
+the model-order test boundary, and CPU/GPU and cross-version tolerance
+policy (ADR-0139).
 
 To inspect only the observations that v14 actually recorded, derive the
 [P5.2a structured streams](docs/structured-observation-audit.md):
@@ -625,6 +641,11 @@ while v7 selection propagation remains under development. The existing
 `--output-file` continues to write the human
 summary, and neither file is overwritten. See
 [ADR-0091](docs/adr/ADR-0091-historical-continual-sleep-history.md).
+The summary describes the configured Phase B noise and transform; zero
+rotation/translation with equal noise is an identity-source control. The
+v0–v5 generator uses the same source seed across phases, so use the
+[v13 stationary-noise study](docs/sleep-trigger-comparison.md) when an
+independently sampled stationary stream is required.
 
 For a small continual order check through the Python API:
 
@@ -894,7 +915,10 @@ hashes. Run the small fixed two-seed comparison from the repository root:
 python -m scripts.run_continual_replay_policy_smoke --result data/continual_replay_policy_v8_smoke.json
 ```
 
-The writer refuses an existing result path. The checked local artifact has
+The CLI checks an existing result path before training. A fresh run with
+`--checkpoint` also refuses an existing checkpoint; `--resume` may read that
+checkpoint but requires a fresh result path. The two output paths must differ.
+The checked local artifact has
 different retained/exposed IDs but identical balanced scores for FIFO and
 reservoir on both seeds; it is a tiny synthetic null result, not a policy
 ranking. The audit's observed/exposed ID sets are reporting memory outside
@@ -971,6 +995,11 @@ Circadian's aggregate balanced score is lower than both baselines under
 both policies in this fixed run. No seed, baseline, metric, or guard
 tolerance was changed in response (ADRs 0107–0108).
 
+The three v9 CLIs reject an occupied `--result` before scheduling or training;
+their exclusive writes still protect the final file. The schedule CLI's
+printed SHA-256 identifies the saved file bytes, including the host's text
+newline encoding. Its JSON contents and the fixed comparison are unchanged.
+
 The [NumPy replay side-effect audit](docs/replay-side-effect-audit.md)
 records which adaptive states replay currently advances and which clocks
 remain wake-only. The opt-in `wake_only_adaptive_v1` policy keeps those
@@ -985,7 +1014,9 @@ two-seed, two-retention-policy ablation locally:
 The v10 runner trains and audits all eight trials before final scoring.
 Historical rows equal v9; the wake-only policy leaves this small study's
 balanced scores unchanged (circadian 0.20, PC 0.625, backprop 0.65/0.70).
-It does not select a policy or change the existing v9 result. See
+The CLI rejects an occupied `--result` before training and reports the saved
+file's SHA-256; its exclusive write still guards the final file. It does not
+select a policy or change the existing v9 result. See
 [ADR-0109](docs/adr/ADR-0109-opt-in-replay-side-effect-policy.md).
 
 Hardest continual-shift stress test (expanded hidden capacity + very heavy drift):
@@ -993,6 +1024,61 @@ Hardest continual-shift stress test (expanded hidden capacity + very heavy drift
 ```powershell
 python scripts/run_continual_shift_benchmark.py --profile hardest-case --seeds 3,7,11,19,23,31,37
 ```
+
+The [P6.2 corrected-profile reproduction](docs/p62-corrected-profile-results.md)
+runs the existing baseline, strength-case, and hardest-case settings with
+`continual_validation_v1`, their original seven seeds, and exclusive local
+request/result/config/text/audit files. Reproduce one fixed profile with
+`python -m scripts.run_p62_profile_reproduction --profile baseline` (or
+`strength-case`/`hardest-case`) into a fresh output directory. The corrected
+hardest-case circadian mean balanced score was 0.768 versus PC's 0.786;
+the result was retained without retuning. The historical text lacks per-seed
+provenance, and this descriptive NumPy route is not a matched-head or strict
+global-final-seal comparison.
+
+The [P6.3 development-only gating pilot](docs/p63-gating-pilot-results.md)
+uses three fresh seeds and matched ordinary/neutral PC heads to isolate the
+existing wake chemical gate at fixed width and equal work. Run it into a
+fresh ignored directory with
+`python -m scripts.run_p63_gating_pilot --output-dir artifacts/runs/p63-gating-pilot-new`.
+The two checked local runs have identical result bytes. Gating was active,
+but final development mean task accuracy did not change on any of the three
+seeds; a lower signed-forgetting number came from worse A accuracy immediately
+after A training. Final test and ten reserved confirmation seeds remain unopened.
+
+The [P6.3 replay factor pilot](docs/p63-replay-factor-pilot-results.md) uses
+the same sealed arrived roles and three development seeds with replay-off/on
+backprop, ordinary PC, and neutral circadian pairs at fixed width eight,
+plus planned width-12 controls. Run the frozen, locally bounded public
+adapter into a fresh ignored directory with
+`python -m scripts.run_p63_replay_factor_pilot --output-dir artifacts/runs/p63-replay-factor-pilot-new`.
+The two checked local processes produced byte-identical 24-cell results.
+Ordinary PC replay improved final development mean by .020833 on two seeds
+and tied on one; neutral circadian matched PC exactly, while backprop replay
+tied on two seeds and worsened on one. Replay adds 12 optimizer updates per
+on arm/seed, so this is a matched-memory, fixed-capacity factor rather than
+equal-compute evidence of circadian superiority. The [Phase 6 metric
+contract](docs/phase6-metric-contract.md) defines the two primary outcomes.
+Confirmation seeds and final tests remain unopened.
+
+The [P6.3 guarded sleep-factor preflight](docs/p63-sleep-factor-preflight-results.md)
+trains nine no-replay arms on three fresh development seeds, including
+structure-only, homeostasis-only, conditional chemical-reset, exact neutral
+PC/sham and planned-width references. Run its bounded public train-only
+gate into a fresh ignored directory with
+`python -m scripts.run_p63_sleep_factor_preflight --output-dir artifacts/runs/p63-sleep-factor-preflight-new`.
+Two checked processes produced byte-identical 27-cell train facts, with
+all 15 A-inner guard attempts accepted and worker RSS below 256 MiB.
+Neither outer-selection nor final accuracy was read in that preflight.
+The [separate scored development route](docs/p63-sleep-factor-development-results.md)
+now globally checks every train fact against the saved c3 result before
+reading an outer role. Run it into a fresh ignored directory with
+`python -m scripts.run_p63_sleep_factor_development --output-dir artifacts/runs/p63-sleep-factor-development-new`.
+Two bounded public processes produced identical 27-cell results. Structure
+had no final mean gain on two seeds and lost .041667 on one; isolated
+homeostasis and gated reset were null at the outer accuracy resolution.
+These remain exploratory development results, with confirmation seeds and
+final roles unopened.
 
 The toy and continual commands now default to `toy_validation_v1` and
 `continual_validation_v1`. Each reserves 20% of the original NumPy training
@@ -1167,7 +1253,8 @@ above 1,000 planned updates. Set
 `--max-planned-training-updates` explicitly after deciding on a local budget.
 This is a prelaunch gate, not a runtime update, time, or memory cap. It does
 not change candidate values, seeds, validation selection, or older results.
-Runtime limits and stop reasons remain open under P5.5c/d.
+The later toy runner's opt-in runtime work/RSS stops are separate; these
+legacy CUDA sweeps retain only this prelaunch update gate.
 
 For a bounded local toy API run, pass an opt-in `ToyExecutionBudget` to
 `run_experiment`. It counts one committed wake update per model per epoch;
@@ -1393,6 +1480,9 @@ not establish a memory winner; imports precede the setup RSS window and
 the observed peaks can miss brief allocations. Run its fixed tiny CPU
 check with `python scripts/run_isolated_head_memory_smoke.py`. See
 [ADR-0017](docs/adr/ADR-0017-process-isolated-head-memory.md).
+That CLI's JSON includes its complete fixed CPU fixture config,
+benchmark track, and common development-role split/feature hashes beside
+the three child PIDs and observed RSS fields.
 
 `src.app.matched_head_tuning.run_matched_head_tuning` adds a bounded
 validation-selected search for the three frozen shared-feature heads. Give
@@ -1498,6 +1588,13 @@ under the separate 0.05-second wall-time budget the circadian head scores
 lower than both baselines. See `docs/adr/ADR-0018-predeclared-repeated-head-confirmation.md`
 for the scope and limitations.
 
+Pass `--output-dir <new-local-directory>` to run the same frozen tiny study
+without touching the default artifacts. The script preflights its selection,
+manifest, result, and failure paths. If an ordinary stage fails, it saves a
+failure JSON with the stage, error, and hashes of files already written; a
+failed selection also retains its available attempt/trial ledger. A failure
+record is not a completed confirmation result.
+
 For the bounded real-CIFAR CPU check, first verify the archive and loader as
 described above, then run:
 
@@ -1507,8 +1604,10 @@ python scripts/verify_cifar_isolated_memory.py
 python scripts/run_cifar_matched_confirmation.py
 ```
 
-The validation command saves its request, six equal-trial selection records,
-and a digested manifest before final test. The separate confirmation command
+The validation command now omits physical final-source construction while it
+saves its request, six equal-trial selection records, and a digested manifest.
+It preflights request/selection/manifest/failure paths and retains a failure
+sidecar with available trial attempts if development work fails. The separate confirmation command
 restores that exact manifest and uses its predeclared seeds 83/89/97 across
 fixed-data, wall-time, and process-isolated memory scopes. It refuses to
 overwrite results or failure records. The retained `artifacts/benchmark_cifar_v2_*_smoke.json`
@@ -1524,7 +1623,8 @@ To budget the next larger-data study without reading test labels, run
 ResNet-50 V2 weights. Its one CPU setup uses seed 101 and 128/64/64
 train/guard/validation examples; the local result took 1.875 seconds and
 records weight, backbone, split, and feature hashes in ignored `data/`
-JSON. It trains no heads and does not score test.
+JSON. The current profile writer constructs development roles only; it trains
+no heads and does not score test. Its earlier saved result was not rerun.
 
 For that bounded pretrained continuation, the verified local CIFAR-10 archive
 and the cached ImageNet ResNet-50 V2 checkpoint are required. The scripts
@@ -1535,7 +1635,8 @@ python scripts/run_cifar_pretrained_validation.py
 python scripts/run_cifar_pretrained_confirmation.py
 ```
 
-The first command writes a request before training and seals final test. It
+The first command writes a request before training and now omits physical
+final-source construction during validation selection. It
 uses 1,024/256/256/512 train/guard/validation/test examples, selection seed
 113, and two equal optimization candidates per head. The second restores its
 saved manifest for seeds 127/131/137 and separate one-epoch, 0.5-second
@@ -1667,7 +1768,9 @@ This descriptive unmatched route uses the named typed
 JSON result now includes the full base and per-seed resolved configs.
 See the [configuration contract](docs/configured-resnet-multiseed.md)
 (ADR-0127). Its validation-selected winners are not a matched
-learning-rule comparison.
+learning-rule comparison. The Phase 6 diagnostic uses two tiny synthetic
+CPU seeds with no downloaded weights; its rows check output structure and
+carry no CIFAR-100 or model-ranking claim.
 
 Generate protocol-labeled charts in a new directory:
 
@@ -1678,7 +1781,8 @@ python scripts/generate_readme_figures.py --summary-csv benchmark_multiseed_cifa
 The figure generator verifies the CSV against its paired
 `benchmark_multiseed_cifar100.json`, then writes under
 `docs/figures/<protocol-id>/` with a provenance manifest. It refuses to
-overwrite any existing chart. The checked-in README figures remain historical;
+overwrite any existing chart and rejects nonfinite CSV or paired-JSON metrics
+before rendering. The checked-in README figures remain historical;
 their missing source CSV prevents verified regeneration from this checkout.
 For an unversioned CSV from outside this checkout, use the explicit
 `--legacy-unversioned` flag; the output is labeled `historical_unknown_v0`.

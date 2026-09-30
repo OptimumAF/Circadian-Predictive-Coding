@@ -8,6 +8,7 @@ from io import StringIO
 import json
 from math import isfinite
 from pathlib import Path
+from shutil import copyfile
 from typing import Any
 
 import pytest
@@ -101,8 +102,23 @@ def test_should_derive_measured_jsonl_and_csv_only_after_complete_score(
 
 def test_should_reject_changed_sidecar_and_rehashed_projection_file(
     measured_runs: tuple[Path, Path],
+    tmp_path: Path,
 ) -> None:
-    run = measured_runs[0]
+    # Why this: tamper checks must be runnable alone and must not mutate the
+    # module-scoped source shared with the projection and repeat tests.
+    source = measured_runs[0]
+    run = tmp_path / source.name
+    for name in (
+        "manifest.json",
+        "training.json",
+        "outcomes.json",
+        "measurements-v1/measurement-manifest.json",
+        "measurements-v1/wake-diagnostics.jsonl",
+    ):
+        destination = run / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        copyfile(source / name, destination)
+    directory = write_measured_observation_projection(run)
     manifest_path = run / "measurements-v1/measurement-manifest.json"
     original_manifest = manifest_path.read_bytes()
     manifest_path.unlink()
@@ -117,7 +133,6 @@ def test_should_reject_changed_sidecar_and_rehashed_projection_file(
         verify_wake_diagnostic_sidecar(run)
     data_path.write_bytes(original)
 
-    directory = run / "observations-measured-v1"
     csv_path = directory / "wake-metrics.csv"
     changed = csv_path.read_bytes().replace(b"loss", b"fake", 1)
     csv_path.write_bytes(changed)

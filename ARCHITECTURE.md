@@ -384,6 +384,49 @@ dependency, so the four plots need no new plotting service or package.
 The old `docs/index.html` remains a separate historical snapshot and
 now visibly links its provenance warning
 (ADRs 0137–0138).
+The P6.3 development-only gating pilot follows script → app → existing
+arrived-source app and NumPy core. `app/continual_gating_pilot.py` composes
+three seeded shallow PC heads on the same arrived development roles,
+checks exact ordinary/neutral parity after every update, and reports
+outer-selection metrics plus work/capacity facts. It has no filesystem
+write or final-role release path. `scripts/run_p63_gating_pilot.py` owns
+exclusive request/result/audit files, source and manifest hashes, the
+subprocess wall limit, and artifact readback. Reusing the existing arrived
+source builder preserves its split/arrival semantics while a distinct
+pilot protocol keeps fixed v14 identities and result bytes untouched.
+The P6.3 replay factor follows script → `app/continual_replay_factor_pilot.py`
+→ the existing arrived-source app and `core/shared_replay_schedule.py` plus
+three NumPy cores. The app fixes source/seed/arm/work identities, gives all
+on arms the same detached recent-row IDs, and checks neutral PC/circadian
+parameter parity at every wake and replay boundary. It scores only arrived
+outer-selection roles, with no final-role release or file IO. The pure
+`core/continual_metrics.py` validates two-task arithmetic without knowing
+the experiment. `scripts/run_p63_replay_factor_pilot.py` owns source-hash
+preflight, an exclusive request, a bounded subprocess, result readback,
+and audit/failure files. The planned width-12 controls have different
+capacity by design; replay on/off pairs have the same width but different
+optimizer work. Other sleep mechanisms and guard/rollback are outside this
+pilot and stay explicit in later protocols.
+`app/continual_sleep_factor_preflight.py` extends the staged matrix at the
+app layer without changing pinned cores or older result identities. It
+constructs nine no-replay controls on arrived train roles, calls the existing
+guarded sleep helper at one A boundary, and returns deterministic work,
+role, proposed/applied structure, and capacity facts. It never reads outer
+or final values. `scripts/run_p63_sleep_factor_preflight.py` preflights
+source/config/output identities and owns the bounded child, observed
+whole-process RSS, exclusive request/result/audit or failure files, and
+readback. The source config retains v5 replay fields solely to satisfy
+arrived-role validation; the actual arm configs disable replay and memory.
+`app/continual_sleep_factor_development.py` reuses the frozen preflight's
+training/guard/fact helpers and retains after-A model copies. It completes
+all 27 train-only cells, compares the entire fact object with the saved c3
+reference, then reads outer roles and computes the pure two-task metrics and
+three paired contrasts. It has no file or final-role access. The separate
+`scripts/run_p63_sleep_factor_development.py` validates the reference
+request/result/audit and pinned source bytes, enforces a bounded child,
+and owns exclusive scored artifacts and readback. This dependency on c3's
+private helpers is deliberate while their bytes and train facts remain
+frozen (ADRs 0143–0144).
 `app/single_resnet_experiment_config.py` owns the root ResNet CLI's
 unchanged 110-field typed preset, strict existing-field override resolver,
 and complete descriptive request record. The CLI translates old flags to

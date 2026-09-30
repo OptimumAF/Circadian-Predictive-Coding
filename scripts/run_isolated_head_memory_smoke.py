@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+from dataclasses import asdict
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -44,8 +45,11 @@ def main() -> None:
     summary = {
         "protocol_id": result.protocol_id,
         "source_protocol_id": result.source_protocol_id,
+        "benchmark_track": result.benchmark_track,
         "memory_scope": result.memory_scope,
         "seed": config.seed,
+        # Preserve the fixed fixture and role identities alongside process RSS.
+        "config": asdict(result.config),
         "head_reports": {
             name: {
                 "pid": report.pid,
@@ -60,6 +64,7 @@ def main() -> None:
                 "sleep_attempts": report.sleep_attempts,
                 "backbone_hash": report.backbone_hash,
                 "initial_head_hash": report.initial_head_hash,
+                "split_hashes": report.split_hashes,
                 "feature_hashes": report.feature_hashes,
             }
             for name, report in result.reports.items()

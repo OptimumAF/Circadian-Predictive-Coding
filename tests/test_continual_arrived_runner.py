@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from collections import Counter
+from dataclasses import asdict, replace
 from hashlib import sha256
 import pickle
 from types import MappingProxyType, SimpleNamespace
@@ -184,6 +185,40 @@ def test_should_repeat_reports_and_isolate_model_order() -> None:
         )
         assert first.metrics.replay_retention == second.metrics.replay_retention
         assert first.guard_decisions == second.guard_decisions
+
+
+def test_should_preserve_each_trained_model_state_when_order_reverses() -> None:
+    forward = arrived._train_arrived_seed(_config(False), 17)
+    reverse = arrived._train_arrived_seed(_config(True), 17)
+
+    assert forward.phase_a.split_hashes == reverse.phase_a.split_hashes
+    assert forward.phase_b.split_hashes == reverse.phase_b.split_hashes
+    assert forward.audit.guard_decisions == reverse.audit.guard_decisions
+    # Why this: method updates interleave differently, but the same role work must occur.
+    assert Counter(forward.audit.accesses) == Counter(reverse.audit.accesses)
+    assert Counter(forward.audit.task_information) == Counter(reverse.audit.task_information)
+    # Why this: elapsed seconds are measurements, not decisions or model state.
+    assert [
+        {key: value for key, value in asdict(event).items() if key != "durations"}
+        for event in forward.sleep_events
+    ] == [
+        {key: value for key, value in asdict(event).items() if key != "durations"}
+        for event in reverse.sleep_events
+    ]
+    for field in (
+        "backprop_after_a",
+        "predictive_after_a",
+        "circadian_after_a",
+        "backprop_model",
+        "predictive_model",
+        "circadian_model",
+    ):
+        first_model = getattr(forward.state, field)
+        second_model = getattr(reverse.state, field)
+        assert (
+            sha256(pickle.dumps(first_model, protocol=5)).digest()
+            == sha256(pickle.dumps(second_model, protocol=5)).digest()
+        ), field
 
 
 def test_should_ignore_outer_label_changes_during_training(

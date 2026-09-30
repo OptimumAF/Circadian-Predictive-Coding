@@ -407,7 +407,9 @@ def format_continual_shift_benchmark(result: ContinualShiftBenchmarkResult) -> s
         ),
         f"Training order: {config.model_order}",
         f"Split hashes by seed: {split_hashes_by_seed}",
-        "Phase A trains on base distribution; phase B trains on shifted/rotated distribution.",
+        # Why this: identity transforms are a supported control, so the
+        # report must describe the configured source rather than imply drift.
+        "Phase A uses the base source; Phase B uses configured noise and transform.",
         f"Seeds: {result.seeds}",
         (
             "Setup: "

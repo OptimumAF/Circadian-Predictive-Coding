@@ -12,6 +12,7 @@ import csv
 from dataclasses import dataclass
 from hashlib import sha256
 import json
+from math import isfinite
 from pathlib import Path
 from typing import Callable
 
@@ -86,11 +87,14 @@ def parse_args() -> argparse.Namespace:
         help="Directory to write new artifacts; default is docs/figures/<protocol-id>.",
     )
     parser.add_argument(
-        "--result-json", type=str, default=None,
+        "--result-json",
+        type=str,
+        default=None,
         help="Paired multi-seed JSON manifest; inferred from the summary CSV by default.",
     )
     parser.add_argument(
-        "--legacy-unversioned", action="store_true",
+        "--legacy-unversioned",
+        action="store_true",
         help="Explicitly render a CSV without a manifest as historical_unknown_v0.",
     )
     parser.add_argument(
@@ -131,13 +135,25 @@ def load_summary_rows(path: Path) -> list[SummaryRow]:
             model_name = str(raw["model_name"])
             if model_name not in MODEL_ORDER or model_name in rows_by_model:
                 raise ValueError(f"Unexpected or duplicate model in summary CSV: {model_name}")
-            rows_by_model[model_name] = SummaryRow(
+            row = SummaryRow(
                 model_name=model_name,
                 test_accuracy_mean=float(raw["test_accuracy_mean"]),
                 train_samples_per_second_mean=float(raw["train_samples_per_second_mean"]),
                 inference_latency_p95_ms_mean=float(raw["inference_latency_p95_ms_mean"]),
                 balanced_score=float(raw.get("balanced_score", "0.0")),
             )
+            # Why this: chart scaling may write partial files before NaN/Inf fails.
+            if any(
+                not isfinite(getattr(row, field))
+                for field in (
+                    "test_accuracy_mean",
+                    "train_samples_per_second_mean",
+                    "inference_latency_p95_ms_mean",
+                    "balanced_score",
+                )
+            ):
+                raise ValueError(f"Summary metrics must be finite for {model_name}.")
+            rows_by_model[model_name] = row
 
     missing = [name for name in MODEL_ORDER if name not in rows_by_model]
     if missing:
@@ -146,7 +162,9 @@ def load_summary_rows(path: Path) -> list[SummaryRow]:
 
 
 def load_figure_source(
-    summary_path: Path, result_path: Path | None, legacy_unversioned: bool,
+    summary_path: Path,
+    result_path: Path | None,
+    legacy_unversioned: bool,
 ) -> tuple[list[SummaryRow], str, Path | None]:
     """Require a paired protocol manifest unless legacy uncertainty is explicit."""
     rows = load_summary_rows(summary_path)
@@ -162,7 +180,11 @@ def load_figure_source(
         result_path = summary_path.with_name(f"{stem.removesuffix('_summary')}.json")
     if not result_path.exists():
         raise FileNotFoundError(f"Paired result JSON does not exist: {result_path}")
-    payload = json.loads(result_path.read_text(encoding="utf-8"))
+
+    def reject_nonfinite(value: str) -> object:
+        raise ValueError(f"Result JSON must contain finite metrics: {value}")
+
+    payload = json.loads(result_path.read_text(encoding="utf-8"), parse_constant=reject_nonfinite)
     protocol_id = payload.get("protocol_id")
     if protocol_id not in VISION_PROTOCOLS:
         raise ValueError(f"Unsupported or missing vision protocol ID: {protocol_id}")
@@ -179,8 +201,10 @@ def load_figure_source(
         if matched is None or any(
             float(matched[field]) != getattr(row, field)
             for field in (
-                "test_accuracy_mean", "train_samples_per_second_mean",
-                "inference_latency_p95_ms_mean", "balanced_score",
+                "test_accuracy_mean",
+                "train_samples_per_second_mean",
+                "inference_latency_p95_ms_mean",
+                "balanced_score",
             )
         ):
             raise ValueError(f"Summary CSV does not match result JSON for {row.model_name}.")
@@ -253,8 +277,12 @@ def draw_bar_chart(
         y0 = bottom - bar_height
         y1 = bottom
 
-        draw.rectangle([(x0, y0), (x1, y1)], fill=MODEL_COLORS[row.model_name], outline=(40, 40, 44))
-        draw.text((x0, bottom + 12), MODEL_LABELS[row.model_name], fill=(20, 20, 24), font=font_body)
+        draw.rectangle(
+            [(x0, y0), (x1, y1)], fill=MODEL_COLORS[row.model_name], outline=(40, 40, 44)
+        )
+        draw.text(
+            (x0, bottom + 12), MODEL_LABELS[row.model_name], fill=(20, 20, 24), font=font_body
+        )
         draw.text((x0, y0 - 16), value_formatter(value), fill=(20, 20, 24), font=font_body)
 
     draw.text(
@@ -441,7 +469,9 @@ def draw_metric_panel(
     chart_bottom = panel_bottom - 44
     chart_height = chart_bottom - chart_top
     chart_width = chart_right - chart_left
-    draw.rectangle([(chart_left, chart_top), (chart_right, chart_bottom)], outline=(220, 225, 234), width=1)
+    draw.rectangle(
+        [(chart_left, chart_top), (chart_right, chart_bottom)], outline=(220, 225, 234), width=1
+    )
 
     values = [float(spec.value_getter(row)) for row in rows]
     chart_min, chart_max = resolve_y_range(
@@ -458,7 +488,9 @@ def draw_metric_panel(
         y = chart_bottom - int(tick_ratio * chart_height)
         tick_value = chart_min + tick_ratio * chart_span
         draw.line([(chart_left, y), (chart_right, y)], fill=(236, 240, 246), width=1)
-        draw.text((chart_left - 40, y - 6), f"{tick_value:.2f}", fill=(110, 115, 124), font=font_body)
+        draw.text(
+            (chart_left - 40, y - 6), f"{tick_value:.2f}", fill=(110, 115, 124), font=font_body
+        )
 
     for index, row in enumerate(rows):
         value = float(spec.value_getter(row))
@@ -467,8 +499,12 @@ def draw_metric_panel(
         ratio = (value - chart_min) / chart_span
         bar_height = max(int(chart_height * ratio), 3)
         y0 = chart_bottom - bar_height
-        draw.rectangle([(x0, y0), (x1, chart_bottom)], fill=MODEL_COLORS[row.model_name], outline=(40, 40, 44))
-        draw.text((x0, chart_bottom + 8), MODEL_LABELS[row.model_name], fill=(32, 33, 38), font=font_body)
+        draw.rectangle(
+            [(x0, y0), (x1, chart_bottom)], fill=MODEL_COLORS[row.model_name], outline=(40, 40, 44)
+        )
+        draw.text(
+            (x0, chart_bottom + 8), MODEL_LABELS[row.model_name], fill=(32, 33, 38), font=font_body
+        )
         draw.text((x0, y0 - 14), spec.value_formatter(value), fill=(22, 22, 26), font=font_body)
 
 
@@ -497,7 +533,9 @@ def draw_compact_overview_chart(
     for model_name in MODEL_ORDER:
         color = MODEL_COLORS[model_name]
         label = MODEL_LABELS[model_name]
-        draw.rectangle([(legend_x, legend_y), (legend_x + 16, legend_y + 12)], fill=color, outline=(60, 60, 64))
+        draw.rectangle(
+            [(legend_x, legend_y), (legend_x + 16, legend_y + 12)], fill=color, outline=(60, 60, 64)
+        )
         draw.text((legend_x + 22, legend_y), label, fill=(36, 38, 44), font=font_body)
         legend_x += 160
 
@@ -732,7 +770,9 @@ def draw_circadian_gif(
             draw.line(points, fill=(189, 102, 36), width=4)
         if points:
             px, py = points[-1]
-            draw.ellipse([(px - 5, py - 5), (px + 5, py + 5)], fill=(189, 102, 36), outline=(70, 40, 18))
+            draw.ellipse(
+                [(px - 5, py - 5), (px + 5, py + 5)], fill=(189, 102, 36), outline=(70, 40, 18)
+            )
 
         current_cycle = frame_index
         hidden_now = hidden_values[frame_index]
@@ -742,7 +782,12 @@ def draw_circadian_gif(
             fill=(22, 22, 26),
             font=font,
         )
-        draw.text((36, height - 38), "Illustrative animation (not a direct training trace).", fill=(112, 116, 124), font=font)
+        draw.text(
+            (36, height - 38),
+            "Illustrative animation (not a direct training trace).",
+            fill=(112, 116, 124),
+            font=font,
+        )
         frames.append(image)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -766,8 +811,7 @@ def main() -> None:
         args.legacy_unversioned,
     )
     output_dir = (
-        Path(args.output_dir) if args.output_dir is not None
-        else Path("docs/figures") / protocol_id
+        Path(args.output_dir) if args.output_dir is not None else Path("docs/figures") / protocol_id
     )
     preflight_figure_outputs(output_dir)
     specs = default_metric_specs()
@@ -859,7 +903,8 @@ def main() -> None:
         "summary_sha256": sha256(summary_path.read_bytes()).hexdigest(),
         "result_json": str(result_path) if result_path is not None else None,
         "result_sha256": sha256(result_path.read_bytes()).hexdigest()
-        if result_path is not None else None,
+        if result_path is not None
+        else None,
         "figures": list(FIGURE_FILENAMES[:-1]),
         "sleep_gif_status": "illustrative, not observed training telemetry",
     }

@@ -193,8 +193,13 @@ def main() -> None:
             test_iterations[0] += 1
             raise AssertionError("Final CIFAR test opened during pretrained validation selection")
 
-    def build_sealed_loaders(config: ResNet50BenchmarkConfig) -> Any:
-        loaders = original_build(config)
+    def build_sealed_loaders(
+        config: ResNet50BenchmarkConfig, *, include_final_test: bool = True
+    ) -> Any:
+        # Why this: a sealed iterator still allows early final-source construction.
+        if include_final_test:
+            raise AssertionError("Pretrained validation selection requested the final source")
+        loaders = original_build(config, include_final_test=False)
         return replace(loaders, test_loader=SealedTestLoader())
 
     started = monotonic()
@@ -206,6 +211,7 @@ def main() -> None:
                 seeds=SELECTION_SEEDS,
                 candidates_per_head=2,
                 confirm_test=False,
+                development_only_source=True,
             )
         elapsed = monotonic() - started
         if elapsed > SELECTION_LIMIT_SECONDS:

@@ -58,6 +58,14 @@ def main() -> None:
     args = parser.parse_args()
     if args.resume and args.checkpoint is None:
         parser.error("--resume requires --checkpoint")
+    if args.checkpoint is not None and args.result.resolve() == args.checkpoint.resolve():
+        parser.error("--result and --checkpoint must be different paths")
+    # Why this: the checkpoint store replaces its file during training, so a
+    # fresh CLI run must protect an existing checkpoint before source access.
+    if args.result.exists():
+        raise FileExistsError(f"v8 policy result already exists: {args.result}")
+    if args.checkpoint is not None and not args.resume and args.checkpoint.exists():
+        raise FileExistsError(f"v8 policy checkpoint already exists: {args.checkpoint}")
     store = (
         TrustedLocalReplayPolicyCheckpointStore(args.checkpoint)
         if args.checkpoint is not None

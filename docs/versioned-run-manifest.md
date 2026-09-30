@@ -83,3 +83,10 @@ The page identifies the completed-bundle failure scope and the fixed
 NumPy track. Historical `docs/index.html` retains its chart data and
 displays a separate provenance caveat
 (ADR-0138).
+
+The [P5.7 reproducibility scope](reproducibility-scope.md) records two
+fresh verified fixed-v14 processes with identical training/outcome bytes;
+their manifests differ only by run ID. The fixed v14 model order is
+sealed. A small corrected configurable continual run tests order
+independence separately, and untested device/version comparisons retain
+no approved numeric tolerance (ADR-0139).

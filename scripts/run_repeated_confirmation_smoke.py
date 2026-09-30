@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import argparse
+from hashlib import sha256
 import json
 import sys
 from dataclasses import asdict, replace
@@ -14,6 +16,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from src.app.matched_head_tuning import (  # noqa: E402
     HeadTuningCandidate,
+    MatchedHeadTuningError,
     run_matched_head_tuning,
 )
 from src.app.repeated_head_confirmation import (  # noqa: E402
@@ -27,6 +30,7 @@ CONFIRMATION_SEEDS = (53, 59, 61)
 WALL_TIME_BUDGET_SECONDS = 0.05
 WALL_TIME_EPOCH_CAP = 1000
 OUTPUT_DIR = REPO_ROOT / "artifacts"
+FAILURE_SCHEMA = "vision_matched_head_repeated_failure_v1"
 
 
 def _base_config() -> ResNet50BenchmarkConfig:
@@ -80,41 +84,78 @@ def _save_json(path: Path, value: Any) -> None:
         stream.write("\n")
 
 
-def main() -> None:
-    paths = {
-        name: OUTPUT_DIR / f"benchmark_repeated_{name}_smoke.json"
-        for name in ("selection", "manifest", "result")
+def _artifact_paths(output_dir: Path) -> dict[str, Path]:
+    return {
+        name: output_dir / f"benchmark_repeated_{name}_smoke.json"
+        for name in ("selection", "manifest", "result", "failure")
     }
+
+
+def _save_failure(paths: dict[str, Path], stage: str, error: Exception) -> None:
+    # Why this: a failed confirmation must retain the frozen selection and
+    # manifest without presenting a missing result as a completed study.
+    record: dict[str, Any] = {
+        "schema_id": FAILURE_SCHEMA,
+        "stage": stage,
+        "error_type": type(error).__name__,
+        "error": str(error),
+        "existing_artifacts": {
+            name: {"path": str(path), "sha256": sha256(path.read_bytes()).hexdigest()}
+            for name, path in paths.items()
+            if name != "failure" and path.is_file()
+        },
+    }
+    if isinstance(error, MatchedHeadTuningError):
+        record["attempts"] = [asdict(attempt) for attempt in error.attempts]
+        record["trials"] = [asdict(trial) for trial in error.trials]
+        record["selections"] = [asdict(choice) for choice in error.selections]
+    with paths["failure"].open("x", encoding="utf-8") as stream:
+        json.dump(record, stream, indent=2, sort_keys=True, allow_nan=False)
+        stream.write("\n")
+
+
+def main(*, output_dir: Path = OUTPUT_DIR) -> None:
+    paths = _artifact_paths(output_dir)
     if any(path.exists() for path in paths.values()):
         raise FileExistsError("Repeated-confirmation smoke artifacts already exist.")
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     base = _base_config()
-    selection = run_matched_head_tuning(
-        base,
-        _candidates(base),
-        seeds=SELECTION_SEEDS,
-        candidates_per_head=2,
-        confirm_test=False,
-    )
-    manifest = create_confirmation_manifest(
-        selection,
-        confirmation_seeds=CONFIRMATION_SEEDS,
-        wall_time_budget_seconds=WALL_TIME_BUDGET_SECONDS,
-        wall_time_epoch_cap=WALL_TIME_EPOCH_CAP,
-    )
-    # Keep both records on disk before the confirmation route can read test labels.
-    _save_json(paths["selection"], selection)
-    _save_json(paths["manifest"], manifest)
-    result = run_repeated_confirmation(manifest)
-    _save_json(paths["result"], result)
+    stage = "selection"
+    try:
+        selection = run_matched_head_tuning(
+            base,
+            _candidates(base),
+            seeds=SELECTION_SEEDS,
+            candidates_per_head=2,
+            confirm_test=False,
+        )
+        stage = "manifest"
+        manifest = create_confirmation_manifest(
+            selection,
+            confirmation_seeds=CONFIRMATION_SEEDS,
+            wall_time_budget_seconds=WALL_TIME_BUDGET_SECONDS,
+            wall_time_epoch_cap=WALL_TIME_EPOCH_CAP,
+        )
+        # Keep both records on disk before the confirmation route can read test labels.
+        stage = "selection_artifact"
+        _save_json(paths["selection"], selection)
+        stage = "manifest_artifact"
+        _save_json(paths["manifest"], manifest)
+        stage = "confirmation"
+        result = run_repeated_confirmation(manifest)
+        stage = "result_artifact"
+        _save_json(paths["result"], result)
+    except Exception as error:
+        _save_failure(paths, stage, error)
+        raise
     print(
         json.dumps(
             {
                 "manifest_digest": manifest.manifest_digest,
                 "selection_seeds": SELECTION_SEEDS,
                 "confirmation_seeds": CONFIRMATION_SEEDS,
-                "artifacts": {name: str(path) for name, path in paths.items()},
+                "artifacts": {name: str(path) for name, path in paths.items() if name != "failure"},
                 "fixed_data_accuracy": {
                     name: asdict(summary) for name, summary in result.fixed_data_accuracy.items()
                 },
@@ -132,4 +173,11 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=OUTPUT_DIR,
+        help="new local directory for the fixed selection/confirmation artifacts",
+    )
+    main(output_dir=parser.parse_args().output_dir)

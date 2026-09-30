@@ -18,6 +18,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--result", required=True, type=Path)
     path = parser.parse_args().result
+    if path.exists():
+        raise FileExistsError(f"result already exists: {path}")
     result = run_difficulty_comparison(fixed_difficulty_manifest())
     payload = json.dumps(asdict(result), sort_keys=True, indent=2, allow_nan=False) + "\n"
     with path.open("x", encoding="utf-8", newline="\n") as output:

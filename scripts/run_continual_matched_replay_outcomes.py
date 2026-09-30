@@ -60,6 +60,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--result", required=True, type=Path)
     path = parser.parse_args().result
+    # Why this: scoring opens final roles; reject a reused output before training.
+    if path.exists():
+        raise FileExistsError(f"matched replay outcome result already exists: {path}")
     result = run_matched_replay_outcomes(_fixed_manifest())
     payload = (
         json.dumps(

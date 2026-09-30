@@ -50,6 +50,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--result", required=True, type=Path)
     path = parser.parse_args().result
+    if path.exists():
+        raise FileExistsError(f"result already exists: {path}")
     payload = _payload()
     with path.open("x", encoding="utf-8", newline="\n") as output:
         output.write(payload)

@@ -254,7 +254,7 @@ def test_dynamics_command_refuses_to_overwrite_historical_output(
         gif_output_path=str(old_gif),
         interactive_output_path=str(tmp_path / "new.html"),
         protocol_id=script.VALIDATION_PROTOCOL,
-        seed=7, snapshot_interval=1, gif_duration_ms=20,
+        seed=7, snapshot_interval=1, gif_duration_ms=20, tiny_smoke=False,
     ))
     monkeypatch.setattr(
         script, "collect_hardest_mode_snapshots",

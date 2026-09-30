@@ -193,6 +193,22 @@ def test_should_emit_one_actual_opt_in_bundle_with_tracked_environment(
     assert json.loads(capsys.readouterr().out)["status"] == "completed"
 
 
+def test_should_repeat_fixed_payloads_and_environment_across_run_ids(tmp_path: Path) -> None:
+    first_path = run_versioned_v14_bundle(tmp_path, "p57-repeat-a", Path.cwd())
+    second_path = run_versioned_v14_bundle(tmp_path, "p57-repeat-b", Path.cwd())
+
+    first = verify_run_bundle(first_path)
+    second = verify_run_bundle(second_path)
+
+    assert first["run_id"] == "p57-repeat-a"
+    assert second["run_id"] == "p57-repeat-b"
+    assert {key: value for key, value in first.items() if key != "run_id"} == {
+        key: value for key, value in second.items() if key != "run_id"
+    }
+    for filename in ("training.json", "outcomes.json"):
+        assert (first_path / filename).read_bytes() == (second_path / filename).read_bytes()
+
+
 @pytest.mark.parametrize("argument", [["--preset", "unknown"], ["--override", "hidden_dim=16"]])
 def test_should_reject_unknown_v14_configuration_before_training(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, argument: list[str]

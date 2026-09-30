@@ -23,6 +23,7 @@ if str(REPO_ROOT) not in sys.path:
 from src.app import matched_head_benchmark as matched  # noqa: E402
 from src.app.matched_head_tuning import (  # noqa: E402
     HeadTuningCandidate,
+    MatchedHeadTuningError,
     run_matched_head_tuning,
 )
 from src.app.repeated_head_confirmation import create_confirmation_manifest  # noqa: E402
@@ -110,7 +111,7 @@ def _save_json(path: Path, value: Any) -> None:
 def main() -> None:
     paths = {
         name: OUTPUT_DIR / f"benchmark_cifar_v2_{name}_smoke.json"
-        for name in ("request", "selection", "manifest")
+        for name in ("request", "selection", "manifest", "failure")
     }
     if (
         len(CONFIRMATION_SEEDS) not in (3, 4)
@@ -146,37 +147,66 @@ def main() -> None:
     )
 
     original_build = matched._build_benchmark_loaders
+    test_iterations = [0]
 
     class SealedTestLoader:
         def __iter__(self) -> Any:
+            test_iterations[0] += 1
             raise AssertionError("Final CIFAR test opened during validation selection")
 
-    def build_sealed_loaders(config: ResNet50BenchmarkConfig) -> Any:
-        loaders = original_build(config)
+    def build_sealed_loaders(
+        config: ResNet50BenchmarkConfig, *, include_final_test: bool = True
+    ) -> Any:
+        # Why this: a sealed iterator still allows early final-source construction.
+        if include_final_test:
+            raise AssertionError("CIFAR validation selection requested the final source")
+        loaders = original_build(config, include_final_test=False)
         return replace(loaders, test_loader=SealedTestLoader())
 
     started = monotonic()
-    with patch.object(matched, "_build_benchmark_loaders", build_sealed_loaders):
-        selection = run_matched_head_tuning(
-            base,
-            candidates,
-            seeds=SELECTION_SEEDS,
-            candidates_per_head=2,
-            confirm_test=False,
+    try:
+        with patch.object(matched, "_build_benchmark_loaders", build_sealed_loaders):
+            selection = run_matched_head_tuning(
+                base,
+                candidates,
+                seeds=SELECTION_SEEDS,
+                candidates_per_head=2,
+                confirm_test=False,
+                development_only_source=True,
+            )
+        elapsed = monotonic() - started
+        if elapsed > WALL_BUDGET_SECONDS:
+            raise TimeoutError(f"CIFAR selection exceeded {WALL_BUDGET_SECONDS} s: {elapsed:.1f} s")
+        if test_iterations[0] != 0:
+            raise AssertionError("Final CIFAR test was iterated during selection")
+        if (
+            len(selection.attempts) != 6
+            or len(selection.trials) != 6
+            or any(attempt.status != "complete" for attempt in selection.attempts)
+            or len(selection.selections) != 3
+            or selection.confirmations
+        ):
+            raise AssertionError("CIFAR validation selection omitted an equal trial")
+        _save_json(paths["selection"], asdict(selection))
+        manifest = create_confirmation_manifest(
+            selection,
+            confirmation_seeds=CONFIRMATION_SEEDS,
+            wall_time_budget_seconds=WALL_TIME_BUDGET_SECONDS,
+            wall_time_epoch_cap=WALL_TIME_EPOCH_CAP,
         )
-    elapsed = monotonic() - started
-    if elapsed > WALL_BUDGET_SECONDS:
-        raise TimeoutError(f"CIFAR selection exceeded {WALL_BUDGET_SECONDS} s: {elapsed:.1f} s")
-    if len(selection.attempts) != 6 or len(selection.selections) != 3:
-        raise AssertionError("CIFAR validation selection omitted an equal trial")
-    _save_json(paths["selection"], asdict(selection))
-    manifest = create_confirmation_manifest(
-        selection,
-        confirmation_seeds=CONFIRMATION_SEEDS,
-        wall_time_budget_seconds=WALL_TIME_BUDGET_SECONDS,
-        wall_time_epoch_cap=WALL_TIME_EPOCH_CAP,
-    )
-    _save_json(paths["manifest"], asdict(manifest))
+        _save_json(paths["manifest"], asdict(manifest))
+    except Exception as error:
+        failure: dict[str, Any] = {
+            "error_type": type(error).__name__,
+            "error": str(error),
+            "elapsed_seconds": round(monotonic() - started, 2),
+            "final_test_iterations": test_iterations[0],
+        }
+        if isinstance(error, MatchedHeadTuningError):
+            failure["attempts"] = [asdict(attempt) for attempt in error.attempts]
+            failure["trials"] = [asdict(trial) for trial in error.trials]
+        _save_json(paths["failure"], failure)
+        raise
     print(
         json.dumps(
             {
@@ -186,8 +216,8 @@ def main() -> None:
                 "selections": {item.head_name: item.candidate_id for item in selection.selections},
                 "attempts": len(selection.attempts),
                 "selection_seconds": round(elapsed, 2),
-                "final_test_iterations": 0,
-                "artifacts": {name: str(path) for name, path in paths.items()},
+                "final_test_iterations": test_iterations[0],
+                "artifacts": {name: str(path) for name, path in paths.items() if path.exists()},
             },
             sort_keys=True,
         )

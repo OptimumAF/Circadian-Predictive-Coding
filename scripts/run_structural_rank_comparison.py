@@ -21,6 +21,8 @@ def main() -> None:
     parser.add_argument("--result", required=True, type=Path)
     parser.add_argument("--train-only", action="store_true")
     args = parser.parse_args()
+    if args.result.exists():
+        raise FileExistsError(f"result already exists: {args.result}")
     manifest = fixed_structural_rank_manifest()
     if args.train_only:
         study = train_unscored_structural_rank_study(manifest)

@@ -33,7 +33,9 @@ PREFIX = "benchmark_cifar_pretrained_v1"
 RESULT_PATH = ARTIFACT_DIR / f"{PREFIX}_result_smoke.json"
 FAILURE_PATH = ARTIFACT_DIR / f"{PREFIX}_failure_smoke.json"
 CONFIRMATION_LIMIT_SECONDS = 480
+EXPECTED_ARCHIVE_BYTES = 170_498_071
 EXPECTED_ARCHIVE_MD5 = "c58f30108f718f92721af3b95e74349a"
+EXPECTED_WEIGHT_BYTES = 102_540_417
 EXPECTED_WEIGHT_SHA256 = "11ad3fa62ca79e40addfd354a8ec4b7c75143b3038b8d2a807fbc68deab379ca"
 EXPECTED_WEIGHT_URL = "https://download.pytorch.org/models/resnet50-11ad3fa6.pth"
 
@@ -65,7 +67,7 @@ def _verify_inputs(
     archive = REPO_ROOT / "data" / "cifar-10-python.tar.gz"
     if (
         request["archive"] != str(archive)
-        or request["archive_bytes"] != 170_498_071
+        or request["archive_bytes"] != EXPECTED_ARCHIVE_BYTES
         or request["archive_md5"] != EXPECTED_ARCHIVE_MD5
         or not archive.is_file()
         or archive.stat().st_size != request["archive_bytes"]
@@ -79,7 +81,7 @@ def _verify_inputs(
         weight_url != EXPECTED_WEIGHT_URL
         or request["weight_url"] != weight_url
         or request["weight_file"] != str(weight_file)
-        or request["weight_bytes"] != 102_540_417
+        or request["weight_bytes"] != EXPECTED_WEIGHT_BYTES
         or request["weight_sha256"] != EXPECTED_WEIGHT_SHA256
         or not weight_file.is_file()
         or weight_file.stat().st_size != request["weight_bytes"]

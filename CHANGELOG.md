@@ -9,6 +9,83 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- A separately frozen P6.3 sleep-factor outer-development route that checks
+  all nine arms and three seeds against the saved train-only result before
+  any outer score. Two bounded public results repeat byte for byte. The
+  isolated homeostasis and gated-reset contrasts are null; structure ties
+  twice and lowers final mean once. Final and confirmation roles stay sealed.
+- A guarded P6.3 train-only sleep-factor preflight with nine no-replay arms,
+  exact neutral PC parity, structural proposal/rollback accounting,
+  homeostasis and conditional chemical-reset controls, and planned-width
+  references. Two bounded 27-cell processes repeat byte for byte; no
+  outer-selection or final score was opened.
+- A prospectively fixed P6.3 replay factor with six matched replay-off/on
+  method arms and two planned-width controls on three development seeds.
+  Two bounded public runs have byte-identical 24-cell results. Neutral
+  circadian equals ordinary PC in both replay states; backprop replay has
+  a negative seed, and no circadian-specific advantage was found. The new
+  Phase 6 two-task metric contract makes final mean accuracy and signed
+  forgetting explicit while retaining balanced score as a legacy alias.
+- A bounded P6.3 development-only chemical-gating pilot on three new seeds,
+  with exact ordinary-PC/neutral-circadian parity, matched wake work and
+  fixed capacity, sealed final roles, predeclared confirmation seeds, and
+  byte-identical fresh-process results. Gating changed plasticity but not
+  final development mean accuracy; the apparent forgetting change came
+  from weaker A learning before B.
+- P6.2 frozen validation-protocol reproductions of the existing baseline,
+  strength-case, and hardest-case continual profiles with seven original
+  seeds, exclusive prelaunch requests, wall limits, complete artifact
+  audits, and independent same-environment repeats. A read-only report
+  preserves the negative corrected hardest-case circadian result and
+  separates historical protocol/code uncertainty from the current paired
+  baseline-versus-strength policy contrast.
+- Phase 6 diagnostic CLI coverage for tiny two-seed synthetic multiseed
+  ResNet JSON/CSV output, process-isolated matched-head memory stdout,
+  and local CIFAR-10 loader-order stdout. The memory smoke now reports its
+  full fixed config, benchmark track, and development split hashes.
+- Phase 6 policy/Pareto public estimate and default budget-refusal checks,
+  plus complete temporary JSON writer checks from equal synthetic reports.
+  No live sweep or new candidate ranking was run.
+- Phase 6 README-figure producer checks for paired CSV/JSON provenance,
+  ten image/HTML/GIF outputs, and early rejection of nonfinite source
+  metrics. The hardest-mode dynamics CLI adds an explicitly labeled
+  `--tiny-smoke` visualization fixture for both validation and legacy
+  protocols.
+- Phase 6 bounded CPU/stub artifact checks for the pretrained feature profile
+  and both older CIFAR validation/confirmation adapters. The local-CIFAR
+  validation writer now preserves a failed selection's attempt ledger in an
+  exclusive failure JSON.
+- Phase 6 public CLI chain smokes for a completed fixed-v14 bundle through
+  observations, report, and dashboard, plus an interrupted checked resume
+  with measured sidecar and projection readback.
+- Phase 6 fixed v14 raw schedule, train-only, and scored CLI artifact
+  smokes. All three CLIs now reject occupied output paths before work;
+  a measured-projection tamper test now creates its own fixture so it
+  passes independently of test order.
+- Phase 6 fixed v12 structural-rank CLI smoke binds all 32 unscored
+  factor cells to their scored rows and saved-file hashes. Both CLI modes
+  now reject occupied result paths before work.
+- Phase 6 fixed v11 difficulty-modulation CLI smoke reads all 24
+  predeclared cells and verifies saved-file integrity. The CLI now rejects
+  an occupied output path before training.
+- Phase 6 fixed v10 replay side-effect ablation CLI smoke reads all eight
+  matched rows, verifies historical v9 parity and saved-file integrity, and
+  rejects occupied output paths before training.
+- Phase 6 bounded v9 schedule, unscored matched-training, and scored outcome
+  artifact smokes. The three CLIs now preflight occupied output paths, and
+  the schedule reports the saved file's actual SHA-256 on Windows.
+- Phase 6 bounded v6–v8 arrived, selection, confirmation, and replay-policy
+  CLI smoke artifacts with unscored checkpoint/final-role readback. The v8
+  policy CLI now rejects occupied result and fresh-checkpoint paths before
+  training and requires distinct output paths.
+- First Phase 6 bounded smoke cells for the configurable NumPy continual
+  CLI's forced/no-sleep identity-source outputs and the fixed v13
+  independently sampled stationary/axis-shift trigger artifacts. The
+  coverage matrix keeps remaining enabled branches and outputs open.
+- P5.7 reproducibility evidence for two separate-process fixed-v14
+  NumPy CPU runs with exact training/outcome bytes, plus a corrected
+  continual model-order state regression and explicit untested
+  CPU/GPU/cross-version tolerance scope (ADR-0139).
 - Verified artifact-only v14 static dashboard and four final-metric PNG
   plots from the descriptive table. Exact regeneration rejects stale or
   hand-edited content; the historical dashboard gains an in-page
@@ -180,6 +257,12 @@ for versioning even while in research-stage development.
 
 ### Changed
 
+- The current CIFAR feature-profile and local/pretrained validation writers
+  omit physical final-source construction during development work. Historical
+  saved results retain their original provenance and were not rerun.
+- Continual text reports now describe the configured Phase B source
+  without implying a shift for an identity transform. The v13 trigger
+  CLI rejects an occupied result path before training or final scoring.
 - ResNet benchmark defaults now enable adaptive sleep budget scaling by default while keeping reward-modulated learning disabled by default.
 - Updated circadian unit tests (NumPy + Torch) with coverage for reward scaling and adaptive budget behavior.
 - Updated README, model card, and core module docs to document new circadian controls.

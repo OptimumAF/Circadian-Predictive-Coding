@@ -56,6 +56,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--result", required=True, type=Path)
     result_path = parser.parse_args().result
+    # Why this: a fixed smoke should not spend its budget before refusing
+    # an occupied output; the later exclusive write still protects races.
+    if result_path.exists():
+        raise FileExistsError(f"matched replay schedule result already exists: {result_path}")
     rows = []
     for policy in (
         ReplayRetentionPolicy("recent_fifo"),
@@ -107,7 +111,13 @@ def main() -> None:
     )
     with result_path.open("x", encoding="utf-8") as output:
         output.write(payload)
-    print(json.dumps({"result": str(result_path), "sha256": sha256(payload.encode()).hexdigest()}))
+    # Why this: text-mode newline translation can change on-disk bytes on
+    # Windows; the reported digest must identify the file actually written.
+    print(
+        json.dumps(
+            {"result": str(result_path), "sha256": sha256(result_path.read_bytes()).hexdigest()}
+        )
+    )
 
 
 if __name__ == "__main__":

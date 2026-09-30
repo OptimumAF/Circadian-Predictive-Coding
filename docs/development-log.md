@@ -9399,3 +9399,1809 @@ were not modified.
   changed source/table/chart bytes. Publish charts/dashboard content in
   a new derived directory without overwriting the historical dashboard
   or training.
+
+## 2026-09-29 — P5.6b verified plots and dashboard; close P5.6
+
+- **Completed task IDs:** P5.6b and P5.6 parent. P5.7 and deferred P2.6a
+  remain unchecked. Reconciled the initial `master` checkout at
+  `68f9dd01a1eb789f7129b421732c7dba1c8c9392` with the reviewed
+  plan commit, latest log, P5.6a report, and broad existing dirty tree.
+  Earlier work and unrelated changes were preserved.
+- **Git state at handoff:** During final documentation, `master` moved to
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad` (`Add typed configs,
+  bounded runs, and verified reports`, author Avery). That commit contains
+  the previously dirty P5.4/P5.5/P5.6a work and this P5.6b code, tests,
+  historical warning, and ADR. This session did not invoke `git commit`
+  or rewrite the new commit. Only the final P5.6 completion edits to
+  `DEVELOPMENT_PLAN.md` and this log remain modified.
+- **Implementation and decision:** `src/app/v14_dashboard_projection.py`
+  validates the fixed descriptive report and renders one self-contained
+  HTML page with all nine source-order arm/method rows, four existing
+  final metrics, both seeds, observed mean/min/max/range, 18/18 cells,
+  scoped zero within-bundle failures, unavailable external failure
+  history, exact outcome protocol, original source commit/dirty identity,
+  and NumPy synthetic continual track. `src/app/v14_report_plot.py` uses
+  existing Pillow to draw each metric's mean and observed two-seed
+  min–max bars without a ranking or uncertainty claim. The pure app
+  modules do no IO or training. `src/infra/v14_dashboard_files.py` calls
+  the P5.6a verifier, rechecks report bytes, publishes an exclusive
+  `dashboard-v1` directory with source/output hashes, and re-derives
+  exact HTML/PNG bytes on verification. The new script exposes create
+  and verify commands. ADR-0138 and the README, architecture, module,
+  manifest, and changelog docs describe the boundary.
+- **Checkout correction:** The README already warned that the old
+  dashboard was a historical snapshot, but inspection found no caveat
+  inside `docs/index.html`. Added only an in-page warning and link to
+  `docs/historical-benchmark-provenance.md`; its charts and data were
+  not changed. A regression check protects that warning. The generated
+  dashboard remains separate. This reconciles the prior P5.6 split
+  assumption without weakening its acceptance criteria.
+- **Acceptance evidence:** A missing-module collection failure preceded
+  implementation. Focused pure/boundary tests exercise deterministic
+  all-row rendering, invalid seed/range/failure/track rejection, missing
+  source refusal, stale report bytes, write-once publication, and
+  hand-edited HTML/PNG rejection. Final focused set: 36 passed. The full
+  CPU suite: 1,732 passed and 41 CUDA-only skips in 382.07 s (started
+  before two final warning/HTML test cases were added; the final focused
+  set covers those cases). Ruff check, mypy (286 source files), format,
+  and diff checks passed. Browser QA loaded all four 1180×730 PNGs and
+  nine rows at desktop and 390 px width, with no page overflow; the
+  table has its own horizontal scroll at narrow width. A favicon 404
+  from the temporary local server was incidental to the page/content.
+- **Accepted local artifacts:** Existing checked raw bundle
+  `artifacts/runs/p54-fixed-v14-preset/` has seeds 47/53,
+  source commit `f4ae40214b5f136e26be63ecd51349223c56c05d` (dirty),
+  outcome protocol `continual_trigger_replay_outcomes_v14`, and track
+  `numpy_synthetic_continual_v14`. Training/outcome SHA-256 remain
+  `174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`/
+  `ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`.
+  Its new `summary-report-v1/summary.json`/`summary.csv` hashes are
+  `f732250da87f65908c237b422b89abbfe27e670f59024d9fb60d0e351e310ef2`/
+  `9073de0c5f057c97f380a071630482f0aea5bd052e6b82d985161cb267e9cea4`;
+  `dashboard-v1/dashboard.html` is
+  `68237c7e81edb360a1e1f8b812e70bd7965045602f22701ad3f11dd6a81d351e`.
+  The dashboard manifest hashes all four PNGs. Desktop/mobile QA
+  screenshots and browser snapshot are in ignored
+  `artifacts/runs/p54-fixed-v14-preset/visual-qa/`. An earlier ignored
+  `p51-v14-schema-d/dashboard-v1` draft became stale after a Pillow
+  default-font missing glyph was replaced with ASCII `min-max`; its
+  verifier rejects it, and it is excluded from accepted evidence.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_v14_dashboard_projection.py  # initial expected missing-module collection error; later passes
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_v14_dashboard_projection.py tests\test_v14_artifact_report.py tests\test_v14_observation_projection.py tests\test_versioned_v14_run.py  # final 36 passed
+  .\.venv\Scripts\python.exe -m scripts.build_v14_artifact_report --run artifacts\runs\p54-fixed-v14-preset  # exit 0, exclusive report
+  .\.venv\Scripts\python.exe -m scripts.build_v14_artifact_report --verify-run artifacts\runs\p54-fixed-v14-preset  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.build_v14_dashboard --run artifacts\runs\p54-fixed-v14-preset  # exit 0, exclusive dashboard
+  .\.venv\Scripts\python.exe -m scripts.build_v14_dashboard --verify-run artifacts\runs\p54-fixed-v14-preset  # exit 0, exact source/output re-derivation
+  .\.venv\Scripts\python.exe -m scripts.build_v14_dashboard --verify-run artifacts\runs\p51-v14-schema-d  # expected exit 1: stale draft rejected
+  .\.venv\Scripts\python.exe -m http.server 8765 --bind 127.0.0.1 --directory artifacts\runs\p54-fixed-v14-preset  # temporary local browser QA; stopped
+  npx.cmd --yes --package @playwright/cli playwright-cli goto http://127.0.0.1:8765/dashboard-v1/dashboard.html  # exit 0; snapshot, desktop/mobile screenshot/eval checks pass
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0: 1,732 passed/41 CUDA skips in 382.07 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 286 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\v14_report_plot.py src\app\v14_dashboard_projection.py src\infra\v14_dashboard_files.py scripts\build_v14_dashboard.py tests\test_v14_dashboard_projection.py  # exit 0
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests, experiment scope, and blockers:** All 41 full-suite
+  skips require CUDA; no P5.6b test skipped. This session reused
+  completed local v14 bundles and did not train, launch a sweep, tune a
+  baseline/seed/metric, change fixed v14 result bytes, or run Torch.
+  The output is descriptive and retains the mixed/null/negative
+  circadian evidence. No blocker to P5.7. The stale ignored draft is
+  preserved but rejected, and an earlier P5.6a stale report under
+  `p51-v14-schema-c` remains excluded after automatic approval review
+  rejected its removal.
+- **Plan changes and exact next action:** Checked P5.6b and P5.6 only
+  after source/report/dashboard verification, visual QA, focused/full
+  tests, and static gates. Corrected the historical warning location
+  in the plan and kept P5.7 open. **Exact next action:** inspect fixed
+  v14 seed derivation, existing model-order-isolation tests, and the
+  P5.1 verifier. Add a small same-environment deterministic artifact
+  repeat and a reversed-model-order regression without changing the
+  fixed preset; compare per-method facts independently of run ID and
+  workspace metadata. Document CPU/GPU and cross-version tolerances
+  without promising bitwise cross-platform reproducibility.
+
+## 2026-09-29 — P5.7 same-environment repeat and portability scope
+
+- **Completed task IDs:** P5.7a, P5.7b, P5.7c, and P5.7 parent. P6.1 and
+  later Phase 6/7/8/9 tasks remain unchecked; P9.1 still awaits actual
+  CI evidence, and P2.6a remains deferred. Re-read `AGENTS.md`, plan
+  handoff/open items, and current log; initial `master` HEAD was
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`, with only the prior
+  turn's final plan/log edits modified. Preserved those edits and all
+  ignored existing experiment artifacts. No Git commit or push was made.
+- **Plan amendment and decision:** Split P5.7 into exact fixed-v14
+  separate-process repeats (a), a valid corrected configurable
+  model-order permutation test (b), and explicit device/version tolerance
+  policy (c). The fixed P5.1 v14 manifest rejects order changes, so a
+  reversed public v14 run would change the study identity. The small v6
+  order check tests the shared corrected continual path without
+  mislabeling it as an alternate fixed-v14 result. ADR-0139 and
+  `docs/reproducibility-scope.md` state this boundary (including official
+  [NumPy compatibility](https://numpy.org/doc/stable/reference/random/compatibility.html)
+  and [PyTorch reproducibility](https://docs.pytorch.org/docs/2.14/notes/randomness.html)
+  references). README, versioned-manifest docs, and changelog link it.
+- **Implementation/validation evidence:**
+  `tests/test_versioned_v14_run.py` now launches two fixed bundles under
+  distinct IDs in one test and requires verified exact training/outcome
+  bytes and equality of all manifest fields except `run_id`.
+  `tests/test_continual_arrived_runner.py` now trains one fixed seed-17,
+  40-sample, two-epoch-per-phase corrected v6 fixture in forward and
+  reverse model order. It compares all three full serialized model states
+  after A and B, Phase A/B role hashes, guard decisions, role-access and
+  task-information multisets, and sleep/replay facts excluding durations.
+  The existing two-seed order regression checks final per-method metrics
+  and replay retention. The first new state test failed only because
+  wall-clock sleep durations differed; it passed after excluding that
+  non-deterministic measurement while retaining every decision field.
+  Focused related files passed 20; after the final audit multiset check,
+  its three targeted cases passed. Full CPU suite passed 1,736 with 41
+  CUDA-only skips in 498.67 s (the final audit multiset assertion was
+  added after that run and is covered by the final focused three).
+  Ruff, mypy (286 source files), touched-file format, and diff checks pass.
+- **Local experiment artifacts:** Two separate PowerShell-launched Python
+  processes wrote ignored completed `artifacts/runs/p57-repro-a/` and
+  `artifacts/runs/p57-repro-b/`, using the unchanged `fixed-v14` preset,
+  both seeds 47/53, all three arms/methods, and the original final
+  metrics. Both `--verify-run` commands and a fieldwise comparison through
+  `verify_run_bundle` passed. Exact training SHA-256 in both:
+  `174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`;
+  exact outcome SHA-256 in both:
+  `ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`.
+  The only differing manifest field is `run_id`, so manifest file hashes
+  differ (`d8d1c358cbd7ef3e6900e96543ac65e7db426d50f67056802451ffb278ab46a3`/
+  `bef0370134f64de98109dd6a66e44a586a6e643a7020506a460ac14b3557a860`).
+  Both record source commit `c17a37d792a6f26728a557c5ecc613d528d0f9ad`,
+  dirty workspace digest
+  `719547e5b317ada43f20019750bcd324999f0afd6f2982f9dd6c4909c14b4a68`,
+  identical config/seed map/source-role hashes/algorithm IDs, Python
+  3.14.7, NumPy 2.4.6, and a Windows 11 Intel CPU with 20 logical cores.
+  No tracked file changed between the two CLI runs. No new score-based
+  choice was made; repeated outcomes retain the negative/null findings.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_versioned_v14_run.py::test_should_repeat_fixed_payloads_and_environment_across_run_ids tests\test_continual_arrived_runner.py::test_should_preserve_each_trained_model_state_when_order_reverses  # first: 1 passed/1 failed on measured duration equality; corrected 2 passed
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p57-repro-a --preset fixed-v14  # exit 0, exclusive run
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p57-repro-b --preset fixed-v14  # exit 0, separate process
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts\runs\p57-repro-a  # exit 0, completed
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts\runs\p57-repro-b  # exit 0, completed
+  # A read-only Python comparison called verify_run_bundle on both,
+  # asserted only run_id changed and exact training/outcome hashes matched;
+  # exit 0. Its full procedure and hashes are in docs/reproducibility-scope.md.
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_versioned_v14_run.py tests\test_continual_arrived_runner.py  # 20 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0: 1,736 passed/41 CUDA skips in 498.67 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_arrived_runner.py::test_should_preserve_each_trained_model_state_when_order_reverses tests\test_continual_arrived_runner.py::test_should_repeat_reports_and_isolate_model_order tests\test_versioned_v14_run.py::test_should_repeat_fixed_payloads_and_environment_across_run_ids  # final 3 passed
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 286 source files
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_versioned_v14_run.py tests\test_continual_arrived_runner.py  # exit 0
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests, limitations, and blockers:** The 41 full-suite skips
+  require CUDA; no new P5.7 test skipped. The fixed v14 track is NumPy
+  CPU only. No Torch/GPU or other Python/NumPy build was run for this
+  milestone, so no cross-device/version numerical tolerance or
+  equivalence claim is made. Same-recorded-environment deterministic
+  files have zero-byte tolerance; runtime durations/memory are outside
+  that gate. No large sweep, new algorithm, baseline tuning, seed or
+  metric change, or external data source was used. No blocker to P6.1.
+- **Plan change and exact next action:** Checked P5.7a/b/c and parent
+  only after separate-process artifact verification, exact field/hash
+  comparison, model-order tests, docs, full/focused tests, and static
+  gates. **Exact next action:** inventory the currently enabled corrected
+  NumPy branches, bounded Torch CPU path, artifact writers, and existing
+  tiny forced-sleep/stationary-control fixtures. Define a fixed small
+  P6.1 smoke matrix and acceptance checks before running it; add the
+  first missing-branch/output test, implement only that bounded smoke
+  path, and verify its local artifacts without tuning from final scores.
+
+## 2026-09-29 — P6.1 first bounded smoke cells
+
+- **Completed task IDs:** P6.1a and P6.1c1. P6.1 parent, P6.1b, the
+  remaining P6.1c routes, and P6.1d–f remain unchecked. P9.1 still
+  awaits actual CI execution; P2.6a remains deferred. Re-read the
+  repository instructions, plan handoff, and current log. Initial HEAD
+  stayed `c17a37d792a6f26728a557c5ecc613d528d0f9ad` on `master`;
+  prior P5.6/P5.7 tracked and untracked edits were preserved. No commit
+  or push was made.
+- **Plan amendment and implementation:** Split P6.1 by the actual public
+  runner/output families in `docs/phase6-smoke-matrix.md`, retaining the
+  original every-enabled-branch/every-output gate. The first fixed
+  one-seed v5 CLI cell uses 40 rows per phase, two epochs per phase,
+  equal noise and identity transform, and forced periodic versus no-sleep
+  controls. Its integrated test reads text, finite JSON, and resolved
+  config; checks four applied versus four skipped decisions, equal role
+  hashes and baseline reports, replay caps, complete rows, and exclusive
+  output paths. The smoke caught a false unconditional “shifted/rotated”
+  line in the text report; `format_continual_shift_benchmark` now states
+  that Phase B uses the configured noise and transform. The v5 generator
+  uses the same source seed for both phases, so this is a paired
+  identity-source cell, not independently sampled stationary noise.
+- **Independent stationary and artifact gate:** The second integration
+  cell uses the unchanged fixed v13 manifest with independent Phase A/B
+  stationary noise, an axis-shift comparison, seeds 41/43, and
+  periodic/adaptive/no-sleep arms. It checks both public train-only and
+  scored JSON outputs and reported SHA-256; all 12 cells; 32 decision
+  rows/cell; four periodic forced events and zero adaptive/no-sleep
+  events; matching frozen train facts and final-role hashes across arms.
+  Its first red run showed an existing output path was rejected only
+  after training/final scoring. The CLI now preflights an occupied path
+  before either branch, while `open("x")` still protects a race.
+  The final focused 77 tests passed after both fixes.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_smoke_suite.py  # initial v5 1 passed; report-label red test then 1 failed before fix; post-fix pass
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_smoke_suite.py::test_should_publish_v13_independent_stationary_and_forced_trigger_artifacts  # red: occupied path reached final scoring; green after preflight
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # 1,737 passed, 41 CUDA-only skips in 353.11 s, before the final wording/occupied-path fixes
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_smoke_suite.py tests\test_sleep_trigger_comparison.py tests\test_continual_shift_benchmark.py tests\test_continual_experiment_config.py tests\test_continual_sleep_telemetry.py  # final post-change 77 passed
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 287 source files
+  .\.venv\Scripts\python.exe -m ruff format --check scripts\run_sleep_trigger_comparison.py src\app\continual_shift_benchmark.py tests\test_phase6_smoke_suite.py  # exit 0
+  git -c core.safecrlf=false diff --check  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_sleep_trigger_comparison --train-only --result artifacts/p61-v13-stationary-train.json  # exit 0; subsequently moved to ignored runs/p61-smoke
+  .\.venv\Scripts\python.exe -m scripts.run_sleep_trigger_comparison --result artifacts/p61-v13-stationary-scored.json  # exit 0; subsequently moved to ignored runs/p61-smoke
+  ```
+
+  Both v5 CLI commands used `--protocol-id continual_global_test_seal_v5
+  --profile strength-case --seeds 17 --sample-count-phase-a 40
+  --sample-count-phase-b 40 --phase-b-train-fraction 0.5
+  --phase-a-epochs 2 --phase-b-epochs 2 --hidden-dim 4
+  --phase-a-noise-scale 0.8 --phase-b-noise-scale 0.8
+  --phase-b-rotation-degrees 0 --phase-b-translation-x 0
+  --phase-b-translation-y 0 --replay-max-examples 4
+  --replay-max-bytes 96 --sleep-mode components`, differing only in
+  `--sleep-interval-phase-a/--sleep-interval-phase-b` (`1/1` forced,
+  `0/0` control) and the three `--output-file`, `--json-result`, and
+  `--resolved-config` paths under `artifacts/runs/p61-smoke/` after the
+  exclusive writes. A read-only PowerShell `ConvertFrom-Json`/`Get-FileHash`
+  check accepted both full output sets and verified 4 applied/4 skipped
+  decisions with matching source-role hashes.
+- **Local experiment artifacts:** The ignored
+  `artifacts/runs/p61-smoke/` directory holds six current v5 files:
+  forced text/JSON/config SHA-256
+  `3e2c080b237f1217f15dc4a844115840b11bf01d43ffac76ceb3de66958427a3`/
+  `c3ed6e83a79cdc79ec645fe6e2e62a3dd236f00633443a062dbe7dd5fbd81a04`/
+  `6b8b3a620406a433263d852e3a4e9d163ac99039c78141caa65d2e168fb0f1bf`,
+  and no-sleep text/JSON/config
+  `689ad5ad7ed820e8c60bb5c4727749a88a2d476b63f47a22dd51e9b085957843`/
+  `179ff92cc0dc58f637a2697c96e3668bcca7d9f6e1d29b92a4907ed4d2055ce8`/
+  `a78754268e3f482e0f92198e6bce24011baa7b881e2abb0fd3e963c3880218f7`.
+  Fixed v13 train-only/scored JSON SHA-256 remain exactly
+  `5b1ae508b074f54198518bc908b733fbae8eff6f17c15868be9df428369c279f`/
+  `e8dc920c1ca6944d5f0c48cc87023aaed0548cd830ac07a6c05746fefa6a9821`,
+  matching the historical fixed result. The same directory preserves
+  one pre-fix `p61-v5-stationary-forced*` three-file set solely as a
+  superseded wording audit; it is excluded from current evidence. The
+  files were moved from the unignored artifact root to the existing
+  ignored `artifacts/runs/` tree; no unrelated file was moved.
+- **Skipped tests, limits, and blockers:** The full suite's 41 skips
+  require CUDA; no P6.1 smoke test skipped. The full suite completed
+  before the two final small code fixes; the final related suite (77),
+  Ruff, mypy, format, and diff checks ran after them. No Torch path,
+  pretrained weights, external data, large sweep, or new scientific
+  comparison was run. Scores are functionality data only and were not
+  used to select a policy, seed, threshold, baseline, or metric. No
+  blocker to the next small P6.1 cell.
+- **Plan changes and exact next action:** Checked only P6.1a/c1 after
+  their artifact, forced/control, red-to-green, and quality evidence.
+  P6.1 remains unchecked because toy, v0–v4, v6–v12, remaining v13,
+  v14 derivative, Torch CPU, and other output families are still open.
+  **Exact next action:** inspect existing toy baseline/indepth and
+  budgeted CLI artifact tests; add one fixed tiny actual-run P6.1b smoke
+  that writes/reads indepth text and resolved-config output and pairs a
+  forced baseline JSON result with a no-sleep control. Assert the
+  seed/noise grid and every declared output without selecting scores.
+
+## 2026-09-29 — P6.1 toy and configurable continual smoke completion
+
+- **Completed task ID:** P6.1b. P6.1 parent and P6.1c/d/e/f remain unchecked;
+  Phase 6 experiments remain gated. Checkout stayed on `master` at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; prior tracked,
+  untracked, and ignored user/work artifacts were preserved. No commit or
+  push was made.
+- **Implementation and evidence:** Added
+  `tests/test_phase6_toy_smoke.py` and
+  `tests/test_phase6_continual_versions_smoke.py`. The toy file launches
+  the real CLI on 80 synthetic rows/two epochs for validation forced and
+  no-sleep baselines, explicit legacy, adaptive-gated sleep, and a fixed
+  indepth 2-seed × 2-noise grid. It reads finite JSON, resolved config,
+  and redirected text; checks protocol/split/source identities, typed
+  decision rows, and unchanged bytes after occupied-path refusal.
+  Indeepth has text and config outputs by design, not a JSON result.
+  The continual file launches each public v0–v4 CLI protocol using seed
+  17, 40 rows/phase, two epochs/phase, equal noise and identity transform,
+  with forced and no-sleep schedules. It reads text/finite JSON/config,
+  checks legacy versus six-role hashes, fixed source and baseline parity,
+  sleep decisions, v4 replay caps, and early occupied-path refusal. This
+  paired identity source reuses rows and does not replace the v13
+  independently sampled stationary control. Existing
+  `tests/test_toy_cli_run_state.py` supplies the small real budgeted toy
+  incomplete-state/checkpoint and checked-resume result/config gate,
+  including sealed final input, checkpoint SHA-256, occupied paths, and
+  tamper rejection.
+- **Red-to-green observation:** The first v0–v4 smoke incorrectly expected
+  all forced decisions to apply: 4 of 5 cases failed. Readback showed v0–v2
+  skip at epoch 4 and v3 at epochs 2/4 with recorded
+  `zero_structural_budget`; v4 applied all four. The assertion now requires
+  at least one applied forced event and validates every applied/skipped
+  reason. The first adaptive toy assertion expected `trigger_reason` to
+  become `adaptive`; the actual truthful trace kept `periodic` as the
+  scheduled reason and recorded `adaptive_not_due` for both skipped
+  decisions. This was corrected in the test, with no model/config/metric
+  change.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_toy_smoke.py  # 3 passed after initial test text-label correction; final file has 4 tests
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_continual_versions_smoke.py  # first 4 failed/1 passed on overstrong applied assertion
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_toy_smoke.py::test_should_write_adaptive_toy_decisions_without_forcing_sleep  # first failed on trigger-reason expectation
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_toy_smoke.py tests\test_phase6_continual_versions_smoke.py  # corrected 8 passed before adaptive addition
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_toy_smoke.py tests\test_phase6_continual_versions_smoke.py tests\test_toy_cli_run_state.py tests\test_toy_experiment_config.py tests\test_toy_sleep_telemetry.py tests\test_phase6_smoke_suite.py tests\test_continual_sleep_telemetry.py  # final 96 passed in 17.06 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_continual_versions_smoke.py  # final 5 passed after extracting the CLI argument builder
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 289 source files
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_phase6_toy_smoke.py tests\test_phase6_continual_versions_smoke.py  # exit 0
+  .\.venv\Scripts\python.exe -m mypy tests\test_phase6_continual_versions_smoke.py  # final single-file exit 0 after the helper extraction
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  Three additional real local toy CLI commands, each under one second,
+  wrote the eight files below with `--samples 80 --epochs 2 --seed 13
+  --hidden-dim 4`; forced/no-sleep baseline used `--noise 0.8
+  --split-threshold 0` and intervals 1/0, while indepth used
+  `--mode indepth --seed-list 13,17 --noise-levels 0.7,0.9
+  --sleep-interval 1 --split-threshold 0`. All returned zero. A read-only
+  PowerShell `ConvertFrom-Json`/`Get-FileHash` check confirmed both
+  baseline decision rows and four indepth trial configs.
+- **Local experiment artifacts:** Ignored `artifacts/runs/p61-smoke/` holds
+  the current toy forced result/config/text SHA-256 values
+  `ba1a7f70cc547250150c24c7ee6ee53fd36bbae42d7e55e214869efa605d5bf9`/
+  `6e44baf6bd93a115848201e4fa2d9ca48f00d0923a33eca60ebf54880564df51`/
+  `61a109aa75120a8a5dd2df2676d59c4eef89bcf947653ce0c641ab20f7fe4974`;
+  no-sleep result/config/text
+  `a7940b46107207a6a0bef02665e0d70a88e0fdfd2b61681bad2b9c3cd872c941`/
+  `7bdbd91cd6cad94d04a09f1312dfff848caf37eb7a0751b6f6ead40b8687269a`/
+  `1583f4c8145fbc222e7a691359b89e5f1e09019da946f30b2719f4791209e222`;
+  indepth config/text
+  `c23b7d98472ad161129f589c345e696e1c1e74a4927f4fe4f053c04ee546e4df`/
+  `5f74d2b52921e79191383d97aca20373897af0dfc610b878e200166cfd6b4a48`.
+  Other new CLI artifacts lived only in pytest temporary directories.
+- **Skipped tests, limits, blockers, plan changes, and exact next action:**
+  The focused 96-test run had no skips. The full CPU suite was not rerun
+  because this increment adds smoke tests only; its prior 1,737 pass/41
+  CUDA-only skips are recorded above. No Torch, pretrained data, large
+  sweep, or score-based choice was made. No blocker to the next cell.
+  Checked P6.1b and marked matrix rows A/B covered; kept P6.1 parent and
+  C–F open without weakening their output or independent-source gates.
+  **Exact next action:** inspect the public v6 arrived and v7/v8 selection
+  CLIs and their existing focused tests; add one tiny fixed train-only and
+  final-role artifact smoke with a forced event, then continue the remaining
+  v6–v12/v13 output inventory before touching larger ablations.
+
+## 2026-09-30 — P6.1c2 arrived, selection, and policy artifact smokes
+
+- **Completed task ID:** P6.1c2. P6.1 parent, P6.1c, P6.1d–f, and later
+  phases remain unchecked. Re-read `AGENTS.md`, the active plan criteria and
+  handoff, the latest log, and the actual worktree before editing. `master`
+  remained at `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; earlier
+  tracked/untracked changes and ignored experimental artifacts were left
+  intact. No commit or push was made.
+- **Implementation and evidence:** Added three real-process P6.1 smoke
+  files. `tests/test_phase6_arrived_cli_smoke.py` reads the fixed v6
+  two-seed role/guard stdout and v7 two-candidate trial/selection stdout
+  as finite JSON; checks every seed/trial, typed forced decisions,
+  development/final hashes, and the chosen circadian history without
+  asserting which candidate wins. `tests/test_phase6_arrived_confirmation_smoke.py`
+  runs the public v7 prepare/run commands from a fixed request; reads the
+  request, both format-8 unscored checkpoints, and both model-order final
+  results. It checks 96 predeclared updates, A/B interruption and resume,
+  forced attempts, no final-role values in checkpoints, final-role release
+  in scored results, and duplicate-path refusal. The v8 policy smoke
+  reads the two-policy/two-seed scored JSON, printed hash summary, format-9
+  unscored checkpoint, replay caps/exposure, and a completed `--resume`
+  through the public CLI to an identical fresh result. Existing focused
+  tests seal final sources and exercise active v6–v8 checkpoint recovery.
+- **Red-to-green fix:** Two v8 preflight tests first failed because an
+  occupied result or fresh checkpoint still entered
+  `run_replay_policy_comparison`; the checkpoint writer could replace
+  its file. `scripts/run_continual_replay_policy_smoke.py` now rejects an
+  occupied result, an occupied checkpoint on a fresh run, and aliased
+  result/checkpoint paths before any training. Completed `--resume` may
+  read its existing checkpoint but still needs a fresh result path.
+  `README.md` and `CHANGELOG.md` document this behavior. No fixed setting,
+  seed, score, model, baseline, or metric changed.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_arrived_cli_smoke.py  # first 2 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_arrived_confirmation_smoke.py  # first 1 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_replay_policy_cli_smoke.py::test_should_refuse_occupied_v8_result_before_training  # red before preflight
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_replay_policy_cli_smoke.py::test_should_refuse_occupied_checkpoint_on_fresh_v8_run  # red before preflight
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_replay_policy_cli_smoke.py  # 3 passed after preflight; final 4 passed after alias/resume coverage
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_arrived_cli_smoke.py tests\test_phase6_arrived_confirmation_smoke.py tests\test_phase6_replay_policy_cli_smoke.py tests\test_continual_arrived_runner.py tests\test_continual_arrived_selection.py tests\test_continual_arrived_confirmation.py tests\test_continual_arrived_checkpoint.py tests\test_continual_arrived_selection_checkpoint.py tests\test_continual_arrived_sleep_telemetry.py tests\test_continual_replay_policy_comparison.py tests\test_continual_replay_policy_checkpoint.py  # 221 passed in 50.21 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_arrived_confirmation_smoke.py tests\test_phase6_replay_policy_cli_smoke.py  # 5 passed after splitting assertion helpers
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0 after removing one initially unused test import
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 292 source files
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_phase6_arrived_cli_smoke.py tests\test_phase6_arrived_confirmation_smoke.py tests\test_phase6_replay_policy_cli_smoke.py scripts\run_continual_replay_policy_smoke.py  # exit 0, repeated after final helper split
+  git -c core.safecrlf=false diff --check  # exit 0, repeated after plan/log edits
+  ```
+
+  The public fixed v6 and v7 stdout commands, v7 `prepare`/`run`, and v8
+  `--result`/`--checkpoint` commands also ran separately into the existing
+  ignored `artifacts/runs/p61-smoke/` directory. A read-only JSON/hash
+  check found two v6 seeds with four decisions each, twelve v7 trials and
+  two final seeds, the unchanged request seeds 17/19 and 96 confirmation
+  updates, and two v8 policies × two seeds. These are smoke outputs only.
+- **Local experiment artifacts:** Current saved SHA-256 values are:
+
+  | Ignored path under `artifacts/runs/p61-smoke/` | SHA-256 |
+  |---|---|
+  | `p61-v6-arrived.json` | `250bbe76f5009fb9bf0fc8f2aa549d3ee29ad80957ea9c1cd4b563044d05bd34` |
+  | `p61-v7-selection.json` | `39f1827377306b57a3f07a9fc3568ee3c3b7569eaa2bf63dec1f75433024f118` |
+  | `p61-v7-confirm-request.json` | `2f68c48ecea17dd2c761b08b1d02fc67db80f5f3ee044e4d10b8e4ace4399cee` |
+  | `p61-v7-confirm-result.json` | `1582fcd9fb22db54208384dba697e9773df77642a648a549bcff07026b5f9d82` |
+  | `p61-v7-confirm-summary.json` | `56057e656d3b2d18507b4382e9cdfbc66e3c38cdb50c2d6ed74c36646810f124` |
+  | `p61-v7-confirm-checkpoints/forward.ckpt` | `f3c139d8b962d0f72215a064ded9e1d413625feca39cb9901c592ea84159eec5` |
+  | `p61-v7-confirm-checkpoints/reverse.ckpt` | `3c93dfe0862d3aad119e1b0ad48e8027549f822a00b8513e97bd6c83eb8a53b8` |
+  | `p61-v8-policy-result.json` | `aee054018b9581f4b973925c16e159e736b2b56f47a3cc8c6d80e256a8609594` |
+  | `p61-v8-policy-summary.json` | `9527e241c379897354603d8add64ffb9275c03db744583f5d7f5e856621f66f6` |
+  | `p61-v8-policy.checkpoint` | `29aaa174e7db0cfc6acc8c03b104500b65f188e85031d2959717a9b7177fa064` |
+
+  The v7 confirmation result includes elapsed time; its hash records this
+  artifact's integrity and is not an exact-repeat criterion. Test-owned
+  artifacts were also written under pytest temporary directories.
+- **Skipped tests, limits, blockers, plan change, and exact next action:**
+  The 221 related tests had no skips. The full CPU suite was not rerun for
+  this bounded CLI increment; the prior 1,737 pass/41 CUDA-only skips are
+  logged above. No optional Torch path, pretrained weights, external data,
+  large sweep, or score-based choice was used. No blocker to the next
+  smoke. Added/checkmarked only P6.1c2 and updated row C as partial; P6.1
+  and P6.1c remain open for v9–v12, other v13 branches, and later rows.
+  **Exact next action:** inspect `run_continual_matched_replay_training_smoke.py`,
+  `run_continual_matched_replay_schedule_smoke.py`, and
+  `run_continual_matched_replay_outcomes.py` with their focused tests;
+  implement a tiny v9 train-only/schedule/scored artifact readback and
+  output preflight gate without changing the frozen matched comparison.
+
+## 2026-09-30 — P6.1c3 fixed v9 matched-replay artifact smoke
+
+- **Completed task ID:** P6.1c3. Re-read the active repository guidance,
+  plan/handoff, latest log, and checkout before editing. `master` remains at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; all earlier uncommitted
+  changes and ignored experiment files were preserved. No commit or push.
+- **Implementation and evidence:** The new
+  `tests/test_phase6_matched_replay_cli_smoke.py` launches the fixed v9
+  schedule, train-only, and scored outcome commands as real processes. It
+  reads finite JSON and the saved-file SHA-256, checks all four
+  policy/seed rows and four A/B boundaries per row, selected content,
+  retention and exact planned/applied method work, unscored schedule and
+  train-only role hashes, matched development/final role hashes across
+  policies, and complete scored rows. It asserts no winner. Existing
+  schedule/runner/outcome tests retain shared-row, final-source-seal, and
+  rollback coverage. Three initial occupied-output tests were red because
+  each CLI entered work before its exclusive write; early result-path
+  checks now make those tests green while `open("x")` remains the write
+  boundary. A further red real-process test showed the schedule CLI
+  reported the hash of its LF payload, while Windows text-mode writing
+  translated that payload to CRLF. The CLI now prints the SHA-256 of the
+  saved file bytes. `README.md` and `CHANGELOG.md` document this correction.
+  Historical v9 output bytes, scores, settings, seeds, metrics, and models
+  were not altered.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_matched_replay_cli_smoke.py::test_should_reject_occupied_v9_result_before_any_work  # initially 3 failed, then 3 passed after preflight
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_matched_replay_cli_smoke.py  # initially one saved-file-hash failure, then 4 passed in 2.04 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_matched_replay_cli_smoke.py tests\test_continual_matched_replay_schedule.py tests\test_continual_matched_replay_runner.py tests\test_continual_matched_replay_outcomes.py  # 42 passed in 2.93 s
+  .\.venv\Scripts\python.exe -m scripts.run_continual_matched_replay_schedule_smoke --result artifacts\runs\p61-smoke\p61-v9-schedule.json  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_continual_matched_replay_training_smoke --result artifacts\runs\p61-smoke\p61-v9-training.json  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_continual_matched_replay_outcomes --result artifacts\runs\p61-smoke\p61-v9-outcomes.json  # exit 0
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 293 source files
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_phase6_matched_replay_cli_smoke.py scripts\run_continual_matched_replay_schedule_smoke.py scripts\run_continual_matched_replay_training_smoke.py scripts\run_continual_matched_replay_outcomes.py  # 4 already formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Ignored experiment artifacts:** `artifacts/runs/p61-smoke/p61-v9-schedule.json`
+  has SHA-256 `84d8241033c41a841456950de220cf8fa9e1904bff33888622a2e5bd661a29fa`,
+  training `p61-v9-training.json` has
+  `0e39f07428f5e9ea6e494abb4a2f4867ea77a63f9f4b87413fc5f47a83ece833`,
+  and outcome `p61-v9-outcomes.json` has
+  `2eb5b0937c992116ee18350dd2a858fb16522131ebc00018fbe5fecab149fe86`.
+  Read-only hash checks found each equal to its existing local
+  `data/continual_matched_replay_*_v9_resolved.json` and `_repeat.json`.
+  The older log's schedule hash `2e8094...` describes the LF in-memory
+  payload rather than that file's bytes; the saved file is unchanged.
+  Test-owned artifacts were also produced in pytest temporary directories.
+- **Skipped tests, plan changes, blockers, exact next action:** The 42 related
+  tests had no skips. The full CPU suite was not rerun for this bounded CLI
+  increment; the prior 1,737 pass/41 CUDA-only skips are recorded above.
+  Added/checkmarked P6.1c3 and updated matrix row C as partial. P6.1c,
+  P6.1 parent, P6.1d–f, v10–v12, and other v13 routes remain open. There
+  is no blocker to the next cell. **Exact next action:** inspect
+  `scripts/run_continual_replay_side_effect_ablation.py` and its focused
+  audit tests, then add one fixed v10 historical/wake-only artifact
+  readback and occupied-output smoke without changing its frozen settings.
+
+## 2026-09-30 — P6.1c4 fixed v10 replay side-effect artifact smoke
+
+- **Completed task ID:** P6.1c4. The same `master` checkout remains at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; earlier tracked and
+  untracked user/agent changes were preserved. No commit or push.
+- **Implementation and evidence:** The new
+  `tests/test_phase6_replay_side_effect_cli_smoke.py` runs the fixed v9
+  outcome and v10 side-effect CLIs as real processes, reads finite JSON,
+  compares printed SHA-256 with saved bytes, and checks duplicate-output
+  refusal. It checks both side-effect choices, FIFO/reservoir retention,
+  seeds 17/19, all four A/B boundaries per trial, three matched methods'
+  eight applied optimizer updates and declared inference iterations, full
+  final-role hashes and scores, exact historical v9 rows, matched role
+  identity across policies, and baseline/work parity across side-effect
+  choices. It does not select a policy. The occupied-path test first failed
+  because v10 entered training before discovering the existing result;
+  `scripts/run_continual_replay_side_effect_ablation.py` now preflights
+  `--result` before `_payload()` and retains exclusive `open("x")`.
+  Existing focused ablation tests establish that all eight trials train
+  before any final-role release, and reject mismatched work/failed sleep.
+  `README.md` and `CHANGELOG.md` document the output behavior.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_replay_side_effect_cli_smoke.py::test_should_reject_occupied_v10_result_before_training  # red before preflight: 1 failed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_replay_side_effect_cli_smoke.py tests\test_replay_side_effect_ablation.py tests\test_replay_side_effect_policy.py tests\test_replay_side_effect_audit.py  # 16 passed in 2.05 s after final assertions
+  .\.venv\Scripts\python.exe -m scripts.run_continual_replay_side_effect_ablation --result artifacts\runs\p61-smoke\p61-v10-side-effect.json  # exit 0
+  Get-FileHash -Algorithm SHA256 artifacts\runs\p61-smoke\p61-v10-side-effect.json,data\continual_replay_side_effect_ablation_v10_resolved.json,data\continual_replay_side_effect_ablation_v10_repeat.json  # all equal
+  .\.venv\Scripts\python.exe -m ruff format tests\test_phase6_replay_side_effect_cli_smoke.py scripts\run_continual_replay_side_effect_ablation.py  # 1 test file reformatted
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 294 source files
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_phase6_replay_side_effect_cli_smoke.py scripts\run_continual_replay_side_effect_ablation.py  # 2 already formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Ignored experiment artifact:**
+  `artifacts/runs/p61-smoke/p61-v10-side-effect.json` SHA-256
+  `1e946e6a14d83fa77e696cebf103e34b765b8b323e5b22276b5c35b74a5c2f2d`
+  matches both existing local `data/continual_replay_side_effect_ablation_v10_resolved.json`
+  and `_repeat.json` byte for byte. Test-owned v9/v10 files were written
+  under pytest temporary directories. No historical result bytes, seed,
+  setting, metric, or baseline were changed. The null side-effect result
+  and negative circadian comparison remain intact.
+- **Skipped tests, plan changes, blockers, exact next action:** The 16
+  related tests had no skips. The full CPU suite was not rerun for this
+  small CLI/test increment; the last full run was 1,737 passed/41
+  CUDA-only skips before these P6.1 additions. Added and checked only
+  P6.1c4, updated matrix row C as partial, and left P6.1c/P6.1 parent,
+  P6.1d–f, v11/v12, and other v13 outputs unchecked. No blocker to the
+  next cell. **Exact next action:** inspect the fixed v11
+  difficulty-modulation and v12 structural-importance public producers
+  and focused tests, then add one bounded real-process v11 output/readback
+  smoke with fixed branches/seeds, role hashes, and occupied-output
+  preflight; keep the null finding unchanged.
+
+## 2026-09-30 — P6.1c5 fixed v11 difficulty-modulation artifact smoke
+
+- **Completed task ID:** P6.1c5. The same `master` checkout remains at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; prior tracked,
+  untracked, and ignored work was preserved. No commit or push.
+- **Implementation and evidence:** The new
+  `tests/test_phase6_difficulty_cli_smoke.py` launches the public fixed
+  v11 NumPy/Torch CPU command as a real process. It reads finite JSON,
+  checks the printed saved-file SHA-256 and duplicate-output refusal,
+  requires all 24 seed/condition/backend/modulation cells, four A/B
+  diagnostic rows and exact 4-update/96-example/8-inference work per
+  cell, equal within-backend arm roles/work, shared development/final
+  role hashes per seed, and three distinct effective B-train hashes.
+  The test records every outcome and selects no arm. Its occupied-output
+  test first failed because v11 entered training before discovering an
+  existing result. `scripts/run_difficulty_matched_comparison.py` now
+  checks the path before training and retains exclusive `open("x")`.
+  Existing focused tests prove all 24 cells train before any final field
+  is read, and reject changed work or source facts before release.
+  `README.md` and `CHANGELOG.md` document the early output check.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_difficulty_cli_smoke.py::test_should_reject_occupied_v11_result_before_training  # red before preflight: 1 failed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_difficulty_cli_smoke.py tests\test_difficulty_matched_benchmark.py tests\test_difficulty_signal_audit.py  # final 14 passed in 4.09 s
+  .\.venv\Scripts\python.exe -m scripts.run_difficulty_matched_comparison --result artifacts\runs\p61-smoke\p61-v11-difficulty.json  # exit 0
+  Get-FileHash -Algorithm SHA256 artifacts\runs\p61-smoke\p61-v11-difficulty.json,data\difficulty-modulation-v11-result.json,data\difficulty-modulation-v11-repeat.json  # all equal
+  .\.venv\Scripts\python.exe -m ruff format tests\test_phase6_difficulty_cli_smoke.py scripts\run_difficulty_matched_comparison.py  # 1 test file reformatted
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 295 source files
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_phase6_difficulty_cli_smoke.py scripts\run_difficulty_matched_comparison.py  # 2 already formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Ignored experiment artifact:**
+  `artifacts/runs/p61-smoke/p61-v11-difficulty.json` has SHA-256
+  `caf939687d54ba4b480e60b7d9593005093a479968989c42789de230b978b9b5`,
+  equal to both existing local `data/difficulty-modulation-v11-result.json`
+  and `data/difficulty-modulation-v11-repeat.json` byte for byte. The
+  pytest smoke produced another file in its temporary directory. The
+  fixed null modulation outcome, seeds, sources, score metric, baselines,
+  and all existing historical outputs were unchanged.
+- **Skipped tests, plan changes, blockers, exact next action:** The 14
+  related tests had no skips. The full CPU suite was not rerun for this
+  small CLI/test increment; the last full run was 1,737 passed/41
+  CUDA-only skips before these P6.1 additions. Added/checkmarked only
+  P6.1c5 and updated matrix row C as partial. P6.1c/P6.1 parent,
+  P6.1d–f, v12, and other v13 outputs remain open. No blocker to the
+  next cell. **Exact next action:** inspect the fixed v12 structural-rank
+  train-only and scored CLI producer with focused tests, then add one
+  bounded real-process readback smoke for both outputs, all 32 factor
+  cells, role/work parity and occupied-output preflight without changing
+  the null finding.
+
+## 2026-09-30 — P6.1c6 and P6.1c v6–v13 smoke-family closure
+
+- **Completed task IDs:** P6.1c6 and P6.1c parent. The checkout remains
+  `master` at `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; earlier
+  tracked/untracked changes and ignored evidence were preserved. No
+  commit or push.
+- **Implementation and evidence:** The new
+  `tests/test_phase6_structural_rank_cli_smoke.py` launches both public
+  fixed v12 modes as real processes. It reads finite JSON, validates
+  printed SHA-256 against saved bytes and duplicate refusal, enumerates
+  the exact 32 seed/backend/three-factor cells, checks train-only role
+  hashes and no final release, equal declared work/capacity and one
+  structural change, and binds every train fact to its scored row with
+  common final-role hashes per seed. Its two early output tests were red:
+  both train-only and scored modes entered work before discovering an
+  occupied file. `scripts/run_structural_rank_comparison.py` now checks
+  `--result` before either mode begins; exclusive writes remain. Existing
+  structural tests prove 32 trials freeze before any final field is read
+  and reject forged work, role, structure, and pre-sleep facts. `README.md`
+  and `CHANGELOG.md` document the output preflight.
+- **P6.1c closure rationale:** P6.1c1 already covered the only public
+  v13 producer, `scripts/run_sleep_trigger_comparison.py`: both files,
+  all 12 cells, independent stationary samples, and forced periodic
+  events. P6.1c2–c5 covered v6–v11 stdout, request, checkpoint, schedule,
+  train-only and scored outputs. P6.1c6 covers the last fixed v12 modes.
+  The joint 20-test P6.1c integration batch passed; matrix row C is now
+  covered. This does not close P6.1 parent, whose v14, optional Torch,
+  and remaining output families are still open. No v12 factor, seed,
+  score, metric, baseline or historical result was changed or selected.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_structural_rank_cli_smoke.py::test_should_reject_occupied_v12_result_before_work  # initially 2 failed, both modes entered work
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_structural_rank_cli_smoke.py tests\test_structural_rank_comparison.py tests\test_structural_reward_rank_audit.py  # final 17 passed in 8.65 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_smoke_suite.py tests\test_phase6_arrived_cli_smoke.py tests\test_phase6_arrived_confirmation_smoke.py tests\test_phase6_replay_policy_cli_smoke.py tests\test_phase6_matched_replay_cli_smoke.py tests\test_phase6_replay_side_effect_cli_smoke.py tests\test_phase6_difficulty_cli_smoke.py tests\test_phase6_structural_rank_cli_smoke.py  # 20 passed in 15.98 s
+  .\.venv\Scripts\python.exe -m scripts.run_structural_rank_comparison --train-only --result artifacts\runs\p61-smoke\p61-v12-train.json  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_structural_rank_comparison --result artifacts\runs\p61-smoke\p61-v12-result.json  # exit 0
+  Get-FileHash -Algorithm SHA256 artifacts\runs\p61-smoke\p61-v12-train.json,data\structural-ranking-v12-train.json,data\structural-ranking-v12-train-repeat.json,artifacts\runs\p61-smoke\p61-v12-result.json,data\structural-ranking-v12-result.json,data\structural-ranking-v12-result-repeat.json  # each variant equals its two historical files
+  .\.venv\Scripts\python.exe -m ruff format tests\test_phase6_structural_rank_cli_smoke.py scripts\run_structural_rank_comparison.py  # 1 test file reformatted
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 296 source files
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_phase6_structural_rank_cli_smoke.py scripts\run_structural_rank_comparison.py  # 2 already formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Ignored experiment artifacts:**
+  `artifacts/runs/p61-smoke/p61-v12-train.json` SHA-256
+  `f4137041aa152c9fca17d8d990a0f89b7329a25a9cfe9b907e2e5e54d29c0379`
+  equals both existing train files; `p61-v12-result.json` SHA-256
+  `1f4bb8017f799fe5f3572ebb5830a51a65d654bde6e23764365121e49844a309`
+  equals both existing scored files. Test-owned files were also written
+  under pytest temporary directories. No large sweep, pretrained data,
+  or GPU work ran.
+- **Skipped tests, plan changes, blockers, exact next action:** The 17
+  related and joint 20 smoke tests had no skips. The full CPU suite was
+  not rerun for this small CLI/test increment; the last full run was
+  1,737 passed/41 CUDA-only skips before these P6.1 additions. Added
+  and checked P6.1c6 and, after confirming the v13 producer inventory,
+  checked P6.1c parent and marked matrix C covered. P6.1 parent and
+  P6.1d–f remain open. No blocker to the next cell. **Exact next action:**
+  inventory the fixed v14 schedule/train-only/scored bundle, versioned
+  manifest, resume state, observation/report/dashboard outputs, and
+  existing verifiers. Run read-only verification on an existing completed
+  v14 bundle and its missing/tampered-input tests, then add the smallest
+  missing producer/readback gate without launching a fresh full study.
+
+## 2026-09-30 — P6.1d1/d2 v14 reader and raw-artifact gates
+
+- **Completed task IDs:** P6.1d1 and P6.1d2. P6.1d parent, P6.1e/f,
+  and P6.1 parent remain unchecked. Rechecked `AGENTS.md`, the active
+  plan/handoff and latest log, and the actual dirty `master` checkout at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad` before editing.
+  Existing tracked/untracked user work and ignored artifacts were
+  preserved. No commit or push.
+- **Read-only existing-artifact verification:** The public bundle verifier
+  accepted completed `p54-fixed-v14-preset`, `p51-v14-schema-d`,
+  `p52-measured-a`, and `p53-resume-cli-a`. Public observation,
+  measured-observation, summary-report, and dashboard verifiers accepted
+  their respective existing directories. Direct sidecar verification
+  accepted `p52-measured-a` and `p53-resume-cli-a`; the latter resume
+  state reads `completed`. No new v14 training was used for these checks.
+  The seven selected missing/tamper tests initially yielded 6 passed,
+  1 failed: the measured-projection tamper test assumed a prior test
+  wrote `wake-metrics.csv`. It now copies five verified source/sidecar
+  files into its own test directory and writes its own projection before
+  tampering. The isolated test passed, followed by all 10 measured and
+  selected missing/tamper cases. No producer behavior or historical
+  artifact changed.
+- **Raw public CLI implementation and evidence:** The new
+  `tests/test_phase6_v14_raw_cli_smoke.py` launches the fixed schedule,
+  train-only, and scored CLIs as real processes. It reads finite JSON,
+  checks printed SHA-256 against saved bytes, both seeds, three arms,
+  all 24 A/B opportunities per seed, retention/selected IDs, method
+  planned versus applied replay rows, unscored development roles,
+  six accepted periodic versus zero adaptive/no-sleep attempts, 18
+  contrasts, three methods per scored cell, common final-role IDs/hashes,
+  and duplicate refusal. Three initial red tests showed each CLI entered
+  work before discovering an occupied output; all three now preflight
+  before `build_payload()` and retain exclusive `open("x")`. Existing
+  focused tests continue to check v9 periodic subset parity, detached
+  train rows, forged work and guard rejection, all-six-trial preflight,
+  and globally delayed final-role release. The focused raw suite passed
+  35; the final raw/measured suite passed 39. `README.md` and
+  `CHANGELOG.md` document the early refusal.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts\runs\p54-fixed-v14-preset  # completed
+  .\.venv\Scripts\python.exe -m scripts.build_v14_artifact_report --verify-run artifacts\runs\p54-fixed-v14-preset  # accepted
+  .\.venv\Scripts\python.exe -m scripts.build_v14_dashboard --verify-run artifacts\runs\p54-fixed-v14-preset  # accepted
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts\runs\p51-v14-schema-d  # completed
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-run artifacts\runs\p51-v14-schema-d  # accepted
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts\runs\p52-measured-a  # completed
+  .\.venv\Scripts\python.exe -m scripts.project_v14_observations --verify-measured-run artifacts\runs\p52-measured-a  # accepted
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts\runs\p53-resume-cli-a  # completed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_versioned_v14_run.py::test_should_write_once_and_reject_tampered_or_missing_files tests\test_versioned_v14_run.py::test_should_reject_partial_cells_even_when_file_checksum_is_updated tests\test_v14_observation_projection.py::test_should_write_once_verify_and_reject_rehashed_forgery tests\test_v14_measured_observations.py::test_should_reject_changed_sidecar_and_rehashed_projection_file tests\test_v14_artifact_report.py::test_should_verify_source_before_writing_and_reject_missing_bundle tests\test_v14_dashboard_projection.py::test_should_verify_report_before_writing_and_reject_missing_source tests\test_v14_checked_resume.py::test_should_reject_changed_checkpoint_bytes_before_training  # first 6 passed/1 failed: test order dependency
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_v14_measured_observations.py::test_should_reject_changed_sidecar_and_rehashed_projection_file  # isolated 1 passed after fixture repair
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_v14_measured_observations.py tests\test_versioned_v14_run.py::test_should_write_once_and_reject_tampered_or_missing_files tests\test_versioned_v14_run.py::test_should_reject_partial_cells_even_when_file_checksum_is_updated tests\test_v14_observation_projection.py::test_should_write_once_verify_and_reject_rehashed_forgery tests\test_v14_artifact_report.py::test_should_verify_source_before_writing_and_reject_missing_bundle tests\test_v14_dashboard_projection.py::test_should_verify_report_before_writing_and_reject_missing_source tests\test_v14_checked_resume.py::test_should_reject_changed_checkpoint_bytes_before_training  # 10 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_v14_raw_cli_smoke.py::test_should_reject_occupied_v14_result_before_work  # initial 3 failed; all entered work
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_v14_raw_cli_smoke.py tests\test_continual_trigger_replay_schedule.py tests\test_continual_trigger_replay_training_study.py tests\test_continual_trigger_replay_outcomes.py tests\test_v14_measured_observations.py  # final 39 passed in 14.03 s
+  .\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_schedule --result artifacts\runs\p61-smoke\p61-v14-schedule.json  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_training --result artifacts\runs\p61-smoke\p61-v14-training.json  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_continual_trigger_replay_outcomes --result artifacts\runs\p61-smoke\p61-v14-outcomes.json  # exit 0
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 297 source files
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_v14_measured_observations.py tests\test_phase6_v14_raw_cli_smoke.py scripts\run_continual_trigger_replay_schedule.py scripts\run_continual_trigger_replay_training.py scripts\run_continual_trigger_replay_outcomes.py  # 5 already formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Ignored experiment artifacts:** `p61-v14-schedule.json` SHA-256
+  `1c30e960aa2dee65a862434fb584e12eaa31bd14a71cb73b3eb919f9dfa5d168`
+  equals the canonical `data/trigger-replay-v14-opportunities-verified{,-repeat}.json`.
+  The older preliminary `data/trigger-replay-v14-opportunities{,-repeat}.json`
+  has CRLF bytes and SHA-256 `6f619a13...`; the 2026-09-29 log explains
+  its superseded writer smoke. `p61-v14-training.json` SHA-256
+  `174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`
+  and `p61-v14-outcomes.json` SHA-256
+  `ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`
+  equal both historical raw repeats and the versioned bundle files.
+  All three fresh files are ignored under `artifacts/runs/p61-smoke/`.
+- **Skipped tests, plan changes, blockers, exact next action:** The final
+  10 and 39 related tests had no skips. The full CPU suite was not rerun
+  for this bounded adapter/test increment; its prior 1,737 pass/41
+  CUDA-only skips preceded these Phase 6 changes. Added/checkmarked
+  P6.1d1/d2, marked matrix row D partial, and left P6.1d parent open
+  without weakening its bundle/derived/sidecar/resume criteria. No
+  blocker to the next cell. **Exact next action:** add one bounded public
+  producer/readback smoke for a completed versioned v14 bundle and its
+  observation, report, and dashboard chain, checking every declared file
+  and verifier. Then cover measured diagnostics/projection and checked
+  resume CLI output through a similarly bounded route.
+
+## 2026-09-30 — P6.1d3/d4 and P6.1d v14 artifact-family closure
+
+- **Completed task IDs:** P6.1d3, P6.1d4, and P6.1d parent. The dirty
+  `master` checkout remains at `c17a37d792a6f26728a557c5ecc613d528d0f9ad`.
+  Earlier tracked/untracked work and ignored historical results were
+  preserved. No commit or push.
+- **Completed bundle chain:**
+  `tests/test_phase6_v14_bundle_chain_cli_smoke.py` launches the public
+  fixed-v14 bundle CLI once into a pytest temporary directory, verifies
+  manifest/training/outcomes and the frozen raw SHA-256 values, then
+  calls each public writer and verifier for observations, report, and
+  dashboard. It reads the exact eight JSONL/CSV observation files and
+  their 144/144/144/144/12/516/18/18 record counts, the two summary
+  files with nine rows, dashboard HTML and four PNG signatures, every
+  hash manifest, and unchanged source bytes. The one-test chain passed.
+- **Measured interrupted-resume chain:**
+  `tests/test_phase6_v14_measured_resume_cli_smoke.py` invokes the public
+  `--resumable --capture-wake-diagnostics` entrypoint, injects failure
+  after one committed trial, and confirms a failed unscored cursor with
+  its checkpoint and no public bundle. A separate CLI process resumes
+  it to all six cells. Public bundle and measured-projection verifiers
+  pass; the test reads a 432-record finite wake sidecar, all ten measured
+  JSONL/CSV projection files and exact counts/hashes, and an idempotent
+  completed `--resume`. Both training/outcome bytes retain SHA-256
+  `174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`/
+  `ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`.
+  Existing checked-resume tests establish that only missing trials
+  retrain and reject source/cursor/checkpoint/role/work drift. The
+  broad versioned/derived/resume/atomic-publication batch passed 63
+  before the two new test functions were split into focused helpers;
+  both passed afterward, including the final descriptive test rename.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_v14_bundle_chain_cli_smoke.py  # initial 1 passed in 4.38 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_v14_measured_resume_cli_smoke.py  # initial 1 passed in 4.94 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_v14_bundle_chain_cli_smoke.py tests\test_phase6_v14_measured_resume_cli_smoke.py tests\test_versioned_v14_run.py tests\test_v14_observation_projection.py tests\test_v14_measured_observations.py tests\test_v14_artifact_report.py tests\test_v14_dashboard_projection.py tests\test_v14_checked_resume.py tests\test_atomic_artifact_publication.py  # 63 passed in 40.61 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_v14_bundle_chain_cli_smoke.py tests\test_phase6_v14_measured_resume_cli_smoke.py  # final 2 passed in 9.37 s after helper split/rename
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 299 source files
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_phase6_v14_bundle_chain_cli_smoke.py tests\test_phase6_v14_measured_resume_cli_smoke.py  # 2 already formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Experiment artifacts and limits:** The two new chains wrote only
+  local pytest temporary directories, which hold their full completed
+  bundle/projection/report/dashboard and interrupted-resume/measurement
+  file sets. The existing ignored `artifacts/runs/p54-fixed-v14-preset/`,
+  `p51-v14-schema-d/`, `p52-measured-a/`, and `p53-resume-cli-a/` were
+  verified read-only in P6.1d1. The new ignored raw files in
+  `artifacts/runs/p61-smoke/` are recorded in P6.1d2. No pretrained
+  data, GPU work, large sweep, or result-driven adjustment occurred.
+- **Skipped tests, plan changes, blockers, exact next action:** The 63
+  related and final 2 chain tests had no skips. The full CPU suite was
+  not rerun for these bounded CLI/reader additions; the last full run
+  before Phase 6 additions was 1,737 passed/41 CUDA-only skips. Added
+  and checked P6.1d3/d4 and then P6.1d parent after all row D files,
+  readers and missing/tampered gates had evidence; matrix D is covered.
+  P6.1 parent and P6.1e/f remain open. No blocker to the next cell.
+  **Exact next action:** inventory supported optional Torch CPU head,
+  fixed-feature, synthetic-vision, matched-head, and representative
+  public branches with their JSON/CSV/config/selection/checkpoint output
+  contracts; add one bounded CPU/stub-data process readback gate without
+  downloading weights. Record unsupported replay and CUDA-only routes
+  as explicit skips rather than parity coverage.
+
+## 2026-09-30 — P6.1e1 Torch CPU unmatched synthetic CLI pair
+
+- **Completed task ID:** P6.1e1. The dirty `master` checkout remains at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; earlier tracked,
+  untracked, and ignored user work was preserved. No commit or push.
+- **Implementation and evidence:** `tests/test_phase6_torch_unmatched_cli_smoke.py`
+  runs the real root ResNet CLI twice with four synthetic examples per
+  train/guard/validation/test role, one epoch, seed 47, CPU, random
+  backbone weights, no dataset download, and one CPU thread. Both result
+  JSON and separate resolved-config JSON parse with nonfinite tokens
+  rejected. The test checks identical embedded/separate config, the
+  descriptive unmatched protocol, complete three-model reports and
+  training order, common four-role hashes, and unchanged output bytes
+  after repeat-command occupied-path refusal. The forced arm records
+  one accepted periodic sleep with the inner guard and no replay update;
+  the disabled arm records one `sleep_disabled` skip and zero attempts.
+  Scores and resource timings were not compared or used for selection.
+  The `torch`/`torchvision` runtime was 2.14.0+cpu/0.29.0+cpu with CUDA
+  unavailable. This does not establish matched-head or replay parity.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -c "import torch, torchvision; print(torch.__version__, torchvision.__version__, torch.cuda.is_available())"  # 2.14.0+cpu 0.29.0+cpu False
+  # Two explicit four-example, one-epoch resnet50_benchmark.py CPU runs saved forced/control JSON and resolved-config files under artifacts/runs/p61-smoke/; both exited 0 in about 4.1 s each.
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_unmatched_cli_smoke.py  # 1 passed in 10.92 s
+  .\.venv\Scripts\python.exe -m ruff format tests\test_phase6_torch_unmatched_cli_smoke.py  # 1 file formatted
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_unmatched_cli_smoke.py tests\test_single_resnet_config.py  # 19 passed in 11.08 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_phase6_torch_unmatched_cli_smoke.py  # 1 already formatted
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 300 source files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Experiment artifacts:** Four exploratory ignored files exist under
+  `artifacts/runs/p61-smoke/`: `p61-torch-unmatched-forced.json`
+  SHA-256 `fa4818bd3f87430cb961256ef607beccd88c7611c224139805e701f23a0be793`,
+  `p61-torch-unmatched-forced-config.json`
+  `e95feefbac5b76372ddea17e775e9bb27209b1497171121bcd9958c3e077a53c`,
+  `p61-torch-unmatched-control.json`
+  `8ba583c7316224af4f3aac1632d51c97cd3e5966f5db1b9b32aeb5af2b48b053`,
+  and `p61-torch-unmatched-control-config.json`
+  `b61f9db3037a36391976add967e94ef34a00a9ccb5837bda7d094602ce2fcd33`.
+  These exploratory commands used the synthetic source's default
+  `dataset_download=True`, which opens no external data for that source;
+  the final test explicitly fixes it to `False`. The test's outputs live
+  only in its temporary directory. Timing-bearing report bytes are not
+  reproducibility hashes. No pretrained file, GPU run, or sweep was used.
+- **Skipped tests, plan changes, blockers, exact next action:** The focused
+  19-test batch had no skips. The full CPU suite was not rerun for this
+  isolated adapter/test increment; the last full run before Phase 6
+  additions was 1,737 passed/41 CUDA-only skips. CUDA-specific
+  representative and allocator branches were not run under the CPU gate;
+  Torch replay is unsupported. Split P6.1e into e1–e4 after route
+  inspection, checked e1 only, and marked matrix row E partial. P6.1e,
+  P6.1f, and P6.1 parent remain unchecked. No blocker to the next cell.
+  **Exact next action:** implement P6.1e2's bounded public fixed-feature,
+  fixed-width capacity, and trusted-checkpoint CPU output/readback gate;
+  use the existing focused contracts, tiny synthetic data, no weights
+  download, and explicit CPU-only memory scope.
+
+## 2026-09-30 — P6.1e2 fixed-feature and trusted checkpoint CPU readback
+
+- **Completed task ID:** P6.1e2. The checkout and earlier work remain as
+  recorded above; no commit, push, historical artifact edit, or new
+  algorithmic behavior occurred.
+- **Implementation and evidence:**
+  `tests/test_phase6_torch_fixed_feature_smoke.py` uses the public
+  three-head shared-feature API with dynamic capacity permitted, a
+  disabled-sleep control on the same four-example/role synthetic bank,
+  the separate forced fixed-width capacity/memory route, and a trusted
+  local checkpointed route. Every returned dataclass round-trips through
+  finite JSON. The test checks all three reports, common role/feature,
+  backbone and initial-head hashes, accepted periodic versus disabled
+  skipped event, unchanged fixed-width parameter counts, bounded work,
+  zero replay and empty CPU CUDA fields. It checks sampled process RSS
+  when the host provides it. The complete checkpoint reads back as
+  format 2 with an after-sleep cursor, one attempt, and only the three
+  development-role feature hashes; the completed result separately
+  includes final-test features. A completed resume retains trained-head
+  hashes; a changed seed and a corrupt checksum reject. The first
+  version of the new test incorrectly expected the final-test feature
+  hash inside the training cursor, then incorrectly treated the
+  after-sleep cursor as a completed-epoch progress count. Both test
+  expectations were corrected to the existing sealed cursor contract.
+  Existing selected tests additionally exercise final-role timing,
+  interruption/resume, capacity recovery, wall-time sealing, and
+  forged sleep-history refusal. No scientific parameters or scores
+  were chosen from these outputs.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_fixed_feature_smoke.py  # first two runs failed on test-only checkpoint assumptions; final 1 passed in 5.31 s
+  .\.venv\Scripts\python.exe -m ruff format tests\test_phase6_torch_fixed_feature_smoke.py  # 1 file formatted
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_fixed_feature_smoke.py tests\test_matched_head_benchmark.py tests\test_matched_head_capacity.py tests\test_fixed_feature_checkpoint_resume.py -k 'test_should_read_fixed_feature_control_capacity_and_trusted_cpu_checkpoint or test_three_head_training_state_ignores_outer_validation_and_final_labels or test_fixed_width_control_preserves_capacity_during_guarded_sleep or test_fixed_width_capacity_checkpoint_preserves_guarded_sleep_and_final_test or test_file_checkpoint_matches_uninterrupted_guarded_training or test_sleep_history_tamper_rejects_before_fixed_feature_update or test_public_wall_time_checkpoint_keeps_final_test_sealed'  # 17 passed, 78 deselected in 13.43 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_unmatched_cli_smoke.py tests\test_phase6_torch_fixed_feature_smoke.py  # 2 passed in 13.59 s, final cross-cell order check
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m ruff format --check tests\test_phase6_torch_unmatched_cli_smoke.py tests\test_phase6_torch_fixed_feature_smoke.py  # 2 already formatted
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 301 source files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Experiment artifacts, skipped tests, plan changes, blockers, exact next
+  action:** The new trusted checkpoint and all result readbacks existed
+  only under pytest's temporary directory. No weight download, CUDA
+  allocator measurement, or sweep occurred. The selected batch had no
+  skips and 78 tests were deliberately deselected; the full CPU suite
+  was not rerun for this focused test-only addition. Checked P6.1e2 and
+  expanded matrix row E's partial evidence. P6.1e3/e4, P6.1f, and P6.1
+  remain unchecked. There is no blocker to the next CPU route.
+  **Exact next action:** implement P6.1e3 by running the fixed tiny
+  `run_repeated_confirmation_smoke.py` selection/manifest/confirmation
+  producer into a pytest temporary output directory without changing
+  its candidates, seeds, or budgets; read back all declared files and
+  test occupied/failure preservation.
+
+## 2026-09-30 — P6.1e3 repeated matched-head artifacts and failure sidecar
+
+- **Completed task ID:** P6.1e3. The dirty `master` checkout remains at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`. Earlier changes and
+  local artifacts were preserved; no commit or push.
+- **Implementation and evidence:**
+  `scripts/run_repeated_confirmation_smoke.py` gained only an optional
+  `--output-dir` and an exclusive failure sidecar. Its no-flag destination,
+  two a/b candidates per head, selection seed 47, confirmation seeds
+  53/59/61, 0.05 s/head wall budget, 1,000 epoch cap, three scopes,
+  metrics, and model settings stayed fixed. The script preflights all
+  four paths before selection. On ordinary failure it records the stage,
+  exception, hashes of persisted files, and available selection
+  attempts/trials; it re-raises and does not publish a false completed
+  result. A confirmation failure retains the already saved validation
+  selection and manifest. The application returns only a complete
+  aggregate, so that sidecar does not claim to preserve inner-scope
+  confirmation rows.
+- **Public producer/readback:**
+  `tests/test_phase6_torch_repeated_confirmation_cli_smoke.py` launches
+  the actual fixed script as a CPU process into a pytest temporary
+  directory, then reads finite stdout and exactly the selection,
+  manifest, and result JSON. It verifies six validation-only selection
+  attempts/trials, two equal candidate trials per head, empty selection
+  confirmations, the source-selection and restorable manifest digests,
+  disjoint fixed seeds, nine fixed-data trials and test confirmations,
+  three deadline wall-time reports, three memory reports with three
+  distinct child PIDs each, and paired development/final role, feature,
+  backbone, and initial-head hashes. It checks all three descriptive
+  summary maps and unchanged-byte occupied-path refusal. A first test
+  run found success stdout advertising the unused failure filename;
+  the producer now lists only published files. The second failed test
+  expectation compared a development-only split map to a completed
+  final-role map; it was corrected to check the final hash separately.
+  Existing selection/manifest tests verify no final access before all
+  fixed-data training and reject manifest/selection drift.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_repeated_confirmation_cli_smoke.py -k 'occupied or failure_after_confirmation_error'  # 5 passed, 1 deselected in 3.22 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_repeated_confirmation_cli_smoke.py::test_should_read_predeclared_three_scope_cpu_cli_artifacts  # two test/readback failures, then corrected
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_repeated_confirmation_cli_smoke.py  # 6 passed in 41.54 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_repeated_confirmation_cli_smoke.py::test_should_save_incomplete_selection_attempt_without_a_false_result tests\test_repeated_head_confirmation.py tests\test_matched_head_tuning.py  # 17 passed in 3.08 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_repeated_confirmation_cli_smoke.py tests\test_repeated_head_confirmation.py tests\test_matched_head_tuning.py  # final 23 passed in 41.65 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m ruff format --check scripts\run_repeated_confirmation_smoke.py tests\test_phase6_torch_repeated_confirmation_cli_smoke.py  # 2 already formatted
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 302 source files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Experiment artifacts:** The passing fixed run's three JSON files
+  were copied byte-for-byte from its pytest temporary directory to
+  ignored `artifacts/runs/p61-smoke/p61-repeated-confirmation/`:
+  `benchmark_repeated_selection_smoke.json` SHA-256
+  `c52b437df0dbdd144bcf12e16efd6be86a623a9d3e46c8f35a121ced6ed89dfd`,
+  `benchmark_repeated_manifest_smoke.json`
+  `a8fcd00ef0e0e4b01c22f5b9195e67afe821c06a271a3c704dbca56bd282fecc`,
+  and `benchmark_repeated_result_smoke.json`
+  `98eb1bddbe552b5ea34afe6c67d26327c10b8154fb32e78f2855ab5457ab83af`.
+  The injected confirmation and selection failures existed only under
+  pytest temporary directories. The historical default `artifacts/`
+  study files were untouched. Timing/RSS fields make complete file
+  hashes provenance for this run, not byte-exact reproducibility targets.
+- **Skipped tests, plan changes, blockers, exact next action:** The final
+  23-test related batch had no skips. The full CPU suite was not rerun;
+  CUDA-specific confirmation was not launched and no pretrained weights
+  or external data were fetched. Marked P6.1e3 complete, expanded
+  matrix row E's partial evidence, and documented the new opt-in path
+  and failure meaning in README. P6.1e/e4, P6.1f, and P6.1 parent remain
+  unchecked. No blocker to the next read-only classification.
+  **Exact next action:** audit the representative CIFAR/pretrained CLI
+  guards and focused tests, run only CPU-safe stub/read-only preflights,
+  and record exact CUDA-only or local-source/weight skip reasons for
+  P6.1e4 without rerunning the frozen confirmation.
+
+## 2026-09-30 — P6.1e4 representative CPU-safe route classification
+
+- **Completed task ID:** P6.1e4. The same dirty `master` checkout at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad` remains in use; no
+  commit, push, artifact overwrite, pretrained download, or frozen
+  confirmation rerun occurred.
+- **Route evidence:** `docs/phase6-torch-route-inventory.md` records the
+  public synthetic, fixed-feature, repeated, representative, local-CIFAR,
+  pretrained CPU, and pinned CUDA paths and output families. The current
+  Torch/torchvision pair is `2.14.0+cpu`/`0.29.0+cpu`, CUDA is unavailable,
+  and `CUBLAS_WORKSPACE_CONFIG` is unset. The representative feasibility
+  and selection runtime guards both rejected this pair before dataset
+  work; their `run`/worker paths also require deterministic CUDA, pinned
+  local archive/weights, and a quiet device. The local CIFAR archive
+  (170,498,071 bytes) and cached ImageNet V2 weights (102,540,417 bytes)
+  are present and passed the pinned read-only provenance checks, so the
+  current skip is a runtime/device gate, not missing source files.
+- **CPU-safe preflights and saved output readback:** The public
+  `prepare_cifar_representative_study` CLI wrote a new ignored request
+  whose SHA-256 `baa4bcaf5138946d01ad0d7c1b8babc21350ae18e53e24bc4e37a9cedf3dc773`
+  equals the original frozen request byte for byte. Public selection
+  `--preflight` restored six complete validation trials, zero final
+  iterations, and saved request/selection/manifest/freeze digests. A
+  read-only saved-scope audit reconstructed all nine fixed-data, three
+  wall-time, and three isolated-memory reports. A first exact
+  current-dataclass versus historical-result assertion failed only on
+  18 fields added since publication: empty `sleep_events` and
+  `cuda_allocator_segments` on each of nine wall-time head reports.
+  Removing those empty defaults produced exact equality; no scientific
+  value differed and no saved byte was changed. Read-only CPU pretrained
+  profile/request/result checks matched the verified cached weight and
+  showed 128/64/64 development-role counts, zero final iterations, six
+  saved validation trials, a restorable manifest, and nine/three/three
+  saved confirmation rows. The five representative test modules passed
+  all 21 CPU-safe stub tests.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_cifar_representative_feasibility.py tests\test_cifar_representative_study.py tests\test_cifar_representative_selection.py tests\test_cifar_representative_restore.py tests\test_cifar_representative_confirmation.py  # 21 passed in 2.83 s
+  .\.venv\Scripts\python.exe -m scripts.prepare_cifar_representative_study --request artifacts/runs/p61-smoke/p61-representative-request.json  # exit 0; new request equals frozen bytes
+  .\.venv\Scripts\python.exe -m scripts.restore_cifar_representative_selection --preflight  # exit 0; six trials, zero final iterations
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  Additional read-only commands used PowerShell here-strings piped to
+  `.\.venv\Scripts\python.exe -`: one invoked
+  `cpu._verify_local_inputs()` and checked the saved profile and CPU
+  pretrained request/selection/manifest/result (exit 0); one restored
+  representative selection and called `audit.audit_saved_scopes()`
+  (exit 0); and one compared the audit to the saved aggregate after
+  removing only the 18 new empty defaults (exit 0). The preceding
+  unnormalized exact-equality command exited 1, as described above.
+
+- **Experiment artifacts, skips, plan changes, blockers, exact next
+  action:** The only new artifact is ignored
+  `artifacts/runs/p61-smoke/p61-representative-request.json` at the
+  frozen request hash above. Existing ignored representative and
+  pretrained results were read only. No CUDA process, quiet-device gate,
+  large CIFAR study, or full CPU test suite ran. Marked P6.1e4 complete
+  and added P6.1e5 because code inspection found CPU-capable older
+  profile/selection/confirmation producers whose historical artifacts
+  alone do not meet row E's fresh bounded producer gate. Matrix E and
+  P6.1e remain partial; P6.1f and P6.1 parent remain open. There is no
+  blocker to stubbed CPU work. **Exact next action:** add a temporary-path
+  stub producer/readback test for `profile_cifar_feature_setup.py`,
+  including request/result/failure and exclusive preflight; then assess
+  the older CPU local-CIFAR/pretrained selection and confirmation
+  adapters under P6.1e5.
+
+## 2026-09-30 — P6.1e5a, e5b1–b3 and Torch CPU row E closure
+
+- **Completed task IDs and checkout:** P6.1e5a, P6.1e5b1, P6.1e5b2,
+  P6.1e5b3, P6.1e5b, P6.1e5, and P6.1e. The checkout remains dirty
+  `master` at `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; all
+  pre-existing working-tree changes were preserved. No commit or push.
+- **Profile writer (e5a):**
+  `tests/test_phase6_torch_pretrained_profile_smoke.py` ran the public
+  writer with temporary request/result/failure paths, a 25-byte local
+  weight stub and sealed two-example development bank. Five tests read
+  finite request/result/stdout, checked exact weight bytes/SHA-256,
+  seed-101 CPU/no-download/ImageNet fields, 60 s declared limit,
+  56 cached feature bytes and two sample IDs per train/guard/validation
+  role, zero final-test iterations, all three occupied-path preflights,
+  and a failure sidecar with no false completed result. The initial
+  e5a test sealed test iteration but did not detect early construction
+  of the final dataset; that separate gap was retained for e5b1.
+- **Source isolation (e5b1):** Raising final-source construction
+  sentinels initially failed in the profile and both older validation
+  CLIs. Each called the default loader, which constructed CIFAR final
+  data even though test iteration was sealed. All three current writers
+  now use the existing `include_final_test=False` path; the validation
+  calls use `development_only_source=True`. Their wrappers reject a
+  request to construct final data. The source sentinels pass and all
+  eight validation output paths refuse occupied files before archive or
+  weight access. ADR-0140 records why this correction is prospective:
+  historical saved selections remain unchanged and retain their earlier
+  weaker source-construction provenance.
+- **Validation writers (e5b2):** Both public `main()` paths ran against
+  a verified tiny local archive, a verified tiny cached-weight stub for
+  pretrained, a two-example feature source and a raising final source.
+  Finite request/selection/manifest/stdout readback found the original
+  73→83/89/97 and 113→127/131/137 seed sets, a/b grid, six complete
+  validation trials, three selections, no final rows or iterations,
+  shared development role/feature/backbone/initial hashes, manifest
+  source digest and typed restore. An injected tuning failure exposed
+  that the local-CIFAR writer retained no failure file; it now writes an
+  exclusive error and attempt/trial ledger after the request, without
+  a false selection/manifest. Pretrained already retained that ledger.
+  Read-only real saved requests, selections, manifests, local archive
+  and cached weight passed source hashes and manifest restoration:
+  local archive MD5 `c58f30108f718f92721af3b95e74349a`, ImageNet V2
+  SHA-256 `11ad3fa62ca79e40addfd354a8ec4b7c75143b3038b8d2a807fbc68deab379ca`,
+  local manifest `eea8a7e0817b32684b0c0d778a0b4d1bbabf24f1aae7204f8bb6ec926b11fb02`,
+  and pretrained manifest `fd101a509411bfcfc2304e76b71edf9a3c47b7b44d7865204db0ab46d3a6fb70`.
+- **Confirmation writers (e5b3):** Each public confirmation `main()`
+  restored the newly saved stub selection/manifest, verified its actual
+  tiny archive and (pretrained) weight file, and wrote one finite result
+  from explicitly synthetic `RepeatedConfirmationResult` rows. The
+  readback required nine matched fixed-data attempts/trials/final rows,
+  three wall-time rows, three memory rows with nine distinct stub PIDs,
+  all three summary maps, and exact frozen seed/candidate pairs. Both
+  adapters reject occupied result/failure files before input access;
+  an injected confirmation interruption leaves request/selection/
+  manifest plus failure, with no result. Changed manifest, selection,
+  same-size archive contents, or pretrained weight contents reject
+  before the confirmation callback. The fixed pretrained size literals
+  were named constants with unchanged defaults so these small fixtures
+  exercise its real provenance code. These synthetic rows test writer
+  and preflight behavior; they are not new model measurements. Read-only
+  historical local/pretrained result SHA-256 values are
+  `4118529edd5d5c7f0594082f5cc5a4b47e7e7d23e6bf5743dadf83e22d78558f`/
+  `a6b55842be28ffe3be4686a2f2f1554b89591f3aef978fabc147b6a8c0551d14`;
+  each binds its original manifest and has nine fixed, three wall-time,
+  and three memory rows.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_pretrained_profile_smoke.py  # 5 passed in 2.79 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_cifar_development_source_isolation.py  # initial 3 source-construction sentinel failures, then 10 and 13 passing checks after correction
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_cifar_development_source_isolation.py -k 'keep_attempt_failure'  # local failure artifact absent initially; fixed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_torch_cifar_development_source_isolation.py tests\test_phase6_torch_pretrained_profile_smoke.py tests\test_matched_head_tuning.py tests\test_repeated_head_confirmation.py  # final 49 passed in 4.03 s, no skips
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m ruff format --check scripts\profile_cifar_feature_setup.py scripts\run_cifar_matched_validation.py scripts\run_cifar_pretrained_validation.py scripts\run_cifar_pretrained_confirmation.py tests\test_phase6_torch_cifar_development_source_isolation.py tests\test_phase6_torch_pretrained_profile_smoke.py  # 6 formatted
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 304 source files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  A confirmation-tamper test first failed only because its expected
+  error regex omitted the pretrained adapter's `disagree` wording;
+  that assertion was corrected and all five tamper cases passed. Two
+  read-only Python here-string commands verified historical local
+  source/selection/manifest and result counts/hashes; both exited 0.
+  A third invoked both confirmation adapters' original
+  `_verify_archive`/`_verify_inputs` on their saved request, selection,
+  and restored manifest with unchanged default constants; it exited 0.
+- **Experiments, artifacts, skipped tests, plan changes, blockers, and
+  exact next action:** New tiny archive/weight and result/failure files
+  lived only under pytest temporary directories. No large CIFAR or
+  pretrained model run, external download, CUDA job, or full CPU suite
+  ran; CUDA-only representative routes remain explicit runtime/device
+  skips. `docs/phase6-torch-route-inventory.md`, README, ADR-0140,
+  matrix row E, and the plan now distinguish the corrected current
+  source boundary from historical saved provenance. The unmodified
+  e5b acceptance was split into source isolation, validation writers, and
+  confirmation writers because an output smoke alone would hide early
+  final-source construction; no acceptance criterion was weakened.
+  P6.1f and P6.1 parent remain unchecked. There is no blocker to the
+  next bounded diagnostic producer. **Exact next action:** inventory
+  P6.1f's callable legacy comparison, policy/Pareto, and visualization
+  scripts and declared output files, then run the smallest fixed
+  saved-input or synthetic producer/readback test without score selection.
+
+## 2026-09-30 — P6.1f1–f5 and bounded P6.1 smoke-suite closure
+
+- **Checkout and completed task IDs:** `master` remains at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad` with prior and current
+  working-tree edits preserved. Completed P6.1f1, f2, f3, f4, f5, P6.1f,
+  and P6.1 for their declared bounded interface/artifact scopes. No commit,
+  push, historical result edit, or scientific candidate selection.
+- **F1 inventory and budget:** `docs/phase6-diagnostic-route-inventory.md`
+  lists the remaining figure/dynamics/multiseed/memory/loader-order and
+  policy/Pareto routes against matrix A–E, each declared output, and its
+  smallest safe source. Extracted local CIFAR-10 exists; extracted CIFAR-100
+  and a paired real multiseed CIFAR-100 figure source do not. Public
+  estimate-only sweeps reported 18 policy candidates/14,400 planned updates/
+  900,000 row exposures and 34 Pareto candidates × three seeds/81,600
+  updates/5,100,000 exposures. Both exceed their default 1,000-update gate.
+- **F2 paired README figures:** The real public CLI ran with a temporary,
+  explicitly synthetic, internally matched three-model CSV/result JSON.
+  `tests/test_phase6_readme_figures_cli_smoke.py` read four valid PNGs, four
+  Plotly HTML pages, one three-frame illustrative GIF, and `provenance.json`;
+  source SHA-256, protocol, row values, labels, and all ten declared filenames
+  matched. An occupied rerun changed no bytes. An initial nonfinite-input
+  test exposed late chart failure/partial output; both CSV and paired JSON
+  loaders now reject NaN/Infinity before rendering. Existing tests preserve
+  paired metric-drift and explicit unversioned-legacy refusal.
+- **F3 hardest dynamics:** `scripts.generate_hardest_mode_dynamics` adds
+  explicit `--tiny-smoke`, fixing 40 rows per phase, two epochs per phase,
+  an eight-point decision grid, one latency repeat, and force-sleep attempt
+  interval one. Both public validation and explicit test-informed legacy
+  choices wrote/read a four-frame 1180×680 GIF plus complete finite HTML
+  payload with protocol, split/scope, frame/prediction, fixture ID/config,
+  and final summaries. Stdout and HTML visibly label the tiny fixture.
+  Both occupied paths refuse before replacing bytes; prior source-seal
+  tests still pass. The default 120/180-epoch visualization was not run.
+- **F4 diagnostics:** A real `scripts.run_multiseed_resnet_benchmark` process
+  with synthetic 8/8/8/8 roles, seeds 5/11, one epoch, CPU, and no weights
+  completed in about five seconds. The new test reads all three files: six
+  finite per-seed rows and three summary rows across JSON and both CSVs,
+  complete resolved trial configs, source/role hashes, validation-only
+  descriptive winners, and all three occupied-path refusals. Scores are
+  fixture output, not a CIFAR-100 or matched-learning result. The fixed
+  `run_isolated_head_memory_smoke` public process completed in about eleven
+  seconds with three distinct CPU PIDs, common development feature/split
+  hashes, fixed head capacity, guard/sleep and observed RSS fields. A red
+  stdout test found missing benchmark track/config/split identities; the
+  script now includes them. Its full fixed config and seed 47 read back.
+  The real local-cache `scripts.verify_cifar_loader_order --data-root data
+  --seed 73` process completed in 39.21 seconds: no download/training,
+  worker counts 0/2, 8/4/4/4 role rows, same split identity, forward/reverse
+  model orders, and `final_test_iterated=false`. Existing two bounded
+  verifier tests cover stochastic views and the optional training seal.
+  The real verifier constructs the final CIFAR source but does not iterate
+  it; this is a diagnostic, not a selection run.
+- **F5 sweep artifact gates:** New public process tests in empty temporary
+  directories read strict finite estimate JSON and default refusals for
+  both sweep scripts; neither wrote a file. Existing sentinel tests confirm
+  refusal before Torch/data. Policy's ordered 18-cell grid SHA-256 is
+  `334a1b15c0c0116d8da596b7d936a06411bfe355ef28be10288bc9a002ff1ec7`;
+  existing tests pin Pareto's 10/12/12 ordered family digests. In-process
+  writer fixtures retained the full grids and fixed seeds but substituted
+  equal finite synthetic development reports and a **test-local** cap to
+  reach serialization. The temporary JSON files read back every 18 policy
+  row and 34 Pareto candidate × three seed rows, top-ten/Pareto/global keys,
+  validation-only selection fields, stdout and occupied-path unchanged
+  bytes. No live Torch/CUDA/data/weights work or full sweep occurred; test
+  report values have no scientific interpretation.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_readme_figures_cli_smoke.py tests\test_readme_figures_protocol.py tests\test_phase6_hardest_dynamics_cli_smoke.py tests\test_hardest_mode_dynamics.py tests\test_numpy_comparison_scope.py  # 21 passed in 3.44 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_multiseed_cli_smoke.py  # 4 passed in 5.65 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_isolated_memory_cli_smoke.py  # initially 1 red missing track; then 1 passed in 10.82 s
+  .\.venv\Scripts\python.exe -m scripts.verify_cifar_loader_order --data-root data --seed 73  # child process in a bounded readback wrapper, exit 0 in 39.21 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_sweep_output_smoke.py  # initially 1 fixture missing num_classes; corrected, 4 passed in 1.28 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_readme_figures_cli_smoke.py tests\test_readme_figures_protocol.py tests\test_phase6_hardest_dynamics_cli_smoke.py tests\test_hardest_mode_dynamics.py tests\test_numpy_comparison_scope.py tests\test_phase6_multiseed_cli_smoke.py tests\test_multiseed_resnet_config.py tests\test_multiseed_output_protection.py tests\test_phase6_isolated_memory_cli_smoke.py tests\test_isolated_head_memory.py tests\test_verify_cifar_loader_order.py tests\test_phase6_sweep_output_smoke.py tests\test_sweep_work_estimate.py tests\test_tuning_selection.py  # 88 passed in 52.39 s, no skips
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 309 source files
+  .\.venv\Scripts\python.exe -m ruff format --check scripts\generate_readme_figures.py scripts\run_isolated_head_memory_smoke.py tests\test_phase6_readme_figures_cli_smoke.py tests\test_phase6_hardest_dynamics_cli_smoke.py tests\test_phase6_multiseed_cli_smoke.py tests\test_phase6_isolated_memory_cli_smoke.py tests\test_phase6_sweep_output_smoke.py  # 7 files formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_phase6_multiseed_cli_smoke.py tests\test_phase6_isolated_memory_cli_smoke.py tests\test_phase6_sweep_output_smoke.py  # final parser-hardening regression: 9 passed in 17.84 s
+  ```
+
+  The standalone F2/F3 tests initially exposed a bad nonfinite figure path
+  and absent tiny dynamics flag; both were fixed. The F5 first run's only
+  failure was its incomplete sealed-loader stub, not product behavior.
+  The large pre-existing dynamics source is not globally Ruff-formatted;
+  only the changed ranges were scoped-formatted, while all other changed
+  Python files pass whole-file format check.
+- **Skipped tests, artifacts, plan changes, blockers, next action:** The
+  full CPU suite was not rerun after this bounded related batch; earlier
+  full-suite evidence preceded Phase 6 additions. CUDA-only representative
+  routes and actual 18/102-trial sweeps were skipped for runtime/device and
+  declared budget reasons. The 120/180-epoch default dynamics and original
+  CIFAR-100 chart generation were skipped; the latter lacks a paired source.
+  F2/F3/F4/F5 files lived under pytest temporary directories, and the real
+  loader stdout stayed in a temporary readback wrapper. No new durable
+  experiment artifact, download, score, baseline tuning, or seed selection.
+  F1–F5 split the original F acceptance by output family without weakening
+  it; README/changelog, inventory, matrix row F, plan task evidence, and
+  handoff now reflect the completed bounded smoke suite. P6.2–P6.7 and
+  later phases remain unchecked; original CIFAR-100 figure inputs and CUDA
+  studies are availability/budget boundaries, not claimed results.
+  **Exact next action:** inspect current toy baseline, strength-case, and
+  hardest-case entrypoints plus historical artifacts; freeze corrected
+  evaluation protocol, fixed settings/seeds, local work budget, and new
+  output paths for the first P6.2 baseline rerun before running it.
+
+## 2026-09-30 — P6.2 corrected toy profiles and same-environment repeats
+
+- **Checkout and completed task IDs:** `master` remains at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; all prior and unrelated
+  working-tree changes were preserved. Completed P6.2a, P6.2b, P6.2c,
+  P6.2d, P6.2e, and P6.2 for their declared seven-seed descriptive scope.
+  No commit, push, historical result rewrite, seed selection, baseline
+  retuning, metric change, or new policy was made.
+- **Predeclared request and why:** `docs/p62-profile-reproduction.md` freezes
+  existing baseline/strength/hardest presets, ordered seeds
+  `3,7,11,19,23,31,37`, source/policy SHA-256, exclusive paths, and
+  240/240/600-second local wall limits. All use
+  `continual_validation_v1` and its 20% development validation reservation.
+  The later v5 global seal requires replay/component-sleep changes to the
+  original baseline, so adopting it here would have altered the profile.
+  V1 constructs final-source objects early and scores a seed before later
+  seeds train; these results are descriptive, not strict-online or
+  matched-head evidence. The original strength/hardest policies were tuned
+  historically and were not reselected.
+- **Executed profiles:** `scripts.run_p62_profile_reproduction` saved each
+  exact request before invoking the unchanged public CLI, then audited
+  strict finite text/JSON/config outputs, seven ordered seeds, three methods,
+  six distinct role hashes per seed, full preset/policy identity, aggregate
+  arithmetic, and file SHA-256. Primary elapsed times were 2.54, 2.60, and
+  9.48 seconds; all completed below the frozen wall limits. The primary
+  result SHA-256 values are respectively
+  `33afd017769c1ec112ac2204db07c923455316adbdd0f92e470a6aaf118e31de`,
+  `1198c5e35cc8959a677a0840fecb8d99ea83bd4fcf94d0a8735d06d61f6d1827`,
+  and `7269356bdc546ebdd138547e4b3ce43caa66f0db390e0ddf09bf4742dd692116`.
+  A later verifier hardening also cross-checked the report's numeric summaries,
+  seeds, policy mode, and role hashes against the saved JSON for all six
+  primary/repeat runs without retraining or modifying their bytes.
+- **Repeated process and outcomes:** Each profile ran again through a fresh
+  CLI process into a second directory. `scripts.verify_p62_profile_repeats`
+  matched every saved audit digest, exact text/config bytes, and all
+  deterministic result fields. Only observed sleep `attempt_seconds` and
+  `core_seconds` differed (168/168/461 fields); this exact timing exclusion
+  was predeclared in `docs/reproducibility-scope.md`. Normalized result
+  SHA-256 values were baseline
+  `05adf9998e3dce485752408b041d63c6797a8293d394436139de63ce23803e5a`,
+  strength
+  `181361c534a2742d0d1259af3a8c4af52b3e094590482b02d1678bc4065bb2d9`,
+  hardest
+  `dc6f547a86bd165891ba3dd4b5d628e29f0019bf51b3853e75bd332545bc24ea`.
+- **Scientific reconciliation:** `docs/p62-corrected-profile-results.md`
+  records all 21 profile/seed balanced rows, five-metric mean/spread for
+  every method, mechanism counts, full repeat hashes, and historical rounded
+  strength/hardest text comparison. The historical exact execution commits,
+  resolved configs, and seed rows are unavailable, so historical-to-current
+  differences combine protocol and intervening code/math changes and cannot
+  be attributed to one fix. Baseline and strength share source/seeds and
+  identical backprop/PC rows; their paired circadian policy contrast has
+  balanced mean `0.943429` under both, despite more strength sleep/splits.
+  Corrected hardest balanced means are circadian `0.768163`, PC `0.786122`,
+  backprop `0.743265`. The negative circadian-versus-PC result was retained.
+  Hardest also changes difficulty, architecture, epochs, and policy, so it
+  cannot isolate policy effects.
+- **Commands and outcomes** from the repository root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.run_p62_profile_reproduction --profile baseline       # exit 0; 2.54 s; seven rows
+  .\.venv\Scripts\python.exe -m scripts.run_p62_profile_reproduction --profile strength-case  # exit 0; 2.60 s; seven rows
+  .\.venv\Scripts\python.exe -m scripts.run_p62_profile_reproduction --profile hardest-case   # exit 0; 9.48 s; seven rows
+  .\.venv\Scripts\python.exe -m scripts.run_p62_profile_reproduction --profile baseline --output-dir artifacts/runs/p62-profiles-repeat       # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_p62_profile_reproduction --profile strength-case --output-dir artifacts/runs/p62-profiles-repeat  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_p62_profile_reproduction --profile hardest-case --output-dir artifacts/runs/p62-profiles-repeat   # exit 0
+  .\.venv\Scripts\python.exe -m scripts.verify_p62_profile_repeats --first-dir artifacts/runs/p62-profiles --second-dir artifacts/runs/p62-profiles-repeat  # exit 0; all three matched
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_p62_profile_reproduction.py tests\test_continual_shift_benchmark.py  # 19 passed, no skips
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0; 312 source files
+  .\.venv\Scripts\python.exe -m ruff format --check scripts\run_p62_profile_reproduction.py scripts\verify_p62_profile_repeats.py tests\test_p62_profile_reproduction.py  # 3 formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  The new six-test runner/repeat suite passed separately before the related
+  19-test gate. One intermediate mypy failure in a new test's nested mutable
+  fixture was fixed by annotating its dictionary type; final mypy passed.
+  A read-only `verify_artifacts` invocation over all three profiles in both
+  directories passed after the text/JSON audit was strengthened.
+- **Artifacts and skips:** Complete exclusive
+  `*.request.json`, `*.txt`, `*.json`, `*-config.json`, and `*.audit.json`
+  files are under ignored `artifacts/runs/p62-profiles/` and
+  `artifacts/runs/p62-profiles-repeat/`; no failure sidecars were produced.
+  The full CPU suite was not rerun after this focused change; the related
+  runner suite and all repository static checks passed. No CUDA/large sweep,
+  external dataset, pretrained checkpoint, v5 changed-policy substitution,
+  or cross-device/version tolerance test was run.
+- **Plan amendments, limitations, next action:** Split original P6.2 into
+  prelaunch freeze, three executable profile gates, and reconciliation;
+  every original criterion remains represented. The plan/README/changelog
+  now identify the corrected descriptive result and negative outcome.
+  Missing historical execution provenance limits old-to-new attribution,
+  and v1's final-source timing limits causal/evaluation claims; neither
+  blocks the next read-only preparation. P6.3 and later tasks remain
+  unchecked. **Exact next action:** inspect fixed v14 matched replay,
+  trigger, and side-effect evidence plus train-only/final-role gates; then
+  predeclare a small development-seed mechanism matrix, equal work/capacity
+  checks, local wall/work budget, and reserved independent confirmation
+  before executing its first cell.
+
+## 2026-09-30 — P6.3a/b matched chemical-gating development pilot
+
+- **Checkout and task IDs:** `master` remains at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; prior dirty work was
+  preserved. Completed P6.3a and P6.3b only. P6.3c/P6.3 parent and P6.8
+  remain unchecked. No commit, push, historical v9–v14 result change,
+  final-test access, or seed/metric/policy selection was made.
+- **Reconciliation and decision:** Read the fixed v14 prospective manifest,
+  matched replay/trigger training and scoring gates, v10 side-effect and v12
+  structural factor context. The existing local
+  `artifacts/runs/p54-fixed-v14-preset` bundle passed the public verifier.
+  Fixed v14 periodic sleep changes applied replay (12 per method) and
+  circadian width (8 to 6/5), so its periodic-minus-no-sleep score cannot
+  isolate one gating mechanism. ADR-0141 records why P6.3 starts with a
+  separate development-only, no-sleep/no-replay, fixed-width gating factor.
+  No v14 setting or saved byte was rekeyed.
+- **Predeclared contract:** `docs/p63-gating-pilot.md` froze the v14-arrived
+  source geometry, distinct protocol ID, development seeds `41,43,59`, ten
+  reserved confirmation seeds, three arms, identical seeded shallow
+  initial tensors, 12 A + 12 B full-batch updates per arm, rate 0.05/two
+  latent iterations, and only `min_plasticity=0.2` as the gating switch.
+  Maximum planned wake work was 240 against 216 actual planned updates;
+  the worker wall limit was 120 seconds. Both roles' final values stayed
+  unopened. The frozen manifest SHA-256 was
+  `3aec33aba455ff3fa04b0d20993ed97f6e0aedc8e64f150fbe0040bf0a44dfe9`,
+  eight-source map digest
+  `797183a7da84bab8c1cb2825dda06c5fdcf3db1fea051564f11122fd88979167`,
+  and pre-run adapter byte SHA-256
+  `919347ba9a9a38d88a83c97b5096898e13f9807f53225a2834b9927cba967c07`.
+  The request records each individual source hash and actual environment.
+- **Implementation and test evidence:** `src/app/continual_gating_pilot.py`
+  composes the three PC arms on the same arrived train rows, checks
+  ordinary/neutral tensor parity after every update, constructs B only
+  after A work, and scores only outer selection. The source-sentinel test
+  replaces both final input/label properties with raising accessors and
+  still completes all three seeds. A changed manifest fails before source
+  access. `scripts/run_p63_gating_pilot.py` preflights source/manifests and
+  output paths, saves an exclusive request before its bounded child,
+  validates finite role/work/capacity/result facts, and writes an audit or
+  failure. An initial adapter test caught Python tuple versus JSON list
+  comparison in the manifest; canonical JSON normalization fixed it before
+  either published run. Timeout, occupied-path, tampered-work, final-seal,
+  and nonfinite-parser tests pass.
+- **Actual experiments:** Two fresh public processes wrote request/result/
+  audit sets under ignored `artifacts/runs/p63-gating-pilot/` and
+  `artifacts/runs/p63-gating-pilot-repeat/`. They completed in 0.355 and
+  0.349 seconds. The result files are byte-identical at SHA-256
+  `ede5ebcd618c663c6cc34a142f81ea6fef8ead627069edc0019ac8e5dda516f7`.
+  Request SHA-256 values differ only as separately timed requests:
+  `f59f0ea68ede111de3545ffec5060fb999cee1395f805adab15e05e85b3294c3`
+  and `e4de6af19bab9207819bbaeee2cd801b65d5708b7df82f1af8bdf5673e8905a6`.
+  Both audits and requests were read back independently against file hashes,
+  source map and frozen manifest; every seed has six development role
+  hashes, three method rows, 24 updates/1,296 presentations/48 latent
+  loops/2,592 example-inference iterations per method, zero sleep/replay,
+  and width eight/33 parameters. No failure sidecar was produced.
+- **Outcome:** Ordinary PC and neutral circadian have exactly equal final
+  tensor hashes and development metrics. Gating minimum plasticity was
+  `0.767757`, `0.809348`, `0.742955`, so the treatment acted. Paired
+  gating-minus-neutral final mean task accuracy was `0,0,0`; mean for both
+  was `0.881944`. Signed-forgetting deltas were
+  `-0.083333,-0.041667,-0.041667`, but each came solely from a lower
+  A-after-A score; A-after-B and B-after-B were unchanged. Therefore the
+  lower forgetting number is not evidence of improved final retention.
+  `docs/p63-gating-pilot-results.md` retains every seed, metric, and
+  limitation. No confirmation or held-out final result was observed.
+- **Commands and outcomes** from the repository root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p54-fixed-v14-preset  # completed bundle verified
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_gating_pilot.py tests\test_p63_gating_pilot_cli.py  # initial 1 red tuple/list audit; fixed, then 6 passed
+  .\.venv\Scripts\python.exe -m scripts.run_p63_gating_pilot --output-dir artifacts/runs/p63-gating-pilot  # exit 0; 9 cells
+  .\.venv\Scripts\python.exe -m scripts.run_p63_gating_pilot --output-dir artifacts/runs/p63-gating-pilot-repeat  # exit 0; identical result SHA
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_gating_pilot.py tests\test_p63_gating_pilot_cli.py tests\test_neutral_circadian_control.py tests\test_continual_trigger_replay_schedule.py  # 23 passed in 2.77 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0; 316 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\continual_gating_pilot.py scripts\run_p63_gating_pilot.py tests\test_continual_gating_pilot.py tests\test_p63_gating_pilot_cli.py  # 4 formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  A separate read-only Python pass parsed both saved requests/results/audits,
+  re-ran `verify_result`, checked request/result SHA-256 and frozen source/
+  manifest identities, required identical result bytes, and computed all
+  paired seed deltas; it exited zero. The initial adapter failure was a
+  fixture/serialization bug, not a published partial study.
+- **Skips, plan amendments, and next action:** Full CPU suite, CUDA, broad
+  factor sweep, independent confirmation, and all final-role scoring were
+  skipped; the new related suite and repository static gates passed. No
+  new dependency was added. Split original P6.3 into checked a/b and open c
+  without relaxing its minimum matrix, matched baseline/capacity, or
+  confirmation needs. P6.8 remains open for general primary metric/cost
+  rules; the pilot predeclared its explicit A/B accuracy and forgetting
+  diagnostics. **Exact next action:** inspect accepted-sleep replay work
+  and capacity seams in the matched runner, then freeze a new replay-on/off
+  and planned-width development protocol with equal-work references and a
+  P6.8 primary metric/cost contract before launching another cell. Keep
+  the reserved confirmation seeds and final roles unopened.
+
+## 2026-09-30 — P6.8 and P6.3c1/c2 fixed-width replay factor
+
+- **Checkout and completed task IDs:** `master` remains at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`, with pre-existing
+  dirty work preserved. Completed **P6.8, P6.3c1, and P6.3c2**. Added
+  open P6.3c3; P6.3c/P6.3 parents, P6.9/P6.10, later phases and deferred
+  P2.6a remain open. No commit, push, historical artifact rewrite,
+  confirmation run, final-role release, CUDA run, or large sweep occurred.
+- **Inspection and decision:** Re-read repository instructions, plan,
+  current log, checkout, matched replay runner/schedule, v14 source
+  geometry, and core component sleep path. The fixed v14 periodic arm
+  applies 12 replay updates per method and can prune width eight to six
+  or five, so its score is confounded for replay attribution. ADR-0142
+  records the distinct fixed-width replay-only factor and alternatives.
+  `docs/phase6-metric-contract.md` fixes final equal-task mean, signed
+  A forgetting, zero-safe optional retention, trajectory labels, paired
+  seed reporting and separate cost vector. `src/core/continual_metrics.py`
+  implements validated arithmetic. A read-only script reconciled every
+  one of 18 saved fixed-v14 and nine gating pilot method rows; neither
+  artifact was changed.
+- **Prospective factor and transparency:** The semantic replay contract
+  in `docs/p63-replay-factor-pilot.md` was written before any new replay
+  score was viewed. It fixed seeds 41/43/59, the same ten still-reserved
+  confirmation seeds, eight arms, same initial width-eight tensors,
+  planned width 12, 12+12 wake epochs, shared eight-row/192-byte FIFO,
+  two recent rows at each of six boundaries, and 684 planned/720 maximum
+  optimizer updates under a 120-second child wall limit. A direct
+  in-process feasibility invocation then printed the three development
+  outcomes before source and adapter byte hashes were pinned. After that
+  probe, replay rates were made explicit in the config at their unchanged
+  core defaults (0.01, two steps, 0.15); no seed, metric, work, treatment,
+  or result-driven setting changed. This early preview is part of the
+  exploratory development history, not independent confirmation. The
+  manifest digest `221465f5...25f1cbed`, sorted 12-source map digest
+  `153f5e7f...2eee8cbe`, and adapter byte SHA
+  `9255ad66...83b8826a` were recorded in the prospective document before
+  the **public scored** processes.
+- **Implementation and isolation evidence:**
+  `src/app/continual_replay_factor_pilot.py` composes replay-off/on
+  backprop, ordinary PC and neutral circadian at width eight plus two
+  planned-width no-replay controls. It preflights the frozen manifest
+  before source construction, builds B only after complete A work,
+  compares both circadian retained ID/order/selection sets with the
+  prediction-independent shared supply, checks all applied work and
+  width, and checks ordinary-PC/neutral-circadian parameter parity after
+  every wake and boundary. Only outer selection is scored. A real
+  three-seed test replaces both final source array properties with
+  raising sentinels and finishes. The public adapter checks source
+  identity and occupied output before a request, writes the request
+  exclusively, runs a bounded child, verifies finite role/metric/work/
+  capacity/ID results, and writes an audit or failure sidecar.
+- **Experiment artifacts and results:** Two fresh public processes saved
+  exclusive request/result/audit sets at ignored
+  `artifacts/runs/p63-replay-factor-pilot/` and
+  `artifacts/runs/p63-replay-factor-pilot-repeat/`. Both finished with
+  all 24 cells and no failure sidecar in 0.507/0.503 measured child seconds.
+  The result JSON files are byte-identical at SHA-256
+  `ecf3f868c96779507e30328f73070edfbdfce0e255dd76eb12bd3d707c3b1de5`.
+  Request hashes are `8a2a9528...1fff512` and
+  `e4a856c6...15d30cc`. Independent readback checked each request's
+  manifest/source/adapter hashes, audit file hashes, all six development
+  role counts/hashes per seed, six exact shared/applied boundary IDs per
+  seed, every finite metric and work/capacity cell, and identical results.
+  Each method has 24 wake updates/1,296 presentations. Each on arm has
+  exactly 12 extra selected-row replay updates; each off arm has zero.
+  Width and parameter count stay 8/33 or planned 12/49. Neutral circadian
+  is bitwise equal to ordinary PC in both replay states. Ordinary PC
+  on-minus-off final mean is +.020833,+.020833,0 by seed; backprop is
+  0,0,-.041667. The apparent PC replay gain is small, its forgetting
+  shifts in opposite directions on the first two seeds, and it is not
+  circadian-specific. `docs/p63-replay-factor-pilot-results.md` publishes
+  all 24 seed/arm accuracy rows, paired contrasts and cost limitations;
+  no winner or confirmation setting was chosen.
+- **Commands and outcomes** from the repository root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_metrics.py  # 8 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_replay_factor_pilot.py tests\test_p63_replay_factor_pilot_cli.py tests\test_continual_metrics.py  # 12 passed
+  .\.venv\Scripts\python.exe -m scripts.run_p63_replay_factor_pilot --output-dir artifacts/runs/p63-replay-factor-pilot  # exit 0, 24 cells
+  .\.venv\Scripts\python.exe -m scripts.run_p63_replay_factor_pilot --output-dir artifacts/runs/p63-replay-factor-pilot-repeat  # exit 0, identical result bytes
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_replay_factor_pilot.py tests\test_p63_replay_factor_pilot_cli.py tests\test_continual_metrics.py tests\test_continual_gating_pilot.py tests\test_p63_gating_pilot_cli.py tests\test_neutral_circadian_control.py tests\test_continual_matched_replay_schedule.py tests\test_continual_matched_replay_runner.py  # 48 passed in 4.48 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0, 322 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\continual_replay_factor_pilot.py src\core\continual_metrics.py scripts\run_p63_replay_factor_pilot.py tests\test_continual_replay_factor_pilot.py tests\test_continual_metrics.py tests\test_p63_replay_factor_pilot_cli.py  # six formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  One read-only Python audit reconciled the 27 prior saved method rows;
+  another independently revalidated both new request/result/audit sets
+  and printed all paired contrasts. The early direct in-process probe
+  completed three seeds and was not used to change numerical settings.
+- **Skips, plan changes, blockers and exact next action:** The full CPU
+  suite was skipped because the focused 48-test source/baseline suite and
+  repository static gates passed; CUDA, process-RSS profiling, per-arm
+  timing, broad factor sweeps, independent confirmation, and all final
+  scoring were skipped. P6.10 stays open because process peak RSS,
+  per-arm wall time and event-duration totals were not measured. Split
+  P6.3c into checked c1/c2 and open c3 while preserving its original
+  structural, homeostasis/reset, schedule, full-minus-one, matched
+  baseline/capacity, and confirmation requirements. **Exact next action:**
+  inspect the v12 structural runner and core component sleep/guard path;
+  then freeze P6.3c3's smallest no-replay structural versus
+  homeostasis/reset control, including planned width, role/seed seal,
+  work/capacity and local resource cap, before scoring any new cell.
+  Do not choose settings from the historical final roles or these
+  development replay/gating scores.
+
+## 2026-09-30 — P6.3c3 guarded sleep-factor train-only preflight
+
+- **Checkout and task IDs:** `master` remains at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`; earlier dirty work
+  and ignored experiment bundles were preserved. Completed **P6.3c3**
+  only and added open **P6.3c4** for scored development. P6.3c/P6.3,
+  independent confirmation, P6.9/P6.10 and later tasks remain open. No
+  commit, push, historical score edit, CUDA work, large sweep, outer-
+  selection score, or final-role release occurred this session.
+- **Inspection and decision:** Read `AGENTS.md`, current plan/log/status,
+  the v12 structural trial and ADR-0114, NumPy component sleep, and
+  `_apply_scheduled_sleep`/`numpy_sleep_decisions`. The helper snapshots
+  the model, scores A inner guard before and after a proposal, restores
+  on a zero-tolerance accuracy drop, and records proposed effects apart
+  from applied effects. ADR-0143 chooses a separate nine-arm no-replay
+  train-only gate with five identically scheduled A-boundary inner-guard
+  attempts, exact PC/neutral parity, active conditional reset,
+  homeostasis, structural split/prune, and planned width-12 references.
+  New development seeds are 67/71/73; ten independent confirmation seeds
+  remain reserved. Reusing v12's 0/1 thresholds and one-split/one-prune
+  caps is an existing mechanism exercise setting, not a choice from its
+  already opened final outcomes.
+- **Contract and implementation:** `docs/p63-sleep-factor-preflight.md`
+  fixed the nine arms, source/role timing, 648 planned/700 maximum wake
+  updates, zero arm replay, one A-boundary guard, 120-second wall and
+  observed 256-MiB worker-RSS limits before public execution. The v5
+  arrived-role validator initially rejected a no-replay source config
+  (`bounded replay requires replay_steps > 0`) in a local **unscored**
+  direct preflight. The source config was corrected to carry the existing
+  replay-enabled v14 role geometry; actual trained arm configs still
+  have replay disabled with zero memory/updates. The contract explicitly
+  records this distinction. `src/app/continual_sleep_factor_preflight.py`
+  runs A, attempts guard-controlled sleep, then constructs B; it returns
+  deterministic role, work, parameter, structural and chemical facts
+  without reading outer or final values. A real three-seed test replaces
+  both final source properties and outer role values with raising
+  sentinels. Another test forces structural guard rejection and verifies
+  rollback while retaining the one-split/one-prune proposal. The public
+  adapter pins 13 selected source hashes, writes exclusive request/result/
+  audit or failure files, limits the child to 120 seconds, samples the
+  worker RSS at 5 ms, and checks the 256-MiB observed peak ceiling.
+  Manifest digest `97c576e1...72617d1`, source-map digest
+  `80c16f34...6339fa`, and adapter SHA `dae68cbd...8d0d3c` were written
+  to the prospective contract before the public preflight. Their full
+  values and selected-source limitation are in that document.
+- **Public artifacts and measured outcome:** Two fresh public processes
+  saved request/result/audit sets under ignored
+  `artifacts/runs/p63-sleep-factor-preflight/` and
+  `artifacts/runs/p63-sleep-factor-preflight-repeat/`, with no failure
+  sidecars. The 27-cell deterministic result JSON is byte-identical in
+  both at SHA-256
+  `e3140d5a0529dc3023b90b60801d8f9caf2e15dd8edb4a85fa875f76f60d624d`.
+  Request hashes are `2edce528...9a2d2` and `949f9a6a...7d7b227`.
+  A separate read-only pass verified each request's source, adapter and
+  manifest hashes, both audit file hashes, every role/work/capacity/
+  guard cell, and identical result bytes. All 648 wake updates and 15
+  guarded attempts completed; all attempts were accepted on A inner
+  accuracy. The three structural arms each proposed and applied one
+  split and one immediate prune, reaching transient width nine/37
+  parameters before returning to width eight/33. Neutral sham and
+  ordinary PC remain exactly equal; gated pair parameters match at the
+  sleep boundary, while reset reduces chemical state and homeostasis
+  changes parameters. Gating minimum A plasticity by seed was
+  0.906077/0.868976/0.869441. The first guard accuracy was only 1/3,
+  so accepted guard status is narrow feasibility evidence.
+  Worker RSS peaks were 42,614,784 and 42,672,128 bytes (10 samples
+  each); elapsed worker times were 0.440 and 0.448 seconds. The RSS
+  sampler cannot guarantee seeing an unsampled brief peak and the
+  numbers are whole-process, not per-arm. The complete unscored report
+  is `docs/p63-sleep-factor-preflight-results.md`.
+- **Commands and outcomes** from the repository root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_sleep_factor_preflight.py  # 3 passed; changed-manifest/outer/final sentinels and guard rollback
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_sleep_factor_preflight.py tests\test_p63_sleep_factor_preflight_cli.py  # 6 passed; public writer/readback, tamper, timeout
+  .\.venv\Scripts\python.exe -m scripts.run_p63_sleep_factor_preflight --output-dir artifacts/runs/p63-sleep-factor-preflight  # exit 0; 27 unscored cells
+  .\.venv\Scripts\python.exe -m scripts.run_p63_sleep_factor_preflight --output-dir artifacts/runs/p63-sleep-factor-preflight-repeat  # exit 0; identical result bytes
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_continual_sleep_factor_preflight.py tests\test_p63_sleep_factor_preflight_cli.py tests\test_continual_replay_factor_pilot.py tests\test_p63_replay_factor_pilot_cli.py tests\test_continual_gating_pilot.py tests\test_p63_gating_pilot_cli.py tests\test_structural_rank_comparison.py tests\test_continual_arrived_runner.py tests\test_neutral_circadian_control.py  # 38 passed in 9.28 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0; 326 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\continual_sleep_factor_preflight.py scripts\run_p63_sleep_factor_preflight.py tests\test_continual_sleep_factor_preflight.py tests\test_p63_sleep_factor_preflight_cli.py  # four formatted after a one-line formatter repair
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  A final read-only hash check confirmed all 13 frozen sources, manifest
+  digest and adapter byte identity still match the public requests.
+- **Skips, plan amendment, blocker and exact next action:** The full CPU
+  suite, CUDA, broad sweeps, scored development, confirmation, final-test
+  release, and per-arm resource profiling were skipped; the focused
+  38-test source/baseline suite and repository static gates passed.
+  P6.3c3 is checked solely for its train-only acceptance criteria; new
+  P6.3c4 keeps the scored factor explicit, leaving P6.3c/P6.3 and the
+  original minimum matrix/independent-confirmation criteria untouched.
+  There is no external blocker. **Exact next action:** freeze a separate
+  c4 outer-selection scorer contract that binds the saved c3 result hash
+  and all nine arms/three seeds; implement a global train-only comparison
+  against those deterministic facts before any outer value is accessed,
+  then run/repeat its bounded public development result and report every
+  paired structural, homeostasis and conditional-reset contrast. Keep
+  confirmation seeds and final roles unopened.
+
+### 2026-09-30 — P6.3c4 scored sleep-factor development
+
+- **Completed ID and checkout:** P6.3c4 only. Continued on `master` at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`, preserving all prior
+  dirty and ignored files. P6.3c/P6.3, full-minus-one, schedule,
+  independent confirmation, and later phases remain unchecked.
+- **Protocol and files:** `docs/p63-sleep-factor-development.md` and
+  ADR-0144 froze the existing nine c3 arms, seeds 67/71/73, role timing,
+  c3 result SHA-256 `e3140d5a...f60d624d`, all-seed exact train-fact
+  comparison, 81 outer evaluations/1,620 rows, two primary metrics and
+  three named paired contrasts before any score. Added
+  `src/app/continual_sleep_factor_development.py`,
+  `scripts/run_p63_sleep_factor_development.py`, two focused test modules,
+  and `docs/p63-sleep-factor-development-results.md`; updated README,
+  ARCHITECTURE and CHANGELOG. The app holds after-A model copies, finishes
+  all 27 cells, and compares the complete c3 fact object before accessing
+  any outer array. The public adapter checks the saved c3 request/result/
+  audit and frozen sources, then writes exclusive bounded artifacts.
+  Exact frozen combined 16-source map SHA is
+  `f618900fde912e7b7fdfecf0ebe329266e6c69604133bbd425560384235daa77`;
+  adapter byte SHA is
+  `08dedd66328f41ab24403e29ca0f8bc8c4b10030528f9e4a2c745b4f0d330634`.
+  No c3 source, earlier score, seed, baseline, metric or threshold changed.
+- **Commands and outcomes** from the repository root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_sleep_factor_development.py -k 'reject or mismatch'  # 2 passed, 1 deselected; changed reference and all-seed outer sentinel before scoring
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_sleep_factor_development.py tests/test_p63_sleep_factor_development_cli.py  # 5 passed; real final-source sentinel, public writer/readback, c3 tamper and metric/contrast tamper
+  .\.venv\Scripts\python.exe -m scripts.run_p63_sleep_factor_development --output-dir artifacts/runs/p63-sleep-factor-development  # exit 0, 27 cells, 81 evaluations
+  .\.venv\Scripts\python.exe -m scripts.run_p63_sleep_factor_development --output-dir artifacts/runs/p63-sleep-factor-development-repeat  # exit 0, identical result bytes
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_sleep_factor_development.py tests/test_p63_sleep_factor_development_cli.py tests/test_continual_sleep_factor_preflight.py tests/test_p63_sleep_factor_preflight_cli.py tests/test_continual_replay_factor_pilot.py tests/test_p63_replay_factor_pilot_cli.py tests/test_continual_gating_pilot.py tests/test_p63_gating_pilot_cli.py tests/test_structural_rank_comparison.py tests/test_continual_arrived_runner.py tests/test_neutral_circadian_control.py  # 45 passed in 9.94 s; includes changed-source and child-timeout failure gates
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0, 330 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_sleep_factor_development.py scripts/run_p63_sleep_factor_development.py tests/test_continual_sleep_factor_development.py tests/test_p63_sleep_factor_development_cli.py  # four formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  A pre-score mypy check found one new dataclass serialization type
+  annotation; it was repaired, with formatting, before the source and
+  adapter hashes were frozen. After scoring, only tests and documentation
+  changed. The new tests bootstrap the fixed c3 preflight on a clean local
+  checkout when its ignored artifact is absent.
+- **Experiment artifacts and independent readback:** The two ignored
+  `artifacts/runs/p63-sleep-factor-development*/` directories each have
+  request/result/audit and no failure. Read-only validation reparsed all
+  27 scored cells and nine paired contrast rows, exact c3 train facts,
+  metric arithmetic, role/work/capacity data, source/manifest/adapter
+  identity, request/audit hashes and byte-identical result SHA-256
+  `e0795b279346054d9c4e4c680e3aea103e347e3dd49960c44b93f8b642eaa9b6`.
+  Request hashes are `8bba0112...e4a553` and `16b327f0...8ff397b`.
+  Worker elapsed times were 0.485/0.473 seconds; sampled whole-worker
+  peak RSS was 43,401,216/43,446,272 bytes (12 samples each), under the
+  120-second/256-MiB caps. Hardware/runtime: Windows 11, Intel Core
+  i7-12700K, Python 3.14.7, NumPy 2.4.6, CPU. Whole-process RSS is not
+  per-arm and sampling may miss a brief peak.
+- **Observed result and decision:** Structure-minus-neutral final mean
+  differences were 0, -.041667, 0 on seeds 67/71/73. Seed 67's +.083333
+  A-after-A difference disappeared after B; its +.083333 signed-forgetting
+  difference is driven by the higher starting A score. The structure arm
+  lost one of 12 B outer examples on seed 71. Homeostasis-minus-neutral
+  and gated-reset-minus-gated-sham were zero in all accuracy and primary
+  metric cells on all seeds despite active parameter and chemical effects.
+  Ordinary PC and neutral sham remain exact. All 27 rows, nine contrasts,
+  mean and sample SD, and costs are in the result report. This negative/
+  null three-seed development result is not independent confirmation.
+- **Skips, plan amendment, blockers and next action:** Full CPU suite,
+  CUDA, broad sweeps, per-arm wall/RSS attribution, confirmation and final
+  release were skipped; no large experiment ran. P6.3c4 is checked with
+  evidence, while new P6.3c5 isolates the schedule train-only factor.
+  The original P6.3c/P6.3 matrix and full-minus-one/confirmation criteria
+  remain open. No external blocker. **Exact next action:** inspect the
+  existing v14 periodic/adaptive decision and full-component call paths,
+  then freeze a c5 matched schedule train-only protocol with role sentinels,
+  work/capacity gates and local caps before any new outer score. Do not
+  choose c5 settings from the c4 result.

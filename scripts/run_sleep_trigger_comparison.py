@@ -21,6 +21,9 @@ def main() -> None:
     parser.add_argument("--result", required=True, type=Path)
     parser.add_argument("--train-only", action="store_true")
     args = parser.parse_args()
+    # Why this: an occupied destination should not rerun training or open final roles.
+    if args.result.exists():
+        raise FileExistsError(f"v13 trigger result already exists: {args.result}")
     manifest = fixed_trigger_manifest()
     if args.train_only:
         study = train_unscored_trigger_study(manifest)

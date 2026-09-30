@@ -96,14 +96,19 @@ def main() -> None:
         def __iter__(self) -> Any:
             raise AssertionError("Pretrained feature profile opened final test")
 
-    def build_sealed_loaders(candidate: ResNet50BenchmarkConfig) -> Any:
-        loaders = original_build(candidate)
+    def build_sealed_loaders(
+        candidate: ResNet50BenchmarkConfig, *, include_final_test: bool = True
+    ) -> Any:
+        # Why this: sealing iteration alone still constructs the held-out CIFAR source.
+        if include_final_test:
+            raise AssertionError("Pretrained feature profile requested the final source")
+        loaders = original_build(candidate, include_final_test=False)
         return replace(loaders, test_loader=SealedTestLoader())
 
     started = monotonic()
     try:
         with patch.object(matched, "_build_benchmark_loaders", build_sealed_loaders):
-            bank = _build_seed_bank(torch, torch.device("cpu"), config)
+            bank = _build_seed_bank(torch, torch.device("cpu"), config, include_final_test=False)
         elapsed = monotonic() - started
         if elapsed > WALL_BUDGET_SECONDS:
             raise TimeoutError(f"Feature setup exceeded {WALL_BUDGET_SECONDS} s")

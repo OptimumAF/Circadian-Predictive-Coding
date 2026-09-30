@@ -20,6 +20,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--result", required=True, type=Path)
     result_path = parser.parse_args().result
+    # Why this: reject an occupied artifact before any model update.
+    if result_path.exists():
+        raise FileExistsError(f"matched replay training result already exists: {result_path}")
     rows = []
     for policy in (
         ReplayRetentionPolicy("recent_fifo"),
