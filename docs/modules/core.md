@@ -68,6 +68,23 @@ for a forced event. `SleepEventResult.performed` distinguishes an executed
 no-topology event from a skipped one. Warmup and trigger clocks retain
 their current behavior; ADR-0033 records the boundary.
 
+NumPy `sleep_event(max_replay_examples=...)` optionally preflights the
+selected replay snapshot batch lengths before any sleep mutation. The
+non-negative argument is the caller's *remaining* allowance; exceeding it
+raises `SleepReplayLimitExceeded` with the planned and remaining example
+counts. Unbudgeted calls and no-replay/skipped sleeps keep their previous
+behavior. The caller owns the cumulative limit and checked cursor
+(ADR-0134); core does not write run-state artifacts or inspect evaluation
+roles.
+
+NumPy `sleep_event(max_hidden_width=...)` and
+`apply_neuron_proposals(..., max_hidden_width=...)` optionally check the
+current adaptive hidden width and the width after selected splits before
+any mutation. The positive limit is absolute for the circadian layer;
+`HiddenWidthLimitExceeded` reports the proposed transient width and cap.
+Splits still precede prunes, so a final width within the cap is insufficient.
+Core does not clamp split selection to make a run fit (ADR-0135).
+
 `sleep_clocks.py` defines validated completed-runner-epoch progress and a
 read-only successful-work snapshot. The four app runners pass typed
 `SleepEpochProgress` for warmup and structural progress windows; direct

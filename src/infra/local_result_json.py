@@ -16,7 +16,12 @@ import numpy as np
 
 def write_local_result_json(result: Any, path: str | Path) -> None:
     """Write a complete result once, refusing to replace an existing path."""
-    payload = json.dumps(asdict(result), default=_encode_numpy, indent=2, allow_nan=False)
+    write_local_json_payload(asdict(result), path)
+
+
+def write_local_json_payload(record: Any, path: str | Path) -> None:
+    """Write a finished JSON-safe record to a new local file."""
+    payload = json.dumps(record, default=_encode_numpy, indent=2, allow_nan=False)
     with Path(path).open("x", encoding="utf-8") as output:
         output.write(payload + "\n")
 

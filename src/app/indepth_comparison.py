@@ -173,33 +173,43 @@ def _run_scenario(
 ) -> list[ExperimentResult]:
     scenario_results: list[ExperimentResult] = []
     for seed in seeds:
-        scenario_config = ExperimentConfig(
-            sample_count=base_config.sample_count,
-            protocol_id=base_config.protocol_id,
-            validation_fraction=base_config.validation_fraction,
-            noise_scale=noise_scale,
-            hidden_dim=base_config.hidden_dim,
-            hidden_dims=base_config.hidden_dims,
-            epoch_count=base_config.epoch_count,
-            backprop_learning_rate=base_config.backprop_learning_rate,
-            pc_learning_rate=base_config.pc_learning_rate,
-            pc_inference_steps=base_config.pc_inference_steps,
-            pc_inference_learning_rate=base_config.pc_inference_learning_rate,
-            circadian_learning_rate=base_config.circadian_learning_rate,
-            circadian_inference_steps=base_config.circadian_inference_steps,
-            circadian_inference_learning_rate=base_config.circadian_inference_learning_rate,
-            circadian_sleep_interval=base_config.circadian_sleep_interval,
-            circadian_force_sleep=base_config.circadian_force_sleep,
-            circadian_use_policy_for_sleep=base_config.circadian_use_policy_for_sleep,
-            circadian_config=base_config.circadian_config,
-            random_seed=seed,
-        )
+        scenario_config = build_indepth_trial_config(base_config, seed, noise_scale)
         scenario_results.append(run_experiment(config=scenario_config))
     return scenario_results
 
 
+def build_indepth_trial_config(
+    base_config: ExperimentConfig, seed: int, noise_scale: float
+) -> ExperimentConfig:
+    """Return the exact config used for one seed/noise cell."""
+    # Why this: artifact construction and execution must share one mapping.
+    return ExperimentConfig(
+        sample_count=base_config.sample_count,
+        protocol_id=base_config.protocol_id,
+        validation_fraction=base_config.validation_fraction,
+        noise_scale=noise_scale,
+        hidden_dim=base_config.hidden_dim,
+        hidden_dims=base_config.hidden_dims,
+        epoch_count=base_config.epoch_count,
+        backprop_learning_rate=base_config.backprop_learning_rate,
+        pc_learning_rate=base_config.pc_learning_rate,
+        pc_inference_steps=base_config.pc_inference_steps,
+        pc_inference_learning_rate=base_config.pc_inference_learning_rate,
+        circadian_learning_rate=base_config.circadian_learning_rate,
+        circadian_inference_steps=base_config.circadian_inference_steps,
+        circadian_inference_learning_rate=base_config.circadian_inference_learning_rate,
+        circadian_sleep_interval=base_config.circadian_sleep_interval,
+        circadian_force_sleep=base_config.circadian_force_sleep,
+        circadian_use_policy_for_sleep=base_config.circadian_use_policy_for_sleep,
+        circadian_config=base_config.circadian_config,
+        random_seed=seed,
+    )
+
+
 def _aggregate_scenario(
-    noise_scale: float, run_results: list[ExperimentResult], seeds: list[int],
+    noise_scale: float,
+    run_results: list[ExperimentResult],
+    seeds: list[int],
 ) -> ScenarioComparison:
     backprop_accuracies = [run.backprop.test_accuracy for run in run_results]
     predictive_accuracies = [run.predictive_coding.test_accuracy for run in run_results]
@@ -216,7 +226,8 @@ def _aggregate_scenario(
         _epoch_for_80pct_progress(run.predictive_coding.loss_history) for run in run_results
     ]
     circadian_progress_epochs = [
-        _epoch_for_80pct_progress(run.circadian_predictive_coding.loss_history) for run in run_results
+        _epoch_for_80pct_progress(run.circadian_predictive_coding.loss_history)
+        for run in run_results
     ]
 
     circadian_splits = [float(run.circadian_sleep.total_splits) for run in run_results]
@@ -226,14 +237,14 @@ def _aggregate_scenario(
     return ScenarioComparison(
         noise_scale=noise_scale,
         run_count=len(run_results),
-        split_hashes_by_seed={
-            seed: run.split_hashes for seed, run in zip(seeds, run_results)
-        },
+        split_hashes_by_seed={seed: run.split_hashes for seed, run in zip(seeds, run_results)},
         backprop=_aggregate_model(
             accuracies=backprop_accuracies,
             final_metrics=backprop_finals,
             progress_epochs=backprop_progress_epochs,
-            training_metric_id=_single_training_metric_id(run.backprop.training_metric_id for run in run_results),
+            training_metric_id=_single_training_metric_id(
+                run.backprop.training_metric_id for run in run_results
+            ),
         ),
         predictive_coding=_aggregate_model(
             accuracies=predictive_accuracies,

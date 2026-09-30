@@ -71,3 +71,15 @@ can now be requested with `--capture-wake-diagnostics`. It is written
 after the complete P5.1 bundle verifies and has its own observation
 ID, source hashes, and verifier. It does not extend the frozen P5.1
 manifest's two-file schema or alter the v14 raw payload bytes.
+
+The separate [P5.6a descriptive report](../README.md) derives a
+seed/arm/method table only after this bundle verifies. Its report
+manifest binds the exact source and table bytes; fixed v14 files retain
+their original names and hashes (ADR-0137).
+The separate [P5.6b dashboard](../README.md) reads only that verified
+table, publishes static HTML/four PNGs in an exclusive `dashboard-v1`
+directory, and verifies exact regeneration against the current report.
+The page identifies the completed-bundle failure scope and the fixed
+NumPy track. Historical `docs/index.html` retains its chart data and
+displays a separate provenance caveat
+(ADR-0138).

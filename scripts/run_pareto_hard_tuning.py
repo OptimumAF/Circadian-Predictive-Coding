@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+import argparse
+from dataclasses import asdict, replace
 import json
 from pathlib import Path
 import sys
@@ -21,6 +22,10 @@ from src.app.resnet50_benchmark import (  # noqa: E402
     _resolve_device,
     _set_seed,
 )
+from src.app.sweep_work_estimate import (  # noqa: E402
+    estimate_vision_candidate_work,
+    require_planned_training_limit,
+)
 from src.infra.vision_datasets import (  # noqa: E402
     SyntheticVisionDatasetConfig,
     build_synthetic_vision_dataloaders,
@@ -29,12 +34,18 @@ from src.shared.torch_runtime import require_torch  # noqa: E402
 
 MULTI_SEEDS: tuple[int, ...] = (7, 13, 29)
 OUTPUT_PATH = Path("benchmark_pareto_hard_guard_selection_v2_results.json")
+DEFAULT_MAX_PLANNED_TRAINING_UPDATES = 1_000
 
 
-def main() -> None:
-    if OUTPUT_PATH.exists():
+def main(
+    *,
+    estimate_only: bool = False,
+    max_planned_training_updates: int = DEFAULT_MAX_PLANNED_TRAINING_UPDATES,
+) -> None:
+    if type(estimate_only) is not bool:
+        raise ValueError("estimate_only must be boolean")
+    if not estimate_only and OUTPUT_PATH.exists():
         raise FileExistsError(f"Sweep output already exists: {OUTPUT_PATH}")
-    torch = require_torch()
     base = ResNet50BenchmarkConfig(
         train_samples=2500,
         validation_samples=700,
@@ -94,13 +105,48 @@ def main() -> None:
         circadian_max_split_per_sleep=1,
         circadian_max_prune_per_sleep=1,
     )
+    seeds = MULTI_SEEDS
+    candidate_groups = {
+        "backprop": build_backprop_candidates(),
+        "predictive": build_predictive_candidates(),
+        "circadian": build_circadian_candidates(),
+    }
+    for family, candidates in candidate_groups.items():
+        if not candidates or any(
+            type(field) is not str or not field.startswith(f"{family}_")
+            for override in candidates
+            for field in override
+        ):
+            raise ValueError(f"Pareto {family} candidates may change {family} fields only")
+    estimate = estimate_vision_candidate_work(
+        tuple(
+            replace(base, **override)
+            for candidates in candidate_groups.values()
+            for override in candidates
+        ),
+        seed_count=len(seeds),
+    )
+    estimate_record = {
+        "candidate_counts": {family: len(rows) for family, rows in candidate_groups.items()},
+        **asdict(estimate),
+    }
+    print(json.dumps({"sweep": "pareto_hard", **estimate_record}, sort_keys=True))
+    if estimate_only:
+        return
+    require_planned_training_limit(estimate, max_planned_training_updates)
+    torch = require_torch()
     _set_seed(torch, base.seed)
     device = _resolve_device(torch, base.device)
-    seeds = MULTI_SEEDS
 
-    backprop_trials = run_backprop_sweep(base, torch, device, seeds)
-    predictive_trials = run_predictive_sweep(base, torch, device, seeds)
-    circadian_trials = run_circadian_sweep(base, torch, device, seeds)
+    backprop_trials = run_backprop_sweep(
+        base, torch, device, seeds, candidate_params=candidate_groups["backprop"]
+    )
+    predictive_trials = run_predictive_sweep(
+        base, torch, device, seeds, candidate_params=candidate_groups["predictive"]
+    )
+    circadian_trials = run_circadian_sweep(
+        base, torch, device, seeds, candidate_params=candidate_groups["circadian"]
+    )
 
     output: dict[str, Any] = {
         "dataset": {
@@ -120,6 +166,8 @@ def main() -> None:
         "final_test_usage": "none",
         "final_test_confirmation": "pending",
         "inference_split": "validation",
+        "prelaunch_estimate": estimate_record,
+        "max_planned_training_updates": max_planned_training_updates,
         "backprop": summarize_model_trials(backprop_trials),
         "predictive": summarize_model_trials(predictive_trials),
         "circadian": summarize_model_trials(circadian_trials),
@@ -145,13 +193,8 @@ def main() -> None:
     print("Best by balanced score:", output["global_best_efficiency"]["model_name"])
 
 
-def run_backprop_sweep(
-    base: ResNet50BenchmarkConfig,
-    torch_module: Any,
-    device: Any,
-    seeds: tuple[int, ...],
-) -> list[dict[str, Any]]:
-    candidates: list[dict[str, Any]] = []
+def build_backprop_candidates() -> list[dict[str, Any]]:
+    """Return the original ordered backprop search cells without training."""
     candidate_params = [
         (0.003, 0.9),
         (0.005, 0.9),
@@ -164,8 +207,24 @@ def run_backprop_sweep(
         (0.02, 0.85),
         (0.02, 0.95),
     ]
-    for index, (lr, momentum) in enumerate(candidate_params, start=1):
-        override: dict[str, Any] = {"backprop_learning_rate": lr, "backprop_momentum": momentum}
+    return [
+        {"backprop_learning_rate": lr, "backprop_momentum": momentum}
+        for lr, momentum in candidate_params
+    ]
+
+
+def run_backprop_sweep(
+    base: ResNet50BenchmarkConfig,
+    torch_module: Any,
+    device: Any,
+    seeds: tuple[int, ...],
+    *,
+    candidate_params: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    if candidate_params is None:
+        candidate_params = build_backprop_candidates()
+    for index, override in enumerate(candidate_params, start=1):
         trial = _run_multiseed_trial(
             base=base,
             override=override,
@@ -185,13 +244,8 @@ def run_backprop_sweep(
     return candidates
 
 
-def run_predictive_sweep(
-    base: ResNet50BenchmarkConfig,
-    torch_module: Any,
-    device: Any,
-    seeds: tuple[int, ...],
-) -> list[dict[str, Any]]:
-    candidates: list[dict[str, Any]] = []
+def build_predictive_candidates() -> list[dict[str, Any]]:
+    """Return the original ordered predictive search cells without training."""
     candidate_params = [
         (256, 0.008, 10, 0.09),
         (256, 0.01, 10, 0.10),
@@ -206,13 +260,29 @@ def run_predictive_sweep(
         (512, 0.015, 12, 0.12),
         (512, 0.02, 14, 0.12),
     ]
-    for index, (hidden, lr, steps, inf_lr) in enumerate(candidate_params, start=1):
-        override: dict[str, Any] = {
+    return [
+        {
             "predictive_head_hidden_dim": hidden,
             "predictive_learning_rate": lr,
             "predictive_inference_steps": steps,
             "predictive_inference_learning_rate": inf_lr,
         }
+        for hidden, lr, steps, inf_lr in candidate_params
+    ]
+
+
+def run_predictive_sweep(
+    base: ResNet50BenchmarkConfig,
+    torch_module: Any,
+    device: Any,
+    seeds: tuple[int, ...],
+    *,
+    candidate_params: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    if candidate_params is None:
+        candidate_params = build_predictive_candidates()
+    for index, override in enumerate(candidate_params, start=1):
         trial = _run_multiseed_trial(
             base=base,
             override=override,
@@ -232,13 +302,8 @@ def run_predictive_sweep(
     return candidates
 
 
-def run_circadian_sweep(
-    base: ResNet50BenchmarkConfig,
-    torch_module: Any,
-    device: Any,
-    seeds: tuple[int, ...],
-) -> list[dict[str, Any]]:
-    candidates: list[dict[str, Any]] = []
+def build_circadian_candidates() -> list[dict[str, Any]]:
+    """Return the original ordered circadian search cells without training."""
     candidate_params: list[dict[str, Any]] = [
         {
             "circadian_head_hidden_dim": 384,
@@ -431,6 +496,20 @@ def run_circadian_sweep(
             "circadian_max_hidden_dim": 1024,
         },
     ]
+    return candidate_params
+
+
+def run_circadian_sweep(
+    base: ResNet50BenchmarkConfig,
+    torch_module: Any,
+    device: Any,
+    seeds: tuple[int, ...],
+    *,
+    candidate_params: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    if candidate_params is None:
+        candidate_params = build_circadian_candidates()
     for index, override in enumerate(candidate_params, start=1):
         trial = _run_multiseed_trial(
             base=base,
@@ -471,8 +550,11 @@ def _run_multiseed_trial(
         _set_seed(torch_module, seed)
         loaders = _build_loaders_for_config(config)
         report = benchmark_validation_candidate(
-            variant=variant, torch=torch_module, device=device,
-            loaders=_training_loaders(loaders), config=config,
+            variant=variant,
+            torch=torch_module,
+            device=device,
+            loaders=_training_loaders(loaders),
+            config=config,
         )
         report_row = report_to_dict(report)
         report_row["split_hashes"] = dict(loaders.split_hashes)
@@ -533,7 +615,10 @@ def _aggregate_reports(seed_reports: list[dict[str, Any]]) -> dict[str, Any]:
         "seed_count": len(seed_reports),
     }
     for metadata in (
-        "benchmark_track", "backbone_trainable", "backbone_pretraining", "head_type",
+        "benchmark_track",
+        "backbone_trainable",
+        "backbone_pretraining",
+        "head_type",
         "training_energy_id",
     ):
         metadata_values = {row[metadata] for row in seed_reports}
@@ -717,4 +802,20 @@ def best_from_all_trials(all_trial_reports: list[dict[str, Any]], key: str) -> d
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--estimate-only",
+        action="store_true",
+        help="print planned training work without opening Torch, weights, or datasets",
+    )
+    parser.add_argument(
+        "--max-planned-training-updates",
+        type=int,
+        default=DEFAULT_MAX_PLANNED_TRAINING_UPDATES,
+        help="prelaunch upper bound on all seed-candidate training batches (default: 1000)",
+    )
+    options = parser.parse_args()
+    main(
+        estimate_only=options.estimate_only,
+        max_planned_training_updates=options.max_planned_training_updates,
+    )

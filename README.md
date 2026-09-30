@@ -343,7 +343,20 @@ python predictive_coding_experiment.py --samples 80 --epochs 4 --json-result toy
 The file is written only after training and final-test scoring and must not
 already exist. `result.circadian_sleep.events` and the JSON `circadian_sleep.events`
 contain one record for each epoch; `event_count` retains the legacy meaning
-of sleep events that changed topology. The toy route has no sleep guard.
+of sleep events that changed topology. New CLI JSON results also include
+`resolved_config`: the full `ExperimentConfig` (including inherited baseline
+rates and nested circadian settings), the mode, ordered seed/noise grid, and
+explicit inputs. The toy route has no sleep guard.
+
+The root toy CLI's `historical-toy` preset retains the original defaults;
+`PC_BASE_SEED`, `PC_DATASET_SIZE`, and `PC_EPOCHS` still supply defaults
+before flags. For either mode, add `--resolved-config toy-config.json` to
+save a complete request after a successful run. Trial configs for indepth
+mode are recorded in noise-level then seed order. Existing flags remain
+available, and typed `--override FIELD=JSON` values apply after them
+for their corresponding config fields. Overrides require `--json-result`,
+`--resolved-config`, or a budgeted `--run-state`; unknown fields and invalid values reject before
+training. The record contains no scores or winner choice (ADR-0128).
 
 The toy API can resume all three NumPy models from a trusted local file,
 including a partial model-order epoch or a sleep with structural replay:
@@ -516,7 +529,46 @@ This adds exclusive JSONL sleep, topology, replay, validation, role,
 and final-result files plus a CSV of final method rows. The raw v14
 files remain unchanged. Wake rows explicitly label per-epoch training
 metrics unavailable because the v14 runner did not record them
-(ADR-0121). For genuine metrics on a **new** bounded v14 run, use the
+(ADR-0121).
+
+For a descriptive table derived only from a completed, verified v14 bundle:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.build_v14_artifact_report --run artifacts/runs/p51-v14-local
+.\.venv\Scripts\python.exe -m scripts.build_v14_artifact_report --verify-run artifacts/runs/p51-v14-local
+```
+
+This writes an exclusive `summary-report-v1` directory with JSON/CSV rows
+for every configured arm and method. Rows show both seed count and the
+observed mean/minimum/maximum/range of four existing final metrics. The
+report includes outcome protocol, source commit/dirty state, and the fixed
+NumPy synthetic continual track. Its zero failed cells applies only to the
+verified completed bundle; failed attempts outside that bundle were not
+recorded. The table is descriptive across unmatched learning rules and
+does not select a winner. It does not modify v14 result bytes or replace
+the historical dashboard (ADR-0137; P5.6a).
+
+To generate a static dashboard and four observed-range plots from that
+verified table, run these commands after the report exists:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.build_v14_dashboard --run artifacts/runs/p51-v14-local
+.\.venv\Scripts\python.exe -m scripts.build_v14_dashboard --verify-run artifacts/runs/p51-v14-local
+```
+
+Open `artifacts/runs/p51-v14-local/dashboard-v1/dashboard.html` locally.
+The exclusive directory contains that page, four PNGs for the existing
+final metrics, and a hash manifest. Verification checks the source bundle
+and table, then re-derives every page and plot byte; a stale report or
+hand-edited figure is rejected. The page lists all nine arm/method cells,
+seed count, observed mean/min/max/range, protocol, source commit, fixed
+track, and the narrow failure scope. Bars show the observed two-seed
+minimum–maximum, not uncertainty intervals. The historical
+`docs/index.html` now displays the provenance warning alongside its
+unchanged historical charts; it is not replaced by the new page
+(ADR-0138; P5.6b).
+
+For genuine metrics on a **new** bounded v14 run, use the
 [measured wake workflow](docs/measured-wake-observations.md):
 
 ```powershell
@@ -561,7 +613,8 @@ training. See the [configuration workflow](docs/configured-continual-experiments
 (ADR-0125). This historical route is descriptive and does not alter
 the fixed matched v14 comparison.
 The [active CLI configuration audit](docs/configuration-entrypoint-audit.md)
-tracks the remaining unmatched ResNet multi-seed configuration gap.
+records configuration contracts for fixed v14, configurable continual,
+toy, and both descriptive ResNet routes.
 
 For a local JSON artifact of a completed v0–v5 continual result, add
 `--json-result continual-result.json`. It contains one typed circadian sleep
@@ -977,6 +1030,17 @@ ResNet benchmark (all 3 models):
 python resnet50_benchmark.py --dataset-name cifar100 --classes 100 --dataset-train-subset-size 20000 --dataset-test-subset-size 5000 --epochs 12 --device cuda
 ```
 
+The root ResNet command uses the named `historical-single-unmatched`
+preset with its original 110 settings. To save the complete request after
+a successful run, add `--resolved-config resnet-config.json`; to save the
+completed report with the same request embedded, add
+`--json-result resnet-result.json`. Both paths must be new. Existing flags
+still work; repeatable `--override FIELD=JSON` values apply after them and
+require one of those artifact paths. Invalid, unknown, and duplicate
+settings reject before the runner opens data. The config artifact records
+the fixed model order and labels this historical route as
+`unmatched_reference` (ADR-0129).
+
 The vision runner defaults to `vision_guard_separated_unmatched_v2`. It uses
 disjoint training, guard, outer validation, and final test roles. Epoch
 stopping and sleep rollback use guard labels; outer validation is measured
@@ -1085,6 +1149,115 @@ separate guard examples for repeated sleep decisions and never score candidate
 trials on final test data. A selected configuration still needs a separate,
 frozen final-test confirmation. The matched-representation routes below use
 a separate protocol and are not pooled with these reference results.
+
+Before running either legacy tuning sweep, inspect its work estimate:
+
+```powershell
+python scripts/run_circadian_policy_sweep.py --estimate-only
+python scripts/run_pareto_hard_tuning.py --estimate-only
+```
+
+The circadian-policy script's 18 existing candidates plan at most 14,400
+training updates and 900,000 training-row exposures. The Pareto script's
+10 backprop, 12 predictive, and 12 circadian candidates across three fixed
+seeds plan at most 81,600 updates and 5,100,000 row exposures. Both use 20
+epochs, 2,500 synthetic training rows, and batch size 64. Each prints its
+estimate before opening Torch or datasets; an ordinary launch refuses work
+above 1,000 planned updates. Set
+`--max-planned-training-updates` explicitly after deciding on a local budget.
+This is a prelaunch gate, not a runtime update, time, or memory cap. It does
+not change candidate values, seeds, validation selection, or older results.
+Runtime limits and stop reasons remain open under P5.5c/d.
+
+For a bounded local toy API run, pass an opt-in `ToyExecutionBudget` to
+`run_experiment`. It counts one committed wake update per model per epoch;
+the update and replay-example ceilings are total across a checked resume,
+as is the peak adaptive circadian hidden width. Wall time is measured afresh
+for each invocation. `max_hidden_width` checks selected splits before sleep
+or final proposal mutation, including temporary growth that a later prune
+would hide. It does not change the model's scientific split decision or
+intrinsic `max_hidden_dim`. A replay example is one row presented in a
+selected sleep replay batch, including repeated
+presentations at later sleeps. The core checks the exact selected batch
+lengths before any sleep mutation, so a zero cap still permits no-replay or
+skipped sleeps. A limit raises `ToyExecutionStopped` with `stop.reason`,
+completed updates, applied replay examples, elapsed seconds, and a checked
+checkpoint position when one was saved. A partial run never returns
+an `ExperimentResult` or opens final-test labels. For example:
+
+```python
+from src.app.experiment_runner import ExperimentConfig, run_experiment
+from src.app.toy_execution_budget import ToyExecutionBudget, ToyExecutionStopped
+from src.infra.circadian_checkpoint_files import TrustedLocalToyCheckpointStore
+
+config = ExperimentConfig(sample_count=80, epoch_count=2)
+store = TrustedLocalToyCheckpointStore("artifacts/local-toy.checkpoint")
+try:
+    run_experiment(
+        config,
+        checkpoint_store=store,
+        execution_budget=ToyExecutionBudget(max_training_updates=2, max_wall_seconds=5.0),
+    )
+except ToyExecutionStopped as stopped:
+    print(stopped.stop.reason, stopped.stop.updates_completed, stopped.stop.resumable)
+```
+
+The clock is checked between complete model updates, before sleep, and
+before final scoring; a single update or sleep operation can exceed the
+wall ceiling before the next check. For the same opt-in boundary through
+the toy CLI, choose new local paths:
+
+```powershell
+python predictive_coding_experiment.py --samples 80 --epochs 2 --sleep-interval 0 --max-training-updates 2 --max-wall-seconds 5 --run-state artifacts/toy-run.json --checkpoint artifacts/toy-run.checkpoint --json-result artifacts/toy-result.json --resolved-config artifacts/toy-config.json
+```
+
+The first command exits with code 3 if a limit stops it. The exclusive
+`toy_cli_run_state_v1` JSON then records `incomplete` and the exact limit
+reason, requested budget, observed wake updates, durable checkpointed
+updates, observed and durable replay examples, current and peak hidden
+widths, any rejected proposed width, elapsed time, and the checkpoint file
+hash/cursor. There is no completed result or separate resolved-config file
+until full final scoring.
+With `--max-process-rss-bytes N`, `work.process_rss` also records the
+invocation's absolute current-process RSS (`pid`, start/observed peak bytes,
+sample count, and sampling interval). The limit includes Python, data, and
+all three models; it is not memory attributed to the circadian model. A
+resume starts a new segment, so attempts do not share an RSS baseline.
+Unsupported process-RSS measurement records `error/process_rss_unavailable`
+before toy data or models are built.
+To continue, use the same scientific settings and artifact paths, add
+`--resume`, and raise the total update ceiling as needed:
+
+```powershell
+python predictive_coding_experiment.py --samples 80 --epochs 2 --sleep-interval 0 --max-training-updates 6 --max-wall-seconds 5 --run-state artifacts/toy-run.json --checkpoint artifacts/toy-run.checkpoint --json-result artifacts/toy-result.json --resolved-config artifacts/toy-config.json --resume
+```
+
+The run state keeps both budget attempts and becomes `completed` only after
+the result is scored and published. A training or output error records
+`error` plus its exception type, with observed and checkpointed work kept
+separate. A missing, changed, or unreadable checkpoint is not resumable.
+The run-state path is exclusive for a fresh run; the checkpoint and output
+paths must also be new and distinct. A `.lock` beside the state prevents
+concurrent local writers. If a process is killed, inspect its `running`
+state and lock before any manual recovery; automatic resume refuses that
+state. Checkpoints are pickle files and must come from a trusted local run.
+Budget flags apply only to toy `baseline` mode. Unbudgeted CLI output and
+the fixed v14 protocol remain unchanged (ADRs 0133–0136). For example, a
+two-epoch 80-sample local toy run with replay enabled can use
+`--sleep-interval 1 --replay-steps 1 --replay-memory-size 2 --max-replay-examples 0`
+with the same state/checkpoint/result paths. It
+stops before the first replay; resume with the same scientific flags,
+`--resume`, and a higher total replay cap. To bound structural growth,
+`--sleep-interval 1 --split-threshold 0 --max-hidden-width 12` stops before
+a toy sleep whose two selected splits would transiently reach width 14 even
+when pruning would return it to 12. Raising only the execution cap to 14
+allows checked resume. The width cap does not measure process RSS. The
+separate `--max-process-rss-bytes` cap starts before toy dataset/model
+construction and checks the sampled high-water before each wake update,
+before sleep, and before final scoring. A 5 ms background sampler may
+observe peaks between these boundaries; the run can stop only at its next
+check. Shorter unseen peaks may be missed, so this is a measured soft
+ceiling rather than a pre-allocation guarantee (ADR-0136).
 
 A staged two-head fixed-feature gate is available through
 `src.app.matched_head_benchmark.run_two_head_fixed_feature_benchmark`.

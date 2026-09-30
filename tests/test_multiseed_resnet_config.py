@@ -54,6 +54,16 @@ def test_should_preserve_current_default_and_flagged_config(
     assert _config_digest(script.build_base_config(parsed)) == expected_digest
 
 
+def test_should_keep_unused_cifar_synthetic_sample_flags_valid() -> None:
+    parsed = script.build_parser().parse_args(["--train-samples", "0", "--test-samples", "0"])
+
+    config = script.build_base_config(parsed)
+
+    assert config.dataset_name == "cifar100"
+    assert config.train_samples == 0
+    assert config.test_samples == 0
+
+
 def _report(model_name: str) -> ModelSpeedReport:
     return ModelSpeedReport(
         model_name=model_name,

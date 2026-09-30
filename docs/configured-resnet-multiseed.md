@@ -22,7 +22,9 @@ and backbone freeze. Use typed `ResNet50BenchmarkConfig` field names,
 such as `num_classes` for `--classes` and `dataset_data_root` for
 `--dataset-root`. `target_accuracy=null` disables target stopping;
 legacy `--target-accuracy` negative values keep their old disabled
-behavior. Model head settings and learning rates are inherited from the
+behavior. `train_samples` and `test_samples` are synthetic-source flags;
+their historical zero values remain accepted when CIFAR is selected.
+Model head settings and learning rates are inherited from the
 preset and cannot be changed through `--override` on this reference
 route. Unknown, duplicate, nonfinite, wrong-type, or out-of-range
 values fail before a runner opens data.

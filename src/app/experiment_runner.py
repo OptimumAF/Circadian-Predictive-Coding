@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import dataclass, field
 from time import perf_counter
+from typing import Callable
 
 from src.app.comparison_scope import NumpyComparisonScope, scope_for_hidden_dims
 from src.app.circadian_checkpoint import (
@@ -19,13 +20,21 @@ from src.app.toy_checkpoint import (
     ToyRunnerCheckpoint,
     toy_config_digest,
     toy_data_digest,
+    toy_checkpoint_width_work,
     validate_toy_checkpoint,
+)
+from src.app.toy_execution_budget import (
+    ToyBudgetSession,
+    ToyExecutionBudget,
+    ToyExecutionProgress,
 )
 from src.core.backprop_mlp import BackpropMLP, NUMPY_BACKPROP_LOSS_ID
 from src.core.circadian_predictive_coding import (
     CircadianConfig,
     CircadianPredictiveCodingNetwork,
+    HiddenWidthLimitExceeded,
     NUMPY_CIRCADIAN_ENERGY_ID,
+    SleepReplayLimitExceeded,
 )
 from src.core.neuron_adaptation import (
     LayerTraffic,
@@ -36,6 +45,7 @@ from src.core.predictive_coding import NUMPY_PC_ENERGY_ID, PredictiveCodingNetwo
 from src.core.sleep_clocks import SleepEpochProgress
 from src.core.sleep_telemetry import SleepEventTelemetry
 from src.infra.datasets import LabeledData, generate_two_cluster_dataset, split_training_validation
+from src.shared.process_memory import ProcessRssSampler
 
 TOY_VALIDATION_PROTOCOL = "toy_validation_v1"
 TOY_LEGACY_PROTOCOL = "toy_legacy_train_test_v0"
@@ -125,6 +135,10 @@ def run_experiment(
     *,
     checkpoint_store: ToyCheckpointStore | None = None,
     resume_from_checkpoint: bool = False,
+    execution_budget: ToyExecutionBudget | None = None,
+    execution_clock: Callable[[], float] | None = None,
+    execution_progress: ToyExecutionProgress | None = None,
+    execution_rss_sampler: ProcessRssSampler | None = None,
 ) -> ExperimentResult:
     """Train all three models on the same data and return comparable reports."""
     if (
@@ -136,11 +150,60 @@ def run_experiment(
         raise ValueError("model_order must be a permutation of the three toy models")
     if resume_from_checkpoint and checkpoint_store is None:
         raise ValueError("resume_from_checkpoint requires a checkpoint store")
+    if execution_budget is None:
+        if any(
+            value is not None
+            for value in (execution_clock, execution_progress, execution_rss_sampler)
+        ):
+            raise ValueError(
+                "execution_clock, execution_progress, and execution_rss_sampler require an execution_budget"
+            )
+        budget_session = None
+    else:
+        if type(execution_budget) is not ToyExecutionBudget:
+            raise ValueError("execution_budget must be a ToyExecutionBudget")
+        budget_session = ToyBudgetSession(
+            execution_budget,
+            execution_clock if execution_clock is not None else perf_counter,
+            execution_progress,
+        )
     policy = adaptation_policy or NoOpNeuronAdaptationPolicy()
     # Why this: arbitrary external policies can carry state outside all three
     # models. The durable route has an explicit stateless policy boundary.
     if checkpoint_store is not None and type(policy) is not NoOpNeuronAdaptationPolicy:
         raise ValueError("toy checkpoint requires the stateless default adaptation policy")
+    if execution_rss_sampler is not None and (
+        budget_session is None
+        or budget_session.budget.max_process_rss_bytes is None
+        or type(execution_rss_sampler) is not ProcessRssSampler
+    ):
+        raise ValueError("execution_rss_sampler requires a process RSS budget and sampler")
+    if budget_session is not None and budget_session.budget.max_process_rss_bytes is not None:
+        # Why this: the process-wide baseline must precede dataset/model construction.
+        sampler = execution_rss_sampler or ProcessRssSampler()
+        try:
+            with sampler:
+                budget_session.attach_memory(sampler)
+                result = _run_experiment_body(
+                    config, policy, checkpoint_store, resume_from_checkpoint, budget_session
+                )
+        finally:
+            budget_session.record_memory_snapshot()
+        budget_session.complete_memory()
+        return result
+    return _run_experiment_body(
+        config, policy, checkpoint_store, resume_from_checkpoint, budget_session
+    )
+
+
+def _run_experiment_body(
+    config: ExperimentConfig,
+    policy: NeuronAdaptationPolicy,
+    checkpoint_store: ToyCheckpointStore | None,
+    resume_from_checkpoint: bool,
+    budget_session: ToyBudgetSession | None,
+) -> ExperimentResult:
+    """Construct data/models and score only after checked training completes."""
     dataset = generate_two_cluster_dataset(
         sample_count=config.sample_count,
         noise_scale=config.noise_scale,
@@ -162,22 +225,45 @@ def run_experiment(
     else:
         raise ValueError(f"Unknown toy benchmark protocol: {config.protocol_id}")
 
+    # Why this: leave the historical unbudgeted training call boundary exact.
     if checkpoint_store is None:
-        trained = _train_toy_models(
-            config=config,
-            policy=policy,
-            train_data=train_data,
-            validation_data=validation_data,
-        )
+        if budget_session is None:
+            trained = _train_toy_models(
+                config=config,
+                policy=policy,
+                train_data=train_data,
+                validation_data=validation_data,
+            )
+        else:
+            trained = _train_toy_models(
+                config=config,
+                policy=policy,
+                train_data=train_data,
+                validation_data=validation_data,
+                budget_session=budget_session,
+            )
     else:
-        trained = _train_toy_models(
-            config=config,
-            policy=policy,
-            train_data=train_data,
-            validation_data=validation_data,
-            checkpoint_store=checkpoint_store,
-            resume_from_checkpoint=resume_from_checkpoint,
-        )
+        if budget_session is None:
+            trained = _train_toy_models(
+                config=config,
+                policy=policy,
+                train_data=train_data,
+                validation_data=validation_data,
+                checkpoint_store=checkpoint_store,
+                resume_from_checkpoint=resume_from_checkpoint,
+            )
+        else:
+            trained = _train_toy_models(
+                config=config,
+                policy=policy,
+                train_data=train_data,
+                validation_data=validation_data,
+                checkpoint_store=checkpoint_store,
+                resume_from_checkpoint=resume_from_checkpoint,
+                budget_session=budget_session,
+            )
+    if budget_session is not None:
+        budget_session.before_final()
     final_test = (
         roles.test
         if config.protocol_id == TOY_VALIDATION_PROTOCOL
@@ -232,6 +318,7 @@ def _train_toy_models(
     validation_data: LabeledData | None,
     checkpoint_store: ToyCheckpointStore | None = None,
     resume_from_checkpoint: bool = False,
+    budget_session: ToyBudgetSession | None = None,
 ) -> _ToyTrainingOutcome:
     """Train and inspect models with no reference to the final test role."""
     resolved_hidden_dims = list(config.hidden_dims) if config.hidden_dims is not None else None
@@ -265,6 +352,9 @@ def _train_toy_models(
     hidden_dim_start = circadian_model.hidden_dim
     sleep_events: list[SleepEventTelemetry] = []
 
+    if budget_session is not None and not resume_from_checkpoint:
+        budget_session.record_initial_width(circadian_model.hidden_dim)
+
     data_digest = toy_data_digest(train_data, validation_data) if checkpoint_store else ""
     config_digest = toy_config_digest(config) if checkpoint_store else ""
     start_epoch = 1
@@ -295,6 +385,17 @@ def _train_toy_models(
         backprop_losses, predictive_coding_energies, circadian_energies = deepcopy(
             checkpoint.losses
         )
+        if budget_session is not None:
+            restored_width, restored_peak_width = toy_checkpoint_width_work(checkpoint)
+            if restored_width != circadian_model.hidden_dim:
+                raise ValueError("toy checkpoint restored hidden width differs from saved width")
+            budget_session.restore_progress(
+                sum(len(history) for history in checkpoint.losses),
+                position,
+                sum(event.replay.applied_examples for event in checkpoint.sleep_events),
+                restored_width,
+                restored_peak_width,
+            )
         sleep_event_count = checkpoint.sleep_event_count
         total_splits = checkpoint.total_splits
         total_prunes = checkpoint.total_prunes
@@ -312,6 +413,8 @@ def _train_toy_models(
     for epoch_index in range(start_epoch, config.epoch_count + 1):
         model_start = start_model_index if epoch_index == start_epoch else 0
         for model_index in range(model_start, len(config.model_order)):
+            if budget_session is not None:
+                budget_session.before_update()
             model_name = config.model_order[model_index]
             if model_name == "backprop":
                 backprop_step = backprop_model.train_epoch(
@@ -339,8 +442,13 @@ def _train_toy_models(
                 )
                 circadian_energies.append(circadian_step.energy)
 
+            if budget_session is not None:
+                budget_session.record_update()
+                if model_name == "circadian_predictive_coding":
+                    budget_session.record_hidden_width(circadian_model.hidden_dim)
+
             if checkpoint_store is not None and model_index + 1 < len(config.model_order):
-                _save_toy_checkpoint(
+                saved_position = _save_toy_checkpoint(
                     checkpoint_store,
                     config,
                     config_digest,
@@ -358,9 +466,11 @@ def _train_toy_models(
                     stage="wake",
                     next_model_index=model_index + 1,
                 )
+                if budget_session is not None:
+                    budget_session.record_checkpoint(saved_position)
 
         if checkpoint_store is not None and model_start < len(config.model_order):
-            _save_toy_checkpoint(
+            saved_position = _save_toy_checkpoint(
                 checkpoint_store,
                 config,
                 config_digest,
@@ -378,6 +488,11 @@ def _train_toy_models(
                 stage="before_sleep",
                 next_model_index=0,
             )
+            if budget_session is not None:
+                budget_session.record_checkpoint(saved_position)
+
+        if budget_session is not None:
+            budget_session.before_sleep()
 
         # Why this: corrected component runs can attempt adaptive sleep on
         # any epoch; legacy runs keep their historical interval-only calls.
@@ -395,11 +510,55 @@ def _train_toy_models(
         if decision.attempted:
             sleep_policy = policy if config.circadian_use_policy_for_sleep else None
             attempt_started_at = perf_counter()
-            sleep_result = circadian_model.sleep_event(
-                adaptation_policy=sleep_policy,
-                force_sleep=decision.force_sleep,
-                epoch_progress=SleepEpochProgress(epoch_index, config.epoch_count),
-            )
+            try:
+                remaining_replay = (
+                    budget_session.remaining_replay_examples if budget_session is not None else None
+                )
+                width_limit = (
+                    budget_session.budget.max_hidden_width if budget_session is not None else None
+                )
+                sleep_progress = SleepEpochProgress(epoch_index, config.epoch_count)
+                if remaining_replay is None and width_limit is None:
+                    sleep_result = circadian_model.sleep_event(
+                        adaptation_policy=sleep_policy,
+                        force_sleep=decision.force_sleep,
+                        epoch_progress=sleep_progress,
+                    )
+                elif remaining_replay is not None and width_limit is None:
+                    sleep_result = circadian_model.sleep_event(
+                        adaptation_policy=sleep_policy,
+                        force_sleep=decision.force_sleep,
+                        epoch_progress=sleep_progress,
+                        max_replay_examples=remaining_replay,
+                    )
+                elif remaining_replay is None:
+                    sleep_result = circadian_model.sleep_event(
+                        adaptation_policy=sleep_policy,
+                        force_sleep=decision.force_sleep,
+                        epoch_progress=sleep_progress,
+                        max_hidden_width=width_limit,
+                    )
+                else:
+                    sleep_result = circadian_model.sleep_event(
+                        adaptation_policy=sleep_policy,
+                        force_sleep=decision.force_sleep,
+                        epoch_progress=sleep_progress,
+                        max_replay_examples=remaining_replay,
+                        max_hidden_width=width_limit,
+                    )
+            except SleepReplayLimitExceeded:
+                assert budget_session is not None
+                budget_session.stop_replay()
+            except HiddenWidthLimitExceeded as exc:
+                assert budget_session is not None
+                budget_session.stop_hidden_width(exc.proposed_width)
+            if budget_session is not None:
+                assert sleep_result.telemetry is not None
+                budget_session.record_replay(sleep_result.telemetry.replay.applied_examples)
+                budget_session.record_hidden_width(
+                    circadian_model.hidden_dim,
+                    sleep_result.old_hidden_dim + len(sleep_result.split_indices),
+                )
             sleep_events.append(
                 describe_unguarded_numpy_sleep_decision(
                     circadian_model,
@@ -431,7 +590,7 @@ def _train_toy_models(
             )
 
         if checkpoint_store is not None:
-            _save_toy_checkpoint(
+            saved_position = _save_toy_checkpoint(
                 checkpoint_store,
                 config,
                 config_digest,
@@ -449,6 +608,8 @@ def _train_toy_models(
                 stage="after_sleep",
                 next_model_index=0,
             )
+            if budget_session is not None:
+                budget_session.record_checkpoint(saved_position)
 
     backprop_traffic = backprop_model.get_layer_traffic()
     predictive_coding_traffic = predictive_coding_model.get_layer_traffic()
@@ -456,7 +617,24 @@ def _train_toy_models(
 
     backprop_model.apply_neuron_proposals(policy.propose(backprop_traffic))
     predictive_coding_model.apply_neuron_proposals(policy.propose(predictive_coding_traffic))
-    circadian_model.apply_neuron_proposals(policy.propose(circadian_traffic))
+    circadian_proposals = policy.propose(circadian_traffic)
+    old_width = circadian_model.hidden_dim
+    width_limit = budget_session.budget.max_hidden_width if budget_session is not None else None
+    try:
+        if width_limit is None:
+            circadian_model.apply_neuron_proposals(circadian_proposals)
+        else:
+            circadian_model.apply_neuron_proposals(
+                circadian_proposals, max_hidden_width=width_limit
+            )
+    except HiddenWidthLimitExceeded as exc:
+        assert budget_session is not None
+        budget_session.stop_hidden_width(exc.proposed_width)
+    if budget_session is not None:
+        budget_session.record_hidden_width(
+            circadian_model.hidden_dim,
+            old_width + sum(proposal.add_count for proposal in circadian_proposals),
+        )
 
     validation_accuracies: tuple[float | None, float | None, float | None] = (None, None, None)
     if validation_data is not None:
@@ -503,7 +681,7 @@ def _save_toy_checkpoint(
     completed_epoch: int,
     stage: str,
     next_model_index: int,
-) -> None:
+) -> CircadianResumePosition:
     """Persist a fully matched cursor after a complete model update or sleep."""
     position = CircadianResumePosition(
         completed_epoch=completed_epoch,
@@ -534,6 +712,7 @@ def _save_toy_checkpoint(
             ),
         )
     )
+    return position
 
 
 def format_experiment_result(result: ExperimentResult) -> str:

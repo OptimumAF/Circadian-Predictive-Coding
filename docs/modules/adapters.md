@@ -49,6 +49,13 @@
 - `scripts/project_v14_observations.py` projects or verifies a completed
   P5.1 bundle in an exclusive local directory. It does not train,
   score, or choose a result (ADR-0121).
+- `scripts/build_v14_artifact_report.py` publishes or verifies one
+  source-checked descriptive JSON/CSV table beside a completed P5.1
+  bundle. It does not train, choose a winner, or edit the dashboard
+  (ADR-0137).
+- `scripts/build_v14_dashboard.py` publishes or verifies one static
+  dashboard derived from a checked P5.6a table. It does not train or
+  modify the historical dashboard (ADR-0138).
 - Opt-in `--capture-wake-diagnostics` on `run_versioned_v14_bundle.py`
   and `--run-measured` / `--verify-measured-run` on
   `project_v14_observations.py` publish genuine train-update metrics
@@ -61,6 +68,24 @@
   unmatched flags and output names, parses repeatable JSON settings
   after them, checks the app's typed config before training, and embeds
   complete per-seed settings in the JSON result (ADR-0127).
+- `predictive_coding_experiment.py` delegates to `src/adapters/cli.py`.
+  The adapter keeps the toy baseline/indepth flags, parses typed JSON
+  overrides, rejects invalid requests before training, and saves a full
+  exclusive resolved-config record or an enriched baseline JSON result
+  after completion (ADR-0128).
+- `src/adapters/toy_budget_cli.py` handles opt-in toy baseline update,
+  time, replay, circadian hidden-width, and process-RSS limits. It claims a local
+  lifecycle path, binds resume to the exact resolved config and trusted
+  checkpoint hash/cursor, records observed and
+  durable wake, replay, and width work plus per-invocation absolute process-RSS
+  start/peak/sample facts for completed/incomplete/error attempts,
+  and publishes a completed JSON only after final scoring. It does not
+  select settings, change training rules, or open final roles (ADRs 0133–0136).
+- `resnet50_benchmark.py` delegates to `src/adapters/resnet_benchmark_cli.py`.
+  All old defaults come from a typed preset, existing flags remain, and
+  repeatable JSON overrides are checked before the Torch runner. The
+  adapter writes an exclusive full config or completed result JSON and
+  retains the original stdout report (ADR-0129).
 
 ## Inputs / Outputs
 

@@ -9,6 +9,7 @@
 - Run bounded, equal-trial tuning of frozen shared-feature heads with validation-only selection
 - Freeze validation-selected matched-head confirmations across predeclared seed and budget scopes
 - Label NumPy toy, continual, and dynamics outputs with algorithm identity and comparison scope
+- Estimate planned synthetic-vision candidate training batches and examples before external resources open
 
 ## Inputs / Outputs
 
@@ -16,6 +17,39 @@
 - Outputs: `ExperimentResult`, `InDepthComparisonResult`, `ResNet50BenchmarkResult`,
   `MatchedHeadTuningResult`, `ProcessIsolatedMemoryResult`, and
   `RepeatedConfirmationResult`
+
+`sweep_work_estimate.py` accepts resolved synthetic `ResNet50BenchmarkConfig`
+candidates and a seed count. It returns the maximum planned optimizer calls
+and row exposures from epochs and full/short batches; a separate predicate
+checks an explicit launch ceiling. It does not train, open datasets, estimate
+validation/inference work, measure elapsed time or memory, or stop a running
+sweep. Both legacy circadian-policy and multi-seed Pareto scripts use it before
+Torch initialization, passing the same ordered candidate lists to training
+after a launch ceiling succeeds.
+
+`toy_execution_budget.py` accepts non-negative total wake-update and
+replay-example ceilings, a positive adaptive circadian hidden-width cap,
+an absolute per-invocation process-RSS cap, per-invocation wall time, and an
+injectable monotonic clock. The toy runner checks them before each model
+update, before sleep, and before final scoring, raising typed incomplete-stop
+facts with a checked existing cursor when available. The budget is outside
+`ExperimentConfig`, so it does not alter scientific identity or old
+checkpoint bytes. An optional mutable `ToyExecutionProgress` exposes
+committed wake/replay work and the last saved
+cursor to an outer adapter even if a later operation raises. The toy runner
+preflights exact selected replay batch lengths before sleep and restores
+applied examples from checked sleep telemetry on resume. This module
+also records current and historical transient peak width from the checked
+circadian snapshot and sleep history. It stops before selected sleep or
+final-proposal growth exceeds the run-level width cap and does not change
+the core's split/prune choice (ADR-0135).
+The RSS sampler starts before toy dataset/model construction, observes
+5 ms background samples and explicit checked boundaries, and records its
+start/peak/sample count. A sampled over-cap peak stops at a boundary; short
+unobserved peaks cannot be ruled out (ADR-0136). This module does not train,
+score, persist a lifecycle artifact, or interrupt an
+individual update/sleep operation; the adapter/infra boundary owns CLI
+publication (ADRs 0132–0136).
 
 `matched_head_tuning.py` takes a guarded, frozen-backbone base configuration,
 predeclared per-head candidate configurations, common seeds, and an equal
@@ -49,13 +83,30 @@ result. Per-model seeds, role splits, and the default execution order stay
 fixed. The option is for reproducibility checks, not candidate selection;
 it does not make the toy and image benchmarks comparable.
 
+`toy_experiment_config.py` takes environment-backed defaults, the original
+toy CLI's existing fields, and explicit typed overrides. It returns a
+validated `ExperimentConfig` and a complete ordered baseline/indepth
+request record. It does not parse command syntax, train, write files, or
+inspect scores. `indepth_comparison.py` supplies the single per-cell config
+constructor used by both execution and recording (ADR-0128).
+
+`single_resnet_experiment_config.py` takes the existing 110-field
+`ResNet50BenchmarkConfig`, named historical preset, and explicit typed
+overrides. It returns a validated config and complete unmatched request
+record. It does not parse flags, load images, run Torch, inspect scores,
+or write files. The existing runner validator still owns protocol and
+model constraints; this module enforces them before the runner starts
+(ADR-0129).
+
 `numpy_sleep_decisions.py` combines a NumPy core result with the runner's
 schedule, attempt duration, and optional measured guard facts. It retains
 the complete core proposal when the arrived inner guard restores a rejected
 attempt. For an unscheduled epoch it reads chemistry without calling sleep.
 It does not choose evaluation roles, score a guard, or change legacy counts.
 `toy_checkpoint.py` stores this sequence with its model/order cursor and
-rejects incomplete or old version-1 histories before model restoration.
+rejects incomplete or old version-1 histories and invalid replay usage
+before model restoration. It derives current and transient peak adaptive
+width for budget resume from the saved model and validated sleep history.
 
 `comparison_scope.py` takes a NumPy hidden-width tuple, or `None` when a
 standalone figure builder lacks architecture provenance. It returns an
@@ -413,6 +464,21 @@ objects into deterministic typed JSONL and final-row CSV bytes. It
 checks cell/epoch order and train-only role access, and marks genuinely
 unrecorded wake metrics unavailable. It does not read files, estimate
 metrics, aggregate seeds, or choose an arm (ADR-0121).
+
+`v14_artifact_report.py` accepts a completed v14 manifest and scored
+outcome object after the file boundary has verified them. It preserves
+the declared seed/arm/method grid and returns deterministic JSON/CSV
+tables with observed final-metric mean/minimum/maximum/range, source and
+track labels, and a strictly within-bundle failure count. It does not
+read files, train, select a result, estimate unpublished failures, or
+make causal comparisons (ADR-0137).
+
+`v14_dashboard_projection.py` accepts a verified P5.6a summary and
+renders a standalone HTML page and four PNGs with every source-order
+arm/method row, fixed metric labels, observed spread, and scoped
+provenance. `v14_report_plot.py` renders means and observed minimum–maximum
+bars using the existing Pillow dependency. Neither module reads files,
+estimates uncertainty, ranks cells, or edits historical pages (ADR-0138).
 
 `wake_diagnostic.py` identifies the metric returned by each successful
 NumPy wake update and validates its order, definition, timing, and

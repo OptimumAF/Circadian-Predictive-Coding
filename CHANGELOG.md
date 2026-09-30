@@ -9,6 +9,54 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- Verified artifact-only v14 static dashboard and four final-metric PNG
+  plots from the descriptive table. Exact regeneration rejects stale or
+  hand-edited content; the historical dashboard gains an in-page
+  provenance warning without changing its charts
+  (ADR-0138).
+- Artifact-only v14 descriptive summary table with all configured
+  arms/methods, seed count, final-metric observed range, source commit,
+  protocol, track, and explicit within-bundle failure scope. It verifies
+  the completed source and re-derives its exclusive JSON/CSV output
+  without editing fixed v14 results (ADR-0137).
+- Opt-in measured absolute process-RSS ceiling for budgeted toy runs.
+  Checked wake/sleep/final stops and a final publication check use a
+  per-invocation sampler; CLI state records start/observed peak/sample
+  facts or a typed unavailable-host error. The sampled ceiling is soft
+  and checked resume starts a new memory segment (ADR-0136).
+- Opt-in run-level circadian hidden-width ceiling for toy runs. It checks
+  selected split growth before sleep or final proposal mutation, including
+  transient width that later pruning hides; checked resume and CLI state
+  carry current and historical peak width separately (ADR-0135).
+- Opt-in total replay-example limit for budgeted toy runs. The core checks
+  selected batch lengths before sleep mutation; checked resume restores
+  applied exposure, and the CLI records observed/durable replay work with
+  a distinct incomplete reason (ADR-0134).
+- Opt-in toy CLI update/time flags with an exclusive versioned local run
+  state. Completed, incomplete, and error attempts record their budget,
+  observed/durable work, reason, and checked checkpoint identity; unsafe
+  resume and overwrite are refused (ADR-0133).
+- Opt-in total wake-update and per-invocation wall-time limits for the
+  toy comparison API. A typed incomplete stop carries exact work and
+  checked resume position without final scoring; default runs retain
+  their old config and result identities (ADR-0132).
+- A prelaunch estimate and explicit planned-update ceiling for the legacy
+  three-family Pareto sweep. Its unchanged 34 candidate lists across three
+  seeds plan at most 81,600 training updates; default launch refuses the
+  work before Torch/data setup, while `--estimate-only` reports it without
+  training (ADR-0131).
+- A prelaunch work estimate and explicit planned-update ceiling for the
+  legacy circadian-policy sweep. `--estimate-only` opens no Torch or data;
+  the 18-candidate default launch is refused at the 1,000-update automatic
+  ceiling until a higher limit is supplied (ADR-0130).
+- A named typed preset and full exclusive configuration/result artifacts
+  for the root single-run ResNet CLI. All 110 old defaults and legacy
+  flag behavior remain; typed overrides and malformed settings reject
+  before the Torch runner (ADR-0129).
+- A named historical toy CLI preset, typed existing-field overrides, and
+  complete baseline/ordered indepth configuration artifacts. New baseline
+  JSON results retain their report fields and include the exact resolved
+  settings; invalid inputs reject before training (ADR-0128).
 - A typed historical unmatched preset and complete base/per-seed
   configuration record for the multi-seed ResNet export, with strict
   existing-field overrides and pretraining validation; historical
@@ -16,8 +64,7 @@ for versioning even while in research-stage development.
   (ADR-0127).
 - Declared a single typed `fixed-v14` preset for the versioned bundle,
   rejecting unknown settings before training while retaining its exact
-  raw result hashes; audited active experiment entrypoints and recorded
-  the remaining unmatched ResNet configuration gap (ADR-0126).
+  raw result hashes; audited active experiment entrypoints (ADR-0126).
 - Typed, explicit overrides for existing continual-shift presets and
   an exclusive fully resolved configuration artifact, with unknown,
   duplicate, nonfinite, and baseline/protocol field rejection before

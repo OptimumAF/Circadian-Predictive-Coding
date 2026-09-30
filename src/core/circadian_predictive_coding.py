@@ -63,6 +63,42 @@ class ReplaySnapshot:
     positive_fraction: float
 
 
+class SleepReplayLimitExceeded(RuntimeError):
+    """A sleep would exceed the caller's remaining replay-example allowance."""
+
+    def __init__(self, planned_examples: int, remaining_examples: int) -> None:
+        self.planned_examples = planned_examples
+        self.remaining_examples = remaining_examples
+        super().__init__(
+            f"sleep would apply {planned_examples} replay examples with "
+            f"{remaining_examples} remaining"
+        )
+
+
+class HiddenWidthLimitExceeded(RuntimeError):
+    """A circadian topology operation would exceed a caller's width cap."""
+
+    def __init__(self, proposed_width: int, max_hidden_width: int) -> None:
+        self.proposed_width = proposed_width
+        self.max_hidden_width = max_hidden_width
+        super().__init__(
+            f"circadian hidden width would reach {proposed_width} "
+            f"with a limit of {max_hidden_width}"
+        )
+
+
+def _validate_hidden_width_limit(max_hidden_width: int | None) -> None:
+    if max_hidden_width is not None and (
+        type(max_hidden_width) is not int or max_hidden_width <= 0
+    ):
+        raise ValueError("max_hidden_width must be a positive integer")
+
+
+def _check_hidden_width_limit(proposed_width: int, max_hidden_width: int | None) -> None:
+    if max_hidden_width is not None and proposed_width > max_hidden_width:
+        raise HiddenWidthLimitExceeded(proposed_width, max_hidden_width)
+
+
 def _summarize_chemical(values: Array) -> ChemicalSummary:
     """Copy only scalar statistics from an aligned NumPy chemical vector."""
     return ChemicalSummary(
@@ -952,8 +988,17 @@ class CircadianPredictiveCodingNetwork:
         current_step: int | None = None,
         total_steps: int | None = None,
         epoch_progress: SleepEpochProgress | None = None,
+        *,
+        max_replay_examples: int | None = None,
+        max_hidden_width: int | None = None,
     ) -> SleepEventResult:
         """Consolidate structure; optionally trigger only when adaptive criteria fire."""
+        _validate_hidden_width_limit(max_hidden_width)
+        _check_hidden_width_limit(self.hidden_dim, max_hidden_width)
+        if max_replay_examples is not None and (
+            type(max_replay_examples) is not int or max_replay_examples < 0
+        ):
+            raise ValueError("max_replay_examples must be a non-negative integer")
         if epoch_progress is not None:
             if current_step is not None or total_steps is not None:
                 raise ValueError("epoch_progress cannot be combined with current_step/total_steps")
@@ -1005,6 +1050,8 @@ class CircadianPredictiveCodingNetwork:
                 completed_epoch=current_step,
                 trigger_reason="forced" if force_sleep else "adaptive",
                 started_at=started_at,
+                max_replay_examples=max_replay_examples,
+                max_hidden_width=max_hidden_width,
             )
         except Exception:
             self.restore_state(snapshot)
@@ -1020,7 +1067,23 @@ class CircadianPredictiveCodingNetwork:
         completed_epoch: int | None,
         trigger_reason: str,
         started_at: float,
+        max_replay_examples: int | None,
+        max_hidden_width: int | None,
     ) -> SleepEventResult:
+        # Why this: a rejected event must not transiently grow topology or run
+        # any replay update before the caller can preserve its checked cursor.
+        replay_enabled = self.config.sleep_mode == "legacy" or self.config.sleep_enable_replay
+        replay_snapshots = (
+            self._planned_replay_snapshots()
+            if max_replay_examples is not None and replay_enabled
+            else None
+        )
+        if max_replay_examples is not None:
+            planned_examples = sum(
+                int(snapshot.input_batch.shape[0]) for snapshot in replay_snapshots or ()
+            )
+            if planned_examples > max_replay_examples:
+                raise SleepReplayLimitExceeded(planned_examples, max_replay_examples)
         old_hidden_dim = self.hidden_dim
         split_indices: tuple[int, ...]
         pruned_indices: tuple[int, ...]
@@ -1040,6 +1103,10 @@ class CircadianPredictiveCodingNetwork:
                 adaptation_policy, split_budget=split_budget, prune_budget=prune_budget
             )
 
+        # Splits run before prunes, so the temporary width can exceed both
+        # entry and final widths even when they fit the caller's ceiling.
+        _check_hidden_width_limit(self.hidden_dim + len(split_indices), max_hidden_width)
+
         lineage_before = self.get_neuron_lineage()
         proposed_ids = tuple(lineage_before.neuron_ids[index] for index in pruned_indices)
         self._split_neurons(split_indices)
@@ -1056,8 +1123,11 @@ class CircadianPredictiveCodingNetwork:
         if self.config.sleep_mode == "legacy" or self.config.sleep_enable_homeostasis:
             self._apply_homeostatic_downscaling()
         replay_examples = replay_updates = 0
-        if self.config.sleep_mode == "legacy" or self.config.sleep_enable_replay:
-            replay_examples, replay_updates = self._run_replay_consolidation()
+        if replay_enabled:
+            if replay_snapshots is None:
+                replay_examples, replay_updates = self._run_replay_consolidation()
+            else:
+                replay_examples, replay_updates = self._run_replay_consolidation(replay_snapshots)
 
         # Sleep partially clears chemistry after consolidation to reset plasticity gate.
         if self.config.sleep_mode == "legacy" or self.config.sleep_enable_chemical_reset:
@@ -1292,9 +1362,14 @@ class CircadianPredictiveCodingNetwork:
         span = self.config.plasticity_sensitivity_max - self.config.plasticity_sensitivity_min
         return self.config.plasticity_sensitivity_min + span * stability
 
-    def apply_neuron_proposals(self, proposals: list[NeuronChangeProposal]) -> PruneOutcome:
+    def apply_neuron_proposals(
+        self, proposals: list[NeuronChangeProposal], *, max_hidden_width: int | None = None
+    ) -> PruneOutcome:
+        _validate_hidden_width_limit(max_hidden_width)
+        _check_hidden_width_limit(self.hidden_dim, max_hidden_width)
         old_hidden_dim = self.hidden_dim
         split_indices, prune_indices = self._indices_from_proposals(proposals)
+        _check_hidden_width_limit(self.hidden_dim + len(split_indices), max_hidden_width)
         lineage_before = self.get_neuron_lineage()
         proposed_ids = tuple(lineage_before.neuron_ids[index] for index in prune_indices)
         self._split_neurons(split_indices)
@@ -2056,12 +2131,11 @@ class CircadianPredictiveCodingNetwork:
             )
         )
 
-    def _run_replay_consolidation(self) -> tuple[int, int]:
-        if self.config.replay_steps <= 0 or len(self._replay_memory) == 0:
-            return 0, 0
-
-        replay_count = min(self.config.replay_steps, len(self._replay_memory))
-        replay_snapshots = self._select_replay_snapshots(replay_count)
+    def _run_replay_consolidation(
+        self, replay_snapshots: list[ReplaySnapshot] | None = None
+    ) -> tuple[int, int]:
+        if replay_snapshots is None:
+            replay_snapshots = self._planned_replay_snapshots()
         examples = 0
         updates = 0
         for snapshot in replay_snapshots:
@@ -2087,6 +2161,12 @@ class CircadianPredictiveCodingNetwork:
             examples += int(snapshot.input_batch.shape[0])
             updates += 1
         return examples, updates
+
+    def _planned_replay_snapshots(self) -> list[ReplaySnapshot]:
+        if self.config.replay_steps <= 0 or not self._replay_memory:
+            return []
+        replay_count = min(self.config.replay_steps, len(self._replay_memory))
+        return self._select_replay_snapshots(replay_count)
 
     def _select_replay_snapshots(self, replay_count: int) -> list[ReplaySnapshot]:
         if replay_count <= 0:

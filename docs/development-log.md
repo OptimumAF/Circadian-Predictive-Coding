@@ -8582,3 +8582,820 @@ were not modified.
   resolved record without changing historical unmatched status,
   baseline rates, validation-only winner logic, or old result files;
   then run focused/full/static gates and assess P5.4c/P5.4 acceptance.
+
+## 2026-09-29 — P5.4c2 descriptive ResNet multi-seed configuration
+
+- Completed task ID: **P5.4c2**. P5.4c3/c4, P5.4c, and P5.4 parent
+  remain unchecked. Re-read AGENTS.md and the current plan/log, then
+  inspected actual `master` HEAD
+  `f4ae40214b5f136e26be63ecd51349223c56c05d`. Previous P5.4c1
+  tracked/untracked edits were present and preserved. HEAD later
+  advanced to `68f9dd01a1eb789f7129b421732c7dba1c8c9392`, a
+  commit containing prior c1 and initial c2 changes;
+  this agent did not run `git commit`. The final CIFAR compatibility
+  repair and handoff edits remain unstaged. No dependency changed.
+  The reviewed `8793c49...` is still the original plan boundary.
+- Before editing, the current no-flag multi-seed CLI built a complete
+  `ResNet50BenchmarkConfig` with canonical JSON SHA-256
+  `8639c5d9a43fde3f3b84d70921e364b43822d2ab22203213317682338565666f`.
+  The representative existing flags (synthetic, classes 10, epochs 2,
+  seed 5, no download, trainable backbone, target 0.8) gave
+  `ac82520c19c15f63c1589d17c72c4d9cc248147efc4dc7b3197f730934c8d029`.
+  Tests now lock both whole-config identities, rather than a subset
+  of fields. The existing JSON only saved selected dataset/runtime
+  fields, omitting inherited model settings and learning rates.
+- Added `src/app/resnet_experiment_config.py` with typed sole preset
+  `historical-unmatched`, the original defaults, strict type/finite/range
+  checks for the fields already exposed by this CLI, and a complete
+  `resnet_multiseed_resolved_config_v1` record. Repeatable JSON overrides
+  apply after old flags, reject duplicate/unknown/nested or bad values,
+  and cannot change model learning rates. The result records the full
+  base config, ordered exact per-seed configs, preset, seeds, exact input
+  tokens, and overrides. The CLI checks runner-returned config identity
+  before writing a result. Its unmatched status, validation-only winner
+  calculation, existing dataset/runtime/summary fields, and CSV names
+  are unchanged. Old artifacts were not rewritten.
+- New test collection first failed for the missing module, then a patch
+  hunk temporarily introduced a syntax error in the script; both were
+  repaired before focused and full gates. The mocked one-seed CLI test
+  writes temporary JSON/CSV, verifies the exact config sent to the fake
+  runner, and checks override precedence. Rejection tests cover
+  baseline-rate/unknown keys, duplicate fields, bool for integer,
+  nonfinite noise, invalid epoch ranges, and runner config drift before
+  publication. Existing output-protection and validation-selection
+  tests remain green. After the first full pass, a parity review found
+  that CIFAR historically ignores the synthetic-only `train_samples`
+  and `test_samples` flags; an explicit red test showed the new
+  validator rejected their valid zero values. Validation now permits
+  zero for CIFAR and requires positive values for synthetic sources.
+  The final focused/static/full gates passed after that repair.
+  ADR-0127, the configuration guide, README,
+  architecture, module docs, audit, changelog, and plan were updated.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_multiseed_resnet_config.py  # initial red ModuleNotFoundError; later passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_multiseed_resnet_config.py tests/test_multiseed_output_protection.py tests/test_resnet50_benchmark.py  # exit 0: 50 passed in 80.74 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # first exit 0: 1,564 passed, 41 skipped in 479.89 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_multiseed_resnet_config.py::test_should_keep_unused_cifar_synthetic_sample_flags_valid  # red before repair, green after
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_multiseed_resnet_config.py tests/test_multiseed_output_protection.py  # final exit 0: 19 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # final exit 0: 1,565 passed, 41 skipped in 484.70 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 262 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/resnet_experiment_config.py scripts/run_multiseed_resnet_benchmark.py tests/test_multiseed_resnet_config.py  # exit 0: three formatted files
+  git -c core.safecrlf=false diff --cached --check  # exit 0
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Experiment artifacts:** the small mocked result/CSV files lived in
+  pytest temporary directories and were not retained as scientific
+  evidence. No actual Torch run, large sweep, seed selection, or
+  score-driven retuning was launched. The prior ignored fixed-v14
+  `artifacts/runs/p54-fixed-v14-preset/` and existing historical
+  results remain untouched. The 41 skips require CUDA; no new config
+  or multi-seed output test was skipped.
+- **Plan changes:** checked c2 after default/flag parity, mocked exact
+  record/rejection tests, full suite, and static gates. A subsequent
+  README scan found two root wrappers omitted by the first scripts-only
+  audit: `predictive_coding_experiment.py` delegates to a configurable
+  toy CLI whose JSON omits `ExperimentConfig`, and `resnet50_benchmark.py`
+  delegates to a configurable single-run Torch CLI that prints only a
+  report. Added c3/c4 and kept c/P5.4 parent unchecked without changing
+  their acceptance criteria. **Blockers:** none. **Exact next action:**
+  capture the root toy CLI's no-flag and representative flagged resolved
+  configs under fixed environment defaults; add red tests for named
+  typed preset, pretraining input rejection, complete baseline JSON
+  config, and ordered indepth seed/noise artifact. Implement the smallest
+  app/adapter change and run a tiny local CPU check plus gates before
+  starting the root single-run ResNet c4 slice.
+
+## 2026-09-29 — P5.4c3 root toy CLI configuration
+
+- **Completed task ID:** P5.4c3. Re-read `AGENTS.md`, the full plan/current
+  handoff, the log, and the actual checkout. `master` remained at
+  `68f9dd01a1eb789f7129b421732c7dba1c8c9392`; the prior P5.4c2
+  compatibility and handoff edits were unstaged and preserved. The plan's
+  reviewed `8793c49...` remains a preparation boundary, not this session's
+  code state. No unrelated or ignored file was removed.
+- Before editing, mocked CLI capture under `PC_BASE_SEED=7`,
+  `PC_DATASET_SIZE=400`, and `PC_EPOCHS=160` gave complete canonical
+  config SHA-256 `b9c678b3ded07dad2969412d8f595d75ac5dc25aa987cff86bca80e51ad42801`
+  for no flags and `96941126d2990a7a16ce2e3e4084e0357844b48f195dac98e10f192e4db8a19c`
+  for the fixed 80-sample/4-epoch/seed-13/deep/noise/reward flag set. The
+  80-sample/2-epoch indepth request with ordered seeds `[13,7]` and noise
+  `[0.7,1.1]` hashed to
+  `097f8551dc083593539903c3a47aa1369cfa3c91b7b81a9af44fc200a2b684f4`.
+  New tests assert all three unchanged identities.
+- Added `src/app/toy_experiment_config.py`: the `historical-toy` preset
+  owns inherited model defaults and environment-backed sample/epoch/seed
+  values. Legacy flags retain precedence, with repeatable typed overrides
+  afterward only for their existing `ExperimentConfig` fields. Unknown,
+  duplicate, wrong-type, nonfinite, range-invalid, occupied-path, and
+  unsaved override requests reject before a runner call. The validator
+  retains valid legacy behavior for a validation fraction unused by the
+  legacy protocol and replay settings unused when replay is disabled.
+  `indepth_comparison.py` now exposes the same per-cell config constructor
+  to its runner and the artifact builder, in noise-level then seed order.
+- The baseline CLI's new JSON embeds `toy_resolved_config_v1` beside the
+  old top-level report fields. `--resolved-config` writes the same full
+  record for baseline or indepth after success, exclusively. A bounded
+  actual 80-sample/one-epoch test asserted the saved config equals the
+  exact object passed to training and that the separate artifact matches.
+  A mocked indepth test asserted all four ordered trial configs without
+  reading scores or choosing a winner. Direct calls to the existing
+  two-argument JSON writer retain their old shape. ADR-0128, README,
+  architecture, module docs, audit, and changelog describe the boundary.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_experiment_config.py  # initial red import; later green
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_experiment_config.py tests\test_toy_sleep_telemetry.py tests\test_indepth_comparison.py tests\test_sleep_artifact_audit.py  # final exit 0: 38 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # first exit 0: 1,582 passed, 41 skipped; final exit 0: 1,585 passed, 41 skipped in 453.50 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 264 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\toy_experiment_config.py src\app\indepth_comparison.py src\adapters\cli.py src\infra\local_result_json.py src\infra\toy_result_files.py tests\test_toy_experiment_config.py  # exit 0: six formatted files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  The first green focused run found two test assertion mismatches because
+  JSON encodes tuple `model_order` as a list; the assertions were corrected
+  to compare canonical JSON. Three compatibility/grid cases were added
+  after the first full run, then the final focused and full suites passed.
+- **Skipped tests and artifacts:** the 41 full-suite skips require CUDA;
+  no toy config test was skipped. The actual bounded result and mocked
+  indepth artifact lived only in pytest temporary directories. No
+  scientific result file, fixed-v14 bundle, historical output, or large
+  sweep was rewritten or launched. No Torch training, seed selection,
+  baseline-rate tuning, metric change, or score-driven choice occurred.
+- **Plan changes and next work:** checked P5.4c3 only, after parity,
+  artifact, rejection, and final gates. P5.4c4, P5.4c, and P5.4 remain
+  unchecked; P5.5–P5.7 and later tasks remain open. Preliminary read-only
+  inspection of `resnet50_benchmark.py` and its adapter found a 110-field
+  config assembled in the CLI. Mocked capture gave default config SHA-256
+  `f7a4b9664fc73e2260c60a7dcb02929d254f9390723e1093270807364b593775`
+  and README flag-set SHA-256
+  `2ef3ac40d8cbe27aee7f292cf26d2188e4fc4680608801f614058f608391f349`
+  without invoking the Torch runner. **Blockers:** none. **Exact next
+  action:** add red P5.4c4 tests locking those two full-config identities,
+  rejecting bad settings before the runner, and saving the exact complete
+  config in an exclusive artifact. Then implement the smallest compatible
+  app preset/adapter change and run focused/full/static gates without a
+  Torch sweep before checking c4, c, or P5.4.
+
+## 2026-09-29 — P5.4c4 and P5.4 configuration audit completion
+
+- **Completed task IDs:** P5.4c4, P5.4c, and P5.4 parent. Re-read
+  `AGENTS.md`, the plan handoff, current log, and checkout before work.
+  `master` stayed at `68f9dd01a1eb789f7129b421732c7dba1c8c9392`;
+  the prior unstaged c2/c3 changes and ignored fixed-v14 artifacts were
+  preserved. The reviewed `8793c49...` commit remains the preparation
+  boundary, not the current checkout.
+- Pre-change mocked CLI capture had fixed the complete 110-field no-flag
+  SHA-256 as
+  `f7a4b9664fc73e2260c60a7dcb02929d254f9390723e1093270807364b593775`
+  and the README CIFAR-100 flag-set SHA-256 as
+  `2ef3ac40d8cbe27aee7f292cf26d2188e4fc4680608801f614058f608391f349`.
+  Tests now lock both and explicit preset parity. The parser's 110 action
+  destinations were mapped to the 110 dataclass fields before editing;
+  92 scalar and six boolean parser-held defaults moved to the typed
+  `historical-single-unmatched` preset, with 98 leftover default
+  placeholders removed. The old `--classes` dataset-dependent omission
+  and `--target-accuracy -1` sentinel remain.
+- Added `src/app/single_resnet_experiment_config.py` for strict finite
+  scalar validation, existing-field typed overrides, and a complete
+  `resnet_single_resolved_config_v1` record. The root adapter checks
+  unknown, duplicate, malformed, type/range-invalid, nonfinite, and
+  occupied/same-path inputs before `run_resnet50_benchmark`. Existing
+  broad flags and stdout formatting remain. A compatibility case preserved
+  CIFAR's ignored synthetic sample flags (including
+  negative values), an empty dataset root, and zero backprop learning
+  rate; the route remains descriptive/unmatched. The completed result
+  JSON retains its report fields and embeds the same record saved by
+  `--resolved-config`. A mocked runner test verifies every requested
+  config field and override, with no Torch training.
+- A final review found that the fixed CLI model order was outside the
+  config dataclass. A red artifact/order-drift test exposed the omission;
+  `VISION_DEFAULT_MODEL_ORDER` now drives the runner and record, and
+  runner order drift rejects before either artifact is published. The
+  record also contains preset, seed, unmatched track, exact input
+  tokens, and overrides. ADR-0129, README, architecture, module docs,
+  audit, and changelog describe the change.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_single_resnet_config.py  # initial red missing-module collection, then 17 passed; final 18 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_single_resnet_config.py tests\test_resnet50_benchmark.py tests\test_sleep_retry_runners.py tests\test_sleep_event_accounting.py tests\test_multiseed_resnet_config.py tests\test_multiseed_output_protection.py  # exit 0: 104 passed before order addition
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_single_resnet_config.py::test_should_save_complete_exact_config_and_descriptive_result tests\test_single_resnet_config.py::test_should_reject_runner_order_drift_before_artifact_publication  # red 2, then repaired
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_single_resnet_config.py tests\test_resnet50_benchmark.py tests\test_sleep_retry_runners.py tests\test_sleep_event_accounting.py  # final exit 0: 87 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # first exit 0: 1,602 passed, 41 skipped; final exit 0: 1,603 passed, 41 skipped in 362.00 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 266 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\resnet50_benchmark.py src\app\single_resnet_experiment_config.py src\adapters\resnet_benchmark_cli.py tests\test_single_resnet_config.py  # exit 0: four formatted files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests and experiment artifacts:** 41 full-suite skips
+  require CUDA; no new single-run config test was skipped. Mocked JSON
+  result/config files were in pytest temporary directories and were
+  not retained as scientific outcomes. No real Torch benchmark, large
+  sweep, baseline/seed/metric tuning, test-informed choice, fixed-v14
+  rerun, or rewrite of a historical result occurred.
+- **Plan changes:** checked c4, then c and P5.4 only after the active
+  CLI audit covered both root wrappers, fixed studies stayed closed,
+  exact defaults and artifacts were verified, and final gates passed.
+  P5.5–P5.7 and later tasks remain unchecked. **Blockers:** none.
+  **Exact next action:** inspect current runner work counters,
+  replay/capacity limits, fixed-v14 manifests, and sweep entrypoints
+  for P5.5. Split the broad budget task where code inspection justifies
+  it, add red tests for a small route with maximum updates, wall time,
+  replay examples, capacity/memory bounds, explicit stop reasons, and
+  prelaunch sweep-size estimation. Implement one bounded increment
+  before any large cross-product experiment.
+
+## 2026-09-29 — P5.5a legacy policy sweep preflight
+
+- **Completed task:** P5.5a only. P5.5 parent and new b–d subtasks
+  remain unchecked. Checkout `master` at
+  `68f9dd01a1eb789f7129b421732c7dba1c8c9392`; earlier P5.4 work
+  and this increment remain unstaged. Preserved prior changes and the
+  ignored fixed-v14 artifact.
+- **Inspection and plan change:** Re-read AGENTS.md, the plan, and the
+  current log, then checked the fixed v14 manifest, runner work counters,
+  synthetic DataLoader, and both legacy tuning scripts. V14 already
+  fixes replay retention at eight examples/192 bytes and width at 4–32.
+  The policy script has 18 candidates, one seed, 20 epochs, 2,500 rows,
+  and batch 64: 14,400 possible wake training updates. Pareto has
+  10+12+12 candidates × three seeds under the same dimensions: 81,600
+  possible updates. Both scripts previously reached Torch/data setup
+  before any size preflight. Split P5.5 into policy preflight (a), Pareto
+  preflight (b), runtime update/time stops (c), and replay/capacity/memory
+  limits (d). A launch estimate does not meet the runtime criteria.
+- **Implementation:** Added pure
+  `src/app/sweep_work_estimate.py` with strict positive synthetic config
+  and seed checks, short-final-batch arithmetic, example exposures, and
+  a planned-update limit predicate. The existing policy script now
+  resolves its actual candidate list and rejects non-circadian overrides
+  that could diverge from its shared loader, prints the estimate, and
+  refuses work over an automatic 1,000-update ceiling before
+  `require_torch`, weights, or dataset construction. `--estimate-only`
+  prints without launching; a higher `--max-planned-training-updates`
+  is explicit. New result JSON records estimate and launch ceiling.
+  README, architecture/module docs, changelog, ADR-0130, and the plan
+  describe the launch-only scope. Candidate settings, seed, guard and
+  validation roles, selection metric, and historical files were not changed.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_sweep_work_estimate.py  # initial red import: missing module, exit 1
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_sweep_work_estimate.py::test_should_reject_candidate_that_changes_shared_loader_before_torch tests\test_tuning_selection.py::test_policy_sweep_passes_training_guard_and_outer_validation_only  # red 1 failure/1 pass, then repaired
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_sweep_work_estimate.py tests\test_tuning_selection.py  # exit 0: 24 passed
+  .\.venv\Scripts\python.exe scripts\run_circadian_policy_sweep.py --estimate-only  # exit 0: 18 candidates, 14,400 updates, 900,000 row exposures; no output file
+  .\.venv\Scripts\python.exe scripts\run_circadian_policy_sweep.py  # expected exit 1: estimated 14,400 exceeds launch ceiling 1,000; no output file
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0: 1,619 passed, 41 skipped in 388.10 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 268 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\sweep_work_estimate.py scripts\run_circadian_policy_sweep.py tests\test_sweep_work_estimate.py  # exit 0: three formatted files after formatting
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests and artifacts:** The 41 full-suite skips require CUDA;
+  no new P5.5a test was skipped. The estimate-only and refusal commands
+  opened no Torch runtime or dataset and launched no sweep; the full suite
+  still ran its existing CPU Torch fixtures. No new scientific output,
+  changed baseline, selected seed/metric, fixed-v14 rerun, or historical
+  artifact rewrite occurred. The CLI paths created no output file; pytest
+  used temporary paths.
+- **Blockers:** none for the next increment. Runtime stop reasons and
+  update/wall/replay/capacity/memory enforcement remain open by design.
+  **Exact next action:** begin P5.5b by extracting Pareto's actual
+  10/12/12 candidate lists into side-effect-free builders. Add red tests
+  asserting 34 candidates × three seeds = 81,600 planned updates and
+  pre-Torch refusal, then reuse the estimator for `--estimate-only` and
+  an explicit launch ceiling. Do not launch the Pareto cross-product.
+
+## 2026-09-29 — P5.5b multi-seed Pareto sweep preflight
+
+- **Completed task:** P5.5b only. P5.5 parent and c/d remain unchecked.
+  Re-read AGENTS.md, the plan, latest log, ADR-0130, and current script;
+  checkout remains `master` at
+  `68f9dd01a1eb789f7129b421732c7dba1c8c9392`. Earlier unstaged
+  changes and ignored fixed-v14 artifacts were preserved.
+- **Pre-change evidence and implementation:** The script held candidate
+  lists inside its three training functions and initialized Torch before
+  enumerating them. Before editing, parsed the literal lists and fixed
+  ordered JSON SHA-256 values: backprop 10 cells
+  `425e85d723384f3c1fbfbd43f7a1364cba1d29252c75f9741eb4651c24f62588`,
+  predictive 12 cells
+  `50858f59efa6b96077a589230ffd0f0b5ca4893a2cbdf14fc439fa1fa7d29356`,
+  and circadian 12 cells
+  `701e8f5874b7ef9b4921c36bf4f8208feb47bab321ecabf199d9edec21f6633a`.
+  Extracted side-effect-free builders in
+  `scripts/run_pareto_hard_tuning.py`; tests pin all three hashes. Main
+  now estimates from those exact lists and the existing seeds (7, 13,
+  29), passes the same lists to the unchanged training calls, and
+  rejects wrong-family candidate fields before Torch. `--estimate-only`
+  prints 34 candidates/102 trials, 81,600 possible wake optimizer
+  updates and 5,100,000 row exposures without launch. An unqualified
+  command refuses at the 1,000-update ceiling; a sufficient explicit
+  `--max-planned-training-updates` reaches a mocked launch boundary.
+  New completed JSON records the prelaunch estimate and ceiling; a
+  mocked result confirms exact candidate counts/seeds, validation-only
+  selection, and pending final test. README, app module docs,
+  changelog, and ADR-0131 were updated.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_sweep_work_estimate.py  # red exit 1: 7 expected missing-builder/preflight failures, 16 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_sweep_work_estimate.py tests\test_tuning_selection.py  # exit 0: 31 passed after implementation, final 32 passed after mocked artifact case
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_sweep_work_estimate.py::test_should_pass_preflighted_pareto_candidates_and_save_estimate  # first exit 1 on a mock keyword typo; corrected, final focused suite passed
+  .\.venv\Scripts\python.exe scripts\run_pareto_hard_tuning.py --estimate-only  # exit 0: 34/102, 81,600 updates, 5,100,000 exposures; no output file
+  .\.venv\Scripts\python.exe scripts\run_pareto_hard_tuning.py  # expected exit 1: planned 81,600 exceeds automatic 1,000; no output file
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0: 1,627 passed, 41 skipped in 366.62 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 268 source files
+  .\.venv\Scripts\python.exe -m ruff format --check scripts\run_pareto_hard_tuning.py tests\test_sweep_work_estimate.py  # exit 0: two formatted files after formatting
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests and artifacts:** The 41 full-suite skips require
+  CUDA; no new P5.5b test was skipped. The direct estimate-only and
+  refusal commands opened no Torch runtime or datasets. Existing CPU
+  Torch tests still ran in the full suite. Only a mocked JSON result in
+  a pytest temporary directory was written; no Pareto sweep, new
+  scientific outcome, baseline/seed/metric tuning, fixed-v14 rerun,
+  or historical output rewrite occurred.
+- **Plan changes and blockers:** checked b after exact candidates,
+  pre-resource refusal, CLI estimate, mocked artifact, full/static gates,
+  and documentation passed. No blocker for c. P5.5 parent, c, and d
+  retain runtime maximum updates, wall time, replay examples,
+  capacity/memory, and explicit stop-reason criteria. **Exact next
+  action:** inspect `src/app/experiment_runner.py` and
+  `src/app/toy_checkpoint.py` at the per-model wake update and final-test
+  release boundaries; add deterministic-clock red tests for an opt-in
+  maximum-update/wall-time stop before the next update with an explicit
+  incomplete reason and checked resume or precise non-resumability.
+
+## 2026-09-29 — P5.5c1 checked toy runtime limits
+
+- **Completed task:** P5.5c1 only. P5.5c2, P5.5c parent, P5.5d, and
+  P5.5 parent remain unchecked. Re-read AGENTS.md, the plan and latest
+  log, then inspected the current toy update, trusted checkpoint, CLI,
+  and final-release boundaries. Checkout remains `master` at
+  `68f9dd01a1eb789f7129b421732c7dba1c8c9392`; earlier unstaged
+  work and ignored fixed-v14 artifacts were preserved.
+- **Plan amendment before implementation:** The existing
+  `_train_toy_models` saves a checked cursor after intermediate model
+  updates and before/after sleep. `run_experiment` scores final-test
+  arrays only after that helper returns. The CLI separately owns full
+  resolved-config and completed-result writers. Split P5.5c into app
+  stop/resume contract c1 and CLI completed/incomplete/error lifecycle
+  artifact c2; the original runtime, stop-reason, and no-leakage criteria
+  remain. ADR-0132 records why execution limits stay outside the
+  scientific `ExperimentConfig` and old checkpoint identity.
+- **Implementation:** Added `src/app/toy_execution_budget.py` with
+  strictly validated optional total wake-update and per-invocation
+  finite wall-time ceilings, an injectable monotonic clock, and a typed
+  `incomplete` stop with exact reason, committed updates, elapsed time,
+  and last successfully saved cursor or explicit non-resumability.
+  `src/app/experiment_runner.py` checks before each complete model
+  update, before sleep, and before final release. On resume, the existing
+  checkpoint validator runs first and the three saved loss lengths
+  supply the total update count. An exact full-run cap completes;
+  stopped runs neither return `ExperimentResult` nor read final labels.
+  The first focused run exposed a strict old `_train_toy_models` keyword
+  boundary, so unbudgeted calls retain exactly their old arguments.
+  README, architecture, app module docs, changelog, and ADR-0132 describe
+  the bounded scope and soft wall-time boundary.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_execution_budget.py  # initial red missing-module collection, exit 1
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_execution_budget.py tests\test_toy_checkpoint_resume.py tests\test_experiment_runner.py  # first 31 pass/1 strict-default-call failure, then 32 passed; after reversed order 33 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_execution_budget.py tests\test_toy_checkpoint_resume.py tests\test_experiment_runner.py tests\test_toy_experiment_config.py tests\test_toy_sleep_telemetry.py  # final exit 0: 68 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0: 1,648 passed, 41 skipped in 378.77 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 270 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\toy_execution_budget.py src\app\experiment_runner.py tests\test_toy_execution_budget.py  # exit 0: three formatted files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests and artifacts:** All 41 full-suite skips are CUDA-only;
+  no new budget test was skipped. The small real toy runs used pytest
+  temporary trusted checkpoints; no retained scientific result or new
+  Torch experiment, sweep, seed/metric/baseline tuning, fixed-v14 rerun,
+  or historical file rewrite occurred. Update ceilings count completed
+  per-model wake calls, not replay/sleep work; wall time is checked at
+  boundaries and a single operation may overrun before the next check.
+- **Blockers:** none for c2. **Exact next action:** inspect the toy CLI
+  path preflight and `local_result_json`/trusted checkpoint stores, then
+  add red opt-in CLI tests for budget flags, exclusive lifecycle artifact
+  with `completed`/`incomplete`/`error` reason and actual work, checked
+  resume, no completed JSON on limit/error, and no final-role access
+  before completion. Implement that adapter/infra increment before
+  checking P5.5c; keep fixed v14 and default toy stdout/output stable.
+
+## 2026-09-29 — P5.5c2 and P5.5c toy CLI lifecycle
+
+- **Completed task IDs:** P5.5c2 and P5.5c parent. P5.5d and P5.5 parent
+  remain unchecked. Re-read `AGENTS.md`, the plan, the latest log, ADR-0132,
+  and the current checkout before work. Branch `master` stayed at
+  `68f9dd01a1eb789f7129b421732c7dba1c8c9392`; all earlier unstaged
+  user/session changes and ignored fixed-v14 artifacts were preserved.
+- **Implementation and decision:** Added opt-in toy baseline CLI flags
+  `--max-training-updates`, `--max-wall-seconds`, `--run-state`, `--checkpoint`,
+  and `--resume` without changing the no-budget runner call, scientific
+  `ExperimentConfig`, baseline settings, protocol, or output schema. The
+  `src/adapters/toy_budget_cli.py` boundary claims distinct new paths and
+  records complete original resolved config plus every attempted budget and
+  input token. `src/infra/toy_run_state_files.py` exclusively creates the
+  versioned state, holds a sidecar lock, and atomically replaces only its
+  observed bytes. Fresh checkpoint names are reserved before state claim;
+  a failed claim cleans up only the exact owned reservation. Checked resume
+  requires an incomplete/error state, identical scientific config/artifact
+  paths, and the exact trusted checkpoint byte SHA-256, cursor, and durable
+  update count. A config artifact left by a failed result publication is
+  reused only when its content matches the state. `ToyExecutionProgress`
+  exposes committed update count even if a later checkpoint write fails;
+  error records distinguish observed work from durable work. An unreadable
+  checkpoint records a null durable count and cannot resume. Results are
+  written only after full final scoring; budget stops exit 3, while other
+  exceptions retain their type after recording `error`. ADR-0133, README,
+  architecture, module docs, changelog, and the plan describe these choices.
+- **Observed local CLI smoke:** `data/p55c2-cli-smoke/` is ignored and retained.
+  With `--samples 80 --epochs 1 --sleep-interval 0`, a fresh invocation
+  using `--max-training-updates 2` exited 3: state `incomplete`, reason
+  `max_training_updates`, observed/durable two updates, no result. A second
+  process with identical scientific/artifact args, `--resume`, and limit
+  three exited 0: state `completed`, observed/durable three updates, result
+  and resolved config present. It was a tiny descriptive toy run, not a new
+  selected scientific outcome; its scores were not used to tune anything.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_cli_run_state.py  # red exit 1: 9 expected failures, 2 passes (missing flags/state)
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_cli_run_state.py tests\test_toy_execution_budget.py tests\test_toy_experiment_config.py  # interim exit 1: Windows lock-close and JSON tuple/list resume issues; repaired to 52 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_cli_run_state.py tests\test_toy_execution_budget.py tests\test_toy_experiment_config.py tests\test_toy_checkpoint_resume.py  # final exit 0: 68 passed
+  $artifactRoot = Join-Path (Get-Location) 'data/p55c2-cli-smoke'
+  New-Item -ItemType Directory -Path $artifactRoot -Force | Out-Null
+  $common = @('--samples','80','--epochs','1','--sleep-interval','0','--run-state',(Join-Path $artifactRoot 'state.json'),'--checkpoint',(Join-Path $artifactRoot 'checkpoint.bin'),'--json-result',(Join-Path $artifactRoot 'result.json'),'--resolved-config',(Join-Path $artifactRoot 'config.json'))
+  .\.venv\Scripts\python.exe predictive_coding_experiment.py @common --max-training-updates 2  # direct process exit 3, incomplete/no result; @common defined with the artifact paths above
+  .\.venv\Scripts\python.exe predictive_coding_experiment.py @common --resume --max-training-updates 3  # direct process exit 0, completed/result present
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # pre-parent-path refinement exit 0: 1,664 passed/41 skipped; final exit 0: 1,666 passed/41 skipped in 392.16 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 273 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\adapters\cli.py src\adapters\toy_budget_cli.py src\app\toy_execution_budget.py src\app\experiment_runner.py src\infra\toy_run_state_files.py tests\test_toy_cli_run_state.py  # exit 0 after formatting: six files
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests and artifacts:** The 41 full-suite skips require CUDA;
+  no new CLI lifecycle test was skipped. Pytest used disposable temporary
+  trusted checkpoints/results. The direct ignored smoke artifacts above
+  are the only retained new run files. No Torch benchmark, large sweep,
+  fixed-v14 rerun, baseline/seed/metric tuning, historical result rewrite,
+  or external service was used. Wall time remains checked between complete
+  operations, so one update/sleep/final score can pass the ceiling before
+  another check. A killed process can leave `running` and a stale lock;
+  the CLI refuses automatic resume until manually audited.
+- **Plan changes and blockers:** Checked c2 and then c only after real
+  stop/resume, lifecycle/error and isolation tests, and final full/static
+  gates. P5.5d still owns replay-example, capacity, and measured-memory
+  limits; P5.5 parent stays open. No blocker for the next increment.
+  **Exact next action:** inspect `src/core/circadian_predictive_coding.py`
+  replay retention and potential sleep work, its structural width caps,
+  `src/app/experiment_runner.py` sleep boundary, and existing RSS sampler.
+  Split P5.5d before coding if the mechanisms require separate acceptance
+  gates. Add red toy runner/CLI tests for strict run-level replay-example
+  and capacity refusal with final-test labels sealed, then implement the
+  smallest bounded route; leave measured memory open until evidenced.
+
+## 2026-09-29 — P5.5d1 exact toy replay-example ceiling
+
+- **Completed task IDs:** P5.5d1. P5.5d2/d3 and their P5.5d/P5.5 parents
+  remain unchecked. Re-read `AGENTS.md`, the full living plan and latest
+  development log; inspected `master` at
+  `68f9dd01a1eb789f7129b421732c7dba1c8c9392` and the dirty checkout.
+  Earlier unstaged work and ignored fixed-v14 artifacts were preserved.
+- **Inspection and decision:** Toy replay uses retained whole-batch snapshots;
+  selected batch length, not `replay_steps` or retained row count, is the
+  exact work. A rejected sleep needs to stop before structural mutation.
+  Split P5.5d into d1 exact total replay exposure, d2 transient hidden width,
+  and d3 observed process RSS. These have different preflight/measurement
+  boundaries; all original parent acceptance remains open. ADR-0134 records
+  the replay decision and alternatives.
+- **Implementation:** An opt-in `max_replay_examples` stays outside the
+  scientific config. The NumPy core selects the actual replay batches once
+  before mutation and raises `SleepReplayLimitExceeded` if their total rows
+  exceed the caller's remaining allowance. The toy app counts only applied
+  telemetry, restores the cumulative count from validated checkpoint sleep
+  history, and raises a distinct incomplete stop at `before_sleep`. It
+  rejects a resumed cap below already durable replay work. The budgeted
+  baseline CLI records observed and durable replay work, cap, reason, and
+  checked identity, while allowing older v1 states without the additive
+  replay fields to resume against their original checkpoint hash/cursor.
+  Checkpoint validation now rejects malformed replay usage before restoration.
+  Unbudgeted core/app call shapes and fixed-v14 scientific identity remain.
+- **Acceptance evidence:** A 52-row selected training batch stops at cap 0,
+  completes at the exact cap 52, and two sleeps complete at 104; stopping
+  before sleep 2 with cap 52 then resuming at 104 reproduces unbounded toy
+  scores, loss histories, and replay work. Direct core tests cover 2+3-row
+  retained batches, priority selection of a nonlatest 3-row batch,
+  pre-mutation rejection, zero/invalid caps, component replay off, disabled
+  sleep, and legacy zero-structural skip. A sealed final role is never read
+  on the stop. A forged negative checkpoint replay count rejects before new
+  work; a lowered resume cap leaves the durable file untouched. After an
+  injected post-replay checkpoint failure the CLI records 52 observed and
+  zero durable examples, then resumes to an exact 52 total. Older v1 run
+  state resumes. No baseline, seed, metric, or outcome was selected.
+- **Direct local process artifact:** `data/p55d1-cli-smoke/` is ignored and
+  retained. With 80 samples, two epochs, sleep interval 1, replay steps 1,
+  and replay memory 2, a fresh CLI process at cap 0 exited 3 with
+  `incomplete/max_replay_examples`, observed/durable replay 0, a checked
+  `before_sleep` checkpoint, and no result. A second process using identical
+  scientific/artifact args plus `--resume --max-replay-examples 104` exited
+  0 with `completed`, 104 observed/durable examples, and a result whose
+  two sleep events sum to 104. This was a tiny budget smoke, not a new
+  comparative experiment.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_replay_budget.py tests\test_toy_cli_run_state.py::test_should_record_replay_limit_and_resume_same_cli_result  # red exit 1: missing SleepReplayLimitExceeded
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_replay_budget.py tests\test_toy_cli_run_state.py::test_should_record_replay_limit_and_resume_same_cli_result  # green: 11 passed after correcting assumed train rows 64 -> observed 52
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_replay_budget.py tests\test_toy_cli_run_state.py tests\test_toy_execution_budget.py tests\test_toy_checkpoint_resume.py tests\test_toy_sleep_telemetry.py tests\test_replay_side_effect_audit.py tests\test_replay_side_effect_policy.py  # existing default-call regression first failed; repaired; final 83 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_cli_run_state.py::test_should_distinguish_observed_replay_from_durable_after_sleep_save_error tests\test_toy_replay_budget.py  # 15 passed
+  $artifactRoot = Join-Path (Get-Location) 'data/p55d1-cli-smoke'
+  $common = @('--samples','80','--epochs','2','--sleep-interval','1','--replay-steps','1','--replay-memory-size','2','--run-state',(Join-Path $artifactRoot 'state.json'),'--checkpoint',(Join-Path $artifactRoot 'checkpoint.bin'),'--json-result',(Join-Path $artifactRoot 'result.json'),'--resolved-config',(Join-Path $artifactRoot 'config.json'))
+  .\.venv\Scripts\python.exe predictive_coding_experiment.py @common --max-replay-examples 0  # exit 3: incomplete, no result
+  .\.venv\Scripts\python.exe predictive_coding_experiment.py @common --resume --max-replay-examples 104  # exit 0: completed, 104 applied examples
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # final exit 0: 1,684 passed, 41 skipped in 382.83 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 274 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\core\circadian_predictive_coding.py src\app\toy_checkpoint.py src\app\toy_execution_budget.py src\app\experiment_runner.py src\adapters\cli.py src\adapters\toy_budget_cli.py tests\test_toy_replay_budget.py tests\test_toy_cli_run_state.py  # exit 0
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests and experiment scope:** The 41 full-suite skips require
+  CUDA. No d1 test was skipped. No Torch benchmark, large sweep, fixed-v14
+  rerun, baseline/seed/metric tuning, historical file rewrite, or external
+  service ran. The replay ceiling counts completed example presentations;
+  it does not bound stored replay memory, transient topology, or process RSS.
+- **Plan changes and blockers:** Checked d1 only after final focused/full
+  CPU and static gates and direct CLI stop/resume. Kept d2/d3 and d/P5.5
+  unchecked; no blocker for the next increment. **Exact next action:** add
+  red toy core/runner/CLI tests for an opt-in transient hidden-width cap:
+  reject initial/resumed over-cap width and actual proposed split growth
+  before mutation, preserve the checked cursor/final-role seal, show
+  exact-cap completion and raised-cap resume, and record observed/durable
+  width in CLI state. Implement the pre-mutation gate without changing
+  scientific config, split/prune decisions, default toy behavior, or fixed
+  v14. Leave measured RSS for d3.
+
+## 2026-09-29 — P5.5d2 transient toy hidden-width ceiling
+
+- **Completed task IDs:** P5.5d2. P5.5d3 and P5.5d/P5.5 parents stay
+  unchecked. The previous goal turn made verified progress on d1; this turn
+  re-read `AGENTS.md`, the plan handoff/acceptance, current log, and the
+  actual dirty checkout. Branch `master` remained at
+  `68f9dd01a1eb789f7129b421732c7dba1c8c9392`; earlier unstaged work
+  and ignored fixed-v14 artifacts were preserved.
+- **Inspection and decision:** Existing intrinsic NumPy `max_hidden_dim`
+  constrains model selection but is scientific configuration, not a new run
+  ceiling. Sleep splits before it prunes. A small fixed fixture with
+  `--split-threshold 0` selected two splits and two prunes, entering and
+  finishing its first sleep at width 12 while transiently reaching 14.
+  Checking only final width or clamping split count would miss/change the
+  actual decision. Final external circadian proposals can also grow width.
+  ADR-0135 fixes an opt-in absolute cap on the adaptive circadian layer,
+  pre-mutation selected-width checks, and a historical peak restored from
+  trusted checkpoint sleep facts. This is separate from replay retention
+  and measured process RSS.
+- **Implementation:** Added positive `max_hidden_width` to the execution
+  budget and root toy baseline CLI, with typed `max_hidden_width` incomplete
+  stops. The core checks initial/current width and `current + selected
+  splits` after existing decisions but before sleep or final proposal
+  mutation. The app checks initial width before any wake update, restores
+  current/peak width from the validated checkpoint snapshot and sleep
+  history, counts actual transient peaks, and stops at the checked
+  `before_sleep` cursor when proposed sleep growth exceeds the cap. The
+  lifecycle JSON separates observed versus durable current/peak width and
+  labels a rejected proposal separately. Older version-1 states without
+  additive width fields still resume only against their original checked
+  checkpoint identity. Unbudgeted model calls keep their original shape.
+- **Acceptance evidence:** Direct core sleep at width 5 with one split and
+  one prune rejects cap 5 before changing weights/lineage/clocks, although
+  the final width would also be 5; cap 6 applies the unchanged proposal.
+  A final external proposal similarly stops before its split. The toy
+  runner rejects cap below initial width at zero updates and a lower cap
+  below restored current or historical transient peak without changing
+  checkpoint bytes. Exact-cap completion and raised-cap checked resume
+  match unbudgeted scores, loss histories, and structural event work;
+  sealed final labels stay unread on a stop. No-growth sleep completes at
+  the initial cap. CLI tests cover invalid flag preflight, non-resumable
+  initial refusal, completed/incomplete states, and observed peak 14 versus
+  durable peak 12 after an injected `after_sleep` checkpoint failure,
+  followed by checked resume. A small combined replay/width API call
+  completed at width 5 with 104 applied replay examples. These are test
+  fixtures, not model selection or a new comparative result.
+- **Direct local process artifact:** `data/p55d2-cli-smoke/` is ignored and
+  retained. An 80-sample, two-epoch baseline process at interval 1,
+  split threshold 0, and cap 12 exited 3: `incomplete/max_hidden_width`,
+  observed/current peak 12, rejected proposed width 14, checked
+  `before_sleep`, no result. A second process with identical scientific
+  and artifact args plus `--resume --max-hidden-width 14` exited 0 with
+  completed JSON, current width 10, observed/durable peak 14. The first
+  sleep's telemetry records before/final width 12 and two applied splits.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_width_budget.py tests\test_toy_cli_run_state.py::test_should_record_transient_width_stop_and_checked_resume tests\test_toy_cli_run_state.py::test_should_reject_invalid_width_flag_before_artifacts  # red exit 1: missing HiddenWidthLimitExceeded
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_width_budget.py tests\test_toy_cli_run_state.py tests\test_toy_execution_budget.py tests\test_toy_replay_budget.py  # green: 73 passed after extra error/final-proposal tests
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_width_budget.py tests\test_toy_cli_run_state.py tests\test_toy_execution_budget.py tests\test_toy_replay_budget.py tests\test_toy_checkpoint_resume.py tests\test_toy_sleep_telemetry.py  # final focused: 93 passed
+  $artifactRoot = Join-Path (Get-Location) 'data/p55d2-cli-smoke'
+  $common = @('--samples','80','--epochs','2','--sleep-interval','1','--split-threshold','0','--run-state',(Join-Path $artifactRoot 'state.json'),'--checkpoint',(Join-Path $artifactRoot 'checkpoint.bin'),'--json-result',(Join-Path $artifactRoot 'result.json'),'--resolved-config',(Join-Path $artifactRoot 'config.json'))
+  .\.venv\Scripts\python.exe predictive_coding_experiment.py @common --max-hidden-width 12  # exit 3, incomplete/no result
+  .\.venv\Scripts\python.exe predictive_coding_experiment.py @common --resume --max-hidden-width 14  # exit 0, completed/result
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0: 1,701 passed/41 CUDA skips in 385.33 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 275 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\core\circadian_predictive_coding.py src\app\toy_checkpoint.py src\app\toy_execution_budget.py src\app\experiment_runner.py src\adapters\cli.py src\adapters\toy_budget_cli.py tests\test_toy_width_budget.py tests\test_toy_cli_run_state.py  # exit 0
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests and experiment scope:** The 41 full-suite skips need
+  CUDA; no d2 test was skipped. No Torch benchmark, large sweep, fixed-v14
+  rerun, baseline/seed/metric tuning, historical result rewrite, or
+  external service ran. The cap bounds the circadian adaptive hidden
+  layer's selected transient width, not baseline widths or process RSS.
+- **Plan changes and blockers:** Checked d2 only after the focused/full
+  CPU and static gates and direct process smoke. Kept d3 and both parents
+  open; no blocker. **Exact next action:** inspect
+  `src/shared/process_memory.py` and the toy runner/CLI pre-resource
+  boundary. Add red injected-reader tests for a per-invocation absolute
+  process-RSS high-water limit checked before resources and at wake,
+  sleep, and final boundaries; verify checked resume, truthful CLI
+  start/peak/sample work, and an unsupported-host error. Implement the
+  observed-memory limit and one tiny real local smoke. Document that
+  between-sample peaks may be observed by the sampler but cannot be
+  prevented; do not alter fixed v14 or historical baselines.
+
+## 2026-09-29 — P5.5d3 measured toy process RSS and P5.5 closure
+
+- **Completed task IDs:** P5.5d3, P5.5d, P5.5. P5.6 and P5.7 remain
+  unchecked. Reconciled the current `master` checkout at
+  `68f9dd01a1eb789f7129b421732c7dba1c8c9392` with the plan/log
+  handoff and preserved all earlier dirty changes and ignored artifacts.
+- **Inspection and decision:** `src/shared/process_memory.py` already
+  supplies a Windows/Linux absolute current-process RSS sampler with a
+  5 ms background interval. The toy budget session is constructed before
+  data, while its existing wake/sleep/final checks provide safe stop
+  boundaries. A process-RSS limit therefore has a fresh per-invocation
+  baseline and cannot be treated as durable model/checkpoint work. ADR-0136
+  records this scope, the soft sampling limit, and why model-parameter
+  estimates or baseline subtraction would answer a different question.
+- **Implementation:** Added positive `max_process_rss_bytes` and typed
+  `max_process_rss_bytes` stop facts to the app budget, plus the root toy
+  CLI flag. The sampler starts before toy dataset/model construction,
+  explicitly samples at each checked wake/sleep/final boundary, and checks
+  its observed high-water after its final sample before a result can be
+  published. `ToyExecutionProgress` keeps measured attempt work even on
+  a later exception. The CLI's additive `work.process_rss` object records
+  absolute current-process scope, PID, start/peak bytes, sample count, and
+  interval per attempt. A checked resume starts a fresh segment, leaving
+  its training checkpoint identity unchanged. A typed unsupported-host
+  failure records `error/process_rss_unavailable` before toy resources.
+  Existing scientific config, baseline rules, default unbudgeted output,
+  fixed v14 bytes, seeds, and metrics were not changed.
+- **Acceptance evidence:** A missing-field red test failed before the
+  implementation. Deterministic fake-reader tests cover refusal before
+  dataset construction; checked wake, before-sleep, and after-sleep/final
+  cursors; observed peak retained after current RSS falls; sealed final
+  labels at the before-final stop; result withheld when the exit sample
+  exceeds the cap; unsupported-host state; and exact-cap completion on a
+  checked CLI resume with a new process segment. The unsupported-host
+  artifact initially had only generic `RuntimeError`, so the first full
+  suite was stopped at about 61% without a test failure while adding the
+  typed state reason. Focused and final full gates then passed.
+- **Direct local process artifacts:** Ignored `data/p55d3-cli-smoke/`
+  contains `refusal/` and `completion/` state/checkpoint/result paths.
+  A one-byte cap refused at zero updates before a checkpoint: start
+  40,542,208 bytes, peak 40,652,800 bytes, three samples, no result.
+  A separate 1 GiB cap completed one 80-sample epoch: start 40,288,256
+  bytes, peak 44,552,192 bytes, 11 samples, three updates, checked
+  checkpoint and result. A direct subprocess check confirmed child exit
+  code 3 for the refusal (the PowerShell tool wrapper itself reported 1
+  for the initial nonzero native command); completion exited 0. These
+  are budget smoke runs, not a comparative result or model selection.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_rss_budget.py  # red: 8 missing-budget-field failures
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_toy_rss_budget.py tests\test_toy_rss_cli.py tests\test_toy_cli_run_state.py tests\test_toy_execution_budget.py tests\test_process_memory.py tests\test_toy_checkpoint_resume.py  # final focused: 71 passed
+  .\.venv\Scripts\python.exe predictive_coding_experiment.py --samples 80 --epochs 1 --sleep-interval 0 --max-process-rss-bytes 1 --run-state data\p55d3-cli-smoke\refusal\state.json --checkpoint data\p55d3-cli-smoke\refusal\checkpoint.bin --json-result data\p55d3-cli-smoke\refusal\result.json --resolved-config data\p55d3-cli-smoke\refusal\config.json  # incomplete, no result
+  .\.venv\Scripts\python.exe predictive_coding_experiment.py --samples 80 --epochs 1 --sleep-interval 0 --max-process-rss-bytes 1073741824 --run-state data\p55d3-cli-smoke\completion\state.json --checkpoint data\p55d3-cli-smoke\completion\checkpoint.bin --json-result data\p55d3-cli-smoke\completion\result.json --resolved-config data\p55d3-cli-smoke\completion\config.json  # completed, exit 0
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # first attempt interrupted without failure at ~61% to repair unsupported-host artifact; final exit 0: 1,713 passed/41 CUDA skips in 361.93 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 277 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\toy_execution_budget.py src\app\experiment_runner.py src\adapters\cli.py src\adapters\toy_budget_cli.py tests\test_toy_rss_budget.py tests\test_toy_rss_cli.py tests\test_toy_cli_run_state.py  # exit 0
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests and experiment scope:** The 41 full-suite skips require
+  CUDA; no d3 test was skipped. No Torch benchmark, large sweep, fixed-v14
+  rerun, baseline/seed/metric tuning, historical result rewrite, or
+  external service ran. The sampler can observe transient peaks between
+  checked boundaries but cannot prevent them; a brief unseen peak may be
+  missed. Its absolute RSS includes Python, data, and all three toy models.
+- **Plan changes and blockers:** Checked d3 only after focused/full/static
+  gates and the real local smoke. Checked d/P5.5 after verifying d1/d2
+  replay/width, c update/time, and a/b sweep preflights already satisfy
+  the original four bound classes and stop/estimate criteria. Kept P5.6,
+  P5.7, and deferred P2.6a open. No blocker. **Exact next action:** inspect
+  the validated P5.1/P5.2/v14 bundle schemas and existing dashboard/report
+  code. Define a small report contract for seed count, spread, failures,
+  protocol, commit, and track; add red tests rejecting incomplete or
+  unvalidated artifacts and producing deterministic table data from one
+  checked local bundle. Then implement that artifact-only increment without
+  training or altering fixed v14/historical results.
+
+## 2026-09-29 — P5.6a source-verified v14 report table
+
+- **Completed task IDs:** P5.6a. P5.6b/P5.6 parent, P5.7, and deferred
+  P2.6a stay unchecked. Re-read `AGENTS.md`, the plan handoff, latest log,
+  actual dirty checkout, validated P5.1/P5.2 file boundaries, and the
+  historical `docs/index.html`. Branch `master` remained at
+  `68f9dd01a1eb789f7129b421732c7dba1c8c9392`; earlier user/worktree
+  changes were preserved.
+- **Decision and plan change:** Split P5.6 into source-verified table work
+  (a) and chart/dashboard rendering (b), retaining the parent criteria.
+  P5.1 verifies exact v14 training/outcome bytes and source roles, while
+  P5.2 emits raw rows; the existing dashboard is historical. The new
+  table must include all declared cells in fixed order without selecting
+  a seed, arm, method, or favorable metric. A completed bundle proves
+  zero missing cells inside it but has no external attempt-failure log;
+  the report explicitly marks that history unavailable (ADR-0137).
+- **Implementation:** `src/app/v14_artifact_report.py` derives deterministic
+  `summary.json` and `summary.csv` with each of three arms × three methods,
+  the two configured seeds, final balanced score/signed forgetting/A-after-B
+  accuracy/B-after-B accuracy mean/minimum/maximum/range, descriptive
+  interpretation, protocol, fixed NumPy synthetic continual track, source
+  commit/dirty/workspace identity, and narrow failure scope.
+  `src/infra/v14_artifact_report_files.py` calls `verify_run_bundle` before
+  reading, rechecks source bytes against the manifest, atomically publishes
+  an exclusive `summary-report-v1` directory, and verifies exact re-derived
+  bytes and source/output hashes. `scripts/build_v14_artifact_report.py`
+  exposes create/verify CLI commands. Source v14 payloads and historical
+  chart/dashboard files were not modified.
+- **Acceptance evidence:** A missing-module red test preceded code. Nine
+  new tests cover deterministic all-cell aggregation and observed spread,
+  missing/reordered/nonfinite/incomplete records, unavailable Git identity,
+  invalid source refusal before writing, changed source SHA, exclusive
+  write, and hand-edited report refusal. Existing P5.1/P5.2 boundary tests
+  pass with them (focused 24). The final full CPU suite passed 1,722 with
+  41 CUDA skips; Ruff, mypy (281 source files), format, and diff checks
+  passed. No score-based sorting, baseline change, or metric tuning occurs.
+- **Experiment/report artifacts:** Ignored
+  `artifacts/runs/p51-v14-schema-d/summary-report-v1/` was created and
+  re-verified from the existing checked bundle. It reports seeds 47/53,
+  18/18 method cells, nine rows, zero failed cells only within the
+  published bundle, external attempts `not_recorded_in_bundle`, outcome
+  protocol `continual_trigger_replay_outcomes_v14`, track
+  `numpy_synthetic_continual_v14`, and dirty source commit
+  `5134a17db04d94d4afa26150dfae1939e724a6f4`. The source training/
+  outcome SHA-256 values remain `174ee794...b324`/`ea11fc7c...501f`;
+  report JSON/CSV values are `a0a3f13b...9a752`/`e879aa84...2f901`.
+  An earlier ignored draft under `p51-v14-schema-c/summary-report-v1`
+  became stale when explicit failure/interpretation scope was added; its
+  verifier rejects it. Automatic approval review rejected removal of
+  that generated directory, so it was left untouched and is not accepted
+  evidence. The fresh `p51-v14-schema-d` artifact is the verified result.
+- **Commands and outcomes** from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_v14_artifact_report.py  # red collection error: missing app module; final 9 passed
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests\test_v14_artifact_report.py tests\test_v14_observation_projection.py tests\test_versioned_v14_run.py  # 24 passed
+  .\.venv\Scripts\python.exe -m scripts.build_v14_artifact_report --run artifacts\runs\p51-v14-schema-d  # wrote exclusive derived report
+  .\.venv\Scripts\python.exe -m scripts.build_v14_artifact_report --verify-run artifacts\runs\p51-v14-schema-d  # exit 0, source and report re-derived
+  .\.venv\Scripts\python.exe -m scripts.build_v14_artifact_report --verify-run artifacts\runs\p51-v14-schema-c  # exit 1, expected stale draft rejection
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0: 1,722 passed/41 CUDA skips in 368.08 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 281 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src\app\v14_artifact_report.py src\infra\v14_artifact_report_files.py scripts\build_v14_artifact_report.py tests\test_v14_artifact_report.py  # exit 0
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+- **Skipped tests and experiment scope:** All 41 full-suite skips require
+  CUDA; no P5.6a test skipped. The suite includes existing bounded
+  fixtures, but this task launched no new comparative training, large
+  sweep, Torch benchmark, fixed-v14 rerun, or external service. The
+  output is a descriptive table, not evidence that circadian wins.
+- **Plan changes and blockers:** Checked P5.6a only after its focused,
+  full, static, and checked local artifact gates. Kept P5.6b/P5.6 and
+  P5.7 open. No blocker to the next implementation; the stale ignored
+  draft is explicitly excluded from evidence and verification rejects it.
+  **Exact next action:** inspect the verified
+  `p51-v14-schema-d/summary-report-v1` table and historical
+  `docs/index.html`; add red tests for a renderer that first verifies
+  the report, includes all nine rows plus seed count, observed range,
+  failure scope, protocol, original commit, and track, and rejects
+  changed source/table/chart bytes. Publish charts/dashboard content in
+  a new derived directory without overwriting the historical dashboard
+  or training.

@@ -14,8 +14,10 @@ The repository is designed to evolve Circadian Predictive Coding as the main alg
   - No CLI parsing, environment loading, or dataset IO
 - `src/app`
   - Use-case orchestration for experiment runs and benchmark workflows
+  - Pure prelaunch work estimates for synthetic vision sweep candidates
+  - Opt-in toy execution ceilings and typed incomplete stops at checked wake/sleep cursors
 - `src/infra`
-  - Dataset/dataloader construction and trusted local checkpoint files
+  - Dataset/dataloader construction, trusted local checkpoints, and exclusive toy run-state files
 - `src/adapters`
   - User-facing CLI parsing and text formatting
 - `src/config`
@@ -60,7 +62,9 @@ core must not depend on app/infra/adapters.
 2. `app.experiment_runner` trains all three toy models
    - `app.toy_checkpoint` validates run identity and model-order progress;
      `infra.circadian_checkpoint_files` stores the trusted payload
-3. `adapters.cli` exposes baseline and in-depth modes
+3. `adapters.cli` exposes baseline and in-depth modes. Its opt-in budget
+   handler binds a checked checkpoint to an exclusive local lifecycle state
+   and publishes a result only after final scoring
 
 ### Continual shift
 
@@ -284,6 +288,16 @@ and verifies each byte against a fresh derivation. The
 commands. No app logic depends on infra; the fixed v14 scoring and role
 release paths are unchanged (ADR-0121).
 
+P5.6a adds `app/v14_artifact_report.py` as a pure aggregate over all
+declared v14 seeds, arms, and methods. `infra/v14_artifact_report_files.py`
+first verifies the completed P5.1 bundle, then atomically publishes an
+exclusive JSON/CSV summary and re-derives both files when verifying it.
+`scripts/build_v14_artifact_report.py` exposes create/verify commands.
+The report identifies the synthetic NumPy track and source commit, shows
+seed count and observed range, and limits its zero-failure statement to
+cells inside the completed bundle. It does not rank models or change the
+fixed v14 payload or historical dashboard (ADR-0137).
+
 P5.2b passes existing core `train_epoch` return values through
 `app/continual_shift_benchmark.py` and opts in to collection only in
 the v14 runner. `app/wake_diagnostic.py` identifies finite metric,
@@ -330,6 +344,52 @@ preset and complete per-seed resolved record. Its script adapter retains
 legacy flags, validates JSON overrides before any Torch runner call,
 and writes the record into the existing descriptive JSON result;
 baseline rates and winner selection are unchanged (ADR-0127).
+`app/toy_experiment_config.py` owns the root toy CLI's typed historical
+preset, strict existing-field overrides, and complete baseline/indepth
+execution record. The adapter parses flags and delegates validation before
+the runner opens data; `indepth_comparison.py` shares its per-cell config
+constructor with the record builder. Infra writes the completed report or
+config to a new local JSON path. Neither app module reads scores to choose
+settings (ADR-0128).
+`app/toy_execution_budget.py` owns typed runtime stops and observed wake
+and applied replay-example progress. The NumPy core preflights the exact
+selected replay batch lengths before sleep mutation when a limit is passed;
+the toy app restores exposure from checked sleep telemetry. This budget is
+separate from replay retention's stored-row bound (ADR-0134).
+The optional run-level circadian hidden-width cap checks selected splits
+before sleep and final proposal mutation. The app restores current and
+historical transient peak width from the checked snapshot and sleep history;
+the CLI separates observed and durable width (ADR-0135).
+The opt-in toy process-RSS cap uses `shared/process_memory.py` from before
+dataset/model construction through the scored invocation. It samples at
+checked wake/sleep/final boundaries and in a 5 ms background thread. The
+absolute process segment is per invocation; the CLI reports it separately
+from durable checkpoint work and never attributes it to a model. An observed
+over-cap peak stops at the next check or before result publication (ADR-0136).
+`adapters/toy_budget_cli.py` ties each budget attempt to the
+complete resolved toy config and trusted checkpoint identity.
+`infra/toy_run_state_files.py` claims an exclusive state path and atomically
+advances it under a local lock. The lifecycle record can be `running`,
+`incomplete`, `error`, or `completed`; the old unbudgeted CLI path and fixed
+v14 files use none of these new paths (ADR-0132–0133).
+The P5.6 report path is script → `infra/v14_artifact_report_files.py` →
+`app/v14_artifact_report.py` after the completed P5.1 verifier passes.
+The independent presentation path is script →
+`infra/v14_dashboard_files.py` → `app/v14_dashboard_projection.py` →
+`app/v14_report_plot.py`. Infra verifies the exact report, writes an
+exclusive static HTML/PNG directory, and re-derives every byte on verify.
+The app owns fixed metric labels and descriptive presentation; it has no
+file access or result-selection rule. Pillow is already a project
+dependency, so the four plots need no new plotting service or package.
+The old `docs/index.html` remains a separate historical snapshot and
+now visibly links its provenance warning
+(ADRs 0137–0138).
+`app/single_resnet_experiment_config.py` owns the root ResNet CLI's
+unchanged 110-field typed preset, strict existing-field override resolver,
+and complete descriptive request record. The CLI translates old flags to
+that preset, validates before the Torch runner, and asks infra to write
+an exclusive config or completed result JSON. The app resolver has no
+score or file access (ADR-0129).
 
 1. Circadian-first with mandatory baseline comparisons
    - Why: improvements are only meaningful when measured against stable references.

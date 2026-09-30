@@ -49,6 +49,11 @@
   (ADR-0078, ADR-0095).
 - `toy_result_files.py` takes a completed toy report and a new local path,
   delegates to `local_result_json.py`, and refuses to overwrite a file.
+- `toy_run_state_files.py` takes finite JSON run-state records and a local
+  path. It exclusively creates the first state, prevents concurrent local
+  writers with a sidecar lock, and atomically replaces only the exact bytes
+  it read or created. It does not train, score, or validate the scientific
+  checkpoint identity (ADR-0133).
 - `local_result_json.py` takes a completed dataclass report and a new local
   path, encodes NumPy values and typed sleep records as finite JSON for toy
   and historical continual CLI artifacts. It does not train models, choose
@@ -73,6 +78,15 @@
   bundles, writes an exclusive hash-bound derived directory, and checks
   exact regeneration from raw seed records. It does not train, score,
   select, or recover partial writes (ADR-0121).
+- `v14_artifact_report_files.py` verifies a completed P5.1 source before
+  reading it, publishes an exclusive JSON/CSV table with source and output
+  hashes, and re-derives exact bytes on verification. It does not train,
+  score, rank methods, or infer failures outside the bundle (ADR-0137).
+- `v14_dashboard_files.py` first verifies the P5.6a report and rechecks
+  exact table hashes before publishing an exclusive `dashboard-v1` static
+  directory. Its verifier re-derives the HTML and four PNGs against the
+  current report and rejects stale or edited bytes. It does not train,
+  choose a result, or overwrite `docs/index.html` (ADR-0138).
 - `measured_observation_files.py` verifies the completed P5.1 source,
   binds canonical wake diagnostics in an exclusive sidecar, and
   re-derives a separate measured projection from that sidecar and raw

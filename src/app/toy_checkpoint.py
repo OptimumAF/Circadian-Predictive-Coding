@@ -19,8 +19,9 @@ from src.app.numpy_checkpoint_validation import (
     validate_numpy_baseline_model,
 )
 from src.core.backprop_mlp import BackpropMLP
+from src.core.circadian_predictive_coding import CircadianNetworkSnapshot
 from src.core.predictive_coding import PredictiveCodingNetwork
-from src.core.sleep_telemetry import SleepEventTelemetry
+from src.core.sleep_telemetry import SleepEventTelemetry, SleepReplayUsage, SleepStructuralChanges
 import numpy as np
 
 
@@ -62,6 +63,32 @@ def toy_data_digest(train: LabeledRole, validation: LabeledRole | None) -> str:
         "numpy_toy_development_roles_v1",
         (("train", train), ("validation", validation)),
     )
+
+
+def toy_checkpoint_width_work(checkpoint: ToyRunnerCheckpoint) -> tuple[int, int]:
+    """Return current and historical transient circadian width from saved work."""
+    snapshot = checkpoint.combined.model_state
+    if not isinstance(snapshot, CircadianNetworkSnapshot) or type(snapshot.state) is not dict:
+        raise ValueError("incompatible toy checkpoint circadian width state")
+    weights = snapshot.state.get("weight_input_hidden")
+    if not isinstance(weights, np.ndarray) or weights.ndim != 2 or weights.shape[1] <= 0:
+        raise ValueError("incompatible toy checkpoint circadian width state")
+    if type(checkpoint.hidden_dim_start) is not int or checkpoint.hidden_dim_start <= 0:
+        raise ValueError("incompatible toy checkpoint initial width")
+    current_width = int(weights.shape[1])
+    peak_width = max(checkpoint.hidden_dim_start, current_width)
+    for event in checkpoint.sleep_events:
+        if not isinstance(event, SleepEventTelemetry) or not isinstance(
+            event.changes, SleepStructuralChanges
+        ):
+            raise ValueError("incompatible toy checkpoint sleep width history")
+        try:
+            event.changes.__post_init__()
+            event.__post_init__()
+        except (AttributeError, TypeError, ValueError) as exc:
+            raise ValueError("incompatible toy checkpoint sleep width history") from exc
+        peak_width = max(peak_width, event.before_width + len(event.changes.applied_split_pairs))
+    return current_width, peak_width
 
 
 def validate_toy_checkpoint(
@@ -124,6 +151,15 @@ def validate_toy_checkpoint(
         )
     ):
         raise ValueError("incompatible toy checkpoint sleep event history")
+    # Why this: a replay budget restored from telemetry must reject a
+    # deserialized negative or over-applied count before any new work.
+    try:
+        for event in checkpoint.sleep_events:
+            if type(event.replay) is not SleepReplayUsage:
+                raise ValueError("replay usage is not typed")
+            event.replay.__post_init__()
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ValueError("incompatible toy checkpoint replay usage") from exc
     if (
         not isinstance(checkpoint.losses, tuple)
         or len(checkpoint.losses) != 3

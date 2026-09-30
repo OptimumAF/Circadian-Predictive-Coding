@@ -3,23 +3,44 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict, fields, replace
+import json
+from pathlib import Path
+import sys
 
 from src.app.resnet50_benchmark import (
     ResNet50BenchmarkConfig,
+    ResNet50BenchmarkResult,
+    VISION_DEFAULT_MODEL_ORDER,
     VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
     VISION_SEEDED_UNMATCHED_PROTOCOL,
     VISION_VALIDATION_UNMATCHED_PROTOCOL,
     format_resnet50_benchmark_result,
     run_resnet50_benchmark,
 )
+from src.app.single_resnet_experiment_config import (
+    SINGLE_RESNET_PRESET_ID,
+    SingleResnetPreset,
+    build_resolved_single_resnet_record,
+    get_single_resnet_preset,
+    resolve_single_resnet_overrides,
+)
+from src.infra.local_result_json import write_local_json_payload
 
 
-def build_argument_parser() -> argparse.ArgumentParser:
+def build_argument_parser(preset: SingleResnetPreset | None = None) -> argparse.ArgumentParser:
     """Build CLI parser for ResNet-50 benchmark runs."""
+    preset = preset or get_single_resnet_preset()
     parser = argparse.ArgumentParser(
         description="Benchmark Backprop, Predictive Coding, and Circadian Predictive Coding on ResNet-50."
     )
-    parser.add_argument("--train-samples", type=int, default=2000)
+    parser.add_argument(
+        "--preset", choices=[SINGLE_RESNET_PRESET_ID], default=SINGLE_RESNET_PRESET_ID
+    )
+    parser.add_argument("--json-result", type=str, default=None)
+    parser.add_argument("--resolved-config", type=str, default=None)
+    parser.add_argument("--override", action="append", default=[], metavar="FIELD=JSON")
+    parser.add_argument("--train-samples", type=int)
     parser.add_argument(
         "--protocol-id",
         choices=[
@@ -27,34 +48,30 @@ def build_argument_parser() -> argparse.ArgumentParser:
             VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
             VISION_VALIDATION_UNMATCHED_PROTOCOL,
         ],
-        default=VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
     )
-    parser.add_argument("--validation-samples", type=int, default=64)
-    parser.add_argument("--guard-samples", type=int, default=64)
-    parser.add_argument("--test-samples", type=int, default=500)
+    parser.add_argument("--validation-samples", type=int)
+    parser.add_argument("--guard-samples", type=int)
+    parser.add_argument("--test-samples", type=int)
     parser.add_argument(
         "--classes",
         type=int,
-        default=None,
         help="Class count for synthetic dataset mode. Ignored for CIFAR modes unless set explicitly.",
     )
-    parser.add_argument("--image-size", type=int, default=96)
-    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--image-size", type=int)
+    parser.add_argument("--batch-size", type=int)
     parser.add_argument(
         "--dataset-name",
         choices=["synthetic", "cifar10", "cifar100"],
-        default="synthetic",
         help="Dataset source used for all three models.",
     )
-    parser.add_argument("--dataset-root", type=str, default="data")
+    parser.add_argument("--dataset-root", type=str)
     parser.add_argument("--dataset-download", dest="dataset_download", action="store_true")
     parser.add_argument("--dataset-no-download", dest="dataset_download", action="store_false")
-    parser.set_defaults(dataset_download=True)
-    parser.add_argument("--dataset-train-subset-size", type=int, default=0)
-    parser.add_argument("--dataset-validation-subset-size", type=int, default=1000)
-    parser.add_argument("--dataset-guard-subset-size", type=int, default=1000)
-    parser.add_argument("--dataset-test-subset-size", type=int, default=0)
-    parser.add_argument("--dataset-num-workers", type=int, default=0)
+    parser.add_argument("--dataset-train-subset-size", type=int)
+    parser.add_argument("--dataset-validation-subset-size", type=int)
+    parser.add_argument("--dataset-guard-subset-size", type=int)
+    parser.add_argument("--dataset-test-subset-size", type=int)
+    parser.add_argument("--dataset-num-workers", type=int)
     parser.add_argument(
         "--dataset-use-augmentation",
         dest="dataset_use_augmentation",
@@ -67,33 +84,29 @@ def build_argument_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="Disable train-time augmentation for torchvision datasets.",
     )
-    parser.set_defaults(dataset_use_augmentation=True)
     parser.add_argument(
         "--dataset-difficulty",
         choices=["easy", "medium", "hard"],
-        default="medium",
         help="Controls class overlap/distractors/noise in synthetic data.",
     )
-    parser.add_argument("--dataset-noise-std", type=float, default=0.06)
-    parser.add_argument("--epochs", type=int, default=8)
-    parser.add_argument("--seed", type=int, default=7)
-    parser.add_argument("--device", type=str, default="auto", help="auto, cpu, cuda, cuda:0")
-    parser.add_argument("--target-accuracy", type=float, default=0.99)
+    parser.add_argument("--dataset-noise-std", type=float)
+    parser.add_argument("--epochs", type=int)
+    parser.add_argument("--seed", type=int)
+    parser.add_argument("--device", type=str, help="auto, cpu, cuda, cuda:0")
+    parser.add_argument("--target-accuracy", type=float)
     parser.add_argument(
         "--eval-batches",
         type=int,
-        default=2,
         help="Per-epoch validation batch count for early-stop checks; 0 uses full validation loader.",
     )
-    parser.add_argument("--inference-batches", type=int, default=50)
-    parser.add_argument("--warmup-batches", type=int, default=10)
+    parser.add_argument("--inference-batches", type=int)
+    parser.add_argument("--warmup-batches", type=int)
 
-    parser.add_argument("--backprop-lr", type=float, default=0.02)
-    parser.add_argument("--backprop-momentum", type=float, default=0.9)
+    parser.add_argument("--backprop-lr", type=float)
+    parser.add_argument("--backprop-momentum", type=float)
     parser.add_argument(
         "--backbone-weights",
         choices=["none", "imagenet"],
-        default="none",
         help="ResNet-50 initialization: random weights or ImageNet-pretrained weights.",
     )
     parser.add_argument(
@@ -102,16 +115,16 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help="Freeze ResNet backbone for backprop baseline.",
     )
 
-    parser.add_argument("--pc-hidden-dim", type=int, default=384)
-    parser.add_argument("--pc-lr", type=float, default=0.03)
-    parser.add_argument("--pc-steps", type=int, default=10)
-    parser.add_argument("--pc-inference-lr", type=float, default=0.15)
+    parser.add_argument("--pc-hidden-dim", type=int)
+    parser.add_argument("--pc-lr", type=float)
+    parser.add_argument("--pc-steps", type=int)
+    parser.add_argument("--pc-inference-lr", type=float)
 
-    parser.add_argument("--circ-hidden-dim", type=int, default=384)
-    parser.add_argument("--circ-lr", type=float, default=0.025)
-    parser.add_argument("--circ-steps", type=int, default=14)
-    parser.add_argument("--circ-inference-lr", type=float, default=0.12)
-    parser.add_argument("--circ-sleep-interval", type=int, default=2)
+    parser.add_argument("--circ-hidden-dim", type=int)
+    parser.add_argument("--circ-lr", type=float)
+    parser.add_argument("--circ-steps", type=int)
+    parser.add_argument("--circ-inference-lr", type=float)
+    parser.add_argument("--circ-sleep-interval", type=int)
     parser.add_argument(
         "--circ-use-adaptive-sleep-trigger",
         dest="circ_use_adaptive_sleep_trigger",
@@ -124,11 +137,10 @@ def build_argument_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="Disable adaptive sleep triggering.",
     )
-    parser.set_defaults(circ_use_adaptive_sleep_trigger=True)
-    parser.add_argument("--circ-min-sleep-steps", type=int, default=60)
-    parser.add_argument("--circ-sleep-energy-window", type=int, default=48)
-    parser.add_argument("--circ-sleep-plateau-delta", type=float, default=5e-5)
-    parser.add_argument("--circ-sleep-chemical-variance-threshold", type=float, default=0.02)
+    parser.add_argument("--circ-min-sleep-steps", type=int)
+    parser.add_argument("--circ-sleep-energy-window", type=int)
+    parser.add_argument("--circ-sleep-plateau-delta", type=float)
+    parser.add_argument("--circ-sleep-chemical-variance-threshold", type=float)
     parser.add_argument(
         "--circ-use-adaptive-sleep-budget",
         dest="circ_use_adaptive_sleep_budget",
@@ -141,11 +153,10 @@ def build_argument_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="Disable adaptive split/prune budget scaling.",
     )
-    parser.set_defaults(circ_use_adaptive_sleep_budget=True)
-    parser.add_argument("--circ-adaptive-sleep-budget-min-scale", type=float, default=0.25)
-    parser.add_argument("--circ-adaptive-sleep-budget-max-scale", type=float, default=1.0)
-    parser.add_argument("--circ-adaptive-sleep-budget-plateau-weight", type=float, default=0.6)
-    parser.add_argument("--circ-adaptive-sleep-budget-variance-weight", type=float, default=0.4)
+    parser.add_argument("--circ-adaptive-sleep-budget-min-scale", type=float)
+    parser.add_argument("--circ-adaptive-sleep-budget-max-scale", type=float)
+    parser.add_argument("--circ-adaptive-sleep-budget-plateau-weight", type=float)
+    parser.add_argument("--circ-adaptive-sleep-budget-variance-weight", type=float)
     parser.add_argument(
         "--circ-force-sleep",
         dest="circ_force_sleep",
@@ -158,7 +169,6 @@ def build_argument_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="At interval checkpoints, run sleep only when adaptive trigger conditions are met.",
     )
-    parser.set_defaults(circ_force_sleep=False)
     parser.add_argument(
         "--circ-enable-sleep-rollback",
         dest="circ_enable_sleep_rollback",
@@ -171,93 +181,141 @@ def build_argument_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="Disable post-sleep rollback guard.",
     )
-    parser.set_defaults(circ_enable_sleep_rollback=True)
-    parser.add_argument("--circ-sleep-rollback-tolerance", type=float, default=0.002)
+    parser.add_argument("--circ-sleep-rollback-tolerance", type=float)
     parser.add_argument(
         "--circ-sleep-rollback-metric",
         choices=["accuracy", "cross_entropy"],
-        default="cross_entropy",
     )
     parser.add_argument(
         "--circ-sleep-rollback-eval-batches",
         type=int,
-        default=2,
         help="Evaluation batches used only for pre/post sleep rollback checks; 0 inherits --eval-batches.",
     )
     parser.add_argument(
         "--circ-sleep-rollback-cooldown-epochs",
         type=int,
-        default=None,
         help="Completed epochs to pause after a rejected sleep; default 0 for legacy, 1 for components. A positive value also requires a new wake batch before retry.",
     )
-    parser.add_argument("--circ-min-hidden-dim", type=int, default=384)
-    parser.add_argument("--circ-max-hidden-dim", type=int, default=640)
-    parser.add_argument("--circ-chemical-decay", type=float, default=0.995)
-    parser.add_argument("--circ-chemical-buildup-rate", type=float, default=0.02)
-    parser.add_argument("--circ-use-saturating-chemical", action="store_true", default=None)
-    parser.add_argument("--circ-chemical-max-value", type=float, default=2.5)
-    parser.add_argument("--circ-chemical-saturation-gain", type=float, default=1.0)
-    parser.add_argument("--circ-use-dual-chemical", action="store_true", default=None)
-    parser.add_argument("--circ-dual-fast-mix", type=float, default=0.70)
-    parser.add_argument("--circ-slow-chemical-decay", type=float, default=0.999)
-    parser.add_argument("--circ-slow-buildup-scale", type=float, default=0.25)
-    parser.add_argument("--circ-plasticity-sensitivity", type=float, default=0.45)
-    parser.add_argument("--circ-use-adaptive-plasticity-sensitivity", action="store_true", default=None)
-    parser.add_argument("--circ-plasticity-sensitivity-min", type=float, default=0.25)
-    parser.add_argument("--circ-plasticity-sensitivity-max", type=float, default=0.55)
-    parser.add_argument("--circ-plasticity-importance-mix", type=float, default=0.50)
-    parser.add_argument("--circ-min-plasticity", type=float, default=0.5)
+    parser.add_argument("--circ-min-hidden-dim", type=int)
+    parser.add_argument("--circ-max-hidden-dim", type=int)
+    parser.add_argument("--circ-chemical-decay", type=float)
+    parser.add_argument("--circ-chemical-buildup-rate", type=float)
+    parser.add_argument("--circ-use-saturating-chemical", action="store_true")
+    parser.add_argument("--circ-chemical-max-value", type=float)
+    parser.add_argument("--circ-chemical-saturation-gain", type=float)
+    parser.add_argument("--circ-use-dual-chemical", action="store_true")
+    parser.add_argument("--circ-dual-fast-mix", type=float)
+    parser.add_argument("--circ-slow-chemical-decay", type=float)
+    parser.add_argument("--circ-slow-buildup-scale", type=float)
+    parser.add_argument("--circ-plasticity-sensitivity", type=float)
+    parser.add_argument("--circ-use-adaptive-plasticity-sensitivity", action="store_true")
+    parser.add_argument("--circ-plasticity-sensitivity-min", type=float)
+    parser.add_argument("--circ-plasticity-sensitivity-max", type=float)
+    parser.add_argument("--circ-plasticity-importance-mix", type=float)
+    parser.add_argument("--circ-min-plasticity", type=float)
     parser.add_argument(
         "--circ-use-reward-modulated-learning",
         action="store_true",
         help="Scale wake learning rate by batch difficulty relative to a moving baseline.",
     )
-    parser.add_argument("--circ-reward-baseline-decay", type=float, default=0.95)
-    parser.add_argument("--circ-reward-difficulty-exponent", type=float, default=1.0)
-    parser.add_argument("--circ-reward-scale-min", type=float, default=0.75)
-    parser.add_argument("--circ-reward-scale-max", type=float, default=1.5)
-    parser.add_argument("--circ-use-adaptive-thresholds", action="store_true", default=None)
-    parser.add_argument("--circ-adaptive-split-percentile", type=float, default=92.0)
-    parser.add_argument("--circ-adaptive-prune-percentile", type=float, default=8.0)
-    parser.add_argument("--circ-sleep-warmup-steps", type=int, default=6)
-    parser.add_argument("--circ-sleep-split-only-until-fraction", type=float, default=0.75)
-    parser.add_argument("--circ-sleep-prune-only-after-fraction", type=float, default=0.95)
-    parser.add_argument("--circ-sleep-max-change-fraction", type=float, default=0.01)
-    parser.add_argument("--circ-sleep-min-change-count", type=int, default=1)
-    parser.add_argument("--circ-prune-min-age-steps", type=int, default=120)
-    parser.add_argument("--circ-split-threshold", type=float, default=0.8)
-    parser.add_argument("--circ-prune-threshold", type=float, default=0.08)
-    parser.add_argument("--circ-split-hysteresis-margin", type=float, default=0.02)
-    parser.add_argument("--circ-prune-hysteresis-margin", type=float, default=0.02)
-    parser.add_argument("--circ-split-cooldown-steps", type=int, default=3)
-    parser.add_argument("--circ-prune-cooldown-steps", type=int, default=3)
-    parser.add_argument("--circ-split-weight-norm-mix", type=float, default=0.30)
-    parser.add_argument("--circ-prune-weight-norm-mix", type=float, default=0.30)
-    parser.add_argument("--circ-split-importance-mix", type=float, default=0.20)
-    parser.add_argument("--circ-prune-importance-mix", type=float, default=0.35)
-    parser.add_argument("--circ-importance-ema-decay", type=float, default=0.95)
-    parser.add_argument("--circ-max-split-per-sleep", type=int, default=1)
-    parser.add_argument("--circ-max-prune-per-sleep", type=int, default=1)
-    parser.add_argument("--circ-split-noise-scale", type=float, default=0.01)
-    parser.add_argument("--circ-sleep-reset-factor", type=float, default=0.45)
-    parser.add_argument(
-        "--circ-sleep-mode", choices=("legacy", "components", "disabled"), default="legacy"
-    )
+    parser.add_argument("--circ-reward-baseline-decay", type=float)
+    parser.add_argument("--circ-reward-difficulty-exponent", type=float)
+    parser.add_argument("--circ-reward-scale-min", type=float)
+    parser.add_argument("--circ-reward-scale-max", type=float)
+    parser.add_argument("--circ-use-adaptive-thresholds", action="store_true")
+    parser.add_argument("--circ-adaptive-split-percentile", type=float)
+    parser.add_argument("--circ-adaptive-prune-percentile", type=float)
+    parser.add_argument("--circ-sleep-warmup-steps", type=int)
+    parser.add_argument("--circ-sleep-split-only-until-fraction", type=float)
+    parser.add_argument("--circ-sleep-prune-only-after-fraction", type=float)
+    parser.add_argument("--circ-sleep-max-change-fraction", type=float)
+    parser.add_argument("--circ-sleep-min-change-count", type=int)
+    parser.add_argument("--circ-prune-min-age-steps", type=int)
+    parser.add_argument("--circ-split-threshold", type=float)
+    parser.add_argument("--circ-prune-threshold", type=float)
+    parser.add_argument("--circ-split-hysteresis-margin", type=float)
+    parser.add_argument("--circ-prune-hysteresis-margin", type=float)
+    parser.add_argument("--circ-split-cooldown-steps", type=int)
+    parser.add_argument("--circ-prune-cooldown-steps", type=int)
+    parser.add_argument("--circ-split-weight-norm-mix", type=float)
+    parser.add_argument("--circ-prune-weight-norm-mix", type=float)
+    parser.add_argument("--circ-split-importance-mix", type=float)
+    parser.add_argument("--circ-prune-importance-mix", type=float)
+    parser.add_argument("--circ-importance-ema-decay", type=float)
+    parser.add_argument("--circ-max-split-per-sleep", type=int)
+    parser.add_argument("--circ-max-prune-per-sleep", type=int)
+    parser.add_argument("--circ-split-noise-scale", type=float)
+    parser.add_argument("--circ-sleep-reset-factor", type=float)
+    parser.add_argument("--circ-sleep-mode", choices=("legacy", "components", "disabled"))
     parser.add_argument("--circ-disable-chemical-reset", action="store_true")
     parser.add_argument("--circ-disable-homeostasis", action="store_true")
     parser.add_argument("--circ-disable-split", action="store_true")
     parser.add_argument("--circ-disable-prune", action="store_true")
-    parser.add_argument("--circ-homeostatic-downscale-factor", type=float, default=1.0)
-    parser.add_argument("--circ-homeostasis-target-input-norm", type=float, default=0.0)
-    parser.add_argument("--circ-homeostasis-target-output-norm", type=float, default=0.0)
-    parser.add_argument("--circ-homeostasis-strength", type=float, default=0.50)
+    parser.add_argument("--circ-homeostatic-downscale-factor", type=float)
+    parser.add_argument("--circ-homeostasis-target-input-norm", type=float)
+    parser.add_argument("--circ-homeostasis-target-output-norm", type=float)
+    parser.add_argument("--circ-homeostasis-strength", type=float)
+    # Why this: one typed dataclass owns all 110 historical defaults; the
+    # adapter only translates field names and preserves --classes auto choice.
+    parser.set_defaults(**_preset_argument_defaults(preset.config))
     return parser
+
+
+def _preset_argument_defaults(config: ResNet50BenchmarkConfig) -> dict[str, object]:
+    aliases = {
+        "num_classes": "classes",
+        "dataset_data_root": "dataset_root",
+        "evaluation_batches": "eval_batches",
+        "backprop_learning_rate": "backprop_lr",
+        "predictive_head_hidden_dim": "pc_hidden_dim",
+        "predictive_learning_rate": "pc_lr",
+        "predictive_inference_steps": "pc_steps",
+        "predictive_inference_learning_rate": "pc_inference_lr",
+        "circadian_head_hidden_dim": "circ_hidden_dim",
+        "circadian_learning_rate": "circ_lr",
+        "circadian_inference_steps": "circ_steps",
+        "circadian_inference_learning_rate": "circ_inference_lr",
+    }
+    defaults: dict[str, object] = {}
+    for item in fields(config):
+        name = item.name
+        value = getattr(config, name)
+        if name in aliases:
+            destination = aliases[name]
+        elif name.startswith("circadian_sleep_enable_"):
+            destination = "circ_disable_" + name.removeprefix("circadian_sleep_enable_")
+            value = not value
+        elif name.startswith("circadian_"):
+            destination = "circ_" + name.removeprefix("circadian_")
+        else:
+            destination = name
+        # The old --classes omission follows the selected CIFAR dataset.
+        defaults[destination] = None if name == "num_classes" else value
+    return defaults
 
 
 def main() -> None:
     """Run benchmark and print formatted report."""
-    parser = build_argument_parser()
+    preset = get_single_resnet_preset()
+    parser = build_argument_parser(preset)
     args = parser.parse_args()
+    result_path = Path(args.json_result) if args.json_result is not None else None
+    config_path = Path(args.resolved_config) if args.resolved_config is not None else None
+    if args.override and result_path is None and config_path is None:
+        parser.error("--override requires --json-result or --resolved-config")
+    for path in (result_path, config_path):
+        if path is not None and path.exists():
+            raise FileExistsError(f"single-run ResNet artifact already exists: {path}")
+    if (
+        result_path is not None
+        and config_path is not None
+        and result_path.resolve() == config_path.resolve()
+    ):
+        parser.error("--json-result and --resolved-config must be different paths")
+    try:
+        overrides = _parse_overrides(args.override)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     target_accuracy = args.target_accuracy
     if target_accuracy < 0.0:
@@ -272,7 +330,8 @@ def main() -> None:
     else:
         num_classes = args.classes
 
-    config = ResNet50BenchmarkConfig(
+    config = replace(
+        preset.config,
         train_samples=args.train_samples,
         protocol_id=args.protocol_id,
         validation_samples=args.validation_samples,
@@ -317,9 +376,7 @@ def main() -> None:
         circadian_min_sleep_steps=args.circ_min_sleep_steps,
         circadian_sleep_energy_window=args.circ_sleep_energy_window,
         circadian_sleep_plateau_delta=args.circ_sleep_plateau_delta,
-        circadian_sleep_chemical_variance_threshold=(
-            args.circ_sleep_chemical_variance_threshold
-        ),
+        circadian_sleep_chemical_variance_threshold=(args.circ_sleep_chemical_variance_threshold),
         circadian_use_adaptive_sleep_budget=args.circ_use_adaptive_sleep_budget,
         circadian_adaptive_sleep_budget_min_scale=args.circ_adaptive_sleep_budget_min_scale,
         circadian_adaptive_sleep_budget_max_scale=args.circ_adaptive_sleep_budget_max_scale,
@@ -339,9 +396,7 @@ def main() -> None:
         circadian_chemical_decay=args.circ_chemical_decay,
         circadian_chemical_buildup_rate=args.circ_chemical_buildup_rate,
         circadian_use_saturating_chemical=(
-            True
-            if args.circ_use_saturating_chemical is None
-            else args.circ_use_saturating_chemical
+            True if args.circ_use_saturating_chemical is None else args.circ_use_saturating_chemical
         ),
         circadian_chemical_max_value=args.circ_chemical_max_value,
         circadian_chemical_saturation_gain=args.circ_chemical_saturation_gain,
@@ -367,9 +422,7 @@ def main() -> None:
         circadian_reward_scale_min=args.circ_reward_scale_min,
         circadian_reward_scale_max=args.circ_reward_scale_max,
         circadian_use_adaptive_thresholds=(
-            True
-            if args.circ_use_adaptive_thresholds is None
-            else args.circ_use_adaptive_thresholds
+            True if args.circ_use_adaptive_thresholds is None else args.circ_use_adaptive_thresholds
         ),
         circadian_adaptive_split_percentile=args.circ_adaptive_split_percentile,
         circadian_adaptive_prune_percentile=args.circ_adaptive_prune_percentile,
@@ -405,10 +458,48 @@ def main() -> None:
         circadian_homeostasis_strength=args.circ_homeostasis_strength,
     )
     try:
+        config = resolve_single_resnet_overrides(config, overrides)
+        resolved_record = build_resolved_single_resnet_record(
+            config, args.preset, sys.argv[1:], overrides
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
+    try:
         result = run_resnet50_benchmark(config)
     except RuntimeError as exc:
         raise SystemExit(str(exc)) from exc
+    if result_path is not None or config_path is not None:
+        if not isinstance(result, ResNet50BenchmarkResult) or result.config != config:
+            raise ValueError("single-run ResNet runner result config differs from request")
+        if result.training_order != VISION_DEFAULT_MODEL_ORDER:
+            raise ValueError("single-run ResNet runner order differs from request")
+    if result_path is not None:
+        payload = asdict(result)
+        payload["resolved_config"] = resolved_record
+        write_local_json_payload(payload, result_path)
+    if config_path is not None:
+        write_local_json_payload(resolved_record, config_path)
     print(format_resnet50_benchmark_result(result))
+
+
+def _parse_overrides(raw_overrides: list[str]) -> dict[str, object]:
+    """Parse JSON syntax once; app validation owns setting names and types."""
+    overrides: dict[str, object] = {}
+    for raw in raw_overrides:
+        name, separator, value = raw.partition("=")
+        if not separator or not name or name != name.strip() or not value:
+            raise ValueError("override must use FIELD=JSON syntax")
+        if name in overrides:
+            raise ValueError(f"duplicate single-run ResNet override key: {name}")
+        try:
+            overrides[name] = json.loads(value, parse_constant=_reject_nonfinite_override)
+        except (json.JSONDecodeError, ValueError) as exc:
+            raise ValueError(f"override {name} must contain valid finite JSON") from exc
+    return overrides
+
+
+def _reject_nonfinite_override(value: str) -> object:
+    raise ValueError(f"nonfinite override token: {value}")
 
 
 if __name__ == "__main__":

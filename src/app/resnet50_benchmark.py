@@ -79,6 +79,7 @@ GUARD_SEPARATED_VISION_PROTOCOLS = {
 }
 VISION_UNMATCHED_REFERENCE_TRACK = "unmatched_reference"
 VISION_END_TO_END_BACKPROP_TRACK = "end_to_end_backprop"
+VISION_DEFAULT_MODEL_ORDER = ("backprop", "predictive", "circadian")
 
 
 @dataclass(frozen=True)
@@ -359,7 +360,7 @@ def run_resnet50_benchmark(
     resume_from_checkpoint: bool = False,
 ) -> ResNet50BenchmarkResult:
     """Benchmark all three model families on the same vision task."""
-    default_order = ("backprop", "predictive", "circadian")
+    default_order = VISION_DEFAULT_MODEL_ORDER
     if model_order is not None:
         if config.protocol_id != VISION_SEEDED_UNMATCHED_PROTOCOL:
             raise ValueError("A custom model_order requires the seeded vision protocol.")

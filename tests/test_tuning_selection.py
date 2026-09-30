@@ -141,6 +141,8 @@ def test_policy_sweep_passes_training_guard_and_outer_validation_only(
     assert '"final_test_usage": "none"' in output
     assert '"final_test_confirmation": "pending"' in output
     assert '"split_hashes"' in output
+    assert '"planned_max_training_updates": 800' in output
+    assert '"max_planned_training_updates": 1000' in output
     assert '"test_accuracy"' not in output
 
 

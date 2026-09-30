@@ -24,9 +24,7 @@ RESOLVED_RESNET_CONFIG_SCHEMA = "resnet_multiseed_resolved_config_v1"
 
 _POSITIVE_INTEGER_FIELDS = frozenset(
     {
-        "train_samples",
         "validation_samples",
-        "test_samples",
         "num_classes",
         "image_size",
         "batch_size",
@@ -36,6 +34,8 @@ _POSITIVE_INTEGER_FIELDS = frozenset(
 _NONNEGATIVE_INTEGER_FIELDS = frozenset(
     {
         "guard_samples",
+        "train_samples",
+        "test_samples",
         "dataset_train_subset_size",
         "dataset_guard_subset_size",
         "dataset_test_subset_size",
@@ -153,6 +153,10 @@ def validate_multiseed_resnet_config(config: ResNet50BenchmarkConfig) -> None:
         if name in _NONNEGATIVE_INTEGER_FIELDS:
             if cast(int, value) < 0:
                 raise ValueError(f"{name} must be non-negative")
+    if config.dataset_name == "synthetic" and (
+        config.train_samples <= 0 or config.test_samples <= 0
+    ):
+        raise ValueError("synthetic train_samples and test_samples must be positive")
     _validate_benchmark_config(config)
     try:
         json.dumps(asdict(config), allow_nan=False)

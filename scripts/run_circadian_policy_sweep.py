@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+import argparse
+from dataclasses import asdict, replace
 import json
 from pathlib import Path
 import sys
@@ -19,6 +20,10 @@ from src.app.resnet50_benchmark import (  # noqa: E402
     _resolve_device,
     _set_seed,
 )
+from src.app.sweep_work_estimate import (  # noqa: E402
+    estimate_vision_candidate_work,
+    require_planned_training_limit,
+)
 from src.infra.vision_datasets import (  # noqa: E402
     SyntheticVisionDatasetConfig,
     build_synthetic_vision_dataloaders,
@@ -26,12 +31,18 @@ from src.infra.vision_datasets import (  # noqa: E402
 from src.shared.torch_runtime import require_torch  # noqa: E402
 
 OUTPUT_PATH = Path("benchmark_circadian_policy_sweep_guard_selection_v2_results.json")
+DEFAULT_MAX_PLANNED_TRAINING_UPDATES = 1_000
 
 
-def main() -> None:
-    if OUTPUT_PATH.exists():
+def main(
+    *,
+    estimate_only: bool = False,
+    max_planned_training_updates: int = DEFAULT_MAX_PLANNED_TRAINING_UPDATES,
+) -> None:
+    if type(estimate_only) is not bool:
+        raise ValueError("estimate_only must be boolean")
+    if not estimate_only and OUTPUT_PATH.exists():
         raise FileExistsError(f"Sweep output already exists: {OUTPUT_PATH}")
-    torch = require_torch()
     base = ResNet50BenchmarkConfig(
         train_samples=2500,
         validation_samples=700,
@@ -92,6 +103,22 @@ def main() -> None:
         circadian_max_split_per_sleep=1,
         circadian_max_prune_per_sleep=1,
     )
+    candidates = build_candidates(base)
+    # Why this: all candidates reuse one base dataset and loader.
+    if any(
+        type(field) is not str or not field.startswith("circadian_")
+        for override in candidates
+        for field in override
+    ):
+        raise ValueError("policy sweep candidates may change circadian fields only")
+    estimate = estimate_vision_candidate_work(
+        tuple(replace(base, **override) for override in candidates), seed_count=1
+    )
+    print(json.dumps({"sweep": "circadian_policy", **asdict(estimate)}, sort_keys=True))
+    if estimate_only:
+        return
+    require_planned_training_limit(estimate, max_planned_training_updates)
+    torch = require_torch()
     _set_seed(torch, base.seed)
     device = _resolve_device(torch, base.device)
     loaders = build_synthetic_vision_dataloaders(
@@ -109,13 +136,15 @@ def main() -> None:
         )
     )
 
-    candidates = build_candidates(base)
     trials: list[dict[str, Any]] = []
     for index, override in enumerate(candidates, start=1):
         config = replace(base, **override)
         report = benchmark_validation_candidate(
-            variant="circadian", torch=torch, device=device,
-            loaders=_training_loaders(loaders), config=config,
+            variant="circadian",
+            torch=torch,
+            device=device,
+            loaders=_training_loaders(loaders),
+            config=config,
         )
         row = {
             "trial": index,
@@ -154,6 +183,8 @@ def main() -> None:
         "final_test_usage": "none",
         "final_test_confirmation": "pending",
         "inference_split": "validation",
+        "prelaunch_estimate": asdict(estimate),
+        "max_planned_training_updates": max_planned_training_updates,
         **summarize_trials(trials),
     }
     with OUTPUT_PATH.open("x", encoding="utf-8") as output_file:
@@ -364,4 +395,20 @@ def best_from_trials(trials: list[dict[str, Any]], key: str) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--estimate-only",
+        action="store_true",
+        help="print planned training work without opening Torch, weights, or datasets",
+    )
+    parser.add_argument(
+        "--max-planned-training-updates",
+        type=int,
+        default=DEFAULT_MAX_PLANNED_TRAINING_UPDATES,
+        help="prelaunch upper bound on total candidate training batches (default: 1000)",
+    )
+    options = parser.parse_args()
+    main(
+        estimate_only=options.estimate_only,
+        max_planned_training_updates=options.max_planned_training_updates,
+    )
