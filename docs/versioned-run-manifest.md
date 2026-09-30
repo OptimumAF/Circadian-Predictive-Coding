@@ -2,6 +2,10 @@
 
 `circadian_run_manifest_v1` is the first complete-run provenance contract.
 The first producer is the fixed NumPy v14 full-stack trigger comparison.
+Its declared typed preset is `fixed-v14`. Passing `--preset fixed-v14`
+explicitly has the same result as omitting it. Unknown preset names and
+setting switches fail before training; changing v14 settings requires a
+new study identity.
 It writes `artifacts/runs/<run-id>/manifest.json` after `training.json` and
 `outcomes.json`, which retain the existing v14 protocol bytes. The local
 directory is ignored by Git. A run ID is a lowercase letter or digit
@@ -34,7 +38,7 @@ of being assigned an invented commit.
 From the repository root, using the documented NumPy environment:
 
 ```powershell
-.\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p51-v14-local
+.\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p51-v14-local --preset fixed-v14
 .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p51-v14-local
 ```
 
@@ -55,8 +59,8 @@ derives JSONL and final-row CSV from a verified completed bundle; the
 P5.1 producer itself still writes only the raw JSON and manifest.
 The separate opt-in [P5.3b checked resume route](v14-checked-resume.md)
 continues from complete unscored trial checkpoints while retaining this
-same public manifest and payload schema. Neither route implements a
-general preset override CLI (P5.4) or claims
+same public manifest and payload schema. Neither route changes the
+`fixed-v14` configuration or claims
 cross-platform bitwise reproducibility (P5.7). New tracks should add a producer and validator
 for the same required provenance fields or introduce a new schema ID
 when the contract changes; existing v14 JSON and checkpoint formats

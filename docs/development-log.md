@@ -8507,3 +8507,78 @@ were not modified.
   and test its sole fixed-v14 preset/unknown-input rejection and
   manifest `resolved_config` identity without opening its frozen
   settings or changing the original raw hashes.
+
+## 2026-09-29 — P5.4c1 fixed-v14 preset and entrypoint audit
+
+- Completed task ID: **P5.4c1**. P5.4c2, P5.4c, and P5.4 parent remain
+  unchecked. Read repository AGENTS.md, the full living plan, and the
+  latest development log, then inspected the actual checkout. The
+  checkout had changed since the preceding handoff: `master` HEAD was
+  `f4ae40214b5f136e26be63ecd51349223c56c05d` (the prior P5.1–P5.4b
+  work is in that commit), and `git status --short` was clean. The plan's
+  reviewed `8793c49...` remains a historical review boundary. This
+  session's new tracked/untracked changes and ignored artifacts were
+  preserved without a commit or dependency change.
+- The fixed v14 bundle already serialized `asdict(study.manifest)` through
+  canonical JSON into `resolved_config`; its writer and disk verifier
+  bound that to both old raw payloads and `config_sha256`. Added pure
+  `src/app/v14_experiment_config.py` with the typed sole ID `fixed-v14`.
+  The versioned runner resolves it before source capture, fresh training,
+  or checked resume; the CLI accepts optional `--preset fixed-v14` and
+  argparse rejects unknown presets and settings. The direct app call
+  rejects an unknown ID before training. No v14 setting, protocol, run
+  manifest schema, seed, baseline, metric, or raw output serializer changed.
+- Tests first failed collection because the resolver did not exist.
+  The first implementation run then exposed a test expectation that
+  compared dataclass tuples to canonical JSON lists; the assertions now
+  compare the exact canonical saved form. One concurrent focused run
+  hit the intended v14 source-drift guard when the runner file changed
+  during its resume test; rerunning with an untouched checkout passed.
+  Focused tests cover unknown CLI/direct inputs before training,
+  default and explicit preset runs, full canonical `resolved_config`,
+  original raw hashes, and checked resume.
+- `docs/configuration-entrypoint-audit.md` inventories documented fixed
+  producers, frozen selection/confirmation routes, the completed
+  configurable continual route, and the actively documented unmatched
+  ResNet multi-seed CLI. That ResNet CLI's parser holds many defaults;
+  its JSON saves only a dataset/runtime subset of the typed
+  `ResNet50BenchmarkConfig`, omitting inherited model settings. Split
+  P5.4c into c1 and new c2; the original P5.4c and parent criteria stay
+  open. ADR-0126 explains why the fixed v14 schema and study identity
+  were left intact. README, architecture, module docs, manifest guide,
+  changelog, and plan/handoff were updated.
+- Commands and outcomes from the workspace root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_versioned_v14_run.py tests/test_v14_checked_resume.py  # final exit 0: 25 passed in 29.94 s; initial red import, tuple/list assertion, and concurrent source-drift rerun retained above
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short  # exit 0: 1,551 passed, 41 skipped in 482.96 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0: 260 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/v14_experiment_config.py scripts/run_versioned_v14_bundle.py tests/test_versioned_v14_run.py  # exit 0: three formatted files
+  git -c core.safecrlf=false diff --check  # exit 0
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p54-fixed-v14-preset --preset fixed-v14  # exit 0, one local fixed six-trial run
+  .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p54-fixed-v14-preset  # exit 0, completed
+  ```
+
+- The ignored local bundle `artifacts/runs/p54-fixed-v14-preset/` has
+  manifest SHA-256
+  `d27aa6cec2f9e474768ee6c1c1a5156a3d04aa19f6082f64f463fe51db9c87d1`.
+  Its training and outcomes retain SHA-256
+  `174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324`
+  and `ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f`.
+  A direct disk comparison against old default bundle
+  `artifacts/runs/p51-v14-schema-c/` found equal `resolved_config`,
+  `config_sha256`, training bytes, and outcome bytes. This is an identity
+  check, not a new hypothesis test or model selection. The 41 full-suite
+  skips require CUDA; no fixed-v14/configuration case was skipped.
+- **Plan changes:** P5.4c1 checked only after focused, full, static,
+  and actual-artifact evidence; P5.4c2 added for the unmatched ResNet
+  CLI. P5.4c and P5.4 remain unchecked. **Blockers:** none.
+  **Exact next action:** inspect `scripts/run_multiseed_resnet_benchmark.py`
+  parser and `build_base_config`, the typed `ResNet50BenchmarkConfig`,
+  and its output tests. Add red no-flag/flag parity, complete resolved
+  config/seeds, and pretraining unknown/invalid-input tests. Move the
+  existing defaults into a named typed app preset and save the actual
+  resolved record without changing historical unmatched status,
+  baseline rates, validation-only winner logic, or old result files;
+  then run focused/full/static gates and assess P5.4c/P5.4 acceptance.

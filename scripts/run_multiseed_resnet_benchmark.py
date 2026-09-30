@@ -24,6 +24,13 @@ from src.app.resnet50_benchmark import (  # noqa: E402
     VISION_VALIDATION_UNMATCHED_PROTOCOL,
     run_resnet50_benchmark,
 )
+from src.app.resnet_experiment_config import (  # noqa: E402
+    MULTISEED_RESNET_PRESET_ID,
+    build_resolved_multiseed_resnet_record,
+    get_multiseed_resnet_preset,
+    resolve_multiseed_resnet_overrides,
+    validate_multiseed_resnet_config,
+)
 
 
 CORE_METRICS: tuple[str, ...] = (
@@ -49,15 +56,18 @@ OPTIONAL_CIRCADIAN_METRICS: tuple[str, ...] = (
 
 
 def build_parser() -> argparse.ArgumentParser:
+    preset = get_multiseed_resnet_preset()
+    base = preset.config
     parser = argparse.ArgumentParser(
         description=(
             "Run multi-seed ResNet benchmark for backprop, predictive coding, and circadian."
         )
     )
+    parser.add_argument("--preset", choices=[MULTISEED_RESNET_PRESET_ID], default=preset.preset_id)
     parser.add_argument(
         "--seeds",
         type=str,
-        default="7,13,29",
+        default=",".join(str(seed) for seed in preset.seeds),
         help="Comma-separated seed list.",
     )
     parser.add_argument(
@@ -67,22 +77,30 @@ def build_parser() -> argparse.ArgumentParser:
             VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
             VISION_VALIDATION_UNMATCHED_PROTOCOL,
         ],
-        default=VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+        default=base.protocol_id,
     )
     parser.add_argument(
         "--dataset-name",
         choices=["synthetic", "cifar10", "cifar100"],
-        default="cifar100",
+        default=base.dataset_name,
     )
-    parser.add_argument("--dataset-root", type=str, default="data")
+    parser.add_argument("--dataset-root", type=str, default=base.dataset_data_root)
     parser.add_argument("--dataset-download", dest="dataset_download", action="store_true")
     parser.add_argument("--dataset-no-download", dest="dataset_download", action="store_false")
-    parser.set_defaults(dataset_download=True)
-    parser.add_argument("--dataset-train-subset-size", type=int, default=0)
-    parser.add_argument("--dataset-validation-subset-size", type=int, default=1000)
-    parser.add_argument("--dataset-guard-subset-size", type=int, default=1000)
-    parser.add_argument("--dataset-test-subset-size", type=int, default=0)
-    parser.add_argument("--dataset-num-workers", type=int, default=0)
+    parser.set_defaults(dataset_download=base.dataset_download)
+    parser.add_argument(
+        "--dataset-train-subset-size", type=int, default=base.dataset_train_subset_size
+    )
+    parser.add_argument(
+        "--dataset-validation-subset-size", type=int, default=base.dataset_validation_subset_size
+    )
+    parser.add_argument(
+        "--dataset-guard-subset-size", type=int, default=base.dataset_guard_subset_size
+    )
+    parser.add_argument(
+        "--dataset-test-subset-size", type=int, default=base.dataset_test_subset_size
+    )
+    parser.add_argument("--dataset-num-workers", type=int, default=base.dataset_num_workers)
     parser.add_argument(
         "--dataset-use-augmentation",
         dest="dataset_use_augmentation",
@@ -93,27 +111,33 @@ def build_parser() -> argparse.ArgumentParser:
         dest="dataset_use_augmentation",
         action="store_false",
     )
-    parser.set_defaults(dataset_use_augmentation=True)
-    parser.add_argument("--dataset-difficulty", choices=["easy", "medium", "hard"], default="hard")
-    parser.add_argument("--dataset-noise-std", type=float, default=0.08)
+    parser.set_defaults(dataset_use_augmentation=base.dataset_use_augmentation)
+    parser.add_argument(
+        "--dataset-difficulty", choices=["easy", "medium", "hard"], default=base.dataset_difficulty
+    )
+    parser.add_argument("--dataset-noise-std", type=float, default=base.dataset_noise_std)
 
     parser.add_argument("--classes", type=int, default=None)
-    parser.add_argument("--train-samples", type=int, default=2500)
-    parser.add_argument("--validation-samples", type=int, default=64)
-    parser.add_argument("--guard-samples", type=int, default=64)
-    parser.add_argument("--test-samples", type=int, default=700)
-    parser.add_argument("--image-size", type=int, default=96)
-    parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--epochs", type=int, default=12)
-    parser.add_argument("--device", type=str, default="cuda")
-    parser.add_argument("--target-accuracy", type=float, default=-1.0)
-    parser.add_argument("--eval-batches", type=int, default=2)
-    parser.add_argument("--inference-batches", type=int, default=20)
-    parser.add_argument("--warmup-batches", type=int, default=5)
+    parser.add_argument("--train-samples", type=int, default=base.train_samples)
+    parser.add_argument("--validation-samples", type=int, default=base.validation_samples)
+    parser.add_argument("--guard-samples", type=int, default=base.guard_samples)
+    parser.add_argument("--test-samples", type=int, default=base.test_samples)
+    parser.add_argument("--image-size", type=int, default=base.image_size)
+    parser.add_argument("--batch-size", type=int, default=base.batch_size)
+    parser.add_argument("--epochs", type=int, default=base.epochs)
+    parser.add_argument("--device", type=str, default=base.device)
+    parser.add_argument(
+        "--target-accuracy",
+        type=float,
+        default=-1.0 if base.target_accuracy is None else base.target_accuracy,
+    )
+    parser.add_argument("--eval-batches", type=int, default=base.evaluation_batches)
+    parser.add_argument("--inference-batches", type=int, default=base.inference_batches)
+    parser.add_argument("--warmup-batches", type=int, default=base.warmup_batches)
     parser.add_argument(
         "--backbone-weights",
         choices=["none", "imagenet"],
-        default="imagenet",
+        default=base.backbone_weights,
     )
     parser.add_argument(
         "--backprop-freeze-backbone",
@@ -125,11 +149,18 @@ def build_parser() -> argparse.ArgumentParser:
         dest="backprop_freeze_backbone",
         action="store_false",
     )
-    parser.set_defaults(backprop_freeze_backbone=True)
+    parser.set_defaults(backprop_freeze_backbone=base.backprop_freeze_backbone)
+    parser.add_argument(
+        "--override",
+        action="append",
+        default=[],
+        metavar="FIELD=JSON",
+        help="repeatable typed override of an existing CLI setting field",
+    )
     parser.add_argument(
         "--output-prefix",
         type=str,
-        default="benchmark_multiseed_results",
+        default=preset.output_prefix,
         help="Output path prefix (without extension).",
     )
     return parser
@@ -161,13 +192,15 @@ def resolve_num_classes(dataset_name: str, classes: int | None) -> int:
 
 
 def build_base_config(args: argparse.Namespace) -> ResNet50BenchmarkConfig:
+    preset = get_multiseed_resnet_preset(args.preset)
     target_accuracy: float | None
     if args.target_accuracy < 0.0:
         target_accuracy = None
     else:
         target_accuracy = float(args.target_accuracy)
 
-    return ResNet50BenchmarkConfig(
+    config = replace(
+        preset.config,
         train_samples=args.train_samples,
         protocol_id=args.protocol_id,
         validation_samples=args.validation_samples,
@@ -196,6 +229,8 @@ def build_base_config(args: argparse.Namespace) -> ResNet50BenchmarkConfig:
         backbone_weights=args.backbone_weights,
         backprop_freeze_backbone=args.backprop_freeze_backbone,
     )
+    validate_multiseed_resnet_config(config)
+    return config
 
 
 def report_to_row(seed: int, report: ModelSpeedReport) -> dict[str, Any]:
@@ -249,7 +284,10 @@ def aggregate_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "final_metric_name": model_rows[0]["final_metric_name"],
         }
         for metadata in (
-            "benchmark_track", "backbone_trainable", "backbone_pretraining", "head_type",
+            "benchmark_track",
+            "backbone_trainable",
+            "backbone_pretraining",
+            "head_type",
             "training_energy_id",
         ):
             metadata_values = {row[metadata] for row in model_rows}
@@ -326,10 +364,33 @@ def _require_one_track(rows: list[dict[str, Any]]) -> None:
 def validation_selection_rows(summary_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Expose only declared selection metrics to winner calculations."""
     fields = (
-        "model_name", "benchmark_track", "validation_accuracy_mean", "train_samples_per_second_mean",
+        "model_name",
+        "benchmark_track",
+        "validation_accuracy_mean",
+        "train_samples_per_second_mean",
         "inference_samples_per_second_mean",
     )
     return [{field: row[field] for field in fields} for row in summary_rows]
+
+
+def _reject_nonfinite_json(token: str) -> object:
+    raise ValueError(f"nonfinite JSON override is invalid: {token}")
+
+
+def parse_overrides(raw_overrides: list[str]) -> dict[str, object]:
+    """Parse repeatable field JSON without silently replacing a duplicate."""
+    overrides: dict[str, object] = {}
+    for raw in raw_overrides:
+        if "=" not in raw:
+            raise ValueError("ResNet override must use FIELD=JSON")
+        name, encoded = raw.split("=", 1)
+        if not name or name in overrides:
+            raise ValueError(f"empty or duplicate ResNet override key: {name!r}")
+        try:
+            overrides[name] = json.loads(encoded, parse_constant=_reject_nonfinite_json)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"invalid JSON override for {name}") from exc
+    return overrides
 
 
 def main() -> None:
@@ -343,7 +404,12 @@ def main() -> None:
         if output_path.exists():
             raise FileExistsError(f"Multi-seed output already exists: {output_path}")
     seeds = parse_seed_list(args.seeds)
-    base = build_base_config(args)
+    legacy_base = build_base_config(args)
+    overrides = parse_overrides(args.override)
+    base = resolve_multiseed_resnet_overrides(legacy_base, overrides)
+    resolved_record = build_resolved_multiseed_resnet_record(
+        base, seeds, args.preset, sys.argv[1:], overrides
+    )
 
     per_seed_rows: list[dict[str, Any]] = []
     split_hashes_by_seed: dict[str, dict[str, str]] = {}
@@ -352,6 +418,8 @@ def main() -> None:
         config = replace(base, seed=seed)
         print(f"[{index}/{len(seeds)}] running seed={seed}")
         result = run_resnet50_benchmark(config)
+        if result.config != config:
+            raise ValueError("ResNet runner result configuration differs from requested trial")
         split_hashes_by_seed[str(seed)] = result.split_hashes
         if result.trained_model_hashes is not None:
             trained_model_hashes_by_seed[str(seed)] = result.trained_model_hashes
@@ -376,15 +444,14 @@ def main() -> None:
         ),
         "best_balanced_model": best_efficiency_model,
     }
-    scores_by_model = {
-        row["model_name"]: row["balanced_score"] for row in selection_rows
-    }
+    scores_by_model = {row["model_name"]: row["balanced_score"] for row in selection_rows}
     for row in summary_rows:
         row["balanced_score"] = scores_by_model[row["model_name"]]
 
     payload = {
         "protocol_id": base.protocol_id,
         "comparison_status": "unmatched reference; validation winners are descriptive only",
+        "resolved_config": resolved_record,
         "dataset": {
             "name": base.dataset_name,
             "root": base.dataset_data_root,
@@ -393,10 +460,12 @@ def main() -> None:
             "validation_subset_size": base.dataset_validation_subset_size,
             "guard_subset_size": (
                 base.dataset_guard_subset_size
-                if base.protocol_id in {
+                if base.protocol_id
+                in {
                     VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
                     VISION_SEEDED_UNMATCHED_PROTOCOL,
-                } else 0
+                }
+                else 0
             ),
             "test_subset_size": base.dataset_test_subset_size,
             "num_workers": base.dataset_num_workers,
@@ -407,10 +476,12 @@ def main() -> None:
             "validation_samples": base.validation_samples,
             "guard_samples": (
                 base.guard_samples
-                if base.protocol_id in {
+                if base.protocol_id
+                in {
                     VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
                     VISION_SEEDED_UNMATCHED_PROTOCOL,
-                } else 0
+                }
+                else 0
             ),
             "test_samples": base.test_samples,
             "num_classes": base.num_classes,

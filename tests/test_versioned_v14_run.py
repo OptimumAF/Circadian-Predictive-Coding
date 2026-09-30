@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -23,6 +24,7 @@ from src.app.continual_trigger_replay_training_study import (
     run_trigger_replay_training_study,
 )
 from src.app.versioned_v14_run import build_v14_run_manifest
+from src.app.v14_experiment_config import FIXED_V14_PRESET_ID, resolve_v14_preset
 from src.core.run_manifest import RunEnvironment
 from src.infra.versioned_run_files import verify_run_bundle, write_run_bundle
 
@@ -60,6 +62,10 @@ def _environment() -> RunEnvironment:
     )
 
 
+def _resolved_v14_config() -> dict[str, Any]:
+    return json.loads(json.dumps(asdict(resolve_v14_preset(FIXED_V14_PRESET_ID))))
+
+
 def _build_manifest(
     fixed_materials: tuple[TriggerReplayTrainingStudy, TriggerReplayComparison, bytes, bytes],
 ) -> dict[str, Any]:
@@ -83,6 +89,7 @@ def test_should_bind_all_required_provenance_and_original_v14_bytes(
         == "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f"
     )
     assert manifest["status"] == "completed"
+    assert manifest["resolved_config"] == _resolved_v14_config()
     assert manifest["source"]["dirty"] is True
     assert manifest["seed_map"]["47"]["phase_b_source"] == 148
     assert manifest["seed_map"]["53"]["circadian"] == 55
@@ -171,12 +178,68 @@ def test_should_emit_one_actual_opt_in_bundle_with_tracked_environment(
     manifest = verify_run_bundle(run_path)
     assert manifest["run_id"] == "p51-v14-integration"
     assert manifest["source"]["commit_sha"] is not None
+    assert manifest["resolved_config"] == _resolved_v14_config()
+    assert manifest["files"]["training"]["sha256"] == (
+        "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324"
+    )
+    assert manifest["files"]["outcomes"]["sha256"] == (
+        "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f"
+    )
     assert json.loads((run_path / "outcomes.json").read_text(encoding="utf-8"))["protocol_id"] == (
         "continual_trigger_replay_outcomes_v14"
     )
     monkeypatch.setattr(sys, "argv", ["run_versioned_v14_bundle", "--verify-run", str(run_path)])
     main()
     assert json.loads(capsys.readouterr().out)["status"] == "completed"
+
+
+@pytest.mark.parametrize("argument", [["--preset", "unknown"], ["--override", "hidden_dim=16"]])
+def test_should_reject_unknown_v14_configuration_before_training(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, argument: list[str]
+) -> None:
+    monkeypatch.setattr(
+        "scripts.run_versioned_v14_bundle.run_trigger_replay_training_study",
+        lambda *_: (_ for _ in ()).throw(AssertionError("trained before preset rejection")),
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["run_versioned_v14_bundle", "--run-id", "p54-unknown", *argument],
+    )
+    with pytest.raises(SystemExit, match="2"):
+        main()
+    with pytest.raises(ValueError, match="preset"):
+        run_versioned_v14_bundle(tmp_path, "p54-unknown", Path.cwd(), preset="unknown")
+    assert not (tmp_path / "p54-unknown").exists()
+
+
+def test_should_preserve_fixed_v14_bytes_with_explicit_preset(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_versioned_v14_bundle",
+            "--run-id",
+            "p54-fixed",
+            "--output-root",
+            str(tmp_path),
+            "--preset",
+            FIXED_V14_PRESET_ID,
+        ],
+    )
+    main()
+    run_path = tmp_path / "p54-fixed"
+    manifest = verify_run_bundle(run_path)
+    assert manifest["resolved_config"] == _resolved_v14_config()
+    assert sha256((run_path / "training.json").read_bytes()).hexdigest() == (
+        "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324"
+    )
+    assert sha256((run_path / "outcomes.json").read_bytes()).hexdigest() == (
+        "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f"
+    )
+    assert json.loads(capsys.readouterr().out)["run"] == str(run_path)
 
 
 def test_should_reject_source_change_during_training_without_writing(

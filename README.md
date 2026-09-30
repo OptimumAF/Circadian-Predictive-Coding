@@ -490,7 +490,7 @@ For a new run with execution provenance, use the opt-in
 [versioned manifest contract](docs/versioned-run-manifest.md):
 
 ```powershell
-.\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p51-v14-local
+.\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --run-id p51-v14-local --preset fixed-v14
 .\.venv\Scripts\python.exe -m scripts.run_versioned_v14_bundle --verify-run artifacts/runs/p51-v14-local
 ```
 
@@ -498,6 +498,9 @@ This writes an ignored local directory with the unchanged v14 train-only
 and scored JSON plus a validated `manifest.json`. It records the executing
 Git/workspace state, exact source-role hashes, seed derivations, runtime
 versions, CPU hardware, float64 precision, and unmeasured timing scope.
+`fixed-v14` is the only accepted preset and is also the default;
+unknown preset names and setting switches fail before training. The
+complete resolved fixed manifest remains in `manifest.json`.
 The run ID must be new; a partial directory cannot pass verification
 (ADR-0120).
 
@@ -557,6 +560,8 @@ order, protocol ID, or baseline learning rates are refused before
 training. See the [configuration workflow](docs/configured-continual-experiments.md)
 (ADR-0125). This historical route is descriptive and does not alter
 the fixed matched v14 comparison.
+The [active CLI configuration audit](docs/configuration-entrypoint-audit.md)
+tracks the remaining unmatched ResNet multi-seed configuration gap.
 
 For a local JSON artifact of a completed v0–v5 continual result, add
 `--json-result continual-result.json`. It contains one typed circadian sleep
@@ -1482,6 +1487,14 @@ Multi-seed benchmark export:
 ```powershell
 python scripts/run_multiseed_resnet_benchmark.py --dataset-name cifar100 --seeds 7,13,29 --dataset-train-subset-size 20000 --dataset-test-subset-size 5000 --epochs 12 --device cuda --output-prefix benchmark_multiseed_cifar100
 ```
+
+This descriptive unmatched route uses the named typed
+`historical-unmatched` preset. Existing flags and repeatable
+`--override FIELD=JSON` values are validated before training; the
+JSON result now includes the full base and per-seed resolved configs.
+See the [configuration contract](docs/configured-resnet-multiseed.md)
+(ADR-0127). Its validation-selected winners are not a matched
+learning-rule comparison.
 
 Generate protocol-labeled charts in a new directory:
 

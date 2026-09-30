@@ -436,6 +436,16 @@ identity fixed, applies validated values, and builds a fully resolved
 config record. It does not parse CLI syntax, train, or write files
 (ADR-0125).
 
+`v14_experiment_config.py` resolves only the typed `fixed-v14` preset to
+the historical manifest and rejects any other ID before training. It
+does not parse CLI syntax, open a source, or change the old fixed result
+identity (ADR-0126).
+
+`resnet_experiment_config.py` owns the typed historical unmatched
+multi-seed preset, validates only the already exposed override fields,
+and builds a complete ordered per-seed config record. It does not parse
+CLI syntax, load images, run Torch training, or write files (ADR-0127).
+
 - Low-level math routines
 - CLI argument parsing
 - Environment variable parsing

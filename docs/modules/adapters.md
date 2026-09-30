@@ -44,7 +44,8 @@
   or verifies an opt-in local P5.1 bundle. Its opt-in resumable mode
   validates an unscored format-10 prefix before further training or
   final release. It does not choose a model or alter v14 metrics
-  (ADRs 0120, 0124).
+  (ADRs 0120, 0124). It declares the sole `fixed-v14` preset and rejects
+  unknown settings before training (ADR-0126).
 - `scripts/project_v14_observations.py` projects or verifies a completed
   P5.1 bundle in an exclusive local directory. It does not train,
   score, or choose a result (ADR-0121).
@@ -56,6 +57,10 @@
   `--override` values for its existing named profiles and optionally
   writes an exclusive fully resolved config record. The app validates
   fields before the adapter invokes training (ADR-0125).
+- `scripts/run_multiseed_resnet_benchmark.py` retains its descriptive
+  unmatched flags and output names, parses repeatable JSON settings
+  after them, checks the app's typed config before training, and embeds
+  complete per-seed settings in the JSON result (ADR-0127).
 
 ## Inputs / Outputs
 

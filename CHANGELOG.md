@@ -9,6 +9,15 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- A typed historical unmatched preset and complete base/per-seed
+  configuration record for the multi-seed ResNet export, with strict
+  existing-field overrides and pretraining validation; historical
+  baseline rates and validation winner logic remain unchanged
+  (ADR-0127).
+- Declared a single typed `fixed-v14` preset for the versioned bundle,
+  rejecting unknown settings before training while retaining its exact
+  raw result hashes; audited active experiment entrypoints and recorded
+  the remaining unmatched ResNet configuration gap (ADR-0126).
 - Typed, explicit overrides for existing continual-shift presets and
   an exclusive fully resolved configuration artifact, with unknown,
   duplicate, nonfinite, and baseline/protocol field rejection before

@@ -11,7 +11,7 @@ from pathlib import Path
 from scripts.run_continual_trigger_replay_outcomes import serialize_outcome_comparison
 from scripts.run_continual_trigger_replay_training import serialize_training_study
 from src.app.continual_trigger_replay_outcomes import score_trigger_replay_training_study
-from src.app.continual_trigger_replay_schedule import fixed_trigger_replay_manifest
+from src.app.continual_trigger_replay_schedule import TriggerReplayOpportunityManifest
 from src.app.continual_trigger_replay_runner import run_trigger_replay_training
 from src.app.continual_trigger_replay_training_study import (
     preflight_trigger_replay_training_study,
@@ -26,6 +26,7 @@ from src.app.v14_trial_checkpoint import (
     validate_v14_trial_checkpoint,
 )
 from src.app.versioned_v14_run import build_v14_run_manifest
+from src.app.v14_experiment_config import FIXED_V14_PRESET_ID, resolve_v14_preset
 from src.app.continual_checkpoint import continual_config_digest
 from src.core.run_manifest import validate_run_id
 from src.infra.run_environment import capture_run_environment
@@ -47,8 +48,10 @@ def run_versioned_v14_bundle(
     capture_wake_diagnostics: bool = False,
     resumable: bool = False,
     resume: bool = False,
+    preset: str = FIXED_V14_PRESET_ID,
 ) -> Path:
     """Refuse an occupied ID, capture source, then emit one complete run."""
+    preset_manifest = resolve_v14_preset(preset)
     safe_id = validate_run_id(run_id)
     destination = Path(output_root) / safe_id
     if resumable and resume:
@@ -61,11 +64,11 @@ def run_versioned_v14_bundle(
         files = V14ResumeFiles(output_root, safe_id)
         with files.claim():
             return _run_checked_resume(
-                files, destination, repository, capture_wake_diagnostics, resume
+                files, destination, repository, preset_manifest, capture_wake_diagnostics, resume
             )
     before = capture_run_environment(repository)
     study = run_trigger_replay_training_study(
-        fixed_trigger_replay_manifest(), capture_wake_diagnostics=capture_wake_diagnostics
+        preset_manifest, capture_wake_diagnostics=capture_wake_diagnostics
     )
     training = serialize_training_study(study).encode("utf-8")
     diagnostics = serialize_wake_diagnostic_study(study) if capture_wake_diagnostics else None
@@ -109,11 +112,11 @@ def _run_checked_resume(
     files: V14ResumeFiles,
     destination: Path,
     repository: str | Path,
+    manifest: TriggerReplayOpportunityManifest,
     capture_wake_diagnostics: bool,
     resume: bool,
 ) -> Path:
     """Continue only a verified unscored prefix; publish after the global gate."""
-    manifest = fixed_trigger_replay_manifest()
     cells = expected_v14_cells(manifest)
     before = capture_run_environment(repository)
     source_digest = before.source.get("workspace_sha256")
@@ -215,6 +218,11 @@ def main() -> None:
     action.add_argument("--verify-run", type=Path, help="verify an existing v14 bundle")
     parser.add_argument("--output-root", type=Path, default=Path("artifacts/runs"))
     parser.add_argument(
+        "--preset",
+        choices=[FIXED_V14_PRESET_ID],
+        help="declared fixed v14 preset; setting overrides are unavailable under this protocol",
+    )
+    parser.add_argument(
         "--capture-wake-diagnostics",
         action="store_true",
         help="save separately versioned real wake metrics after completed scoring",
@@ -224,8 +232,8 @@ def main() -> None:
     lifecycle.add_argument("--resume", action="store_true", help="continue a checked trial cursor")
     arguments = parser.parse_args()
     if arguments.verify_run is not None:
-        if arguments.resumable or arguments.resume:
-            parser.error("resume flags require --run-id")
+        if arguments.resumable or arguments.resume or arguments.preset is not None:
+            parser.error("preset and resume flags require --run-id")
         manifest = verify_run_bundle(arguments.verify_run)
         print(json.dumps({"run": str(arguments.verify_run), "status": manifest["status"]}))
         return
@@ -237,6 +245,7 @@ def main() -> None:
         capture_wake_diagnostics=arguments.capture_wake_diagnostics,
         resumable=arguments.resumable,
         resume=arguments.resume,
+        preset=arguments.preset or FIXED_V14_PRESET_ID,
     )
     payload = (destination / "manifest.json").read_bytes()
     print(json.dumps({"run": str(destination), "manifest_sha256": sha256(payload).hexdigest()}))

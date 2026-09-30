@@ -321,6 +321,15 @@ parses repeatable JSON values, applies them after the preset and legacy
 flags, and writes an exclusive config artifact after a successful run.
 The JSON result embeds the same typed config; no app module imports a
 CLI or filesystem adapter (ADR-0125).
+`app/v14_experiment_config.py` resolves the sole typed `fixed-v14` preset
+before the versioned bundle runs; its `resolved_config` and original
+training/outcome bytes remain unchanged. The active CLI audit records the
+separate unmatched ResNet reference configuration boundary (ADR-0126).
+`app/resnet_experiment_config.py` now owns that route's typed historical
+preset and complete per-seed resolved record. Its script adapter retains
+legacy flags, validates JSON overrides before any Torch runner call,
+and writes the record into the existing descriptive JSON result;
+baseline rates and winner selection are unchanged (ADR-0127).
 
 1. Circadian-first with mandatory baseline comparisons
    - Why: improvements are only meaningful when measured against stable references.
