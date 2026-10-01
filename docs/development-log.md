@@ -11205,3 +11205,4312 @@ were not modified.
   then freeze a c5 matched schedule train-only protocol with role sentinels,
   work/capacity gates and local caps before any new outer score. Do not
   choose c5 settings from the c4 result.
+
+### 2026-09-30 — P6.3c5 matched schedule train-only gate
+
+- **Completed ID and checkout:** P6.3c5 only. Read AGENTS.md, the full
+  development plan and current log, and inspected the actual v14 decision,
+  guard, replay and clock paths. The increment began on `master` at
+  `c17a37d792a6f26728a557c5ecc613d528d0f9ad`. At final handoff Avery's
+  intervening `86cd5bff71b9c70da94ddcf69d8f62316f2d3382` commit collected
+  prior Phase 6 workflows (95 files); all 20 frozen selected c5 source
+  hashes, manifest and adapter bytes remain identical. Preserved its
+  contents, current dirty files and ignored artifacts. No agent commit
+  or push. P6.3c6, P6.3c/P6.3, full-minus-one, scheduled/random growth,
+  independent confirmation and later work remain unchecked.
+- **Contract, decisions and files:** ADR-0145 and
+  `docs/p63-schedule-factor-preflight.md` prospectively froze protocol
+  `continual_schedule_factor_train_only_v1`, fresh seeds 79/83/89 and ten
+  unopened confirmation seeds, eleven models per seed, fixed width 8/12,
+  current periodic/adaptive/no-sleep policies and adaptive thresholds,
+  all-epoch shared FIFO replay supply, current-task inner guard at zero
+  tolerance, rejected replay execution costs, maximum 1,014 executed
+  updates/hard cap 1,100, 120-second wall and sampled 256-MiB RSS caps.
+  Why this: the existing v14 route bundles replay, topology and chemistry;
+  replay-only neutral heads and exact ordinary-PC parity isolate the
+  schedule factor while preserving real guard and decision behavior.
+  Added `src/app/continual_schedule_factor_preflight.py`, independent
+  JSON-only `src/app/continual_schedule_factor_validation.py`,
+  `scripts/run_p63_schedule_factor_preflight.py`, two test modules and
+  `docs/p63-schedule-factor-preflight-results.md`. Updated README,
+  ARCHITECTURE, CHANGELOG and DEVELOPMENT_PLAN. The trainer constructs B
+  only after all eleven A models finish; no outer/final value is read.
+  Rejected neutral replay restores clocks/parameters but its executed
+  optimizer work remains charged; corresponding baseline replay occurs
+  only on commit. No existing model, scheduler or threshold changed.
+- **Commands and outcomes** from the repository root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_schedule_factor_preflight.py  # 5 passed; role/arrival sentinels, rollback cost and adaptive fixture
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_schedule_factor_preflight.py tests/test_p63_schedule_factor_preflight_cli.py  # 8 passed in 3.58 s; public writer/readback, tamper and timeout
+  .\.venv\Scripts\python.exe -m scripts.run_p63_schedule_factor_preflight --output-dir artifacts/runs/p63-schedule-factor-preflight  # exit 0; 33 unscored cells/216 decisions
+  .\.venv\Scripts\python.exe -m scripts.run_p63_schedule_factor_preflight --output-dir artifacts/runs/p63-schedule-factor-preflight-repeat  # exit 0; identical deterministic result bytes
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_schedule_factor_preflight.py tests/test_p63_schedule_factor_preflight_cli.py tests/test_continual_replay_factor_pilot.py tests/test_p63_replay_factor_pilot_cli.py tests/test_continual_sleep_factor_preflight.py tests/test_p63_sleep_factor_preflight_cli.py tests/test_continual_trigger_replay_runner.py tests/test_continual_trigger_replay_training_study.py tests/test_sleep_schedule.py tests/test_neutral_circadian_control.py  # 50 passed in 14.96 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0; 335 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_schedule_factor_preflight.py src/app/continual_schedule_factor_validation.py scripts/run_p63_schedule_factor_preflight.py tests/test_continual_schedule_factor_preflight.py tests/test_p63_schedule_factor_preflight_cli.py  # five formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  Early mypy checks found model-union narrowing and one misplaced test
+  ignore after formatting; both were repaired before freezing source
+  identities and launching public processes. No public run failed and no
+  scientific setting changed. Real outer/final raising sentinels and
+  B-arrival checks pass. A forced rejection observes actual core replay
+  executions, preserved proposed IDs, restored parameters/clocks and no
+  baseline replay; an adaptive fixture commits exactly at wake 10/20
+  under unchanged trigger settings. These fixtures test wiring only.
+- **Artifacts and independent readback:** Both ignored
+  `artifacts/runs/p63-schedule-factor-preflight*/` directories contain
+  `schedule-factor-preflight.request.json`, `.result.json` and
+  `.audit.json`, with no failure. Result byte SHA-256 is
+  `87931c5fc3fad5bf50d5b18d07901d04b8a8e827ab4fce4429c0f1644c813c41`
+  in both. Request hashes are
+  `131a4f62dd8929056a0541acd102fca00a3ff25cbd7ef4e5ec7cb0213d606ef7`
+  and `4b5c2837c66493a714349b8dff83abb153a66d01ea6e5c639add01d7e1e53299`.
+  Frozen manifest SHA is
+  `f8b6d60209516c58bc54e729f659c9fdd37ea1b869652b1cac548a71270ea42a`;
+  sorted selected 20-source map SHA is
+  `2e45a6200ef7629bdc0b27e86386ad02e8064ac144fe049b06d014541aa1dcfd`;
+  adapter byte SHA is
+  `4490f9201b565d3283434da786799cc3d9ac8242218cfc8f9b881de9011b7fbe`.
+  Read-only Python validation, repeated after checkout reconciliation,
+  reparsed finite JSON, rederived all 33 method facts/216 decisions,
+  roles, clocks, guard/replay IDs and costs, capacity, parameter parity,
+  request/result/audit hashes, resource caps and exact result bytes.
+  Worker elapsed times were .662/.672 seconds, RSS peaks
+  43,040,768/42,766,336 bytes (23 samples each). Runtime: Windows 11,
+  Intel Core i7-12700K, Python 3.14.7, NumPy 2.4.6, CPU. RSS is observed
+  whole-worker memory; sampling can miss a shorter peak.
+- **Observed train-only result:** All 18 periodic attempts committed;
+  adaptive/no-sleep attempted none. Total executed optimizer work was
+  900 (792 wake + 108 replay), with zero rejected execution in official
+  runs. All PC/neutral tensors match after each wake/committed replay and
+  at after-A/final checkpoints; all capacity stays at width 8/33
+  parameters or width 12/49. Each adaptive seed had 15 eligible epochs;
+  chemical variance never reached .02 (ranges .000419–.001898,
+  .002278–.006535, .001135–.003786). Plateau passed 7/4/7 times. This
+  inactive finding is retained without threshold/seed tuning and is not
+  a score comparison. Persistent labeled-array scope is 192 shared bytes
+  plus three 192-byte neutral buffers per seed; metadata/temporary copies
+  and model parameters are excluded from that count and included in RSS.
+- **Skips, plan amendments, blockers and exact next action:** Full CPU
+  suite, CUDA, outer development scoring, independent confirmation,
+  final-role release, broad sweeps and per-arm wall/RSS attribution were
+  skipped. The focused 50-test gate and repository static checks passed.
+  Check c5 for its train-only criteria and add c6 as a separate scored
+  acceptance gate; retain every original matrix/full-minus-one and
+  confirmation requirement. No external blocker. **Exact next action:**
+  freeze P6.3c6's outer-development metric/contrast and artifact contract,
+  bind the saved c5 result hash above, and implement an exact comparison
+  of the complete all-seed train-fact object before any outer array is
+  accessed. Retain all 33 cells, the full A/B matrix, two primary metrics
+  and every within-method periodic/adaptive/no-sleep paired contrast,
+  including null/inactive/negative outcomes. Preserve c5 source bytes,
+  thresholds and unopened confirmation/final roles; then run and repeat
+  the bounded public scored result.
+
+### 2026-09-30 — P6.3c6 matched schedule outer-development gate
+
+- **Completed ID and checkout:** P6.3c6 only. Continued from the verified
+  c5 handoff on `master` at `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`.
+  Inspected the actual c5 trainer/fact validator, c4 scoring and artifact
+  gates, the plan's minimum matrix and current log. The previous goal turn
+  made progress by closing c5's evidence/handoff; this turn implemented
+  and validated its next scored task. Preserved all dirty c5 files,
+  Avery's earlier commit and ignored artifacts. No agent commit or push.
+  P6.3c7, combined/full-minus-one, scheduled/random growth, confirmation,
+  the P6.3c/P6.3 parents and later work remain unchecked.
+- **Prospective protocol and files:** Before any outer score,
+  `docs/p63-schedule-factor-development.md` and ADR-0146 froze protocol
+  `continual_schedule_factor_outer_development_v1`, c5 reference SHA
+  `87931c5f...4c813c41`, all eleven cells/three seeds, two primary metrics,
+  nine within-method policy pairs per seed and 99 outer evaluations/1,980
+  rows. Added `src/app/continual_schedule_factor_development.py`,
+  `scripts/run_p63_schedule_factor_development.py`, two test modules and
+  `docs/p63-schedule-factor-development-results.md`. Updated README,
+  ARCHITECTURE, CHANGELOG and DEVELOPMENT_PLAN. Why this: reuse frozen
+  c5 training/fact helpers, hold after-A model copies, and globally compare
+  all train facts and every checkpoint hash before outer input/label
+  access. This avoids early-seed scores and a second training pass.
+  Reuse c4 score types/arithmetic and the core metric contract; preserve
+  c5 source/config/threshold bytes and all confirmation/final seals.
+  The adapter verifies the complete c5 bundle and its actual work/RSS,
+  bounds a fresh worker and owns exclusive scored/failure artifacts.
+- **Commands and outcomes** from the repository root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_schedule_factor_development.py -k 'reject or mismatch'  # final pre-score gate: 4 passed, 1 deselected in 1.28 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_schedule_factor_development.py tests/test_p63_schedule_factor_development_cli.py  # 10 passed in 3.12 s, after source/adapter identities were frozen
+  .\.venv\Scripts\python.exe -m scripts.run_p63_schedule_factor_development --output-dir artifacts/runs/p63-schedule-factor-development  # exit 0; 33 cells/27 pairs, 99 outer evaluations
+  .\.venv\Scripts\python.exe -m scripts.run_p63_schedule_factor_development --output-dir artifacts/runs/p63-schedule-factor-development-repeat  # exit 0; identical deterministic result bytes
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_schedule_factor_development.py tests/test_p63_schedule_factor_development_cli.py tests/test_continual_schedule_factor_preflight.py tests/test_p63_schedule_factor_preflight_cli.py tests/test_continual_sleep_factor_development.py tests/test_p63_sleep_factor_development_cli.py tests/test_continual_replay_factor_pilot.py tests/test_p63_replay_factor_pilot_cli.py tests/test_continual_sleep_factor_preflight.py tests/test_p63_sleep_factor_preflight_cli.py tests/test_continual_trigger_replay_runner.py tests/test_continual_trigger_replay_training_study.py tests/test_sleep_schedule.py tests/test_neutral_circadian_control.py  # 67 passed in 16.10 s
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0; 339 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_schedule_factor_development.py scripts/run_p63_schedule_factor_development.py tests/test_continual_schedule_factor_development.py tests/test_p63_schedule_factor_development_cli.py  # four formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  Initial negative-gate collection failed on a wrong module import for
+  `ReplayRetentionBudget`; the import and two sentinel type annotations
+  were repaired. A later checkpoint-corruption fixture failed on its
+  misspelled `weights_input_hidden`; it was corrected to the actual
+  `weight_input_hidden`. All repairs preceded frozen identities/first
+  score. No scientific setting changed. Code inspection added global
+  checkpoint-copy checks before scoring, with a late-seed corruption
+  sentinel. A read-only contrast preview initially failed on CP1252's
+  unsupported Unicode minus; its ASCII rerun passed. This was a reporting
+  diagnostic, with no result or training change. Both public runs passed.
+- **Behavioral evidence:** Changed manifest/seal fails before source
+  construction. A valid-shaped last-seed reference parameter mismatch
+  encounters raising outer/final sentinels and fails globally without
+  an outer read. Forged replay IDs and a corrupted last after-A copy
+  prevent even the first scorer call. The real final-sealed positive test
+  observes all seeds trained before scoring, all 99 actual accuracy calls
+  in order (24/24/12 rows per cell), unchanged checkpoint hashes, exact
+  PC/neutral parity and every metric/contrast. Public tests reject source,
+  c5 byte/audit, scored metric/contrast/fact and incomplete-cell changes;
+  duplicate output preserves bytes. Timeout/nonfinite fixtures produce
+  failure without a scored result/audit. Tests bootstrap the canonical c5
+  train-only bundle on a clean checkout when absent.
+- **Artifacts, identities and independent readback:** Both ignored
+  `artifacts/runs/p63-schedule-factor-development*/` directories have
+  `schedule-factor-development.request.json`, `.result.json`, `.audit.json`
+  and no failure. Identical result SHA-256 is
+  `776df6a47efd452a9eb33aced8fa74b1938608637109bd716333fafb2edae689`.
+  Request hashes are
+  `f3b2bf5a92c99932b62679cafc6db9cf75fef7ade542400220951c7ca6c221ef`
+  and `1c4470dbaf747840462460f2f887e851836a85c746fbf5dac259837d957769e4`.
+  Unchanged manifest SHA is
+  `f8b6d60209516c58bc54e729f659c9fdd37ea1b869652b1cac548a71270ea42a`;
+  selected combined 23-source map SHA is
+  `3e7d8b8086ba881527f21d513015deb30743884b388b37f2eda23a79b4e29c69`;
+  scored adapter byte SHA is
+  `94fc133317c9b0954cee47b5d5a431285bcf30da3effc9b457153b6bfe6000c1`.
+  Read-only Python revalidation checked every c5 train fact, score metric
+  and paired arithmetic value, all cells/roles/work/capacity, finite JSON,
+  source/adapter/request/result/audit hashes, caps and exact repeat bytes.
+  Whole-worker elapsed times were .645/.643 seconds; observed RSS peaks
+  44,539,904/44,630,016 bytes with 23/24 samples, under 120 seconds/256 MiB.
+  Runtime: Windows 11, Intel Core i7-12700K, Python 3.14.7, NumPy 2.4.6,
+  CPU. RSS includes held checkpoint copies and runtime, is not per-arm,
+  and sampling may miss a brief peak. Total training remains 900 executed
+  updates (792 wake + 108 applied replay), 18 accepted periodic events,
+  zero official rejection and zero adaptive/no-sleep replay. All widths
+  and parameters stay at 8/33 or planned 12/49. C5's labeled-array scope
+  and all 216 decisions remain visible beside scores.
+- **Observed outcome and decision:** All 33 accuracy/primary/optional
+  retention rows, 27 paired rows and nine five-metric mean/sample-SD rows
+  are published. PC/neutral periodic-minus-no-sleep final mean differences
+  are +.3125, +.041667, +.041667; mean +.131944/sample SD .156366.
+  These PC and neutral outcomes are identical with extra replay work,
+  providing no circadian-specific advantage. Backprop policy contrasts
+  are null; inactive adaptive equals no-sleep in every metric, so its
+  PC/neutral final-mean contrast against periodic is negative on each
+  seed. PC/neutral signed-forgetting differences are −.208333, +.041667,
+  +.041667; seeds 83/89 have higher A-after-A with unchanged A-after-B,
+  illustrating the starting-score effect. No seed, threshold, metric or
+  baseline was selected/tuned. No isolated schedule result selects a
+  confirmation configuration.
+- **Skips, plan changes, blockers and exact next action:** Full CPU
+  suite, CUDA, broad sweeps, per-arm wall/RSS attribution, confirmation
+  and final-role release were skipped. The focused 67-test and repository
+  static gates passed. Check c6 only and add c7 as an explicit combined/
+  full-minus-one train-only gate. Original minimum-matrix, growth-control
+  and independent-confirmation criteria are preserved; later combined
+  scoring remains separate. No external blocker. **Exact next action:**
+  inspect `CircadianConfig`/component sleep in
+  `src/core/circadian_predictive_coding.py`, existing v14 full-model
+  orchestration in `src/app/continual_trigger_replay_runner.py`, and c3's
+  guarded controls. Reconcile required combined/minus-one and scheduled/
+  random growth cells with completed isolated factors, then prospectively
+  freeze c7's arrived train-only contract, matched references, fresh seed
+  roles, actual/rejected work, transient capacity and local caps before
+  implementation or new training. Preserve c5/c6 source/result identities
+  and unopened confirmation/final roles; do not choose settings from c6
+  outcomes.
+
+### 2026-09-30 — P6.3c7 combined/full-minus-one train-only gate
+
+- **Completed ID and checkout:** P6.3c7 only. Continued from the verified
+  c6 handoff on `master` at `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`.
+  Read AGENTS, the full plan/current log, then inspected actual component
+  configs, v14 guarded sleep, c3/c5 controls, replay retention, complete
+  snapshots, clocks and neuron adaptation. Rechecked the actual checkout
+  and resumed the known live test handle after context continuation;
+  it completed successfully. The preceding goal turn made progress by
+  completing c6; this turn implemented the next combined gate. Preserved
+  all dirty c5/c6 work, Avery's prior commit and ignored artifacts. No
+  agent commit or push. C8/c9, independent confirmation and original
+  P6.3c/P6.3/later milestones remain unchecked.
+- **Prospective scope and rationale:** Before new training,
+  `docs/p63-combined-factor-preflight.md` and ADR-0147 fixed protocol
+  `continual_combined_factor_train_only_v1`, development seeds 263/269/271,
+  ten unused confirmation seeds 277/281/283/293/307/311/313/317/331/337,
+  all 17 cells, source/arrival/roles, complete work/capacity and local caps.
+  Full reuses v14 component settings, enabling unchanged default difficulty
+  modulation so its removal is defined. This also changes importance
+  history, not solely wake LR. Seven removals differ only in their named
+  existing switch. Each scheduled controller uses its own inner guard;
+  only full commits supply the three matched replay consumers. Width 14
+  is the prospective conservative ceiling, not an observed-width oracle.
+  Periodic structure-only preserves c3's declared thresholds/bounds.
+  Inspection found add-count policy still usage-ranks split parents;
+  explicit scheduled/random selection remains c9. No new core algorithm
+  or scientific setting was selected from prior development outcomes.
+- **New structure and boundaries:** Added three app modules:
+  `src/app/continual_combined_factor_manifest.py` (frozen config/work),
+  `src/app/continual_combined_factor_preflight.py` (arrived training,
+  guard/replay composition and complete facts), and
+  `src/app/continual_combined_factor_validation.py` (independent JSON fact
+  rederivation). Added `scripts/run_p63_combined_factor_preflight.py` for
+  source/output preflight, bounded child and exclusive audit/failure
+  artifacts, plus app/CLI test modules and the full result report.
+  Updated README, ARCHITECTURE, CHANGELOG and DEVELOPMENT_PLAN. The app
+  has no outer/final value access or artifact writes. No pinned older
+  source, core behavior, dependency or environment variable changed.
+  Complete snapshot canonicalization binds value/type, arrays, RNG,
+  memory, chemistry, clocks and lineage. Rejected execution is charged
+  separately from restored clocks. Why this: verify composition and
+  rollback before scored attribution or a new parent-selection algorithm.
+- **Commands and outcomes** from the repository root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_combined_factor_preflight.py  # final app gate: 5 passed in 10.29 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_combined_factor_preflight.py tests/test_p63_combined_factor_preflight_cli.py  # 9 passed in 14.11 s
+  .\.venv\Scripts\python.exe -m scripts.run_p63_combined_factor_preflight --output-dir artifacts/runs/p63-combined-factor-preflight  # exit 0; 51 cells/648 decisions
+  .\.venv\Scripts\python.exe -m scripts.run_p63_combined_factor_preflight --output-dir artifacts/runs/p63-combined-factor-preflight-repeat  # exit 0; identical deterministic bytes
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_combined_factor_preflight.py tests/test_p63_combined_factor_preflight_cli.py tests/test_continual_schedule_factor_development.py tests/test_p63_schedule_factor_development_cli.py tests/test_continual_schedule_factor_preflight.py tests/test_p63_schedule_factor_preflight_cli.py tests/test_continual_sleep_factor_development.py tests/test_p63_sleep_factor_development_cli.py tests/test_continual_replay_factor_pilot.py tests/test_p63_replay_factor_pilot_cli.py tests/test_continual_sleep_factor_preflight.py tests/test_p63_sleep_factor_preflight_cli.py tests/test_continual_trigger_replay_runner.py tests/test_continual_trigger_replay_training_study.py tests/test_sleep_schedule.py tests/test_neutral_circadian_control.py  # 76 passed in 30.65 s; zero skips
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0; 345 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_combined_factor_manifest.py src/app/continual_combined_factor_preflight.py src/app/continual_combined_factor_validation.py scripts/run_p63_combined_factor_preflight.py tests/test_continual_combined_factor_preflight.py tests/test_p63_combined_factor_preflight_cli.py  # six formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  Earlier static checks found a wrong singular sleep-clock import, a
+  positional argument for the keyword-only retention policy, union
+  narrowing and a dynamically constructed telemetry kwargs type.
+  The five app tests initially passed in 10.36 s but mypy required a
+  narrowed optional config in their switch comparison. Those code/test
+  repairs, formatting and final checks preceded frozen implementation
+  identities/public training. No scientific setting changed. One patch
+  context was retried against the formatted source. No official run
+  failed, and no source identity changed after its first public run.
+- **Behavioral evidence:** Manifest/cap/arm changes fail before data;
+  source-byte changes fail before request publication. Raising outer
+  input/label and final-source sentinels pass through real repeated
+  training. A B-arrival canary requires all 17 A wake histories and all
+  12 A opportunities before source construction. Exact initial and every
+  wake/replay PC/neutral parameter parity holds. Forged last-cell work,
+  inner role/hash, proposed IDs, transient width, component budget and
+  state fingerprints fail validation. The forced all-rejected fixture
+  instruments actual core replay calls: 216 executed replay updates,
+  1,440 total updates and 288 guard calls, complete rollback state/lineage
+  equality and no matched consumer replay. Public CLI cases read every
+  request/result/audit, preserve duplicate bytes, and produce only request/
+  failure on timeout/nonfinite worker output, without result/audit.
+- **Artifacts and identities:** Both ignored
+  `artifacts/runs/p63-combined-factor-preflight*/` directories contain
+  `combined-factor-preflight.request.json`, `.result.json`, `.audit.json`
+  and no failure. Identical result SHA-256:
+  `79a7d7e09f0ada01ff72d6e266ddee7576aca52316a0f9a8e2ab3dd402251d13`.
+  First/repeat request hashes:
+  `9001aeee45dceba0286f3bbd97eb1c77bab5fcf550b935588e365529dc2d44bf`
+  and `6453651598f794926fe3d1de93febe4994e75615e61f50793233efda2ea54acb`.
+  Manifest SHA-256:
+  `729bf9df8472752f51696299373555339208af7b5add1892d14154d4f21ad04a`.
+  Selected 26-source map digest:
+  `457df802859b68e42b2a54a31e7a9a49f4e893d07062074bb22d3069a96c737f`.
+  Adapter bytes:
+  `9c3d640638b48d7a2edc9cc4585e205cdb3f2d86bd1c72a6e7a8438bd0f3d404`.
+  The selected map binds c5's 20 sources plus six new/referenced sources,
+  not the full dependency tree. Read-only Python through PowerShell
+  here-strings parsed finite JSON, independently rederived all 51 cells/
+  72 opportunities/648 decisions, roles, clocks, lineage, full rollback,
+  IDs/memory/work/capacity and seals, checked all manifest/source/adapter/
+  request/result/audit identities and costs/caps, and compared exact saved
+  bytes. Report tables were generated from those verified facts; final
+  document/table/hash checks preserve the full rows and unchanged pins.
+- **Observed work and component outcome:** 1,530 executed updates =
+  1,224 wake + 280 applied replay + 26 rejected replay, below 1,548
+  prospective maximum/1,600 hard cap. Seed totals 510/504/516. There are
+  144 guard attempts/288 evaluations/5,184 inner examples, 126 own commits
+  and 18 rollbacks, all during B. Full supplies 10/8/12 updates to each
+  matched replay reference; neutral remains exact ordinary PC. Default
+  full/removal cells proposed no splits. Structure-only proposed nine
+  splits/twelve removals and committed seven/nine; all controllers together
+  proposed nine splits/62 removals and committed seven/44. Rejected child
+  ID 9 is reused after full rollback, with RNG/ID counter restored. Full
+  ends at width six on each seed; every actual/proposed transient width
+  stays bounded. No-schedule/replay/structure disable effects and neutral/
+  no-gating/difficulty-disabled scale facts match their named settings.
+  Full/minus-one work/capacity differs and is not labeled equal compute.
+  No outer performance result is claimed from inner guard values.
+  Every 51-cell work/capacity row, all 18 rejection rows and 33 circadian
+  wake scale rows appear in `docs/p63-combined-factor-preflight-results.md`.
+  Persistent labeled-array scope is 2,304 bytes/seed (shared + eleven
+  circadian buffers), excluding parameters, metadata and temporary copies.
+- **Resource observations and limitations:** First/repeat elapsed times
+  2.902358/2.949283 s; observed whole-worker RSS peaks
+  56,459,264/58,642,432 bytes, with 159/158 samples at 5 ms. Both are under
+  120 s/256 MiB. Sampling includes training, independent validation and
+  result serialization; final stdout/parent writing are outside that
+  interval and brief peaks may be missed. This is not per-arm RSS/time.
+  Runtime is Windows 11/Intel i7-12700K CPU/Python 3.14.7/NumPy 2.4.6.
+- **Skips, plan changes, blockers and exact next action:** Full CPU suite,
+  CUDA, outer scoring, large sweeps, independent confirmation, final-role
+  release and per-arm resource attribution were skipped. The related
+  76-test and repository static gates passed. Check c7 only; retain c8
+  separately scored development and c9 explicit scheduled/random parent
+  control, preserving every original matrix/confirmation criterion and
+  all earlier seed reservations. No external blocker. **Exact next
+  action:** freeze c8's scored protocol against the saved c7 SHA above,
+  all 51 cells, the A/B primary metrics, every named component-removal
+  and matched-reference contrast and unequal work/capacity facts. Reuse
+  the frozen c7 training helpers, hold after-A model copies and globally
+  compare every train fact and checkpoint hash before the first outer
+  input/label access. Preserve c7 source/config identities, inactive
+  full splits and every rejected outcome; leave confirmation/final
+  roles unopened and growth selectors unfinished.
+
+### 2026-09-30 — P6.3c8 combined/full-minus-one outer-development gate
+
+- **Completed ID and checkout:** P6.3c8 only. Continued from the verified
+  c7 handoff on `master` at `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`.
+  Read AGENTS, reconciled the plan/current log with actual checkout and
+  inspected c7 facts/validation, c6 scoring/artifact boundaries and c4
+  score arithmetic. The previous goal turn made progress by implementing
+  and validating c7; this turn implemented its next scored gate. Both c7
+  source/results still verified before new work. Preserved dirty c5/c6/c7
+  files, Avery's prior commit and ignored artifacts. No agent commit/push.
+  C9, independent confirmation and original P6.3c/P6.3/later tasks remain
+  unchecked; no development score selected a confirmation treatment.
+- **Prospective contract and files:** Before any outer score, including
+  scored tests, `docs/p63-combined-factor-development.md`/ADR-0148 froze
+  protocol `continual_combined_factor_outer_development_v1`, saved c7 SHA,
+  every 17-arm/three-seed cell, primary A/B metrics, 22 ordered pairs/seed
+  and 153 outer evaluations/3,060 examples with unchanged work/wall/RSS
+  limits. Added `src/app/continual_combined_factor_development.py`,
+  `scripts/run_p63_combined_factor_development.py`, app/CLI test modules
+  and `docs/p63-combined-factor-development-results.md`. Updated README,
+  ARCHITECTURE, CHANGELOG and DEVELOPMENT_PLAN. Why this: reuse frozen
+  c7 training helpers and c4 score types/arithmetic, hold after-A copies,
+  compare complete all-seed facts and every checkpoint globally before
+  the first outer value. Circadian copy checks include full snapshot
+  RNG/chemistry/memory/lineage/clocks, not only parameters, before/after
+  scoring. The adapter validates the complete c7 request/result/audit,
+  bounds a fresh child and retains exclusive scored/failure artifacts.
+  RSS covers training, copies, scoring, serialization and output validation.
+  The app has no file IO, final release or selection. No core, dependency,
+  environment variable or pinned older source/config/result changed.
+- **Commands and outcomes** from the repository root:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_combined_factor_development.py -k 'reject or mismatch'  # before pins/first score: 5 passed, 1 deselected in 10.36 s
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_combined_factor_development.py tests/test_p63_combined_factor_development_cli.py  # after frozen identities: 11 passed in 18.02 s
+  .\.venv\Scripts\python.exe -m scripts.run_p63_combined_factor_development --output-dir artifacts/runs/p63-combined-factor-development  # exit 0; 51 scores/66 pairs/153 outer calls
+  .\.venv\Scripts\python.exe -m scripts.run_p63_combined_factor_development --output-dir artifacts/runs/p63-combined-factor-development-repeat  # exit 0; identical result bytes
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q --tb=short tests/test_continual_combined_factor_development.py tests/test_p63_combined_factor_development_cli.py tests/test_continual_combined_factor_preflight.py tests/test_p63_combined_factor_preflight_cli.py tests/test_continual_schedule_factor_development.py tests/test_p63_schedule_factor_development_cli.py tests/test_continual_schedule_factor_preflight.py tests/test_p63_schedule_factor_preflight_cli.py tests/test_continual_sleep_factor_development.py tests/test_p63_sleep_factor_development_cli.py tests/test_continual_replay_factor_pilot.py tests/test_p63_replay_factor_pilot_cli.py tests/test_continual_sleep_factor_preflight.py tests/test_p63_sleep_factor_preflight_cli.py tests/test_continual_trigger_replay_runner.py tests/test_continual_trigger_replay_training_study.py tests/test_sleep_schedule.py tests/test_neutral_circadian_control.py  # 87 passed in 47.30 s; zero skips
+  .\.venv\Scripts\python.exe -m ruff check .  # exit 0
+  .\.venv\Scripts\python.exe -m mypy  # exit 0; 349 source files
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_combined_factor_development.py scripts/run_p63_combined_factor_development.py tests/test_continual_combined_factor_development.py tests/test_p63_combined_factor_development_cli.py  # four formatted
+  git -c core.safecrlf=false diff --check  # exit 0
+  ```
+
+  No test or official run failed. During adapter construction, source
+  inspection caught a generated stdout newline/closing-brace issue and
+  corrected it before frozen identities or any worker launch. Static
+  checks passed before pinning, and no source/config identity changed
+  after the first outer score. All settings/seed roles remained fixed.
+- **Boundary and behavioral evidence:** Changed manifest/evaluation seal
+  fails before source. A valid-shaped last-seed PC-width-14 reference
+  parameter mismatch passes c7 shape validation but fails complete global
+  equality while raising outer/final sentinels stay untouched. Forged
+  last-seed replay facts block the first scorer. Corrupted last after-A
+  parameters or RNG also block it; RNG corruption leaves parameters
+  unchanged and is detected by full snapshot hashes. The positive test
+  observes all three seeds finished before scoring, all 17 A histories
+  before B source arrival, actual 153 calls in 24/24/12 order, 3,060 rows,
+  complete checkpoint identity before/after, exact off/replay neutral PC
+  outcomes and every declared metric/contrast under final-source sentinels.
+  Public cases verify changed reference bytes/audit/source refusal, all
+  cells/source/request/result/work hashes, derived metric/pair/fact and
+  incomplete-cell rejection, duplicate unchanged bytes, and timeout/
+  nonfinite failure sidecars without a false scored result/audit. Tests
+  bootstrap the canonical c7 train-only bundle when absent on a clean
+  checkout; they never overwrite occupied/partial scientific outputs.
+- **Artifacts, identities and readback:** Both ignored
+  `artifacts/runs/p63-combined-factor-development*/` directories contain
+  `combined-factor-development.request.json`, `.result.json`, `.audit.json`
+  and no failure. Identical result SHA-256:
+  `2e32c5d7b98b5798f45f5e9b7734088950eec1ef0ae5f19420a282321f3f8714`.
+  First/repeat request hashes:
+  `ad334c090bb554ba5051366bf745aad6ae9127707397f8a33e9700592bea67b1`
+  and `d0a841c73a065a63c277a467df8106eb6319825821319357bf795e59be5b7848`.
+  Unchanged c7 reference SHA:
+  `79a7d7e09f0ada01ff72d6e266ddee7576aca52316a0f9a8e2ab3dd402251d13`.
+  Manifest SHA:
+  `729bf9df8472752f51696299373555339208af7b5add1892d14154d4f21ad04a`.
+  Selected 29-source map digest:
+  `ee0e2c8cb154f9aa427c0b27680841b64a0dfe3c6a90f254159114ca4ce4d6b5`.
+  Scored adapter bytes:
+  `edf68589d83033d0abdf39c737f78044938f84a97b49d86a25698edce42d8c40`.
+  The selected map extends c7's 26 sources with the new app, c4 scorer
+  and c7 adapter, not a full dependency-tree hash. Read-only Python via
+  PowerShell here-strings parsed all finite artifacts, independently
+  rederived every c7 fact/metric/pair/role/work/capacity invariant, checked
+  source/manifest/adapter/reference/request/result/audit identities and
+  limits, and compared exact saved bytes. Tables were generated from
+  verified facts and rechecked against the report. Older source/results
+  and both c7 bundles remain unchanged. Both new outputs contain the
+  entire train gate beside scores, with final release false.
+- **Observed result and costs:** All 51 score/optional-retention rows,
+  66 paired rows, 22 five-metric mean/sample-SD rows and 51 cost rows are
+  published. Full-minus-matched-replay PC final means are
+  -.0625,+.020833,0; mean -.013889/sample SD .043368. Neutral duplicates
+  PC exactly. Full's signed-forgetting difference is -.041667 each seed:
+  better A-after-B on 263/269, but lower A-after-A with unchanged A-after-B
+  on 271. On 263, higher A-after-B coincides with worse B-after-B and
+  lower final mean. Full-minus-backprop off/replay means are
+  -.041667,-.1875,-.041667 (mean -.090278); backprop replay is null in
+  all five contrast fields. Full-minus-planned-width PC is -.041667 on
+  every seed; full-minus-periodic-structure-only is negative on all three.
+  Full-minus-removal means, in declared order, are -.041667,-.006944,
+  -.006944,+.111111,-.027778,+.006944,+.020833. These development rows
+  retain unequal cost/guard/topology and component-interaction scope.
+  No full-model final-mean advantage over matched replay PC is established
+  within these three seeds, and no outcome selected a treatment.
+  Training stays 1,530 executed updates = 1,224 wake + 280 applied replay
+  + 26 rejected replay; 144 guard attempts/288 calls/5,184 examples,
+  126 own commits/18 rollbacks, all prior inactive/proposed/applied IDs and
+  complete state facts unchanged. Full ends at width six; wider PC is
+  prospectively width 14. Persistent labeled-array scope is 2,304 bytes/
+  seed, excluding parameters/metadata/temporary copies. Scoring adds
+  only forward calls, with no optimizer updates or final-role exposure.
+- **Resources and limitations:** First/repeat elapsed times
+  3.228156/3.251908 s; observed RSS peaks 66,109,440/64,065,536 bytes,
+  172/168 samples at 5 ms, below 120 s/256 MiB. Sampled scope includes
+  training, held copies, validation, scoring and result serialization;
+  final stdout/parent writes are outside it and brief peaks may be missed.
+  These are whole-worker, not per-arm costs. Runtime: Windows 11,
+  Intel Core i7-12700K CPU, Python 3.14.7, NumPy 2.4.6. Primary metrics
+  and A/B matrix are outer-development, not confirmation/final results.
+- **Skips, plan changes, blockers and exact next action:** Full CPU suite,
+  CUDA, broad sweeps, independent confirmation, final release and per-arm
+  resource attribution were skipped. Related 87 tests and repository
+  static gates passed. Check c8 only, update the live handoff and retain
+  c9 parent controls, original matrix, independent confirmation and later
+  accuracy/resource/statistical tasks unfinished. No external blocker.
+  **Exact next action:** inspect split eligibility/selection, adaptation
+  counts and RNG/lineage/rollback in `src/core/circadian_predictive_coding.py`
+  and `src/core/neuron_adaptation.py`. Design the smallest explicit
+  scheduled/random parent control for c9 preserving budgets, stable IDs,
+  deterministic rollback and pinned prior protocols; freeze its fresh
+  source/seed/train-only work/capacity/guard contract and verify paired
+  schedules before separately frozen scoring. Keep all confirmation
+  reservations and final roles unopened, and choose no control setting
+  from c8 scores. A count proposal with usage-ranked parents remains
+  insufficient evidence for the missing scheduled/random control.
+
+### 2026-09-30 — P6.3c9a explicit parent selectors and transactional fixtures
+
+- **Completed task:** P6.3c9a, for the bounded core implementation contract.
+  C9/c9b/c9c, original P6.3c/P6.3 growth matrix, independent confirmation
+  and subsequent research/release tasks remain unchecked. No new scientific
+  benchmark result or comparative claim was produced.
+- **Requirement and checkout reconciliation:** Follow the living plan's
+  next explicit scheduled/random control after c8. Read local `AGENTS.md`,
+  the full plan/current log and relevant adaptation/snapshot/proposal/guard
+  sources. `git status --short`/`git rev-parse HEAD` show `master` remains
+  `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`. Earlier c5/c6/c7/c8 dirty
+  files and ignored artifacts are preserved. Phase 0 and isolation/matched
+  baseline gates are already complete for their documented scopes; all
+  eight c5–c8 bundle/source identities still verify. No agent commit/push,
+  remote data, new dependency or environment change was made.
+- **Inspection and prospective plan change:** The current explicit policy
+  supplies counts/prune indices and validates constraints before the old
+  `_rank_proposal_split_sources` seam. Chemical-preferred/fallback ranking
+  differs from strict-threshold built-in selection. A random/cyclic ranker
+  mutates RNG/cursor before a later transient-width check in the otherwise
+  nontransactional direct proposal API. Split c9 into core implementation/
+  fixtures (c9a), separately frozen arrived-role train-only matrix (c9b),
+  and separately gated scoring (c9c). Write the c9a contract/ADR-0149 and
+  unchecked subtask criteria before implementation/fixtures. Preserve every
+  original matrix/confirmation criterion. No c8 score chose selector,
+  count, threshold, seed, baseline or metric settings.
+- **Changed files and boundaries:** New
+  `src/core/controlled_parent_selection.py`,
+  `tests/test_controlled_parent_selection.py`,
+  `docs/p63-parent-control-implementation.md` and
+  `docs/adr/ADR-0149-extend-explicit-parent-ranking-with-transactional-state.md`.
+  Update `DEVELOPMENT_PLAN.md`, `README.md`, `ARCHITECTURE.md`,
+  `CHANGELOG.md` and this log. The core extension imports only existing
+  core, NumPy and standard library code; scheduling, guard/data/score and
+  artifact ownership remain outside core. Every earlier pinned core/app/
+  adapter source is unchanged. New module/test SHA-256 respectively:
+  `dd19acdaeb84830c709a30cc53c96850894b901ba476082636e10808cda132fb`,
+  `42233b34c6aae70e350e684258c09ee4b6d250903ca677522639d2380d0c914a`.
+- **Behavior:** `ParentControlledCircadianNetwork` uses immutable validated
+  usage/scheduled/random settings. Usage delegates the original explicit
+  ranker; cyclic stable-ID and dedicated seeded PCG64 selection retain its
+  chemical tiers and eligible counts, never overriding prune exclusions or
+  topology budgets. The cursor advances only on nonzero cyclic selection.
+  Zero additions leave all selector fields unchanged. Model-owned cursor,
+  RNG, count and last immutable decision join complete snapshots. The
+  detached decision reports candidate/preferred/selected IDs and before/
+  after cursor/RNG fingerprints. Same-settings snapshot validation rejects
+  malformed state before mutation; direct proposals now use a complete
+  transaction, with inherited sleep exception and external guard recovery.
+  Split-capable sleep requires an explicit policy. Prune-only/disabled/
+  skipped behavior inherits the original route. README links the runnable
+  usage example and bounded fixture command; no CLI default changes.
+- **Frozen fixture limits:** At most four fixed two-dimensional labeled
+  rows, model seed 521/selector seed 547, explicit setting variations only
+  for compatibility/support. Initial width four (contract ceiling eight),
+  maximum twelve, at most two additions/removals per call, up to three wake
+  batches and two latent steps. Fixed selector seeds 0..31 test permitted
+  parent support only, with no accuracy/seed selection. The new fixtures
+  access no benchmark datasource, outer/final labels or confirmation role.
+  Existing development-route integration regressions exercise their already
+  frozen role routing; they create no new scientific result.
+- **Commands and observed outcomes (workspace PowerShell):**
+  - `.\.venv\Scripts\python.exe -m ruff format src/core/controlled_parent_selection.py tests/test_controlled_parent_selection.py`
+    formatted two new files, exit 0. Subsequent format changed one file,
+    exit 0.
+  - `.\.venv\Scripts\python.exe -m pytest tests/test_controlled_parent_selection.py -q`
+    initially exited 1: 77 passed/6 failed from guessed `.applied` and
+    `.structural` field names. Inspect the actual public result types and
+    correct to existing `.performed` and telemetry `.changes`; do not
+    modify existing interfaces. The next focused `-q -ra` run passed all
+    83 cases, exit 0. Final counted core command below revalidates them.
+  - `.\.venv\Scripts\python.exe -m ruff check src/core/controlled_parent_selection.py tests/test_controlled_parent_selection.py`
+    passed. Initial `-m mypy` on those two files exited 1 with 14 errors:
+    validated snapshot `Any | None` narrowing, result fields and fixture
+    type annotations. Return explicit validated settings, annotate the
+    corrupt-input boundary/fixture dictionaries, and correct field names.
+    The next two-file mypy passed, exit 0. These corrections change no
+    frozen selector semantics or acceptance criteria.
+  - Final exact core gate:
+
+    ```powershell
+    .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra tests/test_controlled_parent_selection.py tests/test_numpy_proposal_preflight.py tests/test_numpy_builtin_proposal_preflight.py tests/test_numpy_neuron_lineage.py tests/test_numpy_sleep_components.py tests/test_numpy_sleep_telemetry.py tests/test_sleep_history_boundaries.py tests/test_sleep_clocks.py
+    ```
+
+    **157 passed in 2.62 s**, exit 0, zero skipped. All original usage
+    snapshot fields match through split/prune/wake. Scheduled index-shift/
+    wrap and random repeat/support tests pass; predictions are preserved
+    within 1e-15 and core noise draw consumption is equal. Eligible tiers,
+    exclusions, caps/phases and zero additions pass. Both direct/sleep
+    transient width errors and injected post-split exceptions restore every
+    field and retry identically. Simulated guard rejection retains proposed
+    IDs separately, restores full state and retries identically. Snapshot
+    continuation, settings incompatibility and nine malformed-state cases
+    plus changed initial RNG refusal pass without mutation.
+  - Frozen protocol regression gate:
+
+    ```powershell
+    .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra tests/test_continual_schedule_factor_preflight.py tests/test_p63_schedule_factor_preflight_cli.py tests/test_continual_schedule_factor_development.py tests/test_p63_schedule_factor_development_cli.py tests/test_continual_combined_factor_preflight.py tests/test_p63_combined_factor_preflight_cli.py tests/test_continual_combined_factor_development.py tests/test_p63_combined_factor_development_cli.py
+    ```
+
+    **38 passed in 38.29 s**, exit 0, zero skipped. Original rollback gate
+    `.\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra tests/test_atomic_sleep_core.py`:
+    **6 passed in 1.40 s**, exit 0, zero
+    skipped, including actual NumPy and Torch CPU cases. **201 tests total**.
+  - Final repository commands, all exit 0:
+
+    ```powershell
+    .\.venv\Scripts\python.exe -m ruff check src tests scripts
+    .\.venv\Scripts\python.exe -m mypy
+    .\.venv\Scripts\python.exe -m ruff format --check src/core/controlled_parent_selection.py tests/test_controlled_parent_selection.py
+    git diff --check
+    ```
+
+    Ruff passes; mypy reports no issues in **351 files**; two new files are
+    already formatted; diff has no whitespace errors (normal existing
+    LF-to-CRLF Git warnings). Repeat static gates after docs also pass.
+- **Artifacts and readback:** No c9 scientific artifact was created. Eight
+  existing ignored `artifacts/runs/p63-{schedule,combined}-factor-{preflight,development}{,-repeat}/`
+  request/result/audit bundles and absence of failure sidecars were read
+  without training/scoring. PowerShell Python here-string imports each
+  existing adapter, calls `check_source_hashes`, c6/c8 `read_reference`,
+  `verify_result`, finite-JSON parsing, digest and observed RSS validation.
+  It compares exact result bytes and request source/adapter/manifest hashes,
+  completed audit/request/result hashes and local elapsed caps for both
+  directories/protocol. All eight validate. Selected source map/result
+  SHA-256s remain:
+
+  | Protocol | Source count/map SHA-256 | Result SHA-256 (both runs) |
+  |---|---|---|
+  | c5 | 20 / `2e45a6200ef7629bdc0b27e86386ad02e8064ac144fe049b06d014541aa1dcfd` | `87931c5fc3fad5bf50d5b18d07901d04b8a8e827ab4fce4429c0f1644c813c41` |
+  | c6 | 23 / `3e7d8b8086ba881527f21d513015deb30743884b388b37f2eda23a79b4e29c69` | `776df6a47efd452a9eb33aced8fa74b1938608637109bd716333fafb2edae689` |
+  | c7 | 26 / `457df802859b68e42b2a54a31e7a9a49f4e893d07062074bb22d3069a96c737f` | `79a7d7e09f0ada01ff72d6e266ddee7576aca52316a0f9a8e2ab3dd402251d13` |
+  | c8 | 29 / `ee0e2c8cb154f9aa427c0b27680841b64a0dfe3c6a90f254159114ca4ce4d6b5` | `2e32c5d7b98b5798f45f5e9b7734088950eec1ef0ae5f19420a282321f3f8714` |
+
+- **Skips, limits and blockers:** Full CPU suite, CUDA, broad sweeps, new
+  scientific training/scoring, independent confirmation and final release
+  were skipped. No test was skipped in the 201 selected tests. Runtime:
+  Windows 11, Intel Core i7-12700K CPU, Python 3.14.7/NumPy 2.4.6 in the
+  existing `.venv`; original Torch CPU atomic cases ran. This correctness
+  increment estimates no per-arm experiment memory/time/accuracy benefit.
+  There is no external blocker. The plan split preserves all unfinished
+  controls and original acceptance criteria; c9a alone closes no matrix row.
+- **Exact next action:** Read
+  `src/app/continual_combined_factor_preflight.py`, its manifest/validation,
+  and `src/app/continual_shift_benchmark.py` guard orchestration. Write a
+  prospective c9b train-only contract binding fresh development/confirmation
+  and arrived source roles, explicit scheduled counts, usage/scheduled/
+  random and matched neutral/ordinary/backprop/planned-width references,
+  same wake/source exposure, selector/state/lineage fingerprints, guard
+  commits/rejections, actual update/width/memory and wall/RSS limits. The
+  old sleep helper hardcodes `adaptation_policy=None`; the new app should
+  compose explicit-policy sleep with the existing guard/rollback contract.
+  Then implement sentinel/budget/artifact tests and execute/repeat all
+  unscored cells before freezing separate c9c scoring. Choose no setting
+  from c8 results; preserve unused confirmations and final-role seals.
+
+### 2026-09-30 — P6.3c9b paired parent controls, complete train-only gate
+
+- **Previous goal turn:** progress; c9a added verified selector/transaction
+  implementation. This turn completes **P6.3c9b** for its frozen unscored
+  matrix. C9/c9c, original P6.3c/P6.3 and independent confirmation remain
+  unchecked; the full development goal stays active.
+- **Checkout and requirement:** Read `AGENTS.md`, living plan/current log,
+  c9a contract/ADR and actual manifest/training/guard/validation paths.
+  `git status --short`/`git rev-parse HEAD` confirm `master` still at
+  `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`. Preserve prior dirty files,
+  ignored results and existing functionality. Phase 0, evaluation isolation
+  and matched-baseline gates retain their documented evidence. This turn
+  edits no prior pinned implementation, creates no commit/push, adds no
+  dependencies or environment variables, and runs only local bounded work.
+- **Prospective plan/rationale:** The guard helper hardcodes built-in sleep
+  and reports after rollback, losing proposed selector state. Before new
+  fixtures, `docs/p63-parent-factor-preflight.md`/ADR-0150 fix a separate
+  growth-only factor with existing c3 structure-only settings, pruning off,
+  common explicit counts and existing schedule/guard/transaction pieces.
+  Use development seeds 347/349/353 (next primes above the prior reservation
+  337) and reserve ten 359..419 primes, all unused. Eight cells per seed:
+  width-eight backprop/PC/neutral off, usage/scheduled/random growth, and
+  planned width-thirteen backprop/PC off. Initialization seed+1001 and
+  separate selector seed+5001/cursor zero. Request one add at global epochs
+  4/8/12/16/20, zero at 24 under the unchanged final prune-only phase budget.
+  Initial/min width eight, max/transient thirteen; five count attempts, no
+  oracle final-width baseline. Hold wake/source exposure and available
+  memory fixed. No c8 result selected a threshold, count, seed or metric.
+- **New structure and behavior:**
+
+  ```text
+  src/app/continual_parent_factor_manifest.py       frozen cells/counts/budgets
+  src/app/continual_parent_factor_preflight.py      arrived training/explicit policy/guard facts
+  src/app/continual_parent_factor_validation.py     independent ordering/selector/lineage/work checks
+  scripts/run_p63_parent_factor_preflight.py        bounded process and exclusive artifacts
+  tests/test_continual_parent_factor_preflight.py  role/arrival/execution/rollback/corruption fixtures
+  tests/test_p63_parent_factor_preflight_cli.py     public identity/duplicate/failure gates
+  docs/p63-parent-factor-preflight.md              prospective contract and frozen identities
+  docs/p63-parent-factor-preflight-results.md      all 24 capacity/work and 45 parent choices
+  docs/adr/ADR-0150-isolate-parent-ranking-with-planned-growth-and-guard.md
+  ```
+
+  Update plan/live handoff, README, architecture, changelog and this log.
+  The app composes existing schedule decisions, complete core snapshots,
+  explicit proposals and existing guarded telemetry/accuracy rule (post +
+  zero tolerance >= pre); no copied topology/metric algorithm. Capture
+  before/proposed/applied parameter and full-state/selector/lineage/clocks
+  facts, retaining proposed cursor/RNG on rejection. Restore on pre/core/
+  post exceptions or nonfinite guards. Bind before-sleep hash to separately
+  observed wake state. Independently rederive original score ordering,
+  cyclic IDs/cursor, PCG64 draws/hashes, guard outcomes, counts/widths,
+  lineage/clocks, roles and costs. Replay stays disabled and four model
+  buffers match every shared FIFO row's contents/order/bytes before/after
+  sleep. No outer/final arrays, score selection or artifact IO in app.
+- **Implementation findings/corrections and commands:**
+  - Initial three-file format/Ruff passed; targeted mypy found nine optional
+    guard/union narrowing errors. Use explicit narrowed clock/state values
+    and required guard accuracies. First app test command
+    `.\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra tests/test_continual_parent_factor_preflight.py`
+    exited 1: **1 failed, 9 passed, 16 setup errors in 1.40 s**. The old
+    replay supply helper requires unprioritized sampling; c3's inherited
+    inert prioritized setting must stay fixed. A new all-eight-row retained
+    content/order check replaces only that unsupported preview call. This
+    strengthens the supply evidence without changing a treatment. Remove
+    one unused fixture import and explicitly type the raising outer sentinel
+    (first Ruff one error/test mypy two errors). App re-run with `--maxfail=1`
+    passed **26 in 4.20 s**, targeted four-file mypy passed.
+  - An apply-patch context mismatch failed before any writes; inspect actual
+    lines and reapply. Inspection also encountered one Windows `rg` wildcard
+    and one guessed nonexistent path; resolve with `rg ... docs -g p63-*.md`
+    and the actual `src/app/sleep_schedule.py`. These are resolved inspection
+    mistakes, with no changed input or missing dependency.
+  - Add the CLI and identity/failure tests; focused app/CLI command passed
+    **33 in 7.43 s**. Repository Ruff/mypy passed **357 files**. Before
+    official scientific execution, a review identified unlinked before-
+    sleep hashes. Add the `before_checkpoint` forgery test and run
+    `.\.venv\Scripts\python.exe -m pytest -o addopts= -q --maxfail=1 tests/test_continual_parent_factor_preflight.py -k before_checkpoint`:
+    **1 failed, 28 deselected in 1.44 s**, correctly demonstrating acceptance
+    of a changed valid-shaped before hash. Add a separate wake full-state
+    hash/link; retain every frozen training setting. App re-run passed
+    **29 in 5.08 s**. Add two actual retained-row content/order corruption
+    cases. Freeze corrected app/validator/adapter identities before official
+    runs; earlier temporary CLI implementation-test bundles are not scientific
+    evidence and were not substituted for canonical outputs.
+  - Final related gate, exit 0:
+
+    ```powershell
+    .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra tests/test_continual_parent_factor_preflight.py tests/test_p63_parent_factor_preflight_cli.py tests/test_controlled_parent_selection.py tests/test_numpy_proposal_preflight.py tests/test_numpy_builtin_proposal_preflight.py tests/test_numpy_neuron_lineage.py tests/test_numpy_sleep_components.py tests/test_numpy_sleep_telemetry.py tests/test_sleep_history_boundaries.py tests/test_sleep_clocks.py tests/test_atomic_sleep_core.py tests/test_continual_combined_factor_preflight.py tests/test_p63_combined_factor_preflight_cli.py
+    ```
+
+    **210 passed in 25.06 s, zero skipped**, including 38 new app/CLI
+    cases. Actual wake spies observe 576 calls/31,104 examples per complete
+    matrix. All cells repeat under outer/final/B-arrival sentinels; all eight
+    A histories finish before B construction. All-mode controlled guard
+    rejection observes a real core split, retains proposed selector state,
+    restores every field and retries identically to clean models. Random
+    pre/core/post exception/nonfinite fixtures restore state; c9a covers
+    all-mode core/width failure and continuation. Corrupt memory/order and
+    forged parent/RNG/cursor/count/lineage/guard/clocks/work/checkpoint/role/
+    cell/capacity/supply/evaluation seals fail. CLI checks complete request/
+    result/audit identities, actual repeats, source/manifest refusal before
+    work, occupied bytes unchanged, and timeout/nonfinite/exit/incomplete
+    worker failure sidecars with no false completed result/audit. Original
+    NumPy and Torch CPU atomic cases ran, zero skips.
+  - Static commands before official runs, all exit 0:
+
+    ```powershell
+    .\.venv\Scripts\python.exe -m ruff check src tests scripts
+    .\.venv\Scripts\python.exe -m mypy
+    .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_parent_factor_manifest.py src/app/continual_parent_factor_preflight.py src/app/continual_parent_factor_validation.py scripts/run_p63_parent_factor_preflight.py tests/test_continual_parent_factor_preflight.py tests/test_p63_parent_factor_preflight_cli.py
+    git diff --check
+    ```
+
+    Ruff passes; mypy no issues in **357 files**, six files formatted; diff
+    has no whitespace errors, with usual existing LF-to-CRLF warnings.
+- **Official experiments/commands, both exit 0:** `Test-Path` first confirms
+  both canonical output directories unused. Write frozen manifest/source/
+  adapter identities in the contract, then execute sequentially:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.run_p63_parent_factor_preflight --output-dir artifacts/runs/p63-parent-factor-preflight
+  .\.venv\Scripts\python.exe -m scripts.run_p63_parent_factor_preflight --output-dir artifacts/runs/p63-parent-factor-preflight-repeat
+  ```
+
+  Both complete all **24 cells/72 opportunities/216 decisions**. Actual
+  work **576 wake updates**, zero applied/rejected replay; 54 guard
+  attempts/108 forward calls/**1,944 guard examples**. All **45 proposed
+  splits commit**, all 54 sleeps accepted, no official rollbacks; nine
+  final zero-add sleeps and 162 not-due decisions. Every growth cell has
+  width 8→11 after A→13 after B/peak 13, parameters 33→53. Each model
+  receives 24 wakes/1,296 examples; PC/circadian has 48 latent loops/
+  2,592 example iterations, backprop none. Wider references have thirteen
+  neurons/53 parameters throughout. Equal updates do not equalize FLOPs,
+  width or guard overhead. No outer/final primary score was produced;
+  inner accuracy was used only for the fixed guard.
+- **Artifacts, identities and complete readback:** Both ignored
+  `artifacts/runs/p63-parent-factor-preflight{,-repeat}/` contain
+  `parent-factor-preflight.request.json`, `.result.json`, `.audit.json`
+  and no failure. Both result SHA-256:
+  `555fc2fe5dfd86981d87af2d0c15bd8ab925417d9ad748783d95cee95f5a1874`.
+  First/repeat request SHA:
+  `e5c7f0c49d34896409614383db728798bb33cb1b50de239a2a98cad036cfb385`,
+  `e269fc8216a5e6b67d85c817daba0e866f7ff8d8c442a5286a80c59faf44f92a`.
+  Manifest SHA:
+  `a7938028ed3c9279ef74a5f9a2550012927e4bb626b72672861ae64aa71497c9`.
+  Selected **31-source** digest:
+  `280210ea8215b24e3d5238b39daa94725b2091553bfed8d5bb7e5a23977339f9`.
+  Adapter bytes:
+  `39bfd61bd50a1abf0a00308ca40028152270b09f99eb401b4176924dd4c6a8b1`.
+  This selected map extends c7's 26 with three new app sources, c9a selector
+  and c7 adapter; it is not a full transitive dependency hash. Read-only
+  PowerShell Python here-strings parse finite saved files, call independent
+  `verify_result`, source/digest/RSS verifiers, compare all request/audit/
+  manifest/source/adapter/work/capacity/selector/role/seal identities,
+  absence of failures, elapsed/RSS caps and exact result bytes. Recheck all
+  eight c5/c6/c7/c8 bundles with their validators/reference readers: all
+  old selected map/result identities unchanged. No old output is rewritten.
+  The report publishes all 24 work/capacity rows and 45 parent choices;
+  full state/parameter/RNG/lineage histories remain in each verified result.
+  Final readback rederived and checked every report table row against saved
+  result bytes. Repository Ruff, mypy (357 files), six-file formatting and
+  `git diff --check` passed again after documentation; no code or source pin
+  changed after official execution.
+- **Observed parent outcomes and interpretation:** Usage parents are
+  0/6/0/8/4, 5/2/7/5/1, 4/5/7/4/8 on ordered seeds. Cyclic parents are
+  0/1/2/3/4 each seed; random parents are 7/6/7/0/10, 2/5/8/2/1,
+  6/3/2/8/11. Earlier children can themselves be split under original
+  eligibility; repeated parents across events are allowed. All three modes
+  perform actual distinct choices with the same committed counts here.
+  This proves implementation/control reproducibility only, with no primary
+  accuracy/forgetting/efficiency result or treatment selection.
+- **Resource scope and skips:** Four circadian stores plus shared supply
+  retain eight identical rows/192 bytes each: **960 bytes/seed for retained
+  replay/supply arrays only**, excluding source/role arrays, parameters,
+  metadata and temporary copies. Whole-worker RSS includes those costs.
+  First/repeat elapsed **1.682858/1.784217 s**, observed RSS peaks
+  **51,748,864/51,417,088 bytes**, **85/82 samples** at 5 ms, below
+  120 s/256 MiB. Sampling covers training, independent validation and
+  serialization; stdout/parent writes are outside it, brief peaks may be
+  missed, and per-arm resource attribution is unmeasured. `Get-CimInstance
+  -ClassName Win32_Processor` confirms Intel Core i7-12700K; saved request
+  confirms Windows 11/Python 3.14.7/NumPy 2.4.6. Full CPU suite, CUDA,
+  broad sweeps, outer scoring, confirmation and final release were skipped.
+  No selected test skipped. No external blocker.
+- **Plan/handoff and exact next action:** Check c9b only and keep c9/c9c,
+  original matrix/confirmation and later tasks unchecked. Read
+  `src/app/continual_combined_factor_development.py` and its scored adapter;
+  write a prospective c9c contract against saved c9b SHA `555fc2fe...5a1874`,
+  all 24 cells, primary A/B metrics and every growth/reference contrast
+  with unequal cost scope. Bind the full c9b source/request/audit identities.
+  Reproduce all train facts globally, hold full after-A/after-B model copies,
+  and validate every parameter/width/selector/RNG snapshot before the first
+  outer value. Then execute/repeat bounded scored artifacts, retain all
+  null/negative outcomes and every unused confirmation/final seal. Existing
+  metric arithmetic and artifact gates can be reused without modifying
+  earlier pinned implementations. No train outcome selects settings.
+
+### 2026-09-30 — P6.3c9c globally gated parent-control development scoring
+
+- **Previous goal turn:** progress. It implemented the scored app/adapter,
+  passed correctness/static gates, completed and repeated both bounded
+  official runs, validated all evidence and updated the plan/report. The
+  turn was interrupted before this log entry. Every command had returned
+  terminal success; no live command required resuming. This continuation
+  confirms the actual checkout/artifacts and records the completed task.
+  **Completed: P6.3c9c** for its declared development scope. C9/P6.3c/P6.3,
+  independent confirmation, final release and the full goal remain open.
+- **Checkout/requirement:** `git status --short`/`git rev-parse HEAD` confirm
+  `master` at `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`, preserving all earlier
+  dirty increments and ignored files. Read current AGENTS/plan/log and c8/
+  c9b training, guard, validation, manifest and artifact paths. Complete all
+  train/checkpoint comparisons before any outer value; retain every row.
+  No commit/push, dependency, environment variable, core or earlier pinned
+  source changed. Phase 0/isolation/matched-baseline evidence stays intact.
+- **Prospective decisions:** Before scored fixtures,
+  `docs/p63-parent-factor-development.md`/ADR-0151 bind the exact canonical
+  c9b request/result/audit bytes, all eight cells × seeds 347/349/353, primary
+  A/B mean/signed forgetting and twenty ordered pairs per seed. Preserve
+  c9b's initialization, selector seed/cursor, counts, source/inner roles,
+  guard, wake, memory and capacity. Keep 576 updates/600 cap, zero replay,
+  54 guarded attempts/108 calls/1,944 inner examples, 72 added outer calls/
+  1,440 examples, 120-second child limit and observed 256-MiB RSS at 5 ms.
+  Parent pairs are usage-scheduled, usage-random, scheduled-random;
+  each growth cell versus all five fixed/planned-width references; then
+  each width-thirteen method versus its width-eight reference. No outcome
+  selected a contrast, threshold, baseline, seed or metric.
+- **New structure:**
+
+  ```text
+  src/app/continual_parent_factor_development.py     held copies/global train and complete-state gate
+  scripts/run_p63_parent_factor_development.py      canonical reference/source pins/bounded artifacts
+  tests/test_continual_parent_factor_development.py outer/final/arrival and late-corruption sentinels
+  tests/test_p63_parent_factor_development_cli.py    isolated real worker/writer/identity/failure gates
+  docs/p63-parent-factor-development.md             prospective scoring contract and identities
+  docs/p63-parent-factor-development-results.md     all accuracy/pair/summary/cost rows
+  docs/adr/ADR-0151-verify-parent-selector-checkpoints-before-scoring.md
+  ```
+
+  README/architecture/changelog/plan/log describe boundaries, commands and
+  limits. Compose pinned c9b helpers and c4 score arithmetic. Deep-copy all
+  A models before B arrival; independently validate/exactly match the entire
+  all-seed train object. Globally verify both checkpoints' parameters/width
+  and complete circadian hashes, including noise and selector RNG, cursor,
+  settings, calls/decisions, chemistry, memory, lineage and clocks. Recheck
+  after scoring. App owns no files/final access; adapter owns process/IO.
+  Strict result/seed/score/pair schemas reject undeclared scored fields.
+- **Tests/static commands and outcomes:** All commands exit 0; no red test
+  or implementation failure occurred in this increment. Initial two-file
+  format reformatted one; targeted Ruff/mypy passed. Then run:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_parent_factor_development.py -k 'not score_every_cell'
+  ```
+
+  **11 passed, 1 deliberately deselected in 14.34 s** before any outer
+  score. Cases refuse changed contract before source, valid-shaped late
+  reference and supply drift, and after-A/after-B parameter, noise RNG,
+  selector RNG or cursor corruption before even the first scorer. Freeze
+  new identities after repository Ruff/mypy (361 files)/four-file format/
+  diff checks and complete canonical reference readback. Then:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_parent_factor_development.py tests/test_p63_parent_factor_development_cli.py
+  ```
+
+  **31 passed in 23.59 s**, zero skipped. Actual accuracy spies verify all
+  72 calls/1,440 examples only after all seeds, B arrival after all eight A
+  histories, raising final-source sentinels, all metrics/pairs/PC-neutral
+  parity and unchanged full copies. CLI tests use fresh temporary unscored
+  bundles; real child workers run main/worker twice with test-local request/
+  audit byte pins, then writer tests use the actual completed worker output.
+  Source/result bytes and treatment stay frozen. Tests need no ignored
+  canonical files; fixtures are not official scientific evidence. Complete
+  byte/rehash/missing/failure/source/manifest/metric/retention/cell/seed/pair/
+  undeclared-field/final-seal rejection, occupied output without second
+  launch, and timeout/nonfinite/exit/incomplete failure sidecars pass.
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra tests/test_continual_parent_factor_development.py tests/test_p63_parent_factor_development_cli.py tests/test_continual_parent_factor_preflight.py tests/test_p63_parent_factor_preflight_cli.py tests/test_controlled_parent_selection.py tests/test_numpy_proposal_preflight.py tests/test_numpy_builtin_proposal_preflight.py tests/test_numpy_neuron_lineage.py tests/test_numpy_sleep_components.py tests/test_numpy_sleep_telemetry.py tests/test_sleep_history_boundaries.py tests/test_sleep_clocks.py tests/test_atomic_sleep_core.py tests/test_continual_combined_factor_preflight.py tests/test_p63_combined_factor_preflight_cli.py tests/test_continual_combined_factor_development.py tests/test_p63_combined_factor_development_cli.py tests/test_continual_metrics.py
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m mypy
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_parent_factor_development.py scripts/run_p63_parent_factor_development.py tests/test_continual_parent_factor_development.py tests/test_p63_parent_factor_development_cli.py
+  git diff --check
+  ```
+
+  **260 passed in 66.55 s, zero skipped**, including actual original NumPy/
+  Torch CPU atomic cases, plus static gates (mypy 361 files). Existing
+  LF→CRLF Git warnings are informational. Both official output directories
+  were absent (`Test-Path` false) before execution. No source changed after
+  the pre-score freeze.
+- **Official experiment commands/outcomes:** Sequential, exit 0:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.run_p63_parent_factor_development --output-dir artifacts/runs/p63-parent-factor-development
+  .\.venv\Scripts\python.exe -m scripts.run_p63_parent_factor_development --output-dir artifacts/runs/p63-parent-factor-development-repeat
+  ```
+
+  Both complete **24 cells/60 pairs/216 decisions**, exactly 72 outer calls/
+  1,440 examples and unchanged c9b work: 576 wake updates, 45 committed
+  splits, 54 accepted guards (nine zero-add), no replay/rollback. Both
+  deterministic result SHA:
+  `7f76e793eaf123b30116f57d68aa755962d63a56e4bba4b29703ae37b16e2040`.
+  Request SHA first/repeat:
+  `c4654667f4f358cb36bed0a767232181c69f732729fd57a09773fad2f8421fc8`,
+  `75631e6c286958ad43b576b09a1aa76d9e988f9d8b5949cb2d81fe9ba4d83009`.
+  Audit SHA:
+  `c98f6cdd6fa5295b08f91dd9f5daeded9a74c393e2c6b1777182371bcaa7dc79`,
+  `6fe0a947685c1157e4f1153c98f9b9286f2d930801a6f788534832cffdb4f1c4`.
+  Manifest remains `a7938028ed3c9279ef74a5f9a2550012927e4bb626b72672861ae64aa71497c9`.
+  Selected **34-source map**:
+  `b0a86792167a9965e38007b0a0a3cd5a7ee3d229495df4950201198b545be55b`.
+  Scored app/adapter:
+  `53aab115493ba2ca2dd34787e07b4deb2f246bed257aad4eb97baf9e35af1530`,
+  `be57cf809149af570876d75d6f924ec073ee1a35a1d96b68ae4fc7b59129e9c0`.
+- **Artifacts/readback:** Both ignored
+  `artifacts/runs/p63-parent-factor-development{,-repeat}/` contain
+  `parent-factor-development.request.json`, `.result.json`, `.audit.json`
+  and no failure. Read-only PowerShell Python here-strings independently
+  parse all six files, validate the complete canonical reference and train
+  object, recalculate every metric/pair, compare request/source/manifest/
+  adapter/reference/audit/work/elapsed/RSS identities and exact result bytes.
+  Recheck ten older c5/c6/c7/c8/c9b bundles: all source/result pairs remain
+  identical and valid. A second readback checks all **24 accuracy/60 pair/
+  40 summary/48 cost table rows** in the generated report against saved
+  values, including all five mean/sample-SD endpoints. No historical file
+  is rewritten; result tables retain full-precision JSON beside rounded text.
+- **Findings:** Usage-scheduled final mean is **0,0,-.020833**, mean
+  -.006944/sample SD .012028; usage-random is null on all seeds. Scheduled
+  exceeds random only on seed 353. All growth cells tie fixed-eight PC/
+  backprop on the first two seeds and trail them on 353 (usage/random
+  -.0625, scheduled -.041667). Planned-width contrasts are mixed and all
+  retained. Usage forgetting differs partly through A-after-A learning;
+  both A values remain published. No usage-ranking or circadian advantage
+  is established, and no treatment/configuration is selected.
+- **Resources/skips/limitations:** First/repeat elapsed **1.841334/
+  1.844780 s**, observed RSS **56,631,296/57,561,088 bytes**, **91/88 samples**
+  at 5 ms, below 120 s/256 MiB. Sampling covers training, held copies,
+  validation, scoring and serialization, excludes stdout/parent writes,
+  and can miss brief peaks. Per-arm time/RSS/FLOPs remain unmeasured. Same
+  Windows 11/Intel Core i7-12700K/Python 3.14.7/NumPy 2.4.6 environment;
+  cross-version/device portability is unverified. Retained replay/supply
+  arrays are 960 bytes/seed before copies, excluding role/parameter/metadata/
+  temporary arrays. Width/latent/guard costs are unequal and explicit.
+  Full CPU suite, CUDA, broad sweeps, independent confirmation/final release
+  were skipped; no selected test skipped. Scientific CLI binds original
+  canonical c9b request/audit timing bytes, which cannot be regenerated
+  verbatim on a clean clone; fresh unit/worker fixtures run independently.
+  There is no external blocker.
+- **Plan changes/exact next action:** Check c9c only; keep original c9/
+  matrix/confirmation/final criteria open. Add P6.7a inventory because the
+  six distinct development families have separate reservations and need
+  one explicit confirmation scope/budget before more training. Inspect all
+  six manifest/contract families; build the minimum-matrix control/role/
+  reserved-seed/exact-reference inventory and calculate ten-seed budgets.
+  Freeze the smallest informative train-only confirmation gate with all
+  predeclared factors/matched baselines, complete global checkpoint/final
+  seals and separately gated scoring. Choose no threshold, treatment,
+  baseline, seed or metric from development outcomes. Preserve all earlier
+  artifacts/source pins and unused reservations. The full goal stays active.
+
+### 2026-09-30 — P6.7a validated six-factor confirmation inventory
+
+- **Previous goal turn classification:** progress, with c9c implementation,
+  passing tests and completed repeated official evidence. This continuation
+  completed its missing log, rechecked checkout and static gates, then
+  executed the next concrete inventory/validation task. **Completed: P6.7a**
+  for its prospective scope contract. P6.7b/c, original P6.3/c9/confirmation,
+  uncertainty/resource/final tasks and full goal remain open. No goal
+  completion or blocker is claimed.
+- **Checkout and inspection:** `master` still
+  `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`, preserving all dirty c5–c9
+  implementation/docs and ignored artifacts. Read AGENTS, current plan/log
+  and all six manifest/contract families plus actual training/fact/role
+  helpers. One read-only `rg` guessed nonexistent
+  `src/app/continual_global_seal_benchmark.py` and exited 1; correct the path
+  to `src/app/continual_shift_benchmark.py`. No write/data run occurred from
+  that inspection mistake. All later implementation/validation commands
+  pass. No dependency, environment variable, core/pinned scientific source,
+  commit, push or historical result changes.
+- **Finding/prospective rationale:** Gating/replay share the ten
+  101..149 prime reservations, while four other families use separate sets:
+  total fifty distinct confirmation sources/sixty family-seed instances.
+  All are disjoint from fifteen development source seeds. Retain every
+  original named arm/pair, negative/null/inactive outcome and matched
+  baseline; pooling heterogeneous families or counting shared seeds twice
+  would misstate replication. Gating/replay pilot `_run_seed` functions
+  score A outer data before B, and all old pilot manifest validators fix
+  three seeds. Future confirmation must compose training helpers in its
+  own strict joint gate and preserve old sources. Before implementation,
+  `docs/p67-confirmation-scope.md` fixes complete configuration references,
+  reservations, independent final roles, all future metrics/pairs and caps.
+  ADR-0152 records rationale/alternatives. No outcome selects a treatment.
+- **New structure:**
+
+  ```text
+  src/app/continual_confirmation_manifest.py    pure exact original settings/reservations/budget binding
+  scripts/inspect_p67_confirmation_scope.py     saved evidence/usage validation and exclusive scope record
+  tests/test_continual_confirmation_manifest.py no-source/model/score and scope/budget sentinels
+  tests/test_p67_confirmation_scope.py          actual nested usage/IO/identity failure gates
+  docs/p67-confirmation-scope.md                original matrix, role, resource and future gate contract
+  docs/adr/ADR-0152-retain-all-reserved-factors-in-joint-confirmation.md
+  ```
+
+  README/architecture/changelog/plan/log describe scope and commands. The
+  app serializes immutable original resolved configuration bytes and binds
+  their known hashes plus development/source references; it creates no
+  dataset/model or new score and owns no IO. The adapter validates both
+  complete scored-development bundles and prerequisite readers, all
+  source/manifest/adapter/request/audit/result identities and elapsed/RSS
+  facts where originally recorded. It scans actual seed/scored/embedded
+  train rows, not `confirmation_seeds` declarations, and fails on used
+  reservations/malformed rows. Only after every gate does it publish a
+  finite exclusive record; occupied outputs refuse before inspection.
+- **Prospective budget evidence:** Validated factory ceilings scale
+  additively by reserved seed count, rather than observed pilot work.
+
+  | Family | Cells | Wake updates | Maximum optimizer updates | Maximum guard attempts |
+  |---|---:|---:|---:|---:|
+  | Gating | 30 | 720 | 720 | 0 |
+  | Replay | 80 | 1,920 | 2,280 | 0 |
+  | Sleep | 90 | 2,160 | 2,160 | 50 |
+  | Schedule | 110 | 2,640 | 3,380 | 210 |
+  | Combined | 170 | 4,080 | 5,160 | 480 |
+  | Parent | 80 | 1,920 | 1,920 | 180 |
+  | Total | **560** | **13,440** | **15,620** | **920** |
+
+  Future joint cap **16,000 updates / 600 seconds / observed 512 MiB** at
+  5 ms covers six families/fact histories/held copies and serialization.
+  Actual old three-seed combined/parent files alone are 4,635,365/3,045,849
+  bytes; aggregate memory scope differs from single-family 256 MiB. This
+  budget is prospective, not a measurement; brief peaks may be missed.
+  Retained-array scopes before copies per seed: 0/576/0/768/2,304/960 bytes,
+  excluding roles, parameters, metadata and temporary copies. Final roles
+  remain declared forty A/forty B rows. Future independent final scoring
+  needs **1,680 calls/67,200 examples**, **580 original pairs** (1/3/3/9/22/20
+  per seed/family), exact saved global train/checkpoint comparison and a
+  separately frozen uncertainty/multiple-contrast contract before release.
+- **Tests/commands/outcomes:** Initial app/two-file format and targeted
+  Ruff/mypy pass; all **14 pure manifest tests in 0.33 s**, zero skipped.
+  Add inspection/IO tests, then:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff format scripts/inspect_p67_confirmation_scope.py tests/test_p67_confirmation_scope.py
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m mypy
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_manifest.py tests/test_p67_confirmation_scope.py
+  ```
+
+  **21 passed in 0.41 s, zero skipped**, mypy **365 files**, Ruff pass.
+  Dataset/model/accuracy raising sentinels prove no construction/scoring;
+  exact counts/bounds, partial families, seed/cell/pair/reference/final role,
+  changed joint caps/seals and factory settings drift are refused. Nested
+  prior-source usage, declaration-versus-use distinction, malformed rows,
+  occupied-file byte preservation and saved output SHA tests pass. Tests
+  run from fresh fixtures without ignored scientific files.
+- **Read-only real executions, exit 0:** Both output paths absent before:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.inspect_p67_confirmation_scope --output-file artifacts/runs/p67-confirmation-scope.json
+  .\.venv\Scripts\python.exe -m scripts.inspect_p67_confirmation_scope --output-file artifacts/runs/p67-confirmation-scope-repeat.json
+  ```
+
+  Both independently validate **twelve complete scored-development bundles**
+  with prerequisite references and scan **twenty P6.3 result files**. The
+  only observed source seeds are 41/43/59/67/71/73/79/83/89/263/269/271/
+  347/349/353; no reserved source appears in this catalog. No confirmation
+  source/model or final value is opened. Both ignored records are identical:
+  SHA **`622feead54f155521928341151c8496c23c02a54b355b1b3b1e0f68b76c5772f`**.
+  Scope manifest SHA:
+  `8d1ed66b33bbc1bf298cc60604c3741afa22bb4b7e0f6636efe166a52672951b`.
+  App source:
+  `390cc56625983f2038ea98f689c68e11e754c971a49a17fcd63a227bb35b49ec`.
+  Inspection adapter:
+  `e3f96f4e284b56a2db5a21d2c636f9ca4361e4b7fbce5cd8ba8c1ca833b41a1e`.
+  An independent Python readback checks exact bytes, finite JSON, manifest
+  digest, all six per-family bounds, twelve references, twenty usage files,
+  and false confirmation-construction/scoring/final flags. No old file is
+  rewritten. These are inspection artifacts, not new experimental results.
+- **Skips/limits/blockers:** Full CPU suite, CUDA, new training, confirmation
+  scoring, final release and broad sweeps were skipped. No selected test
+  skipped; no external blocker. Pure gates and metadata do not establish
+  experiment performance, memory fit or confirmation success. Runtime stays
+  Windows 11/Intel Core i7-12700K/Python 3.14.7/NumPy 2.4.6. Scientific
+  inspection requires saved development bundles; clean fixture tests do not.
+- **Plan changes/exact next action:** Check only P6.7a; split future unscored
+  execution P6.7b from final-scored P6.7c with P6.11 analysis prerequisite,
+  preserving every original matrix/confirmation/final requirement. Read
+  `src/app/continual_confirmation_manifest.py`, scope contract/record and
+  every family's phase/fact/validator helpers. Implement strict joint
+  seed/settings/fact schema and held A/B checkpoints, composing existing
+  training helpers without early-scoring runners. Add all-family outer/
+  final/arrival, complete checkpoint/rollback, update/RSS/time and artifact
+  failure gates, then execute/repeat all 560 **unscored** cells within fixed
+  joint caps. Only afterward separately freeze full references/source and
+  uncertainty analysis before any final value. The full goal stays active.
+  After all documentation/log edits, repository Ruff and mypy (365 files),
+  `ruff format --check` on all eight new c9c/P6.7a Python files and
+  `git diff --check` passed again, exit 0; only existing LF→CRLF notices.
+
+### 2026-09-30 — P6.7b1 all-family unscored trajectory/checkpoint composition
+
+- **Previous goal turn classification:** progress (completed P6.7a frozen
+  inventory/evidence inspection). This continuation inspected the actual
+  family/role/state helpers, then implemented and validated the next
+  concrete component. **Completed: P6.7b1** for all-six composition fixtures.
+  P6.7b2/P6.7b/P6.7, original matrix/independent final/analysis and the full
+  goal remain open. No goal completion, pause or blocker is claimed.
+- **Checkout/reconciliation:** `master`/HEAD still
+  `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`. Rechecked AGENTS, plan/current
+  handoff/log, original manifests plus gating/replay/sleep/schedule/combined/
+  parent training/fact helpers, snapshot canonicalization, role splitting,
+  existing leakage/rejection tests and quality config. `git status --short`,
+  `git rev-parse HEAD` and `git log --oneline 8793c49ee4f9f8b07649e8db6571ed53746a9a06..HEAD`
+  confirm the ten post-review commits already reconciled by earlier log
+  entries; no new commit. Phase 0 and earlier evaluation/matched-baseline
+  scopes remain completed. Preserved all dirty/untracked c5–c9/P6.7a files
+  and ignored evidence. New code touches no pinned scientific source,
+  configuration, baseline, threshold, seed reservation or metric.
+- **Prospective amendment and rationale:** Before coding, split P6.7b into
+  b1 six-family phase/checkpoint fixtures and b2 independent strict saved
+  JSON/resource/artifact validation plus two complete reserved runs. ADR-0153
+  and `docs/p67-confirmation-training.md` preserve all 560 cells, 60 family/
+  seed instances, all original contrasts and unchanged caps. Gating/replay
+  scored runners are unsuitable; sleep/schedule old facts only bind rejected
+  parameters. Compose original helpers, preserve their raw unscored facts,
+  add full before/after witnesses and hold copies globally. Choose each first
+  existing development seed by manifest order before outcomes: 41/41/67/79/
+  263/347. No reserved source is used. B1 closes only this new fixture scope;
+  no original acceptance was reduced.
+- **New structure/boundaries:**
+
+  ```text
+  src/app/continual_confirmation_state.py       full checkpoint/role facts and live gates
+  src/app/continual_confirmation_simple.py      existing gating/replay/sleep phases, no scores
+  src/app/continual_confirmation_periodic.py    existing schedule/combined/parent phases
+  src/app/continual_confirmation_training.py    exact scope/settings and joint A/B copy barrier
+  tests/test_continual_confirmation_state.py
+  tests/test_continual_confirmation_training.py
+  docs/p67-confirmation-training.md
+  docs/adr/ADR-0153-compose-unscored-family-trajectories-before-joint-artifacts.md
+  ```
+
+  README/architecture/changelog/plan/log updated. Apps own no artifact IO or
+  scoring. Production validates the exact full frozen manifest before any
+  model/source, compares each resolved original configuration again before
+  data, then finishes every family/seed A trajectory and checks all live/
+  copied A states before the first B construction. It checks every held A/B
+  state/role again after B. Private adapters permit development fixtures;
+  there is no production opt-out flag or scientific CLI. A/B copies have
+  independent parameter arrays. Raw original schemas/costs stay intact;
+  gating/replay omit only forbidden scored fields and replay exposure derives
+  from actual applied boundary IDs. Clocks agree with work. Combined/parent
+  retain their existing complete event/selector/lineage witnesses.
+- **Concrete correctness findings:** Baseline fingerprints cover traffic
+  and every instance field as well as parameters; alias relationships need
+  explicit checks because identical bytes could hide detached public aliases.
+  Validate those relationships and exact shallow tensor shapes. Circadian
+  fingerprints reuse the complete existing snapshot digest, covering memory,
+  chemistry, clocks, lineage, both RNGs and parent selector state. Capture
+  finite state recursively, including arrays inside deques. Original gating/
+  sleep models have zero memory and no optional retention budget; capture
+  its absence without configuring a new privilege. Supplemental old-guard
+  before/after records refuse complete-state corruption after rollback/skip.
+  Outer IDs/counts/hashes are declared metadata; outer arrays and final fields
+  stay blocked. Train/inner content hashes are rechecked before B and after
+  training. Neither scores nor settings are selected from fixtures.
+- **Initial red gates and repairs:** Initial checkpoint tests ran
+  `python -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_state.py`
+  with **7 passed/1 failed**, exit 1: the test inserted a tuple where core
+  expects `ReplaySnapshot`; repair the test to corrupt a valid retained item,
+  then **15 passed in .24 s**, zero skips. First training collection errored
+  before any wake because zero-memory gating lacks an optional retention
+  budget; repair capture as described above, preserving original models.
+  First broad type check found 14 narrowing/type annotations, all repaired.
+  Training tests then reached **19 passed/1 failed in 14.44 s**, exit 1,
+  due to a test's nonexistent `_parent_selection_cursor_id`; use actual
+  `_parent_selection_cursor`. Repair outer test-double annotations and an
+  unnecessary ignore. **46 new tests passed in 16.99 s**, zero skips.
+  Add resolved-source/undeclared-seed/late-guard-label/finite-serialization
+  regressions; **119 related passed in 36.32 s**, zero skips. Review then
+  justified three alias/shape regressions; the only further mypy errors
+  were four alias-branch type narrowing complaints. A final direct
+  `isinstance` condition is runtime-equivalent and resolves all four.
+  Several patch attempts refused before mutation because formatter line
+  shapes differed; reread the exact lines and apply matching hunks. No
+  failing fixture was mistaken for scientific evidence or tuned away.
+- **Final substantive test command, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_state.py tests/test_continual_confirmation_training.py tests/test_continual_confirmation_manifest.py tests/test_p67_confirmation_scope.py tests/test_continual_gating_pilot.py tests/test_continual_replay_factor_pilot.py tests/test_continual_sleep_factor_preflight.py tests/test_continual_schedule_factor_preflight.py tests/test_continual_combined_factor_preflight.py tests/test_continual_parent_factor_preflight.py
+  ```
+
+  **122 passed in 35.76 s; 53 new; zero skipped.** Exact legacy unscored
+  facts and complete initial/A/B checkpoints match for every one of the
+  **56 fixture model cells**, including PC/neutral parity and planned wider
+  references. New composition refuses pilot/scoring helper calls and raises
+  outer/final fields. Legacy gating/replay accuracy callbacks are inert
+  placeholders with actual outer fields omitted, then metric fields removed;
+  no scientific accuracy is computed. All-A-before-B, partial/factory scope,
+  late live/held parameter/traffic/noise/selector changes, later A/B cursor
+  changes, altered guard labels, independent arrays, chemistry/memory/lineage,
+  finite serialization and alias/shape sentinels pass. Forced sleep guards
+  reject all five proposals and restore complete state. Forced schedule
+  guards reject six, restore complete state and observe **12 actual core
+  rejected replay updates** with zero baseline replay, exactly matching
+  retained costs. After the runtime-equivalent type condition fix,
+  `python -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_state.py`
+  also passes **18 tests in .25 s**, zero skips. All selected tests are CPU;
+  no dependency installation or environment variable changes.
+- **Static commands:** `python -m ruff format` on the six new Python files
+  during implementation; repository `python -m ruff check src tests scripts`
+  and `python -m mypy` pass, mypy **371 files**, exit 0.
+  `python -m ruff format --check src/app/continual_confirmation_state.py src/app/continual_confirmation_simple.py src/app/continual_confirmation_periodic.py src/app/continual_confirmation_training.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_training.py`
+  and `git diff --check` are repeated after this documentation/log update;
+  final outcome appended below. Use `./.venv/Scripts/python.exe` for every
+  abbreviated Python command above (PowerShell spellings in the blocks).
+- **Read-only historical evidence check, exit 0; no output file:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -c "import json; from pathlib import Path; from scripts.inspect_p67_confirmation_scope import inspect_confirmation_scope; from hashlib import sha256; saved=Path('artifacts/runs/p67-confirmation-scope.json'); current=json.loads(json.dumps(inspect_confirmation_scope(),allow_nan=False)); assert current==json.loads(saved.read_text(encoding='utf-8')); assert sha256(saved.read_bytes()).hexdigest()=='622feead54f155521928341151c8496c23c02a54b355b1b3b1e0f68b76c5772f'; print(json.dumps({'saved_scope_unchanged':True,'development_bundles':len(current['development_references'])*2,'usage_files':len(current['reservation_usage']['result_files_checked']),'summary':current['summary']},sort_keys=True))"
+  ```
+
+  Revalidates all **twelve complete development bundles**, their selected
+  source/manifest/request/result/audit/prerequisite identities and **twenty
+  P6.3 usage files**. Exact old scope record/SHA unchanged, fifty reserved
+  source identities still unused in that catalog. Original 560 cells/
+  13,440 wakes/15,620 maximum executed updates/920 guards/580 future pairs/
+  1,680 final calls/67,200 examples remain. Existing canonical/repeat scope
+  files remain at `artifacts/runs/p67-confirmation-scope{,-repeat}.json`.
+  There is **no new experiment/artifact bundle**, no reserved model/source
+  constructed and no final release. Unit fixtures use fresh in-memory data
+  and need no ignored files; this real historical check uses saved evidence.
+- **Current source identities (not yet a scientific b2 source-map freeze):**
+  `Get-FileHash -Algorithm SHA256 -LiteralPath src/app/continual_confirmation_state.py,src/app/continual_confirmation_simple.py,src/app/continual_confirmation_periodic.py,src/app/continual_confirmation_training.py | Select-Object Path,Hash | ConvertTo-Json -Compress`
+  yields state `5e2eeeb0f10b05a767328a7b2cfb055d78cea33a91b96d434f77aba3448ae86b`,
+  simple `f9f46848310e02a10a8a47caa414c21b6d36812ede3684f803282f1b3eec1073`,
+  periodic `a22f23ef2b3c86682b4e68f65a4c211a664b407de00f21ecd2a2039080de9b9e`,
+  training `372aeeba9b8661918c8137c3d4c5a4f34d26666b76cc84644c99362808c103e1`.
+- **Skipped tests/limits/blockers:** Full CPU suite, CUDA, broad sweeps,
+  reserved confirmation, actual joint RSS/time measurement, artifact lifecycle
+  tests, uncertainty analysis and final scoring skipped because this increment
+  verifies composition fixtures only. No selected test skips and no external
+  blocker. Same Windows 11/Intel Core i7-12700K/Python 3.14.7/NumPy 2.4.6.
+  Passing 56 cells is not 560-cell confirmation/resource evidence. The app
+  composition alone does not independently validate serialized costs or
+  enforce runtime/artifact limits; b2 must add those gates before execution.
+  No new dependency, commit, push, publication or unrelated change.
+- **Exact next action:** Implement `src/app/continual_confirmation_validation.py`
+  with strict finite JSON schemas for all 60 declared family/seed instances,
+  560 cells, role IDs/hashes/counts, initial/A/B complete checkpoints,
+  unchanged legacy decisions/costs and supplemental rollback witnesses.
+  Independently rederive actual/rejected optimizer/latent/guard/memory/
+  transient-capacity facts and checkpoint links; never trust supplied counters
+  or accept partial scientific scope. Compose per-family validation seams
+  while keeping original strict three-seed validators/sources unchanged.
+  Add finite/forgery/global checkpoint/final/arrival sentinels on development
+  fixtures. Then implement an exact saved-scope/source/configuration-bound
+  exclusive-artifact adapter and update/wall/RSS lifecycle gates. Only after
+  all correctness gates pass, execute/repeat all 560 reserved unscored cells
+  under unchanged 16,000 updates/600 s/observed 512 MiB, independently read
+  back both bundles and record equality. Keep P6.7b2/parents and separately
+  frozen P6.7c/P6.11 final/uncertainty criteria open. The full goal stays active.
+  **After this entry:** repository Ruff, mypy (371 files), six-file format
+  check and `git diff --check` all pass, exit 0. Only existing LF→CRLF
+  notices. All work remains uncommitted; no live experiment/process.
+
+### 2026-09-30 — P6.7b2a independent JSON envelope/checkpoint gate
+
+- **Previous goal turn classification:** progress (P6.7b1 all-family
+  composition). **Completed: P6.7b2a** for its declared schema/metadata
+  scope. P6.7b2b/b2c/b/P6.7, original matrix, confirmation/final/analysis
+  criteria and the full goal stay open. No goal pause/completion/blocker.
+- **Checkout:** `master`, HEAD still
+  `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`. Rechecked AGENTS, current
+  plan/handoff/log, actual snapshot/state/role/selector helpers and existing
+  validators. The ten post-review commits remain reconciled by earlier
+  entries. Preserve every dirty/untracked c5–c9/P6.7 source and ignored
+  artifact; no pinned helper, setting, baseline, seed or metric changed.
+- **Prospective plan change:** ADR-0154 split b2 into (a) pure envelope/
+  checkpoint schemas, (b) independent raw cost/guard/supply/selector links,
+  and (c) bounded exclusive artifacts and complete repetition. App-level
+  per-seed schedule/combined/parent checks are reusable; gating/replay/sleep
+  checks currently live in CLI adapters, which app must not import. All
+  original acceptance criteria remain on b2/parents. Only a is checked.
+- **Files/boundaries:** New app modules `continual_confirmation_json.py`,
+  `continual_confirmation_checkpoints.py`, `continual_confirmation_validation.py`
+  and `tests/test_continual_confirmation_validation.py`; new ADR-0154 and
+  `docs/p67-confirmation-validation.md`; README/architecture/changelog/plan
+  and training handoff updated. Decoded JSON is checked without dataset/
+  model construction, training/scoring or IO. Public API is deliberately
+  `verify_confirmation_envelope`, not a complete scientific validator.
+  Exact full scope/order/seals, role IDs/counts/hash links, strict canonical
+  state/field/type/tag/digest inventories, configuration/model/shape/width,
+  seeded initial tensors/RNGs, and clock/retention/lineage/selector views
+  are checked. All declared supplemental witnesses have exact wake/row
+  clocks and complete equality after rejection/skip. Initial state uses
+  deterministic local RNG fingerprints, not supplied training counters.
+- **Tests and repairs:** Initial collection failed (exit 1) on an incorrect
+  `src.core.neuron_lineage` import; `rg` located actual
+  `src.core.neuron_adaptation`, and import plus two canonical type literals
+  were repaired. Mypy with ignored missing imports had not caught that
+  runtime failure. After repair **38 passed in 3.15 s**; added ambiguous
+  canonical/type/nesting cases, **121 related passed in 21.08 s**; added
+  reward/history/decision types and self-consistent guard row-clock
+  corruption. Several patch attempts refused before mutation because
+  formatter context differed; reread exact lines and reapply matching
+  hunks. No failed fixture was discarded or represented as a result.
+- **Final test command, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_validation.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_training.py tests/test_continual_confirmation_manifest.py tests/test_p67_confirmation_scope.py
+  ```
+
+  **125 passed in 21.30 s; 51 new; zero skipped.** Fresh first development
+  seeds 41/41/67/79/263/347 cover all six actual seed bodies and **56 model
+  cells**; source/model/train/score raising sentinels apply during JSON
+  validation. Resealed configuration/clock/selector/lineage/seeded tensor/
+  RNG/view/type/role/rollback/schema forgeries fail. Separate metadata-only
+  envelope fixtures use a per-seed delegation spy to verify sixty reserved
+  rows/fifty distinct identities and partial/reordered/extra/type/seal
+  rejection. They contain no actual checkpoint bodies and are **not**
+  complete 560-cell validation or scientific confirmation.
+- **Static checks, exit 0 (also repeated after documentation):**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m mypy
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_json.py src/app/continual_confirmation_checkpoints.py src/app/continual_confirmation_validation.py tests/test_continual_confirmation_validation.py
+  git diff --check
+  ```
+
+  Ruff pass, mypy **375 files**, four files formatted, diff check pass;
+  only existing LF-to-CRLF notices. `ruff format` on those four files was
+  used during implementation. All commands use the existing virtualenv.
+- **Read-only evidence revalidation, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -c "import json; from pathlib import Path; from scripts.inspect_p67_confirmation_scope import inspect_confirmation_scope; saved=json.loads(Path('artifacts/runs/p67-confirmation-scope.json').read_text(encoding='utf-8')); current=json.loads(json.dumps(inspect_confirmation_scope(),allow_nan=False)); assert current==saved; print('12 development bundles and 20 usage files revalidate; saved scope unchanged')"
+  ```
+
+  All twelve historical development bundles/twenty usage files revalidate;
+  saved scope remains exact. No new experiment/artifact, reserved source/
+  model or scientific/final score. Tests need no ignored files; this real
+  read-only check uses saved development evidence. Current candidate app
+  SHA identities (not a scientific source freeze): JSON
+  `307642a05dd2b73ef3af4a3714c33f85926e205c25d71d85c9dc796d6d9ff203`,
+  checkpoints `582867deced5948c443e81601435ad161c93a89b534422db174e354c6f3c283c`,
+  validation `a815a6579c0cece410a36f255ac18bbc3dd4c70141f07f0771968db07429b311`.
+- **Limits/skips/blockers:** Full CPU suite, CUDA, reserved training,
+  runtime/artifact failure gates, sweeps, uncertainty and final scoring
+  skipped; no selected skips or external blocker. Same Windows 11/Intel
+  Core i7-12700K/Python 3.14.7/NumPy 2.4.6. Hashed JSON cannot reconstruct
+  trained tensors, prove physical aliases or establish role-array contents;
+  live capture/source-bound reproduction remains required. Raw family costs
+  and decisions are still unchecked. No dependency/environment change,
+  commit, push, publication or unrelated edit.
+- **Exact next action:** Prospectively add explicit required parameter-hash
+  contracts to the unrun checkpoint schema. Gating uses
+  `p63-shallow-parameter-tensors-v1`, sleep uses
+  `p63-sleep-factor-shallow-parameters-v1`, and uniform/replay uses
+  `p63-replay-shallow-parameter-tensors-v1`; a digest alone cannot be
+  transformed across prefixes after training. Capture all three from actual
+  tensors, independently derive initial hashes, link existing raw endpoint/
+  guard hashes and add forged-link regressions without changing pinned old
+  helpers. Then implement app-only all-six raw work/decision validation,
+  followed by b2c resource/artifact failures before any reserved source.
+  Only after all gates pass run/repeat all 560 unscored cells; retain
+  P6.7c/P6.11 independent final prerequisites. Full goal remains active.
+
+### 2026-09-30 — P6.7b2b1 original parameter-contract links
+
+- **Previous goal turn classification:** progress (P6.7b2a independent
+  checkpoint schemas, whose completed handoff was recorded above).
+  **Completed: P6.7b2b1**; P6.7b2b2/b2b/b2c/b2/b/P6.7 and every original
+  matrix/confirmation/final criterion remain open. The full goal is active.
+- **Checkout/reconciliation:** Rechecked on-disk AGENTS, plan/handoff/log,
+  `git status --short` and `git log -1 --format='%H %s'`; `master`/HEAD still
+  `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`. Preserve all earlier dirty/
+  untracked work. Original pinned scientific sources/configurations and all
+  seed reservations, baselines, thresholds and metrics are unchanged.
+- **Prospective split/rationale:** Before implementation, add b2b1 for the
+  hash-contract dependency and b2b2 for remaining full raw work/controller/
+  state checks. Read all three existing hash encoders: identical normalized
+  float64 tensors are prefixed differently by gating, replay and sleep.
+  After-trained SHA values cannot be converted between those domains.
+  Combined/parent intermediate records contain hashes rather than full
+  tensor states; explicitly bind their wake/decision/epoch chains and held
+  checkpoints at epochs 12/24 in b2b1, leaving full state/cost checks to b2b2.
+  Amend the still-unrun confirmation schema, preserving its existing uniform
+  field and every parent acceptance criterion. No old artifact is migrated.
+- **Implementation/structure:** Add
+  `src/app/continual_confirmation_parameter_links.py` (explicit contracts
+  and pure raw endpoint/guard/epoch links). Change the new confirmation
+  state/checkpoints/validation modules, two existing confirmation test files,
+  README/architecture/changelog/plan/log/ADR-0154 and validation/training docs.
+  Every live initial/A/B/guard checkpoint now includes
+  `parameter_sha256_by_contract`, with exactly the three original domain
+  prefixes; the legacy uniform field must agree with its replay entry.
+  Capture hashes from actual tensor bytes; pure checkpoint validation
+  independently regenerates all initial hashes from declared seed/width.
+  Raw initial/final facts link for all six families; A facts link where
+  present, sleep pre/post link to witnesses and held A, schedule decisions
+  link to witnesses/boundaries, combined/parent before/after link to wake/
+  epoch records with rejected/skip equality and accepted parent proposals.
+  All boundary epoch maps link to complete held A/B parameter hashes.
+  App imports no CLI validator, opens no files or sources, and scores nothing.
+- **Red/green evidence:** Regression first:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_state.py -k original_hash_contract
+  ```
+
+  **1 failed, 18 deselected in .30 s**, exit 1: expected missing new map.
+  One initial multi-file patch refused before mutation because its last
+  context did not exist; verify unchanged files with `rg`, then reapply.
+  Correct combined decision inventory during inspection to include all
+  full-minus-one arms, including the explicit no-sleep decision. No failed
+  fixture or scientific row is selected away. After implementation,
+  state+validation **108 passed in 4.88 s**; add a backprop live-contract
+  case, four forced-rejection families and six missing-method forgeries,
+  then **119 passed in 7.18 s**, zero skips. Three live model kinds match
+  all original hash helpers before/after a changed parameter. Existing
+  controlled-parent and planned-width fixtures verify the same new schema.
+- **Final related tests, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_state.py tests/test_continual_confirmation_training.py tests/test_continual_confirmation_validation.py tests/test_continual_confirmation_manifest.py tests/test_p67_confirmation_scope.py tests/test_continual_gating_pilot.py tests/test_continual_replay_factor_pilot.py tests/test_continual_sleep_factor_preflight.py tests/test_continual_schedule_factor_preflight.py tests/test_continual_combined_factor_preflight.py tests/test_continual_parent_factor_preflight.py
+  ```
+
+  **223 passed in 43.39 s; 50 added in this increment; zero skipped.**
+  All six original first development seeds and 56 normal fixture cells
+  preserve exact legacy unscored trajectories/copy/arrival/evaluation
+  gates. Missing/extra/swapped/malformed contracts, uniform alias mismatch,
+  resealed initial plus matching raw hash, every raw initial/final/A,
+  sleep/schedule guard and combined/parent wake/guard/boundary hash
+  corruption fail. Missing method rows fail. Forced guards reject every
+  attempted proposal in sleep/schedule/combined/parent; every resulting
+  JSON body validates with model/source/train/score functions forbidden.
+  Rejection counters remain original facts; full cost derivation is next.
+- **Static commands, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff format src/app/continual_confirmation_state.py src/app/continual_confirmation_parameter_links.py src/app/continual_confirmation_checkpoints.py src/app/continual_confirmation_validation.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_validation.py
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m mypy
+  ```
+
+  Ruff pass, mypy **376 files**; six files formatted. Final format/diff and
+  static checks are repeated after docs/log below. No dependency or runtime
+  environment change; Python 3.14.7/NumPy 2.4.6 on the same Windows 11/
+  Intel Core i7-12700K. No commit, push, publication or unrelated edit.
+- **Read-only historical check, exit 0; no output file:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -c "import json; from pathlib import Path; from scripts.inspect_p67_confirmation_scope import inspect_confirmation_scope; saved=json.loads(Path('artifacts/runs/p67-confirmation-scope.json').read_text(encoding='utf-8')); current=json.loads(json.dumps(inspect_confirmation_scope(),allow_nan=False)); assert current==saved; print('12 development bundles and 20 usage files revalidate; saved scope unchanged')"
+  ```
+
+  Twelve historical bundles/twenty usage files and exact saved scope pass.
+  No new experiment artifact, reserved source/model or final/outer value.
+  Fresh fixture tests require no ignored evidence; the real historical
+  check does. `Get-FileHash -Algorithm SHA256 -LiteralPath src/app/continual_confirmation_state.py,src/app/continual_confirmation_checkpoints.py,src/app/continual_confirmation_validation.py,src/app/continual_confirmation_parameter_links.py | Select-Object Path,Hash | ConvertTo-Json -Compress`
+  records current candidate identities (not a b2c source-map freeze): state
+  `2808f11b22aa78894fd322a686e423cd5052d0fea0f7508209f6f89181394cd1`,
+  checkpoints `4b00b454d5b317d2190ca942d36e93e09446b4f043956fd74213abc5d27f73ba`,
+  validation `2d220d74e26533c33b14f1a5267923abe8d6691f9478580fb4e5f67f64272733`,
+  parameter links `4c1fb55e5d414ed7fbb99392ede60d05eafd8c3d025e38e76cfa137f62130262`.
+- **Skips/limits/blockers:** Full CPU suite, CUDA, broad sweeps, reserved
+  560-cell execution, actual joint resource/artifact failures, uncertainty
+  and final scoring skipped; no selected skips or external blocker.
+  Three after-trained domain hashes cannot be independently reconstructed
+  from canonical array fingerprints. Schema/available raw links plus live
+  capture are verified here; future exact source-bound reproduction and
+  full cost/state/controller gates remain mandatory. Metadata-only full
+  envelope tests still use a delegation spy, not 560 trained bodies.
+- **Exact next action:** Implement
+  `src/app/continual_confirmation_work_validation.py` with exact all-six raw
+  schemas/types and independent work/state links. Start with all six normal
+  and four forced-rejection development fixtures as fixed acceptance inputs;
+  derive gating/replay/sleep app checks from inspected original rules
+  without importing CLI, reuse unchanged schedule/combined/parent pure
+  per-seed seams. Refuse forged actual/rejected optimizer/latent/guard/
+  retention/transient-capacity, controller/supply/selector and held full
+  state/witness facts. Expose the complete scientific validator only when
+  all six pass. Then b2c binds saved scope/config/source and enforces
+  exclusive artifacts plus 16,000 updates/600 s/observed 512 MiB before any
+  reserved source; run/repeat all 560 unscored cells only after those gates.
+  P6.7c/P6.11 independent final/analysis prerequisites remain unchanged.
+  **After all documentation/log edits:** repository Ruff and mypy (376
+  files) pass, exit 0. The following also pass, exit 0:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_state.py src/app/continual_confirmation_parameter_links.py src/app/continual_confirmation_checkpoints.py src/app/continual_confirmation_validation.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_validation.py
+  git diff --check
+  ```
+
+  `git status --short` confirms preserved prior changes plus this new
+  parameter-link module. Only existing LF-to-CRLF notices. No live
+  experiment/process or reserved execution; all work remains uncommitted.
+
+### 2026-09-30 — P6.7b2b2 all-family raw work/controller/full state links
+
+- **Previous goal turn classification:** progress (completed b2a and b2b1
+  checkpoint/parameter gates). **Completed: P6.7b2b2 and parent P6.7b2b**
+  for independent strict train-fact validation. P6.7b2c/b2/b/P6.7, original
+  matrix/reserved execution/final/analysis criteria and the full goal remain
+  open. No goal completion/pause/blocker.
+- **Checkout:** `git status --short` and `git log -1 --format='%H %s'`
+  confirm `master`/HEAD `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`.
+  Rechecked on-disk AGENTS, current plan/handoff/log, actual old CLI simple
+  validators and pure periodic seams, canonical snapshots, source rules and
+  core traffic counters. Preserve every prior dirty/untracked file and
+  artifact. No old pinned helper, baseline, configuration, reservation,
+  threshold or metric changes. Earlier post-review reconciliation holds.
+- **Decision before implementation:** Mark b2b2 in progress and record
+  closed existing dataclass annotations plus explicit TypedDict schemas for
+  dictionary-based combined/parent facts. Reject unsupported/open Any
+  annotations; never instantiate a learning model or import a CLI validator
+  in app. Reimplement gating/replay/sleep rules and reuse original pure
+  schedule/combined/parent per-seed validators, preserving their strict
+  three-seed whole-result gates and source pins. No acceptance weakened or
+  original task removed; remaining resource/artifact scope stays b2c.
+- **New structure/boundaries:**
+
+  ```text
+  src/app/continual_confirmation_fact_schema.py       closed raw fact types/keys
+  src/app/continual_confirmation_simple_work.py       independent gating/replay/sleep rules
+  src/app/continual_confirmation_work_validation.py   whole-scope work gate and held state links
+  tests/test_continual_confirmation_work_validation.py
+  ```
+
+  README/architecture/changelog/plan/log/ADR-0154 and validation/training
+  guides updated. Exact raw schemas reject unknown nested fields, bool or
+  float counts, unsupported types and scored/nonfinite input. Simple rules
+  derive all wake/latent/replay/capacity costs, identical FIFO exposure,
+  chemical diagnostics, guarded outcomes, transient split/prune lineage and
+  complete sleep held A state. Reused periodic rules independently derive
+  controller/guard/replay/selector/work facts; new links bind full held A/B
+  state digests, clocks, lineage, selectors, retained/exposed IDs and raw
+  capacity. Schedule energy windows link to the configured tail of captured
+  history. Baseline traffic binds every successful wake/applied replay update
+  at both held stages; prediction never records traffic and these fixed
+  baselines never reset it. Rejected circadian replay is counted separately.
+- **Public contract:** `verify_confirmation_payload` first verifies the
+  exact whole frozen manifest/all sixty reserved rows/560 cells and evaluation
+  seals via the existing envelope gate, then checks every raw body and
+  returns typed derived `SeedWork` records. Family wake totals, maximum actual
+  executed updates and guards, retained-array declarations and the unchanged
+  joint 16,000 update cap are enforced. No partial production flag. App owns
+  no IO/resource execution or source-file binding; b2c must bind provenance,
+  live checkpoints and actual resource stops before scientific execution.
+- **Red/green commands and repairs:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_work_validation.py
+  ```
+
+  Initial collection exit 1: the requested work module did not exist yet.
+  After implementation **3 passed/1 failed in 2.86 s**, exit 1: incorrectly
+  equated the full saved energy history to its trigger window. Inspection
+  of `_decide_and_apply` and core history shows the trigger takes the last
+  configured window while core retains a longer bounded history. Bind the
+  exact tail without changing the trigger/threshold; then **44 passed in
+  7.54 s**. Add nested/cost/supply/exposure/guard/selector/state forgeries and
+  complete metadata delegation/aggregate bounds, **92 passed in 12.55 s**.
+  Inspect both baseline `train_epoch` implementations and add applied-work
+  traffic links/resealed tests, **104 passed in 13.77 s**. No failed source,
+  row or metric is selected away. Forced combined rejected replay expectation
+  is 72, fixed before execution from six replay arms × six attempts × two
+  updates (schedule 12, sleep/parent zero). Split two long validation helpers
+  by boundary/effect responsibility; no algorithm or raw fact changes.
+- **Related regression command, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_work_validation.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_training.py tests/test_continual_confirmation_validation.py tests/test_continual_confirmation_manifest.py tests/test_p67_confirmation_scope.py tests/test_continual_gating_pilot.py tests/test_continual_replay_factor_pilot.py tests/test_continual_sleep_factor_preflight.py tests/test_continual_schedule_factor_preflight.py tests/test_continual_combined_factor_preflight.py tests/test_continual_parent_factor_preflight.py
+  ```
+
+  **327 passed in 56.26 s, zero skipped**, covering all six normal first
+  development bodies (56 model cells) and four additional families with
+  every attempted guard forced to reject. Model/source/train/score raising
+  sentinels apply during validation. Exact old trajectory, all-A-before-B,
+  independent copies, original schemas, cost/parameter/rollback/outer/final
+  seals remain passing. Add five final public source/evaluation/finite gate
+  cases without implementation changes, then the focused command above
+  passes **109 tests in 13.93 s, zero skipped**. Source reference drift,
+  final/outer release, scored/nonfinite and partial scope fail before any
+  work-body/model/source call. Full reserved metadata delegation and family
+  bound tests use a spy, contain no trained bodies, and are not actual
+  560-cell training/validation evidence.
+- **Final review regression and repair:** A nested legacy sleep result could
+  claim `final_released=True` while the outer row remained sealed. The new
+  regression reproduced the gap, **1 failed/109 deselected in 2.31 s**, exit
+  1, with the command below. Add an explicit `False` check matching the old
+  CLI rule, then format and repeat the complete related command above:
+  **333 passed in 56.53 s, zero skipped**, exit 0. This increment adds
+  **110 tests**. All six families and four forced-rejection trajectories
+  remain covered; no metric, baseline or seed selection changed.
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_work_validation.py -k nested_sleep_final_release
+  ```
+- **Static commands, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff format src/app/continual_confirmation_fact_schema.py src/app/continual_confirmation_simple_work.py src/app/continual_confirmation_work_validation.py tests/test_continual_confirmation_work_validation.py
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m mypy
+  ```
+
+  Ruff pass, mypy **380 files**, four formatted. Final static/format/diff
+  checks repeated after docs/log with outcomes below. No new dependency,
+  environment setting, commit, push, publication or unrelated edit.
+- **Read-only evidence verification, exit 0; no output file:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -c "import json; from pathlib import Path; from scripts.inspect_p67_confirmation_scope import inspect_confirmation_scope; saved=json.loads(Path('artifacts/runs/p67-confirmation-scope.json').read_text(encoding='utf-8')); current=json.loads(json.dumps(inspect_confirmation_scope(),allow_nan=False)); assert current==saved; print('12 development bundles and 20 usage files revalidate; saved scope unchanged')"
+  ```
+
+  Twelve complete historical bundles/twenty usage files and saved scope
+  remain exact. No new experiment artifact, reserved source/model or
+  outer/final score. Fixture tests require no ignored artifacts; real
+  historical verification uses the existing saved evidence. Current
+  candidate identities, not yet a scientific b2c source-map freeze, from
+  `Get-FileHash -Algorithm SHA256 -LiteralPath src/app/continual_confirmation_fact_schema.py,src/app/continual_confirmation_simple_work.py,src/app/continual_confirmation_work_validation.py | Select-Object Path,Hash | ConvertTo-Json -Compress`:
+  raw schemas `01f8437eb53eda763edb73c8695c6bd18dbbfa8cb6d8fef0fb7f874e3dc47862`,
+  simple work `f440aa80935f49e76cb2d9876f0beb476b0df18f6ecea4e8dd56ce408065de64`,
+  work gate `cf26b0e73c5230f033c41a25cc436e4e6faa59b76a2375f89d08d6836ec4113f`.
+- **Limits/skips/blockers:** Full CPU suite, CUDA, large sweeps, actual joint
+  RSS/time/artifact lifecycle, reserved training, uncertainty and final
+  scoring skipped; no selected skips or external blocker. Same Windows 11/
+  Intel Core i7-12700K/Python 3.14.7/NumPy 2.4.6. JSON fingerprints cannot
+  reconstruct unseen tensors or chemical variance/means from array hashes,
+  prove physical aliases or actual role content. Verified schemas, decision
+  arithmetic and full declared links require exact source-bound live capture/
+  comparison and repeated train reproduction in b2c. This gate does not claim
+  those resource/provenance/scientific results. All cost/algorithm settings
+  are the original fixed ones, including rejected work and negative results.
+- **Exact next action:** Implement the P6.7b2c boundary, starting by inspecting
+  existing process-RSS/bounded worker/artifact patterns and the exact saved
+  P6.7a scope/source references. Freeze the prospective confirmation source
+  map/configuration/request identity before data, add an exclusive local
+  request/result/audit/failure adapter and an actual independent update
+  counter plus 600 s/observed 512 MiB at 5 ms stops. Test occupied outputs,
+  changed scope/source, missing/malformed/forged result, worker/update/wall/
+  RSS failure and late held-state corruption before any reserved builder.
+  Only after all those correctness gates pass, execute and repeat every one
+  of the 560 unscored reserved cells under unchanged caps and independently
+  verify complete saved facts/live checkpoints/derived work and deterministic
+  equality. Keep b2c/parents open until actual evidence; P6.7c still needs
+  P6.11 statistics/uncertainty and separate final release. Full goal active.
+- **Final documentation/static gate, exit 0:** After recording the final
+  regression, new source identity and acceptance evidence, check b2b2 and
+  b2b and move the handoff to b2c. Preserve every other open criterion.
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m mypy
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_fact_schema.py src/app/continual_confirmation_simple_work.py src/app/continual_confirmation_work_validation.py tests/test_continual_confirmation_work_validation.py
+  git diff --check
+  ```
+
+  Ruff passes; mypy reports no issues in **380 files**; **four files already
+  formatted**. Diff check passes with only existing LF-to-CRLF notices.
+  Repeat the diff check after this final log entry; no source code changed
+  after the 333-test related gate. No live process or new experiment artifact.
+
+### 2026-09-30 — P6.7b2c1/c2 source, live resource and artifact correctness gates
+
+- **Previous goal turn classification:** progress (completed b2b2/b2b, 333
+  related tests and documented evidence). **Completed: P6.7b2c1/c2**, for
+  correctness/provenance/resource/artifact fixtures before reserved data.
+  C3/c/b2/b/P6.7, original matrix and final/analysis criteria remain open.
+  The full goal stays active; no goal completion, pause or blocker.
+- **Checkout/reconciliation:** Rechecked on-disk AGENTS, plan/handoff/log,
+  `git status --short` and `git rev-parse HEAD`: `master` remains
+  `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`. Prior reviewed-commit
+  reconciliation holds. Preserve all earlier dirty/untracked c5–c9/P6.7
+  work and ignored artifacts; no original helper, source pin, setting,
+  baseline, seed, threshold or metric changes. Initial Windows wildcard
+  searches and two guessed infra paths failed; corrected to actual files
+  and `rg` glob filters. These reads changed no state.
+- **Plan decision before implementation:** Inspection shows old selected
+  source maps omit some transitive helpers, old RSS checks happen after
+  training, and saved work totals cannot enforce rolled-back execution.
+  Split b2c before coding into c1 exact scope/source/request binding, c2
+  live limits/exclusive failure gates, c3 two complete reserved processes
+  plus independent readback. Preserve every original parent criterion.
+  ADR-0155 records scoped optimizer observation without editing pinned core.
+- **New structure/boundaries:**
+
+  ```text
+  src/app/continual_confirmation_execution.py   pure request/work/RSS checks
+  src/infra/continual_confirmation_io.py        finite JSON, pins, exclusive artifacts
+  src/infra/continual_confirmation_runtime.py   live optimizer/resource observation
+  scripts/run_p67_confirmation_training.py      child, publication, independent readback
+  tests/test_continual_confirmation_execution.py
+  tests/test_continual_confirmation_runtime.py
+  tests/test_p67_confirmation_training_cli.py
+  docs/p67-confirmation-execution.md
+  docs/adr/ADR-0155-bind-joint-worker-and-count-rolled-back-execution.md
+  ```
+
+  App constructs no source/model and owns no IO. Infra wraps original
+  baseline `train_epoch` and circadian `_run_training_step` only inside a
+  scoped context, restoring methods on success/error. Counts live outside
+  snapshots, cover inherited parent controls and compare exact total and
+  model-kind partitions to independently validated complete facts. Stop
+  before update 16,001. RSS starts before child binding, samples at 5 ms
+  plus explicit optimizer/stage boundaries, retains earlier peaks, includes
+  live copies/validation/full serialization, and refuses invalid telemetry.
+  Both observer and complete child timeout enforce 600 s; observed RSS cap
+  remains 512 MiB. Stdout/framing/parent publication stay outside sampling
+  as predeclared. All live held state/roles are compared after JSON validation
+  and serialization. No fixture/partial/seed/metric/budget production flag.
+- **Provenance:** Exact saved scope bytes must match, and the original
+  twelve complete development bundles/twenty usage files revalidate before
+  any request/data. All 78 source-map entries plus separately bound adapter
+  cover the exact 79-file static local import closure, including package
+  files/conditionally unused Torch code. Independent source-closure tests
+  need no ignored artifacts. Requests bind resolved full manifest, command,
+  Python/NumPy/platform/processor and UTC time; child/parent/reader check them
+  again. Clean tests use isolated scope/source fixtures; metadata-only IO
+  success spies are explicitly not 560-cell training evidence.
+- **Red/green commands and outcomes:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_execution.py tests/test_p67_confirmation_training_cli.py
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_runtime.py
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_p67_confirmation_training_cli.py -k occupied_artifact
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_execution.py tests/test_continual_confirmation_runtime.py tests/test_p67_confirmation_training_cli.py
+  ```
+
+  Binding first **37 passed/.85 s**. Runtime tests first fail collection
+  because the module was absent (**one error/.39 s**); implement it, fix
+  fixture constructor `config` to actual `circadian_config` (**one
+  failed/.34 s**) and uppercase RSS regex (**4 passed/1 failed/.41 s**),
+  then **11 passed/5.93 s**. Combined early gate **49 passed/6.67 s**.
+  Exclusive tests first fail on absent `artifact_paths` (**1 failed/.38 s**),
+  then adapter **43 passed/2.20 s**, claim/race additions **45/2.46 s**,
+  model-kind/time additions **82/8.13 s**. Last-role corruption is refused
+  with a stronger actual content/hash error; correct the regex after
+  **99 passed/1 failed/17.68 s**. No scientific assumption/rule was weakened.
+  Early broad gate **441 passed/77.46 s**, zero skips.
+- **Publication review red regressions and repair:** Three new cases show
+  altered published request bytes still enter launch, altered result bytes
+  receive an audit, and a noncooperating request writer gets our failure
+  marker. Focused first **1 failed/65 deselected/.55 s**, then all three
+  **3 failed/65 deselected/.62 s**, exit 1:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --tb=short tests/test_p67_confirmation_training_cli.py -k 'changed_published_bytes or noncooperating'
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_p67_confirmation_training_cli.py -k 'changed_published_bytes or noncooperating or dependency_closure'
+  ```
+
+  Derive intended request/result encoding hashes before writing and compare
+  actual bytes before launch/audit. Preserve foreign request collisions
+  without adding our failure file. Only this unrun new IO helper/pin changes;
+  original source pins stay exact. **4 passed/64 deselected/1.81 s**, exit 0.
+  Claimed failure retains request/failure and any incomplete result; audit
+  failures are caught too. Occupied paths, competing claims, child exit/
+  timeout/cancel, missing/malformed/duplicate/nonfinite/forged payload,
+  counts/model kind/time/RSS, source/request drift and all publication errors
+  refuse success. Last development-family A parameter, B selector RNG and
+  role-label mutations fail after independent body verification. The six
+  development families retain 1,344 wakes; forced rejected replay is 12
+  schedule/72 combined/zero sleep/parent, externally observed and derived.
+- **Final related correctness command, exit 0, before reserved builders:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_execution.py tests/test_continual_confirmation_runtime.py tests/test_p67_confirmation_training_cli.py tests/test_continual_confirmation_work_validation.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_training.py tests/test_continual_confirmation_validation.py tests/test_continual_confirmation_manifest.py tests/test_p67_confirmation_scope.py tests/test_continual_gating_pilot.py tests/test_continual_replay_factor_pilot.py tests/test_continual_sleep_factor_preflight.py tests/test_continual_schedule_factor_preflight.py tests/test_continual_combined_factor_preflight.py tests/test_continual_parent_factor_preflight.py tests/test_process_memory.py
+  ```
+
+  **444 passed in 76.81 s, zero skipped**, including **108 new** tests.
+  Collection of the three new files confirms 108 in .33 s. Original
+  trajectory/parity/all-A-before-B/copy/role/final/rollback/schema gates pass.
+- **Static commands, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_execution.py src/infra/continual_confirmation_io.py src/infra/continual_confirmation_runtime.py scripts/run_p67_confirmation_training.py tests/test_continual_confirmation_execution.py tests/test_continual_confirmation_runtime.py tests/test_p67_confirmation_training_cli.py
+  .\.venv\Scripts\python.exe -m mypy
+  ```
+
+  Ruff pass, seven formatted, mypy **387 files**. Earlier mypy reports
+  optional request timestamp and unannotated AST module list were fixed by
+  explicit type narrowing/list annotation; no scientific behavior changed.
+  No dependencies, environment settings, commit, push or publication.
+- **Actual read-only binding, exit 0; no output file or reserved data:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -c "from pathlib import Path; import json; from scripts.run_p67_confirmation_training import execution_bindings; from src.app.continual_confirmation_execution import digest_json; b=execution_bindings(Path('artifacts/runs/p67-confirmation-train/confirmation-train.request.json')); print(json.dumps({'source_count':len(b['source_sha256']),'source_map_sha256':digest_json(b['source_sha256']),'adapter_sha256':b['adapter_sha256'],'scope_sha256':b['scope_sha256'],'occupied_outputs': [str(p) for p in (Path('artifacts/runs/p67-confirmation-train'),Path('artifacts/runs/p67-confirmation-train-repeat')) if p.exists()]},sort_keys=True))"
+  ```
+
+  No occupied output directory. All historical references/scope revalidate.
+  Prospective final map **78 entries**, SHA
+  `b8e6ea624228c7422b61bf48fc736cd187893eedd6ce1fd49558f6b11bbd3735`;
+  adapter `e6bafe8bc6c7e2199a578b26ff991a45fbbf4d45085e760fd61d0f9417250445`;
+  scope `622feead54f155521928341151c8496c23c02a54b355b1b3b1e0f68b76c5772f`.
+  `Get-FileHash -Algorithm SHA256 -LiteralPath src/app/continual_confirmation_execution.py,src/infra/continual_confirmation_io.py,src/infra/continual_confirmation_runtime.py,scripts/run_p67_confirmation_training.py | Select-Object Path,Hash | ConvertTo-Json -Compress`
+  confirms app `dc45ad04c9381bee5cbee0ab7e3d70f7da6676304d056a18668be23affc16006`,
+  IO `c77b6fdc58f42c924384e28acce53e9872b279213b77179293f647c4b5b86c82`,
+  observer `faf8ea73611c179eb4238138c831d0db94c8959130c37e4b8cde6efa87ba8078`.
+  Earlier `0dd470f9...` map/`a36d5680...` adapter were unrun pre-review
+  candidates, superseded before data by the publication repairs above.
+- **Skips/artifacts/blockers at this prelaunch gate:** Full CPU suite, CUDA,
+  sweeps, reserved training, uncertainty and final scoring skipped so far;
+  no selected skip, live process, new scientific artifact or external blocker.
+  Same Windows 11/Intel Core i7-12700K/Python 3.14.7/NumPy 2.4.6. No general
+  portability, hard allocation ceiling or final accuracy claim.
+- **Exact next action:** With c1/c2 correctness gates recorded, execute c3's
+  complete fixed public unscored CLI into new `artifacts/runs/p67-confirmation-train`,
+  then the complete repeat into `artifacts/runs/p67-confirmation-train-repeat`
+  under unchanged caps. Independently read back both full bundles, verify
+  every source/request/result/audit/observed resource/derived work identity
+  and require exact deterministic result bytes. Preserve all cells/failures
+  and mark c3/c/b2/b only after complete evidence. P6.7c/P6.11 must still
+  freeze statistics/uncertainty and independent final release. Full goal active.
+
+### 2026-09-30 — P6.7b2c3 complete reserved training, repeat and independent readback
+
+- **Checkout and authorization:** Continue the same active full-plan goal.
+  `master` remains at `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`; preserve all
+  earlier dirty/untracked c5–c9/P6.7 work. The source/request freeze and final
+  444-test correctness gate above precede the first reserved builder. No
+  production source changed afterward, no dependency/environment change,
+  commit, push, external publication or agent delegation.
+- **Completed task IDs:** P6.7b2c3, P6.7b2c, P6.7b2 and P6.7b. The complete
+  original unscored acceptance is met by two actual child processes retaining
+  all six families/fifty distinct reserved sources/sixty family-seed instances/
+  560 cells, exact frozen scope/settings/sources and complete live checkpoint/
+  pure fact/observed cost/resource/artifact checks. Independent public readers
+  pass both bundles, and the entire deterministic result bytes are identical.
+  P6.7/P6.7c, original matrix and P6.9–P6.12 remain unchecked: no outer
+  selection or independent final release, scored analysis or winner claim.
+- **Scientific commands, all exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_training --output-dir artifacts/runs/p67-confirmation-train
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_training --output-dir artifacts/runs/p67-confirmation-train-repeat
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_training --read-only --output-dir artifacts/runs/p67-confirmation-train
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_training --read-only --output-dir artifacts/runs/p67-confirmation-train-repeat
+  ```
+
+  Canonical worker/parent observed times **32.50460129999556/44.24597899999935 s**;
+  repeat **32.650750799999514/44.65887279999879 s**. Every current
+  source/request/result/audit identity, strict derived per-seed work, held
+  checkpoint/state, resource cap and model-kind partition passes. Both
+  output directories were absent at the prelaunch check. They now contain
+  exactly request/result/audit, with no failure or remaining claim. The last
+  repeat readback session 37898 was observed exit 0; no live process remains.
+- **Exact deterministic comparison command, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -c "import json; from pathlib import Path; from hashlib import sha256; runs=[Path('artifacts/runs/p67-confirmation-train'),Path('artifacts/runs/p67-confirmation-train-repeat')]; first=(runs[0]/'confirmation-train.result.json').read_bytes(); second=(runs[1]/'confirmation-train.result.json').read_bytes(); assert first==second; facts=json.loads(first); manifest=facts['manifest']; assert len(facts['seed_results'])==60; assert sum(len(r['after_b']) for r in facts['seed_results'])==560; assert facts['final_released'] is False and facts['outer_selection_scored'] is False; reports=[]; [reports.append({'directory':str(root),'files':{name:{'sha256':sha256((root/('confirmation-train.'+name+'.json')).read_bytes()).hexdigest(),'bytes':(root/('confirmation-train.'+name+'.json')).stat().st_size} for name in ('request','result','audit')},'observed_updates':json.loads((root/'confirmation-train.audit.json').read_text(encoding='utf-8'))['observed_updates']}) for root in runs]; print(json.dumps({'exact_result_bytes_equal':True,'rows':60,'cells':560,'reports':reports},sort_keys=True))"
+  ```
+
+  Prints exact result equality, 60 rows/560 cells, all file identities and
+  observed counts. A further read-only aggregation of the two small audits
+  asserts equal whole `work` and source maps, reads exact requests/environment/
+  limits, totals every family and hashes/list-checks the six artifacts. No
+  scientific training/score is rerun for this inspection.
+- **Actual work, identical in both:** **13,440 wake + 1,724 applied replay +
+  46 rejected executed replay = 15,210 optimizer updates** under 16,000.
+  Live attempted/successful totals are 15,210, partitioned backprop **3,708**,
+  ordinary PC **3,948**, circadian/parent **7,554**, independently compared to
+  the raw method facts/model types. Family executed totals gating **720**,
+  replay **2,280**, sleep **2,160**, schedule **2,988**, combined **5,142**,
+  parent **1,920**. Rejected replay is schedule **6** and combined **40**;
+  rejected work survives rolled-back clocks. Preserve **770** guarded attempts,
+  **1,540** evaluations/**28,320** inner examples, **46,080** retained labeled
+  array bytes before copies and maximum transient width **14**. Full per-seed
+  costs/roles/guards/selector/supply and both held checkpoints remain saved.
+- **Observed resources/environment:** Fixed 600 child seconds and observed
+  512 MiB at 5 ms remain unchanged. Canonical worker PID **27868**, start RSS
+  **44,978,176**, peak **462,479,360 bytes**, **32,315** samples. Repeat PID
+  **1596**, start **44,769,280**, peak **462,348,288**, **32,319** samples.
+  Worker sampler includes copies, validation and full 134-MB serialization;
+  parent publication/stdout framing stays outside that declared section.
+  Both observations are below 536,870,912; no hard allocation/brief-peak or
+  cross-host/version guarantee. Same Windows 11/Intel i7-12700K/Python 3.14.7/
+  NumPy 2.4.6. UTC starts **2026-10-01T05:18:28.371043+00:00** and
+  **2026-10-01T05:22:18.089994+00:00**, both September 30 locally.
+- **Artifacts and freezes:** Local ignored bundles
+  `artifacts/runs/p67-confirmation-train` and
+  `artifacts/runs/p67-confirmation-train-repeat`. Each deterministic result
+  is **134,554,378 bytes**, SHA
+  `3d85c60627de63769d0f0fc0bf5ec781c77d50468673dab466d8bbe28089e547`.
+  Canonical request **91,195 bytes**, SHA
+  `672ec760c83ce7c423058fecd0bf535ff72734bb4bf9cf1fc4a43891c3edbdc3`;
+  audit **35,826**, SHA
+  `ff308e7a4b72e7e5ffa4c182223825d4b6e5f3f5768a7c7abf81c26cade9a0e0`.
+  Repeat request **91,202**, SHA
+  `2023443417597607c9a16f4cba4f5ad5fb2777ccad54d5af0783059066944456`;
+  audit **35,826**, SHA
+  `d1f461e1c21e6d0721102ba13349f6156d625cfa761399e09a0409e83047d01a`.
+  Scope `622feead54f155521928341151c8496c23c02a54b355b1b3b1e0f68b76c5772f`,
+  full manifest `8d1ed66b33bbc1bf298cc60604c3741afa22bb4b7e0f6636efe166a52672951b`,
+  78-entry map `b8e6ea624228c7422b61bf48fc736cd187893eedd6ce1fd49558f6b11bbd3735`
+  plus adapter `e6bafe8bc6c7e2199a578b26ff991a45fbbf4d45085e760fd61d0f9417250445`
+  remain exact. All 79 local sources/twelve historical bundles/twenty usage
+  records revalidate in both complete readers. Requests/timing/resource
+  audits differ only as independently checked nondeterministic metadata.
+- **Documentation/plan amendment:** Add
+  `docs/p67-confirmation-training-results.md` with every seed, all family
+  costs, resources, commands, artifact identities and unscored limitations.
+  Update execution/ADR-0155/README/architecture/changelog and current
+  composition/validation handoffs. Record c3/c/b2/b completion after this
+  evidence. Split P6.11 into a predeclared contract/pure-analysis fixture gate
+  before P6.7c and a complete scored seed report afterward. Why: original
+  P6.11 requires seed-level intervals and all contrasts, and P6.7c already
+  explicitly depends on that predeclaration before the first final value.
+  Preserve the original parent acceptance, every frozen pair, all unfinished
+  matrix/final/analysis scope and unchanged seeds/metrics/baselines/caps.
+- **Tests/skips:** The prelaunch gate above remains **444 passed/76.81 s,
+  zero skipped**, including 108 new tests; no code changed after it. All four
+  real run/readback commands and byte/metadata comparisons now pass. Full
+  CPU suite, CUDA, large sweeps, scored confirmation, final-role release and
+  uncertainty computations skipped for this unscored increment. No favorable
+  seed stopping, extra tuning, environment edit or ranking inference.
+- **Blockers and exact next action:** No external blocker. Read the frozen
+  P6.8 metric and all six pair contracts, then implement P6.11a: predeclare
+  seed-level summaries/uncertainty and multiple-contrast rules for every
+  retained pair, and test a pure analysis module using synthetic/development
+  fixtures with reserved/final reads forbidden. Only after that gate passes
+  may P6.7c bind both complete training bundles and a separately frozen scored
+  protocol/source/artifact/resource boundary before its first independent
+  final value. Keep P6.11/P6.7 and original criteria unchecked until the actual
+  complete scored reports exist. Full goal remains active.
+- **Closing static commands after report/plan updates, all exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_execution.py src/infra/continual_confirmation_io.py src/infra/continual_confirmation_runtime.py scripts/run_p67_confirmation_training.py tests/test_continual_confirmation_execution.py tests/test_continual_confirmation_runtime.py tests/test_p67_confirmation_training_cli.py
+  .\.venv\Scripts\python.exe -m mypy
+  git diff --check
+  ```
+
+  Ruff pass, **seven files already formatted**, mypy **387 source files**
+  without issues, diff check pass with existing LF/CRLF notices only. The
+  actual report contains all bundle identities and seeds. The final task/
+  handoff readback confirms c3/c/b2/b checked and P6.7c/P6.11/a/b unchecked;
+  code remains frozen. No additional optional training/testing is needed for
+  this complete unscored acceptance. Next action remains P6.11a above.
+
+### 2026-09-30 — P6.11a freeze complete seed analysis before final scoring
+
+- **Continuation classification and checkout:** Previous goal turn is
+  progress: two actual 560-cell runs/readbacks/equality and recorded c3/c/b2/b
+  evidence. Continue the original full plan; no smaller goal is substituted.
+  Re-read repository AGENTS/current plan/log, frozen metric/scope and all six
+  original family pair contracts; inspect actual dirty checkout. `master`
+  remains `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`. Preserve earlier c5–c9/
+  P6.7 code/docs/artifacts. No agent delegation, commit, push or dependency/
+  environment change. The goal remains active.
+- **Completed task:** P6.11a only. Before code or synthetic fixtures, add
+  `docs/p611-confirmation-analysis.md` and ADR-0156, marking a in progress.
+  Preserve all 58 original ordered pairs × both original primary endpoints
+  as one **116-statement** simultaneous family, all **560 cells/580 individual
+  pairs**, ten original seeds per vector and the unchanged metric arithmetic.
+  Use within-seed left-minus-right differences and no cross-family pooling
+  or repeat/example replication. Predeclare Student-t df-nine marginal 95%
+  and Bonferroni simultaneous 95% intervals with explicit normal independent
+  seed-outcome/difference assumptions and narrow scope of interpretation.
+  All secondary endpoints remain descriptive, zero-denominator retention
+  remains null, and failure/constant vectors never get invented inference.
+  This does not complete actual scored P6.11/P6.11b/P6.7c or original matrix.
+- **Why/plan amendments before implementation:** Inspecting the complete
+  frozen pair inventories gives counts 1/3/3/9/22/20, not a favorable selected
+  subset. With ten observations per vector, independently checked fixed
+  quantiles avoid a new runtime distribution dependency. Missing/failed
+  values suppress full planned means/intervals and retain observed-only
+  summaries, counts and every reason; multiplicity never shrinks. Constant
+  discrete outcomes do not estimate population uncertainty or prove
+  equivalence. Before app fixtures, declare numeric SD tolerance **1e−12
+  accuracy fractions**: forty-example differences such as `.35−.30` versus
+  `.20−.15` produce binary roundoff near 1e−17 despite equal count changes.
+  Preserve raw values/SD and suppress that interval; no metric is rounded or
+  changed. The real endpoint/mean resolution 1/40/1/80 is much larger. No
+  seed, baseline, learning/guard setting or cap changes and no method switch
+  based on final values. P6.7c can now be split into reference/final-release
+  correctness then full bounded scored publication/repeat, preserving its
+  original criteria and P6.11b's actual report dependency.
+- **New architecture:** `src/core/seed_statistics.py` validates complete
+  ordered observations and explicit null reasons, uses n−1 sample SD and
+  emits conditional/full means, counts/range/SE and predeclared intervals.
+  `src/app/continual_confirmation_analysis_contract.py` binds exact original
+  scope/metric/final-role/train digest and every inference policy/type;
+  `src/app/continual_confirmation_analysis.py` validates every scheduled
+  identity/outcome and shared within-seed role before any summary, rederives
+  all metric/pair vectors, and keeps raw cells/failures/cost reference.
+  The pure modules read/train/score no source/model and own no IO or scientific
+  provenance proof. Future P6.7c must establish actual final/checkpoint/source
+  provenance. Tests are fabricated numbers on declared IDs, not scored
+  confirmation or a scientific result. Core imports no app/infra/adapters.
+- **Numerical references, all read-only, before fixtures:** Official NIST
+  [paired-observation arithmetic](https://www.itl.nist.gov/div898/handbook/prc/section3/prc311.htm),
+  [unknown-variance intervals](https://www.itl.nist.gov/div898/handbook/prc/section2/prc221.htm),
+  [Bonferroni inequality](https://www.itl.nist.gov/div898/handbook/prc/section4/prc463.htm)
+  and [t density](https://www.itl.nist.gov/div898/handbook/eda/section3/eda3664.htm)
+  support the documented model/formulas. Existing local mpmath **1.3.0**, not
+  added as a dependency, independently calculates quantiles with 60-digit
+  beta-tail inversion and direct density integration. Exact executed command,
+  exit 0:
+
+  ```powershell
+  @'
+  import mpmath as mp
+  mp.mp.dps = 60
+  df = mp.mpf(9)
+  def tail(value):
+      return mp.betainc(df/2, mp.mpf('0.5'), 0, df/(df+value*value), regularized=True)/2
+  def quantile(probability):
+      low, high = mp.mpf(0), mp.mpf(20)
+      for _ in range(180):
+          mid = (low+high)/2
+          if tail(mid) > probability:
+              low = mid
+          else:
+              high = mid
+      return (low+high)/2
+  for name, probability in [('marginal_95',mp.mpf('0.025')),('simultaneous_116',mp.mpf('0.05')/232)]:
+      critical = quantile(probability)
+      density = lambda x: mp.gamma(5)/(mp.sqrt(df*mp.pi)*mp.gamma(df/2))*(1+x*x/df)**(-5)
+      integral = mp.quad(density,[critical,mp.inf])
+      assert abs(integral-probability)<mp.mpf('1e-50')
+      print(name, 'critical',mp.nstr(critical,55), 'tail',mp.nstr(integral,55), 'float',float(critical))
+  print('mpmath',mp.__version__)
+  '@ | .\.venv\Scripts\python.exe -
+  ```
+
+  Exact marginal critical
+  **2.262157162798205542607769637943216168573499909959831996**, float
+  **2.2621571627982053**, upper tail .025. Simultaneous critical
+  **5.403490569214909071009396219762004702231913575266157013**, float
+  **5.403490569214909**, upper tail **.05/232**. Both integration errors
+  below 1e−50 before float rounding. No source/data/model/seed/metric
+  evaluation or new experiment artifact.
+- **Red/repair sequence and commands:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_seed_statistics.py
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_seed_statistics.py -k declared_precision
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_analysis.py
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_seed_statistics.py tests/test_continual_confirmation_analysis.py
+  ```
+
+  Core first fails collection on absent module (**one error/.24 s**), then
+  **33 passed/.10 s** after implementation. Roundoff case first fails on
+  absent policy field (**1 failed/35 deselected/.17 s**); add declared field,
+  then correct the fixture's two decimal subtractions after **1 failed/6
+  passed/.14 s** (the originally chosen pair had identical binary values).
+  **36 passed/.10 s**. App first fails collection on absent module (**one
+  error/.19 s**), then **36 passed/.95 s**; two numerical cases give combined
+  **74 passed/1.21 s**. No requirement or statistical method was weakened.
+  First mypy reports **21 errors/three files**: explicit object→numeric type
+  narrowing and deliberately invalid test replacements/optional reasons.
+  Add narrowing/intentional fixture Any annotations and reason asserts;
+  no experimental behavior change. Formatter reports three unformatted
+  files; format the five new files (three changed/two already formatted).
+- **Final related gate, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_seed_statistics.py tests/test_continual_confirmation_analysis.py tests/test_continual_metrics.py tests/test_continual_confirmation_manifest.py tests/test_p67_confirmation_scope.py tests/test_continual_confirmation_execution.py tests/test_p67_confirmation_training_cli.py
+  ```
+
+  **222 passed in 14.20 s, zero skipped**, including **102 new** tests
+  (36 core/66 app). Complete fabricated scope/order/repeat and all 116 primary
+  statements pass. Known independently enumerated count differences
+  `[2,3,4,5,-4,7,8,-1,0,1]/80` give mean **1/32**, SE **7/480** and both
+  interval endpoints. NIST's ten-value mean/SD example and paired covariance
+  pass; a constant paired vector has dispersion zero despite variable arms.
+  Roundoff, strict numeric/overflow, raw endpoint recomputation, missing/one/
+  all-failed, both failed sides, undefined/above-one retention and altered
+  types/scope/pairs/contracts/counts/roles/final-label forgeries pass. A late
+  invalid cell/role/accuracy raises before any partial summary.
+  Collection command `python -m pytest -o addopts= --collect-only -q
+  tests/test_seed_statistics.py tests/test_continual_confirmation_analysis.py`
+  observes **102 cases/.26 s**.
+- **Additional explicit sentinels after the broad gate:** Strengthen two
+  existing tests with exact cost/provenance-scope assertions plus forbidden
+  final-release and RNG functions. A second full gate was launched and
+  yielded live session **63319**, but a steered goal continuation later
+  returned **Unknown process id 63319**. Its final outcome is unverified,
+  never treated as a passing/failed experimental result. Authoritative
+  handle absence means it is no longer live. No science was restarted.
+  Resolve only the changed tests directly, exit 0:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_analysis.py -k 'retain_all_cells or without_source_model_final_or_file_access'
+  ```
+
+  **2 passed/64 deselected/.39 s**, zero skipped. Constructors/train/predict/
+  scorer, both source phases, `release_final_test`, RNG and file reads are
+  forbidden during complete synthetic analysis; all pass. Production code
+  is unchanged since the observed 222-test gate. No live process remains.
+- **Static commands, exit 0 after final tests:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m ruff format --check src/core/seed_statistics.py src/app/continual_confirmation_analysis_contract.py src/app/continual_confirmation_analysis.py tests/test_seed_statistics.py tests/test_continual_confirmation_analysis.py
+  .\.venv\Scripts\python.exe -m mypy
+  ```
+
+  Ruff pass, **five files already formatted**, mypy **392 source files**
+  without issues. No runtime or test requirement adds mpmath/SciPy.
+- **Frozen additional identities, read-only command exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -c "from dataclasses import asdict; import json; from hashlib import sha256; from pathlib import Path; from src.app.continual_confirmation_analysis_contract import fixed_analysis_contract,analysis_contract_digest; c=fixed_analysis_contract(); files=('src/core/seed_statistics.py','src/app/continual_confirmation_analysis_contract.py','src/app/continual_confirmation_analysis.py'); print(json.dumps({'contract_sha256':analysis_contract_digest(c),'source_sha256':{name:sha256(Path(name).read_bytes()).hexdigest() for name in files},'family_pairs':{f.name:len(f.contrasts) for f in c.families},'cells':sum(len(f.seeds)*len(f.arms) for f in c.families),'pairs':sum(len(f.seeds)*len(f.contrasts) for f in c.families),'primary_statements':c.primary_statement_count,'sample_count':c.sample_count,'marginal_critical':c.marginal_critical,'simultaneous_critical':c.simultaneous_critical,'zero_deviation_tolerance':c.zero_deviation_tolerance},sort_keys=True))"
+  ```
+
+  Contract SHA **`5e33ef28862bcdf9d92fe14dd6cf6b71672a2336ffd760a1214ef04666b594b1`**.
+  Core SHA `d848ea585046c0c83ed73e22953f0c5361012b73129e12c464dc5290720195cd`;
+  contract app `0e3989ecfb8191ba4aea1ebb989da23581e48d7a8a919c1a21156b0505323436`;
+  analysis app `3fed747ac5bdd61569c33a48f768b5f54c3159991de9d2e694b5c827a9f25de0`.
+  Counts/116 statements/ten observations/tolerance/critical values match.
+  `execution_bindings` read-only command confirms all 78 old map entries,
+  saved scope `622feead...b76c5772f`, map `b8e6ea62...bbd3735` and old adapter
+  `e6bafe8b...250445` unchanged; it revalidates twelve historical bundles/
+  twenty usage records. Add the three new components to the later full
+  scored closure; never rewrite the original 79-source gate or its bundles.
+- **Docs/artifacts/skips:** Update analysis/ADR-0156/README/architecture/
+  changelog and current P6.7 handoffs. No new experiment/scored artifact or
+  actual reserved/final outcome; existing full unscored bundles remain.
+  Full CPU suite, CUDA, training/scored confirmation, sweeps and actual
+  confirmation intervals skipped because this increment is predeclaration/
+  pure correctness. No selected test skip. Same CPU/Windows/Python/NumPy;
+  source/version/device portability and nominal coverage are not proved by
+  fixtures. Model assumptions and every remaining parent criterion stay
+  explicit. Check P6.11a only after this evidence.
+- **Blockers and exact next action:** No external blocker. Implement P6.7c1's
+  separate scored manifest/request/reference and full source binding, then
+  global comparison of all saved training facts and complete held checkpoints
+  before any final release. Freeze new scored source identities before any
+  scored fixture/value. Test with original development training plus fabricated
+  final roles/metrics, raising original final/reserved/outer and late state/
+  role/cell/cost/request/resource/artifact sentinels. No baseline or metric
+  changes. P6.7c2 must execute/repeat all 560 final cells/580 original pairs/
+  1,680 calls/67,200 examples under the original caps only after those gates;
+  P6.11b then publishes every actual seed/interval. Keep all these and the
+  original matrix/final/resource/report criteria unchecked until complete
+  observed evidence. Full goal remains active.
+- **Closing readback after plan/report edits, exit 0:** `git diff --check`
+  passes with the repository's existing LF/CRLF notices only; `git status
+  --short` confirms the original dirty work and five new Python files/two
+  new analysis documents, with no unrelated removals. Read-only current
+  `execution_bindings` plus `analysis_contract_digest` and source hashing
+  reconfirm analysis `5e33ef28...6b594b1`, all three new byte pins, old map
+  `b8e6ea62...bbd3735`, adapter `e6bafe8b...250445` and saved scope
+  `622feead...b76c5772f`. The plan readback confirms P6.11a checked, original
+  P6.11/b/P6.7c/c1/c2 unchecked and the exact next c1 action above. No actual
+  final-role/scientific value or source setting changed during closeout.
+
+## 2026-10-01 — P6.7c1a scored declaration and complete reproduced training-state proof
+
+- **Repository/session reconciliation:** Read current `AGENTS.md`, the active
+  plan/handoff and latest development log, then inspect unchanged joint
+  training, state, JSON/artifact encoding, execution binding, original final
+  release and development fixtures. The full plan/reviewed-commit reconciliation
+  from earlier sessions remains current. HEAD is still
+  `86cd5bff71b9c70da94ddcf69d8f62316f2d3382` on `master`; preserve all existing
+  dirty/untracked c5–c9/P6.7/P6.11 work. `git rev-parse --show-toplevel`
+  confirms `C:/Users/Avery/Documents/ChatGPT/Circadian`; `rg --files -g AGENTS.md`
+  with artifact/venv/data exclusions finds only the root instructions.
+  No commit/push/install, new dependency/environment change or delegation.
+  Session began September 30 and validation/handoff continued October 1 local.
+- **Prospective plan change:** Before code, split c1 into scientific manifest/
+  complete live state **a**, final-role/evaluation **b**, and full expanded
+  source/request/process/resource/artifact **c**. Keep every original c1/c/c2
+  acceptance unchecked until all its required evidence. Why: each saved
+  result is 134 MB and final release returns a separate role view. Incremental
+  live-fact serialization can compare the whole bound artifact without loading
+  another complete decoded graph; original sealed roles remain reusable for
+  post-evaluation checks. ADR-0157 and `p67-confirmation-scoring-gate.md`
+  declare this before implementation. No cap or scientific scope change.
+- **Completed task: P6.7c1a only.** Add two app modules and two test files:
+
+  ```text
+  src/app/continual_confirmation_scoring_manifest.py
+  src/app/continual_confirmation_scoring_state.py
+  tests/test_continual_confirmation_scoring_manifest.py
+  tests/test_continual_confirmation_scoring_state.py
+  ```
+
+  The manifest binds both complete original request/result/audit identities,
+  scope/old source map/adapter, full unchanged analysis contract, all original
+  endpoints and production cells/pairs/caps. Exact nested types and values
+  reject partial/reordered/retyped/retuned declarations. The state API hashes
+  all live training dataclasses using shallow field conversion and the exact
+  original sorted/indent-two/ASCII/finite/UTF-8/LF artifact encoding. Require
+  the entire result SHA **and byte count**, exact complete held inventory and
+  shared fact attachments, then check every held A/B full model/role state.
+  Recheck inventory/fact bytes after the last checker. Public proofs include
+  the validated scoring manifest digest, explicitly no file/source/resource
+  provenance or final authorization. There is no configurable partial-scope
+  production bypass, final release, scoring or new scientific CLI.
+- **Tests first and observed red/fix commands:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_scoring_manifest.py
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_scoring_state.py
+  ```
+
+  Manifest initially **1 collection error/.38 s**, module absent; implement
+  then **29 passed/.92 s**. State initially **1 collection error/.34 s**,
+  module absent; implement then **1 failed/9 passed/7.62 s** because the test
+  incorrectly named `_parent_selector._rng`. Inspection confirms the original
+  field `_parent_selection_rng`; correct that fixture, then **39 passed/16.59 s**.
+  Add last-check inventory drift coverage and retype the unchanged cost value
+  rather than altering it. No final outcome informs any code/setting choice.
+- **Related gate, observed completion exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_scoring_manifest.py tests/test_continual_confirmation_scoring_state.py tests/test_continual_confirmation_analysis.py tests/test_continual_confirmation_training.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_manifest.py tests/test_continual_confirmation_execution.py tests/test_p67_confirmation_training_cli.py
+  ```
+
+  **296 passed/50.58 s**, zero skipped, session 46509 independently polled
+  through completion. This gate precedes final receipt-manifest metadata,
+  explicit invalid-fixture type annotations and replacing a forbidden metric
+  field with null. Scientific/encoding/live-check behavior stays unchanged.
+  The final gate below reruns every affected new-module case on exact final
+  sources; no missing/lost completion stream is claimed as a pass.
+- **Final new-module gate, observed completion exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_scoring_manifest.py tests/test_continual_confirmation_scoring_state.py
+  ```
+
+  **69 passed/18.16 s**, zero skipped, session 64604 observed completed.
+  Six first original development seeds train all 56 cells with raising
+  original-final/outer sentinels and reserved construction sealed. The complete
+  original writer byte identity matches incremental encoding:
+  **13,523,045 bytes**, SHA
+  **`f28a439142171688363ce11892913535b52ef463a896ae8c6d60981e9b58edee`**.
+  A/B last-family parameter/width/traffic/chemistry/model-RNG/selector-RNG,
+  role phase/seed/final/hash/train-content/count, raw cost/numeric-type/
+  nested-checkpoint/seal/arrival/forbidden-metric-key and held missing/
+  duplicate/order/list/detached-fact/arm errors all fail. Nonfinite/unencodable
+  state fails loudly. Last-check fact or inventory mutation fails before proof.
+  Verification forbids source/model construction, training, prediction/scoring,
+  final release, RNG construction and file reads. Whole sixty-row public
+  dispatch/last-row failure is a clearly labeled metadata-only spy, not real
+  reserved execution. The real public gate rejects partial development
+  training and unbound synthetic whole metadata without that spy. No actual
+  or fabricated final accuracy is evaluated in a.
+- **Static commands and outcomes:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff format src/app/continual_confirmation_scoring_manifest.py src/app/continual_confirmation_scoring_state.py tests/test_continual_confirmation_scoring_manifest.py tests/test_continual_confirmation_scoring_state.py
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_scoring_manifest.py src/app/continual_confirmation_scoring_state.py tests/test_continual_confirmation_scoring_manifest.py tests/test_continual_confirmation_scoring_state.py
+  .\.venv\Scripts\python.exe -m mypy
+  ```
+
+  Formatter initially four reformatted, final receipt/type edits two
+  reformatted/two unchanged; final check **four already formatted**, exit 0.
+  Ruff pass. Mypy initially **eight errors/two test files** for deliberately
+  invalid float/list/outer/empty-role fixtures and a narrowly inferred change
+  dictionary. Use explicit `Any` fixture annotations at invalid boundaries;
+  production annotations unchanged. Final mypy **396 files**, exit 0.
+- **Read-only identities, observed exit 0:** Execute the following in a
+  PowerShell single-quoted here-string piped to `.\.venv\Scripts\python.exe -`:
+
+  ```python
+  from pathlib import Path
+  from hashlib import sha256
+  import json
+  from src.app.continual_confirmation_scoring_manifest import fixed_scoring_manifest,scoring_manifest_digest,scoring_summary
+  from src.app.continual_confirmation_execution import digest_json
+  from scripts.run_p67_confirmation_training import execution_bindings
+
+  def identity(path):
+      digest=sha256()
+      size=0
+      with path.open('rb') as source:
+          for chunk in iter(lambda: source.read(1024*1024),b''):
+              digest.update(chunk)
+              size+=len(chunk)
+      return {'sha256':digest.hexdigest(),'bytes':size}
+
+  manifest=fixed_scoring_manifest()
+  references=[]
+  for reference in manifest.training_bundles:
+      observed={name:identity(Path(reference.directory)/f'confirmation-train.{name}.json') for name in ('request','result','audit')}
+      assert observed['request']['sha256']==reference.request_sha256
+      assert observed['result']=={'sha256':reference.result_sha256,'bytes':reference.result_bytes}
+      assert observed['audit']['sha256']==reference.audit_sha256
+      assert not (Path(reference.directory)/'confirmation-train.failure.json').exists()
+      assert not (Path(reference.directory)/'confirmation-train.claim').exists()
+      references.append({'name':reference.name,'files':observed})
+  bindings=execution_bindings(Path('artifacts/runs/p67-score-unpublished.request.json'))
+  assert digest_json(bindings['source_sha256'])==manifest.training_source_map_sha256
+  assert bindings['scope_sha256']==manifest.scope_record_sha256
+  assert bindings['adapter_sha256']==manifest.training_adapter_sha256
+  files=('src/app/continual_confirmation_scoring_manifest.py','src/app/continual_confirmation_scoring_state.py','tests/test_continual_confirmation_scoring_manifest.py','tests/test_continual_confirmation_scoring_state.py')
+  print(json.dumps({'scoring_manifest_sha256':scoring_manifest_digest(manifest),'summary':scoring_summary(manifest),'training_references':references,'old_source_count':len(bindings['source_sha256']),'old_source_map_sha256':digest_json(bindings['source_sha256']),'old_adapter_sha256':bindings['adapter_sha256'],'new_source_sha256':{name:identity(Path(name))['sha256'] for name in files}},sort_keys=True))
+  ```
+
+  Manifest **`76cf873e5942a661bdb76e6fd7f28fc490fc6b8001e2ae0ccc4afe87063a4223`**;
+  unchanged analysis **`5e33ef28...6b594b1`**. Both results remain SHA
+  `3d85c606...89e547`, 134,554,378 bytes; canonical request/audit
+  `672ec760...edbdc3`/`ff308e7a...cade9a0e0` (91,195/35,826 bytes), repeat
+  `20234434...944456`/`d1f461e1...7d01a` (91,202/35,826 bytes). All six byte
+  hashes match literal manifest references; no failure/claim. Existing bindings
+  revalidate twelve complete historical bundles/twenty usage records and all
+  78 source-map entries plus separately bound adapter. Map
+  `b8e6ea62...bbd3735`, adapter `e6bafe8b...250445` and saved scope
+  `622feead...b76c5772f` stay unchanged. This is actual byte/source readback,
+  not the new full scored boundary or another scientific/resource run.
+- **Frozen added source identities, before any future scored fixture:**
+
+  | File | SHA-256 |
+  |---|---|
+  | `src/app/continual_confirmation_scoring_manifest.py` | `21c86b9f78e6fef0c475400b87f026daa6bca11e20f64f7fa369d853207efca8` |
+  | `src/app/continual_confirmation_scoring_state.py` | `cedd370866fdd7223c83ba4398cc104156d2690b98f77f6547d78f1a6aacdad3` |
+  | `tests/test_continual_confirmation_scoring_manifest.py` | `c74b6ce78c86947484e8b5612df85c0d3be36b4f4e4beb90ad03dad43edb1a1e` |
+  | `tests/test_continual_confirmation_scoring_state.py` | `bcaef675defe50d5f67ddbdcbcaad3d858178e2c9c20443740c29eacb8b5aa81` |
+
+  C1c must add these production modules and the unchanged analysis modules
+  to the full scored source closure; these two pins are not that complete gate.
+- **Docs/artifacts/skipped gates:** Add scoring-gate docs/ADR-0157 and update
+  README/architecture/changelog/plan/log, including stale related README
+  training-status lines. No new scientific artifact, reserved run, final score,
+  actual interval or resource measurement. Existing ignored complete bundles
+  remain in `artifacts/runs/p67-confirmation-train` and
+  `artifacts/runs/p67-confirmation-train-repeat`. Full CPU/CUDA/clean-clone/
+  actual CI, new reserved train/score, sweeps and actual reports skipped because
+  this increment is pure declaration/live state verification. No selected
+  test skipped; no claim of measured new RSS or portability. Same local
+  Windows CPU/Python3.14.7/NumPy2.4.6 environment as prior training evidence.
+- **Unfinished tasks and exact next action:** No external blocker. P6.7c1b
+  is next: prospectively declare final-role identity/count/content/hash checks,
+  all three original endpoint calls and exact final access/call/example counts,
+  failure/null representation, global pre/post training-state proof and
+  post-score original/released-role verification. Implement separate app
+  composition on unchanged manifest `76cf873e...3a4223`; freeze source identities
+  before fabricated final fixtures. Use only original development training,
+  raising original-final/outer/reserved and late release/model/role/endpoint
+  sentinels. C1c still requires full expanded source/request/reference/process/
+  observed work/time/RSS/exclusive-artifact/readback gates. Only then c2 may
+  run/repeat all 560 cells/580 pairs/1,680 calls/67,200 examples under unchanged
+  caps, followed by P6.11b's complete actual seed reports. C1/b/c/c2/P6.7 and
+  original matrix/final/resource/reporting remain unchecked; no metric, seed,
+  baseline, setting or scientific source pin changed. Full development goal
+  remains active.
+- **Closing readback after all plan/report/log edits, exit 0:** `git diff
+  --check` passes with existing LF/CRLF notices only; status preserves all
+  prior dirty files and adds only the four new Python files/scoring doc/ADR
+  described above. Plan readback confirms c1a checked and c1b/c/c1/c2/parents
+  unchecked, with the exact next c1b action. A read-only final hash command
+  reconfirms manifest `76cf873e...3a4223` and all four recorded source/test
+  byte pins unchanged. No live test/worker session remains.
+
+## 2026-10-01 — P6.7c1b independent final-view and fixed endpoint fixture correctness
+
+- **Previous turn / checkout:** Previous goal turn is progress: P6.7c1a
+  changed authoritative code and completed its verified gate. Re-read
+  `AGENTS.md`, current plan/handoff/log and inspect actual status/HEAD plus
+  original final-role/hash/prediction APIs. HEAD remains
+  `86cd5bff71b9c70da94ddcf69d8f62316f2d3382` on `master`. The prior full
+  development-plan/reviewed-commit reconciliation remains current. Preserve
+  all existing dirty/untracked changes. No commit/push/install/dependency/
+  environment change, new algorithmic feature or delegation.
+- **Prospective declaration before code/fixtures:** ADR-0158 and scoring-gate
+  doc/plan declare pure core released-role/hash/count/failure contracts,
+  app global release/evaluation barriers and injected ports, and infra
+  adaptation of unchanged release/prediction. Preserve original ASCII IDs,
+  little-endian float64 shape/content hash and `>= 0.5` threshold. Check whole
+  training before any release; bind all phase/seed/final IDs/counts/content
+  and shared-source signatures before first score. Recheck training/original/
+  released roles and raw endpoint/cell links after evaluation. Only nonfinite
+  probabilities or `FloatingPointError` produce declared numerical null
+  endpoints; all scheduled calls continue. Other errors/contract drift and
+  resource callbacks abort, with no retry/substitution/partial success.
+- **Completed task: P6.7c1b only.** Add:
+
+  ```text
+  src/core/confirmation_final_roles.py
+  src/app/continual_confirmation_scoring.py
+  src/infra/continual_confirmation_final.py
+  tests/test_confirmation_final_roles.py
+  tests/test_continual_confirmation_final_adapter.py
+  tests/test_continual_confirmation_scoring.py
+  ```
+
+  Core imports no outer layer or IO. App keeps original sealed roles and
+  separate final views, validates every raw endpoint/count/null cell before
+  returning, and exposes the complete fixed production gate only. Private
+  development seams remain clearly labeled. Infra validates release-only
+  metadata/object preservation and exact model predictions. Results record
+  three full training proofs, all final IDs/hashes/counts, all raw endpoint
+  records, all cells and local access/call/example/failure totals; external
+  execution/provenance authority is false. The caller still needs c1c's full
+  source/request/observed resource/artifact gate before real reserved scoring.
+- **Tests first and initial static outcomes:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_confirmation_final_roles.py
+  .\.venv\Scripts\python.exe -m mypy src/core/confirmation_final_roles.py src/infra/continual_confirmation_final.py src/app/continual_confirmation_scoring.py tests/test_confirmation_final_roles.py
+  ```
+
+  Initial core **1 collection error/.26 s**, module absent. Implement core/
+  app/infra, then mypy **two errors/one app file**: nullable accuracy list
+  unpacking and missing evaluation-list type. Narrow each endpoint and add
+  explicit list types; **four files type-check**. Inspection confirms full
+  gating/replay source configs differ in ignored circadian/model settings;
+  their original physical generation/split arguments remain shared as declared
+  by the existing scope. Keep shared phase/seed final signatures required.
+- **Freeze all available composition sources before the first fabricated
+  final fixture:** A PowerShell single-quoted Python here-string calls old
+  `execution_bindings`, verifies all five literal analysis/c1a pins, adds
+  original separately bound training adapter and the three new sources,
+  then traverses local imports with the same conservative AST closure rule
+  as the existing closure test (including package init/conditional imports).
+  Entry points: old training CLI, app scoring, infra final adapter. Exact
+  equality gives **87 files** (all old 79 + analysis 3 + c1a 2 + c1b 3).
+  Use unchanged `write_exclusive` to publish metadata only:
+
+  ```text
+  artifacts/runs/p67-confirmation-scoring-composition-source.json
+  bytes: 10,769
+  frozen UTC: 2026-10-01T07:33:21.080407+00:00
+  record SHA: c096145a770e10e3fc1b13114d5147f9d1d888fcf982b8f48902b427848c1c8c
+  map SHA: 40e3309c6e061453ac155039b32b871746ce96a1d659adf80d7714372fd74775
+  initial app SHA: 00495c6b0ad300b53ff9eefdd9a958a77c990675cda6156fd9e49d6d83174a7a
+  ```
+
+  Scientific manifest `76cf873e...3a4223`, analysis `5e33ef28...6b594b1`,
+  old scope/map/adapter and all earlier source identities stay unchanged.
+  Record explicitly has `full_scored_worker_bound=False`; this available
+  composition closure is not the unimplemented c1c worker/request boundary.
+  Full old bindings again revalidate twelve historical bundles/twenty usage
+  files. No new source/model/reserved final is constructed by this command.
+- **First fabricated core/adapter commands, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_confirmation_final_roles.py
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_final_adapter.py
+  ```
+
+  Core **40 passed/.16 s**, adapter **29 passed/.27 s**, zero skipped.
+  Core independently matches pinned hash helper for fabricated arrays/IDs
+  and rejects invalid type/count/dtype/shape/nonfinite/binary/ID/hash/failure
+  contracts. Adapter observes each fabricated input/label field exactly once,
+  leaves original sealed fields/objects unchanged, rejects altered released
+  metadata and verifies threshold ties with known **30/40** count. Nonfinite
+  and floating-point errors become typed nulls; other exceptions or invalid
+  prediction contracts propagate. All arrays are fabricated, no original
+  final dataset/model generation.
+- **Orchestration red/fix evidence, no scientific result:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_scoring.py
+  ```
+
+  First **1 failed/4.21 s**: a refactor misplaced the cell-return block into
+  the endpoint identity helper, producing `NameError`. Move that block back;
+  no scientific rule changes. Production code remains fixed thereafter.
+  Post-repair Ruff initially finds **15 test errors** for imported fixture
+  F401/F811 shadows; use explicit fixture re-export. Mypy finds **five test
+  errors** for uninferred lists and append-as-value lambda; add explicit types
+  and a normal evaluator function. Ruff and full mypy **402 files** then pass.
+- **Linked repaired source freeze before repeating any scored fixture:** Read
+  the first record, require all 86 other source bytes unchanged, replace only
+  app's current hash and attach original record digest/repair reason. Publish
+  exclusively (do not overwrite first record):
+
+  ```text
+  artifacts/runs/p67-confirmation-scoring-composition-source-v2.json
+  bytes: 11,041
+  frozen UTC: 2026-10-01T07:44:51.451282+00:00
+  record SHA: 00226f6bf37bf66c35991694e8c86f5dde308f8a9abd507deb2780bc2975c246
+  map SHA: 21eba485124316799bcc6364e9502ed5e9a86e2eefa06ccbf9d09fa052fe1ae4
+  repaired app SHA: 2458044d2118203a9b94fe728a67b3cbebcf6ce417495a1abe04e08bf82c14ee
+  ```
+
+  Preserve initial failed-code evidence; V2 is authoritative for current
+  c1b composition. All caps/settings/seeds/metrics/baselines/failure policy and
+  earlier source pins remain. Another fixture **1 failed/4.97 s** exposes an
+  assertion that assumes dictionary insertion order for sleep models. Code
+  correctly follows frozen manifest arms. Fix expected order to the actual
+  declaration, preserving exact order acceptance; production stays unchanged.
+  Then the app gate **34 passed/49.76 s**, zero skipped (session 36465 observed
+  completed). Reuse the unchanged c1a development fixture/clone helpers, avoiding
+  a duplicate training design; no old test/source is edited.
+- **Final complete related gate, observed exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_confirmation_final_roles.py tests/test_continual_confirmation_final_adapter.py tests/test_continual_confirmation_scoring.py tests/test_continual_confirmation_scoring_manifest.py tests/test_continual_confirmation_scoring_state.py tests/test_continual_confirmation_analysis.py tests/test_continual_confirmation_training.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_manifest.py tests/test_continual_confirmation_execution.py tests/test_p67_confirmation_training_cli.py
+  ```
+
+  **103 new/399 related passed/99.82 s**, zero skipped, final session 73762
+  explicitly polled through completion. Final test edits additionally forbid
+  file reads and assert all 580 paired seed observations. No production change
+  since V2 freeze. All 56 genuine development-held cells use fabricated final
+  fields: **12 releases/24 input-label field reads/168 endpoint calls/6,720
+  examples** exactly. Two fixture clones repeat all metrics/counts/roles/three
+  training proofs; entire unscored facts remain `f28a4391...8edee`. All original
+  roles stay sealed. Late A/selector/fact/original-role/released-content,
+  including resealed content, retained-count/cell-link and last callback
+  corruption fails before result return. Invalid last-role ID/phase/seed/hash/
+  dtype/count/shared-source prevents first accuracy. First/all numerical
+  failures retain all 168 calls/all 56 cells and null/failure facts. Boundary
+  failures propagate without conversion to numerical outcomes. Public gate
+  rejects real partial development training before final access.
+  Explicit state-spy-only whole metadata uses no reserved dataset/model:
+  **120 fabricated views/1,680 calls/67,200 examples/560 cells/580 paired seed
+  observations**, every declared order/role/cell/failure and all 116 statements
+  plug into unchanged analysis. Without that spy, unbound whole metadata fails.
+  This is dispatch/correctness evidence, not actual confirmation execution.
+  Constructors/train/RNG/file reads and original-final/outer/reserved access
+  sentinels hold; app records no external execution/resource authority.
+- **Final static commands, exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m ruff format --check src/core/confirmation_final_roles.py src/app/continual_confirmation_scoring.py src/infra/continual_confirmation_final.py tests/test_confirmation_final_roles.py tests/test_continual_confirmation_scoring.py tests/test_continual_confirmation_final_adapter.py
+  .\.venv\Scripts\python.exe -m mypy
+  ```
+
+  Ruff pass, **six files formatted**, mypy **402 files**. Only selected new
+  files are formatted; all previous frozen sources/tests unchanged. One docs
+  patch failed atomically because its date context was stale; inspection
+  confirms no partial edits, then apply the intended changes with current
+  context. No scientific or acceptance change.
+- **Final source/test identities:**
+
+  | File | SHA-256 |
+  |---|---|
+  | `src/core/confirmation_final_roles.py` | `acfd451e68280469731c94dcf943b25bb9db4f179ffcd1ab3f4c854321aaf276` |
+  | `src/app/continual_confirmation_scoring.py` | `2458044d2118203a9b94fe728a67b3cbebcf6ce417495a1abe04e08bf82c14ee` |
+  | `src/infra/continual_confirmation_final.py` | `2270fb0c2f2ddb36fa8ae1434324643e417e4a9b54b25589d29c2c18bd479b96` |
+  | `tests/test_confirmation_final_roles.py` | `a8e73f2990ec7b762513a0a787ba54a01bb9b8ee996b71c75fad3b327cde4bd7` |
+  | `tests/test_continual_confirmation_final_adapter.py` | `785e4012f31d7eb8abf0fc4a3dde7a0498df2db82918836c7482978d6fb69eef` |
+  | `tests/test_continual_confirmation_scoring.py` | `2b2265be9679ba1c56d1b3becd7163bf21d90abe941f4497c0cc3aedc3669be1` |
+
+  Read-only current V2 revalidation command, observed exit 0:
+
+  ```powershell
+  @'
+  from pathlib import Path
+  from src.infra.continual_confirmation_io import read_json,file_digest
+  from src.app.continual_confirmation_execution import digest_json
+  path=Path('artifacts/runs/p67-confirmation-scoring-composition-source-v2.json')
+  record=read_json(path)
+  assert len(record['source_sha256'])==87
+  assert digest_json(record['source_sha256'])==record['source_map_sha256']
+  for name,digest in record['source_sha256'].items():
+      assert file_digest(Path(name))==digest,name
+  print({'record_sha256':file_digest(path),'source_map_sha256':record['source_map_sha256'],'source_count':len(record['source_sha256']),'unchanged':True})
+  '@ | .\.venv\Scripts\python.exe -
+  ```
+
+  All 87 byte pins/map/V2 record match above. Earlier 79-file closure, three
+  analysis and two c1a sources are unchanged; c1c must extend/pin this complete
+  available composition into the full worker/adapter boundary before its own
+  fabricated scored fixtures and actual reserved values.
+- **Docs/artifacts/skips:** Update scoring-gate/ADR-0158/README/architecture/
+  changelog/plan/log; only b is checked after complete observed evidence.
+  Two new ignored **metadata-only source freeze records**, no new scientific
+  score/resource artifact, reserved training/final value or actual interval.
+  Both original complete train bundles and all old scientific sources remain.
+  Full CPU/CUDA/clean-clone/actual CI, new reserved train/score, sweeps and
+  actual reports skipped for correctness/composition; zero selected skips.
+  Same Windows CPU/Python3.14.7/NumPy2.4.6; no new measured RSS/portability claim.
+- **Blockers and exact next action:** No external blocker. P6.7c1c is next:
+  inspect old strict request/source/reference/observed-resource/exclusive IO
+  seams; bind unchanged scientific manifest `76cf873e...3a4223`, both complete
+  train bundles/analysis and authoritative available V2 closure. Extend/freeze
+  full scored worker/adapter/request/command/environment/source identities
+  before fixtures; independently read back both full train bundles, without
+  keeping another 134-MB decoded result beside live models. Independently
+  verify every scored role/endpoint/cell/metric/cost link, externally observe
+  actual original optimizer work and final release/input-label/prediction/
+  example counts, enforce unchanged update/600-s/5-ms observed 512-MiB caps,
+  and verify exclusive request/result/audit/failure/readback with late source/
+  request/reference/model/role/endpoint/serialization/resource/publication
+  errors. Keep source-bound final views for post-serialization checks without
+  rereleasing fields. Development/fabricated fixtures only; seal original
+  final/outer/reserved. C1c/c1/c/c2/P6.11b and original matrix/final/resource/
+  reporting remain unchecked. Only after all c1 gates may c2 execute/repeat
+  every real 560 cell/580 pair/1,680 calls/67,200 examples under original caps,
+  then P6.11b reports every actual seed/interval. Full development goal active;
+  no method/metric/seed/baseline/setting/cap changes or favorable stopping.
+- **Closing readback after documentation/handoff edits, exit 0:** `git diff
+  --check` passes (existing LF/CRLF notices only), six-file format passes,
+  status preserves prior work and shows exactly the six new Python files/
+  ADR-0158 plus intended docs. Plan readback confirms c1b checked, c1c/c1/c2
+  and original parents unchecked with the exact next boundary action. Final
+  source-record/manifest readback verifies V2 SHA, map SHA, all 87 actual file
+  hashes and scientific manifest `76cf873e...3a4223` unchanged after all edits.
+  No live worker/test session remains, no actual reserved final value opened.
+
+## 2026-10-01 — P6.7c1c1 complete scored JSON and sequential training-reference readback
+
+- **Checkout and scope:** `master`, unchanged HEAD
+  `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`. Re-read AGENTS/current
+  plan/handoff/log and actual pinned scoring/training/reader/resource seams.
+  Preserve all prior dirty/untracked c5–c9/P6.7/P6.11 work and every old source
+  pin; no commit, push, install, dependency/environment or scientific change.
+  Original reviewed-commit reconciliation remains valid. No new agent.
+- **Prospective plan amendment:** Inspection confirms two 134,554,378-byte
+  results and an existing complete public training reader. Split c1c into
+  **c1c1** pure scored JSON/sequential complete reference readback and **c1c2**
+  full scored worker/request/source/observed execution/resource/artifact
+  lifecycle. ADR-0159 records rationale before implementation. Preserve all
+  parent criteria, complete scope, caps and unfinished work. The sequential
+  helper drops each decoded graph before the next read; no second retained
+  result or whole encoded string. This is design evidence, not measured RSS.
+- **Completed task ID: P6.7c1c1 only.** Add:
+
+  ```text
+  src/app/continual_confirmation_scoring_validation.py
+  src/infra/continual_confirmation_training_references.py
+  scripts/inspect_p67_scoring_training_references.py
+  tests/test_continual_confirmation_scoring_validation.py
+  tests/test_continual_confirmation_training_references.py
+  tests/test_p67_scoring_training_reference_inspection.py
+  docs/adr/ADR-0159-read-training-references-sequentially-and-validate-all-scored-json.md
+  docs/p67-confirmation-scoring-readback.md
+  ```
+
+  Independently derive every ordered cell's raw accuracies/failure/null and
+  every total from endpoint correct counts; require all 60 rows/120 final
+  views/1,680 calls/560 cells, fixed final ID declarations, shared signatures,
+  original training SHA/length and all three global proof inventories/seals.
+  Strict recursive JSON fields/types/values reject numeric aliases, unknown
+  metadata and claimed external authority. Reuse no producer cell helper.
+  App result remains explicitly without live/source/file/resource authority.
+  The infra port receives the actual unchanged public complete training
+  reader from the adapter. Hash six files in one-MiB chunks, compare canonical
+  decoded JSON incrementally, bind old declarations, recheck markers/bytes
+  before/during/after both reads, and keep small costs/historical resources
+  only. The inspection adapter writes exclusive metadata; no scientific run.
+- **Initial red commands, expected missing implementations:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_scoring_validation.py
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_training_references.py
+  ```
+
+  Each exits 1 with one collection error because its production module is
+  absent, **0.42/0.41 s**. Add the modules/inspection adapter; format only
+  new files. Initial targeted Ruff/type checks pass; later full checks pass
+  407 then 408 files as the final adapter test is added. No post-freeze
+  production failure or repair; no old source/test edited.
+- **Source freeze before any fabricated scored/readback fixture:** Run a
+  read-only AST traversal from inspection adapter/scored validator/final
+  adapter, including transitive local/package and conditional Torch imports.
+  Verify all authoritative c1b V2's 87 actual pins; the expanded set equals
+  precisely those plus three new production modules (**90**). Preserve V2
+  record SHA `00226f6b...5c246` and earlier first-failure repair history.
+  Exclusively save ignored metadata at
+  `artifacts/runs/p67-confirmation-scoring-readback-source.json`:
+  **11,396 bytes**, SHA
+  `7f44987225e0e0be4e9dbae861b670d65aeddb0e4c249cabe33030fb494768de`,
+  compact map SHA
+  `e1db9b94e7c0db5695fc391156e6ec48f264e98af93d2f9e83ffb18b8dd11b68`,
+  UTC **2026-10-01T08:39:58.629325+00:00**. It binds unchanged scoring manifest
+  `76cf873e...3a4223`, analysis `5e33ef28...4b1`, scope and old map/adapter;
+  `full_scored_worker_bound=False`. This is the expanded available composition,
+  not c1c2's future full scored worker. Every production pin remains unchanged.
+- **Focused command, observed exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_scoring_validation.py tests/test_continual_confirmation_training_references.py tests/test_p67_scoring_training_reference_inspection.py
+  ```
+
+  **197 passed/14.89 s**, zero skipped; session 66613 observed completed.
+  Whole fabricated JSON uses metadata model tokens and an explicit global
+  state spy; source/model/train/final/RNG/file access is sealed during pure
+  validation. All 560 cells/1,680 endpoints/580 paired seed observations and
+  116 analysis statements remain, including first/last/all numerical failures.
+  Late proofs, roles, endpoint/count/accuracy/cell/failure/order/type/field/
+  total/authority and resealed shared-source errors fail. IO-only private
+  fixtures are deliberately scientifically incomplete; public fixed gates
+  reject their manifests before IO. Tests cover missing/changed/length,
+  failure/claim, detached decoded, resealed old declarations, reader errors
+  and first/last/earlier-after-last drift, plus exclusive/occupied/colliding/
+  corrupted/nonfinite publication, real CLI help and 90-file static closure.
+  IO spies make no actual training/resource claim.
+- **Actual complete reference validation before any new data:** The public
+  inspection adapter runs CLI `main()` with these exact arguments:
+
+  ```text
+  scripts.inspect_p67_scoring_training_references --result-file artifacts/runs/p67-confirmation-scoring-train-reference-readback.json
+  ```
+
+  Executed via `@' ... '@ | .\.venv\Scripts\python.exe -`, whose bounded
+  parent uses `subprocess.run([sys.executable, '-c', code], capture_output=True,
+  text=True, timeout=180, check=False)`. The child rechecks the above freeze
+  SHA/all 90 pins, sets `sys.argv` to the exact arguments, then calls the
+  actual unchanged adapter/complete reader. Its guard uses `ExitStack`/patch
+  on every loaded `src.`/`scripts.` alias named `generate_two_cluster_dataset`,
+  `generate_two_cluster_dataset_with_transform`, `_build_phase_a_roles`,
+  `_build_phase_b_roles`, `_generate_phase_b_source`, `release_final_test`,
+  `release_confirmation_final`, `evaluate_confirmation_final` or
+  `train_confirmation`. It seals all BP/PC/circadian/parent constructors,
+  `train_epoch`, `predict_proba`, `compute_accuracy`, circadian internal
+  `_run_training_step`, and actual `PhaseDecisionRoles` final/outer attribute
+  accesses. Any forbidden access raises and increments a counter. No callback
+  spy replaces the actual complete reader or its pure body validator.
+  This is a saved-unscored readback, not a new training/scoring experiment.
+
+  **Observed exit 0**, parent **28.3516246 s**, **zero forbidden accesses**,
+  session 97639 explicitly polled through completion; 180-s validation budget
+  passes. Two complete old requests/results/audits independently validate,
+  decoded byte fingerprints agree, and all six file identities recheck after
+  both reads. Exclusively publish **72,050-byte** ignored
+  `artifacts/runs/p67-confirmation-scoring-train-reference-readback.json`, SHA
+  `cc1c1deb4c721af5d8250f17783c9daada2501c108be91f825fa37324626b001`.
+  Reproducible ordinary CLI without the extra guard:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.inspect_p67_scoring_training_references --result-file artifacts/runs/p67-reference-inspection.json
+  ```
+
+  Choose a fresh output; the saved evidence above remains exclusive. All
+  actual source/model/update/final/outer guard accesses remain zero.
+- **Both original complete bundles preserved:** Each result is still
+  **134,554,378 bytes**, SHA `3d85c606...89e547`. Canonical request/audit SHA
+  `672ec760...3edbdc3`/`ff308e7a...cade9a0e0`, lengths 91,195/35,826; repeat
+  `20234434...44456`/`d1f461e1...7d01a`, lengths 91,202/35,826. Full exact
+  hashes are retained in the new report/fixed scoring manifest. Each old
+  bundle's 60 seed rows derive **560 cells/13,440 wakes/1,724 applied/46
+  rejected executed replay = 15,210 actual calls**, identical observed and
+  derived costs/model kinds BP 3,708/PC 3,948/circadian 7,554. Guards
+  770/evaluations 1,540/examples 28,320; 46,080 retained labeled bytes before
+  copies; width fourteen. Original verified RSS peaks 462,479,360/462,348,288
+  and worker times 32.5046013/32.6507508 s remain historical training facts;
+  no new scoring RSS/work experiment or inspection memory benchmark.
+- **Final complete related regression command, observed exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_scoring_validation.py tests/test_continual_confirmation_training_references.py tests/test_p67_scoring_training_reference_inspection.py tests/test_confirmation_final_roles.py tests/test_continual_confirmation_final_adapter.py tests/test_continual_confirmation_scoring.py tests/test_continual_confirmation_scoring_manifest.py tests/test_continual_confirmation_scoring_state.py tests/test_continual_confirmation_analysis.py tests/test_continual_confirmation_training.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_manifest.py tests/test_continual_confirmation_execution.py tests/test_p67_confirmation_training_cli.py
+  ```
+
+  **197 new/596 related passed/114.01 s**, zero skipped, session 55291 observed
+  completed. Includes every 399 prior selected gate on unchanged old sources.
+- **Final static commands, observed exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_scoring_validation.py src/infra/continual_confirmation_training_references.py scripts/inspect_p67_scoring_training_references.py tests/test_continual_confirmation_scoring_validation.py tests/test_continual_confirmation_training_references.py tests/test_p67_scoring_training_reference_inspection.py
+  .\.venv\Scripts\python.exe -m mypy
+  ```
+
+  Ruff pass, six files formatted, mypy **408 files**. No post-freeze production
+  changes; no formatting of old pinned files. Source/report readback confirms
+  all 90 pins/map/record and scientific/analysis/bundle identities unchanged.
+- **Final new source/test SHA-256:**
+
+  | File | SHA-256 |
+  |---|---|
+  | `src/app/continual_confirmation_scoring_validation.py` | `e81dbacc4edcdfeae7342102321a2c05abf0e3f160bae627add2bc3bc190f643` |
+  | `src/infra/continual_confirmation_training_references.py` | `61ccd46c0e0fdfd7244a1915305e6bfb4753175c2c959976e821c222951b195f` |
+  | `scripts/inspect_p67_scoring_training_references.py` | `248cc2eef9290c5d051298a1a712f547c5edb04ee5940a7d7b06163452aa7b08` |
+  | `tests/test_continual_confirmation_scoring_validation.py` | `27284a5847e38c4712527ace7b08a830cfa27cfcbb7af99c877edf9350e5cd55` |
+  | `tests/test_continual_confirmation_training_references.py` | `1a03f428752b0ae4eab1bb83ea1c8e7966dca6f1025cd52567f0f4563ac16042` |
+  | `tests/test_p67_scoring_training_reference_inspection.py` | `dec158dc0a843ff090c3272d6419b14c2da29ef29b289dff92ce21a4f3993565` |
+
+- **Docs/artifacts/skips:** Update plan/current handoff/scoring gate/new
+  readback report/ADR159/README/architecture/changelog/log. Check c1c1 only
+  after complete observed evidence. Two ignored metadata-only artifacts:
+  available source freeze and existing-training inspection. No new actual
+  reserved source/model/train/final score or statistical report. Full CPU/
+  CUDA/clean-clone/actual CI, new reserved training/scoring, large sweeps and
+  actual intervals skipped; zero selected test skips. Same Windows CPU,
+  Python 3.14.7/NumPy 2.4.6. No baseline, threshold, metric, seed, cap,
+  environment/configuration or dependency change; no favorable stopping.
+- **Blockers and exact next action:** No external blocker. **P6.7c1c2**:
+  extend/freeze full new scored worker/adapter closure and strict request/
+  command/environment before fabricated fixtures, binding both verified
+  unscored bundles and unchanged analysis/scientific declarations. Use
+  c1c1 sequential parent complete readback and byte-only child checks; compose
+  unchanged training/c1a/b in a bounded child without another huge decoded
+  graph beside held models. Externally count actual optimizer/rejected replay
+  and final release/input-label/prediction/example work. Check source/request/
+  reference before data/release and after scoring/serialization; keep final
+  views for content checks without rereleasing source fields. Preserve
+  16,000 updates/600 s/5-ms observed 512-MiB limits and test late source/
+  request/reference/live model/role/endpoint/serialization/resource and
+  exclusive request/result/audit/failure/readback/publication errors with
+  development/fabricated fixtures, original-final/outer/reserved sealed.
+  C1c2/c1c/c1/c2/P6.7c/P6.11b and original matrix/final/resource/reporting
+  parents remain unchecked. Only then may c2 perform/repeat every actual
+  560-cell/580-pair/1,680-call/67,200-example scored process and verify full
+  deterministic identities; P6.11b reports all actual seeds/intervals.
+  Full development goal stays active; no goal completion/block/pause claim.
+- **Closing checks after documentation/handoff edits, observed exit 0:**
+  `git diff --check` passes (existing LF/CRLF notices only); six-file Ruff
+  format check passes. Final read-only Python check verifies source-freeze
+  SHA/map/all 90 source bytes, the scientific manifest, inspection report
+  SHA/length and every six original reference-file hash/length/marker. Plan
+  readback confirms c1c1 checked and c1c2/c1c/c1/c2/P6.7c/P6.11b unchecked.
+  Status preserves prior work and adds exactly the six new Python files,
+  ADR159 and readback notes plus the intended existing documentation updates.
+  Both long command sessions completed; no live worker/test remains and no
+  actual reserved final value was opened.
+
+## 2026-10-01 — P6.7c1c2 final execution observer increment; worker remains open
+
+- **Status / completed task IDs:** No additional task ID checked. Implement
+  and validate the independent final execution observer and whole pure event
+  verifier required by **P6.7c1c2**, which stays in progress/unchecked. Full
+  request/worker/source/resource/exclusive artifact/readback correctness is
+  still required. C1c/c1/c2/P6.7c/P6.11b and original matrix/final/resource/
+  reporting parents remain unchecked. The full development goal stays active.
+  Previous goal turn made concrete progress (c1c1 complete readback/validation).
+- **Checkout / reconciliation:** Re-read AGENTS and active plan/log, inspect
+  current code/status and both exact original references. `git rev-parse HEAD`
+  remains `86cd5bff71b9c70da94ddcf69d8f62316f2d3382` on `master`; preserve all
+  prior dirty c5–c9/P6.7/P6.11 work. Earlier Phase 0 reconciliation from reviewed
+  `8793c49...` and ten later commits remains valid. All prior 90 composition
+  pins, original scientific/analysis declarations and six original train
+  artifact bytes/markers revalidate. No commit, push, dependency install,
+  environment/configuration change or unrelated edit.
+- **Decision before implementation (ADR-0160):** App release/evaluator totals
+  count port invocations; independently observe the actual source fields,
+  intended held model/input and returned correct count. Implement this
+  component before full worker composition because it is separately testable
+  without a scientific run. Freeze its available closure before component
+  fixtures; explicitly deny full worker/request binding. This changes component
+  implementation order inside the open task, never its acceptance. No worker
+  fixture, full scored request, scientific publication or reserved final is
+  authorized by component tests. All original complete worker/lifecycle gates
+  must still pass before actual reserved final.
+- **New production boundaries:**
+  - `src/infra/continual_confirmation_final_runtime.py`: independent ordered
+    supplied-inventory schedule/counters outside snapshots; scoped transparent
+    source observers and outer guards; exact once-only input/label reads and
+    released-array/ID/hash binding; direct BP/PC/circadian prediction hooks
+    including inherited parent controls. Require actual scheduled model/input
+    and one prediction; independently derive exact correct count or the frozen
+    numerical failure and compare the unchanged adapter outcome. Record
+    completed actual work before later resource stops. Block optimizer/stray/
+    repeated/wrong-order/outer/source operations, retain views/cached arrays
+    through serialization, verify every app event/counter link, and restore
+    all owned guards on every exit. Remove only owned guards when other role
+    metadata is corrupted. Resource policy and complete parameter/controller/
+    selector/RNG state checks remain external; no scientific authorization.
+  - `src/app/continual_confirmation_final_observation.py`: pure public whole
+    fixed-manifest/scored-JSON validation, independent declared model kinds,
+    complete release/read/prediction traces, numerical returns/exceptions and
+    all counters. Exact recursive fields/order/types/values, false source
+    provenance and no live arrays/models/IO/resource authority. Private
+    development seam does not bypass either public scientific gate.
+  - No changes to old production modules or their pinned algorithms. Model
+    snapshots, release helper, threshold, three endpoints, failure policy,
+    metric arithmetic, baselines, settings, seeds and caps remain unchanged.
+- **Test-first/static failures and repairs (all preserved in evidence):**
+  1. `.\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_final_runtime.py`
+     initially fails collection: one missing-new-module error, **0.42 s**.
+     Add the two production modules and ADR160. Format the three Python files.
+  2. Ruff passes; configured `python -m mypy` reports **11 errors/411 files**:
+     unused type-ignore, inferred restore-dictionary value type and optional
+     last-result narrowing. One patch fails atomically against formatter-changed
+     context; read exact lines and apply the type fixes, with no partial edit.
+     Tighten source-field order, resource-before-attempt checks, actual
+     prediction-attempt identity and preprediction content capture before the
+     initial freeze. Ruff/mypy 411 pass.
+  3. Initial available source freeze precedes scored fixtures. The first two
+     genuine development/fabricated-final observer tests pass **2/4.84 s**.
+  4. Add immediate final-budget-callback content-drift regression:
+
+     ```powershell
+     .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_final_runtime.py -k last_budget
+     ```
+
+     **1 failed/2 deselected/5.01 s** on frozen V1. `verify_result` returns
+     before detecting content changed by its last budget callback. Context-exit
+     recheck would later detect it, but method verification must fail immediately.
+     Move callbacks before final content/link checks. Preserve V1 record and
+     link V2 before rerun. The test's inner assertion explicitly proves the
+     method fails immediately, then propagates that expected gate error rather
+     than requesting normal completion from the corrupt context. **3 passed/
+     7.39 s** on frozen V2. No criterion or failure policy weakened.
+  5. Expand runtime failures. `python -m ruff check .` finds one unused test
+     `deepcopy` import; `python -m mypy .` reports **13 errors/413 files** for
+     deliberately invalid optimizer arguments on union-typed test models.
+     Remove the unused import and annotate the blocked-call test model `Any`;
+     calls still intentionally fail before the physical optimizer operation.
+     Production source is unchanged. Configured Ruff/mypy 411 pass. Expanded
+     runtime **54 passed/53.25 s**, zero skipped, session 2219 completed.
+  6. Add pure whole-observation tests with independent arm-name/count oracle,
+     live model/source/train/predict/RNG/file sentinels. **109 passed/18.17 s**,
+     zero skipped, session 73691 completed. Add independent literal model-kind
+     totals to runtime cases and five further caught-call/source/final-budget
+     cases. They pass in the final combined gate below; no further production
+     repair or post-V2 production edit.
+- **Prospective freezes / exact byte readback:**
+  - Initial ignored `artifacts/runs/p67-confirmation-final-observer-source.json`,
+    **11,470 bytes**, SHA
+    `2548a3c5b8ec8d7640e4e586f689a2f126b8b0fef311ea244432df9523430445`,
+    map `563d866c1a049e6d225716921dca98b1f92c2aec690ce2d9299a96307e66572a`,
+    UTC **2026-10-01T09:32:06.192421+00:00**. Initial runtime pin
+    `e9ca6ff6fd61fb083ed6365c206e44061221039627f72b20913ce2274a3831f8`.
+  - Authoritative ignored V2 `artifacts/runs/p67-confirmation-final-observer-source-v2.json`,
+    **11,845 bytes**, SHA
+    `2bc058e2859ade591a462f0674f3ea5d72c5f1205065246f63aa1f01c771f169`,
+    map `28aa619ed9c808872b5353c5644e80b3cab9aff8659db73020186f46a987417a`,
+    UTC **2026-10-01T09:45:32.046559+00:00**. Supersedes the first record;
+    records the callback-order regression/rationale and changes only the new
+    runtime source pin. All other 91 pins remain exact.
+  - Both component records set `full_scored_worker_bound=False` and
+    `scored_request_bound=False`; no reserved final access. Conservative static
+    AST closure from all four recorded entrypoints is **92 files**, including
+    conditional unused Torch/package imports. Independent one-shot Python
+    recomputes the closure and requires its exact path-set equality with V2,
+    all current source SHA values, the one-file V1/V2 repair, every prior 90 pin,
+    scientific manifest `76cf873e...3a4223` and original reference hashes/markers.
+    The new pure app source is unchanged across both records.
+  - Original c1c1 complete-reader inspection remains **72,050 bytes**, SHA
+    `cc1c1deb4c721af5d8250f17783c9daada2501c108be91f825fa37324626b001`.
+    This session verifies that report's exact bytes and all six original
+    request/result/audit hashes/lengths/markers; it does not repeat full large
+    decoded readback. Both results remain **134,554,378 bytes** at
+    `3d85c606...89e547`. No old scientific/source/analysis/reference pin changed.
+- **Behavior/evidence scope:**
+  - Genuine first-development-seed training across all six families supplies
+    56 cells. Fabricated final sources replace raising original-final fields;
+    outer/reserved access remains sealed. Actual direct observation sees
+    **12 releases/12 input/12 label reads/168 predictions/6,720 examples**;
+    model-kind partition BP **42**, PC **45**, circadian/parent **81**. All
+    three complete development training proofs and state remain exact. No new
+    original final values are scored.
+  - Whole-size fixture reuses those genuine development models (no reserved
+    constructors/training), fabricates final arrays and attaches reserved-seed
+    metadata tags only. Public scoring requires an **explicit global-state
+    spy**, recorded as such. Observe **120 releases/120 input/120 label reads/
+    1,680 physical predictions/67,200 examples**, partition **420/450/810**.
+    Actual events agree with public whole scored JSON/observation validation,
+    including a first numerical exception. Global spy barriers observe
+    `[0, 0, 1680]` completed prediction counts. Without the spy, the actual
+    complete training gate rejects fake facts before any source field. Original
+    genuine development full state also rechecks after model reuse. This is
+    fixture evidence only, not reproduced reserved training or scientific
+    provenance/resources.
+  - Tests reject wrong/extra/early/stray/retried prediction/release/source work,
+    optimizer calls, outer access, caught forbidden operations, copied/resealed
+    substituted arrays, fake adapter outcomes, wrong actual inputs, changed
+    content/bindings/observed or app counts after serialization. All first/all
+    nonfinite/FP failures retain all scheduled calls/null cells; other source/
+    shape/dtype/range/contract/errors abort. Resource callbacks use the original
+    live observer with deterministic fake RSS/clock, before/after source/
+    prediction and after serialization. Completed operations remain observed
+    before stops. Cancellation and source failures restore all hooks/guards.
+    Late parameter drift explicitly needs the separate complete live-state
+    checker: final observer identity checks are not a substitute.
+  - Pure whole tests independently expect fixed arm names and partition
+    420/450/810; cover every late event link, total, unknown/missing/extra/order,
+    count type including zero-vs-False, numerical return-vs-exception policy,
+    partial/unbound manifests/scored bodies and last proof drift. All retain
+    false authority; no IO/live score/RNG/model construction.
+- **Final related regression command, observed exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_final_runtime.py tests/test_continual_confirmation_final_observation.py tests/test_continual_confirmation_runtime.py tests/test_continual_confirmation_scoring_validation.py tests/test_continual_confirmation_training_references.py tests/test_p67_scoring_training_reference_inspection.py tests/test_confirmation_final_roles.py tests/test_continual_confirmation_final_adapter.py tests/test_continual_confirmation_scoring.py tests/test_continual_confirmation_scoring_manifest.py tests/test_continual_confirmation_scoring_state.py tests/test_continual_confirmation_analysis.py tests/test_continual_confirmation_training.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_manifest.py tests/test_continual_confirmation_execution.py tests/test_p67_confirmation_training_cli.py
+  ```
+
+  **168 new/781 related passed in 200.26 s**, zero skipped; session **96969**
+  explicitly observed completed. Includes all 596 prior selected scored/
+  reference/analysis/training checks and 17 original optimizer/resource cases.
+  The new runtime total is 59; new pure total is 109. No test process remains.
+- **Final static commands, observed exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m ruff check src tests scripts
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_final_observation.py src/infra/continual_confirmation_final_runtime.py tests/test_continual_confirmation_final_observation.py tests/test_continual_confirmation_final_runtime.py
+  .\.venv\Scripts\python.exe -m mypy
+  git diff --check
+  ```
+
+  Ruff pass, four files formatted, mypy **412 files**, diff pass (existing
+  LF/CRLF notices only). No formatting of old pinned sources.
+- **Final four source/test SHA-256 and byte lengths:**
+
+  | File | SHA-256 | Bytes |
+  |---|---|---:|
+  | `src/app/continual_confirmation_final_observation.py` | `263561557dc26aa44923872d016bc406fa50b3577eb289c7b7a4c7428b354c9d` | 5,500 |
+  | `src/infra/continual_confirmation_final_runtime.py` | `b8e656687c10275f73210661d942c453f5bdb00625d0f24fd176be3de8d8db09` | 23,174 |
+  | `tests/test_continual_confirmation_final_observation.py` | `a8e8ee868f2e8daaa416b2cb29ddd0bc90c5b7042d394f9afec459ad1dc494dc` | 11,242 |
+  | `tests/test_continual_confirmation_final_runtime.py` | `6da836858e79e472eaee057d85ef9afe8c20b6e89060c29a1a50064306e45779` | 34,297 |
+
+- **Artifacts/docs/skips:** Exclusively publish metadata-only ignored
+  `artifacts/runs/p67-confirmation-final-observer-validation.json`, **4,310
+  bytes**, SHA `469715f65a28f638d03e7a83becd34102ebb01e5f19cc6aea803c01d5d5fc7e3`.
+  Intended encoded hash/length is computed before `open('xb')` and actual
+  streaming identity verified after. The report records actual test outcomes,
+  source/test identities, explicitly distinguishes development from whole
+  global-spy fixtures, has no resource measurement and denies scientific
+  execution/full worker/request authority. Preserve both source freezes.
+  Update ADR160/new observer docs, plan/handoff, scoring/readback docs, README,
+  architecture, changelog and this log. No additional checkbox marked complete.
+  Full CPU/CUDA/clean-clone/actual CI, new reserved training/scoring, sweeps and
+  actual statistical reports/intervals skipped; zero selected test skips.
+  Fake resource tests make no RSS/performance claim. Same Windows CPU/Python
+  3.14.7/NumPy 2.4.6; no new dependencies, threshold/seed/baseline/metric/cap
+  change, favorable stopping or new actual scientific artifact.
+- **Blockers / exact next action:** No external blocker. Implement and freeze
+  **P6.7c1c2's complete scored request/worker/adapter and command/environment**
+  on authoritative 92-source observer V2 and unchanged scientific manifest.
+  Bind both c1c1 complete train readbacks and exact analysis before worker
+  fixtures. Compose unchanged training/optimizer observer/c1a/b, the final
+  observer, and complete scored/observation validators in a bounded child.
+  Parent reads both references sequentially; child checks bytes without another
+  full decoded graph beside live models. Retain final views through scientific
+  serialization; check source/request/reference before data/release and after
+  score/serialization, repeat the complete live training-state checker and
+  final observer links after serialization. Enforce original 16,000 calls/
+  600 s/5-ms observed 512-MiB limits. Test all late source/request/reference/
+  model/role/endpoint/content/serialization/resource/publication failures and
+  exclusive request/result/audit/failure/readback with development/fabricated
+  fixtures and original-final/outer/reserved seals. Keep all c1c2 acceptance
+  intact and unchecked until complete evidence. Only afterward may c2 run
+  and repeat both full actual scored matrices/readbacks; P6.11b reports every
+  actual seed/predeclared interval. Full development goal remains active.
+- **Closing readback after documentation/handoff edits, observed exit 0:**
+  Verify four metadata record SHA/lengths, the exact 92-file V2 source/map and
+  all prior 90 pins, four tested source/test identities, fixed scientific
+  manifest and six original reference-file bytes/markers. Plan readback requires
+  c1c1 checked and c1c2/c1c/c1/c2/P6.7c/P6.11b unchecked; validation metadata
+  still denies complete worker/request/scientific execution and lists no new
+  completed IDs. Four-file Ruff format and `git diff --check` pass. Current
+  status preserves prior dirty work and adds the four observer Python files,
+  ADR160/observer docs and intended plan/log/README/architecture/changelog/
+  scoring-doc updates. All three observed test sessions completed; no live
+  worker/test or actual reserved final value.
+
+## 2026-10-01 — P6.7c1c2 full scored worker correctness complete
+
+- **Completed task IDs:** **P6.7c1c2, P6.7c1c, P6.7c1** after every original
+  correctness acceptance gate below. No actual reserved final value or full
+  scored confirmation was executed. C2/P6.7c, P6.3c/P6.3, P6.7, P6.11b and
+  original matrix/final/resource/reporting parents remain unchecked. The full
+  development goal remains active.
+- **Reconciliation / intent:** Read actual AGENTS, full plan/current log and
+  inspect the current checkout before implementation; reuse the previous
+  Phase 0 reconciliation from reviewed `8793c49...` through ten later commits
+  to `master` at `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`. Preserve all dirty
+  c5–c9/P6.7/P6.11 work and earlier source/evidence pins. The next increment
+  closes evaluation correctness/provenance before actual final experiments or
+  new algorithms. No agent commit/push, external write, dependency/environment
+  change, baseline/seed/metric/threshold/cap tuning or favorable stopping.
+- **Implementation / boundaries:** Add five production files: pure closed
+  request/worker/audit declarations; infra current bindings, held worker and
+  exclusive artifact/readback lifecycle; thin CLI supplying both unchanged
+  complete training readers. ADR-0161 and
+  `docs/p67-confirmation-scored-worker.md` give module responsibilities,
+  non-responsibilities, source/request/resource contracts and safe extension.
+  Parent rederives the exact historical small report by sequential complete
+  readback. Child verifies six file bytes/markers rather than decoding another
+  134-MB body beside held models. Original optimizer observer and c1a/b/final
+  observer compose under original caps. Retained source-returned final views
+  survive scientific serialization and complete later state/content/model/
+  endpoint/observation checks; source fields are not rereleased. Public scope,
+  command/environment, scientific manifest, analysis and counts are strict;
+  no partial scientific CLI or seed/metric/budget override exists.
+- **Test-first / initial failures preserved in chronology:**
+  1. New pure-module test initially raised a collection import error (0.18 s)
+     before the module existed. Implemented five production modules and ADR.
+     Initial mypy found one optional-report type error in 418 files; the
+     boundary now accepts decoded `Any` and validates its exact report before
+     IO. This changes the type boundary, not acceptance or allowed reports.
+  2. First source-freeze assertion compared a 96-file new-CLI-only AST closure
+     with declared 97, before any record/fixture write. Preserve the historical
+     reference-inspection producer and all prior 92 pins: declare the
+     conservative union of both entrypoints (exact 97), with ADR rationale.
+  3. Pure expanded collection failed because pytest reserves fixture name
+     `request` (0.43 s). Renamed only identifier tokens to `scored_request`;
+     protocol strings/keys unchanged. Then **83 passed / 10.80 s**.
+  4. Private genuine development kernel first failed a test assumption about
+     parent `_selector_rng` (**1 failed / 2 passed / 12.41 s**). Correct actual
+     names are `_parent_selection_rng`, fake source `inputs/targets` and fact
+     `all_a_completed_before_first_b`; the resealed-label case now alters the
+     actual retained role hash. The next run **1 failed / 11 passed / 35.28 s**
+     exposed a test mutating training arrays shared by later module-fixture
+     cases. Give that case an owned equal-content training-role copy. No
+     production weakening; then **19 passed / 52.01 s**, session 55524 exit 0.
+  5. First binding IO test failed (**1 failed / 0.71 s**) because the inherited
+     pure-component seal also forbade filesystem reads. Restore only
+     `Path.read_bytes/read_text` for this real IO boundary; keep model/source/
+     train/RNG/final seals. Then **29 passed / 13.54 s**, session 76601 exit 0.
+  6. Initial artifact lifecycle **51 passed / 25.23 s**, session 51175 exit 0.
+     Add a concrete failure-marker regression: after audit publication a late
+     binding error plus failed failure-marker write left a readable success.
+     **1 failed / 51 deselected / 1.61 s** demonstrated that defect. Repair
+     revokes only our verified, still-identical completion audit if recording
+     failure itself fails, retaining request/result and foreign/changed bytes.
+     Preserve V1 and freeze V2 before repaired scored fixture reruns. Extend
+     the regression to changed foreign audit preservation too.
+  7. CLI expansion plus repaired artifact/binding tests **100 passed / 40.58 s**,
+     session 10764 exit 0. Initial mypy then found two test-spy lambdas using
+     `list.append` as a value in 422 files; replace with ordinary functions.
+     All new static gates pass afterward. No production pin changed here.
+- **Prospective source/request evidence:** Original full worker V1 was frozen
+  before scored worker fixtures at UTC `2026-10-01T15:49:17.459163+00:00`;
+  97-file map `f3671a9c9a5274eb14cc4674072b84f3f785c5c94a7803c542c35901fb604217`.
+  Full V1 request template SHA `22cc02153c076d4ceba25a27586cf780945441126c2182cbaba84c7d3d77c736`,
+  183,568 bytes. Authoritative linked V2 was frozen at
+  `2026-10-01T16:27:32.978044+00:00`, before repaired fixture reruns. It changes
+  only the new artifact module and the own binding-module pin; all prior 92
+  source hashes remain unchanged. V2 map
+  `e0cfd897867786271974bcc971b647084f7fcf34b28e8db8a140a2d8c3f7ff8c`;
+  full request template `8f6febfc75d1d030219eebea9a85f9352722329ae5f81506f26e4517f63a2874`,
+  183,568 bytes, binds exact command/environment/science/references/limits.
+  Templates do not publish a scored request or launch a scientific worker.
+  Prospective records keep their original incomplete flags; final correctness
+  authority is in the separate validation record, with no science claim.
+
+  | Ignored `artifacts/runs/` record | SHA-256 | Bytes |
+  | --- | --- | ---: |
+  | `p67-confirmation-scored-worker-source.json` | `961d85cae91010b51ff665a1929cca51af538c581bf40d3990829bf68b33c520` | 202,702 |
+  | `p67-confirmation-scored-worker-source-v2.json` | `0dc9b7fd3c67d5ba3059324645e7c731f7153795a0ded4eb7c5fb731bbb3bf9c` | 203,060 |
+  | `p67-confirmation-scored-binding-preflight.json` | `b5ab82a71cc5978e383e7632609a2b9e6382f66bdb30efb96871fd7554fc821f` | 984 |
+  | `p67-confirmation-scored-binding-preflight-v2.json` | `96342728ebbc932fd3513ba24f1123d21b35cc2e3536cd9ffe39a487783dd1b4` | 983 |
+  | `p67-confirmation-scored-development-worker-validation.json` | `29f29eb8d65209c17915e5efdef4b3b449e1f768a56ec9ebc0750c6ca504de58` | 104,982 |
+  | `p67-confirmation-scored-worker-correctness-validation.json` | `e50d63f4e33e90f19fe81f8afa3ba5731bd96b44e7097367372edb71c42d23fe` | 5,543 |
+
+- **Actual metadata preflight, no new source/model/train/final access:** Both
+  unchanged complete training readers rederive the exact report SHA
+  `cc1c1deb4c721af5d8250f17783c9daada2501c108be91f825fa37324626b001`, 72,050 bytes,
+  and full request template; all loaded local builder/train/release/evaluate
+  aliases, real model constructors/update/prediction/accuracy methods and
+  original-final/outer fields are raising sentinels. Pure old RNG seed/hash
+  verification remains allowed. V1 guarded child exited 0 in 28.4962485 s
+  (parent 28.9334145 s), session 70450, under 180 s and zero forbidden accesses.
+  V2 uses the saved ignored reproducible validation script:
+
+  ```powershell
+  .\.venv\Scripts\python.exe artifacts/runs/validate-p67-scored-bindings-v2.py
+  ```
+
+  First validation-script attempt exited 1 in 0.4908268 s before readers: the
+  actual model API is `predict_proba`, not `predict`. Guard the existing actual
+  method. Corrected attempt **exit 0 / child 30.4984472 s / parent 30.9592891 s**,
+  session 37123 completed, under unchanged 180-s validation timeout, exact
+  97-source/template equality and zero forbidden accesses. No measured RSS or
+  new scientific execution is claimed by this metadata preflight.
+- **Real bounded development child:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe artifacts/runs/validate-p67-scored-development-worker.py
+  ```
+
+  Fixed first development seeds: gating/replay 41, sleep 67, schedule 79,
+  combined 263, parent 347. All reserved seeds fail source construction;
+  original development-final and outer fields remain raising sentinels.
+  Real unchanged six-family training/held copies plus private worker kernel
+  run in a separate child with the original actual optimizer observer, actual
+  5-ms process RSS sampler, monotonic clock and original 16,000/600-s/512-MiB
+  caps. The independent partial JSON port is an explicit private spy; the
+  public fixed-scope validator MUST reject its development body. No scope or
+  digest override is exposed by the production worker or CLI.
+  First attempt exited 1 / parent 12.0006658 s after all actual predictions
+  because the validation script asserted nonexistent `source_field_accesses`.
+  Correct actual separate `input_reads/target_reads` assertions; no production
+  change. Final attempt **exit 0 / child 11.2071609 s / parent 11.8479239 s**,
+  session 64627 observed completed. Actual optimizer work **1,518** = 1,344
+  wake + 166 applied + **8 rejected-executed** replay, kind totals BP/PC/
+  CPC+parent **370/394/754**, independently linked to complete validated raw
+  development facts. 77 guard attempts/154 evaluations/2,832 examples; 4,608
+  retained array bytes before copies. Complete development fact SHA
+  `f28a439142171688363ce11892913535b52ef463a896ae8c6d60981e9b58edee`,
+  **13,523,045 bytes**, unchanged. **12 releases/24 fields/168 actual
+  predictions/6,720 examples**, six exact request/source/reference binding
+  rechecks; every held state/content proof passes and owned hooks restore.
+  Actual development RSS start **57,704,448**, peak **126,111,744** bytes,
+  **4,847 samples at 0.005 s**, including training/copies/retained views/
+  serialization/proofs/exit sample. These are limited development observations,
+  not confirmation resource authority, reserved reproduction or a metric/win
+  claim. No complete reserved scored request/result/audit was produced.
+- **Final regression / commands and outcomes:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m pytest -o addopts= -q -ra --maxfail=1 tests/test_continual_confirmation_scoring_execution.py tests/test_continual_confirmation_scoring_worker.py tests/test_continual_confirmation_scoring_bindings.py tests/test_continual_confirmation_scoring_artifacts.py tests/test_p67_confirmation_scoring_cli.py tests/test_continual_confirmation_final_runtime.py tests/test_continual_confirmation_final_observation.py tests/test_continual_confirmation_runtime.py tests/test_continual_confirmation_scoring_validation.py tests/test_continual_confirmation_training_references.py tests/test_p67_scoring_training_reference_inspection.py tests/test_confirmation_final_roles.py tests/test_continual_confirmation_final_adapter.py tests/test_continual_confirmation_scoring.py tests/test_continual_confirmation_scoring_manifest.py tests/test_continual_confirmation_scoring_state.py tests/test_continual_confirmation_analysis.py tests/test_continual_confirmation_training.py tests/test_continual_confirmation_state.py tests/test_continual_confirmation_manifest.py tests/test_continual_confirmation_execution.py tests/test_p67_confirmation_training_cli.py
+  .\.venv\Scripts\python.exe -m ruff check .
+  .\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_scoring_execution.py src/infra/continual_confirmation_scoring_bindings.py src/infra/continual_confirmation_scoring_worker.py src/infra/continual_confirmation_scoring_artifacts.py scripts/run_p67_confirmation_scoring.py tests/test_continual_confirmation_scoring_execution.py tests/test_continual_confirmation_scoring_bindings.py tests/test_continual_confirmation_scoring_worker.py tests/test_continual_confirmation_scoring_artifacts.py tests/test_p67_confirmation_scoring_cli.py
+  .\.venv\Scripts\python.exe -m mypy
+  git diff --check
+  ```
+
+  **203 new / 984 related passed / 321.40 s**, zero skipped, session **72920**
+  explicitly completed. New counts 83 pure + 19 private development kernel +
+  29 bindings + 53 artifact + 19 CLI = 203; all 781 prior selected cases remain.
+  Ruff all checks passed; ten files already formatted; mypy **422 files**
+  passes; diff has no error (existing LF/CRLF warnings only). Late complete
+  parameters/controller/selector/facts/train-role/model-binding/final-content/
+  resealing/endpoint/count/serialization, source/request/reference bytes,
+  original caps, cancellation, occupied/competing/foreign outputs, failed
+  failure-marker publication and complete readback drift are tested.
+- **Final pin / evidence readback:** Independently recheck actual 97-file map,
+  all prior 92 pins, scientific manifest
+  `76cf873e5942a661bdb76e6fd7f28fc490fc6b8001e2ae0ccc4afe87063a4223`, exact analysis
+  `5e33ef28862bcdf9d92fe14dd6cf6b71672a2336ffd760a1214ef04666b594b1`, both full
+  templates and all six original request/result/audit byte identities/markers.
+  Original result bytes remain **134,554,378 each**, SHA
+  `3d85c60627de63769d0f0fc0bf5ec781c77d50468673dab466d8bbe28089e547`;
+  old 78-source map/adapter and canonical/repeat request/audit identities remain
+  unchanged. The 72,050-byte metadata test fixture is an exact clean-test copy
+  of the old verified report, not a substitute for either actual reader.
+  Final correctness record stores every new source/test/fixture/validation
+  script SHA and size, completed IDs, source/request/reference links and gate
+  results; it explicitly denies actual reserved scored/scientific execution.
+- **Plan/docs changes:** Mark only c1c2/c1c/c1 complete after accepted evidence;
+  preserve every original criterion and unfinished task. Retain old observer
+  progress as explicitly historical and move live handoff to c2. Add worker
+  docs/ADR161, update README/architecture/changelog and component reports with
+  current status. The only production repair is the linked V2 artifact failure
+  handling. No original algorithm/baseline/seed/metric/cost distinction/cap is
+  repinned, dropped or weakened.
+- **Skipped / limits:** Full CPU/CUDA suite, actual CI/clean-clone run, large
+  sweeps, full reserved scored processes/repeats and actual statistical seed/
+  interval reporting were skipped; zero selected test skips. Same Windows CPU,
+  Python 3.14.7/NumPy 2.4.6 environment. All metadata/fabricated/private evidence
+  is explicitly limited; no actual confirmation score/resource/winner claim.
+- **Blockers / exact next action:** No external blocker. Execute **P6.7c2**
+  through the strict public CLI on two fresh distinct local output directories,
+  unchanged scope/train references/analysis/97-source V2/settings/caps:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_scoring --execute --output-dir artifacts/runs/p67-confirmation-scored
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_scoring --execute --output-dir artifacts/runs/p67-confirmation-scored-repeat
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_scoring --read-only --output-dir artifacts/runs/p67-confirmation-scored
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_scoring --read-only --output-dir artifacts/runs/p67-confirmation-scored-repeat
+  ```
+
+  Each execution first freshly verifies both complete train bundles and saves
+  its full exact request before training. Enforce the original observed work,
+  state/content, final-call, time/RSS and exclusive artifact gates in both
+  children and complete readbacks. Require all **560 cells / 580 pairs /
+  1,680 calls / 67,200 examples** and exact canonical scientific result-byte
+  equality, retaining every failure/null/negative/inactive row and all rejected
+  work. On any original cap failure preserve evidence, leave c2 unchecked and
+  state the next action; do not tune seeds/metrics/baselines/caps. P6.11b then
+  reports every actual seed/contrast/predeclared interval under the unchanged
+  missing/constant/null rules. Full development goal stays active.
+
+## 2026-10-01 — P6.7c2 actual full scored confirmation and repetition complete
+
+- **Completed task IDs:** **P6.7c2, P6.7c** after both complete actual scored
+  processes, both independent public readbacks and additional entire-byte/
+  complete pairing checks. Session also completed **P6.7c1c2, P6.7c1c,
+  P6.7c1** as recorded above before any reserved final value. P6.11b, C9,
+  P6.3c/P6.3/P6.7 and original matrix/resource/hypothesis/reporting parents
+  remain unchecked. Full development goal remains active.
+- **Gate before first final value:** Closing c1 readback verifies authoritative
+  V2/current 97-file map, correctness metadata and six original train bytes;
+  both official c2 output directories are fresh. Initial closing helper used
+  Windows default cp1252 for the UTF-8 plan and raised `UnicodeDecodeError`
+  before experiments; specify UTF-8 and repeat successfully, exit 0. Ruff and
+  mypy 422 pass; diff has no error. C1 completion/evidence is recorded in plan
+  and log before launching actual c2. No scientific pin or cap changes after
+  this gate. Both actual requests are exclusively saved before training.
+- **Commands / observed outcomes, all exit 0:**
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_scoring --execute --output-dir artifacts/runs/p67-confirmation-scored
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_scoring --execute --output-dir artifacts/runs/p67-confirmation-scored-repeat
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_scoring --read-only --output-dir artifacts/runs/p67-confirmation-scored
+  .\.venv\Scripts\python.exe -m scripts.run_p67_confirmation_scoring --read-only --output-dir artifacts/runs/p67-confirmation-scored-repeat
+  .\.venv\Scripts\python.exe artifacts/runs/validate-p67-scored-repetition.py
+  ```
+
+  Canonical execution session **74812**, repeat **4124**, readbacks **44224**
+  and **96636**, all explicitly observed completed. Execute sessions are
+  sequential and use the strict fixed public worker, no private fixture ports.
+  Public readbacks are independent and were batched after both workers ended;
+  each freshly dispatches both full unchanged training readers and verifies
+  every saved/current scientific/reference/source/resource/audit link. The
+  additional saved validation script exited 0 in 2.38 s; its initial stdout
+  printed the full work vectors and was truncated, so a separate compact
+  metadata read retrieved every bundle identity/resource without rerunning.
+- **Complete scientific scope / equality:** **60 family/seed rows / 50 distinct
+  source seeds / 560 successful cells / 1,680 successful endpoints**, zero
+  failed cells/endpoints. Family cell counts gating/replay/sleep/schedule/
+  combined/parent **30/80/90/110/170/80**, with every original arm/seed/order
+  retained. Each actual observer records **120 releases / 120 input + 120
+  label field reads / 1,680 predictions / 67,200 final examples**. Entire
+  complete training facts/held models/controllers/selectors/roles are verified
+  before any release and after evaluation/serialization; all original before/
+  after training proofs match the bound 134,554,378-byte raw result fingerprint.
+  Final content, exact correct-count/accuracy/failure links and late current
+  artifact/source/reference checks pass. No outer-selection score.
+  Both entire **1,116,254-byte scientific results are byte-for-byte equal**,
+  SHA `2fae14cc615b2f2bf50716ea3e930514551283b662cded84befab91e39f698a7`.
+- **Observed costs/resources, original caps unchanged:** Each has **15,210**
+  attempted/executed optimizer calls = **13,440 wake + 1,724 applied replay +
+  46 rejected-executed replay**, BP/PC/CPC+parent **3,708/3,948/7,554**. Both
+  independently match complete bound raw work: 770 guards/1,540 evaluations/
+  28,320 examples, 46,080 retained array bytes before copies, width peak 14.
+
+  | Actual observation | Canonical | Repeat |
+  | --- | ---: | ---: |
+  | Worker seconds | 68.5221003 | 68.2845622 |
+  | Claimed parent lifecycle seconds | 71.0737686 | 70.6688824 |
+  | RSS start bytes | 47,513,600 | 47,288,320 |
+  | RSS peak bytes | 234,356,736 | 234,295,296 |
+  | RSS samples at .005 s | 45,855 | 45,838 |
+
+  Original **16,000 updates / 600 s / observed absolute 512 MiB at 5 ms** pass.
+  Models/held copies/final views remain retained across measured serialization/
+  global proof/exit checks. Original scope still excludes stdout framing and
+  parent publication from child RSS; parent lifecycle starts after initial
+  complete-reference preflight, not at overall CLI start. No per-arm time/RSS/
+  FLOPs claim or composite winner; P6.10 retains broader resource acceptance.
+- **Local ignored complete artifacts:**
+
+  | Directory/file | SHA-256 | Bytes |
+  | --- | --- | ---: |
+  | `p67-confirmation-scored/confirmation-scored.request.json` | `a89efeff39467c1d4c55a45707ee5f700242c26dbfd47dc100912202921e1334` | 183,577 |
+  | `p67-confirmation-scored/confirmation-scored.result.json` | `2fae14cc615b2f2bf50716ea3e930514551283b662cded84befab91e39f698a7` | 1,116,254 |
+  | `p67-confirmation-scored/confirmation-scored.audit.json` | `b53bfea96cdcf8c903311f94ac714fe4f2b4d19fa8b0775cfbd0f2d257fcd01f` | 1,039,853 |
+  | `p67-confirmation-scored-repeat/confirmation-scored.request.json` | `c34829231ca2d1c85d0211865d920c3747a3d4ccf1121bf9d90f7ad098bf609a` | 183,584 |
+  | `p67-confirmation-scored-repeat/confirmation-scored.result.json` | `2fae14cc615b2f2bf50716ea3e930514551283b662cded84befab91e39f698a7` | 1,116,254 |
+  | `p67-confirmation-scored-repeat/confirmation-scored.audit.json` | `76688d9eff2018dda2918192f6b7aeb8efc82c806d75d94abdf5d4a53a71c36d` | 1,039,852 |
+
+  All paths are under `artifacts/runs/`; no failure/claim. Additional complete
+  repetition record `p67-confirmation-scored-repetition-validation.json`, SHA
+  `f255d78b10e5315d2b23fec2693a2a446c28be336630877698df82e2d1df9d89`, **63,687 bytes**.
+  Validation producer `validate-p67-scored-repetition.py` SHA
+  `93dda4b7d0188a511bdd9cc7758fa1c84590d8cdfc19959ab58960e6d1ac953e`, **5,454 bytes**.
+  Both source maps remain authoritative V2
+  `e0cfd897867786271974bcc971b647084f7fcf34b28e8db8a140a2d8c3f7ff8c` (97 files);
+  source-freeze record `0dc9b7fd...bf9c`, science `76cf873e...3a4223`, analysis
+  `5e33ef28...6b594b1`, all prior 92 source pins and all six original train
+  files remain unchanged. Prospective correctness/metadata records retain
+  their historical no-scientific-execution flags; actual c2 authority is
+  recorded separately here and in its repetition validation.
+- **Pairing/analysis validation without report completion:** Use unchanged
+  `verify_scored_payload` then `analyze_confirmation` on both already publicly
+  verified complete results. Require all **58 ordered contrasts / 580 original
+  pairs / 116 primary statements**, ten planned seed observations per vector,
+  complete fixed scope and identical roles. Both entire encoded pure analysis
+  bodies repeat exactly at SHA
+  `9796965cef1b5e1b3604d6ba69f84d05d6e6cc1e1b7d70ec298c91ba90f47b5c`, **1,885,930 bytes**.
+  This fingerprint is a scope/repetition check, not an exhaustive published
+  seed/raw-cost report. P6.11b remains unchecked: every seed/mean/dispersion/
+  frozen interval and joined original per-arm cost vector must be published
+  and completely read back. The repeat adds no independent seeds; shared
+  gating/replay IDs are not pooled. Every inactive/duplicate/negative/undefined
+  value is retained without favorable selection or method changes.
+- **Plan/docs / skipped / preservation:** Mark c2/c only after observed complete
+  evidence; add `docs/p67-confirmation-scored-results.md`, update live plan/log
+  handoff and README/architecture/changelog/component reports. One multi-file
+  documentation patch failed its ADR context check atomically; correct context
+  and reapply, with no production/evidence change. Existing working/dirty user
+  changes remain; no commit/push, new dependency/environment change, large
+  sweep, baseline/seed/metric/cap tuning or algorithm change. Full CPU/CUDA
+  suite, actual CI/clean-clone run and exhaustive statistical reporting remain
+  skipped. The earlier **984 related tests / zero skips**, Ruff/ten-file
+  format/mypy 422 gate remains valid: no tested production/test source changed
+  after it, and both full physical experiments/readbacks now additionally pass.
+- **Blockers / exact next action:** No external blocker. Execute **P6.11b**
+  reporting from the two complete verified official scored bundles and exact
+  predeclared `5e33ef28...6b594b1` contract. Publish all individual seed/arm/
+  contrast vectors, three raw endpoints, primary mean-task accuracy and signed
+  forgetting, dispersion and fixed marginal/simultaneous intervals across
+  all 116 statements. Join complete original raw costs by family/seed/arm and
+  exact train-result digest, including rejected-executed work. Bind complete
+  report/source/input identities; verify full report/artifact readback and
+  deterministic analysis repetition. Preserve every null/negative/inactive/
+  duplicate/undefined case; do not pool families, treat repeats as new
+  replications, select contrasts/intervals, tune science/caps or declare a
+  composite winner. No new training or final source/model access is needed.
+  P6.9/P6.10/P6.12 and original parents keep all separate criteria unchecked
+  until their evidence. Full development goal stays active.
+- **Closing session readback, exit 0:** Recheck all 97 current source bytes,
+  every c1 source/test/fixture/validation-script identity, both c1/c2 validation
+  records, the c2 producer and all six new scored artifacts plus all six old
+  train references/markers. Plan contains the five completed session IDs and
+  P6.11b/P6.11/P6.7/P6.3c/P6.10 remain unchecked with the P6.11b handoff.
+  Both official scored bundles still have no failure/claim. Final Ruff all,
+  ten-file format, mypy 422 and diff checks pass (LF/CRLF warnings only).
+  All actual execution/readback/test sessions are completed; no live worker.
+  Documentation edits after experiments change no frozen production/test byte.
+
+
+## 2026-10-01 — P6.11b1 complete original cost projection and independent readback
+
+### Requirement, checkout and reconciliation
+
+Continued the current P6.11b handoff after complete P6.7c scoring/repetition.
+Read actual AGENTS, plan acceptance/current handoff and current development log;
+reconciled actual checkout/artifact/source facts with the prior reviewed state.
+The full living plan/log contain extensive historical evidence; a compact plan
+requirements view retained acceptance while omitting only completed evidence
+suffixes. Initial output hit cp1252 Unicode encoding and combined-tool output
+limits; the UTF-8 retry/targeted current reads changed no source or requirement.
+Actual HEAD remains `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`, branch `master`,
+with prior c5–c9/P6.7/P6.11 dirty/untracked work preserved. Phase 0 tasks remain
+checked with their historical evidence; current work preserves evaluation
+isolation and matched baselines before new algorithms.
+
+Concrete increment: bind all original family/seed/arm raw costs to the entire
+training result, reuse both unchanged complete readers, preserve rejected work,
+checkpoint capacity and shared context, then publish/repeat/read back exact
+local cost metadata. No new scientific training, final source access, metric,
+seed, baseline, interval choice, cap, dependency, environment variable, commit,
+push, network/GPU run or sweep.
+
+### Plan changes and task status
+
+Completed **P6.11b1** only. Split original b into b1 cost binding and b2 exhaustive
+scored seed/interval/cost publication, with original b acceptance unchanged.
+Why: existing 72,050-byte reference metadata retains grouped work/resources;
+full 134,554,378-byte original results contain per-arm raw costs and capacity.
+Only a separate complete tested join can attach those facts without inventing
+per-arm measurements. B2/b/P6.11 and C9/P6.3c/P6.3/P6.7/P6.9/P6.10/P6.12
+retain their unfinished acceptance. P9.1 still requires actual CI.
+
+The prospective small shared-metadata assumption was disproved by measurement:
+raw supplemental guards and periodic opportunity context include full proof
+states. Both exact cost artifacts are 112,635,395 bytes, with a standalone
+103,705,403-byte projection. Preserve this literal evidence; b2 can publish all
+compact arm costs and reference complete shared proof context by byte identity,
+with complete actual reader proof, instead of copying a second proof body.
+No cost field or original criterion was silently removed to reduce size.
+
+### Implementation and boundaries
+
+Added:
+
+```text
+src/app/continual_confirmation_report_costs.py
+  Whole original result fingerprint, pure projection, independent work checks.
+src/infra/continual_confirmation_report_cost_references.py
+  Sequential unchanged complete readers, full cost/reference/audit equality.
+scripts/inspect_p611_confirmation_costs.py
+  Exact source extension, exclusive metadata publication, complete readback.
+tests/test_continual_confirmation_report_costs.py
+tests/test_continual_confirmation_report_cost_references.py
+tests/test_p611_confirmation_cost_inspection.py
+docs/adr/ADR-0162-preserve-original-cost-facts-before-attaching-confirmation-scores.md
+docs/p611-confirmation-cost-join.md
+```
+
+App stays pure with inward dependency direction; infrastructure owns the
+complete-reader composition and the adapter owns filesystem publication.
+Existing scientific modules are unchanged. The public projection requires the
+entire original 3d85c606...89e547/134,554,378-byte body before and after projection,
+then verifies complete work and every scheduled cost key. It preserves every
+raw method field/null/inactive/rejected fact, initial/after-A/after-B capacity
+and state/parameter identities, shared seed context, supplemental guards and
+training-role links. Mutable raw facts are copied. Streaming original encoding
+avoids another whole encoded result string. Raw proof context remains large.
+
+Each original complete reader independently owns scientific provenance and
+resource/request/source/work validation. Capturing costs before its decoded
+result is discarded preserves sequential readback. Projected work must equal
+its independent audit, the complete projections must equal each other, all six
+original file/marker checks must pass and complete reference metadata must equal
+cc1c1deb...26b001/72,050 bytes. Published/readback cost metadata contains current
+100-source identities and exact canonical bytes; before/after/late source and
+output changes fail. Publication refuses occupied paths before entering readers.
+Metadata explicitly declares statistical_seed_report_complete=false and
+scored_bundles_validated=false. No authority to train or release final data.
+
+### Correctness commands and outcomes
+
+Test-first commands for each new module initially failed collection because the
+module did not yet exist (three intentional red runs, no tests executed).
+Each implementation was then added. Intermediate focused suites passed 21,
+27, 43, 49 and finally 55 tests. The final meaningful related command was:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -o addopts='' -q tests/test_continual_confirmation_report_costs.py tests/test_continual_confirmation_report_cost_references.py tests/test_p611_confirmation_cost_inspection.py tests/test_continual_confirmation_work_validation.py tests/test_continual_confirmation_training_references.py tests/test_p67_scoring_training_reference_inspection.py tests/test_continual_confirmation_validation.py
+```
+
+Observed session 51321 terminal exit 0: **314 passed in 32.45 s**, including
+55 new tests, **zero skipped**. Coverage includes original encoder equality,
+all six genuine first development families after sealed model/data calls,
+complete raw fields/capacity/rejected work, detached mutable copies, partial or
+ambiguous scope, invalid counts/capacity, nonfinite serialization, cost/audit
+mismatch, changed repeated cost, detached or late changed training body/files,
+exact conservative 100-file closure, old/new source corruption, exclusive
+collisions, missing/stale/resealed/unknown/duplicate/noncanonical output,
+publication/source/output drift, reader failure and CLI help/no-mode/unsupported
+scientific override behavior.
+
+Initial static checks found six fixture-import F811 cases and three mypy
+annotations. Replaced imports with fixture module aliases and supplied explicit
+container/result annotations; only new files were repaired before freezing.
+Several documentation/source-pin patch attempts did not match exact text and
+made no change; actual lines were read and corrected. The full original b
+criterion stayed byte-for-byte unchanged. A duplicate heading introduced while
+inserting README/architecture sections was corrected.
+
+Final and post-evidence static commands:
+
+```powershell
+.\.venv\Scripts\python.exe -m ruff check src tests scripts
+.\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_report_costs.py src/infra/continual_confirmation_report_cost_references.py scripts/inspect_p611_confirmation_costs.py tests/test_continual_confirmation_report_costs.py tests/test_continual_confirmation_report_cost_references.py tests/test_p611_confirmation_cost_inspection.py
+.\.venv\Scripts\python.exe -m mypy
+git diff --check
+git status --short
+```
+
+All exit 0: Ruff all checks pass; six files formatted; mypy **428 source files**
+pass; diff check passes. Git gives existing LF-to-CRLF advisories for dirty docs,
+with no content/whitespace error. All prior user work and HEAD/branch remain.
+
+Skipped/not run: zero skips in the selected 314 tests. The full repository
+suite, fresh clone/install, Torch/GPU/real CI, new training/final experiments
+and sweeps were not rerun for this read-only consumer increment. Related gate,
+complete actual readbacks and exact preservation of old frozen sources cover
+its concrete risks; their remaining original acceptance is not claimed done.
+
+### Prospective source freeze before actual cost reads
+
+Exclusive `artifacts/runs/p611-confirmation-cost-source.json`:
+14,115 bytes, SHA **8400b7c38335199c36f3dd2839c810cb268a4a2bb8fac7a9a3b320fabe83c101**.
+It binds all 100 source files, unchanged six original training artifact bytes,
+Python/NumPy/platform/processor facts, 55 new/314 related correctness evidence,
+180-second validation budget and explicit unfinished statistical/scored scope.
+Map SHA **adc4da3da4a96bd6a9b941137862d34efcccce8751713c916f60fc328b01410f**.
+It extends authoritative scored V2 record 0dc9b7fd...bf9c/203,060 bytes and
+preserves every original 97 pin/map e0cfd897...7ff8c. No ignored freeze file is
+needed by the public consumer at runtime; the validation harness binds it.
+
+New production identities:
+
+| File | Bytes | SHA-256 |
+| --- | ---: | --- |
+| app cost projection | 7,819 | 7881c74a462550f407b16e8f2ccbf761f0faa0ed81a46bee14f3d2d099164298 |
+| infra cost references | 3,631 | 7c92d58e1e9c5a168a22afa85e2bfdfdf8ae98ab36f5264c1d121c6bc1a26133 |
+| cost CLI | 4,554 | 3c3add12dd9de8b5226d4ba7c70dffa4b8b5185a7107d53a860dfd97f8a6b73e |
+| projection tests | 7,986 | c57249f939b391ea5b46d17b4b5612f846cb9bfb9686a86e5627ea6b2875c913 |
+| cost-reference tests | 4,569 | df97486084b3aa7fd7705ca969c4ba390f8221c169e6e9e649b915fb9acc531b |
+| cost CLI tests | 9,850 | ba0a6f3e15f314b5740e45437909b04009027c566b892c61174ab8cdfaebc226 |
+
+### Actual local validation commands and terminal evidence
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/validate-p611-confirmation-costs.py
+```
+
+Observed session 7838 terminal exit 0. The saved 8,536-byte local validation
+producer SHA is **4e6edbed83b3f3968e17fd4f0ed2ecdc6a5c2fc95347cd3eb0fc1d3644fd8a98**.
+Parent launches these four sequential child commands, each with timeout 180 s:
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/validate-p611-confirmation-costs.py --worker artifacts/runs/p611-confirmation-costs.json
+.\.venv\Scripts\python.exe artifacts/runs/validate-p611-confirmation-costs.py --worker artifacts/runs/p611-confirmation-costs-repeat.json
+.\.venv\Scripts\python.exe artifacts/runs/validate-p611-confirmation-costs.py --worker artifacts/runs/p611-confirmation-costs.json --read-only
+.\.venv\Scripts\python.exe artifacts/runs/validate-p611-confirmation-costs.py --worker artifacts/runs/p611-confirmation-costs-repeat.json --read-only
+```
+
+All four return 0 and every one of 24 named raising boundary guards has zero
+calls. Guards cover source/data builders and imported aliases, confirmation
+training, model construction/train/predict/accuracy and final release/evaluate.
+Each actual operation independently reads both complete original training
+bundles (eight original full readbacks total). No original final or outer
+field was opened. Original optimizer/RSS/wall facts remain historical validated
+observations; new elapsed times are derivative validation costs, not new
+scientific per-arm or resource measurements.
+
+| Operation | Child inspection seconds | Parent seconds |
+| --- | ---: | ---: |
+| Canonical publication | 72.9429458 | 73.7242413 |
+| Repeat publication | 73.6094244 | 74.3912447 |
+| Canonical independent readback | 74.4638817 | 75.2698046 |
+| Repeat independent readback | 74.5481404 | 75.3261709 |
+
+Each projection retains all **560 unique cost keys/60 seed contexts/1,680
+checkpoint cost rows**, 13,440 wake + 1,724 applied replay + **46 rejected
+executed replay** = **15,210 actual updates** and 46,080 shared retained bytes
+before copies. Full projected/audit/group/kind/reference costs agree. Both
+complete metadata files are byte-for-byte equal, including raw contexts,
+all source/input identities and historical resources.
+
+| Local evidence | Bytes | SHA-256 |
+| --- | ---: | --- |
+| artifacts/runs/p611-confirmation-costs.json | 112,635,395 | 214ce7ad00f61ca1aac8f85ad1381f50e9fc4235baeec59d7daf6043cc7d81dd |
+| artifacts/runs/p611-confirmation-costs-repeat.json | 112,635,395 | 214ce7ad00f61ca1aac8f85ad1381f50e9fc4235baeec59d7daf6043cc7d81dd |
+| Standalone entire projection | 103,705,403 | 42bbe9049ddd863cf8daa7cca0dc4d62bd26ba9f1be5f7ae05be300107e27868 |
+| artifacts/runs/p611-confirmation-cost-validation.json | 15,682 | eac94f8e95144d52e389cacf61ad1351ce5b71c07eadb972cfdc8b2cec889e37 |
+| artifacts/runs/p611-confirmation-cost-handoff-validation.json | 14,861 | 58e1e23c7b6e2753b945ca4db387f54fa9f9d91f5dd8c76bcd02f94d47931767 |
+
+Validation metadata binds exact commands/exit codes, whole output/projection
+identities, all source/test/harness bytes, original inputs, full work counts,
+24 zero-call guards per operation, test evidence and completed b1 only. All
+cost evidence remains local ignored data. Public reuse command (preserves the
+existing occupied publications):
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.inspect_p611_confirmation_costs --result-file artifacts/runs/p611-confirmation-costs.json --read-only
+```
+
+The complete validation producer intentionally refuses occupied publish paths;
+do not rerun it over these files. Use the public read-only command or preserve
+all current evidence and record fresh explicitly named outputs if necessary.
+
+### Size profiling and closing revalidation
+
+A read-only Python JSON size profile of the first published metadata found
+compact encoding sizes 1,238,185 bytes for all cells, 52,503,109 bytes for seed
+contexts and 19,283 bytes for group work. First schedule supplemental guards
+alone occupy 3,725,191 compact bytes; first combined/parent opportunity context
+occupies 803,659/470,210 bytes. Method fields across each family remain complete.
+These are representation sizes, not process RSS or per-arm memory measurements.
+The artifact is larger than expected and still meets all declared timeout and
+complete raw-fact criteria; the measured rationale is recorded rather than
+silently removing proofs or changing scientific caps.
+
+Closing read-only validation rechecks the full 100-source map against the
+prospective freeze; all production/test/harness/cost bytes against validation;
+all six original training artifacts; all six c2 scored artifact byte identities
+and absence of failure/claim markers; unchanged scientific manifest
+76cf873e...3a4223 and analysis contract 5e33ef28...6b594b1; unchanged master HEAD;
+checked b1 and unchecked b2/b/P6.11/original parents. The six scored-file checks
+are explicitly byte preservation, not a new complete scored readback or
+statistical-report authority. No source or original artifact drift was found.
+
+Updated DEVELOPMENT_PLAN.md, README, ARCHITECTURE, CHANGELOG, analysis/scored
+results cross-references, ADR162/cost docs and this log. New production source
+bytes remain exactly those frozen before actual cost reading. No live child
+or validation process remains.
+
+### Blockers and exact next action
+
+No blocker for b2. Original actual CI/matrix/resource/hypothesis/reporting
+acceptance remains unfinished and is not closed by this cost metadata.
+
+**Next exact action: P6.11b2.** Implement a separate source/input-bound exhaustive
+report consumer of both unchanged complete official scored readers and fixed
+analysis contract 5e33ef28...6b594b1. Join all 560 original family/seed/arm raw
+costs from verified b1; publish each original seed, all three raw endpoints,
+all 626 arm/contrast metric vectors, mean/dispersion and fixed marginal and
+simultaneous intervals for all 116 primary statements. Retain all null,
+negative, inactive, duplicate, failure and undefined outcomes; deterministic
+repeats add no seed replications and families are not pooled. Keep every
+per-arm raw cost field and bind/link complete shared cost context by exact
+112,635,395-byte artifact identity instead of copying another large proof body.
+Freeze the new report closure/protocol, pass corruption/publication gates,
+then publish both complete reports and independently repeat/read back all
+bytes. Existing pure analysis golden 9796965c...47b5c/1,885,930 bytes is pairing
+validation, not completed reporting. Do not tune baselines/seeds/metrics/caps,
+choose favorable intervals or start new training/sweeps. Only b1 is checked.
+
+## 2026-10-01 — P6.11b2: publish and independently repeat/read back the exhaustive confirmation report
+
+### Requirement, reconciliation and completed IDs
+
+Continued the current handoff after reading AGENTS.md, the full development
+plan and current log. Phase 0/reviewed-commit reconciliation, evaluation
+isolation and matched baselines were already verified. The actual checkout
+remains master at `86cd5bff71b9c70da94ddcf69d8f62316f2d3382`; the original
+review was `8793c49...` with ten later commits previously reconciled. Preserved
+all earlier dirty increments, user changes, frozen sources and local evidence.
+
+Completed **P6.11b2 and P6.11b** after their full acceptance evidence. Original
+P6.11/P6.9/P6.10/P6.12, P6.7/P6.3/C9 and actual CI remain unchecked pending
+their own original criterion/evidence audits. This is a complete reporting
+increment, not completion of the full repository plan.
+
+Why this: b1 established the original raw cost facts. The next unblocked task
+was to attach the entire frozen scored analysis and every original cost without
+selecting outcomes. A separate consumer preserves the existing scientific
+freeze and reuses complete validated readers instead of modifying a runner.
+
+### Changes and boundaries
+
+```text
+src/app/continual_confirmation_report_cost_binding.py  exact compact cost/context binding
+src/app/continual_confirmation_report.py               complete frozen analysis/cost join
+src/app/continual_confirmation_report_rendering.py     exhaustive deterministic Markdown
+src/infra/continual_confirmation_report_bindings.py    current sources/inputs/complete ports
+src/infra/continual_confirmation_report_artifacts.py   exclusive publication/full readback
+scripts/run_p611_confirmation_report.py               fixed local CLI
+tests/test_continual_confirmation_report.py
+tests/test_continual_confirmation_report_rendering.py
+tests/test_continual_confirmation_report_bindings.py
+tests/test_continual_confirmation_report_artifacts.py
+tests/test_p611_confirmation_report_cli.py
+tests/fixtures/p611_confirmation_report_costs.json     original unscored cost metadata only
+docs/adr/ADR-0163-publish-the-complete-frozen-confirmation-report.md
+docs/p611-confirmation-report.md
+```
+
+App is pure and owns no data/model/IO/scoring. Infra owns artifact identities
+and reader composition; CLI supplies unchanged complete scored/cost readers.
+Each scored reader gets fresh complete b1 evidence; each b1 readback reads
+both original full training bundles sequentially. Full shared proof context
+stays bound by exact original cost file/projection identity and all sixty JSON
+pointers. Every per-arm raw cost and checkpoint capacity is copied completely.
+The compact 1,608,771-byte input reconstructs exactly from the finished report
+at SHA `865112555b1323aeb873521053e51cc163b142ca82a6aa4a4d72aa08b01a3383`.
+
+Publication refuses occupied request/result/Markdown/audit/failure/claim paths
+before readers. Strict canonical/current request/source/input checks surround
+complete readers and output publication. Failure-marker IO failure revokes
+only our still-identical completion audit; foreign/partial bytes remain.
+Independent readback rebuilds the entire JSON/Markdown/audit and checks late
+file/source/marker drift. No new dependency, environment variable, model,
+dataset, metric rule or scientific override was introduced.
+
+### Prospective freeze and production preservation
+
+The complete 106-source V1 map extends all original 97 scored pins and three
+b1 cost pins. Manual local-import AST closure inspection visited exactly the
+declared 106 files. The source/request freeze preceded the new metadata fixture
+and fabricated report tests; production bytes were not changed afterward.
+Historical prospective false correctness/publication flags remain preserved;
+actual completion is established by the later validation record.
+
+| Frozen evidence | Bytes | SHA-256 |
+| --- | ---: | --- |
+| artifacts/runs/p611-confirmation-report-source.json | 40,465 | 971b2a18054d6d0b15763d0af1ccea93c261ddd1a1d6320a313a0cef6ed48fe6 |
+| Complete 106-source map | — | 67063e2b13329d8fb86654cbb4acf4c4b348db0d98e1f9e7abeca5e265058517 |
+| src/app/continual_confirmation_report_cost_binding.py | 3,638 | bcdefe01975d7eea334a43391d7a43ec10caec299456301ebf21f404871f7975 |
+| src/app/continual_confirmation_report.py | 6,438 | 2fa3428d1d10a271bb501a5c51c9303545c034e6c4b25d6a8c44f39b7d9ab619 |
+| src/app/continual_confirmation_report_rendering.py | 8,103 | d18de2e75bd1ca60c6a8d51b474a687b895df85cec75790cffdc83a7fbace7f2 |
+| src/infra/continual_confirmation_report_bindings.py | 12,147 | 2b79542dcb4af5d605d7f18d392df80ace42a1367403f532ebf06b4812f489fb |
+| src/infra/continual_confirmation_report_artifacts.py | 8,993 | c09ffadd126ec8e43069a6aaf8a1f151b777ada37eef421817dc9c11605051a3 |
+| scripts/run_p611_confirmation_report.py | 2,486 | d127fff3c3462567f44a964f31e34bb472595dc88bd00627497c55c3bb284148 |
+| Unscored metadata fixture / local compact cost input | 1,608,771 | 865112555b1323aeb873521053e51cc163b142ca82a6aa4a4d72aa08b01a3383 |
+
+The freeze was written at 2026-10-01T19:11:20.336206+00:00. Fixed scoring
+manifest SHA `76cf873e5942a661bdb76e6fd7f28fc490fc6b8001e2ae0ccc4afe87063a4223`
+and analysis contract SHA
+`5e33ef28862bcdf9d92fe14dd6cf6b71672a2336ffd760a1214ef04666b594b1`
+remain unchanged, as do original seeds/settings/baselines/scientific caps.
+
+### Correctness commands, failures and repairs
+
+The first report-only pytest collection failed with an ImportError before the
+new module existed. After implementation, 17 pure cases passed in 5.16 s.
+Initial mypy caught an optional request-time type; the input was narrowed
+before the prospective freeze. Inspection also corrected dataclass handling
+of the tuple of training references before that freeze.
+
+The first three-file test run reported 8 failures / 28 passes in 8.56 s.
+All eight were test fixture mistakes: renderer expected nonexistent
+`no_observations` instead of the unchanged frozen `incomplete_observations`
+status; seven boundary tests inherited the pure-app file-read prohibition.
+Kept the pure app/rendering IO seals and used source/model sentinels for the
+filesystem boundary fixtures. No frozen production source was repaired or
+acceptance weakened. The next full five-file run passed 76 tests in 14.22 s.
+Mypy then caught three test annotations; corrected only test annotations and
+an explicit forbidden-port function. Added strict current/canonical UTC,
+unknown/resealed request, input marker/budget and partial-cost cases.
+All 101 new tests subsequently passed in 15.33 s. Ruff/mypy caught an unused
+test import and a reused str/Path test variable; corrected those test details.
+
+Final related gate, terminal exit 0: **446 passed in 37.82 s, zero skipped**:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -o addopts='' -q tests/test_continual_confirmation_report.py tests/test_continual_confirmation_report_rendering.py tests/test_continual_confirmation_report_bindings.py tests/test_continual_confirmation_report_artifacts.py tests/test_p611_confirmation_report_cli.py tests/test_continual_confirmation_analysis.py tests/test_seed_statistics.py tests/test_continual_confirmation_scoring_validation.py tests/test_continual_confirmation_report_costs.py tests/test_continual_confirmation_report_cost_references.py tests/test_p611_confirmation_cost_inspection.py tests/test_continual_confirmation_training_references.py
+.\.venv\Scripts\python.exe -m ruff check src tests scripts
+.\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_report_cost_binding.py src/app/continual_confirmation_report.py src/app/continual_confirmation_report_rendering.py src/infra/continual_confirmation_report_bindings.py src/infra/continual_confirmation_report_artifacts.py scripts/run_p611_confirmation_report.py tests/test_continual_confirmation_report.py tests/test_continual_confirmation_report_rendering.py tests/test_continual_confirmation_report_bindings.py tests/test_continual_confirmation_report_artifacts.py tests/test_p611_confirmation_report_cli.py
+.\.venv\Scripts\python.exe -m mypy
+git diff --check
+```
+
+Ruff, eleven-file format, mypy (439 files) and diff gates pass. Existing dirty
+documentation may emit Git LF/CRLF advisories; no diff-check error. Python
+3.14.7/NumPy 2.4.6 on the existing Windows i7-12700K environment was preserved.
+
+Tests cover complete fabricated scope/repetition; raw cost/key/context binding;
+late role/checkpoint/seed/cost corruption; negative/null/failure/undefined
+vectors; unrounded complete rendering; strict request/source/input/returned
+reader identities; occupied/partial/late-drift publication and readback;
+failure-marker/audit revocation ownership; finite/timeout budgets; and fixed
+CLI dispatch without scientific overrides. Clean fixtures carry no reserved
+scored value and establish no actual scientific provenance.
+
+A later read-only JSON introspection initially raised KeyError `family` because
+the family summary key is `name`. Corrected only the diagnostic lookup; it then
+exited 0. No source/artifact/evaluation was changed. Some large documentation
+reads were output-truncated; focused reads recovered the relevant sections.
+`rg` with no matching stale status returned its normal exit 1, not a test
+failure. No timed-out or unobserved validation run is counted as passing.
+
+### Four actual bounded complete operations
+
+After the final correctness gate, this local producer ran four sequential
+fresh processes with hard timeout 180 s each:
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/validate-p611-confirmation-report.py
+```
+
+The producer's saved bytes are 8,520 / SHA
+`9de6a5098299fc5be23b6d5c570682b85d94551ceeb5437a77f49cf182bc44a2`.
+Each observed child command is the same Python/producer with `--worker`
+and the absolute canonical or repeat directory, adding `--read-only` for
+readback; all exact command arrays are in the validation metadata. The parent
+session remained live through all four operations; transient polling did not
+cause a restart or overwrite. All four terminal exit codes are zero.
+
+| Operation | Child seconds | Parent seconds | Exit |
+| --- | ---: | ---: | ---: |
+| Canonical publication | 161.8299165 | 162.4241344 | 0 |
+| Repeat publication | 161.8716003 | 162.4786186 | 0 |
+| Canonical independent complete readback | 161.0518800 | 161.6595500 | 0 |
+| Repeat independent complete readback | 160.6489414 | 161.2716384 | 0 |
+
+All 24 named data/model/train/final guards and imported aliases recorded zero
+calls in every child. These operations perform **sixteen original complete
+training readbacks and eight complete scored readbacks** total. No new source,
+model, training, final-view release, final field or prediction was accessed.
+Derivative elapsed time is not a new scientific per-arm resource measurement.
+
+| Local evidence | Bytes | SHA-256 |
+| --- | ---: | --- |
+| artifacts/runs/p611-confirmation-report/confirmation-report.request.json | 26,104 | 57db44ded2fdc9a0011dac61ac8f0b11e55f6e831df21215ba2f98003054aff7 |
+| artifacts/runs/p611-confirmation-report-repeat/confirmation-report.request.json | 26,111 | 4e5bb5956f4a8d35274054bf08ec5cf32349ca43e999e93c1fa6ec4d9fa1733e |
+| Both confirmation-report.result.json files | 7,537,678 | 363ed97dba808281d13224526b4b36614ae452188cade256992b530b6ab03088 |
+| Both confirmation-report.md files | 2,958,568 | c989df16853868e910bf99303470927d17c6f01ed86e5dd004d35692bf03fddc |
+| artifacts/runs/p611-confirmation-report/confirmation-report.audit.json | 4,474 | 5bd1f8d641b7658ef661ded7a633e1ce5a04026b64380215e91b1832f3585486 |
+| artifacts/runs/p611-confirmation-report-repeat/confirmation-report.audit.json | 4,475 | 0d6b2fd124c7029b52d86623533c6bef5ecac51cbdffae448c8a1fe777d0a31a |
+| artifacts/runs/p611-confirmation-report-validation.json | 17,011 | 031f398f03115cc2967be7b4c6a571ac5d8c822910bc0bd55ce74f500495a9d8 |
+| Entire unchanged analysis in both reports | 1,885,930 | 9796965cef1b5e1b3604d6ba69f84d05d6e6cc1e1b7d70ec298c91ba90f47b5c |
+
+The validation binds current frozen sources, tests/fixture/producer bytes,
+all commands/outcomes/times/guards, all report identities and full coverage.
+Both JSON and Markdown bodies are byte-for-byte equal; request path/time and
+derivative audit elapsed time remain distinct. All four required artifact
+parts exist in both bundles, with no claim/failure marker. All original six
+training, six scored and two complete b1 cost files are preserved unchanged.
+
+### Complete outcome accounting and scientific interpretation
+
+The report publishes all **560 successful cells, 1,680 successful endpoints,
+626 arm/contrast vectors, 6,260 seed observations and 116 primary statements**.
+All 56 arms × six metrics and 58 contrasts × five metrics are retained. Every
+vector keeps its ten planned seeds, mean, sample SD, SE/range, raw marginal
+and simultaneous interval or explicit frozen eligibility reason. Fifty distinct
+sources are not pooled across sixty family contexts; repeated runs add no N.
+
+Interval status counts are estimated 535, zero observed variance 35,
+descriptive only 54 and incomplete observations 2. There are 105 eligible
+simultaneous primary intervals; the eleven other primary statements remain
+with observed mean/SD zero and no eligible CI, under unchanged rules. Their
+complete identity list is in the report document. Both undefined retention
+observations retain raw endpoints and `zero_a_after_a`: schedule seed 233 /
+pc_12_no_sleep and parent seed 373 / pc_13_off. All **935 negative observations**
+remain; that count includes signed forgetting and paired differences, whose
+signs do not imply one generic win/loss direction. No rank/winner was invented.
+
+All raw original costs, actual initial/after-A/after-B capacities and context
+links remain. Original 13,440 wake + 1,724 applied replay + **46 rejected
+executed replay** = 15,210 updates and shared retained 46,080 bytes before
+copies remain distinguished from whole-process historical wall/RSS. Weaker
+initial A beside forgetting, inactive policies, null contrasts, rejection,
+model-based interval assumptions and unclipped intervals remain visible.
+No baseline tuning, favorable seed/metric/contrast/interval selection, changed
+cap, new scientific result or sweep was performed.
+
+### Plan/doc changes, skipped gates and exact next action
+
+Updated DEVELOPMENT_PLAN.md, README, ARCHITECTURE, CHANGELOG, ADR163/report
+docs and prior analysis/cost/scored-result cross-references. Checked only b2/b
+after complete actual evidence. Added **unchecked P6.9a** as a small concrete
+stage/task matrix presentation and original criterion audit. Why this: complete
+values and provenance now exist, but storing three endpoints does not silently
+close the original matrix/resource/hypothesis presentation criteria. Original
+P6.9 text and all other unfinished acceptance are preserved. B-after-A is
+unmeasured before arrival under the frozen three-endpoint contract; no new
+final view may be opened retrospectively to fill that cell.
+
+Skipped: full repository suite, fresh-clone/actual CI, Torch/CUDA, additional
+scientific training/scoring/final-source reads and broad sweeps. The 446-test
+related gate covers the changed consumer/analysis/input boundaries; unrelated
+backend/algorithm/environment behavior was not changed. No agent commit/push,
+worktree, dependency/environment change or new algorithmic feature. Actual
+CI and unmeasured per-arm timing/RSS are limitations, not hidden zero costs.
+
+No blocker for the next stored-data consumer. Original parent acceptance must
+be audited explicitly; P6.10 still needs compute/memory presentation and
+unmeasured-cost accounting, and P6.12 explicit supported/rejected/unresolved
+hypothesis and development-versus-confirmation conclusions. Full plan remains
+unfinished; current reporting success does not close unrelated parents.
+
+**Next exact action:** audit original P6.11/P6.9/P6.10/P6.12 against the complete
+source-bound report and record each criterion/evidence/gap before closing any
+parent. Then implement P6.9a's separate pure stage/task matrix presenter over
+every one of the 560 stored endpoint rows, with original roles/counts/hashes,
+explicit unavailable B-after-A, rederived forgetting/retention and preserved
+null/negative-transfer cases. Test full scope/arithmetic/corruption/repetition,
+bind new consumer source/input/output identities, and publish/read back its
+deterministic result. Extend through new modules over the verified report;
+keep scientific pins and all unfinished criteria. No new training or final
+source access is necessary. Closing preservation/static evidence follows.
+
+### Closing preservation and static evidence
+
+After the plan/docs/log updates, Ruff check exits 0, eleven-file format exits 0,
+mypy exits 0 with 439 files, and `git diff --check` exits 0. No production or
+test source changed after the 446-test gate, so that gate was not repeated
+without a concrete remaining risk. Only documentation and ignored closing
+evidence changed.
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/validate-p611-confirmation-report-handoff.py
+```
+
+This closing read-only preservation command exits 0 in 7.01 s and publishes
+exclusive metadata `artifacts/runs/p611-confirmation-report-handoff-validation.json`,
+**19,447 bytes**, SHA
+`4ca7e899a33e5a853451988c9a30b0c4712ed47835dcb649fac369e1afdf08b8`.
+It checks the complete current 106-source map against the prospective freeze,
+every test/fixture/producer identity against the actual validation, all current
+request/input/scope/report bytes and absent markers, whole canonical analysis,
+cost reconstruction and exact Markdown rendering/repetition. It confirms
+unchanged HEAD and checked b2/b plus unchecked P6.11/P6.9/P6.9a/P6.10/P6.12/
+P6.7/P6.3/P6.3c/P6.3c9. No late drift or lost original evidence was found.
+This is explicitly storage/source preservation and pure consistency, not a
+new complete scientific readback; those four actual reader commands already
+passed independently. No live validation child remains. Full plan is active.
+
+**Handoff remains:** audit the original reporting criteria against the complete
+report, then implement unchecked P6.9a through a new stage/task presentation
+module over all stored endpoints. Preserve the unavailable B-after-A cell and
+all original scientific/source/seed/metric/baseline/cap and evaluation seals.
+
+
+## 2026-10-01 — Original P6.11/P6.9 audits and P6.9a complete stored matrices
+
+### Checkout, reconciliation and completed IDs
+
+Re-read AGENTS.md, the development plan/current handoff and log; reconcile
+actual source/artifact/status evidence with the plan. `master`/HEAD remains
+`86cd5bff71b9c70da94ddcf69d8f62316f2d3382`, ten commits after the reviewed
+`8793c49...` boundary. Phase 0, evaluation isolation and matched-baseline
+increments already have recorded acceptance; this session extends their
+fixed scientific protocol through stored-data consumers. Preserve all
+pre-existing tracked modifications, untracked development increments and
+original artifacts. No commit/push/worktree/dependency/environment change.
+
+Completed **P6.11** after all four original reporting criteria and current
+preservation pass; **P6.9a** after all correctness and four actual complete
+operations pass; **P6.9** after a separate original measurement-scope audit.
+P6.10/P6.12/P6.3/P6.3c/P6.3c9/P6.7 and broader stream/vision/CI/optimization/
+release tasks remain unchecked. No new algorithmic feature, training,
+scientific scoring, source/final view, baseline/seed/metric/CI/cap change or
+large sweep. All experiment evidence stays local and ignored.
+
+### Original reporting audit
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/inspect-phase6-reporting-acceptance.py
+```
+
+Exit 0, parent 7.39 s / audit 6.7844600 s, all 24 scientific boundary guards
+zero. Exclusive `artifacts/runs/phase6-reporting-acceptance-audit.json` is
+**13,157 bytes**, SHA
+`e7189eafe1a36f7d691be3f9c6e2e03ce46aa632b2806d38bb006dc4da4b697f`.
+It records the four original P6.11 criteria verbatim and verifies current
+source/input/report/test/producer preservation and both whole declared
+report/analysis bodies. All 626 ten-seed vectors, 58 paired contrasts,
+116 prospective primary statements, 105 eligible simultaneous CIs and
+original final role/count/content links remain. Eleven ineligible primary
+CIs, two undefined retention values and all negative/null observations
+remain. Ten source seeds within each family are the replication unit;
+fifty distinct sources across sixty contexts are not pooled and repeats
+add no N. The earlier four actual complete report operations are byte-bound.
+This audit is current stored-artifact/declaration consistency with recorded
+complete readback authority, not a new scientific readback or data access.
+P6.11 was checked only after this evidence.
+
+### Small matrix consumer increment and frozen boundaries
+
+New production files:
+
+```text
+src/app/continual_confirmation_matrix_inputs.py
+  Reuse public whole report/scored declaration validation on stored facts.
+src/app/continual_confirmation_matrix.py
+  Every individual 2x2 stage/task matrix, original metrics and transfer scope.
+src/app/continual_confirmation_matrix_rendering.py
+  Exhaustive matrix/count/role/checkpoint/pointer Markdown with raw precision.
+src/infra/continual_confirmation_matrix_bindings.py
+  Current fixed complete source/input/request and official report-reader port.
+src/infra/continual_confirmation_matrix_artifacts.py
+  Exclusive publication/failure ownership and independent complete readback.
+scripts/run_p69_confirmation_matrix.py
+  Fixed CLI composing the unchanged complete official report reader.
+```
+
+Five new test modules cover those boundaries. No new fixture: use existing
+unscored cost metadata plus fabricated scored values. The pure input bridge
+builds an expected training declaration to reuse existing validators; it does
+not claim source/execution authority. Only the complete official report reader
+and current full bindings supply that authority. Direction remains CLI ->
+infra -> app/core; infra never imports the adapter. Inputs, outputs and
+non-responsibilities are documented in each module, ADR-0164, the matrix
+report, README and architecture. No new dependencies or environment variables.
+
+The prospective source/request freeze precedes the first fabricated matrix
+fixture: `artifacts/runs/p69-confirmation-matrix-source.json`, **32,923 bytes**,
+SHA `9d4ff61cb1c167640589793a5db1fbe04e6707d88fa7045a5f1805e5b1ad5165`.
+All 112 local runtime dependencies match the complete AST import closure;
+map SHA `4885420a055a3d23f852baddcd32fcc23416c614d33cd30091ac5f543cca7f92`.
+All original 106 report pins remain unchanged. Its prospective correctness/
+publication flags remain false historically; later receipts provide terminal
+evidence. No frozen production byte changed after this record or test outcomes.
+
+| New production file | Bytes | SHA-256 |
+| --- | ---: | --- |
+| app/continual_confirmation_matrix_inputs.py | 4,476 | f5649c2639a611a59a10a6a96bd3ab2e489014e33d5eab33204bbfb09a8cb100 |
+| app/continual_confirmation_matrix.py | 5,093 | 412ff5579832bcd4f259a1685232d8a8032fdb828064d2e206327816d305275d |
+| app/continual_confirmation_matrix_rendering.py | 5,088 | 04f86e8b3664fd64fc868d77e200e277b2f444de83c1e7ed6b37be83f456f7c6 |
+| infra/continual_confirmation_matrix_bindings.py | 8,589 | ca6bcd2210fdc4eaa968be31daf0e5760609514a300d416b4536bb63e4671d85 |
+| infra/continual_confirmation_matrix_artifacts.py | 8,345 | cdc85136c9a4407a4717460369e97f1f283412b9d2998f0e8cdea8e0c8b52c67 |
+| scripts/run_p69_confirmation_matrix.py | 2,241 | 584b36e30f13438353b8204d6ea31febd2f1db87cd93cca5064d24fad3accf35 |
+
+### Tests, failures, repairs and static commands
+
+Tests were written first where practical. Initial test collection failed
+with ImportError for the not-yet-created matrix module, exit 1 / zero tests.
+Before the production freeze, Ruff formatted seven files; mypy found two
+mixed endpoint-dictionary type errors. Add explicit `list[dict[str, Any]]`
+annotation, then formatting and mypy (446 files at that point) pass. Pin all
+production sources before the first fabricated matrix fixture.
+
+First app/rendering gate: **23 passed, 15.96 s, exit 0**. First complete
+five-module gate: **71 passed / 39 setup errors, 36.66 s, exit 1**. The
+binding IO fixtures inherited the pure scoring fixture's raising
+`Path.read_bytes` sentinel. Fix only the test fixture import to reuse the
+existing unscored-reference data/model seal for binding tests; retain pure
+app/renderer file seals and all scientific source/model/train/final guards.
+No production source, scientific criterion or frozen identity changed.
+The complete new gate then has **110 passed, 40.61 s, zero skipped, exit 0**:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -o addopts='' -q --tb=short tests/test_continual_confirmation_matrix.py tests/test_continual_confirmation_matrix_rendering.py tests/test_continual_confirmation_matrix_bindings.py tests/test_continual_confirmation_matrix_artifacts.py tests/test_p69_confirmation_matrix_cli.py
+```
+
+Final related gate: **556 passed, 78.87 s, zero skipped, exit 0**:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -o addopts='' -q --tb=short tests/test_continual_confirmation_matrix.py tests/test_continual_confirmation_matrix_rendering.py tests/test_continual_confirmation_matrix_bindings.py tests/test_continual_confirmation_matrix_artifacts.py tests/test_p69_confirmation_matrix_cli.py tests/test_continual_confirmation_report.py tests/test_continual_confirmation_report_rendering.py tests/test_continual_confirmation_report_bindings.py tests/test_continual_confirmation_report_artifacts.py tests/test_p611_confirmation_report_cli.py tests/test_continual_confirmation_analysis.py tests/test_seed_statistics.py tests/test_continual_confirmation_scoring_validation.py tests/test_continual_confirmation_report_costs.py tests/test_continual_confirmation_report_cost_references.py tests/test_p611_confirmation_cost_inspection.py tests/test_continual_confirmation_training_references.py
+.\.venv\Scripts\python.exe -m ruff check src tests scripts
+.\.venv\Scripts\python.exe -m ruff format --check src/app/continual_confirmation_matrix_inputs.py src/app/continual_confirmation_matrix.py src/app/continual_confirmation_matrix_rendering.py src/infra/continual_confirmation_matrix_bindings.py src/infra/continual_confirmation_matrix_artifacts.py scripts/run_p69_confirmation_matrix.py tests/test_continual_confirmation_matrix.py tests/test_continual_confirmation_matrix_rendering.py tests/test_continual_confirmation_matrix_bindings.py tests/test_continual_confirmation_matrix_artifacts.py tests/test_p69_confirmation_matrix_cli.py
+.\.venv\Scripts\python.exe -m mypy
+git diff --check
+```
+
+Ruff check, eleven-file format, mypy **450 files** and diff all exit 0.
+Coverage includes all original endpoint/cell/analysis/cost links, raw
+correct-count accuracy, signed forgetting, zero/above-one retention,
+negative/positive/zero transfer, mixed/all failed endpoints, strict source/
+request/environment/protocol/input/reader authority, late drift, occupied/
+partial outputs, failure-marker/audit ownership, budgets and fixed CLI.
+
+Correctness receipt V1, **5,776 bytes**, SHA
+`ef47e2f7285c4bdd103fe40bfd8535dfa1ad8bb7b16352db76a2f17c64f471ff`,
+is preserved. Linked V2 corrects literal shell quoting in recorded argv
+(`addopts=` is the actual argv; `addopts=''` is the shell spelling), and
+binds fresh static checks after the test-only fixture repair:
+`artifacts/runs/p69-confirmation-matrix-correctness-validation-v2.json`,
+**7,552 bytes**, SHA
+`94ee5a17cee2ee7f4412a7981d00ea5794dc408b8850039f1441a109c10ade81`.
+No source, outcome, test count, scientific setting or acceptance changed.
+
+Read-only diagnostics also had one cp1252 UnicodeEncodeError printing a plan
+arrow; rerun with `python -X utf8` exits 0. Some initial large plan/doc/status
+reads were truncated by output budgets; focused section/criterion reads
+recovered the relevant content. No source/artifact changed from those reads.
+
+### Four actual complete bounded operations and artifacts
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/validate-p69-confirmation-matrix.py
+```
+
+The prospective 180-second **derivative validation** budget follows measured
+160-163-second costs of the prior four complete report operations. It does
+not replace the original scientific 16,000 executed-update / 600-second /
+512-MiB sampled process-memory caps. The producer binds the prospective
+source freeze, V2 correctness receipt, exact tests/fixtures and all original
+inputs before/after each child. Original train/scored/cost/report bytes and
+scope/configuration/environment remain preserved. Each child invokes one
+unchanged complete report reader, two complete scored readers and four
+complete original training readers; four/eight/sixteen readers in total.
+All 24 data/model/train/final guards and imported aliases remain sealed.
+
+| Actual operation | Child pipeline seconds | Parent seconds | Exit |
+| --- | ---: | ---: | ---: |
+| Canonical publication | 174.4392317999882 | 178.33264239999698 | 0 |
+| Repeat publication | 174.05550480000966 | 177.9656485000014 | 0 |
+| Canonical independent complete readback | 172.4643405000097 | 176.4029249999876 | 0 |
+| Repeat independent complete readback | 172.41754170000786 | 176.3804769999988 | 0 |
+
+All four terminal outcomes and producer **exit 0** were observed (final
+exec session 28059). All 24 guards are zero in every child. No active child
+remains. Preserve occupied output paths; do not restart the producer over
+published bundles. Its identity is **10,180 bytes**, SHA
+`c992f75147abfbd6414de02a7270a604ea94f6e952fafa3d9ae27f96669da288`.
+
+Exclusive final `artifacts/runs/p69-confirmation-matrix-validation.json`:
+**18,108 bytes**, SHA
+`112813b519843c08cfbec06bb6e1e3160d32f4320cf42d4314b16ba304bcf481`.
+It retains commands, times, guards, original source/input and new output
+identities, whole reconstruction/coverage and exact repetition. It records
+only P6.9a complete at that point; subsequent original scope audit is separate.
+Canonical/repeat directories are `artifacts/runs/p69-confirmation-matrix`
+and `artifacts/runs/p69-confirmation-matrix-repeat`:
+
+| Complete part | Bytes | SHA-256 |
+| --- | ---: | --- |
+| Both result JSON files | 1,973,394 | a1e968677a7ff98ee0c8b43b3ed3945aef34547d3f7c835edccc9f564d06a086 |
+| Both Markdown files | 749,183 | 8acd86ca2566b3b40e55fa5aa9bd30944162a720f6950e6a56472e03c3f742a0 |
+| Canonical request | 18,704 | e6d42168f7e3229d4ec32ac02443778dd1ffe2318d10a266cd7a8c7e1915f9ba |
+| Repeat request | 18,711 | f3a455eb13c3c198f6f9057a2869d6f8097f43cbf3fac17c37216590425ff881 |
+| Canonical audit | 5,985 | 4b3143a6a154c0237ead843769d694c4e24cb55e85a1d5dcf645505db1511a76 |
+| Repeat audit | 5,987 | 23e512ddc340c3c66d453d315c7b2a84995f4c2537922b87326c4d73feb86e3a |
+
+Both whole result JSON and Markdown files repeat byte for byte; request
+path/time and derivative audit durations retain their actual distinct values.
+Every required request/result/Markdown/audit exists, no claim/failure marker.
+Original full report result remains 7,537,678 bytes / `363ed97d...03088`,
+original report Markdown 2,958,568 / `c989df16...ddc`; all original six train,
+six scored and two 112,635,395-byte complete raw cost files remain unchanged.
+Original analysis and prospective metric/manifest/contrast identities remain.
+
+### Complete matrix findings and original P6.9 scope audit
+
+Publish all **560 rows, 2,240 slots, 1,680 original successful endpoints and
+560 explicitly unmeasured B-after-A slots**, zero failed endpoints/cells.
+Each measured slot retains exact original endpoint/count/task/checkpoint/
+role-content hash and JSON pointer. Successful raw endpoints would remain
+when another endpoint failed, while original whole-cell metric null rules
+stay unchanged. Signed forgetting and retention are rederived under the
+original formulas; above-one retention and weak initial A remain visible.
+Two zero-base undefined retention rows remain: schedule seed 233 /
+pc_12_no_sleep (A-after-A 0, A-after-B .85) and parent seed 373 / pc_13_off
+(0, .8). Descriptive A backward transfer is positive in 241, negative in 87
+and zero in 232 cells. These counts are heterogeneous cell descriptions,
+not pooled inference, seed-level comparisons or a model-winner ranking.
+Every B forward-transfer value remains unavailable; no untrained-B reference.
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/inspect-p69-original-acceptance.py
+```
+
+First scope-audit helper attempt exits 1 in 4.16 s at a Markdown consistency
+assertion; no receipt published. The helper rendered decoded canonical JSON,
+which alphabetizes metric keys rather than preserving the declared ordering.
+The unchanged official reader already reconstructs the expected matrix before
+rendering. Correct only the ignored audit helper to follow that same complete
+pure reconstruction and bind exact provenance; no production/test/output or
+scientific behavior changes. The corrected command exits **0 in 6.63 s**
+(audit 6.0106268 s), all 24 scientific guards zero. It preserves both complete
+matrix bundles/current original inputs, frozen 112 sources/tests/producers,
+committed metric contract and original scored manifest/analysis, and checks
+whole pure matrix/Markdown reconstruction plus recorded full readbacks.
+
+Exclusive `artifacts/runs/p69-original-acceptance-audit.json` is **6,466 bytes**,
+SHA `0435a1d72c3b1ed16d2d08b5fcc5b15c7edcf28813fb603ef6a8cfbb3e96cc37`.
+It records the unchanged original P6.9 text and criterion decisions.
+**Scope correction:** the earlier reporting audit inferred a fully measured
+four-slot requirement. The already accepted prospective P6.8 metric contract
+explicitly defines the full current two-task matrix as A-after-A/A-after-B/
+B-after-B, and the original P6.9 wording does not add a future-task B-after-A
+measurement. The immutable scientific manifest declares exactly these three
+endpoints before final values. Requiring a fourth endpoint here would add an
+undeclared acceptance requirement. Therefore P6.9 is complete for that
+unchanged original measured setting after full matrix/evaluation-seal evidence;
+this is not a weakened criterion, new endpoint or retrospective protocol.
+B-after-A/forward transfer stay visibly unmeasured, and historical
+`original_fully_measured_matrix_acceptance_complete` flags stay false.
+No fully measured four-slot matrix is claimed. Earlier receipts/gaps remain
+immutable history with this linked correction. Longer-stream/future-transfer
+work retains its separate prospective independent evaluation requirements.
+
+### Plan/document changes, skipped gates, blockers and exact next action
+
+Updated DEVELOPMENT_PLAN.md, README, ARCHITECTURE, CHANGELOG, ADR-0164,
+reporting acceptance audit, matrix document and full-report cross-reference.
+Checked P6.11/P6.9a/P6.9 only after their separate complete evidence. Original
+criteria and all unfinished work remain. Split resource work into unchecked
+**P6.10a**, complete field/unit/scope inventory, and **P6.10b**, exhaustive
+outcome-versus-compute/memory consumer and deterministic publication/readback.
+Why this: sixty shared context proofs, per-arm raw work and historical whole-
+process time/RSS have distinct measurement scopes; inventory must precede
+resource attribution and deciding whether new measurement is genuinely needed.
+No composite winner, zero-filled unknown or favorable subset is authorized.
+
+Skipped: full repository suite, fresh clone/actual CI, Torch/CUDA, additional
+scientific training/scoring/source/final-view access and broad sweeps. The
+556-test gate covers every changed consumer/analysis/input/artifact boundary;
+unrelated backend/algorithm/environment behavior has not changed. Actual CI
+and per-arm timing/RSS/guard durations remain unmeasured limitations, not
+invented zero costs. No agent delegation, new dependency/environment or commit.
+The full development goal remains active and unfinished. Closing preservation
+and fresh static evidence follow; no repeat of the same 556-test gate without
+a concrete new risk because production and test sources remain unchanged.
+
+No blocker for P6.10a. P6.10/P6.12 and original scientific/longer-stream parents
+require their own acceptance. Deferred CUDA is still hardware limited and
+actual CI/release/full-suite gates remain unverified. Preserve all failed/
+null/negative/inactive outcomes and original sealed final roles.
+
+**Exact next action:** implement P6.10a's complete source/input-bound resource
+field/unit/scope inventory from all 560 raw method costs, 1,680 checkpoint
+capacity records, sixty full shared contexts and both original train/scored
+resource audits. Independently reconcile wake/latent/replay/guard/storage/
+capacity/history totals, including rejected-executed replay and shared storage;
+label each field measured/derived/unmeasured with exact source pointers and
+reason. Publish/repeat/read back the deterministic inventory and map remaining
+resource gaps to concrete next actions. Then P6.10b adds all original accuracy/
+forgetting against scoped compute/memory without a composite ranking, followed
+by explicit H1-H4 supported/rejected/unresolved and development-versus-
+confirmation interpretation. Extend with separate verified-report consumer
+modules; preserve frozen scientific sources/seeds/baselines/metrics/caps and
+forbid retrospective new final views or large sweeps.
+
+
+### Closing preservation and final static evidence
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/validate-p69-confirmation-matrix-handoff.py
+```
+
+Exit 0 in 6.52 s (audit 5.8875109 s), all 24 scientific guards zero.
+Exclusive `artifacts/runs/p69-confirmation-matrix-handoff-validation.json`
+is **26,130 bytes**, SHA
+`ce733130f93cacfa7346192605c21ff781a7b9485f514428a56d032421f83f25`.
+It rechecks all current 112 sources against the prospective freeze, current
+original request/input/scope/report bytes, exact tests/fixtures/producer and
+correctness/actual/scope-audit receipts, both whole matrix bundles and pure
+reconstruction/Markdown equality, absent original/new markers and unchanged
+HEAD. Completed P6.11b2/P6.11b/P6.11/P6.9a/P6.9 and unchecked P6.10/P6.10a/
+P6.10b/P6.12/P6.7/P6.3/P6.3c/P6.3c9 match the current plan. No late drift or
+lost original evidence. This is storage/source preservation, not another
+complete scientific reader run; all four actual complete operations already
+passed independently. The earlier prospective/four-slot flags remain intact.
+
+Fresh Ruff check exits 0, eleven-file format exits 0, mypy exits 0 with
+**450 files**, and `git diff --check` exits 0 (ordinary existing LF/CRLF
+warnings only). No production or test source changed after the 556-test gate,
+so it was not repeated without a concrete remaining risk. Only docs and
+ignored scope/closing evidence changed. Full repository/fresh-clone/actual
+CI/Torch/CUDA and new scientific experiments remain skipped as above.
+No live child remains and the full development goal stays active.
+
+**Handoff:** begin unchecked P6.10a with all 560 raw cost records, 1,680
+checkpoint capacities, sixty shared proof contexts and original train/scored
+resource audits. Bind every resource field/unit/scope/measurement status to
+its exact source, reconcile rejected execution/shared storage and preserve
+unmeasured per-arm wall/RSS/guard durations. Publish/repeat/read back that
+complete inventory before P6.10b outcome-versus-compute/memory presentation
+and P6.12 explicit hypothesis conclusions. Preserve fixed scientific scope,
+all unfavorable/null observations, existing user changes and final seals.

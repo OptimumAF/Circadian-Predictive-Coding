@@ -427,6 +427,220 @@ request/result/audit and pinned source bytes, enforces a bounded child,
 and owns exclusive scored artifacts and readback. This dependency on c3's
 private helpers is deliberate while their bytes and train facts remain
 frozen (ADRs 0143–0144).
+`app/continual_schedule_factor_preflight.py` builds the fixed-width matched
+schedule controls and shared all-epoch replay supply. The existing guard
+helper owns neutral-model rollback; baseline replay happens only after
+commit. Rejected neutral replay executions remain in the cost ledger.
+`app/continual_schedule_factor_validation.py` independently rederives
+readiness, spacing, guard decisions, shared IDs and method work from the
+complete deterministic fact object. Neither module reads outer/final
+arrays or writes files. `scripts/run_p63_schedule_factor_preflight.py`
+pins the selected sources/manifest, bounds the worker, and owns exclusive
+request/result/audit/failure files and finite readback (ADR-0145).
+`app/continual_schedule_factor_development.py` reuses c5's training/fact
+helpers and c4's score types/arithmetic, holding after-A model copies until
+all 33 c5 cells and every checkpoint hash match globally. Only then does it
+read outer roles and report all nine within-method policy pairs per seed.
+It has no file IO or final-role release. The separate
+`scripts/run_p63_schedule_factor_development.py` verifies the canonical c5
+bundle and resource facts, pins the selected 23-source map, bounds its child,
+and owns exclusive scored files and complete readback (ADR-0146). The frozen
+private-helper dependencies are deliberate: equality against the unscored
+reference detects any orchestration drift without editing c5 source bytes.
+`app/continual_combined_factor_manifest.py` freezes the existing combined
+switches, seven removals and matched replay/capacity references before data.
+`app/continual_combined_factor_preflight.py` composes arrived training,
+the existing guarded sleep helper and shared replay supply; only full commits
+feed baseline replay. It returns complete unscored state/lineage/work facts
+and charges rejected replay, retaining exact neutral PC parity. Complete
+snapshot fingerprints include RNG, memory, chemistry and clocks.
+`app/continual_combined_factor_validation.py` independently rederives all
+JSON fact/role/clock/capacity/ID and cost invariants without data or file IO.
+Dependency direction is script → combined app modules → existing app source/
+guard helpers and NumPy cores. `scripts/run_p63_combined_factor_preflight.py`
+owns selected-source/manifest pins, an exclusive request, bounded worker,
+whole-worker RSS through validation/serialization, and result/audit/failure
+files. The app has no outer/final value access or artifact writes. Keeping
+the current component APIs intact isolates combined correctness from the
+missing scheduled/random parent selector, retained as separate c9 work
+(ADR-0147). Changing those helpers requires a new protocol identity.
+`app/continual_combined_factor_development.py` reuses the frozen c7 helpers
+and c4 score types/arithmetic, retaining after-A models. It completes all
+51 train cells and independently validates exact equality with the saved
+c7 facts, then globally checks every checkpoint's parameter/width and
+complete circadian snapshot hash before any outer value. It checks copies
+again after scoring and reports all 22 declared pairs/seed with neutral
+PC parity. It has no file IO, final-role release or selection logic.
+`scripts/run_p63_combined_factor_development.py` validates the entire c7
+request/result/audit and source/work/RSS identities before launch, adds a
+selected 29-source map, bounds the child and owns exclusive scored/failure
+artifacts. RSS covers training, held copies, scoring, serialization and
+output validation; stdout/parent writes are outside the interval. These
+deliberate frozen dependencies allow drift detection without editing c7
+or core behavior (ADR-0148). Explicit parent-selection controls remain c9.
+`core/controlled_parent_selection.py` adds the explicit-proposal parent
+ranking extension (ADR-0149). It inherits the original eligibility, budgets,
+split/prune, lineage and complete sleep transaction. Usage delegates the
+old ranker; cyclic stable-ID and separate seeded PCG64 modes preserve its
+chemical-preference tiers. Immutable decision views describe selected IDs
+and cursor/RNG fingerprints. Model-owned selector state participates in
+snapshot compatibility/rollback, including a new transaction around direct
+proposals because selection precedes a transient-width check. Split-capable
+sleep requires an explicit policy. This core module imports only core and
+standard/NumPy code; it has no scheduling, guarding, datasets, scores or IO.
+Experiment orchestration and separately gated scoring belong to app.
+`app/continual_parent_factor_manifest.py` fixes c9b's eight cells, arrived roles,
+fresh seeds, common explicit counts and planned-width/work limits without
+constructing data. `app/continual_parent_factor_preflight.py` composes existing
+schedule decisions, inner-guard semantics/telemetry and core snapshot/restore
+around explicit policy sleep, capturing proposed selector state before rejection.
+It checks complete wake/before/proposed/applied snapshots and all retained row
+contents/order. No replay, outer/final scoring or artifact IO occurs in this app.
+`app/continual_parent_factor_validation.py` independently rederives parent ranks,
+PCG64/cursor state, counts, phase/guard decisions, lineage, clocks and costs.
+`scripts/run_p63_parent_factor_preflight.py` binds the selected 31-source/manifest/
+adapter identities, bounded child process and exclusive result/audit/failure
+artifacts. These modules extend the existing pieces without patching earlier
+frozen helpers (ADR-0150).
+`app/continual_parent_factor_development.py` composes those pinned helpers
+and existing score arithmetic, retaining every after-A copy before B arrival.
+It globally compares complete train facts and parameter/width/full circadian
+state hashes before outer values, including parent selector and both RNGs,
+then verifies copies after scoring (ADR-0151). It owns no IO or final access.
+`scripts/run_p63_parent_factor_development.py` binds exact canonical c9b
+request/result/audit bytes, the selected 34-source map, all twenty pairs per
+seed and bounded child/RSS/exclusive artifact gates. Temporary test bundles
+substitute only fixture request/audit pins within isolated tests; the public
+CLI requires the declared canonical files. Independent confirmation remains
+outside these development modules.
+`app/continual_confirmation_manifest.py` binds the six existing resolved
+factor configurations, every reserved seed/cell/pair, known source/result
+digests and prospective joint budgets without data/model/score/IO access
+(ADR-0152). `scripts/inspect_p67_confirmation_scope.py` verifies canonical
+and repeated development evidence, inventories actual reserved-seed usage
+and publishes an exclusive finite scope record. It creates no confirmation
+source or model. `app/continual_confirmation_state.py` binds sealed role
+metadata and complete live checkpoint fingerprints, validating baseline
+parameter aliases and exact shallow shapes. `continual_confirmation_simple.py`
+and `continual_confirmation_periodic.py` compose six existing family phase
+helpers and preserve raw unscored costs/decisions, adding full sleep/schedule
+rejection witnesses. `continual_confirmation_training.py` validates the frozen
+scope/settings, holds independent A copies, completes all A work before any B
+source, and rechecks every held checkpoint (ADR-0153). These components own
+no artifact IO or scoring. Independent all-seed JSON/resource/artifact gates
+and final scoring remain later work; old scientific sources/validators stay
+unchanged. Fixtures use existing development sources, never reserved seeds.
+`continual_confirmation_json.py` verifies finite/types/canonical schemas,
+`continual_confirmation_checkpoints.py` verifies declared model/state/view and
+seeded initial fingerprints, and `continual_confirmation_validation.py`
+enforces complete reserved envelope/role/witness metadata (ADR-0154). The
+checkpoints carry exact hashes for all three original parameter contracts;
+`continual_confirmation_parameter_links.py` binds raw endpoints, supplemental
+sleep/schedule witnesses and combined/parent wake/guard/epoch chains to held
+boundaries. Hashes are captured from live bytes and independently derived for
+seeded initial state. Intermediate hashes cannot reconstruct tensor contents.
+`continual_confirmation_fact_schema.py` closes raw dataclass/TypedDict keys and
+types. `continual_confirmation_simple_work.py` independently derives simple
+family rules; `continual_confirmation_work_validation.py` reuses unchanged
+periodic seams, binds raw full held state/clock/lineage/selector/supply and
+baseline traffic to applied work, and exposes only whole-scope
+`verify_confirmation_payload` with derived work records/caps. These pure app
+components construct no model/source and own no IO/score. No app imports CLI
+validators. `app/continual_confirmation_execution.py` binds strict request
+metadata and compares observed optimizer/model-kind counts and RSS to pure
+facts. `infra/continual_confirmation_io.py` owns unambiguous finite JSON,
+source-file checks, exclusive claims/files and intended byte identities.
+`infra/continual_confirmation_runtime.py` observes original optimizer seams
+outside rollback snapshots and enforces fixed work/wall/observed RSS caps.
+`scripts/run_p67_confirmation_training.py` binds the saved scope and complete
+79-file local code closure, validates the child request before data and live
+held states after JSON validation/serialization, and publishes/readbacks
+complete request/result/audit/failure bundles (ADR-0155). App owns no IO or
+method wrapping. Both full 560-cell reserved processes and independent
+readbacks now verify exact deterministic equality; source-bound live capture
+binds actual values/arrays to fingerprints before separate scoring. P6.7c
+still requires the predeclared P6.11 uncertainty/contrast contract and a new
+independent final-release boundary.
+`core/seed_statistics.py` owns pure ordered observations, explicit nulls,
+conditional observed summaries and predeclared interval arithmetic. It
+imports no app/infra/adapters or distribution library.
+`app/continual_confirmation_analysis_contract.py` binds all original cells,
+pairs, seed IDs, final-role counts, metric/sign/missing/constant rules and
+fixed interval constants to the frozen manifest/train digest.
+`app/continual_confirmation_analysis.py` validates the whole scheduled scope
+and shared within-seed final identities before summaries, recomputes metrics
+from raw accuracies and retains every arm/contrast/seed/failure. Analysis has
+no data/model/IO/source-proof authority; the future scored boundary must
+establish actual provenance and join costs by the exact P6.7b reference.
+ADR-0156 records P6.11a's tested declaration; independent scoring and actual
+seed reports remain separate gates.
+`app/continual_confirmation_scoring_manifest.py` binds both complete saved
+train bundle identities, the full analysis declaration and every original
+endpoint/cell/pair/cap without IO. `continual_confirmation_scoring_state.py`
+incrementally encodes the reproduced training dataclasses in the original
+artifact byte contract, requires the complete production inventory and
+exact held fact attachments, and checks all live models/original sealed
+roles. It returns a state proof without final-release authority or source/
+file/resource provenance. Reuse this check before and after later evaluation;
+separate final views require their own content checks. ADR-0157 records why
+the proof avoids a second full decoded result without changing the memory
+cap. Final composition is implemented below; the complete scored process/
+artifact boundary remains unfinished.
+`core/confirmation_final_roles.py` validates released binary float64 arrays,
+ASCII IDs, original role-byte hashes and typed exact count/numerical-failure
+results. It imports no app/infra/adapters or IO. `app/continual_confirmation_scoring.py`
+declares release/evaluation/checkpoint ports, globally checks training before
+release, binds every final/shared-source view before any evaluation, dispatches
+all three fixed endpoints in manifest order and retains failed/null cells.
+It rechecks training, original/released roles and endpoint/cell links before
+returning app-local accounting; external provenance/execution authority is
+explicitly false. `infra/continual_confirmation_final.py` composes unchanged
+final release, validates release-only metadata and uses the original binary
+prediction threshold to derive exact correct counts. Only declared numerical
+prediction failures become nulls; other errors propagate (ADR-0158). The
+available 87-source composition closure is frozen before fabricated fixtures,
+with a linked correction record for an initial refactoring error. C1c must
+extend this to the full worker/request/resource/artifact closure and independent
+actual observations; fixtures do not authorize reserved final execution.
+`app/continual_confirmation_scoring_validation.py` independently reads the
+whole ordered scored JSON matrix, exact global training proofs and final
+role links; derives every cell/failure/total from decoded endpoint counts;
+and preserves app-only authority. No source/model/live verification or IO.
+`infra/continual_confirmation_training_references.py` streams bound file
+identities, composes an injected complete training reader sequentially,
+binds decoded canonical bytes and original declarations, and checks markers/
+bytes after both reads. Only small reference/cost/historical resource metadata
+survives each large graph. The inspection script supplies the unchanged public
+training reader and publishes exclusive metadata (ADR-0159). Available source
+closure extends to 90 unchanged/pinned files before fabricated scored fixtures;
+the full scored request/worker/observation/artifact boundary remains c1c2.
+`infra/continual_confirmation_final_runtime.py` keeps independent ordered
+source/release/prediction facts outside model snapshots. Scoped original-role
+source observers and outer guards preserve sealed metadata; direct prediction
+hooks bind the actual model/input and independently derive exact outcomes.
+It retains views/source-returned arrays through serialization and restores
+owned guards on every exit. Resource policy and full live-state verification
+remain external. `app/continual_confirmation_final_observation.py` independently
+links the whole fixed scored JSON to every declared observation/model kind,
+with no live/IO/resource authority. ADR-0160 records the callback-order repair
+and limits of these 92-source component freezes. They are extended by the
+97-source full scored composition below; no partial scientific scope or core edit.
+`app/continual_confirmation_scoring_execution.py` owns closed full request,
+observed worker and saved audit links without IO or live authority.
+`infra/continual_confirmation_scoring_bindings.py` checks exact current sources,
+scope/reference files, request bytes, command and environment.
+`infra/continual_confirmation_scoring_worker.py` composes unchanged training,
+original optimizer/resource observation, complete state gates and direct final
+observation; retained views survive scientific serialization and later checks.
+`infra/continual_confirmation_scoring_artifacts.py` owns exclusive parent
+request/result/audit/failure publication and complete independent readback.
+The new CLI supplies both unchanged complete training readers sequentially;
+the child checks bytes instead of decoding another large graph beside models.
+ADR-0161 and the worker report preserve the V1 failure-marker regression and
+prospective V2 repair. Development/fabricated correctness closes c1c2/c1c/c1;
+both actual full scored processes/resources/repetition/readbacks now pass c2,
+with exact scientific result-byte equality. The subsequent P6.11b consumer
+below completes exhaustive seed/interval/cost publication and readback.
 `app/single_resnet_experiment_config.py` owns the root ResNet CLI's
 unchanged 110-field typed preset, strict existing-field override resolver,
 and complete descriptive request record. The CLI translates old flags to
@@ -442,6 +656,80 @@ score or file access (ADR-0129).
    - Why: enables reproducible sweeps and ablations without branching code paths.
 4. Deterministic seed handling
    - Why: avoids flaky claims in model comparisons.
+
+## Confirmation cost consumer
+
+`app/continual_confirmation_report_costs.py` binds the entire original training
+result and preserves raw method cost fields, three checkpoint capacities and
+shared seed context. Streaming fingerprints surround projection and complete
+work validation. `infra/continual_confirmation_report_cost_references.py`
+composes the two unchanged complete training readers sequentially, derives
+the cost join before each held-checkpoint graph is discarded, and requires
+full repeated cost/audit/reference equality. The cost CLI extends the unchanged
+97-source closure to 100, publishes exclusive inspection metadata and fully
+rederives it on readback. It has no scientific execution or statistical-report
+authority. Full guard proof context makes this evidence large; recorded local
+validation budgets remain separate from the original scientific caps.
+ADR-0162 and the cost-join report document the boundaries and original costs.
+
+## Exhaustive confirmation report consumer
+
+`app/continual_confirmation_report_cost_binding.py` binds the complete compact
+original cost identity and exact references to every shared proof context.
+`app/continual_confirmation_report.py` verifies both entire scored payloads,
+reuses the frozen analysis twice, requires full equality and joins all 560
+outcome/cost cells. `app/continual_confirmation_report_rendering.py` renders
+every raw endpoint, cost and all 626 seed vectors/116 primary statements with
+raw precision, null/eligibility reasons and no selection or ranking. These
+three pure modules own no IO, model/data access or experiment execution.
+
+`infra/continual_confirmation_report_bindings.py` owns current 106-source,
+environment, request and input identities, complete sequential reader ports,
+and original run/resource provenance. `infra/continual_confirmation_report_artifacts.py`
+owns exclusive request/result/Markdown/audit/failure/claim publication and
+independent full reconstruction. The fixed report CLI supplies the unchanged
+complete scored readers; each gets a fresh full cost readback, itself using
+both original complete training readers. Dependency direction remains CLI →
+infra → app/core. Infrastructure never imports its CLI adapter.
+
+ADR-0163 and the report record the prospective freeze, 101 new/446 related
+passing tests, and four bounded actual operations with exact whole JSON and
+Markdown repetition. All original scientific pins and caps remain unchanged.
+The 180-second consumer budget measures derivative validation only; original
+whole-process RSS/wall is retained and grants no per-arm resource claim.
+Add future matrix/resource presenters over the verified report boundary with
+their own input/output scope and evidence; retain every unmeasured field and
+unfinished parent criterion.
+
+## Stored confirmation matrix consumer
+
+`app/continual_confirmation_matrix_inputs.py` bridges the stored report to the
+existing public scored/report declaration validators and rederives every
+original endpoint/cell/summary/cost link. Its reconstructed expected training
+declaration grants no source or execution authority. `app/continual_confirmation_matrix.py`
+then preserves every individual 2×2 stage/task matrix, raw endpoint/count/role
+record and original metric/failure policy, with B-after-A explicitly unmeasured.
+`app/continual_confirmation_matrix_rendering.py` presents every row and exact
+original JSON pointer with raw float precision and descriptive transfer signs.
+
+`infra/continual_confirmation_matrix_bindings.py` extends the unchanged
+106-source report closure to a prospectively frozen 112. It binds both
+original report bundles and all their original inputs, invokes one unchanged
+complete official report reader and rechecks current bindings. That reader
+itself validates both complete scored bundles and four complete original
+training references. `infra/continual_confirmation_matrix_artifacts.py`
+owns exclusive request/result/Markdown/audit/failure/claim publication and
+independent full reconstruction; the fixed CLI supplies the complete port.
+Direction remains CLI → infra → app/core, without an infra-to-adapter import.
+
+ADR-0164 and the matrix report record scope, prospective source/request budget,
+110 new/556 related tests and actual complete publication/readback evidence.
+No original model/dataset/scoring/metric/interval rule or cap changes. The
+original reporting audit independently closes P6.11, and the subsequent
+scope audit closes P6.9 under its prospective three-endpoint contract.
+P6.9a passes both actual publications/readbacks with exact whole result bytes;
+the future-task slot remains unmeasured. Resource or hypothesis
+presenters should extend the verified report boundary via separate modules.
 
 ## Extension Rules
 

@@ -9,6 +9,169 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- An explicit stored confirmation stage/task matrix consumer with all 560
+  individual matrices, 1,680 measured endpoint/count/role/checkpoint records
+  and 560 unmeasured B-after-A slots. Original derived metrics, failed-cell
+  policy, undefined retention and all transfer signs remain. Six new pure/IO/
+  CLI modules preserve original scientific pins and expose no new endpoint or
+  primary metric. All 110 new/556 related tests and static gates pass; two
+  actual publications and both independent complete readbacks pass within
+  each 180-second hard budget, with exact whole JSON/Markdown repetition.
+  P6.9a is complete; the separate original scope audit closes P6.9 under the
+  accepted prospective three-endpoint contract, preserving the missing slot.
+- A criterion-by-criterion current audit of original reporting parents,
+  verifying source/input/report preservation and the complete P6.11 seed,
+  pairing, replication and prospective multiple-comparison evidence. P6.11
+  now passes all four original criteria. The subsequent matrix scope audit
+  corrects an undeclared fourth-cell requirement; P6.10/P6.12 retain their
+  explicit resource presentation/hypothesis gaps.
+
+- An exhaustive frozen confirmation report with all 560 raw cells, 626 metric
+  vectors/6,260 planned seed observations, all 116 primary statements and
+  original per-arm costs/checkpoint capacities/shared context references.
+  Six pure/IO/CLI consumer modules preserve the existing scientific pins.
+  All 101 new/446 related tests pass; both actual full publications and both
+  independent complete readbacks exit 0 within each 180-second derivative
+  budget with no data/model/train/final call. Whole JSON and Markdown repeat
+  byte for byte; eleven ineligible primary CIs, two undefined retention values
+  and every negative/null value remain. P6.11b2/P6.11b are complete. Original
+  matrix/resource/hypothesis parent criteria retain explicit next audits.
+
+- A complete original confirmation cost join with raw method facts, all three
+  checkpoint capacities, shared guard context and rejected-executed replay.
+  The cost consumer preserves the exact 97 scored-source pins, adds three
+  modules and publishes/readbacks exclusive local inspection metadata. All
+  55 new/314 related tests pass. The exhaustive scored seed/interval/cost
+  publication was subsequently completed above under unchanged P6.11b acceptance.
+
+- Complete independent confirmation and exact deterministic repetition across
+  all 560 cells/580 original pairs, with both full public readbacks, unchanged
+  source/settings/caps and complete observed work/resources. Both scientific
+  result files are byte-for-byte equal; no failed cell was omitted. C2/P6.7c
+  is complete; the complete seed/interval/raw-cost report remains P6.11b.
+- A complete source-bound scored request/worker/CLI and exclusive artifact
+  lifecycle, reusing both complete historical training readers and every
+  original scientific setting, algorithm and resource cap. The 97-source
+  prospective freeze preserves a failure-marker regression and linked V2
+  repair. All 203 new/984 related tests and guarded metadata/development child
+  validations pass. C1c2/c1c/c1 correctness is complete; full reserved scoring,
+  deterministic repeats and actual statistical reporting remain open.
+- An independent final execution observer over actual source fields and model
+  predictions, with exact endpoint/count/model/input links, retained-view
+  post-serialization checks and restored guards on failure/cancellation.
+  A pure whole observation verifier binds every event/type/model kind to the
+  fixed scored JSON. Development/fabricated fixtures preserve numerical-null
+  rules and original seals. Linked source freezes retain a callback-order
+  regression and repair. The complete scored worker above supplies the further
+  request/artifact gates; no actual reserved final value or scientific change.
+- Complete scored JSON validation with independent endpoint-to-cell/failure/
+  total links, plus sequential byte-bound readback of both saved training
+  bundles through the unchanged full public reader. Actual readback passes
+  with source/model/train/final/outer access sealed; the available 90-source
+  composition is frozen before fabricated fixtures. Full scored worker,
+  observed resources and artifact lifecycle remain gated; no reserved final.
+- Independent final-role/count contracts and complete fixed endpoint
+  composition over unchanged release/model prediction. All final views are
+  bound before evaluation; every endpoint/failure/null and post-score full
+  state/role/link check is retained. Available source closure is frozen
+  before fabricated fixtures, with a preserved refactoring-error repair.
+  All 103 new/399 related tests pass, zero skipped. Complete source/request/
+  process/resource/artifact gates and actual reserved scoring remain open.
+- A separate complete scoring manifest binding both saved training bundles
+  and the unchanged analysis declaration, plus incremental full training
+  artifact fingerprinting and global held model/role verification. Original
+  development fixtures keep final/outer/reserved access sealed. This state
+  proof has no final-release or file/source/resource authority; final scoring
+  and complete process/artifact gates remain unfinished.
+- A frozen complete confirmation analysis contract and pure seed summaries/
+  pairing API. All 58 pairs retain two primary metrics under one predeclared
+  116-statement interval family; every seed, failure/null/constant vector,
+  endpoint and exact cost reference remains visible. Known arithmetic and
+  late scope/role/accuracy/forbidden-read gates pass 102 new/222 related tests,
+  zero skipped. No final score or new dependency; actual reports remain open.
+- Complete bounded unscored confirmation and independent repeat/readback of
+  all 560 cells across six families. Both result files are byte identical;
+  each observes/derives 15,210 updates including 46 rejected replay updates
+  within the unchanged work/time/observed memory limits. Full local artifact
+  identities, all reserved seeds and costs are recorded. Final scoring and
+  seed-level uncertainty/contrast analysis remain separate unfinished gates.
+- A source-bound joint confirmation worker with strict prelaunch requests,
+  live optimizer counts outside rollback, fixed child wall/observed RSS
+  stops and exclusive artifact/readback gates. All 108 new/444 related tests
+  pass with zero skips, including publication-byte and competing-writer
+  regressions. The complete reserved execution evidence is recorded above;
+  separate scoring remains gated.
+- A complete pure confirmation validator for all six families, strict nested
+  raw types, independently derived costs and full held-state/controller links.
+  Rejected replay work, baseline traffic and nested final seals are checked;
+  110 new/333 related tests pass with zero skips. Source-bound reproduction,
+  actual resource/artifact gates and the reserved runs remain unfinished.
+- Explicit confirmation parameter hashes for all three existing domain
+  prefixes, independent seeded initial checks and raw endpoint/guard/epoch
+  links. Fifty added/223 related tests pass, zero skipped, including four
+  families with forced guard rejection. Full raw work/state/controller and
+  bounded reserved execution gates remain open; old scientific pins stay intact.
+- Independent finite/canonical confirmation envelope, role and checkpoint
+  schema checks, including declared configuration/capacity, seeded initial
+  parameter/RNG and duplicate view/rollback links. 51 new/125 related tests
+  pass with zero skips. Raw family cost/decision links and bounded artifact/
+  reserved execution remain open; no scientific source/score changed.
+- Six-family unscored trajectory composition with independent A copies,
+  global A-before-B arrival and complete baseline/circadian/selector
+  fingerprints. Exact legacy fixture parity, full rollback/rejected work,
+  late corruption, alias/shape and outer/final seals pass (53 new/122 related
+  tests, zero skips). Independent JSON/resource/artifact gates and actual
+  reserved confirmation remain unfinished; no scientific source/score changed.
+- A pure six-factor confirmation manifest and read-only evidence inspection:
+  all reserved cells/pairs, fifty distinct source seeds, original settings
+  and prospective joint budgets are bound. Two scope records repeat exactly;
+  twelve complete development bundles and twenty result files validate with
+  no prior reserved-seed use. No confirmation data/model or score is created;
+  joint unscored training and separate final/uncertainty gates remain open.
+- Separately frozen paired parent-control development scoring with global
+  all-seed training and complete selector/RNG/checkpoint gates before outer
+  access. Two bounded 24-cell results repeat exactly with all 60 contrasts
+  and costs. Usage ties random and trails scheduled on one seed; all growth
+  cells fall below fixed-eight controls on that seed. Tests use isolated
+  references; scientific runs bind the recorded canonical bundle. Independent
+  confirmation, final release and original matrix criteria remain open.
+- A bounded paired parent-control train-only gate with identical explicit
+  growth attempts, usage/cyclic/random parent modes and fixed/wider
+  backprop/PC/neutral references. Complete selector/guard/lineage work and
+  checkpoint gates pass; two fresh 24-cell results repeat exactly, with
+  576 updates/45 splits/54 accepted guards and no outer/final scores.
+  Separate scoring, original matrix and independent confirmation remain open.
+- An explicit-proposal parent-selection core extension with original usage,
+  cyclic stable-ID and separately seeded PCG64 modes. Existing eligibility,
+  count/width/phase constraints and topology operations are inherited.
+  Complete snapshots restore selector state; direct proposals and sleep
+  failures recover deterministically. Bounded fixtures preserve original
+  usage behavior and prior frozen protocol identities. Paired growth
+  experiments, scored development and confirmation remain open.
+- A separate P6.3 combined/full-minus-one development gate that globally
+  verifies all 51 c7 train cells and complete circadian checkpoint state
+  before outer access. Two bounded results repeat exactly, preserving all
+  66 contrasts and work/capacity/rejection facts. Full-minus-matched-replay
+  PC has mixed seed differences and a negative final-mean average; full
+  trails backprop and planned-width PC on every seed. Confirmation/final
+  roles stay sealed, and scheduled/random growth controls remain open.
+- A P6.3 combined/full-minus-one train-only gate with 17 cells on three
+  fresh seeds, complete rollback fingerprints, matched full-controlled
+  replay and planned-width references. Two bounded 51-cell results repeat
+  exactly; 1,530 executed updates include 26 rejected replay updates.
+  All 18 rejected proposals restore state. Default combined splits stay
+  inactive, with every work/capacity and rejected row retained. Outer
+  scoring, scheduled/random growth controls and confirmation remain open.
+- A separate P6.3 schedule outer-development gate that compares all 33 c5
+  train cells and checkpoint hashes before outer access. Both bounded results
+  repeat exactly, retaining all 27 paired policy rows. Periodic replay improves
+  ordinary PC and neutral identically; backprop and inactive adaptive contrasts
+  are null. Confirmation and final roles remain sealed.
+- A P6.3 matched schedule train-only gate with periodic/current-adaptive/
+  no-sleep policies, fixed width, shared replay, planned-width references,
+  inner-guard rollback and explicit rejected replay execution costs. Two
+  bounded 33-cell results repeat exactly. Adaptive stayed inactive under
+  its unchanged chemical-variance threshold; no outer/final score was read.
 - A separately frozen P6.3 sleep-factor outer-development route that checks
   all nine arms and three seeds against the saved train-only result before
   any outer score. Two bounded public results repeat byte for byte. The

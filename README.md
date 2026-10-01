@@ -1080,6 +1080,205 @@ homeostasis and gated reset were null at the outer accuracy resolution.
 These remain exploratory development results, with confirmation seeds and
 final roles unopened.
 
+The [matched schedule train-only preflight](docs/p63-schedule-factor-preflight-results.md)
+uses periodic, current adaptive and no-sleep policies with matched replay
+across width-eight backprop/PC/neutral heads and planned width-12 references.
+Run `python -m scripts.run_p63_schedule_factor_preflight --output-dir artifacts/runs/p63-schedule-factor-preflight-new`.
+Two bounded 33-cell processes repeated exactly: periodic committed six
+guarded events per seed; adaptive stayed inactive because chemistry
+variance never reached its unchanged threshold. Executed work was 900
+optimizer updates, with no outer or final score. Schedule development
+scoring uses a separate gate against these saved train facts.
+The [scored schedule comparison](docs/p63-schedule-factor-development-results.md)
+now verifies all 33 train cells and checkpoint copies globally before
+reading outer roles. Run `python -m scripts.run_p63_schedule_factor_development --output-dir artifacts/runs/p63-schedule-factor-development-new`.
+On a clean checkout first produce its canonical reference with
+`python -m scripts.run_p63_schedule_factor_preflight --output-dir artifacts/runs/p63-schedule-factor-preflight`.
+Two scored processes repeat exactly. Periodic replay improves PC and neutral
+final mean on all three development seeds, with identical outcomes and extra
+replay work; backprop is null and inactive adaptive matches no-sleep. All
+33 rows and 27 policy contrasts are published. These development results
+leave combined/minus-one controls, confirmation and final release open.
+
+The [combined/full-minus-one train-only gate](docs/p63-combined-factor-preflight-results.md)
+now covers 17 cells on three fresh seeds, with exact neutral PC controls,
+full-controlled replay references, periodic structure-only and planned
+width-14 references. Run it into a fresh ignored directory with
+`python -m scripts.run_p63_combined_factor_preflight --output-dir artifacts/runs/p63-combined-factor-preflight-new`.
+Its frozen configuration permits no scientific overrides. Two bounded
+51-cell results repeat exactly: 1,530 executed updates include 26 rejected
+replay updates, and all 18 rejected sleep proposals restore complete state.
+The default full/removal cells proposed no splits; the structure-only
+control did. The report retains every work/capacity and rejected-proposal
+row. Outer scoring uses a separate gate; scheduled/random growth controls,
+confirmation and final release remain unfinished. No new dependencies or
+environment variables are required.
+
+The [combined development comparison](docs/p63-combined-factor-development-results.md)
+now globally matches every c7 train fact and complete circadian checkpoint
+before outer access. Run `python -m scripts.run_p63_combined_factor_development --output-dir artifacts/runs/p63-combined-factor-development-new`.
+On a clean checkout first produce the canonical c7 reference with
+`python -m scripts.run_p63_combined_factor_preflight --output-dir artifacts/runs/p63-combined-factor-preflight`.
+Two bounded scored runs repeat exactly, retaining 51 score rows and 66
+paired contrasts. Full-minus-matched-replay PC final-mean differences are
+-.0625,+.020833,0; full trails backprop and planned-width PC on every seed.
+All mixed, null and negative rows remain published with unequal costs and
+capacity. These development scores select no confirmation treatment;
+the separately scoped parent controls below preserve final-role seals.
+
+The [explicit parent-control implementation](docs/p63-parent-control-implementation.md)
+provides `ParentControlledCircadianNetwork` with immutable `usage`,
+`scheduled` or `random` settings. Direct proposals and explicit-policy sleep
+reuse the original eligibility, budgets and function-preserving topology
+operations. Complete snapshots restore the separate PCG64 stream, stable-ID
+cursor and decision record; incompatible selector settings are refused.
+Run its bounded fixtures with
+`python -m pytest tests/test_controlled_parent_selection.py`.
+These core fixtures establish no comparative performance claim. No new
+dependencies or environment variables are required.
+
+The [paired parent train-only gate](docs/p63-parent-factor-preflight-results.md)
+now verifies eight cells on three fresh seeds, with common explicit counts,
+within-width initialization, neutral PC parity and complete selector/guard/
+lineage rollback evidence. Run
+`python -m scripts.run_p63_parent_factor_preflight --output-dir artifacts/runs/p63-parent-factor-preflight-new`.
+Two official bounded results repeat exactly: 576 wake updates, zero replay,
+45 committed splits and 54 guarded sleeps. Usage/cyclic/random cells choose
+different parents, all reach the predeclared width thirteen, and the final
+sleep requests zero under the unchanged phase budget. No outer/final score
+was read by this train-only route. Its report preserves unequal capacity/
+guard costs and local RSS scope.
+
+The [paired parent development report](docs/p63-parent-factor-development-results.md)
+adds separately frozen scoring after complete all-seed train facts and every
+held parameter/width/selector/RNG checkpoint match c9b. Run
+`python -m scripts.run_p63_parent_factor_development --output-dir artifacts/runs/p63-parent-factor-development-new`
+with the recorded canonical c9b request/result/audit bundle present. The
+[contract](docs/p63-parent-factor-development.md) binds its exact bytes;
+fresh request timestamps/audit measurements cannot reproduce those bytes.
+Fixture tests run without ignored canonical files:
+`python -m pytest tests/test_continual_parent_factor_development.py tests/test_p63_parent_factor_development_cli.py`.
+Two official bounded results repeat exactly, retaining all 24 accuracy rows,
+60 pairs and costs. Usage ties random in final mean on all seeds and trails
+scheduled on one; all growth cells trail fixed-eight references on that seed.
+All null/negative/mixed outcomes remain. Independent confirmation and final
+release remain open; no development result selects a treatment.
+
+The [confirmation scope](docs/p67-confirmation-scope.md) preserves all six
+factors and fifty distinct reserved source seeds (gating/replay reuse ten),
+with 560 cells and a prospective maximum 15,620 updates. Inspect saved
+development bundles without constructing new data/models using
+`python -m scripts.inspect_p67_confirmation_scope --output-file artifacts/runs/p67-confirmation-scope-new.json`.
+Scope fixtures run with
+`python -m pytest tests/test_continual_confirmation_manifest.py tests/test_p67_confirmation_scope.py`.
+This read-only record is complete. Both unscored confirmation runs are
+verified below; independent final scoring and actual uncertainty reports
+remain unfinished.
+
+The [unscored training composition](docs/p67-confirmation-training.md) now
+holds every family A checkpoint before any B source and binds complete
+baseline/circadian/selector state. All six trajectories match their original
+development fixtures exactly, with outer/final fields blocked. Run these
+fixtures using `python -m pytest tests/test_continual_confirmation_state.py tests/test_continual_confirmation_training.py`.
+Independent JSON, resource and artifact validation subsequently passed
+before both 560-cell reserved runs below; this composition component has
+no scientific CLI.
+
+The [independent envelope validator](docs/p67-confirmation-validation.md)
+now checks frozen scope, sealed role IDs and complete canonical checkpoint
+schemas without constructing models/data or scoring. Its fixtures run with
+`python -m pytest tests/test_continual_confirmation_validation.py`.
+Checkpoints also carry explicit hashes for the three original parameter
+contracts, with seeded initial and available raw endpoint/guard/epoch links.
+All six normal and four forced-rejection development bodies pass these links.
+The full pure train-fact API, `verify_confirmation_payload`, independently
+checks all family costs, guards, supply, selector and held full state links;
+run `python -m pytest tests/test_continual_confirmation_work_validation.py`.
+The [bounded execution boundary](docs/p67-confirmation-execution.md) binds
+the saved scope, complete local sources and request before data. Live update
+counts retain rejected replay, and child wall/observed RSS stops plus
+exclusive request/result/audit/failure and independent readback gates now
+pass development fixtures. Run its checks with
+`python -m pytest tests/test_continual_confirmation_execution.py tests/test_continual_confirmation_runtime.py tests/test_p67_confirmation_training_cli.py`.
+The CLI uses `python -m scripts.run_p67_confirmation_training --output-dir <new-directory>`;
+`--read-only` verifies a complete existing bundle. Both full 560-cell unscored
+reserved runs and independent readbacks now pass with identical result bytes;
+the [training results](docs/p67-confirmation-training-results.md) record all
+seeds, costs, source/artifact identities and observed resource limits. Final
+scoring and the exhaustive report subsequently pass the P6.7c/P6.11b gates
+below. No seed, baseline, metric or budget override is exposed.
+
+The [predeclared confirmation analysis](docs/p611-confirmation-analysis.md)
+now has a pure seed-summary core and strict complete-scope app API. It keeps
+every original cell/pair, computes within-seed differences, and declares
+model-based marginal and all-116-primary-statement simultaneous intervals.
+Missing/failure/constant vectors and optional retention have explicit
+descriptive/null rules; no seed or family is pooled or selected. Run
+`python -m pytest tests/test_seed_statistics.py tests/test_continual_confirmation_analysis.py`.
+Its fabricated fixtures prove arithmetic/pairing, without final data or
+scores. The subsequent P6.7c provenance/release gates and full scoring are
+complete, as is the [exhaustive confirmation report](docs/p611-confirmation-report.md).
+Original matrix/resource/hypothesis reporting criteria remain separate.
+
+The [independent scoring state gate](docs/p67-confirmation-scoring-gate.md)
+binds both complete train bundles and the full analysis declaration. Its
+app API incrementally fingerprints every reproduced training fact and
+checks all held A/B models and original sealed roles, before and after
+future evaluation. Run development-only fixtures with
+`python -m pytest tests/test_continual_confirmation_scoring_manifest.py tests/test_continual_confirmation_scoring_state.py`.
+The state proof does not authorize final access or verify file/source/
+resource provenance. Final-role/evaluation composition now passes the
+development/fabricated fixtures below; complete scored process/artifact
+gates remain required. No new scientific CLI is exposed.
+
+The same [scoring gate](docs/p67-confirmation-scoring-gate.md) now has pure
+final-role/count contracts, app orchestration and an infra adapter over
+unchanged release/prediction. Every final view is bound before evaluation,
+all three original endpoints are attempted at the same binary threshold,
+and numerical failures retain raw counts/null cells. Whole training,
+original/released roles and endpoint links are rechecked before return.
+Run `python -m pytest tests/test_confirmation_final_roles.py tests/test_continual_confirmation_final_adapter.py tests/test_continual_confirmation_scoring.py`.
+The 103 new/399 related checks use development training and fabricated final
+fields; their full-scope delegation is not real reserved execution. Source
+freeze history retains a repaired first-fixture failure. Actual final scoring,
+external execution/resource observations and complete provenance/artifact
+readback remain gated by c1c/c2; no scientific setting or baseline changed.
+
+The [complete scoring readback gate](docs/p67-confirmation-scoring-readback.md)
+independently links all saved roles/endpoints/cells/proofs and derives metrics,
+failures and totals. A sequential reference reader composes the unchanged
+complete training reader for both bound bundles; each large decoded body is
+discarded before the next read. With the original local ignored bundles
+present, inspect them without new training/final access using
+`python -m scripts.inspect_p67_scoring_training_references --result-file artifacts/runs/p67-reference-inspection.json`
+(choose a fresh output). Tests use `python -m pytest tests/test_continual_confirmation_scoring_validation.py tests/test_continual_confirmation_training_references.py tests/test_p67_scoring_training_reference_inspection.py`.
+JSON/reference checks compose with the separately verified bounded worker and
+scored artifact lifecycle described below.
+
+The [final execution observer](docs/p67-confirmation-final-observation.md)
+records actual source fields and model predictions separately from app counts.
+It binds the intended held model/input and independently verifies each returned
+correct count or declared numerical failure. Retained views support checks
+after serialization; all owned guards restore on failure or cancellation.
+Run `python -m pytest tests/test_continual_confirmation_final_runtime.py tests/test_continual_confirmation_final_observation.py`.
+These development/fabricated component checks keep original final/outer fields
+sealed. Their 92-source component freeze is extended by the full worker.
+
+The [bound scored worker](docs/p67-confirmation-scored-worker.md) completes
+c1c2/c1c/c1 correctness on a prospective 97-source request/command/environment
+freeze. It composes unchanged training, independent optimizer/final observers,
+complete state/JSON checks, original resource caps, exclusive publication and
+complete independent readback. All 203 new/984 related tests pass, plus actual
+two-reader metadata preflight and a bounded development child with fabricated
+final fields. The [full confirmation and repeat](docs/p67-confirmation-scored-results.md)
+subsequently completed all 560 cells and both independent readbacks; their
+entire scientific result bytes match under unchanged caps. Safe public help is
+`python -m scripts.run_p67_confirmation_scoring --help`; the worker report lists
+the fixed execute/repeat/readback commands and acceptance. C2/P6.7c is
+complete; the subsequent P6.11b report now publishes every actual seed/interval
+with joined raw costs. No seed/metric/baseline/cap changes or partial scientific
+overrides.
+
 The toy and continual commands now default to `toy_validation_v1` and
 `continual_validation_v1`. Each reserves 20% of the original NumPy training
 split for validation and reports split hashes; the phase-B training fraction
@@ -1813,6 +2012,74 @@ pytest -q
 - Model Card: [docs/model-card.md](docs/model-card.md)
 - Learning mathematics: [docs/learning-mathematics.md](docs/learning-mathematics.md)
 - Review Notes: [docs/circadian-model-review-notes.md](docs/circadian-model-review-notes.md)
+
+## Confirmation cost inspection
+
+P6.11b1 projects every original family/seed/arm's raw costs from both complete
+training bundles, preserving rejected-executed replay and all checkpoint
+capacities. It publishes exclusive local inspection metadata and rederives
+every byte on readback. The existing scientific source/seed/metric/cap pins
+remain fixed. See [cost join](docs/p611-confirmation-cost-join.md) for module
+boundaries, evidence, commands and cost interpretation. The subsequent
+exhaustive scored seed/interval/cost report below completes P6.11b2/P6.11b.
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.inspect_p611_confirmation_costs --result-file artifacts/runs/p611-confirmation-costs.json --read-only
+.\.venv\Scripts\python.exe -m pytest -q tests/test_continual_confirmation_report_costs.py tests/test_continual_confirmation_report_cost_references.py tests/test_p611_confirmation_cost_inspection.py
+```
+
+## Exhaustive confirmation report
+
+The [complete report](docs/p611-confirmation-report.md) retains all 560 original
+cells, 626 arm/contrast metric vectors, 6,260 planned seed observations and
+all 116 primary statements under the frozen analysis contract. It joins every
+raw method cost, checkpoint capacity and original run/resource/role fact.
+Both actual publications and both independent complete readbacks pass within
+each 180-second derivative budget; JSON and Markdown repeat byte for byte.
+All 101 new/446 related tests and static checks pass. Undefined retention,
+negative values and eleven primary statements without eligible confidence
+intervals remain visible. Repeated runs add no seed replications.
+
+The local report is `artifacts/runs/p611-confirmation-report/confirmation-report.md`,
+with unabridged companion `confirmation-report.result.json`. Existing outputs
+are preserved; publication uses a new empty directory. Verify current evidence:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_p611_confirmation_report --read-only --output-dir artifacts/runs/p611-confirmation-report
+.\.venv\Scripts\python.exe -m pytest -q tests/test_continual_confirmation_report.py tests/test_continual_confirmation_report_rendering.py tests/test_continual_confirmation_report_bindings.py tests/test_continual_confirmation_report_artifacts.py tests/test_p611_confirmation_report_cli.py
+```
+
+The report document lists complete commands, identities and remaining criteria.
+The [original reporting audit](docs/phase6-reporting-acceptance-audit.md)
+subsequently closes P6.11 against all four original criteria. Original
+matrix/resource/hypothesis acceptance is assessed separately.
+
+## Stored confirmation stage/task matrices
+
+The [matrix consumer](docs/p69-confirmation-matrix.md) presents every one of
+the 560 original family/seed/arm rows as a labeled 2×2 stage/task matrix.
+All 1,680 measured endpoint/count/role/checkpoint records remain, with the
+560 B-after-A slots explicitly unmeasured before arrival. Original metrics,
+failed-cell rules, undefined retention and negative/positive backward transfer
+remain. Forward transfer is unavailable; no new final view or primary metric
+is added. All 110 new/556 related tests and static gates pass. Two actual
+publications and both independent complete readbacks pass under each
+180-second hard budget; whole JSON and Markdown repeat byte for byte.
+P6.9a and the original P6.9 pass after the separate scope audit against the
+prospective three-endpoint contract. The future-task slot remains unmeasured.
+
+Verify the completed canonical publication using the full original reader:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.run_p69_confirmation_matrix --read-only --output-dir artifacts/runs/p69-confirmation-matrix
+.\.venv\Scripts\python.exe -m pytest -q tests/test_continual_confirmation_matrix.py tests/test_continual_confirmation_matrix_rendering.py tests/test_continual_confirmation_matrix_bindings.py tests/test_continual_confirmation_matrix_artifacts.py tests/test_p69_confirmation_matrix_cli.py
+```
+
+The consumer has no seed/method/endpoint/metric/cap override; preserve existing
+occupied outputs. Its document contains the module map, complete commands,
+source/artifact identities, budget scope and remaining original criteria.
+Extend resource/hypothesis presentation through the same complete verified
+report boundary with separate modules, keeping scientific sources fixed.
 
 ## Citation
 
