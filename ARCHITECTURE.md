@@ -731,6 +731,294 @@ P6.9a passes both actual publications/readbacks with exact whole result bytes;
 the future-task slot remains unmeasured. Resource or hypothesis
 presenters should extend the verified report boundary via separate modules.
 
+## Original resource field and scope inventory
+
+`app/continual_confirmation_resource_contexts.py` independently derives
+context work/guard/storage and named capacity points from complete stored
+facts. `app/continual_confirmation_resource_fields.py` assigns every arm field
+its unit, scope, measurement status and original pointer; no shared wall/RSS
+is attributed to an arm. `app/continual_confirmation_resources.py` binds the
+entire original cost/report/audit declarations, preserves all cells/contexts,
+reconciles work/capacity/storage and exposes explicit gaps.
+`app/continual_confirmation_resource_rendering.py` renders every field/status/
+scope without outcome ranking. Large original proof objects stay referenced.
+
+`infra/continual_confirmation_resource_bindings.py` preserves all original
+106 report/scientific pins and adds the existing pure report-input validator
+plus seven new inventory files. All 114 sources are pinned, covering all 90
+runtime imports plus retained evidence producers. It checks current original
+input/report/scope/recorded-reader identities before/after two complete saved
+cost/report/audit reads and independent inventory reconstruction.
+`infra/continual_confirmation_resource_artifacts.py` owns exclusive publication,
+failure/audit ownership, late byte checks and full reconstruction. The fixed
+CLI supplies paths; dependency direction remains CLI → infra → app/core.
+
+ADR-0165 distinguishes current saved-evidence inventory authority from another
+complete scientific reader run. P6.10b preserves its separate official-reader
+requirement. The consumer's 120-second derivative budget does not change
+scientific caps. The resource document/log record prospective source/input
+binding, 99 new/576 related tests, actual bounded acceptance and unknowns.
+No model/source construction, profiling, training or new final view. Add
+outcome-versus-cost or hypothesis presentation through separate modules over
+verified inputs; preserve measurement scopes and all unfinished criteria.
+
+## Complete original checkpoint retention ledger
+
+`app/continual_confirmation_retention_checkpoints.py` extracts every original
+nullable view, replay owner field, ordered array fingerprint and exact
+canonical mapping pointer, with shared FIFO facts kept separate.
+`app/continual_confirmation_retention_costs.py` requires the whole original
+training and inventory identities, validates every checkpoint/state/role/work
+and reconciles every stage/group/arm against original inventory facts.
+`app/continual_confirmation_retention_rendering.py` deterministically presents
+every arm/checkpoint and shared context; companion JSON keeps all proof fields.
+
+`infra/continual_confirmation_retention_references.py` composes two unchanged
+complete original training reader ports, verifies entire decoded-part bytes
+through the existing reference boundary and compares full projections. Each
+large training graph is discarded before the next reader.
+`infra/continual_confirmation_retention_bindings.py` freezes all 121 sources
+(111 runtime imports plus preserved original evidence) and binds complete
+current input/request/environment/recorded inventory authority.
+`infra/continual_confirmation_retention_artifacts.py` owns exclusive parts,
+failure/audit ownership, late marker/byte/budget checks and full independent
+reconstruction. Only `run_p610_retention_costs` composes the actual original
+training adapter; infra never imports it. Direction remains CLI → infra → app/core.
+
+ADR-0166 requires verified closed-state evidence before deriving zero owned
+bytes from a null view. Configured empty and disabled storage remain distinct.
+Shared FIFO, array geometry, checkpoint copies and process RSS have separate
+scopes; no samples are reopened or content IDs rehashed. The prospective
+180-second derivative budget preserves all original scientific caps. All
+83 new/506 related tests and four actual full-reader operations pass, with
+complete byte repetition and eight original reader calls. P6.10b1 is complete;
+add outcome-versus-cost presentation over the complete official report and
+current bound ledgers via separate modules, retaining all unfinished criteria.
+
+## Complete original outcome versus cost presentation
+
+Three new pure app modules join the accepted whole report/resource/retention
+bodies. `continual_confirmation_outcome_cost_inputs` validates complete scope,
+original report declarations, counter/capacity/state/parameter/owned/shared
+links and historical process scopes. `continual_confirmation_outcome_costs`
+requires every original canonical body identity and retains full metrics,
+endpoints, costs, proofs, histories and original interval/replication records.
+`continual_confirmation_outcome_cost_rendering` presents all 560 cells against
+compute and memory, with every shared context and four separate process segments.
+No IO, model/data/training/scoring/profiling or resource allocation belongs here.
+
+The public interface is `build_outcome_cost_presentation(report, inventory,
+retention) -> body`, then `render_outcome_cost_presentation(body) -> Markdown`.
+The private development seam grants no original artifact/source/reader authority.
+Exact original `_work_fields`/`_array_proofs` validators are reused under frozen
+sources rather than copying their work/array semantics. Complete JSON retains
+all 25,400 history points and 626 original metric vectors; tables do not rank
+or select models. No new dependency or environment variable.
+
+P6.10b2's prospective 124-source map preserves all earlier 121 sources and
+covers 85 pure imports. All 45 new/417 related tests/static gates and both
+complete pure saved-input derivations pass, exact whole repetition and zero
+scientific calls. Recorded prior full-reader authority is preserved; no fresh
+official reader is executed by the pure API itself.
+
+`infra/continual_confirmation_outcome_cost_bindings` binds all six complete
+original/companion bundles, both pure outputs and 127 current sources, then
+invokes the unchanged whole official report reader and public pure builder.
+The just-validated current request passes only within the operation: complete
+saved request bytes are checked before the reader, every current binding is
+reconstructed after the whole derivation and at final publication/readback.
+There is no cross-operation cache. This avoids immediate duplicate traversals
+identified after a preserved first 240-second derivative timeout. No full check,
+reader scope, scientific setting or cap is dropped.
+
+`infra/continual_confirmation_outcome_cost_artifacts` owns four exclusive
+parts, failure/claim markers and full independent reconstruction. Distinct
+claim ownership preserves replaced foreign claims and other artifacts; failure
+cleanup revokes only provably owned parts. Only `run_p610_outcome_costs` composes
+the actual whole report adapter. Infra depends inward on unchanged app/core.
+All 112 new/359 related tests and static gates pass after a repaired prospective
+freeze; all 120 local runtime imports are pinned. Four actual unoccupied v2
+operations pass under the unchanged 240-second derivative envelope (215.65–
+216.26 seconds), with the original inner reader 180-second/scientific caps.
+Four whole report/sixteen training/eight scored readers and zero scientific
+guards per operation, exact whole JSON/Markdown repetition and complete current
+bindings pass. The original criterion audit closes b3/b/P6.10 at the declared
+sampled whole-process RSS, named capacity history and recorded/derived work/
+owned-shared storage scopes. Historical false-parent/gap flags remain immutable;
+the first timeout and occupied partial claim survive. P6.12 and broader work
+remain. See ADR-0167/presentation guide/original acceptance audit.
+
+## Complete primary confirmation findings
+
+`app/continual_confirmation_findings` requires the whole original P6.11 report,
+reuses its complete declaration validator and preserves every raw field and
+all 116 primary statements. Each statement keeps its exact interval/seed/
+direction/eligibility and three secondary endpoint summaries. Fixed hypothesis
+context maps distinguish combined-system comparisons from isolated factors;
+no hypothesis vote, favorable subset or composite score is introduced.
+
+`app/continual_confirmation_findings_rendering` rebuilds and compares the whole
+body before deterministic exhaustive Markdown. Exact round-trippable numbers,
+all statement rows and the entire original report appendix remain. Public API:
+`build_confirmation_findings(whole_report) -> body`, then
+`render_confirmation_findings(body) -> Markdown`. The private fixture seam
+grants no artifact/source/current IO authority. Both modules are pure app
+logic with no infra/adapter import, dependency or environment setting.
+
+ADR-0168 freezes 129 current sources covering all 75 pure runtime imports and
+44 test dependencies before new fixtures. All 36 new/331 related tests/static
+gates and two actual saved-input derivations pass, with exact whole output
+repetition and zero scientific/fresh reader calls. The original a acceptance
+audit passes. P6.12b must separately bind all development/tuning, activity,
+cost and operational failure evidence and prove complete current publication/
+readbacks; P6.12 remains unfinished. Extend through separate modules, preserving
+these frozen sources, every original statistical rule and all unfinished work.
+
+## Complete fixed development evidence for findings
+
+The pure `continual_findings_development` app module retains every original
+input and projects 168 development cells/174 prospective within-seed pairs.
+`continual_findings_development_bindings` owns whole filesystem/source checks;
+its development/preflight validators are explicit ports. The outer
+`inspect_p612_development_findings` CLI composes the unchanged original
+validators. A fixed JSON input catalog lives in `src/config`. App has no
+infra/adapter import; no dependency, environment setting or scientific
+override was introduced.
+
+ADR-0169 explains this separately tested input boundary. All original outer
+roles and metric names remain, including the gating pilot's five fields.
+Twelve gating/replay pairs are marked as projections; 162 stored contrasts
+remain unchanged. Twenty complete bundles and both original scope records
+are retained. Tests and two bounded actual derivations establish b1, without
+fresh confirmation-reader authority. Add b2 synthesis and b3 complete IO
+through separate modules; keep all frozen sources and original criteria.
+
+## Complete original confirmation activity
+
+`app/continual_confirmation_activity` accepts two whole canonical original
+bodies and preserves the complete transaction/replay-offer/cell records. Its
+pure helpers check original guard direction, rollback commits, skipped work,
+attempt counters and the neutral controller's three-applier scope. No
+filesystem, infra or adapter imports occur in this module.
+
+ADR-0170 explains why original raw decisions must precede interpretation;
+final counters cannot supply missing individual commit records. The b2a
+source/input freeze, meaningful tests and two complete actual derivations
+pass. Extend through separate b2 synthesis and b3 IO modules; this projection
+does not grant fresh current confirmation-reader authority.
+
+## Complete fixed findings synthesis
+
+Four pure app modules separate whole identity/declaration checks, operational
+failure interpretation, exhaustive synthesis and rendering. The fixed
+`p612_findings_inputs.json` catalog binds all original bodies/repeats and 93
+complete raw records. Existing complete primary/development/activity/matrix
+declaration validators remain unchanged. Historical matrix reader provenance
+is independently verified against its original complete source/request
+template and grants no fresh execution authority.
+
+The public API is `build_complete_findings(inputs)` followed by
+`render_complete_findings(body)`. Every original raw input is retained in the
+companion JSON; exhaustive Markdown uses exact numbers and complete indexes.
+H1–H4 remain unresolved at the fixed measured scopes. The timeout/claim and
+failed synthesis attempt remain; unobserved counters are not replaced by zero.
+ADR-0171 records the rationale. All tests/statics and two bounded actual pure
+derivations pass. b3 owns current filesystem/source checks and reader ports,
+exclusive publication and independent readbacks; no app-to-infra import or
+new dependency/environment/scientific override is introduced.
+
+## Complete current findings IO
+
+`app/continual_findings_readers.py` defines three complete reader ports.
+`infra/continual_findings_current_bindings.py` binds the full current physical
+scope; `current_inputs` composes fresh ports and unchanged public synthesis;
+`artifacts` owns exclusive claims, whole outputs and independent readback.
+The fixed `run_p612_complete_findings` CLI wires unchanged outcome/cost,
+matrix and development adapters. Each report reader dispatches separately.
+There is no app-to-infra import, cross-operation cache or scientific override.
+ADR-0172 and [the IO guide](docs/p612-current-findings-publication.md) describe
+budgets, corruption/ownership gates and complete actual acceptance evidence.
+Two publications and two fresh independent readbacks retain every pure result
+byte; the original b3/b/P6.12 audit passes. Failed observer parts remain separate
+and preserved; historical pure scope/pending flags are not rewritten.
+
+## Complete retrospective pilot variability
+
+`core/pilot_precision.py` reuses ordered seed summaries and projects conditional
+SE without IO, critical-value selection or a sufficient-count decision.
+`app/continual_pilot_variability.py` first validates the entire original
+development input ledger, retains all116 primary paired vectors and binds
+whole input/ledger/manifest/analysis identities. It uses unchanged df-nine
+critical values only as conditional half-width scaling at the original count.
+Missing/constant forecast reasons and weak three-seed/role-dispersion limits
+remain explicit. No source/model/train/score/final/IO layer is added.
+
+The dependency direction is app → original app validators and core summaries;
+core → core seed statistics. A private fabricated seam grants no original
+or current reader authority. Actual evidence dispatches the unchanged complete
+development reader once, with every original port and120-second gate. ADR-0173
+and the pilot guide preserve the missing original prospective sample-size
+criterion; a future planning/feasibility module must supply a separate
+prospective count/untouched-role contract before new confirmation.
+
+## Complete prospective precision feasibility
+
+`core/seed_precision_budget.py` owns validated numeric sensitivity and
+bounded-mean sufficient-count arithmetic using complete ordered pilot rows.
+`app/continual_precision_contract.py` fixes the target/ranges/assumptions;
+`app/continual_precision_feasibility.py` first validates that contract and
+the entire original development/pilot boundary, then retains all116 vectors,
+original provenance and exact additive six-family work. Output is detached
+from its input. Core depends only on core summaries; app depends inward on
+core and existing complete app validators. No new IO/source/scoring layer.
+
+Why this: a separate bounded check covers constant/discrete pilots without
+pretending a three-seed SD certifies final-role precision. No sample-count
+selection, new interval or confirmation launch belongs to these modules.
+ADR-0174 and [the feasibility guide](docs/p67-precision-feasibility.md) preserve
+the negative planning result and the original unchecked sample-size criterion.
+Extend next through the separate untouched-role/execution contract and fixtures,
+preserving all informative factors/matched controls and fixed caps.
+
+## Complete retained seed declaration inventory
+
+`core/seed_usage.py` traverses decoded regular/canonical metadata, embedded
+configurations and CLI arguments. Typed declarations retain locations and
+representations; unresolved values remain visible. It owns no IO or RNG.
+`infra/seed_usage_inventory.py` discovers and freezes all retained JSON files,
+checks complete membership/whole bytes before and after, and retains parse
+failures. Runtime/cache exclusions and the newly owned output are explicit;
+external/symbolic or unowned output paths fail before exclusion.
+Dependency direction is infra → core. No app/scientific import is introduced.
+
+The whole 593-file actual inventory/repeat and 30 new/100 related fixtures pass.
+Declarations alone cannot prove prior execution or independence. D2b2 owns
+schema/text/source/default/derived-stream/release classification; d2b3 owns
+full execution fixtures. ADR-0175 and [the guide](docs/p67-seed-usage-inventory.md)
+explain the split. Original P6.7 acceptance and scientific caps remain open.
+
+## Complete retained prior seed context and history
+
+`core/seed_declaration_context.py` gives every original declaration/issue a
+typed context and preserves structured seed-map base/stream evidence.
+`core/seed_source_evidence.py` retains text/CSV witnesses and all Python AST
+calls, assignments/defaults and seed mapping values without executing source.
+`infra/prior_seed_evidence.py` freezes every retained physical file and all
+local Git objects/commit-path aliases, verifies full membership/whole bytes
+before and after, and parses identical bodies once with every alias retained.
+Opaque/unparsed/symbolic/history uncertainty remains explicit. Infra depends
+on core; these modules own no scientific dispatch or fresh-role admission.
+
+Why this: seed-named JSON fields alone miss structured maps and historical
+source/default/stream evidence. Context prevents treating quantity fields or
+valid nonrandom policy nulls as executed seed identities while preserving the
+original raw records. ADR-0176 and [the guide](docs/p67-prior-seed-evidence.md)
+record the boundary and extension path. 163 selected tests and static checks
+pass. The first whole audit passes, but its independent repeat exceeds 180s;
+the resource/reproducibility acceptance remains unfinished. Extend through
+bounded complete saved-input timing diagnosis, then original b2 chronology/
+ambiguity/role contract and b3 fixtures with the original scientific caps.
+
 ## Extension Rules
 
 - New adaptation strategies should be added via policy/config extension points, not by hardcoding branches across modules.

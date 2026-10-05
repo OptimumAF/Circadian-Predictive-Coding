@@ -1,6 +1,7 @@
 # ADR-0165: Inventory resource fields with their original scope
 
-Status: accepted design; correctness and actual acceptance pending.
+Status: accepted and implemented; complete correctness and actual bounded
+publication/repetition/readback acceptance pass.
 Date: 2026-10-01.
 
 ## Context
@@ -59,3 +60,12 @@ explicit about unavailable measurements. P6.10b can add outcome presentation
 through a new module over the same verified evidence. Full resource/hypothesis,
 stream and release acceptance remain separate. Tests use unscored development
 or fabricated metadata; they do not establish reserved scientific authority.
+All 99 new/576 related tests and static gates pass. Both actual publications
+and both full saved-input reconstructions exit 0 within 120 seconds each,
+with byte-identical full JSON/Markdown and all 24 scientific guards zero.
+The resource document/log record exact sources, inputs, outputs and scope.
+The inventory identifies 300 owned-retention fields absent from raw method
+rows. Add P6.10b1 to recover those exact fields from the already saved complete
+checkpoint proofs before outcome presentation. Missing projection metadata
+does not itself require a new resource measurement or authorize allocation
+of group bytes to arms. Original parent acceptance stays unchanged.

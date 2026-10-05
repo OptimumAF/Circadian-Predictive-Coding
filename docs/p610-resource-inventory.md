@@ -1,8 +1,10 @@
 # P6.10a: Complete original resource field and scope inventory
 
-Status: implementation and first correctness gate pass; related correctness
-and actual publication/repetition/readback acceptance are pending. Keep
-P6.10a unchecked. Original P6.10/P6.10b/P6.12 remain unchecked.
+Status: **P6.10a is complete** after correctness, both actual publications and
+both independent full saved-input reconstructions pass. Original
+P6.10/P6.10b were later completed by the separate
+[complete presentation and original acceptance audit](p610-original-acceptance-audit.md).
+P6.12 remains unfinished; all historical inventory flags and evidence are preserved.
 
 ## Module boundaries
 
@@ -99,13 +101,113 @@ actual publication. Prior complete cost operations took 74–75 seconds; this
 inventory reconstructs saved inputs and does not repeat scientific reader
 execution. Original 16,000-update / 600-second / 512-MiB scientific caps remain.
 First app gate: 11 passing tests / 10.04 seconds. First five-module gate:
-99 passing tests / 29.47 seconds, zero skipped. Related gate is pending.
+99 passing tests / 29.47 seconds, zero skipped. The related gate has
+**576 passing tests / 97.77 seconds**, zero skipped. Ruff, twelve-file format,
+mypy (462 files) and diff checks pass. Correctness metadata
+`artifacts/runs/p610-resource-inventory-correctness-validation.json` is
+**8,323 bytes**, SHA
+`39c6e39bbc315ee99d34b5b1427695756779f511283db09c6ad87c663fee0f63`.
+It binds exact commands/outcomes, prospective sources and all 22 local test
+dependencies/fixtures. No production bytes changed after the freeze.
 New tests cover all six genuine first development families after model/data
 seals, full 560-row metadata-only dispatch, scope/arithmetic/units/history/
 guard/storage corruption, source/input/request drift, repeated inventory,
 exclusive occupied/partial files, ownership/failure-marker handling and CLI.
 The metadata dispatch is not reserved-source reproduction; IO spies are not
 scientific readback authority.
+
+## Actual complete local acceptance
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/validate-p610-resource-inventory.py
+```
+
+All four children and the parent producer have terminal **exit 0**, with all
+24 data/model/train/final guards zero in every child. Each operation reads both
+complete original cost inspections/report bodies and all four original audits,
+rederives every resource/context/history field, and checks current full source/
+request/input/artifact/marker identities. These are complete inventory
+reconstructions with preserved original reader authority, not new scientific
+reader executions or measurements. The unchanged 120-second budgets pass:
+
+| Operation | Child pipeline seconds | Parent seconds | Exit |
+| --- | ---: | ---: | ---: |
+| Canonical publication | 25.1951845 | 28.1383509 | 0 |
+| Repeat publication | 24.8593975 | 27.7544853 | 0 |
+| Canonical independent inventory readback | 23.0446379 | 25.9806550 | 0 |
+| Repeat independent inventory readback | 23.0088494 | 25.9768949 | 0 |
+
+Final exclusive `artifacts/runs/p610-resource-inventory-validation.json` is
+**19,375 bytes**, SHA
+`5b4d77e2aadaf7c309ed1a409984503f058b03637a2146b01e0c0bb753e61443`.
+It binds exact sources/correctness/test/producer bytes, every command/time/
+outcome/guard, original input scopes and every output identity. Bundles are
+`artifacts/runs/p610-resource-inventory` and
+`artifacts/runs/p610-resource-inventory-repeat`; preserve occupied outputs:
+
+| Part | Bytes | SHA-256 |
+| --- | ---: | --- |
+| Both complete result JSON files | 15,490,091 | 46b923ad046a2c980f60a6d2d6fc16f9415c7cfe1787893c2078c2263091821f |
+| Both complete Markdown files | 2,359,993 | acaab45960dd448def9568a13aaa9a68d7000904973e50e9db771346e8b5b48b |
+| Canonical request | 19,405 | d261c7dcf827b333a543b89ca7a6bde904fb86dd8d2c296831f92ffd66f1d605 |
+| Repeat request | 19,412 | fa1d9990f6fc136e4002b1fc2b94029380d8423eefeef96c473dc93b089439a7 |
+| Canonical audit | 6,434 | 06e5e64a5fc0e848e83312b3befef67b249b188ab37525041e2534118c3031e2 |
+| Repeat audit | 6,435 | 4b9f288f74eeb1f0bb9376ff81f17581149ba491e38af5995fb205e2b1a5dd05 |
+
+Both entire result JSON/Markdown bodies repeat byte for byte. Request path/
+time and derivative audit duration retain their actual distinct values. All
+required parts exist, with no claim/failure marker. No live child remains.
+
+Coverage: **560 cells / 1,680 checkpoint capacities / sixty contexts / four
+original process segments / 12,880 fields / 25,400 capacity-history points**.
+Field statuses are 1,940 measured, 8,960 derived and 1,980 unmeasured. The
+unmeasured fields comprise three timing/RSS fields per arm (1,680) and 300
+owned-retention fields absent from the raw method projection. They are not
+invented zeroes and absence from this projection does not prove absence from
+the original full checkpoint evidence. Exactly 7,680 shared FIFO bytes plus
+38,400 owned retained array bytes across distinct contexts reproduce the
+original 46,080 bytes before copies. Work remains 13,440 wake plus 1,724 applied
+plus 46 rejected-executed replay = 15,210 updates; all 770 guarded attempts /
+1,540 predictions / 28,320 guard examples and transient capacity agree.
+
+Historical whole-process observations remain separate:
+
+| Original segment | Audit seconds | Worker seconds | Sampled peak RSS bytes |
+| --- | ---: | ---: | ---: |
+| Train canonical | 44.2459790 | 32.5046013 | 462,479,360 |
+| Train repeat | 44.6588728 | 32.6507508 | 462,348,288 |
+| Scored canonical | 71.0737686 | 68.5221003 | 234,356,736 |
+| Scored repeat | 70.6688824 | 68.2845622 | 234,295,296 |
+
+Every original sampling interval/start/count/PID and update observer remains
+in JSON. These are original separate process segments with their own validation
+and scoring work, not a per-arm speed/memory comparison or isolated guard cost.
+
+## Closing preservation and checkout reconciliation
+
+Two external commits advance the session's starting `86cd5bff...2d3382`
+checkout to `57b6fd01...6aa89`. Their 184 additions/five documentation
+modifications preserve all tested source bytes. The agent makes no Git commit
+or push. Both 114-source inventory and 112-source earlier matrix maps, all
+recorded test/fixture dependencies, original/current complete artifact parts
+and current request/source/input/environment/marker bindings remain exact.
+The original P6.10/P6.10b criterion lines remain unchanged and unchecked.
+
+Closing command `artifacts/runs/validate-p610-resource-inventory-handoff.py`
+exits 0 in **19.75691869998991 seconds**, all 24 scientific guards zero.
+It checks current saved-byte/request/render consistency with recorded actual
+complete reconstructions; it is not another full inventory or scientific
+reader run. No training/scoring/final source, measurement or profiling.
+Fresh Ruff/twelve-file format/mypy 462/diff pass. Exclusive local receipts:
+
+- `p610-resource-inventory-checkout-reconciliation.json`: 20,810 bytes,
+  SHA `898678ba46392540403bc4037dbd51323527aaba93fcb70a8057c778000a2fe3`.
+- `p610-resource-inventory-handoff-validation.json`: 45,746 bytes,
+  SHA `b70b9b2d9db8fe9a208485aae6a8868230b617f062fe88f6fcc367f3c8616932`.
+
+Both are under `artifacts/runs/`; preserve occupied closing receipts. The
+development log records full commands, bindings, skips and exact next action.
+Do not rerun the unchanged 576-test gate solely for documentation changes.
 
 ## Local commands and exact next action
 
@@ -121,10 +223,18 @@ git diff --check
 
 Publication refuses occupied outputs before any input reads. Preserve current
 artifacts and failures; use read-only reconstruction for complete bundles.
-After the related gate, freeze correctness/test/producer identities, then run
-two local publications and two independent full saved-input reconstructions
-within each prospective budget. Only terminal passing evidence can close a.
-P6.10b then adds every original accuracy/forgetting outcome against the scoped
+P6.10a is checked after all terminal acceptance evidence above. The subsequent
+[P6.10b1 retention ledger](p610-retention-costs.md) now resolves all 300 raw
+projection gaps through both complete original training readers, preserving
+all nullable views, owner/array/state/role/source proofs and stage/group totals.
+The original inventory and all historical missing-field flags stay unchanged.
+Both actual publications and both independent full readbacks pass, with
+83 new/506 related tests and exact whole result bytes. This is complementary
+checkpoint evidence, with no new measurement/final view or shared allocation.
+Next P6.10b adds every original accuracy/forgetting outcome against the scoped
 work/storage/capacity ledger, retaining all failures/nulls/negative/inactive
 results. Map missing measurements to prospective next actions without changing
 scientific endpoints, seeds, baselines or caps. No broad sweeps are required.
+Skipped: full repository/fresh-clone/actual CI, Torch/CUDA, new scientific
+training/scoring/final views, profiling and sweeps. Related tests cover all
+changed boundaries; original broader resource and hypothesis criteria remain.

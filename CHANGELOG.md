@@ -9,6 +9,162 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- Complete retained prior seed evidence boundary: typed declaration contexts
+  and structured streams; full text/CSV/JSONL/Python witnesses; every retained
+  physical file and local Git object/alias, including unreachable/opaque and
+  failed records. 33 new plus 130 related tests and static checks pass. First
+  full 1,949-file/3,585-object audit passes; independent repeat times out at
+  hard180. Both saved outputs are byte identical; this does not complete the
+  failed resource gate. P6.7d2b2a and original prior-usage/role gates remain
+  unchecked. ADR-0176 records the choice and original scope/caps stay fixed.
+
+- Complete retained JSON seed declaration inventory: all 593 whole files and
+  membership, regular/canonical/embedded/CLI declarations, explicit unresolved
+  fields, complete identical repeats and owned-path containment. 30 new and
+  100 related tests pass with no skips; static gates pass. All passing v1
+  bytes remain. P6.7d2b1 metadata acceptance completes; full prior usage,
+  untouched roles and execution fixtures remain in d2b2/d2b3. ADR-0175 records
+  the split; no source/seed/baseline/metric/cap or scientific authority change.
+
+- Complete prospective precision/budget feasibility consumer: fixed five-point
+  objective, all116 primary vectors/348 raw pilot observations, conditional
+  df-two dispersion uncertainty, separate bounded-mean sufficient counts and
+  exact six-family work ceiling. 57new/155selected tests and complete repeated
+  saved-input/independent arithmetic gates pass. Objective remains uncertified
+  at ten; original P6.7/d2 and fresh-role execution gates stay open. ADR-0174
+  records the split; first unused-import lint failure and exact bytes remain.
+
+- Complete retrospective pilot variability consumer: all116 original primary
+  paired vectors/348 development observations, conditional ten-seed forecasts
+  with26 zero-dispersion nulls, whole source/input bindings and clean pure
+  correctness gates. Original P6.7 stays open for missing prospective variance-
+  based sample-size justification; ADR-0173 records separate repair increments.
+
+- Original P6.3 staged-matrix parent acceptance and chronology report. All27
+  focused fixtures pass with no skips; complete unchanged scope/development
+  readers validate every original reservation/request/port. The tuple/list
+  observer failure, full-byte diagnostic and separate corrected source remain.
+  Both audit attempts fit shared180 seconds. Only P6.3 is newly complete;
+  P6.7 sample-size justification remains open. No scientific setting changed.
+- Original P6.3c eleven-variant minimum-matrix acceptance audit and evidence
+  report. All 375 unchanged focused fixtures pass with no skips. The complete
+  original development reader rebuilds the exact ledger under its 120-second
+  gate; all 560 saved confirmation cells and both scored payloads reproduce the
+  unchanged analysis under the prospective 180-second audit cap. All matched
+  references, unequal costs, inactive effects and unresolved results remain.
+  Only P6.3c is newly marked complete; P6.3/P6.7 remain open. No source or
+  experimental setting changed; the first entry parser failure is preserved.
+- Original P6.3c9 scheduled/random growth-control acceptance audit and evidence
+  report. The unchanged five C9 test files pass 152 tests with no skips; the
+  bounded whole-input audit verifies complete training/scored analysis and all
+  ten reserved parent seeds/eight arms/twenty pairs. All forty parent primary
+  intervals include zero under the original 116-statement scope. Only C9 is
+  marked complete; no production source, experiment setting or baseline changed.
+- Complete current findings reader ports, fixed source/input bindings,
+  exclusive publication and fresh independent reconstruction with preserved
+  foreign ownership/failure history. All 53 new/304 related tests and static
+  gates pass; the prospective 150-source/79-test scope and 840-second outer
+  cap preserve every original reader/scientific gate. Two publications and two
+  fresh independent complete readbacks pass and retain every accepted pure
+  JSON/Markdown byte. First observer accounting failure and15 snapshots remain;
+  all attempts fit the original shared3,360-second budget. The unchanged
+  original b3/b/P6.12 audit passes; all broader unfinished work remains open.
+
+- Complete fixed development/confirmation findings synthesis and exhaustive
+  Markdown, preserving all six whole evidence bodies, 93 raw failure/handoff/
+  source records and every original cell/pair/statement/decision. H1–H4 remain
+  unresolved within measured settings, without new statistics or a winner.
+  Historical provenance, timeout claims and unobserved killed-child counters
+  remain. All 49 new/198 related tests and static gates pass; two complete
+  derivations repeat exact JSON/Markdown under unchanged 180-second caps.
+  The first schema-mismatch failure and all snapshots remain. Only P6.12b2
+  passes its original audit; b3/b/P6.12 current IO gates remain unfinished.
+
+- Complete original confirmation activity: 560 cells, sixty contexts, all
+  3,650 decisions and sixty replay offers, with original guards/reasons/
+  proposals/rollback work/capacity/null records and explicit controller scope.
+  All 25 new/115 related tests and static gates pass. Two complete derivations
+  repeat 36,742,525 output bytes under the declared 180-second caps. Source
+  preflight failures and snapshots remain. Only P6.12b2a passes its audit;
+  complete b2 findings and b3 current publication/readbacks remain unfinished.
+
+- Complete fixed development findings: 20 original bundles, 168 cells and
+  174 declared within-seed pairs with original settings/roles/metrics/seeds.
+  Current source and whole-part checks compose unchanged validator ports.
+  52 new/204 related tests and static gates pass; two complete derivations
+  repeat all 43,831,409 result bytes under hard 120-second caps. First failed
+  fixture/static receipts are preserved. P6.12b1 passes its original audit;
+  b2/b3/b/P6.12 remain open for complete findings and current publication.
+
+- A pure complete primary-confirmation findings ledger and exhaustive Markdown
+  retaining the entire original report and all 116 statements/626 vectors/
+  6,260 seed observations. Original simultaneous intervals, signs, eligibility,
+  raw secondary endpoints and failure/null/negative reasons remain unchanged.
+  All 105 available primary intervals include zero; eleven remain ineligible.
+  H1–H4 are unresolved in this primary evidence, with explicit pending tradeoff
+  synthesis and no hypothesis vote or equivalence claim. All 36 new/331 related
+  tests and static gates pass. Two complete saved-input derivations repeat exact
+  whole JSON/Markdown within the prospective 120-second envelope, preserving
+  129 source/44 test byte bindings and zero scientific/fresh official-reader
+  calls. P6.12a passes its original acceptance audit. P6.12b and original P6.12
+  remain open for complete development/tuning/activity/cost/operational-failure
+  synthesis and IO publication/readbacks. No scientific setting, source, seed,
+  baseline, metric, interval assumption, cap, dependency or environment change.
+
+- A separate complete original-report-reader outcome/cost consumer, exclusive
+  publisher and fixed `run_p610_outcome_costs` CLI with full independent readback.
+  All 112 new/359 related tests and Ruff/format/mypy gates pass; 127 sources cover
+  all 120 local runtime imports. Current upstream bundles/requests, whole inputs,
+  late drift, partial/occupied/corrupt/resealed/foreign/failure/budget cases remain
+  bound. A first hard 240-second timeout and its partial claim/source snapshots
+  are preserved. A newly frozen intra-operation request handoff removes immediate
+  duplicate traversals while retaining every complete before/after/final binding
+  check, the whole reader and all scientific/budget/acceptance scopes. Four actual
+  v2 operations pass at 215.65–216.26 seconds under the same 240-second cap, with
+  whole JSON/Markdown repetition, four report/sixteen training/eight scored
+  readers and zero scientific guards. Original b/resource acceptance audit
+  passes without new requirements or retrospective measurements; P6.10b3/b/
+  P6.10 are complete at their original scopes. P6.12 and broader work remain.
+
+- A complete pure original outcome-versus-cost presentation preserving all
+  560 cells, 3,360 metric values/reasons, 1,680 checkpoint proofs, sixty contexts,
+  12,880 scoped fields, 25,400 history points and every original analysis/interval
+  declaration. Complete compute and memory tables retain null/negative/above-one/
+  failed/rejected/inactive facts and separate shared/historical scopes. Three
+  app modules and two test modules pass 45 new/417 related tests/static gates.
+  Both bounded complete saved-input derivations repeat whole JSON/Markdown with
+  unchanged prospective 124-source binding and zero scientific calls. P6.10b2
+  is complete for pure scope; no fresh official reader authority is claimed.
+  P6.10b3's later full-reader publisher/four actual operations and original
+  b/parent audits now pass separately as recorded above. No metric/seed/baseline/
+  cap/dependency change.
+
+- A complete original checkpoint retention ledger for all 560 arms/1,680
+  checkpoints/sixty contexts/180 context-stage records. Seven app/infra/CLI
+  modules preserve nullable views, every replay owner field, 3,200 array pairs
+  and state/role/source pointers, resolving all 300 missing projection fields.
+  Closed-state zeroes, configured-empty buffers, owned arrays and shared FIFO
+  remain distinct; 38,400 owned + 7,680 shared bytes reconcile before copies.
+  All 83 new/506 related tests and static checks pass; both actual publications
+  and both independent full readbacks pass unchanged 180-second budgets with
+  exact whole JSON/Markdown repetition and eight fresh original training
+  reader calls. P6.10b1 is complete. Original inventories, null views, sources,
+  scientific settings and caps are preserved. P6.10b outcome presentation and
+  original parent criteria remain unfinished.
+
+- A complete original confirmation resource-field inventory over all 560
+  arms, 1,680 checkpoints, sixty shared contexts and four train/scored run
+  audits. Seven pure/IO/CLI modules retain source pointers, units, measured/
+  derived/unmeasured scopes, rejected execution and available parameter
+  history. Shared storage stays distinct from process RSS; per-arm durations
+  and RSS remain unknown. All 99 new/576 related tests and static gates pass;
+  both actual publications and independent inventory reconstructions exit 0
+  within each 120-second budget, with exact whole JSON/Markdown repetition.
+  P6.10a is complete. The inventory records 12,880 fields and 25,400 capacity
+  points, keeping 300 unavailable owned-retention fields for an explicit
+  original-checkpoint proof increment before the outcome-versus-cost report.
+  Original resource and outcome-presentation criteria remain unfinished.
+
 - An explicit stored confirmation stage/task matrix consumer with all 560
   individual matrices, 1,680 measured endpoint/count/role/checkpoint records
   and 560 unmeasured B-after-A slots. Original derived metrics, failed-cell

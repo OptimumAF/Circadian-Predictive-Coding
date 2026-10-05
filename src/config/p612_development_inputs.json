@@ -1,0 +1,175 @@
+{
+  "preflight_bundles": [
+    {
+      "directory": "artifacts/runs/p63-sleep-factor-preflight",
+      "family": "sleep",
+      "files": {
+        "audit": {
+          "byte_count": 616,
+          "sha256": "2892e7fb4585f4e253235a3be88af4f12513b63d7adfbb8ecc3fcee38d44e610"
+        },
+        "request": {
+          "byte_count": 7139,
+          "sha256": "2edce528fbb161439959fe695fc918dc859febb48a39bce99305248dfe39a2d2"
+        },
+        "result": {
+          "byte_count": 45189,
+          "sha256": "e3140d5a0529dc3023b90b60801d8f9caf2e15dd8edb4a85fa875f76f60d624d"
+        }
+      },
+      "prefix": "sleep-factor-preflight"
+    },
+    {
+      "directory": "artifacts/runs/p63-sleep-factor-preflight-repeat",
+      "family": "sleep",
+      "files": {
+        "audit": {
+          "byte_count": 616,
+          "sha256": "7592848822b87bffb80ceee4528246f8818a8663f574892432b1f77784cb4b7f"
+        },
+        "request": {
+          "byte_count": 7139,
+          "sha256": "949f9a6a474484b832d584afc016ee0dc3d9aa595b02bbbb1966180077d7b227"
+        },
+        "result": {
+          "byte_count": 45189,
+          "sha256": "e3140d5a0529dc3023b90b60801d8f9caf2e15dd8edb4a85fa875f76f60d624d"
+        }
+      },
+      "prefix": "sleep-factor-preflight"
+    },
+    {
+      "directory": "artifacts/runs/p63-schedule-factor-preflight",
+      "family": "schedule",
+      "files": {
+        "audit": {
+          "byte_count": 801,
+          "sha256": "5d7831305bac6cac9fafba77f02bf5505f1c9bcfee35bdbf544c49e826822482"
+        },
+        "request": {
+          "byte_count": 17134,
+          "sha256": "131a4f62dd8929056a0541acd102fca00a3ff25cbd7ef4e5ec7cb0213d606ef7"
+        },
+        "result": {
+          "byte_count": 451657,
+          "sha256": "87931c5fc3fad5bf50d5b18d07901d04b8a8e827ab4fce4429c0f1644c813c41"
+        }
+      },
+      "prefix": "schedule-factor-preflight"
+    },
+    {
+      "directory": "artifacts/runs/p63-schedule-factor-preflight-repeat",
+      "family": "schedule",
+      "files": {
+        "audit": {
+          "byte_count": 801,
+          "sha256": "223b779d88cea030a7959402256ad1c2e177c2a191f7fbaf03ea7615d8d0d12c"
+        },
+        "request": {
+          "byte_count": 17134,
+          "sha256": "4b5c2837c66493a714349b8dff83abb153a66d01ea6e5c639add01d7e1e53299"
+        },
+        "result": {
+          "byte_count": 451657,
+          "sha256": "87931c5fc3fad5bf50d5b18d07901d04b8a8e827ab4fce4429c0f1644c813c41"
+        }
+      },
+      "prefix": "schedule-factor-preflight"
+    },
+    {
+      "directory": "artifacts/runs/p63-combined-factor-preflight",
+      "family": "combined",
+      "files": {
+        "audit": {
+          "byte_count": 1024,
+          "sha256": "08d34e448d01f1286c255d72cfa5ae9554dd431acc923325786ff12c57ad9b99"
+        },
+        "request": {
+          "byte_count": 46108,
+          "sha256": "9001aeee45dceba0286f3bbd97eb1c77bab5fcf550b935588e365529dc2d44bf"
+        },
+        "result": {
+          "byte_count": 4635365,
+          "sha256": "79a7d7e09f0ada01ff72d6e266ddee7576aca52316a0f9a8e2ab3dd402251d13"
+        }
+      },
+      "prefix": "combined-factor-preflight"
+    },
+    {
+      "directory": "artifacts/runs/p63-combined-factor-preflight-repeat",
+      "family": "combined",
+      "files": {
+        "audit": {
+          "byte_count": 1024,
+          "sha256": "1a37a5fe7b76c5dbeb1283233b4d537ee79d3352240a5074df325803da4adf3b"
+        },
+        "request": {
+          "byte_count": 46108,
+          "sha256": "6453651598f794926fe3d1de93febe4994e75615e61f50793233efda2ea54acb"
+        },
+        "result": {
+          "byte_count": 4635365,
+          "sha256": "79a7d7e09f0ada01ff72d6e266ddee7576aca52316a0f9a8e2ab3dd402251d13"
+        }
+      },
+      "prefix": "combined-factor-preflight"
+    },
+    {
+      "directory": "artifacts/runs/p63-parent-factor-preflight",
+      "family": "parent",
+      "files": {
+        "audit": {
+          "byte_count": 980,
+          "sha256": "c872792099a2ab5c772df69fac532b0205b2c33000112fb976219115b7a366d7"
+        },
+        "request": {
+          "byte_count": 23255,
+          "sha256": "e5c7f0c49d34896409614383db728798bb33cb1b50de239a2a98cad036cfb385"
+        },
+        "result": {
+          "byte_count": 3045849,
+          "sha256": "555fc2fe5dfd86981d87af2d0c15bd8ab925417d9ad748783d95cee95f5a1874"
+        }
+      },
+      "prefix": "parent-factor-preflight"
+    },
+    {
+      "directory": "artifacts/runs/p63-parent-factor-preflight-repeat",
+      "family": "parent",
+      "files": {
+        "audit": {
+          "byte_count": 981,
+          "sha256": "c094eabc07ba98c301a0930d2ecbc4885437f4eb89c5f4a1b9cc6fcdca790286"
+        },
+        "request": {
+          "byte_count": 23255,
+          "sha256": "e269fc8216a5e6b67d85c817daba0e866f7ff8d8c442a5286a80c59faf44f92a"
+        },
+        "result": {
+          "byte_count": 3045849,
+          "sha256": "555fc2fe5dfd86981d87af2d0c15bd8ab925417d9ad748783d95cee95f5a1874"
+        }
+      },
+      "prefix": "parent-factor-preflight"
+    }
+  ],
+  "prior_sources": {
+    "file": "artifacts/runs/p612-confirmation-findings-handoff-validation.json",
+    "identity": {
+      "byte_count": 31530,
+      "sha256": "77262966c5206199f6b52af09f2ffe68bdc6e992059cb24cee7eda48f673a876"
+    }
+  },
+  "schema_id": "p612_fixed_development_input_catalog_v1",
+  "scope_files": {
+    "artifacts/runs/p67-confirmation-scope-repeat.json": {
+      "byte_count": 119067,
+      "sha256": "622feead54f155521928341151c8496c23c02a54b355b1b3b1e0f68b76c5772f"
+    },
+    "artifacts/runs/p67-confirmation-scope.json": {
+      "byte_count": 119067,
+      "sha256": "622feead54f155521928341151c8496c23c02a54b355b1b3b1e0f68b76c5772f"
+    }
+  },
+  "validation_seconds": 120
+}
