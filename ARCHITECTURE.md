@@ -1019,8 +1019,327 @@ the resource/reproducibility acceptance remains unfinished. Extend through
 bounded complete saved-input timing diagnosis, then original b2 chronology/
 ambiguity/role contract and b3 fixtures with the original scientific caps.
 
+## Current checkout bindings and historical seed-evidence timing
+
+The local saved-evidence diagnosis owns durable phase events and current whole
+physical/Git/source/proof pins. It uses the existing process RSS sampler and
+standard-library JSON/profiler; it adds no public module or dependency. It
+re-encodes the entire saved report with exact canonical bytes while retaining
+all historical content/aliases and declared uncertainty.
+
+Why this: a later user commit changes live HEAD without changing the preserved
+historical source bytes. The new current binding is the complete old freeze
+cloned with only its head parameter changed to prospectively frozen28e71ee;
+the identical full validator and every original source/test/input/proof/guard
+check run unchanged. Current complete Git and historical objects/aliases are
+both bound. Historical freezes/functions/failed receipts remain immutable.
+The diagnostic supplies measurements; original repeat/resource/fresh-role
+acceptance remains unfinished. Extend via measured, parity-checked lexical
+work before another explicitly declared protocol choice or scientific source.
+
 ## Extension Rules
 
 - New adaptation strategies should be added via policy/config extension points, not by hardcoding branches across modules.
 - New datasets must be added in `infra` and wired via `app`, never directly from `core`.
 - Major algorithmic changes require an ADR in `docs/adr/`.
+
+
+### P6.7d2b2a2: preserve the measured lexical boundary
+
+The pure seed_source_evidence text/AST/CSV contract is unchanged. A complete
+fixed benchmark rejects whole-word scan plus substring search: exact token/
+column/line-hash parity, about5.69% slower across both complete-input passes.
+Why this: optimize only against a declared complete workload and behavior
+regressions; a valid negative result retains the existing simple implementation.
+Eleven additional pure fixtures cover Unicode case/words/combining marks,
+whole-word boundaries, line separators, normalized UTF8 hashes and character
+columns. Local metadata producers and snapshots stay under the owned evidence
+transaction. Source release/admission remains a separate unfinished contract.
+
+
+### Complete saved chronology boundary (P6.7d2b2b1)
+
+Add core/seed_stream_screening.py for the eight fixed source, role split, exposure, initialization, parent selection and circadian local-noise streams; app/prior_seed_corpus.py for complete membership; app/prior_seed_chronology.py for every saved witness and its unknown chronology; and infra/saved_prior_seed_evidence.py for whole-byte IO and before/after membership. Dependency direction is infra -> app -> core. No expression execution, unpickling, RNG sampling, real candidate selection or positive admission path. No new dependency or environment variable.
+
+Why this: exact input pointers and canonical full-record digests retain millions of original witnesses without copying them into a second report. Numeric declarations, inventory lineage, static literals and Git copies do not prove execution, independent replications or actual final role release. The screen always denies admission; verified chronology and the complete prospective protocol are separate unfinished contracts. ADR-0177 records alternatives and consequences.
+
+
+### Fixed original release readback boundary (P6.7d2b2b2)
+
+Add core/seed_release_chronology.py for supported observer order, app/scored_release_witnesses.py for complete decoded audit/result witnesses, and infra/original_release_witnesses.py for the fixed actual original reader boundary. Dependency direction is infra -> app -> core. No dependency or environment variable is added.
+
+Why this: retain whole source-bound original evidence before deriving partial order. Pure dictionaries and private fixture spies leave reader verification false; only the fixed public adapter calls the original scoring reader and both original full training readers. Each node binds an exact original pointer and full record digest. Full current/historical preservation is a separate closing gate. Documentary clocks, copies and shared numeric seeds establish no stronger chronology or independence. ADR-0178 records context, alternatives and consequences. Future work must complete the independent prospective protocol and original resource acceptance before fresh authority.
+
+
+### Complete pending confirmation contract
+
+Add core/prospective_replications.py, app/prospective_confirmation_design.py, app/prospective_confirmation_evidence.py and infra/prospective_confirmation_inputs.py plus four test files. Dependencies point infra -> app -> core; no new dependency, environment variable or execution adapter. See docs/p67-prospective-confirmation-contract.md and ADR-0179 for inputs/outputs/non-responsibilities, commands, rationale and extension.
+
+Why this: validate every future setting and role requirement before binding any actual source. A separate complete saved-file consumer retains unresolved prior effects and negative precision without turning copies or declarations into fresh authority. Current source/history/proof preservation remains a supervised boundary concern; actual original readers were executed in the preceding component.
+
+
+## Prospective external stream boundary
+
+`src/app/prospective_stream_declarations.py` consumes the existing app design and core declaration types; no infra/adapters imports. One pure public function validates whole canonical design identity and all external streams.
+
+Public `validate_prospective_stream_declarations` verifies the expected whole
+design identity, all60 ordered bindings/50 planned groups and every400 external
+typed stream claim through unchanged public full-design/replica validators.
+Missing/extra/reordered/duplicate/mutable/detached/symbolic/unknown-record and
+late type/value drift are rejected; exact types defeat value-equal booleans,
+floats and string subclasses. All560 cells/480 roles/116 contrasts, original
+matched settings/eight offsets/analysis/count/caps/stopping remain. Return
+independent replications unknown/fresh authority false; no source/RNG/model/IO/
+scoring/execution or historical-domain proof. Original25 helper cases are unbound.
+
+Current full metadata suite120 passes, including42 new and78 existing cases,
+0errors/0failures/0skips in5.4621946s. Ruff/two-file format/full no-incremental
+mypy560/diff pass. Preserve initial missing-module red1error and full mypy1error,
+exact old fixture versions and the local-only annotation repair; no exclusions,
+ignores, mock adapter or cap reset. Complete preservation remains pending.
+
+Dependency flow: caller -> app stream validator -> app fixed design/public replica checks -> core replica/stream metadata. The future outer request adapter must prove full provenance and compose this boundary without granting scientific authority from numeric claims. See ADR-0180.
+
+
+## Complete prospective role/source/request boundary
+
+Core holds frozen declarations and inspection result; app consumes fixed design and public stream checks, never infra/adapters.
+
+`inspect_prospective_role_request` composes the existing full-design and400-stream
+checks with all100 ordered phase-source descriptors and480 ordered role records.
+Bind complete design/source-map/request metadata identities, expected code
+declaration and every original data argument/geometry/derived data seed. Exact
+types/order/counts/IDs/availability/use policies and planned shared views are
+checked; resealing cannot repair foreign, partial, mutable, overlapping, reordered,
+early-release, unknown-schema or array/execution claims. Preserve A120 development
+positions and B60 retained original positions in0..119, final IDs0..39 and all560
+cells/116 contrasts/original settings/analysis/count/caps/stopping. No existing
+source/test changed. Return all actual provenance/chronology/authority flags false,
+independent replications unknown and all12 actual-proof obligations still required.
+
+Full fixed metadata suite174 passes (54 new/120 existing),0errors/0failures/0skips
+in14.7607819s. Ruff/all3-file format/full
+no-incremental mypy563/diff pass. Retain initial missing API, reserved pytest fixture
+name and mypy local-variable failures; fix only fixture/local names and formatting,
+with exact failed versions preserved. No exclusions, weakened tests or cap reset.
+Full preservation is pending; original25 helper cases remain unbound. Metadata
+hashes and expected code declarations do not verify physical source or release.
+
+Dependencies: caller -> app role inspector -> app full design/stream checks -> core role/replica/stream records. Actual whole-file/code/UTC/owner/prior/resource proofs belong to outer adapters through inner proof ports; no physical proof is inferred here. Why this: keep metadata inspection safe before any source while preserving original B row IDs. See ADR-0181.
+
+
+## Prospective bundle proof port
+
+Core contains immutable spec/snapshot/result and read/recheck protocol. App validates fixed design/full typed request and declarations; infra implements strict whole-file proof. Dependency flow: caller -> app preflight -> core protocol/types and app e gate; infra -> app decoder/core protocol. No app/core import infra/adapters.
+
+`preflight_prospective_request_bundle` composes the full e inspector through an
+inner read/recheck port. The real outer reader binds canonical whole request,
+source metadata map, closed expected code manifest and every declared code file
+before and after app inspection. Full100 sources/480 roles/400 streams/60 views
+are preserved. Exact schemas/types/membership/identities and distinct regular
+paths, failed/pending markers, canonical UTC/owner and original full resource/
+same-request repeat declarations are checked. Retain all560 cells/116 contrasts/
+settings/analysis/count/caps/stopping, all12 actual-proof obligations and every
+prior unknown. Physically matching declared files do not prove runtime closure,
+exclusive ownership, before-source chronology, untouched sources, independence,
+actual resource fit/repetition or b3. All actual/fresh/execution/precision flags
+remain false; independent replications unknown;25 original helper cases unbound.
+
+Full304 behavioral tests pass (55 new/249 related),0errors/0failures/0skips in
+56.0459501s. Ruff/all5-file format/full
+no-incremental mypy568/diff pass. Preserve missing API, two tuple-pop fixture
+failures, duplicate module-name failure and two deliberately invalid payload
+typing failures. Correct fixtures/import and validate foreign rows before
+attributes; add six regressions. Final local Any annotation only has identical
+runtime AST after erasure; no optional56s pytest rerun, scope exclusion/ignore,
+test removal or cap reset. Whole preservation is pending. No scientific work.
+
+Why this: existing saved-evidence reader checks historical inputs, while current code/request/map files require separate complete physical checks. Future lease/runtime/provenance admission must compose the port without treating physical metadata as fresh source or execution proof. See ADR-0182.
+
+
+## Prospective generation recipes
+
+Core has immutable recipe/request/inspection records; app composes existing complete fixed-design/stream/source/concrete-role gates. Dependency flow: caller -> app generation -> app gates/core records. App/core import no infra/adapters. A future V2 physical reader and live sequential arrival observer must use inner ports.
+
+The V2 generation request freezes480 ordered role recipes/100 source declarations/
+400 streams/60 bindings against the unchanged complete fixed design (560 cells/
+116 contrasts). Assignment/exposure rules and seeds, original/retained geometry,
+counts, allowed uses, availability, all120 canonical final-ID tuples and all12
+actual-proof obligations are frozen; all360 development role ID realizations are
+unset. The separate full concrete-role declaration bridge composes e's partition/
+shared-view checks after strict type rejection and binds its result to the V2
+request. It cannot prove actual arrival, seeded assignment, runtime code, owner,
+chronology, source independence/freshness or execution. All actual/fresh/execution/
+precision flags remain false; independence unknown. Existing e/f remain intact.
+
+Initial full382 cases pass (78 new/304 related) in
+99.9559949s. Six added sentinel cases then
+expose deepcopy before rejection; preserve every failed version/receipt and reject
+full concrete schema before encoding. All84 current new cases pass in
+35.8429476s. Current unique coverage388:
+all304 related cases match earlier complete receipts; all776 older physical Python
+files unchanged, no existing source/test/script references new modules or symbols,
+and all78 earlier generation fixtures have identical runtime AST and rerun. No
+optional full repeat: related-suite-reuse.json binds full reuse evidence without
+scope/test removal. Ruff/all4-file format/full no-incremental mypy572/diff pass in
+63.6039481s. Whole preservation pending.
+
+Why this: original label-dependent split/exposure rules cannot be realized before source arrival; freeze rules then bind realizations without early scientific work. See ADR-0183.
+
+
+## V2 generation files and shared physical proofs
+
+Core defines immutable V2 snapshot/result and reader protocol. App owns full exact decoder/g recipe/envelope preflight through that port. Outer V1/V2 typed adapters delegate identical whole-file IO to one infra module. Dependency flow: caller -> app/core port -> injected infra adapter -> shared infra IO; app/core import no IO.
+
+The V2 physical boundary binds the full request/source map/code manifest and every
+closed expected code file to all480 recipes/100 source declarations/400 streams/
+60 bindings, unchanged560 cells/116 contrasts/settings/analysis/stopping/count/caps
+and all12 actual-proof obligations. Immutable snapshots and inner read/recheck port
+keep app/core free of IO. Both versions share whole bytes, canonical strict JSON,
+root-contained regular paths, physical alias/publication-marker checks and late
+rechecks. V1 public constructor/read/recheck behavior is preserved. All360
+development realizations stay unset;120 final-ID tuples declare geometry only.
+UTC/owner/resource/same-generation-request repeat are checked as declarations.
+Matching physical metadata proves neither runtime code closure, exclusive owner,
+actual sources/roles/arrival/assignment/chronology, unrecycled independence, prior
+effect resolution, resource fit, independent repeat nor b3 admission. These stay
+required; independence unknown and fresh/execution/precision flags false.
+
+Initial full454 cases pass (66 new/388 related),0skips in
+138.3763548s. Two added V1/V2 direct source
+numeric-alias recheck cases expose comparing the rebuilt snapshot with the source
+map instead of the supplied snapshot. Restore the original supplied-snapshot
+comparison; all68 current new cases pass in
+30.2081090s,0skips. Current unique
+coverage456 is bound by both full receipts and exact V1 specialization: all six
+original private IO/constructor bodies, whole read/recheck bodies after controlled
+callback substitution and three public signatures match the saved V1 AST; all42
+other lead files unchanged, all66 prior fixture ASTs unchanged and rerun. This is
+coverage across receipts, not a single456-case pytest invocation. Ruff/all7-file
+format/full no-incremental mypy578/diff pass in
+45.6565722s. Whole preservation pending.
+
+Why this: share actual repeated physical policy while keeping typed schema/scientific rule validation separate; one permitted older V1 implementation edit preserves exact prior semantics and original150 closure. See ADR-0184.
+
+
+## Live V2 ownership proof port
+
+Core contains immutable whole scope/observations and live claim/observe protocols. App composes unchanged full H/g file preflight through injected reader/owner ports. Infra owns native locking/path/handle/whole-file IO, standard platform modules and non-scientific nonce/time. Dependency: caller -> app -> core ports -> injected outer owner/reader. No app/core imports infra/adapters.
+
+Complete V2 file preflight now composes a live owner port with a real native local
+lease. Contention keys use the entire inner generation request, so different
+outer owner declarations/file copies of that request contend in one configured
+canonical registry. All480 recipes/100 sources/400 streams/60 bindings, unchanged
+560 cells/116 contrasts/settings/analysis/stopping/count/caps and all12 admission
+obligations remain. Reread after acquiring and recheck whole physical files/owner
+before yield and on success/failure exit. Immutable observations bind scope,
+native single-link file identity, nonce and monotone sequence/UTC at the recorded
+time held. Native handles release on exception and process death; permanent lock
+paths stay in place and are never reclaimed/unlinked by the adapter. Observations
+remain historical after exit and cannot authorize execution. Runtime code closure,
+actual arrival/assignment/chronology, cross-host ownership/source independence,
+prior effects/resource/repeat/b3 remain unverified; all fresh/execution/precision
+flags false and independence unknown.360 development IDs remain unset and120
+final-ID tuples declare geometry only. Existing49 lead files/APIs unchanged.
+
+Full502 cases pass (46 owner/456 related),0errors/failures/skips in
+131.0861267s. Real native Windows controls
+cover same-process and subprocess contention, different outer owners for the same
+whole inner request, normal release and os._exit73 process-death release, failures,
+clock rollback/type rejection, physical/registry drift and early/late invalid
+observations. All new cases guard scientific source/final/model/scoring/RNG/array
+work; IO/native non-scientific UUID/time are intentional. Ruff/all4-file format/
+full no-incremental mypy582/diff pass in
+25.8889968s. Preserve initial missing
+API and static fixture mapping-type failure, all exact versions/receipts. No
+optional repeated tests; shared tests132.2325310/180spent, static50.7586573/180spent.
+Whole preservation pending.
+
+Why this: ownership lifetime requires a live native holder, while actual runtime code/import closure remains a separate next gate. Permanent request keys prevent owner/file-copy bypass; observations are historical after exit. See ADR-0185.
+
+
+### Prospective runtime process proof port (ADR-0186; acceptance open)
+
+Core immutable RuntimeCodeObservation/LiveRuntimeCodeLease/GenerationRuntimeObserver
+-> app full V2/native owner/runtime composition <- injected outer process observer.
+Focused Python/native modules inspect actual namespaces/code/files/executable memory.
+App/core perform no process IO or source/model work. Actual code observations and
+source-version/full prior/arrival/resource/repeat/b3 admission remain distinct.
+All53 prior lead files/original150 closure unchanged; no new dependencies/config.
+
+
+### Runtime capture cost diagnosis (ADR-0187)
+
+Owned evidence tools profile the unchanged real V2/native/process boundaries and
+transform a complete saved JSON body through a pure experimental codec. No source
+layer/dependency/config change or actual source/model work. Raw actual membership
+remains complete; metadata compression cannot attest source/runtime/provenance.
+Measure and prove full parity before any exact-type namespace optimization.
+
+
+### Exact-type native namespace optimization (ADR-0188)
+
+Only outer runtime_python_objects._namespace changes: exact native container type
+identity returns no instance dictionary; all other native descriptor branches and
+full GC/function/file/native/process boundaries retain behavior. No persistent
+cache/core/app API/config/dependency change. The complete frozen GC adapter is
+owned parity evidence only, preserving unfiltered actual inputs for both complete
+implementations. Every current544 regression case/current590 static file passes;
+full source-version/transient/nested-schema/continuity admission remains open.
+
+
+### Passive complete runtime structure and static V2 callback (ADRs0189/0190)
+
+App -> pure core record/value/Python/native/payload validation; infra retains whole
+files/native process/owners/audit through existing ports. Per-body identity registry
+and passive repr codec/fixed module-load patterns add no persistent observation
+cache or source authority. V2 uses one typed metadata projection instead of two
+transient lambdas, preserving identical sources/public ports/file checks. Tests
+report complete temp paths; supervisor copies whole runtime groups after finish.
+No dependency/config/environment change. Broader source-version/reference-count/
+transient/arrival/prior/science admission remains required and unproved.
+
+
+### Marshal diagnostics before observer retention
+
+The new tests compare complete native public code/constant contents and raw marshal
+bytes without editing the infra observer, pure schema or inward dependency direction.
+Native metadata sharing requires its own retention control; private interpreter and
+source/version correspondence remains unproved (ADR-0191).
+
+
+### Native code-value lifetime before runtime baseline
+
+The infra observer composes a focused retention collector with its existing native
+namespace reader. The strong-reference tuple lasts for the actual lease; core/app
+validation and raw hashes/audit remain unchanged. Pure pytest-free fixture helpers
+serve unit and real-process controls. Private build/source/transient admission remains
+open; no inward dependency bypass (ADR-0192).
+
+
+### Admission counterexamples preserve proof boundaries
+
+Real V2/native owner/observer fixtures save actual records and separately labeled
+edited structural controls. No production or core/app dependency changes. Continuous
+code/binding enforcement and complete source/native/build attestation require separate
+trusted composition; green boundary/schema checks cannot supply it (ADR-0193).
+
+
+### Installed monitoring measurements inform enforcement
+
+The pytest-free capability fixture composes real V2/native ownership and observers,
+with primitive monitoring event identities and full unfiltered runtime artifacts.
+It changes no core/app/infra production dependency. Separate continuous enforcement
+must reject unsupported callback/native/tracing paths before admission and remain
+effective after a caught denial. VM events and boundary equality grant no native/
+source authority (ADR-0194).
+
+
+### Global mutation mechanism before complete admission
+
+Optional infra enforcement captures the complete actual GC function/code catalog and
+monitors global before-call/instruction events over explicit lifetimes. It rejects
+unsupported tools/tracing/native calls, retains poison and verifies exact with release
+plus callback removal. Existing observer and inward dependencies remain unchanged.
+Trusted support-operation/source/native/private/full-lifetime integration still required
+(ADR-0195); no diagnostic lifetime grants scientific authority.

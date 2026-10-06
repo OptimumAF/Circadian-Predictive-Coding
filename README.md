@@ -7,6 +7,14 @@
 
 Circadian Predictive Coding is a research-first repository focused on biologically inspired learning where models adapt their own structure over wake and sleep cycles.
 
+The [model card](docs/model-card.md) distinguishes the matched frozen-feature
+head track, practical image references and descriptive NumPy studies. It records
+data-access rules, training-energy limits, backend capabilities, resource scope
+and retained negative or unresolved results. Use the named
+[evaluation protocol](docs/evaluation-protocols.md) and
+[original publication evidence](docs/published-experiment-register.md) when
+interpreting a comparison.
+
 ## Why This Repo
 
 This project is built around one central idea:
@@ -117,7 +125,8 @@ and an applied or skipped reason. NumPy counts exact replay examples and
 updates; Torch reports zero replay. Timing is excluded from sleep-result
 equality and model snapshots. The toy NumPy runner now attaches one typed
 decision per epoch, including unscheduled and disabled epochs, to its report
-and checkpoint. Guarded runner outcomes remain in development; see
+and checkpoint. Supported vision and arrived-role routes record guarded outcome decisions.
+See the [structured observation audit](docs/structured-observation-audit.md),
 [ADR-0088](docs/adr/ADR-0088-numpy-core-sleep-facts.md),
 [ADR-0089](docs/adr/ADR-0089-torch-core-sleep-facts.md), and
 [ADR-0090](docs/adr/ADR-0090-toy-sleep-event-history.md).
@@ -129,9 +138,10 @@ See [ADR-0036](docs/adr/ADR-0036-width-sensitive-sleep-history.md).
 
 NumPy circadian models can copy and restore their full model-owned state
 in memory with `snapshot_state()` and `restore_state(saved)`, including
-replay and local random state. This is a correctness primitive for later
-guard rollback and checkpoint work. Core sleep and guarded vision sleep
-now restore rejected or invalid events; durable checkpoints remain open.
+replay and local random state. Snapshot APIs support current rollback and trusted local checkpoint routes.
+Core sleep and guarded vision sleep restore rejected or invalid events.
+Continuation formats and boundaries differ by route; see
+[checked v14 trial-prefix resume](docs/v14-checked-resume.md).
 See [ADR-0037](docs/adr/ADR-0037-numpy-in-memory-full-snapshot.md) and
 [ADR-0049](docs/adr/ADR-0049-atomic-core-sleep.md).
 
@@ -304,6 +314,11 @@ The current local environments use Python 3.14.7. The original Python 3.11
 environments are retained as ignored `*-py311-snapshot` folders for reproducing
 older runs. CI continues checking Python 3.11, 3.12, and 3.14; the project’s
 minimum syntax and type-check target remains Python 3.11.
+
+For exact versions from the tested Windows CPU environment, use the dated
+[dependency constraints and reproduction guide](docs/dependency-reproducibility.md).
+Supported ranges remain in the requirements files; clean-install validation
+is recorded separately from checks of the existing environment.
 
 Optional torch benchmark dependencies:
 
@@ -2330,6 +2345,594 @@ seed or scientific execution authority.
 .\.venv\Scripts\python.exe -m pytest -q tests/test_seed_declaration_context.py tests/test_seed_source_evidence.py tests/test_prior_seed_evidence.py
 ```
 
+## Complete saved seed-evidence timing diagnosis
+
+[The timing guide](docs/p67-prior-seed-evidence.md) records whole saved-output
+encoding and physical/Git/source-pin measurements. The accepted diagnosis
+preserves the new28e71ee checkout commit and every historical object/alias;
+three attempts130.5s stay within the original180s budget. Whole canonical
+output matches the two original reports. Encoding takes4.0s and writing1.6s;
+the original timed-out semantic repeat stays unaccepted. Existing source/test
+bytes remain unchanged. Next is a fixed lexical matching benchmark before any
+measured optimization, with all original scientific/role gates still open.
+
 ## Citation
 
 If this repository contributes to your work, cite it using [CITATION.cff](CITATION.cff).
+
+
+### Fixed seed-text matching result (P6.7d2b2a2)
+
+The declared complete-input lexical comparison preserves every reference but
+the proposed whole-word scanner is about5.69% slower overall. The production
+matcher is unchanged. Eleven new Unicode/boundary/hash/column regressions
+bring the targeted suite to174passing/0skipped; Ruff/format/mypy535pass.
+See docs/p67-prior-seed-evidence.md and the development log for the full
+fixed protocol, timings, artifacts and original open resource/role gates.
+This scoped result does not release fresh seeds or repair the failed full audit.
+
+
+### Conservative seed chronology and stream screening (P6.7d2b2b1)
+
+Add core/seed_stream_screening.py for the eight fixed source, role split, exposure, initialization, parent selection and circadian local-noise streams; app/prior_seed_corpus.py for complete membership; app/prior_seed_chronology.py for every saved witness and its unknown chronology; and infra/saved_prior_seed_evidence.py for whole-byte IO and before/after membership. Dependency direction is infra -> app -> core. No expression execution, unpickling, RNG sampling, real candidate selection or positive admission path. No new dependency or environment variable.
+
+The complete saved projection and its independent repeat pass in 80.0653510s and 79.2781750s, each below 120s. All projection attempts, including the failed first attempt, consume 195.2825407/240s. The entire 3,119,886-byte outputs are identical: SHA256 775765742287cb234ee744764cb90ebfd323715301eeef4b5a775129a9a95959. Every original saved witness and alias remains bound. Each accepted projection observes all 24 science guards at zero. This component verifies no new historical execution or actual release event; it does not assert that past execution was absent.
+
+The targeted suite passes 279 tests with zero skips; Ruff, formatting, mypy (544 files) and diff checks pass. See docs/p67-seed-release-chronology.md for responsibilities, usage, test commands and safe extension. The original full semantic repeat and fresh-role contract remain open.
+
+
+### Original execution and release witnesses (P6.7d2b2b2)
+
+Add core/seed_release_chronology.py for supported observer order, app/scored_release_witnesses.py for complete decoded audit/result witnesses, and infra/original_release_witnesses.py for the fixed actual original reader boundary. Dependency direction is infra -> app -> core. No dependency or environment variable is added.
+
+Each original bundle retains all60 family/seed rows,560 cells,120 release views,240 source reads,1680 endpoint calls/67200 examples and2043 causal nodes. One unchanged scoring reader reconstructs both unchanged complete training references per stage. All source/request/audit/state/failure/resource links and full original parts are bound to the prior4471-content/13149-alias ledger; every old uncertainty is preserved. Request UTC is documentary; exact actual release UTC/cross-run order/independent replication count stay unknown. The two original request/audit/resource records remain distinct even though their full causal traces agree. All24 science guards are0 in each accepted stage. Fresh admission and original resource acceptance remain false.
+
+Canonical/repeated full-reader parents pass in62.0712639s/59.9263664s, each<120s; shared121.9976303/240s including failures.
+
+The complete659-case correctness gate passes by603 unchanged existing cases from the preserved full run plus all56 new cases retested with0failures/0skips. The initial full run's single guarded-IO fixture failure is retained. Only that new fixture function changed to closed binary streams; all production/old tests/guards are unchanged. Ruff, six-file formatting, mypy550 and diff pass. See docs/p67-original-release-witnesses.md for scope, usage, run/test commands and safe extension. Final preservation/checkbox acceptance is pending below.
+
+
+P6.7d2b2b2 is now complete after the full145.3345128s preservation
+gate and original END rebuild. The earlier pending statement is superseded.
+All659 targeted cases are covered by603 unchanged existing passes and56 corrected
+new passes,0skips; both original full-reader stages and Ruff/format/mypy550 pass.
+The guide and development log contain the complete evidence and commands.
+Exact release UTC/cross-run order/independent replication count stay unknown.
+Original resource/fresh-role/parent milestone acceptance remains open.
+
+
+### Complete prospective confirmation requirements (P6.7d2b2c)
+
+Add core/prospective_replications.py, app/prospective_confirmation_design.py, app/prospective_confirmation_evidence.py and infra/prospective_confirmation_inputs.py plus four test files. Dependencies point infra -> app -> core; no new dependency, environment variable or execution adapter. See docs/p67-prospective-confirmation-contract.md and ADR-0179 for inputs/outputs/non-responsibilities, commands, rationale and extension.
+
+Preserve every six-family configuration,56 arm templates,560 cells,480 required phase/role bindings,116 ordered primary contrasts, original analysis/null/constant rules and explicit shared groups/all eight derived offsets. Actual future seed/source/role/request identities remain unset; numeric separation, declared groups and fixture flags establish no independent source or untouched-role proof. Ten replications per family remain exploratory and five-point simultaneous precision is uncertified. The complete optimizer ceiling remains15620 within16000, wall600s/RSS536870912 with0.005s observation; future time/memory fit is unmeasured. No favorable stopping, replacement, metric/baseline/configuration change or cap reset.
+
+Complete saved projections pass25.4059030s/25.4807513s, each<120s/shared50.8866543<240s. Complete856-case correctness coverage passes by791 behaviorally unchanged cases from the full original run plus all65 affected cases retested with0errors/0failures/0skips in15.3569170s;117 new cases are included. Ruff/eight-file format/mypy558/diff pass. Closing preservation remains pending.
+
+
+P6.7d2b2c is now complete after full116.3851414s preservation
+and one original END rebuild. All856 cases are covered (791 unchanged original
+passes plus65 affected reruns),0skips; Ruff/format/mypy558 and both complete
+saved-contract projections pass. Earlier pending closing is superseded; the
+guide/log contain commands, source/output identities and preserved static
+failure. Actual untouched source/seed/role/request bindings, b3 proofs and
+original prior-use/resource/parent acceptance remain unfinished.
+
+
+## Complete prospective stream declarations
+
+Public `validate_prospective_stream_declarations` verifies the expected whole
+design identity, all60 ordered bindings/50 planned groups and every400 external
+typed stream claim through unchanged public full-design/replica validators.
+Missing/extra/reordered/duplicate/mutable/detached/symbolic/unknown-record and
+late type/value drift are rejected; exact types defeat value-equal booleans,
+floats and string subclasses. All560 cells/480 roles/116 contrasts, original
+matched settings/eight offsets/analysis/count/caps/stopping remain. Return
+independent replications unknown/fresh authority false; no source/RNG/model/IO/
+scoring/execution or historical-domain proof. Original25 helper cases are unbound.
+
+Current full metadata suite120 passes, including42 new and78 existing cases,
+0errors/0failures/0skips in5.4621946s. Ruff/two-file format/full no-incremental
+mypy560/diff pass. Preserve initial missing-module red1error and full mypy1error,
+exact old fixture versions and the local-only annotation repair; no exclusions,
+ignores, mock adapter or cap reset. Complete preservation remains pending.
+
+Module, typed caller example, commands and extension notes: [guide](docs/p67-prospective-stream-declarations.md). Evidence: stream-declaration-contract/green-v2-validation.json, static-v2-validation.json and development log.
+
+
+### Prospective stream declaration verification
+
+P6.7d2b2d is complete for its full declared external-stream scope. The function
+checks the complete pinned design/60 ordered bindings/50 planned groups/all400
+typed claims through existing public validators.120 current metadata tests pass
+(42 new/78 related),0errors/0failures/0skips; Ruff/two-file format/full mypy560/diff
+pass. Initial missing-module and mypy failures, exact fixture versions and local
+annotation-only correction remain. No test/import exclusion or old cap reset.
+
+Full preservation passes116.0157001s including
+4.7566800s preparation. All1982 physical files,
+3701 current Git objects/34 commits
+and all historical aliases, original150 sources/79 tests/174 inputs/proofs, all29
+previous code files plus2 new and all held clone/patch pins match before/after.
+One complete original END rebuild/24 science guards0. No new original reader,
+semantic corpus audit or scientific dispatch. Whole d acceptance is recorded;
+all369 prior task lines/criteria and244 raw240 nonseparator tables remain.
+
+Actual future source/seed/role/request provenance, original failed resource
+350.7925872/360spent/9.2074128remaining, all prior unknowns, negative precision and
+full b2/b3/d2b/d2/P6.7/d3 criteria stay required. Independent replications remain
+unknown, fresh authority false;25 helper cases remain unbound and all helper
+integrations held. No scientific seed/config/baseline/metric/cap/stop change.
+
+Evidence: stream-declaration-contract/handoff-source.json, handoff-validation.json,
+handoff-operation.json and handoff-final-log-append.json/final-append-operation.json.
+Exact next action: P6.7d2b2/b3: define the complete pure prospective source/request envelope and compose the new400-stream check. Start with all480 ordered role declarations and their expected counts/availability: implement typed role/source/request identity preflight and late omission/reordering/overlap/mutation tests on the full560-cell/116-contrast layout, with actual final values unavailable. Keep actual source/request/seeds unset, all prior unknowns and fresh/execution authority false. Bind or explicitly revise each remaining helper case only against the real full envelope; no dummy adapter or skipped coverage. Resolve the original failed resource acceptance explicitly without resetting 350.7925872/360spent or9.2074128remaining. Complete source/version and b3 isolation/parity/resource/reproducibility/artifact proof before science or integrating the held CI/P6.4 proposals.
+
+
+## Complete prospective role request metadata
+
+`inspect_prospective_role_request` composes the existing full-design and400-stream
+checks with all100 ordered phase-source descriptors and480 ordered role records.
+Bind complete design/source-map/request metadata identities, expected code
+declaration and every original data argument/geometry/derived data seed. Exact
+types/order/counts/IDs/availability/use policies and planned shared views are
+checked; resealing cannot repair foreign, partial, mutable, overlapping, reordered,
+early-release, unknown-schema or array/execution claims. Preserve A120 development
+positions and B60 retained original positions in0..119, final IDs0..39 and all560
+cells/116 contrasts/original settings/analysis/count/caps/stopping. No existing
+source/test changed. Return all actual provenance/chronology/authority flags false,
+independent replications unknown and all12 actual-proof obligations still required.
+
+Full fixed metadata suite174 passes (54 new/120 existing),0errors/0failures/0skips
+in14.7607819s. Ruff/all3-file format/full
+no-incremental mypy563/diff pass. Retain initial missing API, reserved pytest fixture
+name and mypy local-variable failures; fix only fixture/local names and formatting,
+with exact failed versions preserved. No exclusions, weakened tests or cap reset.
+Full preservation is pending; original25 helper cases remain unbound. Metadata
+hashes and expected code declarations do not verify physical source or release.
+
+API/commands/extension notes: [guide](docs/p67-prospective-role-requests.md). See ADR-0181 and development log.
+
+
+### Prospective role request metadata acceptance
+
+P6.7d2b2e alone is complete for the full declared metadata envelope:100 ordered
+phase sources,480 roles,400 streams,60 bindings/50 groups, all560 cells/116
+contrasts/settings/counts/analysis/caps/stopping unchanged. Exact schemas/types,
+whole identities, generator declarations, disjoint original development positions,
+final IDs, shared views and availability/use policies checked. Actual source,
+role, code and chronology unverified; independence unknown; fresh/execution/
+precision authority false. All12 actual-proof obligations and25 unbound helper
+cases remain required. All370 older task criteria and244 raw240 nonseparator
+table rows preserved. Original b2/b3/d2b/d2/P6.7/d3 remain unfinished.
+
+Full174-case scope passes (54 new/120 related),0errors/0failures/0skips. Ruff,
+3-file format/full mypy563/diff pass. Preserve missing API, reserved pytest fixture
+and local tuple/set typing failures, exact versions, name-only corrections and
+formatting. All31 previous source/test files remain byte-identical,3 new files
+added; no dependency, scientific setting/seed/baseline/metric/cap/stop changes.
+
+Whole preservation passes in115.2141911s including
+4.5584410s preparation:1987 physical files,
+3716 current Git objects/34 commits,
+all current/historical aliases, original150 sources/79 tests/174 inputs/proofs,
+all34 lead code pins and all held clone/patch pins match before/after. One complete
+original END rebuild,24 science guards0. No original reader/semantic audit/science.
+Original failed resource350.7925872/360spent/9.2074128remaining, all earlier prior
+unknowns and negative precision remain unresolved. Development goal remains active.
+
+Evidence: role-source-request-contract/handoff-source.json, handoff-validation.json,
+handoff-operation.json and handoff-final-log-append.json/final-append-operation.json.
+Exact next action: P6.7d2b2/b3: implement actual prospective request admission before first source. Read src/infra/prospective_confirmation_inputs.py, src/app/prospective_confirmation_evidence.py and the new role request modules, then define the inner proof port and outer full-envelope IO adapter for whole code/source-map/request bytes, prospective UTC and exclusive ownership, all prior uncertainty effects, joint resource and independent-repeat envelopes. Start with full100-source/480-role fixtures and late physical-pin/UTC/owner/resource corruption tests; bind or explicitly revise each of the25 unbound helper cases against this real full request, never a dummy adapter. Preserve actual seeds/source/arrays unset, unknown independence, fresh/execution authority false until full admission and b3 isolation/parity/resource/reproducibility/artifact/readback proofs pass. Explicitly resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Keep held CI/P6.4 proposals unintegrated until source/version and boundary corrections pass.
+
+
+## Prospective request file bundle preflight
+
+`preflight_prospective_request_bundle` composes the full e inspector through an
+inner read/recheck port. The real outer reader binds canonical whole request,
+source metadata map, closed expected code manifest and every declared code file
+before and after app inspection. Full100 sources/480 roles/400 streams/60 views
+are preserved. Exact schemas/types/membership/identities and distinct regular
+paths, failed/pending markers, canonical UTC/owner and original full resource/
+same-request repeat declarations are checked. Retain all560 cells/116 contrasts/
+settings/analysis/count/caps/stopping, all12 actual-proof obligations and every
+prior unknown. Physically matching declared files do not prove runtime closure,
+exclusive ownership, before-source chronology, untouched sources, independence,
+actual resource fit/repetition or b3. All actual/fresh/execution/precision flags
+remain false; independent replications unknown;25 original helper cases unbound.
+
+Full304 behavioral tests pass (55 new/249 related),0errors/0failures/0skips in
+56.0459501s. Ruff/all5-file format/full
+no-incremental mypy568/diff pass. Preserve missing API, two tuple-pop fixture
+failures, duplicate module-name failure and two deliberately invalid payload
+typing failures. Correct fixtures/import and validate foreign rows before
+attributes; add six regressions. Final local Any annotation only has identical
+runtime AST after erasure; no optional56s pytest rerun, scope exclusion/ignore,
+test removal or cap reset. Whole preservation is pending. No scientific work.
+
+Module boundaries, API, commands and extension: [guide](docs/p67-prospective-request-bundles.md), ADR-0182 and development log.
+
+
+### Prospective role request metadata acceptance
+
+P6.7d2b2f alone is complete for its declared full physical file/proof-port scope.
+Core immutable spec/snapshot/result/protocol, app strict full e preflight, outer
+whole canonical reader,55-case suite/fixture helper, guide and ADR-0182 delivered.
+Every declared expected code member and whole request/source metadata map/code
+manifest are checked before/after app inspection. All100 sources/480 roles/400
+streams/60 views and560 cells/116 contrasts/settings/analysis/count/caps/stopping
+preserved. Canonical UTC/owner/full resource/repeat declarations checked; actual
+runtime closure, exclusive ownership, source/role/chronology, prior effects,
+resource/repeat/b3 proofs remain required. All12 actual proof obligations and all25
+original helper requirements remain explicit/unbound. Independence unknown;
+fresh/execution/precision authority false. No actual scientific seed/source/array.
+
+Full304 behavioral cases pass (55 new/249 related),0errors/0failures/0skips. Ruff,
+five-file format/full mypy568/diff pass. Retain missing API, two tuple-pop fixture
+errors, duplicate module mapping and two deliberate-invalid typing errors, every
+exact version and corrections. Final local Any annotation has identical runtime
+AST after erasure; no optional behavioral rerun or exclusions/ignores. All34
+older code/test files unchanged,5 new added; no dependencies or scientific changes.
+
+Full preservation passes140.9387601s including
+6.6221024s preparation:all1994 physical files,
+3733 current Git objects/34 commits,
+all current/historical aliases, original150 sources/79 tests/174 inputs/proofs,
+all39 lead code pins and held clone/patch pins match before/after. One original
+END rebuild,24 science guards0. No original reader/semantic audit/science.
+All371 older task criteria and244 raw240 nonseparator plan tables unchanged.
+Original failed resource350.7925872/360spent/9.2074128remaining and negative
+precision stay unresolved; full b2/b3/d2b/d2/P6.7/d3 unfinished, overall goal active.
+
+Evidence:request-bundle-boundary/handoff-source.json, handoff-validation.json,
+handoff-operation.json and handoff-final-log-append.json/final-append-operation.json.
+Exact next action:P6.7d2b2/b3: compose actual admission proofs with the full verified request bundle. First inspect original role splitting/exposure and whether every declared development ID can be known before any source; preserve original semantics and explicitly revise incompatible prospective assumptions rather than compute source/labels early. Bind a trusted complete runtime code closure and a live exclusive-owner lease through inner ports, then compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and every prior effect with all100 sources/480 roles. Add full late lease/closure/prior/request/resource corruption tests; bind or explicitly revise all25 helper cases against real full proofs. Do not infer chronology, freshness, independence or prior absence from declarations. Resolve original failed resource acceptance explicitly without resetting350.7925872/360spent or9.2074128remaining; preserve all b3 isolation/parity/resource/repeat/artifact/readback gates and held CI/P6.4 proposals. Keep actual seeds/source/arrays unset and execution false until full admission passes.
+
+
+## Prospective generation request and role assignment
+
+The V2 generation request freezes480 ordered role recipes/100 source declarations/
+400 streams/60 bindings against the unchanged complete fixed design (560 cells/
+116 contrasts). Assignment/exposure rules and seeds, original/retained geometry,
+counts, allowed uses, availability, all120 canonical final-ID tuples and all12
+actual-proof obligations are frozen; all360 development role ID realizations are
+unset. The separate full concrete-role declaration bridge composes e's partition/
+shared-view checks after strict type rejection and binds its result to the V2
+request. It cannot prove actual arrival, seeded assignment, runtime code, owner,
+chronology, source independence/freshness or execution. All actual/fresh/execution/
+precision flags remain false; independence unknown. Existing e/f remain intact.
+
+Initial full382 cases pass (78 new/304 related) in
+99.9559949s. Six added sentinel cases then
+expose deepcopy before rejection; preserve every failed version/receipt and reject
+full concrete schema before encoding. All84 current new cases pass in
+35.8429476s. Current unique coverage388:
+all304 related cases match earlier complete receipts; all776 older physical Python
+files unchanged, no existing source/test/script references new modules or symbols,
+and all78 earlier generation fixtures have identical runtime AST and rerun. No
+optional full repeat: related-suite-reuse.json binds full reuse evidence without
+scope/test removal. Ruff/all4-file format/full no-incremental mypy572/diff pass in
+63.6039481s. Whole preservation pending.
+
+API, module tree, commands and safe extension: [guide](docs/p67-prospective-generation-requests.md), ADR-0183 and development log. No new configuration/environment dependencies.
+
+
+### Prospective generation recipe metadata acceptance
+
+P6.7d2b2g alone is complete for its full generation-recipe/claim metadata scope.
+Core immutable V2 request/recipe/results, pure app factory/inspector/concrete-role
+bridge,84-case suite/full invented fixture helper, guide and ADR-0183 delivered.
+Freeze all480 recipes/100 source declarations/400 streams/60 bindings and whole
+560 cells/116 contrasts/settings/count/analysis/stopping/caps/all12 obligations.
+All360 development realizations remain unset until permitted arrival;120 final-ID
+tuples are declared from geometry without final values. Existing label-dependent
+stratified split/class-balanced B exposure/original positions remain. Separate
+full concrete claims compose e partition/shared-view checks and retain actual
+arrival/seeded assignment unverified. Existing e/f unchanged; actual V2 physical
+reader/live sequential arrival/runtime closure/lease/prior/resource/repeat/b3
+proofs remain required. Independence unknown, fresh/execution/precision false.
+
+Initial full382 cases pass78 new/304 related; all84 current new cases pass after
+six actual copying-risk failures and strict early schema repair. Verified complete
+reuse of unchanged304 case IDs/dependencies (all776 prior physical Python files
+unchanged, no forward imports/symbol references), all78 original generation
+fixtures AST-identical and rerun:388 current unique coverage,0errors/failures/skips.
+Ruff/four-file format/full mypy572/diff pass without ignores/exclusions/dependencies.
+Retain initial missing API, failed newline preservation/missing producer attempts,
+diagnostic, six copy sentinels, every exact version/receipt and corrections; all
+failures spend original declared caps. Guide reservation formula clarified with
+exact earlier guide retained. All39 older lead code/test files unchanged,4 added.
+
+Full preservation passes173.1951707s including
+6.6674974s preparation:all2000 physical files,
+3753 current Git objects/34 commits,
+all current/historical aliases, original150 sources/79 tests/174 inputs/proofs,
+all43 lead code pins and held clone/patch pins before/after. One original END
+rebuild,24 science guards0; no original reader/semantic audit or new science.
+All372 older task criteria and244 raw240 nonseparator tables unchanged. Original
+failed350.7925872/360spent/9.2074128remaining and negative precision unresolved;
+b2/b3/d2b/d2/P6.7/d3 remain open,25 helper cases unbound/three proposals held.
+
+Evidence:generation-role-recipes/handoff-source.json, handoff-validation.json,
+handoff-operation.json and handoff-final-log-append.json/final-append-operation.json.
+Exact next action:P6.7d2b2/b3: implement the complete V2 physical generation-request reader and inner read/recheck port for all480 recipes/100 sources/400 streams/60 bindings before any source. Preserve e/f APIs; do not feed fabricated concrete development IDs to the V1 bundle reader as a pre-source request. Add full late physical request/source-map/code/UTC/owner/resource/repeat corruption fixtures. Then bind a live phase-arrival observer to each permitted sequential arrival and original split/exposure recipes, retaining a complete immutable proof ledger rather than constructing future sources early to fill the full declaration bridge. Compose trusted runtime closure/live exclusive lease, all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper cases. Resolve original failed resource acceptance without resetting 350.7925872/360spent or9.2074128remaining. Preserve all b3 isolation/init/parity/resource/artifact/repeat/readback gates and held CI/P6.4 proposals. Keep actual scientific seeds/source/arrays unset and execution false until full admission passes.
+
+Terminal verification reuses the accepted173.1951707s whole2000/current/history/original/held-clone before-and-after gate, then checks all23 documents/43 lead code pins before publication, exact four document mutations/372 older task criteria/plan tables/log prefix and unchanged19 other documents/43 code pins after. No optional repeated whole physical/held-clone read after publication, no new whole-history/END/scientific run or cap increase. Exact previously prepared terminal producer retained unexecuted. Commands: prepare-budgeted-terminal.py; record-terminal-v2.py. document-operation-v2.json's0.1687795s was outside the operation filename glob; its full elapsed is now explicitly charged once through terminal-budget-accounting-operation.json. Whole closing actual spent including that debt remains below180; final receipt binds all charged families.
+
+
+## V2 prospective generation file preflight
+
+The V2 physical boundary binds the full request/source map/code manifest and every
+closed expected code file to all480 recipes/100 source declarations/400 streams/
+60 bindings, unchanged560 cells/116 contrasts/settings/analysis/stopping/count/caps
+and all12 actual-proof obligations. Immutable snapshots and inner read/recheck port
+keep app/core free of IO. Both versions share whole bytes, canonical strict JSON,
+root-contained regular paths, physical alias/publication-marker checks and late
+rechecks. V1 public constructor/read/recheck behavior is preserved. All360
+development realizations stay unset;120 final-ID tuples declare geometry only.
+UTC/owner/resource/same-generation-request repeat are checked as declarations.
+Matching physical metadata proves neither runtime code closure, exclusive owner,
+actual sources/roles/arrival/assignment/chronology, unrecycled independence, prior
+effect resolution, resource fit, independent repeat nor b3 admission. These stay
+required; independence unknown and fresh/execution/precision flags false.
+
+Initial full454 cases pass (66 new/388 related),0skips in
+138.3763548s. Two added V1/V2 direct source
+numeric-alias recheck cases expose comparing the rebuilt snapshot with the source
+map instead of the supplied snapshot. Restore the original supplied-snapshot
+comparison; all68 current new cases pass in
+30.2081090s,0skips. Current unique
+coverage456 is bound by both full receipts and exact V1 specialization: all six
+original private IO/constructor bodies, whole read/recheck bodies after controlled
+callback substitution and three public signatures match the saved V1 AST; all42
+other lead files unchanged, all66 prior fixture ASTs unchanged and rerun. This is
+coverage across receipts, not a single456-case pytest invocation. Ruff/all7-file
+format/full no-incremental mypy578/diff pass in
+45.6565722s. Whole preservation pending.
+
+Module tree/API/commands/safe extension: [guide](docs/p67-prospective-generation-bundles.md), ADR-0184 and development log. No configuration/environment/dependency changes.
+
+
+### Prospective generation file metadata acceptance
+
+P6.7d2b2h alone is complete for its full V2 physical generation-file metadata scope.
+Deliver core immutable snapshot/result/reader protocol, pure app full decoder/g
+preflight, V2 outer adapter, shared whole-file IO, V1 delegation, full fixtures/
+68-case suite, guide and ADR-0184. Bind all480 recipes/100 source declarations/
+400 streams/60 bindings and unchanged whole560 cells/116 contrasts/settings/count/
+analysis/stopping/caps/all12 obligations.360 development realizations remain unset;
+120 final-ID tuples declare geometry without final values. Whole request/source
+map/code manifest/every expected code file, canonical UTC/owner/full resource/
+same-generation-request repeat declarations and late rechecks are verified as
+physical metadata. Actual runtime closure/live owner/arrival/seeded assignment/
+chronology/unrecycled independence/prior effects/resource fit/repeat/b3 gates stay
+required; independence unknown and fresh/execution/precision authority false.
+
+Initial full454 cases pass66 new/388 related. Review's two direct V1/V2 source
+numeric-alias regressions actually fail, preserve all seven failed versions and
+restore original supplied-snapshot comparison. Entire current68 module passes,
+0errors/failures/skips. Exact six old private/constructor bodies and entire
+read/recheck bodies specialize to the saved V1 AST; public signatures unchanged.
+All388 related case IDs match earlier complete coverage, all66 prior V2 fixtures
+AST-identical and rerun,42 other lead files unchanged.456 current unique cases
+across full receipts; no claim of one456-case invocation or criterion reduction.
+Full Ruff/7-file format/no-incremental mypy578/diff pass without ignores/exclusions/
+dependencies. Missing API, failed patch anchor before mutation/diagnostic1s, both
+alias failures and all exact versions/format/preparation receipts retained/charged.
+One permitted V1 infra edit retains full original6599 bytes; original150 closure
+unrekeyed,42 other prior lead files unchanged,6 new code/test files added (49 total).
+
+Full preservation passes79.0719877s including
+0.0078148s preparation:all2008 physical files,
+3771 current Git objects/34 commits,
+all current/historical aliases, original150 sources/79 tests/174 inputs/proofs,
+all49 current lead code pins, old V1 bytes and held clone/patch pins before/after.
+One original END rebuild,24 science guards0; no original reader/semantic audit or
+scientific dispatch. All373 prior task criteria/244 raw240 nonseparator tables
+unchanged. Original failed350.7925872/360spent/9.2074128remaining,4471 prior contents/
+13149 aliases/full effects and negative precision remain unresolved. All b2/b3/
+d2b/d2/P6.7/d3 parent tasks open;25 helper cases Unbound/three proposals held.
+
+Evidence:generation-request-bundle/handoff-source-v2.json, handoff-validation-v3.json,
+handoff-v3-operation.json, handoff-final-log-append.json/final-append-operation.json;
+earlier entry/declaration/all gates/JUnit/exact versions/V1 specialization/reuse/
+document receipts. No experiment, actual scientific seed/source/array or tuning.
+Exact next action:P6.7d2b2/b3: add the trusted live exclusive request-owner port and complete runtime code closure around the V2 full physical generation request, then a live phase-arrival observer which binds each permitted sequential arrival to the frozen split/exposure recipes and a complete immutable proof ledger. Do not construct future B/source/labels early to fill complete claims. Compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper requirements without promoting toy fixtures to actual proof. Resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Preserve all b3 isolation/init/parity/resource/artifact/repeat/readback gates and held CI/P6.4 proposals. Keep actual scientific seeds/source/arrays unset and execution false until full admission passes.
+
+Closing correction: initial close-session.py failed after42.7518605s (including5.0792412s preparation) because its red fixture loop looked for the preserved old V1 reader under red-fixtures; its exact whole original is in before-code. No original END rebuild had run. Retain failed source/operation/producer unchanged; accepted=False. prepare-closing-recovery.py verifies the pinned exact unhandled failure line and entire unconditional completed prefix AST: all retained/2008 physical/full-history/original whole before pins, three clone checks and initial24-guard zero observation completed. close-session-v2.py corrects only that lookup, reuses the full before evidence, installs/checks all original guards/bindings again while skipping only the redundant initial original whole-pin read, executes every remaining full gate, all retained/original/2008 physical/current/history/clone after checks and exactly one original END rebuild. No criteria/count/cap reduction, failed attempt spends the same180s family. v2 accepted whole receipt is handoff-source-v2.json/handoff-validation-v3.json/handoff-v3-operation.json; original generic handoff operation stays failed. record-terminal-v3.py is the actual terminal producer; preserve unused record-terminal.py. Conservative0.5s diagnostic charge is included in recovery preparation. Initial prepare-closing-recovery.py asserted one occurrence of the output-name tuple, which also appears in previous-stage refs; it stopped before either new supervisor existed. Retain that producer/prefix JSON, correct only the first occurrence in prepare-closing-recovery-v2.py, charge1s for failed attempt/copy preparation and keep earlier-stage refs unchanged. Future sessions must use the accepted v2 source/operation from this terminal receipt, never the failed generic source as current acceptance.
+
+The v2 recovery next failed during preparation at its occupied handoff-launch-contract.json name, before any worker/guard/END launch. Preserve its entire prepared handoff-source-v2.json and producer unchanged, retain launch-name-failure-v2.json and charge5s for the4.8307972s tool wall. prepare-closing-recovery-v3.py/close-session-v3.py use a distinct launch receipt and a small operative handoff-recovery-source-v3.json bridge that pins the full unchanged v2 source, current operative producer and every newer artifact. Accepted handoff-validation-v3.json/handoff-v3-operation.json bind both source identities and all complete acceptance gates. No second full source copy, cap increase or retained artifact deletion. record-terminal-v3.py reconstructs exact before-terminal documents from already preserved whole before-publication bases and their complete document-change append text (or full new-guide text), verifying actual whole byte identities before edits. This retains all old bytes without duplicating2.5MB and stays within16MB. Future sessions must use this terminal's accepted v3 operation/validation, full v2 base source plus v3 operative bridge; generic failed gate and unused v2 prepared source alone are not acceptance. Commands/outcomes: initial close-session.py failed; first recovery preparation asserted repeated anchor before new supervisors; corrected prepare-closing-recovery-v2.py passed with debt1s; close-session-v2.py failed before worker with debt5s; prepare-closing-recovery-v3.py passed; close-session-v3.py completed all remaining gates; record-terminal-v3.py publishes only after acceptance.
+
+Terminal scope: reuse accepted whole2008/current/history/original/held-clone before-and-after gate; check all25 documents/49 current code pins before publication, exact four document edits/373 previous criteria/plan tables/log prefix and unchanged21 other documents/49 code pins after. No optional repeated whole physical/held-clone/END/scientific run after terminal publication. Every operation uses the budgeted filename glob; preparation includes0.5s conservatively charged prior-binding shape inspection. Terminal producer prepared/pinned before whole closing. All families and output remain within their original declared caps.
+
+
+## Live prospective generation owner
+
+Complete V2 file preflight now composes a live owner port with a real native local
+lease. Contention keys use the entire inner generation request, so different
+outer owner declarations/file copies of that request contend in one configured
+canonical registry. All480 recipes/100 sources/400 streams/60 bindings, unchanged
+560 cells/116 contrasts/settings/analysis/stopping/count/caps and all12 admission
+obligations remain. Reread after acquiring and recheck whole physical files/owner
+before yield and on success/failure exit. Immutable observations bind scope,
+native single-link file identity, nonce and monotone sequence/UTC at the recorded
+time held. Native handles release on exception and process death; permanent lock
+paths stay in place and are never reclaimed/unlinked by the adapter. Observations
+remain historical after exit and cannot authorize execution. Runtime code closure,
+actual arrival/assignment/chronology, cross-host ownership/source independence,
+prior effects/resource/repeat/b3 remain unverified; all fresh/execution/precision
+flags false and independence unknown.360 development IDs remain unset and120
+final-ID tuples declare geometry only. Existing49 lead files/APIs unchanged.
+
+Full502 cases pass (46 owner/456 related),0errors/failures/skips in
+131.0861267s. Real native Windows controls
+cover same-process and subprocess contention, different outer owners for the same
+whole inner request, normal release and os._exit73 process-death release, failures,
+clock rollback/type rejection, physical/registry drift and early/late invalid
+observations. All new cases guard scientific source/final/model/scoring/RNG/array
+work; IO/native non-scientific UUID/time are intentional. Ruff/all4-file format/
+full no-incremental mypy582/diff pass in
+25.8889968s. Preserve initial missing
+API and static fixture mapping-type failure, all exact versions/receipts. No
+optional repeated tests; shared tests132.2325310/180spent, static50.7586573/180spent.
+Whole preservation pending.
+
+Module tree/API/configuration/commands/safe extension: [guide](docs/p67-prospective-generation-ownership.md), ADR-0185 and development log. Registry roots are explicit constructor inputs; no new environment/dependency defaults.
+
+
+### Native prospective owner scoped acceptance
+
+P6.7d2b2i alone is complete for full V2 live local native owner component.
+Core immutable complete scope/point-in-time observations/live protocols, app full
+H/g owner context and outer standard native lease delivered with46-case full
+controls, guide and ADR-0185. Full480 recipes/100 sources/400 streams/60 bindings,
+unchanged560 cells/116 contrasts/settings/count/caps/analysis/stopping/all12 proof
+obligations remain. Registry key is the whole inner generation request; different
+outer owners/file copies cannot evade local contention. Permanent single-link
+regular lock bytes/handle identity, aware monotone UTC/sequence/scope/nonce and
+whole files rechecked before/while/after, including failure exits. Native handles
+release after exception and actual os._exit73 process death; never unlink/reclaim
+registry files. Observations are historical after exit; runtime closure/arrival/
+assignment/chronology/global source independence/prior/resource/repeat/b3 remain
+required, independence unknown and fresh/execution/precision authority false.
+
+One full502 invocation passes46 new native/456 related0errors/failures/skips.
+Full Ruff/4-file format/no-incremental mypy582/diff pass without ignores/exclusions.
+Initial missing API and fixture mapping-type failure preserved with exact four
+failed versions and all receipts; explicit mapping annotation and stronger UTC/
+rollback/failure-exit checks applied before full pass. All49 prior lead files and
+original150 source closure unchanged and unrekeyed. Native Windows executed; actual
+POSIX/symlink/junction privileges/backend/CUDA/training/resume/clean-clone CI/full
+repo pytest outside502/original semantic audit/repeat/science/optional repetition
+not run. Parent and child scientific sentinels remain raised throughout controls.
+
+Full preservation passes116.1562081s including
+4.9806298s preparation:all2014 physical files,
+3793 current Git objects/34 commits,
+all current/historical aliases, original150 sources/79 tests/174 inputs/proofs,
+all53 lead files and three held clone/commit/patch pins before/after. Exactly one
+original END rebuild,24 science guards0; no original reader/semantic audit or
+scientific dispatch. All374 previous task criteria and244 raw240 nonseparator
+tables unchanged. Original4471 contents/13149 aliases/full uncertainty/effects,
+negative precision and failed350.7925872/360spent/9.2074128remaining persist. All
+b2/b3/d2b/d2/P6.7/d3 tasks open;25 helper requirements Unbound/three proposals held.
+
+Artifacts:generation-request-ownership entry/declaration/red/format/static failure/
+complete failed versions/full green/JUnit/static-v2/document-change/operation/
+handoff-source.json/handoff-validation.json/handoff-operation.json and terminal
+handoff-final-log-append.json/final-append-operation.json. No experiment, actual
+scientific seed/source/arrays or favorable metric/baseline/algorithm selection.
+Commands: start-generation-request-ownership.py; run-gates.py red; run-format.py;
+run-gates.py static; prepare-static-repair.py; run-format-v2.py; run-gates-v2.py
+green/static-v2; update-documents.py; prepare-preservation.py; close-session.py;
+record-terminal.py. Every owned producer immutable/single-use, every launched
+process terminal. Overall goal active; external blockers:none. Full caps and
+output remain unchanged; budgets before terminal:{"closing_and_documents_including_preparation": 117.05128449999029, "entry_including_failures": 1.277946999995038, "static_including_failures": 50.758657299971674, "tests_including_failures": 132.23253100004513}.
+Terminal reuses accepted whole before/after gate, checks all27 docs/53 code before
+publication and exact4 document edits/374 old criteria/tables/log prefix/unchanged
+23 other docs/53 code after. Exact before-terminal texts reconstruct from pinned
+whole before-publication bases plus complete recorded append text/new-guide text;
+no duplicate whole snapshots or optional whole physical/clone/END repeat. Final
+receipt binds terminal elapsed/shared180 total/remainder/16MB output/diff.
+
+Exact next action:P6.7d2b2/b3: implement complete trusted runtime code closure through an inner proof port, composing full V2 physical files and the live owner context. Bind actual loaded Python/native dependencies and actual callable/code objects, closed complete membership and late loaded/monkeypatched/detached code drift before source construction; a caller-declared code manifest or native owner observation cannot substitute. Then implement the live sequential phase-arrival observer against frozen split/exposure recipes with an immutable complete actual proof ledger, without constructing future B/source/labels early. Compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper cases. Resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Preserve b3 isolation/init/parity/resource/artifact/repeat/readback and held CI/P6.4 proposals. Actual scientific seeds/source/arrays stay unset and execution false until complete admission passes.
+
+
+### Runtime code observation component (acceptance open)
+
+Full V2/native owner now composes with actual Python/native process observations.
+See docs/p67-prospective-runtime-closure.md for module tree/API/commands, actual
+controls, preserved failures/costs and explicit source-version/transient gaps.
+Current16 bounded cases/full589 static pass; full runtime/test admission remains
+open, P6.7d2b2j unchecked. No scientific source/seed/algorithm change.
+
+
+Runtime increment closing verifies all2023 files/53 prior code files and original
+bindings/history/held proposals. P6.7d2b2j remains unchecked; see its guide/log for
+remaining full correctness/resource/source-version gates. No science ran.
+
+
+### Complete runtime cost diagnosis
+
+See docs/p67-runtime-capture-cost.md for full actual process/profile/readback and
+commands. A lossless subtree candidate preserved every byte but was22.7x slower
+than canonical serialization. Production60 source/test files remain unchanged;
+complete runtime/scientific admission and original failed budgets stay open.
+
+
+Runtime cost diagnosis P6.7d2b2j1 is complete after whole2025-file/history/original
+binding preservation. All60 source/test files unchanged; slower lossless encoding
+retained as a negative result. Next: exact-type namespace lookup/full parity;
+complete runtime/scientific admission and failed budgets remain open.
+
+
+### Exact-type namespace lookup
+
+The native runtime observer now skips MRO scans for exact dict/list/tuple/set/
+frozenset values. Full actual original/candidate byte parity and current544
+regression cases pass; see docs/p67-runtime-namespace-optimization.md for commands,
+limits and preserved failed budgets. Runtime/scientific admission remains open.
+
+
+Namespace optimization P6.7d2b2j2 is complete after whole2028-file/history/original
+binding preservation, full544 regressions0 skipped/current590 static checks.
+See docs/p67-runtime-namespace-optimization.md. Next: full nested-runtime schema
+and actual continuity controls, then trusted source-version/transient closure.
+Scientific admission and failed original budgets remain open.
+
+
+### Complete passive runtime validation
+
+Five pure core modules now validate every encoded V1 runtime child; app validates
+exact full continuity and every failure final check. Static V2 callbacks preserve
+held membership across file errors. Current548 cases0 skips/full597 static checks
+pass; ordinary tests use tmp_path and supervisors retain complete runtime groups.
+See docs/p67-runtime-payload-schema.md and docs/p67-runtime-reader-callbacks.md for
+commands, layers, retained failed caps and open source/transient/scientific gates.
+
+
+Static callback P6.7d2b2j3b is complete after current548 zero-skip/597 static and
+whole2039-file/history/original binding preservation. See the runtime schema and
+callback guides. Next: whole code-constant/reference-count/source-version/transient
+controls; prior failed correctness/output/scientific gates remain unaccepted.
+
+
+### Marshal reference diagnostics
+
+18 bounded controls distinguish reference-lifetime serialization drift from real
+code changes. Production observer retention/source admission remains open. See
+[complete controls](docs/p67-runtime-marshal-controls.md) and ADR-0191 for commands,
+failed evidence and the required next gate.
+
+
+### Observed code-value retention
+
+The runtime freeze retains complete reached code/public values before its baseline.
+Full581 cases and real first-use/exception/release records pass; source/build/private/
+transient admission remains open. [Retention guide](docs/p67-runtime-python-retention.md)
+records commands, exact limits, failed evidence and the next gate (ADR-0192).
+
+
+### Runtime admission limits
+
+Seven real/structural controls demonstrate five gaps remaining after runtime retention.
+Boundary hashes, filenames and schema success do not provide continuous/source proof.
+[Counterexample guide](docs/p67-runtime-admission-limits.md) records commands/evidence/
+required guard work (ADR-0193). Full runtime/scientific admission remains open.
+
+
+### Installed runtime monitoring coverage
+
+Seven real capability controls measure ordinary/native/callback execution and caught
+trace denial. Primary monitoring misses the second tool's callback; trace errors
+deactivate tracing. [Coverage guide](docs/p67-runtime-monitoring-coverage.md) records
+full artifacts/commands and mandatory enforcement work (ADR-0194). Complete runtime
+guard/source/scientific admission remains open.
+
+
+### Optional runtime mutation enforcement
+
+[Mutation guide](docs/p67-runtime-execution-guard.md) documents global mutation denial,
+persistent poison and actual callback cleanup on measured CPython3.14. Full runtime/
+source/native/lifetime admission remains unavailable. Original120s gates remain open;
+current23-control successor and complete readback pass (ADR-0195).

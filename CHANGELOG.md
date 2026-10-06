@@ -9,6 +9,19 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- Dated Windows CPU dependency constraints and exact installed environment
+  metadata, with reproduction commands and explicit clean-install/historical
+  provenance limits. Broad supported ranges and installed packages are unchanged.
+
+- Complete saved seed-evidence timing diagnosis: every historical content/
+  alias and original b1 row, canonical whole-byte equality, full current file/
+  Git/source/proof pins and durable phase events. Preserve the new28e71ee user
+  commit and all old objects/aliases with an explicit head-only current contract
+  passed through the identical full validator. V1/V2 failures remain; all
+  diagnostic attempts130.5s<180. Serialization4.0s/write1.6s are small measured
+  costs. No permanent source/test/dependency change or scientific run; original
+  semantic repeat/resource/role gates remain unfinished.
+
 - Complete retained prior seed evidence boundary: typed declaration contexts
   and structured streams; full text/CSV/JSONL/Python witnesses; every retained
   physical file and local Git object/alias, including unreachable/opaque and
@@ -607,3 +620,282 @@ for versioning even while in research-stage development.
 - Circadian mechanisms including chemical gating, adaptive sleep policies, split/prune logic, and rollback support.
 - ResNet-50 benchmark path comparing all three model families.
 - Test suite and deterministic data generation for reproducible experiments.
+
+
+### 2026-10-05 — Fixed lexical benchmark and boundary regressions
+
+- Add eleven seed-text behavior cases for Unicode words/case, combining marks,
+  line separators, full tokens, character columns and normalized line hashes.
+- Retain the complete fixed negative benchmark: candidate matches every record
+  but is about5.69% slower; production matcher unchanged.
+- Verify174targeted tests/0skips, Ruff/format and mypy535. Full-audit repeat,
+  chronology and fresh-role acceptance remain open under their original gates.
+
+
+### 2026-10-05 — Complete saved chronology and conservative stream screen
+
+- Add complete saved-corpus membership and witness validation, whole-byte IO, unknown release chronology and all eight current derived streams.
+- Add 59 meaningful pure and boundary cases, including one-based JSONL positions, blank rows, corruption, omissions, dynamic/opaque provenance and unconditional fresh-role denial.
+- Verify 279 targeted tests, zero skips, Ruff/format/mypy (544 files) and two entire byte-identical saved projections under fixed local caps.
+- Retain every failed attempt and the original failed semantic resource gate. No experiment, baseline, metric, seed, scientific cap or fresh-role authority changes.
+
+
+### 2026-10-05 — Source-bound original release witnesses
+
+- Add three release-witness modules and three test files (56 new cases), retaining all fixed scope, late failures and explicit chronology limits.
+- Read both complete original scoring bundles, each through the unchanged scoring reader and both unchanged complete training readers; retain all prior raw contents/aliases/unknowns.
+- Pass the full659-case aggregate correctness gate,0skips, Ruff/format/mypy550/diff and both120s/shared240 metadata readback caps. Preserve the first fixture and UTF-8 preparation failures and exact versions.
+- Preserve scientific inputs/metrics/baselines/seeds/caps, the earlier negative lexical result and the original failed current-semantic resource gate. Closing acceptance is recorded separately.
+
+
+### 2026-10-05 — Complete pending prospective contract
+
+- Add four modules/four test files with117 new full-scope and boundary cases.
+- Preserve all fixed settings, roles, primary contrasts, caps and stopping rules; bind all saved prior effects, complete original reader outputs and precision evidence.
+- Pass856 related tests/0skips, Ruff/format/mypy558/diff and two complete120s/shared240 saved metadata projections.
+- Preserve original negative precision, old failed semantic resource acceptance and inherited code/user changes; actual execution/provenance and parent acceptance stay unfinished.
+
+
+### 2026-10-06T01:27:35.502909+00:00 — Complete prospective stream claim validation
+
+Public `validate_prospective_stream_declarations` verifies the expected whole
+design identity, all60 ordered bindings/50 planned groups and every400 external
+typed stream claim through unchanged public full-design/replica validators.
+Missing/extra/reordered/duplicate/mutable/detached/symbolic/unknown-record and
+late type/value drift are rejected; exact types defeat value-equal booleans,
+floats and string subclasses. All560 cells/480 roles/116 contrasts, original
+matched settings/eight offsets/analysis/count/caps/stopping remain. Return
+independent replications unknown/fresh authority false; no source/RNG/model/IO/
+scoring/execution or historical-domain proof. Original25 helper cases are unbound.
+
+Current full metadata suite120 passes, including42 new and78 existing cases,
+0errors/0failures/0skips in5.4621946s. Ruff/two-file format/full no-incremental
+mypy560/diff pass. Preserve initial missing-module red1error and full mypy1error,
+exact old fixture versions and the local-only annotation repair; no exclusions,
+ignores, mock adapter or cap reset. Complete preservation remains pending.
+
+Add one app module,42 full-layout guarded tests, guide and ADR-0180. No existing source/test file or original scientific source closure changed.
+
+
+### 2026-10-06T02:04:09.582400+00:00 — Complete prospective role request metadata
+
+`inspect_prospective_role_request` composes the existing full-design and400-stream
+checks with all100 ordered phase-source descriptors and480 ordered role records.
+Bind complete design/source-map/request metadata identities, expected code
+declaration and every original data argument/geometry/derived data seed. Exact
+types/order/counts/IDs/availability/use policies and planned shared views are
+checked; resealing cannot repair foreign, partial, mutable, overlapping, reordered,
+early-release, unknown-schema or array/execution claims. Preserve A120 development
+positions and B60 retained original positions in0..119, final IDs0..39 and all560
+cells/116 contrasts/original settings/analysis/count/caps/stopping. No existing
+source/test changed. Return all actual provenance/chronology/authority flags false,
+independent replications unknown and all12 actual-proof obligations still required.
+
+Full fixed metadata suite174 passes (54 new/120 existing),0errors/0failures/0skips
+in14.7607819s. Ruff/all3-file format/full
+no-incremental mypy563/diff pass. Retain initial missing API, reserved pytest fixture
+name and mypy local-variable failures; fix only fixture/local names and formatting,
+with exact failed versions preserved. No exclusions, weakened tests or cap reset.
+Full preservation is pending; original25 helper cases remain unbound. Metadata
+hashes and expected code declarations do not verify physical source or release.
+
+Add core/app modules,54 guarded tests, guide and ADR-0181. New dependency/environment/configuration: none.
+
+
+### 2026-10-06T02:36:42.881847+00:00 — Whole prospective request file preflight
+
+`preflight_prospective_request_bundle` composes the full e inspector through an
+inner read/recheck port. The real outer reader binds canonical whole request,
+source metadata map, closed expected code manifest and every declared code file
+before and after app inspection. Full100 sources/480 roles/400 streams/60 views
+are preserved. Exact schemas/types/membership/identities and distinct regular
+paths, failed/pending markers, canonical UTC/owner and original full resource/
+same-request repeat declarations are checked. Retain all560 cells/116 contrasts/
+settings/analysis/count/caps/stopping, all12 actual-proof obligations and every
+prior unknown. Physically matching declared files do not prove runtime closure,
+exclusive ownership, before-source chronology, untouched sources, independence,
+actual resource fit/repetition or b3. All actual/fresh/execution/precision flags
+remain false; independent replications unknown;25 original helper cases unbound.
+
+Full304 behavioral tests pass (55 new/249 related),0errors/0failures/0skips in
+56.0459501s. Ruff/all5-file format/full
+no-incremental mypy568/diff pass. Preserve missing API, two tuple-pop fixture
+failures, duplicate module-name failure and two deliberately invalid payload
+typing failures. Correct fixtures/import and validate foreign rows before
+attributes; add six regressions. Final local Any annotation only has identical
+runtime AST after erasure; no optional56s pytest rerun, scope exclusion/ignore,
+test removal or cap reset. Whole preservation is pending. No scientific work.
+
+Add core/app/infra modules, fixture/helper tests, guide and ADR-0182. Existing34 source/test files unchanged; no new dependencies/environment variables or scientific changes.
+
+
+### 2026-10-06T03:17:55.023521+00:00 — Versioned prospective generation recipes
+
+The V2 generation request freezes480 ordered role recipes/100 source declarations/
+400 streams/60 bindings against the unchanged complete fixed design (560 cells/
+116 contrasts). Assignment/exposure rules and seeds, original/retained geometry,
+counts, allowed uses, availability, all120 canonical final-ID tuples and all12
+actual-proof obligations are frozen; all360 development role ID realizations are
+unset. The separate full concrete-role declaration bridge composes e's partition/
+shared-view checks after strict type rejection and binds its result to the V2
+request. It cannot prove actual arrival, seeded assignment, runtime code, owner,
+chronology, source independence/freshness or execution. All actual/fresh/execution/
+precision flags remain false; independence unknown. Existing e/f remain intact.
+
+Initial full382 cases pass (78 new/304 related) in
+99.9559949s. Six added sentinel cases then
+expose deepcopy before rejection; preserve every failed version/receipt and reject
+full concrete schema before encoding. All84 current new cases pass in
+35.8429476s. Current unique coverage388:
+all304 related cases match earlier complete receipts; all776 older physical Python
+files unchanged, no existing source/test/script references new modules or symbols,
+and all78 earlier generation fixtures have identical runtime AST and rerun. No
+optional full repeat: related-suite-reuse.json binds full reuse evidence without
+scope/test removal. Ruff/all4-file format/full no-incremental mypy572/diff pass in
+63.6039481s. Whole preservation pending.
+
+Add two modules, full fixtures/test suite, guide and ADR-0183. All39 previous lead files unchanged; e/f/public interfaces retained. No dependencies/scientific defaults/actual experiments.
+
+
+### 2026-10-06T04:12:00.060845+00:00 — Complete V2 prospective generation file boundary
+
+The V2 physical boundary binds the full request/source map/code manifest and every
+closed expected code file to all480 recipes/100 source declarations/400 streams/
+60 bindings, unchanged560 cells/116 contrasts/settings/analysis/stopping/count/caps
+and all12 actual-proof obligations. Immutable snapshots and inner read/recheck port
+keep app/core free of IO. Both versions share whole bytes, canonical strict JSON,
+root-contained regular paths, physical alias/publication-marker checks and late
+rechecks. V1 public constructor/read/recheck behavior is preserved. All360
+development realizations stay unset;120 final-ID tuples declare geometry only.
+UTC/owner/resource/same-generation-request repeat are checked as declarations.
+Matching physical metadata proves neither runtime code closure, exclusive owner,
+actual sources/roles/arrival/assignment/chronology, unrecycled independence, prior
+effect resolution, resource fit, independent repeat nor b3 admission. These stay
+required; independence unknown and fresh/execution/precision flags false.
+
+Initial full454 cases pass (66 new/388 related),0skips in
+138.3763548s. Two added V1/V2 direct source
+numeric-alias recheck cases expose comparing the rebuilt snapshot with the source
+map instead of the supplied snapshot. Restore the original supplied-snapshot
+comparison; all68 current new cases pass in
+30.2081090s,0skips. Current unique
+coverage456 is bound by both full receipts and exact V1 specialization: all six
+original private IO/constructor bodies, whole read/recheck bodies after controlled
+callback substitution and three public signatures match the saved V1 AST; all42
+other lead files unchanged, all66 prior fixture ASTs unchanged and rerun. This is
+coverage across receipts, not a single456-case pytest invocation. Ruff/all7-file
+format/full no-incremental mypy578/diff pass in
+45.6565722s. Whole preservation pending.
+
+Add core/app/V2 infra/shared IO, full fixtures/tests, guide and ADR-0184. Delegate V1 with exact previous bytes/API/semantics retained; other42 lead files unchanged. No original source rekey, dependencies, scientific defaults or experiments.
+
+
+### 2026-10-06T05:03:43.593306+00:00 — Full V2 live native ownership boundary
+
+Complete V2 file preflight now composes a live owner port with a real native local
+lease. Contention keys use the entire inner generation request, so different
+outer owner declarations/file copies of that request contend in one configured
+canonical registry. All480 recipes/100 sources/400 streams/60 bindings, unchanged
+560 cells/116 contrasts/settings/analysis/stopping/count/caps and all12 admission
+obligations remain. Reread after acquiring and recheck whole physical files/owner
+before yield and on success/failure exit. Immutable observations bind scope,
+native single-link file identity, nonce and monotone sequence/UTC at the recorded
+time held. Native handles release on exception and process death; permanent lock
+paths stay in place and are never reclaimed/unlinked by the adapter. Observations
+remain historical after exit and cannot authorize execution. Runtime code closure,
+actual arrival/assignment/chronology, cross-host ownership/source independence,
+prior effects/resource/repeat/b3 remain unverified; all fresh/execution/precision
+flags false and independence unknown.360 development IDs remain unset and120
+final-ID tuples declare geometry only. Existing49 lead files/APIs unchanged.
+
+Full502 cases pass (46 owner/456 related),0errors/failures/skips in
+131.0861267s. Real native Windows controls
+cover same-process and subprocess contention, different outer owners for the same
+whole inner request, normal release and os._exit73 process-death release, failures,
+clock rollback/type rejection, physical/registry drift and early/late invalid
+observations. All new cases guard scientific source/final/model/scoring/RNG/array
+work; IO/native non-scientific UUID/time are intentional. Ruff/all4-file format/
+full no-incremental mypy582/diff pass in
+25.8889968s. Preserve initial missing
+API and static fixture mapping-type failure, all exact versions/receipts. No
+optional repeated tests; shared tests132.2325310/180spent, static50.7586573/180spent.
+Whole preservation pending.
+
+Add focused core/app/infra owner modules, full native suite/guide/ADR-0185. All49 previous lead files and original150 closure unchanged. No dependencies/scientific defaults/algorithm changes/experiments.
+
+
+### In progress: complete runtime process observation gate
+
+Added actual whole Python/native runtime observations and inner live proof ports
+composed with full V2/native ownership. Real drift/release/cost controls, failures
+and bounded current16/full589 static evidence retained. P6.7d2b2j remains unchecked
+for complete correctness/resource/source-version/transient admission requirements.
+No scientific experiment, prior source rekey or accepted parent change.
+
+
+### Complete runtime capture cost diagnosis
+
+Retained full actual process body/all96 call costs, independent exact readback and
+13 whole corruption controls. Fixed lossless candidate saves36.8% raw bytes but is
+22.7x slower on matched input. No production edit, scientific experiment, source
+closure rekey or reset of original j/scientific acceptance.
+
+
+### P6.7d2b2j2 — Exact-type namespace lookup
+
+Preserved complete original native observer before a five-type identity fast path.
+Full unfiltered45793-object lookup and10.33MB runtime byte parity, independent
+readback/17 corruption controls and current544 cases/current590 static gates pass.
+One matched pair showed28% lower lookup time; no variance/future throughput claim.
+Retain every failed fixture/static/budget receipt and all unfinished admission.
+
+
+### P6.7d2b2j3b — Static runtime reader callbacks
+
+Added complete pure V1 structure and exact app continuity/failure final checks,
+passive string validation and static V2 source projection. Retain every failed
+400s/500s/221MB output gate and full lossless output archive. Current548 no-skip/
+597-file static gates and whole49 complete +11 partial record readback pass.
+Scientific/source-version/transient/resource predecessor gates remain unchecked.
+
+
+### P6.7d2b2j4a — Marshal reference controls
+
+Added18 complete diagnostic controls/54 raw readbacks: reference-only byte drift,
+public-field/constant retention, first return/actual exception, genuine constant/
+bytecode/nested changes and line-table aliases. Production observer unchanged; old
+failed budgets preserved. No scientific source/seed/baseline/metric changes.
+
+
+### P6.7d2b2j4b — Observed code/public-value retention
+
+Retain reached native code, recursive constants/public metadata before runtime freeze.
+Added15 controls including complete real V2/native owner records; full581 tests0 skips
+and602 static pass. Preserved old mutation denials, failure bytes/budgets and unrelated
+changes. Source/build/private/transient and scientific admission remain unfinished.
+
+
+### P6.7d2b2j5 — Actual runtime admission counterexamples
+
+Added seven bounded controls demonstrating transient function/default changes, loaded
+source mismatch, omitted unreferenced membership and missing nested-route limits.
+Full3 actual+2 edited/25 raw/28 failed partial readback, current604 static pass.
+Production and73 old full581 pins unchanged; source/runtime/scientific admission open.
+
+
+### P6.7d2b2j6a — Installed monitoring coverage
+
+Added seven bounded actual controls with3 full records/32 raw codes/39 child files,
+48 failed partial raw files and independent readback. Foreign callback execution is
+invisible to the primary monitor; caught trace denial removes tracing. Corrected a
+fixture's public borrowed-result ownership and directly verified five callback slots.
+Current1 test/static606 pass;75 old source/test pins unchanged. Complete guard open.
+
+
+### P6.7d2b2j6b1 — Persistent runtime mutation correctness
+
+Added optional global mutation guard, poison and actual cleanup. Corrected actual3.14
+with-exit semantics and full native/slice catalog serialization. New23-control case/
+8068 raw codes/7841 function joins/3 historical records/current609 static/independent
+content readback pass; exact typing-comment executable parity retained with differing
+source bytes. Original120s and full admission requirements remain open.

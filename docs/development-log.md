@@ -19196,3 +19196,4984 @@ P6.7 acceptance remain false. Five-point precision remains uncertified at ten.
 This terminal handoff supersedes the pending closing paragraph without
 removing history. No new scientific source/value is authorized by metadata
 equality, correctness fixtures or a passing preservation check alone.
+
+
+## 2026-10-05 — P6.7d2b2a1 complete saved-output/binding diagnosis; resource gate remains open
+
+### Entry, progress classification, checkout and plan amendments
+
+Read AGENTS and whole current plan/log. Entry records plan728411bytes/SHA
+b7a260da4d7e030f325d849b4799bb50b1c2306fdba2004eddaf5869fce713c1;
+log1333586bytes/SHAf1b229087e65d08abeb2ecf2cac37eb33b4001e8d80169022d703ebb3b56f25a,
+prior final nine live bindings and full exact copies. Previous goal turn was
+progress: three evidence modules/33new tests/first full actual accepted,
+byte-identical saved repeat and preserved negative terminal/resource gate;
+not complete original prior usage or scientific authority. No prior worker
+was live at entry; all occupied producers are terminal and not restarted.
+
+HEAD advanced during diagnosis from57b6fd0 to28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8,
+`Add resource, findings, and seed-evidence audits` (109existing audit/docs/source/
+test files, thirteen commits after reviewed8793c49). Preserve the user commit,
+all current/source bytes and prior dirty/history versions. Inspection of Git
+logs, full commit stat, name-status delta and actual object/commit membership
+records23added objects:14blobs/8trees/1commit/3,133,713bytes. V3 whole checks
+confirm every old object byte/type/size/hash and historical commit/path alias
+still present; new current3608objects/34commits are bound before/after. A
+declaration list/commit alone is not a past-execution or fresh-role proof.
+
+Added unchecked a1 before implementation: full saved-output/current-binding
+timing within one hard180s metadata budget including preparation/failures,
+durable phase events,700000000byte new output cap. Original364 task lines and
+244raw/240nonseparator table lines preserved. Then explicit Git and head-only
+current-contract repair amendments preserve every365task/old acceptance.
+Full correctness/performance evidence now passes; complete closing still
+pending. Completed task IDs so far:none; terminal append may complete only a1
+after its full preservation gate. Original b2a/b2/d2b/d2/P6.7/b3/d3 remain open.
+Added unchecked a2 fixed lexical parity/timing task before any optimization;
+all365existing task lines/table bytes remain,366current tasks. No criterion
+weakened, unfinished work deleted or original exhausted cap increased.
+
+### Scope and explicit HEAD binding rationale
+
+Local producer files live only in newly claimed owned
+artifacts/runs/p67-untouched-seed-usage/prior-evidence/timing-diagnostic/.
+Exact owner and exclusive outputs, complete static source/proof/physical/Git/
+document pins and full historical saved source are frozen before decoding.
+The historical581898985-byte report retains4471distinct complete bodies/
+13149alias occurrences and every593original b1 file/494389declaration/30318issue.
+The complete same canonical serialization is re-encoded and whole-hashed;
+this is not a new semantic evidence reader or scientific dispatch. Opaque/
+unparsed/symbolic/history/quantity/nonrandom/null records remain unchanged.
+
+Why this: historical live-HEAD comparison cannot remain a current contract
+after a legitimate user commit. Keep old source freeze546839bytes/SHA
+2c50c387a24867fc67fb14173b1b8be1964f08144704505f6cea9b976c4294ff
+and entire source_pins function immutable. Prospectively save an exact full
+current clone changing only `head` to28e71ee; verify every other field equal,
+then invoke the entire identical validator before/after. Its150source/79test/
+174input/fourteen whole original body, proof, control, gate, guard and actual
+HEAD assertions all remain. Current original clone546839bytes/SHA
+f9532150c608480c54438f98ea0a64ca10eea1b78561103477904dd41f793e60.
+Full current Git objects/aliases also bind every historical object/alias; no
+historical rewrite or assertion skip. No changed scientific source/request,
+fresh-role authority, baseline/model/metric/contrast/seed/interval/cap or dependency.
+
+### Exact commands, failures and accepted whole diagnostic
+
+`.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/timing-diagnostic/run-diagnostic.py`
+V1 exits1, no timeout,28.1118213parent. It freezes source/proofs5.1603176s,
+old source/guards8.8438281s, all1949physical pins9.8296635s and current Git
+4.0510327s before detecting mismatch with assumed historical graph. No decode
+or serialization ran. An assertion after a completed observation lacks a
+terminal validation; do not call its unobserved final guard counts zero.
+Preserve all17complete V1 records/source/journal/producer/snapshots in exact copies.
+
+`.../run-diagnostic-v2.py` exits1, no timeout,19.1763013parent. Whole current
+Git freeze9.7411232s preserves every historical object/alias; original full
+source checks9.1341855s then reject current HEAD!=historical HEAD. Durable
+failed phase records AssertionError. No decode/serialization/science. Preserve
+all five complete V2 source/producer/launch/journal/supervisor copies; V1+V2
+47.2881226s leaves132.7118774 of the same original180. An initial diagnostic
+rg lookup named a nonexistent metadata helper; targeted actual provider reads
+located it. No dispatch/mutation followed that lookup; all final relevant
+helpers were read and whole-pinned, not assumed from truncated output.
+
+`.../run-diagnostic-v3.py` exits0, no timeout,82.4092759worker/83.2362735parent
+under132.7118774remaining, with full declared current/historical HEAD bridge.
+All attempts130.5243961<originalshared180. All18phase observations have durable
+started/completed events; whole canonical output equals original SHA/bytes.
+Current1949physical files/3,913,208,298bytes and current3608Git objects/34commits/
+every alias, all historical3585objects/33commits/aliases, original/new source/
+test/input/proof/document maps pass before/after. Every original b1 raw record
+matches; all24 science guards0, zero semantic/scientific/complete original
+development/confirmation reader dispatch. Complete original end binding
+rebuild is reserved for the once-at-end closing gate; do not rerun science.
+
+Full phase measurements (wall seconds):
+source/proof/current Git freeze13.5918492; original source/guards before9.4219942;
+all1949physical before10.2760355; all3608Git/34commit before4.1533446;
+whole first/failed report identities1.2835608/1.2717036;
+read entire581898985bytes0.1769605; full JSON decode3.5508041;
+all4471content/13149alias validation0.0096617;
+all593b1 declarations/issues0.7749199; full canonical encode3.9749375;
+full write/flush/fsync1.5874618; whole new canonical hash1.2675110;
+all1949physical after10.2707903; all3608Git/34commit after5.1333315;
+all original/new source/test/input/proof/doc checks after11.8028265;
+whole old report hashes after1.2638338/1.2642727. Durable complete journal
+and profile function counters retain measured scope/overhead. These are
+diagnostic observations, not the unrecorded historical failed-parent timings.
+
+Sampled absolute metadata-worker RSS3,113,938,944bytes/2391samples/20ms interval,
+with GIL/native sampling gaps; not exact peak/model attribution/scientific
+512MiB acceptance. Output607,921,349bytes before receipt<700,000,000; all occupied
+passing/failing outputs remain. No new dependency or permanent source/test
+change. Serialization is a small measured cost; no unmeasured serialization
+refactor is justified. Source regex inspection motivates an independent fixed
+lexical parity/timing benchmark before choosing any optimization. Negative
+performance/parity results remain valid and do not force code changes.
+
+### Gates not substituted, tests/skips and artifacts
+
+Original full actual170.7777781 first pass and180.0148091 timeout remain;
+all actual350.7925872/360spent,9.2074128remaining. Reports are still identical,
+but original repeat-validation absent/terminal resource acceptance false and
+failed repeat guard counters unobserved. The saved diagnosis is not a resumed
+or repeated current semantic audit and does not recycle those exhausted gates.
+Complete prior usage, fresh roles and original P6.7 acceptance stay false.
+Five-point precision remains uncertified at ten; all116contrasts/informative/
+matched factors and scientific600s/16000updates/512MiB are unchanged.
+
+No pytest/lint/format/mypy rerun this session: permanent source/test/config/
+dependency bytes are unchanged and whole-bound. Prior163tests/33new+130related/
+0skips, Ruff/format/mypy535 and diff remain historical accepted evidence.
+Each new local diagnostic producer was AST-parsed before dispatch; full
+canonical equality and complete mutation/source/input/proof guards validate
+its actual behavior. Wider unrelated suites, Torch/CUDA/CI, clean-clone,
+platform tests, fits, confirmations and sweeps remain intentionally unrun.
+No skipped test is represented as a pass. Git diff whitespace checks run
+after documentary changes and closing; existing LF-to-CRLF advisories do not
+normalize original213/61/76README/architecture/changelog CRLF counts.
+
+All paths in the table are within the owned timing-diagnostic directory.
+First/second preservation manifests bind every complete earlier copy; current
+source/repair documents bind the complete graph and head-only original clone.
+
+| Artifact within `timing-diagnostic/` | Whole bytes | SHA-256 |
+| --- | ---: | --- |
+| `entry.json` | 5902 | `4a1c792281790c5a475b05dc7d4ffd8d68314782f026a1a3278c55a735955950` |
+| `run-diagnostic.py` | 19051 | `60b873e98a1b67602a157fb55e22483905b8fd6a15d3b3f3be53f656a9326e64` |
+| `launch-contract.json` | 934 | `c4c1b8bb47e4eaf305368efc0864e0d264215ef5ae237730cdd8cbd86f10da60` |
+| `timing-source.json` | 2497593 | `7a975d6de9e8728b7ff97ef2eb74af5eb83c4d00b4b542eb371493e41808ebd2` |
+| `phase-events.jsonl` | 2524 | `204a360303fc0634f34f9feb1210dd8e5e859ff28819b8cbcb3feae5af38f093` |
+| `timing-operation.json` | 1738 | `046837d3ac21f6d9fa245859a0afa5eadd6dfb44f7e9063ed98a92bbbac52b14` |
+| `first-attempt-preservation.json` | 9783 | `8265745a37f65f15a7f39a85bd6d9375d971b9eef5a3f38d16b807194f0e18b3` |
+| `git-reconciliation.json` | 15514 | `7635af8eaf0debc0ca13d545b83570bb4298f7b5fa28edbbdf63f3c6d46c9144` |
+| `run-diagnostic-v2.py` | 21715 | `6fb215b78a7203cc578462e1b9ca1381b82f5e3e69522939006f55f2a06587ee` |
+| `launch-contract-v2.json` | 1136 | `1472996421f23b195a1c5c2b71df594aad8d63e59a13a8653d771f364e1938f1` |
+| `timing-source-v2.json` | 4707570 | `29cdf717afed3b86539780968fa1d1fb9e328a8195b69817290758a3db1b810c` |
+| `phase-events-v2.jsonl` | 1217 | `ff11c2bb8621ab48b3228cc088f6f5b14a2f08c5e809e9a1145c84b6b2906fd2` |
+| `timing-operation-v2.json` | 3078 | `8886db6da14d7dfcf4d28e19ad92cbf4920b88e1ec8c5afe523fe8ff0ba08b9b` |
+| `second-attempt-preservation.json` | 3539 | `9e7a8f25a677d91af386501f35f80e709aa06425e7eb4d435a05a0dd4d823104` |
+| `head-contract-repair.json` | 10104 | `583ab77fd5a5f034912484b39c232d10c80633e572e79233b8b8ae07fefa4506` |
+| `run-diagnostic-v3.py` | 24695 | `1826038c1e33f1942ace8bdcaff84526476344ac882c452afe0424745b36183f` |
+| `launch-contract-v3.json` | 1283 | `dcebad11e445dc03c59e67c9382e9cf9acf43c1847d6555b85ab2563f101eec7` |
+| `timing-source-v3.json` | 4711798 | `61f8152698926e9e8ce7ef086790afa2766553ac596c616ce9d3fceb3413ae64` |
+| `current-original-binding-v3.json` | 546839 | `f9532150c608480c54438f98ea0a64ca10eea1b78561103477904dd41f793e60` |
+| `phase-events-v3.jsonl` | 11576 | `4974bcb81e6640b9271d7d47bbef40f637b7d43d4ef43cdacdd2e3b8d18156a6` |
+| `timing-validation-v3.json` | 17144 | `c3f557f939769c7ae2b1357ae354b687736c7d63a2a2634dd8113c89f9b6ab1b` |
+| `timing-operation-v3.json` | 1738 | `fb4cc52d15f77af078771e67164671b3cf203326ff13da917c714c60fe5405f8` |
+| `canonical-v3.json` | 581898985 | `8713d77e4fa997600a61e202b772c18ad6564f81d253cb4b52dc0c6ab6b68706` |
+
+### Closing and exact next action
+
+Preserve all original365task lines and244raw/240nonseparator plan table lines;
+new a2 makes366tasks. a1 stays unchecked pending complete hard180 closing of
+all current/historical physical/Git/source/test/input/proof/doc maps and one
+complete original binding END rebuild using the declared current-head clone.
+Exact before-evidence snapshots bind every prior documentary version; all
+old log bytes and old docs outside insertions stay. No external blocker;
+verified measurement/reconciliation progress; overall goal remains active.
+Only after closing succeeds, append terminal evidence and mark only a1[x].
+
+**Exact next action:** P6.7d2b2a2: declare one fixed local lexical benchmark before changing seed_source_evidence.py. Pin the complete123,220,118-byte b1 JSON input plus deterministic ASCII/Unicode/hash-rich/multiline/empty/word-boundary cases; compare the original full-word seed/RNG regex against a whole-word scan with the same case-insensitive seed substring test for every token/column/line digest. Budget the correctness/performance diagnostic at180s including failures, preserve negative results and every original input/scope, and optimize only if parity and measured improvement hold. Keep original b2a repeat/resource failure and350.7925872/360s spent budget unchanged; no current full semantic audit, fresh source/value, baseline/metric/contrast/seed/cap change or scientific run. Then complete original b2 chronology/uncertainty/role contract and b3 full execution fixtures under unchanged original gates.
+
+
+#### Terminal P6.7d2b2a1 complete diagnosis and final live handoff
+
+`python -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/timing-diagnostic/record-evidence.py`
+exits0,no timeout,1.6597033worker/1.7673468parent seconds<180.
+Document-contract2340bytes/SHA0461837dcc176ac20dd959796d00ea0a63b80334bdef1de8f4ae56832ece9cfb;
+document-change9349bytes/SHA119dcacb54cc71f3054c7de46a3977995ef5e05aad065a5944a253406438a16c;
+document-operation1128bytes/SHAa28527682444cdbb5a60749490f50fee1f0be0451b94fba6a71cc027af731d39.
+All nine before-evidence documentary versions remain complete; six authorized
+docs change and all other bytes/source/test/dependencies remain unchanged.
+
+`python -X utf8 .../timing-diagnostic/close-session.py` exits0,no timeout.
+Entire preparation+worker share original hard180: 1.4162624s
+preparation, 178.5837376s worker timeout;
+117.5331517s actual worker/119.1020072s entire parent.
+It checks all1949current physical membership/whole bytes and frozen historical
+timing identities through six exact authorized documentary copies, all3608
+current Git objects/34commits/every alias, every historical3585object byte/
+33commit/path alias, and complete original/new source/test/input/proof/doc
+maps before/after. The entire original binding is rebuilt exactly once at
+the end. The original150sources/79tests/174inputs/fourteen whole bodies,
+ledger/upstream bundles/prior-reader/failure/dirty/passing metadata proofs and
+historical guides/source/producer versions remain. Same full source validator
+runs against the declared current clone, changing only head; every other
+original field matches the immutable historical freeze. User commit28e71ee
+and current source/test bytes are preserved. All24closing science guards0;
+zero new semantic corpus audit/scientific/complete original reader dispatch.
+Fresh diff exits0; all original plan table/acceptance and raw docs/CRLF bytes
+outside exact insertions and all old log bytes remain. No unrelated change loss.
+
+Only now mark **P6.7d2b2a1[x]** with recorded timing, canonical equality and
+closing evidence. Completed task IDs this session:[P6.7d2b2a1]. All366tasks
+remain; all365earlier acceptance criteria and244raw/240nonseparator table lines
+are unchanged. Only a1 checkbox/evidence changes; a2/b2a/b2/d2b/d2/P6.7/b3/d3
+remain unchecked. The guide receives an exact-prefix terminal status append.
+Every prior live plan/guide/log version has an exact before-terminal copy;
+other six live documents stay identical to the closing freeze.
+
+Closing source397490bytes/SHA303330f403688c328c2ea69316fa4bd9c95be289a9fced396517b8f4db41d0fc;
+validation48780bytes/SHA0a36835f0de1ca9609a2aa3af689a39b158a8eefe9bab4569325b3a1f6844e78;
+operation1221bytes/SHA8e3618c598696325df0a999c72004298aa86984a0e30aed6b24e112adea0a76e.
+Immutable pre-terminal log `artifacts/runs/p67-untouched-seed-usage/prior-evidence/timing-diagnostic/log-at-handoff.md` is
+1346826bytes/SHA14529c3bbeb1efd2ba32999cc39109b2f7cb41d0a374a07a646fa09838c03570.
+This append preserves its entire exact prefix. Exclusive nested
+`handoff-final-log-append.json` binds all nine final live documents and fresh
+post-append diff; `final-append-operation.json` records the terminal supervisor.
+Use these final live bindings at next entry; earlier live hashes are history.
+
+V1failed28.1118213/V2failed19.1763013/V3accepted83.2362735parent seconds total
+130.5243961<original180 diagnostic seconds, including preparation/failures.
+All4471historical contents/13149alias occurrences and all593b1 raw files/
+494389declarations/30318issues match. Whole581898985-byte canonical output
+matches SHA8713d77e4fa997600a61e202b772c18ad6564f81d253cb4b52dc0c6ab6b68706.
+Decode3.5508041/encode3.9749375/write/fsync1.5874618s; full original/new pins
+before9.4219942/after11.8028265s, physical10.2760355/10.2707903s, Git4.1533446/
+5.1333315s. Sampled absolute metadata RSS3,113,938,944bytes/2391samples/20ms,
+with GIL/native gaps; not exact peak/model memory or scientific512MiB evidence.
+Measurements do not identify the unobserved historical late-parent cost.
+
+Original full semantic first audit170.7777781 passes, independent repeat
+180.0148091 times out; its validation is absent and final guards unobserved.
+Actual350.7925872/360spent and9.2074128remaining stay fixed. Equality and this
+accepted saved diagnosis/closing cannot relabel or reopen that failed resource
+gate. Complete prior usage, fresh-role authority and original P6.7 acceptance
+remain false. Scientific600s/16000updates/512MiB,116contrasts/all informative/
+matched configurations, metrics/baselines/seeds/intervals are unchanged.
+Five-point precision remains uncertified at ten. No new confirmation or sweep.
+Permanent code/test bytes unchanged; prior163test/0skip/static535 evidence
+remains accepted historical coverage. New local metadata producers were syntax
+parsed and whole behavior/pins verified; wider pytest/lint/format/mypy/Torch/
+CUDA/CI/clean-clone/platform suites were intentionally not rerun. No new test
+is reported as a pass or skipped relevant backend treated as coverage.
+
+**Exact next action:** P6.7d2b2a2: declare one fixed local lexical benchmark before changing seed_source_evidence.py. Pin the complete123,220,118-byte b1 JSON input plus deterministic ASCII/Unicode/hash-rich/multiline/empty/word-boundary cases; compare the original full-word seed/RNG regex against a whole-word scan with the same case-insensitive seed substring test for every token/column/line digest. Budget the correctness/performance diagnostic at180s including failures, preserve negative results and every original input/scope, and optimize only if parity and measured improvement hold. Keep original b2a repeat/resource failure and350.7925872/360s spent budget unchanged; no current full semantic audit, fresh source/value, baseline/metric/contrast/seed/cap change or scientific run. Then complete original b2 chronology/uncertainty/role contract and b3 full execution fixtures under unchanged original gates.
+No external blocker; verified measurement/reconciliation/closing progress;
+overall development goal active. This terminal record supersedes pending
+closing instructions while preserving all original failures and scope.
+
+
+## 2026-10-05 — P6.7d2b2a2 complete fixed lexical validation, closing pending
+
+### Reconciliation and declared increment
+
+Read AGENTS and whole current plan/log, verify all nine prior live bindings
+and exact before copies, and preserve user commit28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8
+(13commits after8793c49 reviewed). Current inherited doc changes remain.
+Initial plan740000bytes/SHA0b5e1f2e87f1e0f111ffa48ea1ae3233b52336364143f9c4e0a7f9949d09c65f;
+initial log1353025bytes/SHA873e56477d921e8e8dbae7649db3c53d1939d82772a81a7a312bed3bbd6c34b2.
+Exclusive nested lexical-benchmark output was absent before claim. Before
+code changes, entry/cases declare all13fixed cases and full123220118-byte b1
+input, balanced original/candidate then candidate/original pairs, every record
+comparison and candidate<=85% original total/faster both decision rule.
+Each source-freeze/test/static/benchmark family shares180s including failures;
+documents/closing180, owned new outputs<=32,000,000bytes. No scientific cap
+or role/seed/baseline/metric/contrast/interval change. Prior a1 was verified
+progress; old original b2a repeat remained a failed terminal resource gate.
+
+### Implementation and experiment outcome
+
+Add eleven manual expected token/character-column/line-hash behavior cases
+to tests/test_seed_source_evidence.py, covering empty/negative/lookalikes/
+sharp-s, ASCII/punctuation/case, long-s/full Unicode words, combining marks,
+Unicode numeral categories, emoji character positions, CRLF/Unicode line
+separators, last line without newline and long entire words. Existing AST,
+CSV/default/schema/alias/unparsed/no-execution cases remain. Tests first
+against unchanged production matcher. No permanent implementation change.
+
+Exact parity passes on all13 declared cases and the entire123,220,118-byte b1 text, comparing every ordered line/token/character-column/normalized UTF8 line SHA. Both full passes retain1,574,091 bearing lines/1,638,595 references; whole ordered-record SHA0a611dd98f77bdc0d102d5d3b5d221ac816675c5b21b0f19bd7f9527048b36ba. Candidate total32.9219424s versus original31.1501527s (ratio1.0568790; about5.69% slower), and slower in both balanced orders. It fails the predeclared candidate<=85% rule. Retain the original reader unchanged; no alternate case/input/metric or candidate tuning. Negative performance is a valid result.
+
+| Fixed complete-input order | Original seconds | Candidate seconds |
+| --- | ---: | ---: |
+| original -> candidate | 15.6172864 | 16.6217737 |
+| candidate -> original | 15.5328663 | 16.3001687 |
+
+The complete fixed record comparison and full SHA also agree between both
+pairs; every1,574,091line record and1,638,595token reference is compared,
+not just aggregate totals. Tiny-case timing differences do not select another
+workload or decision metric. Production src/core/seed_source_evidence.py
+remains6923bytes/SHA5ce081ac4a62be7160886796b12bd01c489b181a3d08b9e6a033364049352c5c.
+Negative result retained; no optimization, candidate search or selected seeds.
+
+### Commands, resource receipts and failures
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment.py format
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/prepare-v2.py
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment-v2.py freeze
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/prepare-v3.py
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment-v3.py freeze-v3
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/prepare-v4.py
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment-v4.py freeze-v4
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment-v4.py tests-before
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment-v4.py benchmark
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment-v4.py static
+```
+
+Initial orchestration JS had a syntax error and did not dispatch a shell.
+One inline Python preparation command failed PowerShell quote parsing; its
+follow-on v2 launch failed because that file did not exist. No worker/freeze/
+test/benchmark started from those errors. File-backed exclusive preparation
+then corrected the literal declared complete_retained_input key; v1format
+producer remains immutable. V2freeze fails at a historical live test pin
+13.3403354parent seconds. V3binds exact before bytes, then fails28.0401303s
+because actual Git membership grew with unchanged HEAD. V4 requires every
+prior full object/commit/path alias, pins all actual3616objects/34commits and
+passes27.6423593worker/27.7984365parent. All freezes69.1789022<180, with
+110.8210978remaining; no reset. Eight added local objects/2355332bytes have
+complete IDs/bytes in saved history; author/release remains unclaimed.
+All1949physical paths/whole bytes, old source/test/input/proofs and copies
+are retained; current tests have a separate source binding. Old failed
+versions/launch contracts/operations/journals stay immutable and terminal.
+
+Tests174/0errors/0failures/0skips pass12.1031154worker/12.2734379parent.
+Benchmark passes66.5231259worker/66.6846840parent<180. Format0.2666725parent
+and full static1.6924653parent total1.9591378<180. Static executes Ruff check
+src/tests/scripts, format --check all six b2a feature source/test files,
+mypy all configured535files and git diff --check, each exit0. Test/static
+validation receipts retain the exact argv/output/JUnit/SHA. Python3.14.7/
+NumPy2.4.6/Windows11/i7-12700K unchanged; no dependencies or upgrades.
+
+### Experiment artifacts and complete identities
+
+All following are relative to `artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/`; whole files are pinned:
+
+- `entry.json`: 6196bytes / SHA2560282cc058c3838cdd4f981483206c140db948e2506771051528e25fd54cbd35d
+- `cases.json`: 82363bytes / SHA256903835965f9da8136695b30a83329fca1f38ee104348798901a40046539b6c53
+- `source.json`: 2988931bytes / SHA256f4b79b31694d03cf9300639915277527c75f2716467dc4222ab2dc1936defaba
+- `run-increment.py`: 16344bytes / SHA256428f9b99f6184a5166cc929e3e81a8455cf1a93b743208d1d6470afcd4f90b40
+- `run-increment-v2.py`: 16380bytes / SHA25602175fa9c7f7deff9b96707ac717412da9fb96b32b9f579c4e4c40c6f415ba8f
+- `run-increment-v3.py`: 16968bytes / SHA256ffc1b4038b8eb29f32a16a15a44155c9d88044eaacbd40eea6adf35f3516d815
+- `run-increment-v4.py`: 17517bytes / SHA256e9d2da8d4ede545ee3f2ddd776bc712b3a199e347ce2c730748bd300c3796355
+- `freeze-operation.json`: 1768bytes / SHA2568815bfc66d2046e85e2352334aea1fae27ba594bf5b64644a214066947807420
+- `freeze-v3-operation.json`: 1521bytes / SHA2562791874c6f945ed8e141abc15cd57c6e44b29cb2449fbd2ea5a3b19414232331
+- `freeze-v4-validation.json`: 411bytes / SHA2561be6e254d4c6b7770c3907bc4a88abab02d70b1d5a8beff5e2def5cb85eaa76c
+- `freeze-v4-operation.json`: 925bytes / SHA25683347bd2e08d0576fcad2d28e96947c38da2965e6343e5c3d035daa82523e606
+- `tests-before-validation.json`: 2425bytes / SHA256d7f11e153c12fbe2bffba9c06b6361aa83fea885eb63498e1db30b82cf5623e1
+- `tests-before-operation.json`: 924bytes / SHA256735fb2838188cc474b8d0813b324a85ab388305feb202c314879283237771ba9
+- `benchmark-validation.json`: 27389bytes / SHA25672d3b42985a89dcecd0ba6b4c737d98dfdb476557653885e4051931df3beec8e
+- `benchmark-operation.json`: 926bytes / SHA256f1a19e7ef0d9dec6182648d70fc58d9d2b75ec954f82d5d370bb92008660c77c
+- `static-validation.json`: 3454bytes / SHA256b845b7f8c4fdc8fac08a1445922e7cc014bc0e916a17bd69af63e97f1e74e5a2
+- `static-operation.json`: 917bytes / SHA256940ccd344ad379c0dddda236606d2a9dbab7933626dae5f2d7a3daf1a057c3bb
+- `observed-current-history-v4.json`: 2074239bytes / SHA256a9d412dd114e49e7bb7c4456b689a5135816e0d4258b99a6c32d9aa0b9c01626
+- `current-history-reconciliation-v4.json`: 617bytes / SHA256e2e9de6910edf3b5f8f79fcf461040f009ce05c48d5dc1241c42ed7921a0a850
+
+Entry owns eleven whole pre-edit copies. Source owns complete1949physical
+files/current3616Gitobjects/34commits/all aliases plus full historical/
+original source/test/input/proof/document maps and prospective fixtures.
+Benchmark durable per-case/pair started/completed journal, all full record
+checksums/counts/wall/CPU values and negative decision are retained. Outputs
+are about7.73MB before documentation, below32MB. Do not restart occupied
+producers; any later attempt must preserve outcomes and share original caps.
+
+### Plan amendments, skips, blockers and next action
+
+Prospective protocol and measured negative result are appended explicitly;
+all366task lines/criteria and244raw/240nonseparator table lines unchanged.
+Completed IDs so far this session: none; P6.7d2b2a2 waits for complete closing
+preservation plus one original END rebuild and terminal evidence. Negative
+performance satisfies a2 validation, not original b2a whole resource repeat.
+Original first170.7777781s passes; independent repeat180.0148091s hard
+timeout, no validation receipt and final guards unobserved. Original actual
+350.7925872/360spent/9.2074128remaining stays fixed. Whole saved canonical
+equality is unchanged historical evidence. Full prior usage/fresh roles/
+P6.7/b2a/b2/b3/d2b/d2/d3 acceptance remain false/unchecked. Scientific
+600s/16000updates/512MiB, all116contrasts/informative/matched settings and
+five-point precision uncertified at ten remain unchanged.
+
+Skipped: no post-implementation rerun because production source is unchanged;
+no wider pytest, Torch/CUDA/CI/clean-clone/platform, semantic corpus audit,
+scientific/confirmation/training/scoring/replay/model run or large sweep.
+Targeted tests include all meaningful pure/boundary/membership/corruption/
+no-science/metadata/declaration/AST/CSV coverage with0actualskips; optional
+backends are not counted as passed. Original resource gate is an acceptance
+blocker for fresh roles, not an external obstacle to the conservative contract.
+
+**Exact next action after closing:** P6.7d2b2: implement a conservative prior-release chronology and role-admission contract from the entire saved evidence. Preserve declarations versus execution, all aliases/default/symbolic/opaque/unparsed/unknown releases and derived RNG streams; keep admission false while original b2a repeat/resource acceptance is false. Add meaningful pure/boundary/no-science fixtures under a prospectively declared local metadata budget. Preserve the failed repeat and350.7925872/360spent/9.2074128remaining; resolve its original acceptance explicitly before releasing any fresh source/value. Then complete the unchanged fixed-role/config/count/caps/analysis/stopping/source/request contract and b3 full execution fixtures. No sweep or scientific run.
+Overall development remains active; no external blocker requiring user input.
+
+
+### Terminal P6.7d2b2a2 acceptance and exact handoff
+
+Completed task IDs this session:[P6.7d2b2a2]. Only this fixed lexical
+validation is complete after the preservation gate passes109.1708907worker/
+113.4567783entire parent seconds<180, including4.0968794
+preparation. Complete all1949physical/current3616Git/34commit
+whole object/alias pins and every historical3585/33 and prior3608/34 complete
+object/alias, every original/new source/test/input/proof/doc map are checked
+before/after. One original END binding rebuild passes; the same entire old
+source validator uses its full declared clone changing onlyHEAD to28e71ee.
+All24closing science guards0; no semantic corpus/scientific/original reader
+dispatch. Every366task criterion and244raw/240nonseparator table line is
+preserved, old log exact prefix and original CRLF bytes remain.
+
+Commands/outcomes:
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/update-documents.py
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/close-session.py
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/record-terminal.py
+```
+
+Document append passes0.3123460s before
+this terminal append; both share original180document seconds. Closing
+source2994587bytes/SHA9b48698127d55e8a9ae52b735f10611361d7b00d7388e8d5f25dc7ff3afd25de;
+validation9089bytes/SHAddeb3e60a23027b1e8e3da1bad902ee959d67d95223655750c90ce7d12c5c999;
+operation919bytes/SHA82decec04e9faa0d87c3ff8ab37490a4799d85f64cd77899b32c57369dad6e34.
+Immutable log-at-handoff.md1364133bytes/
+SHA8030c1253877aafd0f7ccf43a0911c530b361efb7e212c0cd4b1d12f309da1f5 is preserved as this entire
+append prefix. Exact before-terminal copies, final live nine-document bindings
+and new source/test identities are recorded in handoff-final-log-append.json;
+final-append-operation.json records whole receipt identities, fresh diff and
+combined document cost. All nested producers/outputs are terminal; use saved
+receipts instead of restarting occupied names.
+
+Negative result: every record matches, original complete-input31.1501527s
+versus candidate32.9219424s, ratio1.0568790/about5.69% slower. Original
+production matcher remains whole-byte identical; eleven new behavior cases
+pass with the full174targeted/0skipped suite. Ruff/format/mypy535/diff pass.
+Benchmark66.6846840<180; all source freezes incl failures69.1789022<180;
+tests12.2734379<180; format+static1.9591378<180. No implementation/seed/
+metric/baseline/config/contrast/interval/cap/dependency selection or change.
+
+Original b2a independent semantic repeat remains failed/unaccepted, final
+guards unobserved, no repeat validation receipt.350.7925872/360spent and
+9.2074128remaining stay fixed; old full canonical equality does not pass
+its resource gate. b2a/b2/b3/d2b/d2/P6.7/d3 remain unchecked. No fresh
+role/source/value/confirmation/P6.7 completion authority. Scientific
+600s/16000updates/512MiB/all116contrasts/informative/matched scope and
+five-point precision uncertified at ten remain unchanged. Skips stay those
+explicitly recorded above; no skipped backend is claimed as coverage.
+No external blocker. Original failed resource acceptance blocks fresh role
+admission; conservative chronology/contract implementation is unblocked.
+
+**Exact next action:** P6.7d2b2: implement a conservative prior-release chronology and role-admission contract from the entire saved evidence. Preserve declarations versus execution, all aliases/default/symbolic/opaque/unparsed/unknown releases and derived RNG streams; keep admission false while original b2a repeat/resource acceptance is false. Add meaningful pure/boundary/no-science fixtures under a prospectively declared local metadata budget. Preserve the failed repeat and350.7925872/360spent/9.2074128remaining; resolve its original acceptance explicitly before releasing any fresh source/value. Then complete the unchanged fixed-role/config/count/caps/analysis/stopping/source/request contract and b3 full execution fixtures. No sweep or scientific run.
+Overall development remains active. This terminal evidence supersedes the
+pending-closing instruction while retaining every original negative result.
+
+
+## 2026-10-05 — P6.7d2b2b1 complete saved chronology implementation; closing pending
+
+### Reconciliation, scope and implementation
+
+Read full AGENTS.md, DEVELOPMENT_PLAN.md and development log; their whole entry
+identities are in entry.json. Preserve user HEAD 28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8 (13 commits after
+reviewed 8793c49) and inherited docs/test edits. Verify the prior live a2 receipt,
+all nine document identities and all six existing seed source/test files. The a2
+negative result is valid progress: every fixed reference matches but candidate is
+5.69% slower, so the original matcher stays unchanged. Original b2a resource
+repeat remains failed. Add one prospective b2b1 component with unchanged parent
+criteria, preserving all 366 older task lines and 244 raw/240 nonseparator tables.
+The initial plan was 745937 bytes/SHA 16ab87486d1b125dc90d35db91fa89bb08c508694629dac2b6fa1bdefc9bc830;
+the log was 1368399 bytes/SHA ac3a735da938bceaa0bd44207acbe1a2a0b384690a2734b3f1b08d2a5deefed4.
+
+Before inspection/fixtures, the absent chronology-contract output was exclusively
+claimed. Declare inspection/source/tests/static families 180s including failures,
+two complete independent saved projections 120s each/shared240 including failures,
+closing180 including preparation, documents180 including terminal and new owned
+outputs32,000,000 bytes. Original scientific600s/16000updates/512MiB unchanged.
+Add core/seed_stream_screening.py for the eight fixed source, role split, exposure, initialization, parent selection and circadian local-noise streams; app/prior_seed_corpus.py for complete membership; app/prior_seed_chronology.py for every saved witness and its unknown chronology; and infra/saved_prior_seed_evidence.py for whole-byte IO and before/after membership. Dependency direction is infra -> app -> core. No expression execution, unpickling, RNG sampling, real candidate selection or positive admission path. No new dependency or environment variable.
+Add five test files (including the shared fabricated fixture) with 59 new cases.
+The whole targeted suite also retains the 174 earlier cases and 46 decision/final
+role cases. No test setting, skip, dependency, baseline, metric, seed, contrast,
+interval, objective or exhausted original cap is changed.
+
+### Complete outcomes and uncertainty
+
+The complete saved projection and its independent repeat pass in 80.0653510s and 79.2781750s, each below 120s. All projection attempts, including the failed first attempt, consume 195.2825407/240s. The entire 3,119,886-byte outputs are identical: SHA256 775765742287cb234ee744764cb90ebfd323715301eeef4b5a775129a9a95959. Every original saved witness and alias remains bound. Each accepted projection observes all 24 science guards at zero. This component verifies no new historical execution or actual release event; it does not assert that past execution was absent.
+
+Coverage and all semantic/unknown counters are in projection-v5-validation.json.
+No input subset or representative file is used. Every content row binds the exact
+original input pointer, complete aliases, raw SHA/bytes and canonical whole saved
+witness-record SHA; the entire original witness body remains immutable. Numeric
+candidate/inventory declarations and mapped fields stay conservative occurrences,
+never executed-trial or independent-replication counts. Known quantities/null
+policies remain classified. All AST/default/dynamic/symbolic/unrecorded hash,
+opaque/unparsed/unreachable and actual execution/release uncertainty remains.
+The current eight-stream screen includes circadian local RNG at base+11002.
+No actual candidate base is selected, source constructed or RNG sampled; empty
+collision results cannot grant admission. Verified events zero means this consumer
+verifies no new events, not that historical execution never happened.
+
+### Commands, failures and fixed resource accounting
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/start-chronology-contract.py
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/inspect-saved.py
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/inspect-jsonl-positions.py
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/run-gates-v5.py format-v5
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/run-gates-v5.py freeze-v5
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/run-gates-v5.py tests-v5
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/run-gates-v5.py static-v5
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/run-gates-v5.py projection-v5
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/run-gates-v5.py repeat-v5
+```
+
+Immutable run-gates.py, v2, v3, v4 and v5 retain every launch contract, validation,
+operation and fixture/source version. The first tests fail 5/270 (zero errors/skips)
+because fabricated tuples differ from actual JSON-decoded lists. Preserve 11 exact
+first-version copies; normalize only fixtures through JSON, retaining strict lists.
+Add the valid blank duplicate CSV header case. The initial preservation helper
+fails before writes on an unhashable dict_items union; retain it and charge observed
+0.2801707s plus preparation costs to the source family. V2 tests pass 271/0skips;
+mypy finds duplicate flat-test module imports. Preserve second-version copies;
+repair imports to the repository's flat test convention. V3 tests pass 271, then
+mypy finds a missing local list annotation. Preserve third-version copies and add
+only list[ProposedStreamCollision]. V4 tests/static pass 271/mypy544.
+
+The first complete projection fails after 35.9390147s
+on the mistaken zero-based JSONL assumption; no chronology output or passing
+validation is produced. Failed terminal guard counters are unobserved after the
+exception, never reported as zero. Original reader inspection and every saved JSONL
+row establish exact one-based consecutive positions, preserving blank rows. My
+initial commentary guessed skipped blank rows; this was corrected immediately by
+the actual reader/full inspection. Preserve 11 fourth-version files and the failure.
+Fix exact one-based validation and add eight blank/corrupt-position regressions.
+No line omission, case/seed selection, weakened validation or corpus change.
+V5 passes 279 tests, zero errors/failures/skips; Ruff all src/tests/scripts, format
+nine new files, mypy all 544 configured files and diff pass. Receipts retain full
+commands/output/JUnit and before/after source identities. Read-only lookups for
+two guessed producer filenames were absent; actual saved producers were then read.
+No worker or scientific dispatch occurred from those failed lookups.
+
+All fixed family parent seconds (including failed attempts/preparations):
+{"saved_projection_shared_including_failures": 195.28254070004914, "schema_inspection_including_failures": 14.119099900010042, "source_freeze_including_failures": 150.4208617000369, "static_including_failures": 7.9437969999271445, "tests_including_failures": 63.434427300002426}
+Source v5 freezes every 1960 current physical path/byte (1949 prior plus 11 new
+source/test/docs), all actual 3626 Git objects/34 commits,
+every older whole object/commit/path alias and unchanged HEAD. All original source,
+test, input, proof and documentary snapshots remain; no current semantic reader is
+called. Python3.14.7/NumPy2.4.6/Windows11/i7-12700K unchanged. No upgrade/dependency.
+
+### Experiment artifacts
+
+All paths below are relative to artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/; full whole identities are bound:
+
+- entry.json: 7671 bytes, SHA256 f44a96fb7cdc04d74854e228afbb322d07c39c80f9f511415dd68d63b2ac89ff
+- schema-inspection.json: 3698 bytes, SHA256 eeb1ecfa1875869b6265739d04e3fc7973200910342701eea42316470dab1af4
+- jsonl-position-inspection.json: 792 bytes, SHA256 016256370421b4f870451c9e9bd8ec0309f42614fecf3d72750f5ad93445c64e
+- source-v5.json: 2206324 bytes, SHA256 62da7cdf2228771ff1f36d027db2334712d49f7cd67f22055d7bae30c488252c
+- tests-validation.json: 10869 bytes, SHA256 2f5f2c1f3c8c3601d6815ed90934bbc707d88c8d1dfaf4a0d849919091da83d8
+- tests-v5-validation.json: 1676 bytes, SHA256 d72089b67e73a99262e6824a88eaf7764ea529f88d6828d12149311f3b0bb0ad
+- static-v2-validation.json: 2820 bytes, SHA256 8efe3ad5513b23bfb973a34b380d2d43a6277c450965b0d606160641c0278efc
+- static-v3-validation.json: 2405 bytes, SHA256 0e8415322fa22a01b655da89d5447ff792aec83e770c38d0f8299c38427a412e
+- static-v5-validation.json: 2230 bytes, SHA256 df375996e1d68d364f90e58de068bc6cb4c1d301a6c7205916b5f8b75bc15c9b
+- projection-operation.json: 2322 bytes, SHA256 6d6e053889768642aff5f42f6d81c947dfa9414c634bfeba6c390ceb1f5c54dd
+- projection-v5-validation.json: 2891 bytes, SHA256 ee9c7f2e95e2caa682d0aedc863489f1cbf7991052c715cd9c9b4862721fa2ce
+- projection-v5-operation.json: 853 bytes, SHA256 d79e3e2447210a76e9e5093a406c1c4a3deb95f5e53a7d514f01c3de0aea40a2
+- repeat-v5-validation.json: 2891 bytes, SHA256 731d751d290c8d142fcd3e2c2929df630a90685d483cc3a90d228e54ab203a28
+- repeat-v5-operation.json: 848 bytes, SHA256 4e76abb6ae31672708b0297fd6112fc66b8ccab30f644780a403933f99b36796
+- chronology.json: 3119886 bytes, SHA256 775765742287cb234ee744764cb90ebfd323715301eeef4b5a775129a9a95959
+- chronology-repeat.json: 3119886 bytes, SHA256 775765742287cb234ee744764cb90ebfd323715301eeef4b5a775129a9a95959
+
+Exact entry copies, first/second/third/fourth-version copies, supervised failures,
+complete physical/Git maps and prior live receipts remain immutable. Occupied
+names are terminal. New metadata outputs remain within32MB; do not restart or
+reset any existing producer. Closing and terminal receipt will bind live docs.
+
+### Tasks, skips, acceptance blockers and exact next action
+
+Completed task IDs so far this session: none; only P6.7d2b2b1 is a completion
+candidate after full preservation plus one original END binding rebuild/24guards0.
+Original b2a/b2/b3/d2b/d2/P6.7/d3 stay unchecked with their full unchanged criteria.
+Original first semantic audit170.7777781s passes; repeat180.0148091s times out,
+no repeat validation exists and final guards are unobserved. Original actual
+350.7925872/360s spent and9.2074128s remaining stay fixed. Historical canonical
+equality and this saved projection do not repair that failed resource gate.
+Five-point precision remains uncertified at ten; all116contrasts/informative/
+matched settings remain unchanged. No fresh role/source/value authority.
+
+Skipped: wider pytest, clean-clone/platform/CI, Torch/CUDA backend checks, actual
+current semantic corpus audit, dataset construction, model/RNG/training/scoring/
+confirmation/replay and large sweeps. The targeted suite has zero actual skips;
+unrun backends are not claimed as passing. Existing decision/final role fixtures
+are exercised only through their deterministic unit tests. Failed original resource
+acceptance blocks fresh admission, not further conservative implementation. No
+external blocker requiring user input. ADR-0177 and the guide record why the new
+component is separate and how to extend it without converting unknowns to freshness.
+
+**Exact next action after closing:** P6.7d2b2: bind verified execution and actual role-release chronology from the complete original raw artifact bodies and readers, preserving every saved witness, alias and unknown. Complete the unchanged prospective ordered independent role/config/count/caps/analysis/stopping/source/request contract and all b3 execution fixtures before any d3 source release. Keep admission false while original b2a repeat/resource acceptance is false; explicitly resolve that acceptance without resetting 350.7925872/360 spent or 9.2074128 remaining. No seed selection, confirmation or sweep.
+Overall development remains active. Closing/terminal evidence will supersede
+the pending status while preserving every negative result and acceptance criterion.
+
+
+### Terminal P6.7d2b2b1 acceptance and current handoff
+
+Completed task IDs this session: [P6.7d2b2b1]. Mark only this scoped saved
+chronology/stream-screen component complete after all acceptance evidence passes.
+The full closing gate passes 111.8162546s worker /
+116.4208071s entire parent <180s, including
+4.4341668s preparation. It checks every 1960 current physical
+file/whole byte, all current 3626 Git objects/34 commits, every
+prior and historical complete object/commit/path alias and all original/new source,
+tests, inputs, proofs and document snapshots before/after. One complete original
+END binding rebuild passes; the original full source validator uses the declared
+clone changing only HEAD to28e71ee. All24 closing science guards remain0. Existing
+seed reader/source/test files and unrelated inherited changes are preserved.
+All367 task criteria, every other366 task line,244 raw/240 nonseparator plan table
+lines, the whole old log prefix and original CRLF bytes remain. No dependency,
+baseline, metric, actual seed, interval, contrast, matched config or scientific cap
+change. Overall development remains active; this component advances original b2.
+
+Commands/outcomes:
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/update-documents.py
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/close-session.py
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/chronology-contract/record-terminal.py
+```
+
+Document append passes0.5234251s; this terminal append shares the same180s
+document family. Closing source2215113bytes/SHA256a7c274de8475b658ea89f60022de1df3357a571de407210a66f677c270f4ef07;
+validation8054bytes/SHA256ec214b4dc692a4a6cf6a73874065c7e3c0b96df931d9d3681048cb308d51844a;
+operation824bytes/SHA25677568b11c6e4f5932a8be0d46cc25ba96806a1e7d01fbbb68294bead4b952840.
+Immutable log-at-handoff.md1380650bytes /
+SHA256e40540fe760f61b06a5e687033bccb6688ba9cd92b1587fb4ec1834bdbfe09d1 is the exact append prefix.
+The final live receipt binds all11 current documents (nine inherited plus new ADR
+and guide), all9 new source/test files, before-terminal whole copies and closing
+receipts. final-append-operation.json records whole receipt identity, fresh diff,
+combined document time and total output use. Every occupied producer is terminal.
+
+Both complete independent projections retain all4471 contents/13149 aliases,
+all metadata/declarations/unknowns/text/AST/CSV/JSONL and each full saved-record
+digest. Entire3119886byte outputs are identical: SHA256
+775765742287cb234ee744764cb90ebfd323715301eeef4b5a775129a9a95959. Each accepted projection reports24guards0, no current
+semantic corpus audit/scientific dispatch and no newly verified execution/release
+event. This does not assert absence of historical execution. Fresh admission
+remains false; actual candidates are unselected. All279 targeted tests/0skips and
+Ruff/format/mypy544/diff pass. Exact command/JUnit/output evidence is retained.
+
+Fixed budget families before closing/terminal (including all failures):
+{"documents_including_terminal": 0.5234251000219956, "saved_projection_shared_including_failures": 195.28254070004914, "schema_inspection_including_failures": 14.119099900010042, "source_freeze_including_failures": 150.4208617000369, "static_including_failures": 7.9437969999271445, "tests_including_failures": 63.434427300002426}
+The initial270-case fixture failure, flat-test import failure, type annotation
+failure and35.9390147s failed zero-based JSONL projection remain immutable;
+failed terminal guards are unobserved after exception, not claimed zero. Correct
+one-based/blank-row semantics are proven by the complete saved inspection and
+eight added regressions. No omitted input or validation relaxation. The prior
+fixed lexical negative result remains valid; candidate5.69% slower, original
+matcher unchanged. No attempt or exhausted cap is reset.
+
+Original b2a independent full semantic repeat remains failed/unaccepted, no
+repeat validation receipt and terminal guards unobserved.350.7925872/360s spent
+and9.2074128s remaining are unchanged. Current saved consumer success and original
+canonical equality cannot repair resource acceptance. Original b2a/b2/b3/d2b/
+d2/P6.7/d3 remain unchecked with their full original criteria. Scientific600s/
+16000updates/512MiB and all116 informative/matched contrasts remain unchanged;
+five-point precision remains uncertified at ten. No fresh role/source/value,
+confirmation or P6.7 completion authority. Skipped suites/backends/clean clone/
+CI/current semantic/science/sweep are explicitly listed above; actual targeted
+skips0 and no unrun backend is counted as covered. No external blocker.
+
+**Exact next action:** P6.7d2b2: bind verified execution and actual role-release chronology from the complete original raw artifact bodies and readers, preserving every saved witness, alias and unknown. Complete the unchanged prospective ordered independent role/config/count/caps/analysis/stopping/source/request contract and all b3 execution fixtures before any d3 source release. Keep admission false while original b2a repeat/resource acceptance is false; explicitly resolve that acceptance without resetting 350.7925872/360 spent or 9.2074128 remaining. No seed selection, confirmation or sweep.
+This terminal evidence supersedes the pending-closing status and preserves all
+historical failures, unknowns and unfinished work. Development goal stays active.
+
+
+## 2026-10-05T23:13:16.503484+00:00 — P6.7d2b2b2 original execution/release reader increment
+
+Completed task IDs at this point: []; P6.7d2b2b2 remains pending its full closing.
+Read AGENTS, full plan/current log and prior terminal evidence; reconcile actual
+HEAD28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8 against reviewed8793c49 and the
+prior handoff. Preserve the user commit, inherited modifications and all prior
+367 task lines. Add one scoped b2b2 task prospectively; full acceptance is retained.
+Phase0 and evaluation isolation/matched controls remain the established priority.
+
+Add core/seed_release_chronology.py for supported observer order, app/scored_release_witnesses.py for complete decoded audit/result witnesses, and infra/original_release_witnesses.py for the fixed actual original reader boundary. Dependency direction is infra -> app -> core. No dependency or environment variable is added.
+
+Each original bundle retains all60 family/seed rows,560 cells,120 release views,240 source reads,1680 endpoint calls/67200 examples and2043 causal nodes. One unchanged scoring reader reconstructs both unchanged complete training references per stage. All source/request/audit/state/failure/resource links and full original parts are bound to the prior4471-content/13149-alias ledger; every old uncertainty is preserved. Request UTC is documentary; exact actual release UTC/cross-run order/independent replication count stay unknown. The two original request/audit/resource records remain distinct even though their full causal traces agree. All24 science guards are0 in each accepted stage. Fresh admission and original resource acceptance remain false.
+
+Canonical/repeated full-reader parents pass in62.0712639s/59.9263664s, each<120s; shared121.9976303/240s including failures.
+
+The complete659-case correctness gate passes by603 unchanged existing cases from the preserved full run plus all56 new cases retested with0failures/0skips. The initial full run's single guarded-IO fixture failure is retained. Only that new fixture function changed to closed binary streams; all production/old tests/guards are unchanged. Ruff, six-file formatting, mypy550 and diff pass.
+
+Commands/outcomes (all listed gates pass; exact stdout/JUnit are retained):
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/run-gates-v3.py freeze-v3
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/run-gates-v3.py tests-v3
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/run-gates-v3.py static-v3
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/run-gates-v3.py canonical
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/run-gates-v3.py repeat
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/update-documents.py
+```
+
+Earlier commands/outcomes: start-release-witnesses.py passes1.4188238s; declare-task.py
+adds only the new task/rationale. inspect-original-inputs.py fails9.1002897s on
+the wrong strict-JSON import before body inspection; v2 passes25.1323353s with the
+correct existing seed_usage import. All198 original raw paths/169 distinct whole
+contents, every full training/scoring triplet,150 original sources/79 original
+tests and complete proof/control pins are checked. All24 accepted inspection
+guards0; failed terminal guards are unobserved after exception. No real science.
+check-pure-increment.py pure-format/pure-tests pass37cases/0skips. run-gates.py
+freeze passes; tests runs the entire659 with658pass/1failure/0skips in85.9008563s.
+The new IO fixture used inherited-forbidden Path.read_bytes; production code is
+unchanged. prepare-correction-v2.py preserves full before copies and appends the
+prospective split rationale, then fails on Windows cp1252 read_text. Its0.4444644s
+reported parent wall is conservatively charged to both source/doc families.
+Exclusive v3 uses explicit UTF-8, verifies the exact prior append, corrects only
+that fixture function and preserves all other AST statements/whole production/
+old test bytes. The formatter changes only its blank line, retaining both exact
+versions. tests-v3 matches every original JUnit class/name occurrence and combines
+all603 unchanged existing passes with all56 corrected new passes:659/0errors/
+0failures/0skips,21.0857705s. No test exclusion, guard relaxation, cap reset/increase,
+dependency or production/scientific change. All occupied producers/receipts stay
+immutable. Source freezes are32.5035191s corrected/42.8899520s first, preserving
+all1968 current physical files and all current Git objects/commits/historical
+aliases. Full closing is still required.
+
+Complete source identity: {"byte_count": 2273304, "sha256": "d05d5bd61dfe7a61b357a8c7fd9f83e79ff6acb4d337a47e8bf24fc9a4c8c43e"}
+Full gate identities: {"canonical": {"operation": {"byte_count": 855, "sha256": "4eec2244cdfb2fdedd2799aff15edaa379357e370849413e01931ec0e3692986"}, "validation": {"byte_count": 2692, "sha256": "4a73706cb5165e927aed120c51cf342001633705792033789d1b5a88b37f5ae5"}}, "freeze-v3": {"operation": {"byte_count": 851, "sha256": "8cff82bc987846185c0969e841171b89549f5403636125cda088feed11fdb406"}, "validation": {"byte_count": 352, "sha256": "a43774eb35922b9be563f5336209aa1d9ebfdd066b84e3cb071c5b055a893ab5"}}, "repeat": {"operation": {"byte_count": 853, "sha256": "71ba74834a2cdc87b7f7625024ad299db9051c324623135817d895ab3d03d36b"}, "validation": {"byte_count": 2689, "sha256": "b2ff584b4fdc36c517419c3a579377cc4121a7b2a8496662ded91d7b9c2fce97"}}, "static-v3": {"operation": {"byte_count": 847, "sha256": "725c784399646f43bf018656a03aff090e53a1b0aaa2e0063c59be45d827961d"}, "validation": {"byte_count": 2141, "sha256": "a90f859f010841f69128c8ea807b89e27b8ed15332f032a630d9c17f44d10ea0"}}, "tests-v3": {"operation": {"byte_count": 846, "sha256": "60c9401208382a80c961201e1cfed63f13375fcf165cc8ccd7bc237ba3db5891"}, "validation": {"byte_count": 89935, "sha256": "89ba3505dac86534a566d73a5eb212c5c5b227619358dc631a1f32d511cb9819"}}}
+Whole original witness artifacts: {"artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/canonical-witness.json": {"byte_count": 435509, "sha256": "6d757b6ce07b25bf28addbc58ea53b217af075f116c1b9ea7d99912db20e4cce"}, "artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/repeat-witness.json": {"byte_count": 435540, "sha256": "1aba932a6ecee03f43bdb05db18f66229103a79660c77e9572cee37ef7e0f7f4"}}
+Canonical historical result totals: {"endpoint_calls": 1680, "example_count": 67200, "failed_cells": 0, "failed_endpoints": 0, "final_role_views": 120, "release_calls": 120, "successful_cells": 560, "successful_endpoints": 1680}
+Budget families before document/closing/terminal: {"documents_including_terminal": 0.502879299976924, "inspection_including_failures": 35.652056899969466, "saved_witness_projection_shared_including_failures": 121.99763030000031, "source_freeze_including_failures": 76.10076200003748, "static_including_failures": 3.2658495000796393, "tests_including_failures": 118.88803819997702}
+All180s inspection/source/tests/static/docs/closing,120s each/shared240 readbacks
+(including failures/preparation) and32,000,000 new-output limits remain declared.
+Original failed full semantic repeat remains350.7925872/360spent/9.2074128remaining,
+unaccepted with no validation/terminal guards unobserved. Scientific600s/
+16000updates/512MiB, all116 informative/matched contrasts, baselines/metrics/
+actual seeds/configurations/intervals remain unchanged. Five-point precision
+remains uncertified at ten. Earlier fixed lexical candidate5.69% slower remains
+valid; original production matcher is unchanged. No scientific experiment,
+confirmation, fresh role/source, new semantic corpus audit or large sweep runs.
+
+Skipped: full repository pytest outside this explicit659-case scope, optional
+backend/CUDA parity/performance runs, clean-clone/CI replay and actual scientific
+training/scoring/current semantic audit/sweeps. Targeted skips are0. Static checks
+cover src/tests/scripts and mypy550; unit spies prove fixture behavior, not original
+execution. Only complete actual original readers supply the scoped historical
+readback. No unrun backend is counted covered. No external blocker.
+
+Plan changes: one prospective task addition; explicit split correctness evidence
+after the single fixture failure, with full scope/counts/old criteria retained.
+Preserve every367 older task line and all368 current criteria; tables/old log
+prefix/CRLF remain unchanged. Original b2a/b2/b3/d2b/d2/P6.7/d3 are unfinished,
+with their full unchanged acceptance. No criteria were weakened.
+
+**Exact next action after closing:** P6.7d2b2: conservatively bind remaining unknown historical execution/release effects and complete the prospective ordered independent source/seed/final-role/config/count/caps/analysis/stopping/source/request contract, retaining all original informative/matched cells and116 contrasts. Add the complete b3 isolation/reproducibility/resource/artifact fixtures before any d3 source release. Resolve original b2a repeat/resource acceptance explicitly without resetting350.7925872/360spent or9.2074128remaining. Keep fresh admission false; no seed selection, confirmation or sweep.
+Before marking this task, execute the full close-session.py preservation gate and
+one original END binding rebuild, then record-terminal.py with actual receipts.
+
+
+### 2026-10-05T23:19:34.110897+00:00 — Terminal P6.7d2b2b2 acceptance and current handoff
+
+Completed task IDs this session: [P6.7d2b2b2]. Mark only this scoped original
+execution/release readback component complete after its full acceptance passes.
+All659 distinct targeted cases are covered:603 unchanged existing cases passed
+the retained complete run; all56 new cases pass the corrected full new suite,
+with0errors/0failures/0skips. The single initial fixture failure/Windows UTF-8
+preparation failure and full code/source/JUnit/operations remain immutable.
+Only that fixture function changed to closed binary streams; production/old
+tests/guards remain byte-identical. Ruff/format/mypy550/diff pass.
+
+The canonical/repeated original reader parents pass62.0712639s/
+59.9263664s, each<120s/shared121.9976303<240s. Each dispatches one
+unchanged scoring reader and both unchanged complete training readers; all24
+science guards0. Each binds60 family/seed rows,560 cells,120 release views,240
+source reads,1680 endpoint calls/67200 examples,2043 complete causal nodes and
+every original endpoint/failure/state/request/source/audit/work/resource link.
+Full causal traces/result identities agree while original request/audit/resource
+records remain distinct. Neither deterministic repeats/shared seeds nor saved
+copies add independent source replications. Request UTC remains documentary;
+exact actual release UTC/cross-run order/independent count remain unrecorded.
+All4471 prior contents/13149 aliases/full witnesses/every uncertainty are retained
+in their original entire bound ledger, including the581,898,985-byte evidence.
+Pure/private fixture ports still establish no original-reader verification.
+
+The complete preservation gate passes116.1756790s worker /
+145.3345128s entire parent<180s, including
+28.9345272s preparation. Every1968 current physical file/whole
+byte, all3651 current Git objects/34 commits and all older/historical
+whole objects/commit/path aliases are preserved before/after, with every original
+and new source/test/input/proof/document pin. One complete original END binding
+rebuild passes using only the HEAD28e71ee clone; all24 closing science guards0.
+Inherited user changes, all15 previous source/test files, all367 older task lines,
+all368 criteria,244 raw/240 nonseparator table lines, exact old log prefix and
+original CRLF bytes remain. Only the new task checkbox changes after evidence.
+
+Commands/outcomes:
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/update-documents.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/close-session.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/release-witnesses/record-terminal.py
+```
+
+Closing source: {"byte_count": 2247592, "sha256": "8f29498489cc40bf8f43ddef720f180f7c1206dca2caed57ff109e801a68b309"}
+Closing validation: {"byte_count": 8219, "sha256": "d0d3671ff01ddccc888973bc0600e38c3cc0ec25d63a93248508492de848b4d3"}
+Closing operation: {"byte_count": 880, "sha256": "82ea8359b76109500c98588854fa7591cbdcedc5d2197c96de1d1a21875e344a"}
+Whole witness outputs: {"canonical": {"byte_count": 435509, "sha256": "6d757b6ce07b25bf28addbc58ea53b217af075f116c1b9ea7d99912db20e4cce"}, "repeat": {"byte_count": 435540, "sha256": "1aba932a6ecee03f43bdb05db18f66229103a79660c77e9572cee37ef7e0f7f4"}}
+log-at-handoff.md exact whole append prefix: {"byte_count": 1395834, "sha256": "56a395c8577210b86d903f5832512dd82be8ffa060e4f1f0f08c63d0af19ed93"}
+Budget families before closing/terminal: {"documents_including_terminal": 0.9476731999861687, "inspection_including_failures": 35.652056899969466, "saved_witness_projection_shared_including_failures": 121.99763030000031, "source_freeze_including_failures": 76.10076200003748, "static_including_failures": 3.2658495000796393, "tests_including_failures": 118.88803819997702}
+This final append shares the original180s document family, including all prior
+failures. final-append-operation.json records combined elapsed time, whole final
+live receipt identity, diff and total output<32,000,000. The final live receipt
+binds all13 current documents, all6 new source/test files and all15 preceding
+source/test files, whole before-terminal copies and closing validation/source.
+Every occupied producer is terminal; no scientific experiment is running.
+
+Original b2a full semantic repeat/resource acceptance stays false, with no repeat
+validation and terminal guards unobserved after timeout:350.7925872/360spent/
+9.2074128remaining. No successful saved reader repairs that historical gate.
+Earlier negative lexical timing (candidate5.69% slower) is retained; original
+production matcher is unchanged. All116 original informative/matched contrasts,
+metrics/baselines/actual seeds/configurations/analysis and scientific600s/
+16000updates/512MiB remain unchanged; five-point precision is still uncertified
+at ten. Fresh-role/prior-usage/P6.7 acceptance stays false; no new source/model/
+RNG/training/scoring/final value/candidate selection/current semantic audit or
+sweep. Original b2a/b2/b3/d2b/d2/P6.7/d3 remain unchecked with all full criteria.
+Onlyb2b2 advances. Skipped suites/backends/clean clone/CI/current semantic/science
+are listed in the session entry; actual targeted skips0 and no unrun backend is
+counted covered. No external blocker; full development goal remains active.
+
+**Exact next action:** P6.7d2b2: conservatively bind remaining unknown historical execution/release effects and complete the prospective ordered independent source/seed/final-role/config/count/caps/analysis/stopping/source/request contract, retaining all original informative/matched cells and116 contrasts. Add the complete b3 isolation/reproducibility/resource/artifact fixtures before any d3 source release. Resolve original b2a repeat/resource acceptance explicitly without resetting350.7925872/360spent or9.2074128remaining. Keep fresh admission false; no seed selection, confirmation or sweep.
+This terminal receipt supersedes pending-closing status while preserving every
+historical failure, unknown, original criterion and unfinished task.
+
+
+## 2026-10-06T00:21:57.282371+00:00 — P6.7d2b2c complete prospective design increment
+
+Completed task IDs so far: []; P6.7d2b2c waits for complete preservation.
+Read AGENTS/full plan/current log at entry; HEAD28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8
+still reconciles against reviewed8793c49 plus13 commits. Preserve inherited user
+changes and all21 previous source/test files. Phase0 and evaluation isolation/
+matched settings remain the priority. One new scoped c task, rationale and unchanged
+acceptance were prospectively appended; parent work remains.
+
+Add core/prospective_replications.py, app/prospective_confirmation_design.py, app/prospective_confirmation_evidence.py and infra/prospective_confirmation_inputs.py plus four test files. Dependencies point infra -> app -> core; no new dependency, environment variable or execution adapter. See docs/p67-prospective-confirmation-contract.md and ADR-0179 for inputs/outputs/non-responsibilities, commands, rationale and extension.
+
+Preserve every six-family configuration,56 arm templates,560 cells,480 required phase/role bindings,116 ordered primary contrasts, original analysis/null/constant rules and explicit shared groups/all eight derived offsets. Actual future seed/source/role/request identities remain unset; numeric separation, declared groups and fixture flags establish no independent source or untouched-role proof. Ten replications per family remain exploratory and five-point simultaneous precision is uncertified. The complete optimizer ceiling remains15620 within16000, wall600s/RSS536870912 with0.005s observation; future time/memory fit is unmeasured. No favorable stopping, replacement, metric/baseline/configuration change or cap reset.
+
+Retain all4471 whole prior contents/13149 aliases/witnesses/every unknown and numeric/meaning witness, both complete source-bound original-reader outputs with all2043 causal nodes each, all raw artifact links and every original precision vector/arithmetic/assumption. Both whole saved-contract projections are deterministic; each verifies original150-source/79-test/174-input/proof/control closure, whole581898985-byte saved evidence and prior/current code before/after, with24 science guards0. New original-reader executions0; earlier actual reader validation is whole pinned evidence. Pure/boundary flags supply no current source proof or fresh admission.
+
+Complete saved projections pass25.4059030s/25.4807513s, each<120s/shared50.8866543<240s. Complete856-case correctness coverage passes by791 behaviorally unchanged cases from the full original run plus all65 affected cases retested with0errors/0failures/0skips in15.3569170s;117 new cases are included. Ruff/eight-file format/mypy558/diff pass.
+
+Commands/outcomes:
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/start-prospective-contract.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/declare-task.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/inspect-design-inputs.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/check-core-increment.py core-format
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/check-core-increment.py core-tests
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/check-design-increment.py design-format
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/check-design-increment.py design-tests
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/prepare-evidence-gates.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/check-evidence-increment.py evidence-format
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/check-evidence-increment.py evidence-tests
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/prepare-full-gates.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/prepare-typing-correction.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/prepare-ordered-typing-tests.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/run-ordered-typing-tests.py tests-v2
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/prepare-publication-v2.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/run-gates-v2.py freeze-v2
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/run-gates-v2.py static-v2
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/run-gates-v2.py projection
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/run-gates-v2.py repeat
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/prepare-documents.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/update-documents.py
+```
+
+Entry/whole five-input factory inspection pass1.4101213s/26.3139214s; all24
+inspection guards0. Core/design/evidence increments pass50/158/140 tests with
+0errors/0failures/0skips. Full source freeze passes29.5148072s,
+all1978 physical files and complete current/historical Git membership; complete
+closing is still required. The initial static gate fails five mypy errors in four new files after Ruff/format/diff pass; its whole receipt/stdout/source remain. prepare-typing-correction.py fixes only those sites, preserves all eight before versions, and records two fixtures differ only by erased annotations. The same two fixed bounds are indexed explicitly and the same heterogeneous late-field mapping is named with an annotation. All34 evidence and31 core cases are rerun; all791 other cases retain behavior/whole production bytes. Original full856/0errors/0failures/0skips run120.2879024s remains. Corrected65-case rerun15.3569170s passes; aggregate856 scope and both JUnits remain. No case omission, suppression, exclusion, cap reset or weakened criterion. A separate test-only producer aligns these same65 cases to original JUnit order before any rerun; source-v2 and all180s families remain unchanged.
+Read-only searches initially supplied literal Windows globs/guessed absent
+artifact producer names; corrected with rg --files. No mutation/test exclusion
+or weakened criterion resulted. Occupied producers/receipts stay immutable.
+
+Whole current source: {"byte_count": 2306193, "sha256": "998da97926535d85c38ceca1556474a521165f642d6479639dd0faa836690c64"}
+Whole accepted gate receipts: {"freeze-v2": {"operation": {"byte_count": 852, "sha256": "b3df98bfb137bb8d422ee49da5fddd8de823b06f611257bb41e12098e52c05e0"}, "validation": {"byte_count": 351, "sha256": "769c14df3a806f0e1f315fdb1aefb59031cfad6844ec387a3e24d3b6278157b9"}}, "projection": {"operation": {"byte_count": 860, "sha256": "f727a73be8d3e15c232df41434b2c0005692cfaefe665327ac80739aed30fe72"}, "validation": {"byte_count": 2485, "sha256": "0eec20846a879bb26c4834bc42dfbd26fb2394030169574e6f52bc0654a8c71e"}}, "repeat": {"operation": {"byte_count": 856, "sha256": "5103a257bb97ae7d58fbc0f0088a2091d0e92a3348999aabffc62e8e367cca61"}, "validation": {"byte_count": 2486, "sha256": "55ad22451d46ea12d4787f16f81b5118891dd90045b9f67bb14b551a30ab642c"}}, "static-v2": {"operation": {"byte_count": 847, "sha256": "39bdc4ac147ffdaa495108ea53f14e09457c409eea11a56155b7fe65a859d5f5"}, "validation": {"byte_count": 2265, "sha256": "c7adfb78c9b3817c4a1352550de13a4963558d79c393e94743395afc77d7a7fc"}}, "tests-v2": {"operation": {"byte_count": 848, "sha256": "af1c18d87d44ab6efc2926c77ffedecfaa0066ad26490f48b5b6632994f50399"}, "validation": {"byte_count": 115447, "sha256": "05fd661c0f5394cecf1cfb92862e864d5d78e5945fef434050095c643a2d6290"}}}
+Whole deterministic pending contract artifacts: {"artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/projection-contract.json": {"byte_count": 5900954, "sha256": "5c4bcfdbea434c616784731169bdf115a2d07b314beadaa66dfdab6f9c16c12b"}, "artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/repeat-contract.json": {"byte_count": 5900954, "sha256": "5c4bcfdbea434c616784731169bdf115a2d07b314beadaa66dfdab6f9c16c12b"}}
+Budget families before document/closing/terminal: {"documents_including_terminal": 0.01192550000268966, "inspection_including_failures": 27.724042700021528, "saved_contract_projection_shared_including_failures": 50.886654300033115, "source_freeze_including_failures": 61.180885799985845, "static_including_failures": 4.637227500032168, "tests_including_failures": 169.48983430000953}
+Original old semantic350.7925872/360spent/9.2074128remaining is unchanged,
+unaccepted with no repeat validation and terminal guards unobserved. No new
+semantic corpus audit, source/model/RNG/training/scoring/release, candidate
+selection, confirmation or sweep. Earlier negative lexical candidate5.69%
+slower remains valid; production matcher unchanged. Negative precision and
+original116 contrasts/metrics/baselines/analysis/caps are retained.
+
+Separate coordinator reported human-approved independent clones, never shared
+worktrees/Git objects or lead checkout mutation. Validation was serial CI -> seed
+-> stream under its separately declared small software caps; all three terminal
+before lead timed freeze/readback gates resumed. CI/seed narrow static checks
+pass; stream five-file static/mypy with --follow-imports=skip passes. Their
+runtime tests NOT RUN because supported Python lacks pytest: ZERO runtime
+coverage is claimed. No installs, environment borrowing, training suites or
+science. Patches received for later review only; original150-source closure,
+including v14_resume_files.py, remains unchanged. Exact proposed commits:
+CI656b9b8420a2fd79fa0321d7b0e49485283079f3;
+seed99b66919b3ad617f4e8a5ee12526426485389183;
+stream7762bfde1a27be004f6d57749ef03dd9480db858.
+Seed lane permission covers only immutable input-inspection151588-byte SHA
+da420394bc454aec88f742de9b97429e172b362ac71ff8e00ce89136b6faa2b8,
+its five complete inputs and original uncertainty/failed-resource/no-fresh limits.
+Lead owns integration/source provenance and supported-environment runtime gates.
+
+Skipped: repository-wide pytest outside the fixed856 cases; optional backend,
+CUDA, CPU training/resume suites, clean-clone/CI replay, helper runtime tests,
+actual science/current semantic corpus audit/sweeps. Actual targeted skips0;
+full src/tests/scripts Ruff and configured mypy558 pass. No unrun suite/backend
+is counted covered. No external blocker; actual provenance, b3 and original
+failed-resource acceptance remain unfinished requirements.
+
+Plan changes: scoped complete pending design/evidence task with unchanged
+parents, never an execution authorization. All368 older lines/369 criteria,
+244 raw/240 nonseparator tables, exact old log prefix/CRLF and original
+negative/failure evidence are preserved. Scope/counts/caps unchanged.
+
+**Exact next action after closing:** P6.7d2b2: resolve actual independent source/seed/final-role/source-map/request provenance and every retained prior uncertainty; review the isolated helper proposals and runtime-validate accepted fixtures without modifying the frozen original source closure. Implement the full b3 isolation/parity/mutation/resource/reproducibility/artifact gates before any fresh release. Explicitly resolve original b2a failed repeat/resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Keep actual seeds/source/request unset and fresh authority false until all original requirements pass.
+Before checking c, run the whole close-session.py preservation gate and one
+original END binding rebuild, then record-terminal.py with actual receipts.
+
+
+### 2026-10-06T00:28:37.037576+00:00 — Terminal P6.7d2b2c scoped acceptance and handoff
+
+Completed task IDs this session: [P6.7d2b2c]. The complete pending design/evidence
+component satisfies its full scope after preservation; original parent milestones
+and actual future provenance/execution remain unfinished. Goal turn classification:
+verified progress; the full development objective is NOT complete.
+
+Implement four new modules and four test files (117 new cases). Preserve six full
+family configurations/56 arms/560 cells/480 role requirements/116 ordered primary
+statements, original analysis/null/constant/stopping rules and all eight offsets.
+Explicit shared groups retain original coupling; actual independent replication
+count and new seed/source/role/request identities remain unset. Numeric declarations,
+copied audits and synthetic flags establish no actual provenance or admission.
+Ten replications remain exploratory; five-point precision is still uncertified.
+Original scientific600s/16000updates/536870912-byte RSS caps stay unchanged.
+
+Correctness covers all856 original fixed cases:791 behaviorally unchanged passes
+from the immutable full120.2879024s run plus all65 affected cases passing the
+15.3569170s rerun,0errors/0failures/0skips. All34 evidence and31 core cases were
+rerun after the five-error mypy correction; two fixtures differ only by erased
+annotations. Bounds use the same exact two ordered elements; the core fixture
+names the same heterogeneous mapping. Full JUnit class/name occurrences, whole
+old/corrected versions and the failed2.2312371s static gate remain preserved.
+No exclusion, guard relaxation, typing suppression, dependency, baseline/metric/
+seed choice or cap reset. Ruff/eight-file format/mypy558/diff all pass.
+
+The complete saved projections pass25.4059030s/25.4807513s, each<120s/
+shared50.8866543<240s including failures. Whole output bytes agree. Every4471
+content/13149 alias/whole witness/unknown/meaning/numeric occurrence, both full
+original-reader outputs with2043 nodes each and all116 complete precision
+vectors/arithmetic/assumptions remain. Each checks original150-source/79-test/
+174-input/proof/control closure and complete581898985-byte saved evidence before/
+after, with all24 science guards0. New historical reader executions0: this
+consumer reuses previous whole actual original-reader witnesses. Its pure output
+never establishes current source proof or fresh authority by itself.
+
+The complete closing passes111.7191306s worker /
+116.3851414s entire parent<180s, including
+4.4928722s preparation. Every1978 physical file/whole
+byte, all3674 current Git objects/34
+commits and every older/historical whole object/path alias are preserved before/
+after. All original/current new source/test/input/proof/docs remain; all21
+preceding code/test files and inherited user changes are unchanged. One complete
+original END binding rebuild passes using only the HEAD28e71ee clone; all24
+closing science guards0. All368 older task lines/369 current criteria and244 raw/
+240 nonseparator tables remain. Onlyc checkbox changes; exact old log/CRLF
+prefixes are preserved. Fifteen current docs and all8 new/21 previous code/test
+files are bound by this final live receipt and exact before-terminal snapshots.
+
+Commands/outcomes (closing and terminal accepted, no new science):
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/update-documents-v2.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/prepare-closing.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/close-session.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prospective-contract/record-terminal.py
+```
+
+Before executing publication, read-only review caught the generated unbound
+extra_commands assignment and removed its duplicated prefix; no failed execution
+or root document mutation occurred before that repair. Its exact final producer
+is source-bound. Python3.14 emits SyntaxWarning for literal backslashes in that
+immutable metadata publisher's command prose, including when imported at closing;
+the commands retain their intended bytes and all actual gates pass. Warnings are
+not suppressed, and accepted producers remain unchanged; future new templates
+should use raw/escaped strings. Production and test modules pass static gates.
+
+Closing source: {"byte_count": 2282562, "sha256": "af1cca3fecf7825c06bc64b4eced9ba79ac522ea6a578ce51e3c325c4c23efc8"}
+Closing validation: {"byte_count": 8257, "sha256": "5d5104cb1fdddf85674ffaaa5d486352c9dad57d987972eac6c54ac128b9c2bf"}
+Closing operation: {"byte_count": 878, "sha256": "7b604ba5ee178ff446c50c3764432a338d8ecde5cfcf9141bad44fd875b922bf"}
+Whole repeated saved contracts: {"projection": {"byte_count": 5900954, "sha256": "5c4bcfdbea434c616784731169bdf115a2d07b314beadaa66dfdab6f9c16c12b"}, "repeat": {"byte_count": 5900954, "sha256": "5c4bcfdbea434c616784731169bdf115a2d07b314beadaa66dfdab6f9c16c12b"}}
+Budget families after closing/before terminal: {"closing_including_preparation": 116.38514139998006, "documents_including_terminal": 0.46206879999954253, "inspection_including_failures": 27.724042700021528, "saved_contract_projection_shared_including_failures": 50.886654300033115, "source_freeze_including_failures": 61.180885799985845, "static_including_failures": 4.637227500032168, "tests_including_failures": 169.48983430000953}
+The terminal receipt records final whole doc identities, elapsed document family,
+diff and total new output<32000000. All occupied producers are terminal.
+
+Helper proposals remain accepted FOR REVIEW only, with no integration into the
+audited checkout. CI/seed/stream static checks passed in separate sequential
+software windows; runtime tests NOT RUN because supported Python lacked pytest.
+No borrowed lead environment, installs, source/model/train/scoring/experiment or
+shared Git/worktree objects. All three helper lanes were terminal before these
+timed gates. Supported-environment runtime checks and source/version reconciliation
+are future lead work; no helper result completes a scientific milestone.
+
+Original b2a semantic repeat/resource acceptance remains false with
+350.7925872/360spent/9.2074128remaining, no repeat validation and terminal guards
+unobserved after timeout. Saved projections do not repair that gate. Earlier
+negative lexical timing (candidate5.69% slower) remains valid; production matcher
+unchanged. No actual source/model/RNG/training/scoring/final release/new candidate,
+new current semantic corpus audit, confirmation or large sweep. Skipped repository
+pytest outside856, backend/CUDA/CPU training/resume suites, clean clone/CI,
+helper runtime tests and science are listed above; none is counted covered.
+
+Plan change: complete only the prospectively declared structural/evidence c
+component, preserving full original acceptance and every unfinished parent.
+Original b2a/b2/b3/d2b/d2/P6.7/d3 stay unchecked; actual provenance/roles/request,
+remaining prior-use uncertainty, failed-resource resolution and all b3 execution
+proofs remain required. No external blocker.
+
+**Exact next action:** P6.7d2b2: resolve actual independent source/seed/final-role/source-map/request provenance and every retained prior uncertainty; review the isolated helper proposals and runtime-validate accepted fixtures without modifying the frozen original source closure. Implement the full b3 isolation/parity/mutation/resource/reproducibility/artifact gates before any fresh release. Explicitly resolve original b2a failed repeat/resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Keep actual seeds/source/request unset and fresh authority false until all original requirements pass.
+This terminal receipt supersedes pending closing while retaining all historical
+failures, negative results, original acceptance criteria and unfinished work.
+
+
+## 2026-10-06T00:57:42.059709+00:00 — Isolated helper proposals: runtime and boundary review
+
+Completed task IDs: **none**. Concrete local software validation progressed
+P6.7d2b2/b3; every original scientific acceptance criterion remains required.
+Phase0 read/reconciliation: AGENTS/full plan/full log were read; master
+28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8 remains13 commits after the reviewed
+commit, with inherited dirty/untracked files preserved. Whole15 documents and29
+source/tests were matched to the preceding terminal receipt and copied at entry.
+The separate human-approved helpers' exact whole patches/commits/all tracked
+files were pinned before/after; all source changes were reviewed. No subagent,
+network fetch, install, checkout/reset, branch or commit was made by this turn.
+
+Commands and outcomes
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/start-helper-review.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/helper-review/declare-validation.py
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/helper-review/run-runtime.py ci
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/helper-review/run-runtime.py seed
+.\.venv\Scripts\python.exe -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/helper-review/run-runtime.py stream
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/helper-review/run-probe.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/helper-review/update-documents.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/helper-review/close-session.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/helper-review/record-terminal.py
+```
+
+Each runtime supervisor invokes existing supported Python3.14.7/NumPy2.4.6,
+`-m pytest -q -ra -p no:cacheprovider` on exactly the supplied full test module,
+with whole JUnit names/outcomes/skip reasons and stdout retained. Caches are
+disabled and outputs are outside the audited source trees. Independent clone
+Git objects/no alternates and clean tracked files remain; no original150-source
+change or accepted production integration.
+
+- CI656b9b8:8 pass/0 skips/0 errors/0 failures,1.4510469s. Includes native Windows
+  contender/unlock-on-RuntimeError/KeyboardInterrupt/reacquisition plus mocked
+  Windows/POSIX byte-position/binding checks. Native POSIX execution was not run.
+- Seed99b6691:11 pass/25 skip/0 errors/0 failures,1.4733230s. Every skip says
+  `proposal unbound: lead-owned frozen contract adapter not supplied`. The11
+  cases establish existing private role-schema and early envelope rejection
+  only. Toy hashes are fabricated formatting tokens, not actual provenance;
+  the toy one-replica envelope is not the full560-cell/480-role/116-contrast study.
+- Stream7762bfd:11 pass/0 skips/0 errors/0 failures,1.1975120s. Literal two-feature
+  array/splitter checks cover three-occurrence ordering/replay/final barriers;
+  seeded fixture splitting is software RNG, not a fresh scientific replication.
+- Probe1.7466118s:7 malformed metadata requests reach the raising provider;
+  no source/array/RNG is constructed. These negative observations require early
+  request validation. The valid control proves the sentinel is reachable. No
+  access events are emitted in any probe. AST audit finds app-to-infra imports
+  at20/24/25. Do not infer future-task leakage merely from the coordinator's
+  protocol object: helper docs explicitly restrict that object to coordination.
+
+Total current runtime30 pass/25 skipped (55 collected).
+No failed pytest cases; negative boundary findings are distinct from pytest
+outcomes and are retained, not relabeled as passes. Shared runtime4.1218819/180s;
+entry producer11.6508805/180s; sentinel/static-probe1.7466118/180s; declaration
+0.0113114s charged to shared closing/doc180s. Terminal receipts record actual
+document/closing costs including preparation and all failed producer attempts.
+Read-only PowerShell inspection also reported missing guessed prepare-close-v2,
+close-session-v2 and nested start-helper-review paths; rg found the actual
+prepare-closing/close-session and parent start-helper-review paths. Those reads
+made no mutation and were not mistaken for successful validation gates.
+
+Artifacts: helper-review/entry.json/before whole copies; all3 launch/runtime
+operations and JUnit files; probe-launch-contract.json/probe-observations.json/
+probe-operation.json; review-decisions.json identity{'byte_count': 5556, 'sha256': 'cc4a0d8eeb6aa472029ac4cb41f32200f3abecf1e91fbcaea82c3a763d71a126'}; document-change
+and operation; pending handoff-source/validation/operation and terminal receipt.
+Whole immutable clone inputs remain the originals. No experimental artifact,
+actual scientific source/seed/request/final role or result was generated.
+
+Skipped tests/gates:25 future-contract cases are explicitly unbound. Current
+repository-wide pytest/ruff/format/mypy were not rerun because no lead production
+or existing tests changed; previous856-case and558-source static evidence remains
+historical, not current rerun coverage. Helpers' narrow Ruff/format/mypy checks
+were previously accepted, with `--follow-imports=skip`; that does not establish
+integrated dependency checks. Full backend/training/resume, CUDA/native POSIX,
+clean-clone CI, original semantic repeat/current corpus audits and all scientific
+experiments remain held. No skipped test is counted as covered.
+
+Plan rationale: add review results/next actions only, preserving every369 task
+line/criterion/244 raw240 nonseparator tables and inherited log bytes/CRLF. No
+checkbox changes. The CI source change, unbound seed toy and stream architecture/
+validation defects require revisions before integration. The complete original
+P6.7d2b2/b3 criteria, actual independent source/seed/final-role/source-map/request
+provenance, all4471 prior effects/13149 aliases/unknowns, original failed repeat/
+resource350.7925872/360spent/9.2074128remaining, negative precision and all matched
+settings/metrics remain. No old budget reset or baseline/seed/metric tuning.
+
+External blockers: none. Acceptance work remains unfinished as listed above.
+Development goal continues; this is verified software-validation progress.
+Closing preservation is pending, and no parent milestone is declared complete.
+
+**Exact next action:** P6.7d2b2/b3: adapt the seed proposal to the lead's complete structural contracts. First inspect the existing31 core/28 design tests for overlap; replace the one-replica stream fixtures with the exact60 ordered replica slots/50 planned source groups and bind genuinely missing stream cases to declare_prospective_replica_streams. Keep chronology/source/request/final-role cases explicitly unfinished until a real pure envelope inspector exists; do not supply a dummy adapter or count25 skips as passes. Preserve560 cells/480 roles/116 contrasts and all prior unknowns. Resolve the original failed repeat/resource acceptance explicitly without resetting350.7925872/360spent or9.2074128remaining. Then revise the P6.4 app through inner ports and reject malformed arrival metadata before its provider; reconcile CI source versions before applying its lock patch. Keep actual scientific source/request/seeds unset and fresh authority false.
+
+
+### 2026-10-06T00:59:49.617489+00:00 — Terminal isolated helper review and handoff
+
+Completed task IDs: []; concrete validation progress under P6.7d2b2/b3.
+All3 exact supplied test modules ran in immutable clean independent clones:
+8 CI +11 existing seed-schema +11 literal stream cases pass =30.25 seed-envelope
+cases remain skipped/unbound. No pytest failures/errors; no skipped case covered.
+Seven sentinel observations are negative findings: invalid metadata reaches the
+provider. No source/array/RNG work in the probe; three app-to-infra imports remain.
+No helper integration accepted. The CI original-source change still requires
+explicit historical/current reconciliation; seed needs full contracts; stream
+needs inner ports and pre-provider validation. No algorithm or baseline tuning.
+
+Whole closing accepted in116.8605227s including
+4.6282917s preparation, within shared closing/doc180s.
+Worker112.0649855s. Whole1978 physical files and
+3697 current Git objects/34 commits,
+all historical aliases, original150-source/79-test/174-input/proof closure, all29
+lead code/test files and whole three clone/patch inputs match before/after.
+One complete original END rebuild;24 scientific guard counters0; no new original
+reader executions/current semantic audit or scientific dispatch. This preservation
+does not repair the old unaccepted semantic repeat/resource gate. Original
+350.7925872/360spent/9.2074128remaining, all4471 prior unknown effects/13149 aliases,
+560 cells/480 roles/116 contrasts and negative precision remain unchanged.
+
+Closing source identity:{'byte_count': 2297241, 'sha256': 'e15c50ef057fba43b5e4c7894ff0f4d54ec52871c7559ed6bf93701760001836'}
+Closing validation identity:{'byte_count': 6787, 'sha256': 'c43ca0fea784f82d0808f030b16c3cc2c312e1d3a7086f6bea78466563090add'}
+Closing operation identity:{'byte_count': 890, 'sha256': '22dc1ceba2cf895e45950da28e32e4ab8d4a38eef83adb9cd048e1c8432d6bfd'}
+Accepted budget-family parent seconds before terminal:{"closing_and_documents_including_preparation": 116.94438700005412, "entry_and_inspection_including_failures": 11.650880500033963, "proposal_runtime_including_failures": 4.121881899947766, "static_and_probes_including_failures": 1.7466117999865673}
+The final operation records terminal cost, shared cap, diff and total owned
+output against16000000 bytes. All owned producers are terminal. The previous
+helper-runtime-not-run note is superseded by the explicit current outcomes;
+previous narrow static checks and856-case/558-source results remain historical.
+Current full repository/backend/training/resume/CUDA/native POSIX/clean-clone CI,
+original semantic repeat/audits and scientific tests remain skipped as listed
+above. No unsupported coverage or milestone acceptance claim.
+
+All369 task lines/criteria and244 raw/240 nonseparator table lines are identical
+to entry. Only plan/log appendices changed; original log bytes/CRLF are preserved.
+No unrelated user change, source or test was altered. External blockers:none;
+unfinished acceptance and proposal revision work is explicit. Development goal
+remains active; this turn is verified validation progress, not goal completion.
+
+**Exact next action:** P6.7d2b2/b3: adapt the seed proposal to the lead's complete structural contracts. First inspect the existing31 core/28 design tests for overlap; replace the one-replica stream fixtures with the exact60 ordered replica slots/50 planned source groups and bind genuinely missing stream cases to declare_prospective_replica_streams. Keep chronology/source/request/final-role cases explicitly unfinished until a real pure envelope inspector exists; do not supply a dummy adapter or count25 skips as passes. Preserve560 cells/480 roles/116 contrasts and all prior unknowns. Resolve the original failed repeat/resource acceptance explicitly without resetting350.7925872/360spent or9.2074128remaining. Then revise the P6.4 app through inner ports and reject malformed arrival metadata before its provider; reconcile CI source versions before applying its lock patch. Keep actual scientific source/request/seeds unset and fresh authority false.
+
+
+## 2026-10-06T01:27:35.502909+00:00 — P6.7d2b2d complete external stream declaration implementation
+
+Completed IDs:[] pending full preservation; candidate:P6.7d2b2d only. Prior goal
+turn classified progress (30 helper passes/25 unbound skips and negative boundary
+evidence). Revalidate actual master28e71ee...4fb8/13 commits since8793c49, all15
+current doc and29 source/test hashes against that terminal receipt. Read full
+plan/log/AGENTS; preserve inherited dirty/untracked changes. Existing31 core/28
+design tests already cover seed types/shared groups/collisions. Missing public
+external-stream validation justifies prospective d, keeping all old criteria.
+
+Files:
+src/app/prospective_stream_declarations.py (one public pure function)
+tests/test_prospective_stream_declarations.py (42 guarded full-layout cases)
+docs/p67-prospective-stream-declarations.md (inputs/outputs/commands/extension)
+docs/adr/ADR-0180-bind-complete-stream-claims-to-prospective-design.md
+README/ARCHITECTURE/CHANGELOG/PLAN/log appendices. Existing29 source/test files
+and original150 scientific source closure remain byte-identical.
+
+Public `validate_prospective_stream_declarations` verifies the expected whole
+design identity, all60 ordered bindings/50 planned groups and every400 external
+typed stream claim through unchanged public full-design/replica validators.
+Missing/extra/reordered/duplicate/mutable/detached/symbolic/unknown-record and
+late type/value drift are rejected; exact types defeat value-equal booleans,
+floats and string subclasses. All560 cells/480 roles/116 contrasts, original
+matched settings/eight offsets/analysis/count/caps/stopping remain. Return
+independent replications unknown/fresh authority false; no source/RNG/model/IO/
+scoring/execution or historical-domain proof. Original25 helper cases are unbound.
+
+Current full metadata suite120 passes, including42 new and78 existing cases,
+0errors/0failures/0skips in5.4621946s. Ruff/two-file format/full no-incremental
+mypy560/diff pass. Preserve initial missing-module red1error and full mypy1error,
+exact old fixture versions and the local-only annotation repair; no exclusions,
+ignores, mock adapter or cap reset. Complete preservation remains pending.
+
+
+Commands and outcomes
+
+```powershell
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/start-stream-declaration-contract.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/declare-task.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/run-gates.py red
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/run-format.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/run-gates.py green
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/run-gates.py static
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/prepare-corrected-gates.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/run-gates-v2.py green-v2
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/run-gates-v2.py static-v2
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/update-documents.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/prepare-closing.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/close-session.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/stream-declaration-contract/record-terminal.py
+```
+
+Red: pytest exit2, one collection error because API absent,1.1536110s. Retain full
+trace/JUnit and exact fixture9273-byte version before strengthening. Add value-
+equal boolean/base/value and string-subclass cases before implementation gates.
+Formatter0.1622834s preserves exact two before/after versions. Initial full
+green:120/0errors/0failures/0skips,5.3643351s. Initial full static41.4489035s:
+Ruff/format/diff pass; mypy reports one fixture **mapping error atline200.
+Preserve entire failed receipt and10312-byte fixture. Correct only the local
+`changes: dict[str, dict[str, Any]]` annotation; erased AST is identical.
+Correction0.0166673s is charged to original static family. No type ignore/import
+skip, test omission, false adapter, new dependency or budget reset. New immutable
+runner changes output mode names only and retains the full120 fixed scope.
+Corrected full green120/0errors/0failures/0skips,5.4621946s. Corrected full
+static26.2892236s: Ruff allsrc/tests/scripts, both format files, full no-incremental
+mypy560 and diff pass. Windows Git emits the existing LF->CRLF advisory for
+inherited modified files; advisory is retained, no byte conversion performed.
+
+All42 new cases install raising source/final-release/model/scoring/RNG/Path.open
+guards. Literal offsets/numeric fixtures validate all400 external records,60
+views/50 groups and late full-layout forgeries. Fixture base1 exists solely to
+testTrue==1 coercion; no scientific seed is chosen. Mutable/unknown record,
+symbolic/float/boolean type, checksum/design drift, all eight cross-group offsets
+and same-count substitutions fail. The120-case scope includes31 existing core,
+28 design and19 seed-stream cases. Each supervised command retains full argv,
+JUnit classname/name/outcomes/source pins and stdout/stderr. No actual prior
+history or source/RNG-domain proof is manufactured by those fixtures.
+
+Budgets before documents:{"closing_and_documents_including_preparation": 0.6144249999779277, "entry_including_failures": 0.18966019997606054, "static_including_failures": 67.91707779996796, "tests_including_failures": 11.980140699946787}. Hard
+entry/tests/static180s each and shared closing/doc180s including preparation and
+terminal;16MB new output. All failures charged. Original350.7925872/360 spent and
+9.2074128 remaining are unchanged. No original reader/current semantic audit,
+actual scientific source/model/RNG/training/scoring, confirmation or large sweep.
+The current module passes numeric metadata only and returns fresh authority false.
+
+Artifacts: stream-declaration-contract entry/before/declaration, red/green/static/
+green-v2/static-v2 XML/validation/operation/launch files, exact before-strengthening/
+format/type-correction versions, annotation-correction operation, document-change/
+operation and pending whole handoff/terminal receipts. No scientific artifact.
+Skipped: full repository pytest outside120, backend/CUDA/training/resume/native
+POSIX/clean-clone CI, original semantic repeat and scientific experiments. The25
+helper future-envelope cases remain unbound; three held helper proposals remain
+unintegrated. Only related numeric behavior is implemented here; no skip becomes
+pass and no history, role, source/request, chronological or domain case is counted
+complete. Previous negative experiments/precision and complete original matrix
+and matched baselines/metrics/count/caps/stopping remain.
+
+Plan changes: add d prospectively, preserving all369 older criteria/task lines
+and244 raw240 nonseparator tables. Keep unfinished b2/b3/d2b/d2/P6.7/d3 acceptance,
+all4471 prior contents/13149 aliases/unknowns, actual future identities and full
+execution/resource/reproducibility/artifact gates. d is pending closing; completion
+will change only its checkbox and append evidence. External blockers:none.
+Development goal is active; this is implementation progress, not goal completion.
+
+**Exact next action:** P6.7d2b2/b3: define the complete pure prospective source/request envelope and compose the new400-stream check. Start with all480 ordered role declarations and their expected counts/availability: implement typed role/source/request identity preflight and late omission/reordering/overlap/mutation tests on the full560-cell/116-contrast layout, with actual final values unavailable. Keep actual source/request/seeds unset, all prior unknowns and fresh/execution authority false. Bind or explicitly revise each remaining helper case only against the real full envelope; no dummy adapter or skipped coverage. Resolve the original failed resource acceptance explicitly without resetting 350.7925872/360spent or9.2074128remaining. Complete source/version and b3 isolation/parity/resource/reproducibility/artifact proof before science or integrating the held CI/P6.4 proposals.
+
+
+### 2026-10-06T01:31:03.626488+00:00 — Terminal P6.7d2b2d scoped acceptance and handoff
+
+Completed IDs:[P6.7d2b2d]. Full external numeric declaration acceptance passes;
+development goal remains active and original parent milestones remain unfinished.
+Implement one pure public app validator, one42-case full-layout test module, guide
+and ADR-0180. No existing source/test changed. Existing31 core/28 design/19 stream
+cases retain behavior; full120-case green rerun passes after local annotation-only
+repair. All guarded types/design/checksum/late record/omission/reorder/collision/
+unknown-domain schema cases remain; scientific IO/RNG/model/source/score guards
+raise. No mocked contract or skipped case is reported as implemented coverage.
+
+P6.7d2b2d is complete for its full declared external-stream scope. The function
+checks the complete pinned design/60 ordered bindings/50 planned groups/all400
+typed claims through existing public validators.120 current metadata tests pass
+(42 new/78 related),0errors/0failures/0skips; Ruff/two-file format/full mypy560/diff
+pass. Initial missing-module and mypy failures, exact fixture versions and local
+annotation-only correction remain. No test/import exclusion or old cap reset.
+
+Full preservation passes116.0157001s including
+4.7566800s preparation. All1982 physical files,
+3701 current Git objects/34 commits
+and all historical aliases, original150 sources/79 tests/174 inputs/proofs, all29
+previous code files plus2 new and all held clone/patch pins match before/after.
+One complete original END rebuild/24 science guards0. No new original reader,
+semantic corpus audit or scientific dispatch. Whole d acceptance is recorded;
+all369 prior task lines/criteria and244 raw240 nonseparator tables remain.
+
+Actual future source/seed/role/request provenance, original failed resource
+350.7925872/360spent/9.2074128remaining, all prior unknowns, negative precision and
+full b2/b3/d2b/d2/P6.7/d3 criteria stay required. Independent replications remain
+unknown, fresh authority false;25 helper cases remain unbound and all helper
+integrations held. No scientific seed/config/baseline/metric/cap/stop change.
+
+Evidence: stream-declaration-contract/handoff-source.json, handoff-validation.json,
+handoff-operation.json and handoff-final-log-append.json/final-append-operation.json.
+Exact next action: P6.7d2b2/b3: define the complete pure prospective source/request envelope and compose the new400-stream check. Start with all480 ordered role declarations and their expected counts/availability: implement typed role/source/request identity preflight and late omission/reordering/overlap/mutation tests on the full560-cell/116-contrast layout, with actual final values unavailable. Keep actual source/request/seeds unset, all prior unknowns and fresh/execution authority false. Bind or explicitly revise each remaining helper case only against the real full envelope; no dummy adapter or skipped coverage. Resolve the original failed resource acceptance explicitly without resetting 350.7925872/360spent or9.2074128remaining. Complete source/version and b3 isolation/parity/resource/reproducibility/artifact proof before science or integrating the held CI/P6.4 proposals.
+
+Closing source identity:{'byte_count': 2312695, 'sha256': 'e7905b1cb7d84bc04b55262377bee8520f0907fa358bf1091683f930ba406bcd'}
+Closing validation identity:{'byte_count': 7439, 'sha256': '5942635122070ddffa79e63e7131b762608c6216bc59e632fb5b41191f660fda'}
+Closing operation identity:{'byte_count': 890, 'sha256': 'c839ec99597258f70402d5378bd9edb615b9c45456536efe78f448d385e96a69'}
+Budget families before terminal:{"closing_and_documents_including_preparation": 117.27799530001357, "entry_including_failures": 0.18966019997606054, "static_including_failures": 67.91707779996796, "tests_including_failures": 11.980140699946787}
+Final operation records terminal elapsed/shared180 remainder, diff and total owned
+output against16MB. All owned producers are terminal. Skipped full repository
+pytest outside120/backend/training/resume/CUDA/native POSIX/clean-clone CI/original
+semantic repeat/science remain as listed above. Previous helper25 skips remain
+explicitly unbound; no actual source/request/seed chosen, final value or experiment.
+No external blocker. Preserve all original failures/negative results/criteria;
+this is verified implementation progress. The earlier pending note is superseded.
+
+**Exact next action:** P6.7d2b2/b3: define the complete pure prospective source/request envelope and compose the new400-stream check. Start with all480 ordered role declarations and their expected counts/availability: implement typed role/source/request identity preflight and late omission/reordering/overlap/mutation tests on the full560-cell/116-contrast layout, with actual final values unavailable. Keep actual source/request/seeds unset, all prior unknowns and fresh/execution authority false. Bind or explicitly revise each remaining helper case only against the real full envelope; no dummy adapter or skipped coverage. Resolve the original failed resource acceptance explicitly without resetting 350.7925872/360spent or9.2074128remaining. Complete source/version and b3 isolation/parity/resource/reproducibility/artifact proof before science or integrating the held CI/P6.4 proposals.
+
+
+## 2026-10-06T02:04:09.582400+00:00 — P6.7d2b2e complete role/source/request metadata implementation
+
+Completed IDs:[] pending whole preservation; candidate:P6.7d2b2e only. Read full
+AGENTS/plan/log; revalidated d terminal and all17 docs/31 code files before edits.
+Actual master28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8 retains13 commits since
+reviewed8793c49; inherited dirty/untracked files preserved. No branch or commit.
+Live splitter inspection justifies B60-row subset of original120 development
+positions, not a new dense ID range. All six fixed family data configurations
+agree on160/160 samples,.25 test,.8/1 noise,40-degree B rotation,(.9,-.7) B
+translation,.5 B exposure,.2/.2 inner/outer fractions. Method settings differ;
+data configuration pins exclude method/sleep parameters while complete design
+pin preserves those original settings. Actual seeded/class-balanced role
+assignment and physical source/code/UTC/release provenance remain unverified.
+
+Files: src/core/prospective_role_requests.py (frozen typed metadata/result),
+src/app/prospective_role_requests.py (pure factory/encoder/full inspector),
+tests/test_prospective_role_requests.py (54 guarded cases),
+docs/p67-prospective-role-requests.md and ADR-0181. README/architecture/changelog/
+plan/log append only; all31 older source/test files and original150 sources unchanged.
+
+`inspect_prospective_role_request` composes the existing full-design and400-stream
+checks with all100 ordered phase-source descriptors and480 ordered role records.
+Bind complete design/source-map/request metadata identities, expected code
+declaration and every original data argument/geometry/derived data seed. Exact
+types/order/counts/IDs/availability/use policies and planned shared views are
+checked; resealing cannot repair foreign, partial, mutable, overlapping, reordered,
+early-release, unknown-schema or array/execution claims. Preserve A120 development
+positions and B60 retained original positions in0..119, final IDs0..39 and all560
+cells/116 contrasts/original settings/analysis/count/caps/stopping. No existing
+source/test changed. Return all actual provenance/chronology/authority flags false,
+independent replications unknown and all12 actual-proof obligations still required.
+
+Full fixed metadata suite174 passes (54 new/120 existing),0errors/0failures/0skips
+in14.7607819s. Ruff/all3-file format/full
+no-incremental mypy563/diff pass. Retain initial missing API, reserved pytest fixture
+name and mypy local-variable failures; fix only fixture/local names and formatting,
+with exact failed versions preserved. No exclusions, weakened tests or cap reset.
+Full preservation is pending; original25 helper cases remain unbound. Metadata
+hashes and expected code declarations do not verify physical source or release.
+
+
+Commands and outcomes (owned producers are single-use, preserve occupied receipts):
+```powershell
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/start-role-source-request-contract.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/declare-task.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/prepare-gates.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/run-gates.py red
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/run-format.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/run-gates.py green
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/run-gates.py static
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/correct-local-names.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/run-gates-v2.py green-v2
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/prepare-final-gates.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/run-format-v2.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/run-gates-v3.py green-v3
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/run-gates-v3.py static-v3
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/capture-red-fixture.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/update-documents.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/prepare-closing.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/close-session.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/role-source-request-contract/record-terminal.py
+```
+Red pytest exit2/one missing-module error,1.1047177s,
+acceptedFalse. Exact13116-byte red fixture recovered from the retained pre-format
+version by undoing the recorded post-red oracle strengthening; full recorded
+launch SHA/byte count match before exclusive saving. Initial green exit2/one
+collection error: pytest reserves `request` for its own fixture,
+1.3569077s. Initial static
+25.9702413s: Ruff/format/diff pass;
+mypy one error at app line222 (tuple/set local variable name). Exact before-name-
+correction app/test copies match initial failed gate pins. Rename fixture/local
+variables only, then format (before/after bytes retained); no ignore/import skip
+or test removal. Green-v2 all174 pass in14.6274098s;
+final green-v3 all174 pass in14.7607819s,
+final static-v3 full563/Ruff/format/diff pass in25.5128208s.
+Inherited LF/CRLF Git advisories retained; no line-ending conversion.
+
+All54 new cases raise on source/final release, RNG, model construction/scoring
+and Path.open. Full valid100/480/400/60 control includes B60..119 IDs, exact
+shared gating/replay views and two independent literal generator argument
+oracles. Late resealed omissions/duplicates/reorder/overlap, valid-looking changed
+shared subset, bool/float ordinal/count/flag and string-subclass coercions,
+unknown dataclass subclasses, foreign final namespace/position/order and detached
+full hashes fail without input mutation. Expected code declaration is fabricated
+fixture metadata, never actual code/source proof or scientific seed choice.
+Keep all12 real-proof obligations and every earlier prior unknown explicit.
+
+Budget families before documents:{"closing_and_documents_including_preparation": 0.5853510000742972, "entry_including_failures": 0.4373673999798484, "static_including_failures": 51.81351700006053, "tests_including_failures": 31.851342599955387}.
+Entry/tests/static180s each including failures; shared docs/preparation/closing/
+terminal180s;16MB owned output. Original350.7925872/360spent and9.2074128remaining
+unchanged. No semantic corpus audit/original reader/scientific data/RNG/model/
+training/scoring/final values/sweep. Artifacts: role-source-request-contract entry,
+before docs/declaration/gate launch/validation/operation/JUnit, exact red fixture,
+before-format/before-name-correction copies and final name/format receipts;
+document-change/operation, pending whole handoff and terminal receipts. No experiment.
+Skipped: full repository pytest outside174, backend/training/resume/CUDA/native
+POSIX/clean-clone CI, original semantic repeat and scientific experiments.25
+helper cases remain unbound; CI/seed-role/multiphase proposals remain held.
+Plan rationale and all unfinished b2/b3/d2b/d2/P6.7/d3 criteria preserved.
+External blockers:none. This is implementation progress; goal remains active.
+
+**Exact next action:** P6.7d2b2/b3: implement actual prospective request admission before first source. Read src/infra/prospective_confirmation_inputs.py, src/app/prospective_confirmation_evidence.py and the new role request modules, then define the inner proof port and outer full-envelope IO adapter for whole code/source-map/request bytes, prospective UTC and exclusive ownership, all prior uncertainty effects, joint resource and independent-repeat envelopes. Start with full100-source/480-role fixtures and late physical-pin/UTC/owner/resource corruption tests; bind or explicitly revise each of the25 unbound helper cases against this real full request, never a dummy adapter. Preserve actual seeds/source/arrays unset, unknown independence, fresh/execution authority false until full admission and b3 isolation/parity/resource/reproducibility/artifact/readback proofs pass. Explicitly resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Keep held CI/P6.4 proposals unintegrated until source/version and boundary corrections pass.
+
+
+### 2026-10-06T02:09:42.347303+00:00 — Terminal P6.7d2b2e scoped acceptance and handoff
+
+Completed IDs:[P6.7d2b2e]. Prior pending note is superseded only for this metadata
+component. Core/app modules,54-case fixture suite, guide and ADR-0181 delivered;
+all older code and working functionality preserved. Commands and outcomes, every
+failed attempt/correction, skips and artifact paths remain in the preceding
+session entry. All owned producers terminal; no new experiment or final value.
+
+P6.7d2b2e alone is complete for the full declared metadata envelope:100 ordered
+phase sources,480 roles,400 streams,60 bindings/50 groups, all560 cells/116
+contrasts/settings/counts/analysis/caps/stopping unchanged. Exact schemas/types,
+whole identities, generator declarations, disjoint original development positions,
+final IDs, shared views and availability/use policies checked. Actual source,
+role, code and chronology unverified; independence unknown; fresh/execution/
+precision authority false. All12 actual-proof obligations and25 unbound helper
+cases remain required. All370 older task criteria and244 raw240 nonseparator
+table rows preserved. Original b2/b3/d2b/d2/P6.7/d3 remain unfinished.
+
+Full174-case scope passes (54 new/120 related),0errors/0failures/0skips. Ruff,
+3-file format/full mypy563/diff pass. Preserve missing API, reserved pytest fixture
+and local tuple/set typing failures, exact versions, name-only corrections and
+formatting. All31 previous source/test files remain byte-identical,3 new files
+added; no dependency, scientific setting/seed/baseline/metric/cap/stop changes.
+
+Whole preservation passes in115.2141911s including
+4.5584410s preparation:1987 physical files,
+3716 current Git objects/34 commits,
+all current/historical aliases, original150 sources/79 tests/174 inputs/proofs,
+all34 lead code pins and all held clone/patch pins match before/after. One complete
+original END rebuild,24 science guards0. No original reader/semantic audit/science.
+Original failed resource350.7925872/360spent/9.2074128remaining, all earlier prior
+unknowns and negative precision remain unresolved. Development goal remains active.
+
+Evidence: role-source-request-contract/handoff-source.json, handoff-validation.json,
+handoff-operation.json and handoff-final-log-append.json/final-append-operation.json.
+Exact next action: P6.7d2b2/b3: implement actual prospective request admission before first source. Read src/infra/prospective_confirmation_inputs.py, src/app/prospective_confirmation_evidence.py and the new role request modules, then define the inner proof port and outer full-envelope IO adapter for whole code/source-map/request bytes, prospective UTC and exclusive ownership, all prior uncertainty effects, joint resource and independent-repeat envelopes. Start with full100-source/480-role fixtures and late physical-pin/UTC/owner/resource corruption tests; bind or explicitly revise each of the25 unbound helper cases against this real full request, never a dummy adapter. Preserve actual seeds/source/arrays unset, unknown independence, fresh/execution authority false until full admission and b3 isolation/parity/resource/reproducibility/artifact/readback proofs pass. Explicitly resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Keep held CI/P6.4 proposals unintegrated until source/version and boundary corrections pass.
+
+Closing source identity:{'byte_count': 2336447, 'sha256': 'ee3a66b5520f75e6e5fd85df497c211062f0df3b3643dec7c82d8b9cf279cec5'}
+Closing validation identity:{'byte_count': 8177, 'sha256': '308aa695a0e6aefccc50773ef554157e6723a41686583cea624afe009c6856bf'}
+Closing operation identity:{'byte_count': 892, 'sha256': 'cdf6f770c43478809eb82d11589a3ec59679b0c1aae691bbb69784b48ef7625c'}
+Budget families before terminal:{"closing_and_documents_including_preparation": 115.95715130009921, "entry_including_failures": 0.4373673999798484, "static_including_failures": 51.81351700006053, "tests_including_failures": 31.851342599955387}
+Final receipt records terminal elapsed, shared180s total/remainder, diff and owned
+output against16MB. No old budget reset or original failed repeat repaired.
+Skipped: full repository pytest outside174, backend/training/resume/CUDA/native
+POSIX/clean-clone CI, original semantic repeat and science.25 original helper
+cases remain unbound, and CI/seed-role/multiphase proposals held. No external
+blocker; actual admission and full b3 acceptance are the next uncompleted work.
+
+**Exact next action:** P6.7d2b2/b3: implement actual prospective request admission before first source. Read src/infra/prospective_confirmation_inputs.py, src/app/prospective_confirmation_evidence.py and the new role request modules, then define the inner proof port and outer full-envelope IO adapter for whole code/source-map/request bytes, prospective UTC and exclusive ownership, all prior uncertainty effects, joint resource and independent-repeat envelopes. Start with full100-source/480-role fixtures and late physical-pin/UTC/owner/resource corruption tests; bind or explicitly revise each of the25 unbound helper cases against this real full request, never a dummy adapter. Preserve actual seeds/source/arrays unset, unknown independence, fresh/execution authority false until full admission and b3 isolation/parity/resource/reproducibility/artifact/readback proofs pass. Explicitly resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Keep held CI/P6.4 proposals unintegrated until source/version and boundary corrections pass.
+
+
+## 2026-10-06T02:36:42.881847+00:00 — P6.7d2b2f complete physical bundle boundary implementation
+
+Completed IDs:[] pending preservation; candidate:P6.7d2b2f only. Previous goal
+turn:verified implementation progress (e complete). Current checkout/head/master
+28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8/13 commits since8793c49 revalidated
+against e terminal:all19 docs/34 source/test files match. Full plan/log/AGENTS
+read and copied; inherited dirty/untracked changes preserved. No new branch/commit.
+Inspect actual saved-input/evidence reader and full role/source modules; the old
+reader binds five historical bodies and retains4471 contents/13149 aliases but
+does not verify this current whole request/code/map. Add f prospectively with
+complete physical integrity scope, preserving every parent/unknown/failed gate.
+
+New files:
+src/core/prospective_request_bundles.py (immutable descriptors/snapshot/result/port)
+src/app/prospective_request_bundles.py (pure strict decoder/full preflight)
+src/infra/prospective_request_bundles.py (whole canonical file reader/recheck)
+tests/prospective_request_bundle_fixtures.py (full fabricated metadata/real temp IO)
+tests/test_prospective_request_bundles.py (55 science-guarded cases)
+docs/p67-prospective-request-bundles.md and ADR-0182; five existing docs appended.
+No older source/test or original150 closure altered. Layer boundaries preserved.
+
+`preflight_prospective_request_bundle` composes the full e inspector through an
+inner read/recheck port. The real outer reader binds canonical whole request,
+source metadata map, closed expected code manifest and every declared code file
+before and after app inspection. Full100 sources/480 roles/400 streams/60 views
+are preserved. Exact schemas/types/membership/identities and distinct regular
+paths, failed/pending markers, canonical UTC/owner and original full resource/
+same-request repeat declarations are checked. Retain all560 cells/116 contrasts/
+settings/analysis/count/caps/stopping, all12 actual-proof obligations and every
+prior unknown. Physically matching declared files do not prove runtime closure,
+exclusive ownership, before-source chronology, untouched sources, independence,
+actual resource fit/repetition or b3. All actual/fresh/execution/precision flags
+remain false; independent replications unknown;25 original helper cases unbound.
+
+Full304 behavioral tests pass (55 new/249 related),0errors/0failures/0skips in
+56.0459501s. Ruff/all5-file format/full
+no-incremental mypy568/diff pass. Preserve missing API, two tuple-pop fixture
+failures, duplicate module-name failure and two deliberately invalid payload
+typing failures. Correct fixtures/import and validate foreign rows before
+attributes; add six regressions. Final local Any annotation only has identical
+runtime AST after erasure; no optional56s pytest rerun, scope exclusion/ignore,
+test removal or cap reset. Whole preservation is pending. No scientific work.
+
+
+Commands and outcomes (owned producers single-use; occupied receipts retained):
+```powershell
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prepare-request-bundle-session.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/start-request-bundle-boundary.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/declare-task.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/prepare-gates.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/run-gates.py red
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/run-format.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/run-gates.py green
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/run-gates.py static
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/preserve-initial-failures.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/prepare-corrected-gates.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/run-format-v2.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/run-gates-v2.py green-v2
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/run-gates-v2.py static-v2
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/correct-type-fixture.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/run-gates-v3.py static-v3
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/prepare-documents.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/update-documents.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/prepare-closing.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/close-session.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/prepare-terminal.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/request-bundle-boundary/record-terminal.py
+```
+Red1 missing-module collection error/exit2,1.1956138s;
+exact10018-byte test/5163-byte helper before implementation preserved in
+red-fixtures. Initial full green298 collected/2 failures/0skips,
+53.9165969s: omission setup used tuple.pop,
+not boundary acceptance. Initial static2.3958902s:
+Ruff/format/diff pass; mypy duplicate helper module names prevents full checking.
+Retain all five failed source/test versions. Slice tuple omission, adopt existing
+bare fixture import convention (no __init__/configuration change), move exact
+foreign row type check before attributes; add five foreign-port and one actual
+Windows hardlink alias regression. Full green-v2 all304 pass,
+56.0459501s,0errors/0failures/0skips.
+Full static-v226.9470364s checks568:
+two invalid adversarial payload type errors, Ruff/format/diff pass. Preserve full
+13105-byte current fixture, annotate only local snapshot Any to express deliberate
+invalid values. Complete runtime AST after annotation erasure identical; production
+unchanged, full304 behavior/case set preserved without optional pytest repetition.
+Final static-v329.1866520s: Ruff all,
+five-file format, full no-incremental mypy568/diff pass. No ignore/import skip or
+scope reduction; existing LF/CRLF advisories retained without bytes conversion.
+
+New full real-file valid control has100/480/400/60 declarations and five declared
+temporary code files; these invented members are not a scientific runtime closure.
+Request/source-map/code metadata are real whole canonical files, and all file
+members are read/rechecked. Last equal-size byte drift in all four file kinds,
+late code mutation through recheck, code membership resealing, hardlink alias,
+unknown fields/port records, duplicate/nonfinite/noncanonical JSON, malformed/
+future/naive UTC, owner/cap/repeat/array/execution claims and unsafe specs fail.
+All55 new tests guard source/final release/model construction/scoring/RNG; IO
+allowed intentionally. New numeric metadata is fabricated, not actual seed choice.
+249 related cases:174 previous metadata +24 historical input +34 saved evidence
++17 strict seed JSON. All twelve actual proof obligations remain open. Original
+25 toy helper cases reviewed individually and recorded as unbound in guide;
+no dummy adapter, mock positive admission or skipped case promoted to pass.
+
+Budget families before documents:{"closing_and_documents_including_preparation": 0.6363895999384113, "entry_including_failures": 0.19416770001407713, "static_including_failures": 58.94007320009405, "tests_including_failures": 111.1608750000014}.
+Entry/tests/static180s each including all failures; shared docs/preparation/whole
+closing/terminal180s,16MB output. Original350.7925872/360spent/9.2074128remaining
+unchanged. No original semantic audit/reader/current source construction/RNG/model/
+training/final release/scoring/confirmation/sweep or new experiment artifact.
+Artifacts: request-bundle-boundary entry/declaration/exact before documents;
+red/initial/final gate launch/validation/operation/JUnit, all failed source versions,
+before-format/correction/annotation copies and operation; document-change/operation,
+pending whole handoff/terminal receipts. All settings/baselines/metrics/caps/stops
+and prior negative results preserved. Skipped full repository pytest outside304,
+backend/CUDA/training/resume/native POSIX/clean-clone CI/original semantic repeat/
+science and optional pytest after verified annotation-only repair. Original25
+helper tests remain unbound; CI/seed-role/P6.4 proposals remain held.
+External blockers:none. Full actual admission/runtime/lease/prior/resource/repeat/
+b3 proofs are unfinished; overall goal active. Only f may complete after preservation.
+
+**Exact next action:** P6.7d2b2/b3: compose actual admission proofs with the full verified request bundle. First inspect original role splitting/exposure and whether every declared development ID can be known before any source; preserve original semantics and explicitly revise incompatible prospective assumptions rather than compute source/labels early. Bind a trusted complete runtime code closure and a live exclusive-owner lease through inner ports, then compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and every prior effect with all100 sources/480 roles. Add full late lease/closure/prior/request/resource corruption tests; bind or explicitly revise all25 helper cases against real full proofs. Do not infer chronology, freshness, independence or prior absence from declarations. Resolve original failed resource acceptance explicitly without resetting350.7925872/360spent or9.2074128remaining; preserve all b3 isolation/parity/resource/repeat/artifact/readback gates and held CI/P6.4 proposals. Keep actual seeds/source/arrays unset and execution false until full admission passes.
+
+
+### 2026-10-06T02:43:41.631312+00:00 — Terminal P6.7d2b2f scoped acceptance and handoff
+
+Completed IDs:[P6.7d2b2f]. Only the complete declared file/protocol boundary is
+accepted. Earlier pending note superseded for f only; all actual proof requirements
+and parent acceptance remain. Commands/outcomes, every failure/version/correction,
+skips/artifacts/plan rationale are recorded in preceding session entry. All owned
+producers terminal, no new experiment/final value or helper integration.
+
+P6.7d2b2f alone is complete for its declared full physical file/proof-port scope.
+Core immutable spec/snapshot/result/protocol, app strict full e preflight, outer
+whole canonical reader,55-case suite/fixture helper, guide and ADR-0182 delivered.
+Every declared expected code member and whole request/source metadata map/code
+manifest are checked before/after app inspection. All100 sources/480 roles/400
+streams/60 views and560 cells/116 contrasts/settings/analysis/count/caps/stopping
+preserved. Canonical UTC/owner/full resource/repeat declarations checked; actual
+runtime closure, exclusive ownership, source/role/chronology, prior effects,
+resource/repeat/b3 proofs remain required. All12 actual proof obligations and all25
+original helper requirements remain explicit/unbound. Independence unknown;
+fresh/execution/precision authority false. No actual scientific seed/source/array.
+
+Full304 behavioral cases pass (55 new/249 related),0errors/0failures/0skips. Ruff,
+five-file format/full mypy568/diff pass. Retain missing API, two tuple-pop fixture
+errors, duplicate module mapping and two deliberate-invalid typing errors, every
+exact version and corrections. Final local Any annotation has identical runtime
+AST after erasure; no optional behavioral rerun or exclusions/ignores. All34
+older code/test files unchanged,5 new added; no dependencies or scientific changes.
+
+Full preservation passes140.9387601s including
+6.6221024s preparation:all1994 physical files,
+3733 current Git objects/34 commits,
+all current/historical aliases, original150 sources/79 tests/174 inputs/proofs,
+all39 lead code pins and held clone/patch pins match before/after. One original
+END rebuild,24 science guards0. No original reader/semantic audit/science.
+All371 older task criteria and244 raw240 nonseparator plan tables unchanged.
+Original failed resource350.7925872/360spent/9.2074128remaining and negative
+precision stay unresolved; full b2/b3/d2b/d2/P6.7/d3 unfinished, overall goal active.
+
+Evidence:request-bundle-boundary/handoff-source.json, handoff-validation.json,
+handoff-operation.json and handoff-final-log-append.json/final-append-operation.json.
+Exact next action:P6.7d2b2/b3: compose actual admission proofs with the full verified request bundle. First inspect original role splitting/exposure and whether every declared development ID can be known before any source; preserve original semantics and explicitly revise incompatible prospective assumptions rather than compute source/labels early. Bind a trusted complete runtime code closure and a live exclusive-owner lease through inner ports, then compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and every prior effect with all100 sources/480 roles. Add full late lease/closure/prior/request/resource corruption tests; bind or explicitly revise all25 helper cases against real full proofs. Do not infer chronology, freshness, independence or prior absence from declarations. Resolve original failed resource acceptance explicitly without resetting350.7925872/360spent or9.2074128remaining; preserve all b3 isolation/parity/resource/repeat/artifact/readback gates and held CI/P6.4 proposals. Keep actual seeds/source/arrays unset and execution false until full admission passes.
+
+Closing source identity:{'byte_count': 2363506, 'sha256': '3d69495539618ae665c66648a5ba843d3187422d9d845838f8ee402fc8c3644d'}
+Closing validation identity:{'byte_count': 8951, 'sha256': '57c60e425209bd9862e9610b46e67fdbd6217aee82855e34dd0c8d707cfd9176'}
+Closing operation identity:{'byte_count': 892, 'sha256': 'f68f8091d889cd5471689c2a446c8353e0e459cc93c68fe708f646573732917b'}
+Budget families before terminal:{"closing_and_documents_including_preparation": 141.78104269993491, "entry_including_failures": 0.19416770001407713, "static_including_failures": 58.94007320009405, "tests_including_failures": 111.1608750000014}
+Final receipt records terminal elapsed/shared180 total/remainder, diff and output
+against16MB. Original failed semantic resource/repeat remains unchanged. Skipped
+full repository pytest outside304/backend/CUDA/training/resume/native POSIX/clean
+clone CI/original semantic repeat/science and optional pytest after proved
+annotation-only repair.25 original helper cases remain unbound; CI/seed-role/P6.4
+proposals held. No external blocker; this is verified implementation progress.
+
+**Exact next action:** P6.7d2b2/b3: compose actual admission proofs with the full verified request bundle. First inspect original role splitting/exposure and whether every declared development ID can be known before any source; preserve original semantics and explicitly revise incompatible prospective assumptions rather than compute source/labels early. Bind a trusted complete runtime code closure and a live exclusive-owner lease through inner ports, then compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and every prior effect with all100 sources/480 roles. Add full late lease/closure/prior/request/resource corruption tests; bind or explicitly revise all25 helper cases against real full proofs. Do not infer chronology, freshness, independence or prior absence from declarations. Resolve original failed resource acceptance explicitly without resetting350.7925872/360spent or9.2074128remaining; preserve all b3 isolation/parity/resource/repeat/artifact/readback gates and held CI/P6.4 proposals. Keep actual seeds/source/arrays unset and execution false until full admission passes.
+
+
+### 2026-10-06T03:17:55.023521+00:00 — P6.7d2b2g generation recipe implementation; preservation pending
+
+Completed IDs:[]; g awaits whole closing/terminal gates. Overall goal active.
+Read/reconciled full unchanged f handoff, AGENTS, plan/log and actual checkout:
+master HEAD28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8,13 commits since reviewed
+8793c49ee4f9f8b07649e8db6571ed53746a9a06; existing dirty/user changes retained.
+Entry freezes21 doc/39 lead code pins and exact before copies. Inspect actual
+generator/split/exposure: development IDs need arrived labels/source RNG; B uses
+original positions. Prospectively declare g and full criteria before fixtures.
+
+The V2 generation request freezes480 ordered role recipes/100 source declarations/
+400 streams/60 bindings against the unchanged complete fixed design (560 cells/
+116 contrasts). Assignment/exposure rules and seeds, original/retained geometry,
+counts, allowed uses, availability, all120 canonical final-ID tuples and all12
+actual-proof obligations are frozen; all360 development role ID realizations are
+unset. The separate full concrete-role declaration bridge composes e's partition/
+shared-view checks after strict type rejection and binds its result to the V2
+request. It cannot prove actual arrival, seeded assignment, runtime code, owner,
+chronology, source independence/freshness or execution. All actual/fresh/execution/
+precision flags remain false; independence unknown. Existing e/f remain intact.
+
+Initial full382 cases pass (78 new/304 related) in
+99.9559949s. Six added sentinel cases then
+expose deepcopy before rejection; preserve every failed version/receipt and reject
+full concrete schema before encoding. All84 current new cases pass in
+35.8429476s. Current unique coverage388:
+all304 related cases match earlier complete receipts; all776 older physical Python
+files unchanged, no existing source/test/script references new modules or symbols,
+and all78 earlier generation fixtures have identical runtime AST and rerun. No
+optional full repeat: related-suite-reuse.json binds full reuse evidence without
+scope/test removal. Ruff/all4-file format/full no-incremental mypy572/diff pass in
+63.6039481s. Whole preservation pending.
+
+
+Commands/outcomes (all owned producers single-use; occupied receipts retained):
+```powershell
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/start-generation-role-recipes.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/declare-task.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/prepare-gates.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/run-gates.py red
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/run-format.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/run-gates.py green
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/prepare-schema-gates.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/run-schema-gates.py schema-red [missing producer; no pytest]
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/correct-schema-preparation.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/prepare-schema-gates-v2.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/run-schema-gates.py schema-red
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/preserve-schema-risk.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/run-format-v2.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/run-schema-gates.py green-v2
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/run-schema-gates.py static-v2
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/verify-related-reuse.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/update-documents.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/prepare-closing.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/close-session.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/prepare-terminal.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-role-recipes/record-terminal.py
+```
+Initial missing API red1 collection error/exit2,2.3562748s,
+no passing acceptance. Initial full382 pass0errors/0failures/0skips. Review identifies
+foreign-payload deepcopy risk, adds six raising copy sentinels. Failed schema gate
+preparation asserts an unnecessary terminal newline while reconstructing exact
+passed fixture; three prior copies retained. Subsequent missing producer call
+executes no pytest. Diagnostic proves exact18877-byte original passed prefix SHA
+f9df7c8136f73732a2df63666664ddd5c1415583276a60eab9e4f79d17308000 without added
+newline; a distinct corrected preparation preserves fourth copy. Both failures
+and diagnostic conservatively charged3s, original producer unchanged. Actual six
+sentinel cases then fail as intended,3.9554590s,
+retain complete four failed source/test versions/JUnit/receipts. Strict full
+concrete schema before encoding repairs all six. Full84 current new cases pass;
+full static572/Ruff/4-file format/diff pass without exclusions/ignores/dependencies.
+Initial full382 receipt plus current84 and complete related reuse proof establish
+all388 current unique cases: old304/code dependencies unchanged (all776 older
+physical Python files checked; no forward new-module/symbol references), all78
+original generation fixtures AST-identical and rerun. No optional full repeat.
+
+All84 new cases guard scientific source/final/model/scoring/RNG/array construction/
+IO. Positive metadata uses invented declarations only, not actual scientific seed
+selection/source/arrival/assignment. Full100/480/400/60/560/116/all12 retained;
+all final-value barriers/outer-use restrictions and unknown independence remain.
+No algorithm/baseline/settings/metrics/stopping/precision/count/cap change, scientific
+work or experiment artifact. Existing e/f retained;25 original helper requirements
+remain Unbound, CI/seed-role/P6.4 proposals held. Actual V2/live observer/runtime/
+lease/prior/resource/repeat/b3 proofs open. Original semantic resource failure
+350.7925872/360spent/9.2074128remaining unchanged; no original reader or audit restart.
+
+Budget families before documents:{"closing_and_documents_including_preparation": 0.7516089000273496, "entry_including_failures": 0.6794881000532769, "static_including_failures": 64.60391240002355, "tests_including_failures": 147.35948979994282}.
+Entry/tests/static180s each including failures; shared docs/preparation/whole
+closing/terminal180s,16MB output. Artifacts: generation-role-recipes entry/declaration,
+exact red/pass/format/schema failure versions/operations/JUnit, whole reuse proof,
+document-change/operation and pending whole handoff/terminal receipts. Skipped
+full repository pytest outside388/backend/CUDA/training/resume/native POSIX/
+clean-clone CI/original semantic repeat/science and optional full related repeat
+after new outward bridge correction. Original25 helper tests remain unbound.
+External blockers:none; parent unfinished work preserved. Whole preservation and
+one original END rebuild still required before completing g only.
+
+**Exact next action:** P6.7d2b2/b3: implement the complete V2 physical generation-request reader and inner read/recheck port for all480 recipes/100 sources/400 streams/60 bindings before any source. Preserve e/f APIs; do not feed fabricated concrete development IDs to the V1 bundle reader as a pre-source request. Add full late physical request/source-map/code/UTC/owner/resource/repeat corruption fixtures. Then bind a live phase-arrival observer to each permitted sequential arrival and original split/exposure recipes, retaining a complete immutable proof ledger rather than constructing future sources early to fill the full declaration bridge. Compose trusted runtime closure/live exclusive lease, all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper cases. Resolve original failed resource acceptance without resetting 350.7925872/360spent or9.2074128remaining. Preserve all b3 isolation/init/parity/resource/artifact/repeat/readback gates and held CI/P6.4 proposals. Keep actual scientific seeds/source/arrays unset and execution false until full admission passes.
+
+
+Documentation clarification before closing: the guide now spells out the existing per-class reservation max(1, round(class_count * fraction)), ensuring at least one row. Exact earlier guide retained; no code/test/rule/acceptance change. refine-documents.py accepted; commands/evidence retained with document-operation-v2.json/document-change-v2.json.
+
+
+### 2026-10-06T03:27:16.699589+00:00 — Terminal P6.7d2b2g scoped acceptance and handoff
+
+Completed IDs:[P6.7d2b2g]. Only full metadata recipe/claim boundary accepted.
+Earlier pending note superseded for g only; parent proof requirements retained.
+Commands/outcomes/failures/skips/artifacts/rationale are in preceding session
+entry and guide; refine-documents.py/document-v2 records formula clarity. All
+owned producers terminal; no scientific seed/source/array, experiment or helper
+integration. Overall goal active; no external blocker.
+
+P6.7d2b2g alone is complete for its full generation-recipe/claim metadata scope.
+Core immutable V2 request/recipe/results, pure app factory/inspector/concrete-role
+bridge,84-case suite/full invented fixture helper, guide and ADR-0183 delivered.
+Freeze all480 recipes/100 source declarations/400 streams/60 bindings and whole
+560 cells/116 contrasts/settings/count/analysis/stopping/caps/all12 obligations.
+All360 development realizations remain unset until permitted arrival;120 final-ID
+tuples are declared from geometry without final values. Existing label-dependent
+stratified split/class-balanced B exposure/original positions remain. Separate
+full concrete claims compose e partition/shared-view checks and retain actual
+arrival/seeded assignment unverified. Existing e/f unchanged; actual V2 physical
+reader/live sequential arrival/runtime closure/lease/prior/resource/repeat/b3
+proofs remain required. Independence unknown, fresh/execution/precision false.
+
+Initial full382 cases pass78 new/304 related; all84 current new cases pass after
+six actual copying-risk failures and strict early schema repair. Verified complete
+reuse of unchanged304 case IDs/dependencies (all776 prior physical Python files
+unchanged, no forward imports/symbol references), all78 original generation
+fixtures AST-identical and rerun:388 current unique coverage,0errors/failures/skips.
+Ruff/four-file format/full mypy572/diff pass without ignores/exclusions/dependencies.
+Retain initial missing API, failed newline preservation/missing producer attempts,
+diagnostic, six copy sentinels, every exact version/receipt and corrections; all
+failures spend original declared caps. Guide reservation formula clarified with
+exact earlier guide retained. All39 older lead code/test files unchanged,4 added.
+
+Full preservation passes173.1951707s including
+6.6674974s preparation:all2000 physical files,
+3753 current Git objects/34 commits,
+all current/historical aliases, original150 sources/79 tests/174 inputs/proofs,
+all43 lead code pins and held clone/patch pins before/after. One original END
+rebuild,24 science guards0; no original reader/semantic audit or new science.
+All372 older task criteria and244 raw240 nonseparator tables unchanged. Original
+failed350.7925872/360spent/9.2074128remaining and negative precision unresolved;
+b2/b3/d2b/d2/P6.7/d3 remain open,25 helper cases unbound/three proposals held.
+
+Evidence:generation-role-recipes/handoff-source.json, handoff-validation.json,
+handoff-operation.json and handoff-final-log-append.json/final-append-operation.json.
+Exact next action:P6.7d2b2/b3: implement the complete V2 physical generation-request reader and inner read/recheck port for all480 recipes/100 sources/400 streams/60 bindings before any source. Preserve e/f APIs; do not feed fabricated concrete development IDs to the V1 bundle reader as a pre-source request. Add full late physical request/source-map/code/UTC/owner/resource/repeat corruption fixtures. Then bind a live phase-arrival observer to each permitted sequential arrival and original split/exposure recipes, retaining a complete immutable proof ledger rather than constructing future sources early to fill the full declaration bridge. Compose trusted runtime closure/live exclusive lease, all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper cases. Resolve original failed resource acceptance without resetting 350.7925872/360spent or9.2074128remaining. Preserve all b3 isolation/init/parity/resource/artifact/repeat/readback gates and held CI/P6.4 proposals. Keep actual scientific seeds/source/arrays unset and execution false until full admission passes.
+
+Closing source identity:{'byte_count': 2392094, 'sha256': '678dae90d7aa1c7fd3b68d2957f7395a1a50b198bbe634ac1e056f768d7a590b'}
+Closing validation identity:{'byte_count': 9631, 'sha256': 'add5faac75a3ebd03467e8759ca2411e49a3e657eb338ed4a6933dbf1991aa78'}
+Closing operation identity:{'byte_count': 891, 'sha256': '8f90d820ccd9db9f4396c5a840012e5600a6f3cc7936bedc8532485ae002867b'}
+Budget families before terminal:{"closing_and_documents_including_preparation": 174.41084850003244, "entry_including_failures": 0.6794881000532769, "static_including_failures": 64.60391240002355, "tests_including_failures": 147.35948979994282}
+Final receipt records terminal elapsed/shared180 total/remainder/output<16MB/diff.
+Original failed semantic resource/repeat unchanged. Skipped full repository pytest
+outside388/backend/CUDA/training/resume/native POSIX/clean-clone CI/original semantic
+repeat/science and optional full related repeat after new outward module schema
+correction; complete unchanged dependency/case proof supports304-case reuse.
+25 original helper cases remain unbound; CI/seed-role/P6.4 proposals held.
+This is verified implementation progress; original development goal unfinished.
+
+**Exact next action:** P6.7d2b2/b3: implement the complete V2 physical generation-request reader and inner read/recheck port for all480 recipes/100 sources/400 streams/60 bindings before any source. Preserve e/f APIs; do not feed fabricated concrete development IDs to the V1 bundle reader as a pre-source request. Add full late physical request/source-map/code/UTC/owner/resource/repeat corruption fixtures. Then bind a live phase-arrival observer to each permitted sequential arrival and original split/exposure recipes, retaining a complete immutable proof ledger rather than constructing future sources early to fill the full declaration bridge. Compose trusted runtime closure/live exclusive lease, all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper cases. Resolve original failed resource acceptance without resetting 350.7925872/360spent or9.2074128remaining. Preserve all b3 isolation/init/parity/resource/artifact/repeat/readback gates and held CI/P6.4 proposals. Keep actual scientific seeds/source/arrays unset and execution false until full admission passes.
+
+Budgeted terminal scope and accounting clarification:
+Terminal verification reuses the accepted173.1951707s whole2000/current/history/original/held-clone before-and-after gate, then checks all23 documents/43 lead code pins before publication, exact four document mutations/372 older task criteria/plan tables/log prefix and unchanged19 other documents/43 code pins after. No optional repeated whole physical/held-clone read after publication, no new whole-history/END/scientific run or cap increase. Exact previously prepared terminal producer retained unexecuted. Commands: prepare-budgeted-terminal.py; record-terminal-v2.py. document-operation-v2.json's0.1687795s was outside the operation filename glob; its full elapsed is now explicitly charged once through terminal-budget-accounting-operation.json. Whole closing actual spent including that debt remains below180; final receipt binds all charged families.
+
+
+### 2026-10-06T04:12:00.060845+00:00 — P6.7d2b2h V2 physical recipe bundle; preservation pending
+
+Completed IDs:[]; h awaits whole closing/terminal gates. Overall goal active.
+Recheck complete g handoff/AGENTS/full plan/log and actual dirty checkout; master
+HEAD28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8,13 commits since reviewed
+8793c49ee4f9f8b07649e8db6571ed53746a9a06. Existing/user changes retained.
+Entry freezes23 docs/43 lead code files and complete before copies. Declare h's
+full criteria before fixtures. Permit only V1 infra reader delegation; preserve
+its original6599 bytes/SHA6d7075629d44dca85dc1d36e6fcc5e9fb8821c3da83ddaaccb494a817f7ffe48.
+It is absent from original150 closure; other42 lead files remain unchanged.
+
+The V2 physical boundary binds the full request/source map/code manifest and every
+closed expected code file to all480 recipes/100 source declarations/400 streams/
+60 bindings, unchanged560 cells/116 contrasts/settings/analysis/stopping/count/caps
+and all12 actual-proof obligations. Immutable snapshots and inner read/recheck port
+keep app/core free of IO. Both versions share whole bytes, canonical strict JSON,
+root-contained regular paths, physical alias/publication-marker checks and late
+rechecks. V1 public constructor/read/recheck behavior is preserved. All360
+development realizations stay unset;120 final-ID tuples declare geometry only.
+UTC/owner/resource/same-generation-request repeat are checked as declarations.
+Matching physical metadata proves neither runtime code closure, exclusive owner,
+actual sources/roles/arrival/assignment/chronology, unrecycled independence, prior
+effect resolution, resource fit, independent repeat nor b3 admission. These stay
+required; independence unknown and fresh/execution/precision flags false.
+
+Initial full454 cases pass (66 new/388 related),0skips in
+138.3763548s. Two added V1/V2 direct source
+numeric-alias recheck cases expose comparing the rebuilt snapshot with the source
+map instead of the supplied snapshot. Restore the original supplied-snapshot
+comparison; all68 current new cases pass in
+30.2081090s,0skips. Current unique
+coverage456 is bound by both full receipts and exact V1 specialization: all six
+original private IO/constructor bodies, whole read/recheck bodies after controlled
+callback substitution and three public signatures match the saved V1 AST; all42
+other lead files unchanged, all66 prior fixture ASTs unchanged and rerun. This is
+coverage across receipts, not a single456-case pytest invocation. Ruff/all7-file
+format/full no-incremental mypy578/diff pass in
+45.6565722s. Whole preservation pending.
+
+
+Commands/outcomes (owned producers immutable/single-use; occupied receipts retained):
+```powershell
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/prepare-generation-bundle-session.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/start-generation-request-bundle.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/declare-task.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/prepare-gates.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/run-gates.py red
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/delegate-v1-reader.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/run-format.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/run-gates.py green
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/run-gates.py static
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/prepare-recheck-gates.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/run-recheck-gates.py recheck-red
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/preserve-recheck-risk.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/run-format-v2.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/run-recheck-gates.py green-v2
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/run-recheck-gates.py static-v2
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/verify-v1-specialization.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/update-documents.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/prepare-closing.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/close-session.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/prepare-terminal.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-bundle/record-terminal.py
+```
+Initial missing API red1 collection error/exit2 in
+1.4568281s is not acceptance. Full454 cases
+then pass66 new/388 related in138.3763548s;
+initial static full578 passes. Review discovers direct-source numeric alias risk,
+adds two tests before fixing shared IO. First patch anchor failed before mutation
+or gate execution; diagnostic/full failed attempt conservatively charged1s by
+recheck preparation. Actual V1/V2 direct recheck cases both fail DID NOT RAISE in
+2.4198237s; preserve all seven failed
+source/test bytes, failure details, JUnit and receipts. Restore original supplied
+snapshot comparison, format, run entire current68 module (no narrow selector) and
+full Ruff/7-file format/no-incremental mypy578/diff. All pass without exclusions,
+ignores or dependencies. v1-specialization-and-suite-reuse.json proves exact six
+private/constructor/entire read/recheck bodies and public signatures,388 matched
+related case IDs, all66 previous fixture ASTs unchanged and rerun, current68 IDs,
+42 unchanged files and whole old/current reader pins. Current456 unique coverage
+across receipts; no optional full related rerun or criterion reduction. All failed
+versions/preparation/format/recheck costs charged to the original family caps.
+
+All68 new cases guard source/final/model/scoring/RNG/arrays; IO allowed. Full
+invented five code files and request/map/manifest/code corruption are file controls,
+never actual source/code execution or scientific seeds/replications. All480/100/
+400/60/560/116/all12 obligations retained,360 development IDs unset/120 final
+geometry tuples. Real existing split/exposure remains label-dependent and preserves
+original indices. Matching file/UTC/owner/resource/repeat declarations cannot
+certify runtime closure/live lease/arrival/assignment/chronology/unrecycled source
+independence/prior effects/resource fit/independent repeat/b3. Independence unknown;
+fresh/execution/precision false. Original25 helper requirements remain individually
+Unbound; CI/seed-role/P6.4 proposals held. No experiment artifact, favorable seed,
+baseline/model/metric/analysis/stopping/count/cap change or new dependency.
+
+Budgets before docs:{"closing_and_documents_including_preparation": 0.7970071000163443, "entry_including_failures": 0.8006290000048466, "static_including_failures": 89.79951090004761, "tests_including_failures": 173.48859059996903}.
+Entry/tests/static180s each including failures; shared documents/preparation/whole
+closing/terminal180s and16MB output. Tests173.4885906/180 spent; no optional testing.
+Original failed semantic resource/repeat350.7925872/360spent/9.2074128remaining
+unchanged. No original reader/audit restart. Full4471 prior contents/13149 aliases,
+all historical chronology/provenance/effects, negative precision and b2/b3/d2b/d2/
+P6.7/d3 criteria remain open. Evidence: generation-request-bundle entry/declaration,
+red/green/static/format receipts/JUnit/exact versions, recheck-red preserved failures,
+whole specialization/reuse, document-change/operation and pending whole handoff/
+terminal receipts. Skipped full repository pytest outside456/backend/CUDA/training/
+resume/native POSIX/clean-clone CI/original semantic repeat/science and optional full
+related rerun after restoring exact original V1 semantics. All new fixtures0skips;
+25 old helper cases unbound. External blockers:none; no current producer running.
+Whole original/current/history/held-clone preservation and one original END rebuild
+remain required before checking only h. Task criteria/tables/old log bytes preserved.
+
+**Exact next action:** P6.7d2b2/b3: add the trusted live exclusive request-owner port and complete runtime code closure around the V2 full physical generation request, then a live phase-arrival observer which binds each permitted sequential arrival to the frozen split/exposure recipes and a complete immutable proof ledger. Do not construct future B/source/labels early to fill complete claims. Compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper requirements without promoting toy fixtures to actual proof. Resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Preserve all b3 isolation/init/parity/resource/artifact/repeat/readback gates and held CI/P6.4 proposals. Keep actual scientific seeds/source/arrays unset and execution false until full admission passes.
+
+
+### 2026-10-06T04:29:18.112936+00:00 — Terminal P6.7d2b2h scoped acceptance and handoff
+
+Completed IDs:[P6.7d2b2h]. Only complete V2 physical metadata boundary accepted.
+Earlier pending notes superseded for h only; all parent acceptance retained.
+Commands/outcomes/failures/skips/artifacts/plan rationale in preceding session
+entry and guide. Complete physical protection commands:prepare-closing.py;
+prepare-terminal.py; close-session.py; record-terminal.py. All owned producers
+terminal. Overall goal active, no external blocker, all original unknowns retained.
+
+P6.7d2b2h alone is complete for its full V2 physical generation-file metadata scope.
+Deliver core immutable snapshot/result/reader protocol, pure app full decoder/g
+preflight, V2 outer adapter, shared whole-file IO, V1 delegation, full fixtures/
+68-case suite, guide and ADR-0184. Bind all480 recipes/100 source declarations/
+400 streams/60 bindings and unchanged whole560 cells/116 contrasts/settings/count/
+analysis/stopping/caps/all12 obligations.360 development realizations remain unset;
+120 final-ID tuples declare geometry without final values. Whole request/source
+map/code manifest/every expected code file, canonical UTC/owner/full resource/
+same-generation-request repeat declarations and late rechecks are verified as
+physical metadata. Actual runtime closure/live owner/arrival/seeded assignment/
+chronology/unrecycled independence/prior effects/resource fit/repeat/b3 gates stay
+required; independence unknown and fresh/execution/precision authority false.
+
+Initial full454 cases pass66 new/388 related. Review's two direct V1/V2 source
+numeric-alias regressions actually fail, preserve all seven failed versions and
+restore original supplied-snapshot comparison. Entire current68 module passes,
+0errors/failures/skips. Exact six old private/constructor bodies and entire
+read/recheck bodies specialize to the saved V1 AST; public signatures unchanged.
+All388 related case IDs match earlier complete coverage, all66 prior V2 fixtures
+AST-identical and rerun,42 other lead files unchanged.456 current unique cases
+across full receipts; no claim of one456-case invocation or criterion reduction.
+Full Ruff/7-file format/no-incremental mypy578/diff pass without ignores/exclusions/
+dependencies. Missing API, failed patch anchor before mutation/diagnostic1s, both
+alias failures and all exact versions/format/preparation receipts retained/charged.
+One permitted V1 infra edit retains full original6599 bytes; original150 closure
+unrekeyed,42 other prior lead files unchanged,6 new code/test files added (49 total).
+
+Full preservation passes79.0719877s including
+0.0078148s preparation:all2008 physical files,
+3771 current Git objects/34 commits,
+all current/historical aliases, original150 sources/79 tests/174 inputs/proofs,
+all49 current lead code pins, old V1 bytes and held clone/patch pins before/after.
+One original END rebuild,24 science guards0; no original reader/semantic audit or
+scientific dispatch. All373 prior task criteria/244 raw240 nonseparator tables
+unchanged. Original failed350.7925872/360spent/9.2074128remaining,4471 prior contents/
+13149 aliases/full effects and negative precision remain unresolved. All b2/b3/
+d2b/d2/P6.7/d3 parent tasks open;25 helper cases Unbound/three proposals held.
+
+Evidence:generation-request-bundle/handoff-source-v2.json, handoff-validation-v3.json,
+handoff-v3-operation.json, handoff-final-log-append.json/final-append-operation.json;
+earlier entry/declaration/all gates/JUnit/exact versions/V1 specialization/reuse/
+document receipts. No experiment, actual scientific seed/source/array or tuning.
+Exact next action:P6.7d2b2/b3: add the trusted live exclusive request-owner port and complete runtime code closure around the V2 full physical generation request, then a live phase-arrival observer which binds each permitted sequential arrival to the frozen split/exposure recipes and a complete immutable proof ledger. Do not construct future B/source/labels early to fill complete claims. Compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper requirements without promoting toy fixtures to actual proof. Resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Preserve all b3 isolation/init/parity/resource/artifact/repeat/readback gates and held CI/P6.4 proposals. Keep actual scientific seeds/source/arrays unset and execution false until full admission passes.
+
+Closing source identity:{'byte_count': 2427219, 'sha256': '63bde1edb09dd790cddf8f659591d47e43e09b97f1b5a589234cbf27f5e8eb76'}
+Closing validation identity:{'byte_count': 15839, 'sha256': 'd91e598b95e81b796f2c802a620c9646972bfd06f9472d529ae9fbf2c0293b5b'}
+Closing operation identity:{'byte_count': 1029, 'sha256': '4c4df8287f65dde952bdca74e6141b7641cada8e694a4e220f1200a264daedd4'}
+Budgets before terminal:{"closing_and_documents_including_preparation": 129.8754395999713, "entry_including_failures": 0.8006290000048466, "static_including_failures": 89.79951090004761, "tests_including_failures": 173.48859059996903}
+Final receipt records terminal elapsed/shared180 total/remainder/output<16MB/diff.
+Tests173.4885906/180; optional repeated testing is skipped. Static includes all
+format/delegation/specialization attempts and failures; caps unchanged. Original
+semantic failed repeat/resource acceptance not repaired. Skipped full repository
+pytest outside456/backend/CUDA/training/resume/native POSIX/clean-clone CI/original
+semantic repeat/science and optional full related rerun after restoring exact V1
+semantics. Existing55 V1 cases ran in full454; both new direct V1/V2 regressions
+pass with current68.25 original helper requirements remain Unbound; no integration.
+
+**Exact next action:** P6.7d2b2/b3: add the trusted live exclusive request-owner port and complete runtime code closure around the V2 full physical generation request, then a live phase-arrival observer which binds each permitted sequential arrival to the frozen split/exposure recipes and a complete immutable proof ledger. Do not construct future B/source/labels early to fill complete claims. Compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper requirements without promoting toy fixtures to actual proof. Resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Preserve all b3 isolation/init/parity/resource/artifact/repeat/readback gates and held CI/P6.4 proposals. Keep actual scientific seeds/source/arrays unset and execution false until full admission passes.
+
+Closing correction: initial close-session.py failed after42.7518605s (including5.0792412s preparation) because its red fixture loop looked for the preserved old V1 reader under red-fixtures; its exact whole original is in before-code. No original END rebuild had run. Retain failed source/operation/producer unchanged; accepted=False. prepare-closing-recovery.py verifies the pinned exact unhandled failure line and entire unconditional completed prefix AST: all retained/2008 physical/full-history/original whole before pins, three clone checks and initial24-guard zero observation completed. close-session-v2.py corrects only that lookup, reuses the full before evidence, installs/checks all original guards/bindings again while skipping only the redundant initial original whole-pin read, executes every remaining full gate, all retained/original/2008 physical/current/history/clone after checks and exactly one original END rebuild. No criteria/count/cap reduction, failed attempt spends the same180s family. v2 accepted whole receipt is handoff-source-v2.json/handoff-validation-v3.json/handoff-v3-operation.json; original generic handoff operation stays failed. record-terminal-v3.py is the actual terminal producer; preserve unused record-terminal.py. Conservative0.5s diagnostic charge is included in recovery preparation. Initial prepare-closing-recovery.py asserted one occurrence of the output-name tuple, which also appears in previous-stage refs; it stopped before either new supervisor existed. Retain that producer/prefix JSON, correct only the first occurrence in prepare-closing-recovery-v2.py, charge1s for failed attempt/copy preparation and keep earlier-stage refs unchanged. Future sessions must use the accepted v2 source/operation from this terminal receipt, never the failed generic source as current acceptance.
+
+The v2 recovery next failed during preparation at its occupied handoff-launch-contract.json name, before any worker/guard/END launch. Preserve its entire prepared handoff-source-v2.json and producer unchanged, retain launch-name-failure-v2.json and charge5s for the4.8307972s tool wall. prepare-closing-recovery-v3.py/close-session-v3.py use a distinct launch receipt and a small operative handoff-recovery-source-v3.json bridge that pins the full unchanged v2 source, current operative producer and every newer artifact. Accepted handoff-validation-v3.json/handoff-v3-operation.json bind both source identities and all complete acceptance gates. No second full source copy, cap increase or retained artifact deletion. record-terminal-v3.py reconstructs exact before-terminal documents from already preserved whole before-publication bases and their complete document-change append text (or full new-guide text), verifying actual whole byte identities before edits. This retains all old bytes without duplicating2.5MB and stays within16MB. Future sessions must use this terminal's accepted v3 operation/validation, full v2 base source plus v3 operative bridge; generic failed gate and unused v2 prepared source alone are not acceptance. Commands/outcomes: initial close-session.py failed; first recovery preparation asserted repeated anchor before new supervisors; corrected prepare-closing-recovery-v2.py passed with debt1s; close-session-v2.py failed before worker with debt5s; prepare-closing-recovery-v3.py passed; close-session-v3.py completed all remaining gates; record-terminal-v3.py publishes only after acceptance.
+
+Terminal scope: reuse accepted whole2008/current/history/original/held-clone before-and-after gate; check all25 documents/49 current code pins before publication, exact four document edits/373 previous criteria/plan tables/log prefix and unchanged21 other documents/49 code pins after. No optional repeated whole physical/held-clone/END/scientific run after terminal publication. Every operation uses the budgeted filename glob; preparation includes0.5s conservatively charged prior-binding shape inspection. Terminal producer prepared/pinned before whole closing. All families and output remain within their original declared caps.
+
+
+### 2026-10-06T05:03:43.593306+00:00 — P6.7d2b2i complete native owner implementation; preservation pending
+
+Completed IDs:[]; i awaits whole closing/terminal acceptance. Overall goal active.
+Revalidated H accepted terminal, full v2 base/operative v3 bridge and accepted
+handoff-v3 operation/validation; failed generic attempts retain accepted=False.
+All25 docs/49 current lead code pins, full plan/log before copies and actual dirty
+checkout preserved. HEAD/master28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8,13 commits
+since reviewed8793c49ee4f9f8b07649e8db6571ed53746a9a06. Previous goal turn verified
+progress. No running prior handles or child delegation. Initial search's Windows
+wildcard-path/large plan output diagnostic retained in conversation; corrected
+with rg directories/-g and targeted current criteria. Conservatively charge1s
+through entry operation. Inspect existing V14 native standard lock, preserve it.
+Declare i before fixtures with full criteria/budgets. Reasoned split: native
+ownership lifetime and complete actual code/import closure are independent proofs;
+only ownership implemented now, runtime closure stays exact next action.
+
+Complete V2 file preflight now composes a live owner port with a real native local
+lease. Contention keys use the entire inner generation request, so different
+outer owner declarations/file copies of that request contend in one configured
+canonical registry. All480 recipes/100 sources/400 streams/60 bindings, unchanged
+560 cells/116 contrasts/settings/analysis/stopping/count/caps and all12 admission
+obligations remain. Reread after acquiring and recheck whole physical files/owner
+before yield and on success/failure exit. Immutable observations bind scope,
+native single-link file identity, nonce and monotone sequence/UTC at the recorded
+time held. Native handles release on exception and process death; permanent lock
+paths stay in place and are never reclaimed/unlinked by the adapter. Observations
+remain historical after exit and cannot authorize execution. Runtime code closure,
+actual arrival/assignment/chronology, cross-host ownership/source independence,
+prior effects/resource/repeat/b3 remain unverified; all fresh/execution/precision
+flags false and independence unknown.360 development IDs remain unset and120
+final-ID tuples declare geometry only. Existing49 lead files/APIs unchanged.
+
+Full502 cases pass (46 owner/456 related),0errors/failures/skips in
+131.0861267s. Real native Windows controls
+cover same-process and subprocess contention, different outer owners for the same
+whole inner request, normal release and os._exit73 process-death release, failures,
+clock rollback/type rejection, physical/registry drift and early/late invalid
+observations. All new cases guard scientific source/final/model/scoring/RNG/array
+work; IO/native non-scientific UUID/time are intentional. Ruff/all4-file format/
+full no-incremental mypy582/diff pass in
+25.8889968s. Preserve initial missing
+API and static fixture mapping-type failure, all exact versions/receipts. No
+optional repeated tests; shared tests132.2325310/180spent, static50.7586573/180spent.
+Whole preservation pending.
+
+
+Commands/outcomes (single-use owned producers and distinct corrected names):
+```powershell
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/start-generation-request-ownership.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/run-gates.py red
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/run-format.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/run-gates.py static
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/prepare-static-repair.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/run-format-v2.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/run-gates-v2.py green
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/run-gates-v2.py static-v2
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/update-documents.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/prepare-preservation.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/close-session.py
+.\.venv\Scripts\python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/generation-request-ownership/record-terminal.py
+```
+Initial missing API red1 collection error/exit2 is not acceptance,
+1.1464043s. Preserve exact red fixture bytes.
+Format all4 new files. Initial Ruff/format pass, full mypy582 fails only fixture
+mapping inference at **values[kind],24.6044970s.
+Preserve all four actual failure source/test versions and full receipts. Add
+explicit dict[str,dict[str,Any]] annotation, no ignore/exclusion. Review strengthens
+snapshot UTC before native IO, rollback monotonicity, native checks around failed
+physical recheck and nested app failure exit. Add clock/late-real-port controls
+before the one full current502 invocation:46 new native controls/456 related,
+all0errors/failures/skips. Full static582/Ruff/4-file format/diff pass; all49 prior
+lead files unchanged before/after both gates. No optional further testing.
+
+Native Windows executes real same-process and subprocess held-owner contention,
+normal exit and os._exit73 death/reacquisition, canonical permanent single-link
+registry file checks, full V2 drift before/while/after, errors/UTC/monotone sequence,
+and owner/file-copy changes sharing one inner request. All positive controls are
+real full V2/native holders. Negative initial ports never yield; late wrappers
+alter observations from a real held native port. Scientific source/array/RNG/
+model/final/scoring sentinels run in parent and child. No actual seed selection,
+source generation/code execution/independent replication, experiment or favorable
+baseline/metric/count/cap/analysis/stopping change. UUID/time/native IO belong to
+non-scientific owner metadata. All12 original admission proofs remain; ownership
+observations historical after exit, no execution/fresh/precision authority.
+
+Budgets before docs:{"closing_and_documents_including_preparation": 0.7943056999938563, "entry_including_failures": 1.277946999995038, "static_including_failures": 50.758657299971674, "tests_including_failures": 132.23253100004513}.
+Entry/tests/static180s each including failures; documents/preparation/whole
+closing/terminal share180s,16MB output. Original failed semantic resource/repeat
+350.7925872/360spent/9.2074128remaining unchanged; no original reader/semantic audit
+restart. Full4471 contents/13149 aliases/all prior historical uncertainty/effects,
+negative precision,25 individual Unbound helper cases and CI/seed-role/P6.4 held
+proposals retained. All parent b2/b3/d2b/d2/P6.7/d3 tasks open. Artifacts:new
+generation-request-ownership entry/declaration/before copies, red/format/static
+failure/full failed versions/v2/green JUnit/gates/document-change/operation and
+pending whole handoff/terminal. Tests skipped:actual native POSIX/symlink/junction
+privilege cases/backend/CUDA/training/resume/clean-clone CI/full repository pytest
+outside502/original semantic repeat/science/optional repetitions; executed502 have
+zero skips. External blockers:none. Whole original/current/history/held-clone
+preservation and one original END rebuild still required before checking i only.
+
+**Exact next action:** P6.7d2b2/b3: implement complete trusted runtime code closure through an inner proof port, composing full V2 physical files and the live owner context. Bind actual loaded Python/native dependencies and actual callable/code objects, closed complete membership and late loaded/monkeypatched/detached code drift before source construction; a caller-declared code manifest or native owner observation cannot substitute. Then implement the live sequential phase-arrival observer against frozen split/exposure recipes with an immutable complete actual proof ledger, without constructing future B/source/labels early. Compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper cases. Resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Preserve b3 isolation/init/parity/resource/artifact/repeat/readback and held CI/P6.4 proposals. Actual scientific seeds/source/arrays stay unset and execution false until complete admission passes.
+
+
+### 2026-10-06T05:14:34.190142+00:00 — Terminal P6.7d2b2i scoped acceptance and handoff
+
+Completed IDs:[P6.7d2b2i]. Earlier pending note superseded for i only; all original parent requirements preserved.
+
+P6.7d2b2i alone is complete for full V2 live local native owner component.
+Core immutable complete scope/point-in-time observations/live protocols, app full
+H/g owner context and outer standard native lease delivered with46-case full
+controls, guide and ADR-0185. Full480 recipes/100 sources/400 streams/60 bindings,
+unchanged560 cells/116 contrasts/settings/count/caps/analysis/stopping/all12 proof
+obligations remain. Registry key is the whole inner generation request; different
+outer owners/file copies cannot evade local contention. Permanent single-link
+regular lock bytes/handle identity, aware monotone UTC/sequence/scope/nonce and
+whole files rechecked before/while/after, including failure exits. Native handles
+release after exception and actual os._exit73 process death; never unlink/reclaim
+registry files. Observations are historical after exit; runtime closure/arrival/
+assignment/chronology/global source independence/prior/resource/repeat/b3 remain
+required, independence unknown and fresh/execution/precision authority false.
+
+One full502 invocation passes46 new native/456 related0errors/failures/skips.
+Full Ruff/4-file format/no-incremental mypy582/diff pass without ignores/exclusions.
+Initial missing API and fixture mapping-type failure preserved with exact four
+failed versions and all receipts; explicit mapping annotation and stronger UTC/
+rollback/failure-exit checks applied before full pass. All49 prior lead files and
+original150 source closure unchanged and unrekeyed. Native Windows executed; actual
+POSIX/symlink/junction privileges/backend/CUDA/training/resume/clean-clone CI/full
+repo pytest outside502/original semantic audit/repeat/science/optional repetition
+not run. Parent and child scientific sentinels remain raised throughout controls.
+
+Full preservation passes116.1562081s including
+4.9806298s preparation:all2014 physical files,
+3793 current Git objects/34 commits,
+all current/historical aliases, original150 sources/79 tests/174 inputs/proofs,
+all53 lead files and three held clone/commit/patch pins before/after. Exactly one
+original END rebuild,24 science guards0; no original reader/semantic audit or
+scientific dispatch. All374 previous task criteria and244 raw240 nonseparator
+tables unchanged. Original4471 contents/13149 aliases/full uncertainty/effects,
+negative precision and failed350.7925872/360spent/9.2074128remaining persist. All
+b2/b3/d2b/d2/P6.7/d3 tasks open;25 helper requirements Unbound/three proposals held.
+
+Artifacts:generation-request-ownership entry/declaration/red/format/static failure/
+complete failed versions/full green/JUnit/static-v2/document-change/operation/
+handoff-source.json/handoff-validation.json/handoff-operation.json and terminal
+handoff-final-log-append.json/final-append-operation.json. No experiment, actual
+scientific seed/source/arrays or favorable metric/baseline/algorithm selection.
+Commands: start-generation-request-ownership.py; run-gates.py red; run-format.py;
+run-gates.py static; prepare-static-repair.py; run-format-v2.py; run-gates-v2.py
+green/static-v2; update-documents.py; prepare-preservation.py; close-session.py;
+record-terminal.py. Every owned producer immutable/single-use, every launched
+process terminal. Overall goal active; external blockers:none. Full caps and
+output remain unchanged; budgets before terminal:{"closing_and_documents_including_preparation": 117.05128449999029, "entry_including_failures": 1.277946999995038, "static_including_failures": 50.758657299971674, "tests_including_failures": 132.23253100004513}.
+Terminal reuses accepted whole before/after gate, checks all27 docs/53 code before
+publication and exact4 document edits/374 old criteria/tables/log prefix/unchanged
+23 other docs/53 code after. Exact before-terminal texts reconstruct from pinned
+whole before-publication bases plus complete recorded append text/new-guide text;
+no duplicate whole snapshots or optional whole physical/clone/END repeat. Final
+receipt binds terminal elapsed/shared180 total/remainder/16MB output/diff.
+
+Exact next action:P6.7d2b2/b3: implement complete trusted runtime code closure through an inner proof port, composing full V2 physical files and the live owner context. Bind actual loaded Python/native dependencies and actual callable/code objects, closed complete membership and late loaded/monkeypatched/detached code drift before source construction; a caller-declared code manifest or native owner observation cannot substitute. Then implement the live sequential phase-arrival observer against frozen split/exposure recipes with an immutable complete actual proof ledger, without constructing future B/source/labels early. Compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper cases. Resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Preserve b3 isolation/init/parity/resource/artifact/repeat/readback and held CI/P6.4 proposals. Actual scientific seeds/source/arrays stay unset and execution false until complete admission passes.
+
+Closing source identity:{'byte_count': 2453338, 'sha256': 'dc59c27417e5a23519a37e3b19bba83f99bc2f61ff332f7fe7138801f791edd2'}
+Closing validation identity:{'byte_count': 10148, 'sha256': '9e6c996ee4362ce616cf369b24b50f69adf676c817f726e17fc67c01f1de60eb'}
+Closing operation identity:{'byte_count': 893, 'sha256': 'e306d83bea706b7dc95c220276e70dfc23f6043b0529e0bed4b155a705b14bbc'}
+
+**Exact next action:** P6.7d2b2/b3: implement complete trusted runtime code closure through an inner proof port, composing full V2 physical files and the live owner context. Bind actual loaded Python/native dependencies and actual callable/code objects, closed complete membership and late loaded/monkeypatched/detached code drift before source construction; a caller-declared code manifest or native owner observation cannot substitute. Then implement the live sequential phase-arrival observer against frozen split/exposure recipes with an immutable complete actual proof ledger, without constructing future B/source/labels early. Compose all five saved pending inputs/full4471 contents/13149 aliases/whole historical witnesses and all prior effects; bind or explicitly revise all25 original helper cases. Resolve original failed resource acceptance without resetting350.7925872/360spent or9.2074128remaining. Preserve b3 isolation/init/parity/resource/artifact/repeat/readback and held CI/P6.4 proposals. Actual scientific seeds/source/arrays stay unset and execution false until complete admission passes.
+
+
+### 2026-10-06T05:45:25.900699+00:00 — Runtime code observation implemented; P6.7d2b2j acceptance open
+
+Completed IDs:[]; previous goal turn verified progress; this turn implements a real
+whole-process runtime component and obtains actual code/memory drift/cost evidence.
+I terminal/full handoff revalidated, all27 old document/53 source-test pins and
+HEAD/master13 commits since reviewed8793c49... unchanged. Full prior plan/log reads
+reconciled with their pinned terminal appends; original Phase0/isolation/matched
+baseline decisions remain. No prior source/test edit or original150 closure rekey.
+
+Added core immutable runtime records/protocols, app full V2/native-owner context,
+outer current-process observer, focused Python/native observation helpers, full
+fixture/test modules, guide and ADR0186. Complete Windows image/address-space
+enumeration and whole files/executable bytes; every sys.modules entry, actual
+GC-tracked detached function/nested code/default/closure/global and code-bearing
+namespace/entrypoint/import-state bindings. Point-in-time observations remain
+historical after exit. Audit hooks deny import/exec/compile/direct code/function
+construction/ctypes loads/symbol lookup/tracing attempts while active and become
+inactive on all exits. All required full480/100/400/60/560/116 and12 proof obligations
+are preserved through unchanged V2/owner gates. Every scientific admission flag
+stays false; source independence unknown. Caller file manifest does not establish
+loaded runtime/source correspondence. Generated/opaque code/native correspondence,
+non-audited MAKE_FUNCTION/transient changes and unobserved provenance remain open.
+This prototype does not prove full trusted source-version closure or authorize work.
+
+Commands/outcomes (exact argv/stdout/stderr/JUnit/full pins in owned receipts):
+- `python -B .../runtime-code-closure/run-gates.py red`: expected missing API,
+  exit2/collection error;0.7506482s, unaccepted red retained.
+- Initial `static`: five unused fixture imports,0.1984545s; format retained.
+- `run-gates-v2.py probe`: wrong ParentControlled module import,16fail/1.5457009s.
+- `run-gates-v3.py probe-v2`: weak proxy forwarded isinstance(type) and canonical
+  fixture had newline,16fail/7.6168724s. Read native type dictionaries, use exact
+  metatype checks and canonical immutable JSON. No descriptor execution allowed.
+- `run-gates-v4.py probe-v3`:16pass/17.6679789s at that exact earlier version;
+  real positive complete V2/native/process/detached/private executable membership
+  and reacquisition plus15 invalid port cases. Not a current positive rerun.
+- `static-v2`: Ruff/format pass,12 dynamic-reflection/fixture typing errors;
+  full589-file mypy30.2923897s. Explicit dynamic Any at reflection boundary,
+  native ModuleType dictionary descriptor, external observation validation and
+  real frozen-dataclass metadata; no ignores/exclusions/new dependency.
+- `run-gates-v5.py late`:3fail/74.9797348s. Eight grouped Python controls exceeded
+  child40s; denied DLL load followed by full late drift error retained in chain;
+  file fixture expected identity but actual failure was whole-byte-count mismatch.
+  Retain all failures/versions. Split eight controls into two four-control groups
+  (each40s unchanged); check the actual exception chain and actual byte-count
+  message. No acceptance requirement removed. `static-v3`: one literal tuple
+  inference issue in fixture,35.9718105s. Annotate tuple[str,...], no behavior edit.
+- `run-capture-diagnostic.py`: real native and failure groups bothpass/40.7294426s,
+ 19 whole observations. Private executable-memory mutation denied, late DLL load
+ denied before execution retained with later drift, consumer exception/release/
+ reacquire/inactive handle and complete late-file rejection/recovery. Zero science
+ calls. Current fixture has an exactly normalized AST-equivalent type annotation;
+ six other source files exact diagnostic pins. No claim of a current rerun.
+- `run-gates-v7.py final-bounded`:16 current casespass/25.4943789s, zero skips:
+ python_b instance/file/import/code controls plus15 malformed/foreign port cases.
+- `run-gates-v7.py static-v4`: full Ruff/src-tests-scripts, seven-file format,
+ mypy589/no-incremental/cache nul and git diff check allpass/26.0484993s.
+
+Test family168.799304299871/180spent,
+11.200695700129remaining, including every failure and
+preparation. Static93.082978400053/180spent. Entry
+1.2848869/180. Documents/preparation/whole closing/terminal share180 and16MB output.
+Original semantic/scientific resource failure remains350.7925872/360spent,
+9.2074128remaining; no reset, cap increase, original reader/semantic audit/sweep.
+
+Measured scope:341modules/7663functions/51native images/74-or75 executable regions,
+complete raw runtime11,184,832–11,185,325bytes. Python mean1.05–1.07s,
+native mean0.50–0.51s, serialization0.09–0.10s per capture. Exact totals/whole phase
+rows retained in capture diagnostic, not projected into original historical phases.
+The current grouped/resource/complete correctness gate is unaccepted. Leave j and
+every original parent unchecked; no code manifest/native observation substituted
+for full trusted closure. Keep acceptance text unchanged; document batching and
+cost evidence for a separately declared protocol/optimization, not a silent reset.
+
+Skipped/unverified: current positive/python_a and full20-case invocation, all502
+related rerun (earlier exact pins/502-case acceptance retained), full repository
+pytest/clean-clone CI, POSIX/native other architectures, new library algorithms/
+CUDA/training/final/scoring/resume, independent actual scientific repeat/admission,
+complete malformed/continuity/transient/native/source-version variants and all25
+Unbound helper cases. No experiment artifact; owned runtime receipts are synthetic
+process/file/memory controls only. Three helper proposals remain held.
+
+Preserve all375 earlier criteria/244 raw240 actual tables and27 docs, complete old
+files/history/original150 sources79 tests174 inputs/proofs, five full saved inputs/
+4471 contents/13149 aliases/history/uncertainty effects/negative precision and every
+b3/arrival/ledger/reproducibility/resource/artifact requirement. Whole current
+preservation/one original END rebuild pending; completed IDs remain[].
+
+Exact next action:P6.7d2b2j remains unchecked. First inspect the complete capture-diagnostic-validation.json and every preserved failure/version, then declare a bounded runtime capture cost/parity diagnosis using its actual full341-module/7663-function/51-image/74-or75-executable-region/11.18MB observations. Measure duplicate Python namespace/graph traversal and full physical-path/native reads before optimizing; retain every actual module/function/code/closure/default/global/namespace/entrypoint/import-state/native file/executable-memory binding and prove complete equality or explicit lossless graph equivalence, with no subset/caching-away late drift. Current shared tests168.79930429987144/180spent (11.20069570012856remaining) must not be reset or represented as passed. Finish current positive and python_a controls, malformed/continuity/owner/request/native/late-code variants and all502 related cases under a prospectively justified bounded gate protocol preserving the failed180-second requirement and receipts. Close generated/opaque source-version correspondence and MAKE_FUNCTION/other non-audited transient callable gaps before claiming full runtime closure. Then implement sequential arrival/immutable complete actual ledger, all five saved inputs/full4471 contents/13149 aliases/history/prior effects/25 Unbound helper cases and every b3 gate. Preserve original350.7925872/360spent/9.2074128remaining and held CI/P6.4; actual scientific seeds/source/arrays unset and execution false.
+
+
+### 2026-10-06T05:50:41.703922+00:00 — Terminal runtime observation progress; j unchecked
+
+Completed IDs:[]; classification:verified_progress. The new actual process observer
+and bounded positive/drift/release/cost evidence are implemented; P6.7d2b2j remains
+unchecked for full current20/all502 correctness/resource/source-version/transient/
+continuity requirements. Earlier pending preservation note is superseded only by
+accepted whole preservation, not by an invented runtime/scientific admission pass.
+
+Single-use closing exit0/115.2227169000s, whole2023 files
+and current/historical Git before/after; all53 prior code files unchanged, all60
+current lead pins, original150 sources79 tests174 inputs/proofs,29 current docs,
+375 prior task criteria/244 raw240 actual tables,25 original Unbound helper cases,
+all three whole held clones/commits/patches. Exactly one original END rebuild;
+all24 scientific guards0. No original reader/semantic audit/scientific dispatch,
+source closure rekey/helper integration/favorable seeds/baselines/metrics/cap changes.
+
+Closing source:2499268bytes/SHA256
+ee543679024fa25d206c0e9929e100db43684415682f75ae4a248430eb95604c; validation:10257bytes/SHA256
+b3e8e3963ff406a230670693b30a8ad4b2f7ce81a42a86a7818beb3ffb015266; complete source/references retain every
+earlier accepted bridge/whole saved input/history witness and failed receipt.
+Current bounded16pass, zero skips/full589 staticpass. Real native/failure diagnostic
+passed at the retained annotation-equivalent version; current positive/python_a/
+full20/all502 rerun remain unverified. Shared tests168.79930429987144/180spent,
+11.20069570012856remaining; static93.08297840005253/180spent; no budget reset.
+Documents/preparation/closing spent116.6358261001/180 before this final append;
+final-append-operation records its own charged elapsed and whole output <16MB.
+Original resource failure350.7925872/360spent/9.2074128remaining unchanged.
+
+Actual scientific seeds/source/arrays remain unset; runtime closure/source-version,
+arrival/chronology/freshness/execution/precision authority false, independence
+unknown; all original b2/b3/d2b/d2/P6.7/d3 and held CI/P6.4 requirements remain open.
+No external blocker. Internal next gates: lossless complete capture/resource
+diagnosis, remaining full tests and actual source/version/transient correspondence.
+
+Exact next action:P6.7d2b2j remains unchecked. First inspect the complete capture-diagnostic-validation.json and every preserved failure/version, then declare a bounded runtime capture cost/parity diagnosis using its actual full341-module/7663-function/51-image/74-or75-executable-region/11.18MB observations. Measure duplicate Python namespace/graph traversal and full physical-path/native reads before optimizing; retain every actual module/function/code/closure/default/global/namespace/entrypoint/import-state/native file/executable-memory binding and prove complete equality or explicit lossless graph equivalence, with no subset/caching-away late drift. Current shared tests168.79930429987144/180spent (11.20069570012856remaining) must not be reset or represented as passed. Finish current positive and python_a controls, malformed/continuity/owner/request/native/late-code variants and all502 related cases under a prospectively justified bounded gate protocol preserving the failed180-second requirement and receipts. Close generated/opaque source-version correspondence and MAKE_FUNCTION/other non-audited transient callable gaps before claiming full runtime closure. Then implement sequential arrival/immutable complete actual ledger, all five saved inputs/full4471 contents/13149 aliases/history/prior effects/25 Unbound helper cases and every b3 gate. Preserve original350.7925872/360spent/9.2074128remaining and held CI/P6.4; actual scientific seeds/source/arrays unset and execution false.
+
+
+### 2026-10-06T05:51:44.924336+00:00 — Documentary terminal footer correction
+
+Completed IDs:[]; P6.7d2b2j remains unchecked. Final visual text read found two
+literal '+' markers in the newly appended README footer. Remove only those two
+markers; retain exact earlier README in before-terminal-format-README.md and the
+first terminal source/receipts unchanged. No source/test/criteria/resource/science
+change, new tests or second original END rebuild. Operative metadata is now
+handoff-final-log-append-v2.json/final-append-v2-operation.json, linked by
+operative-terminal.json. Recheck all60 current code/all29 documents around these
+three exact document changes and preserve375 original criteria/tables/log prefix.
+Whole2023/history/original binding/held-proposal closing remains accepted. Shared
+closing/document spending including this repair is recorded by v2 operation.
+Exact next action:P6.7d2b2j remains unchecked. First inspect the complete capture-diagnostic-validation.json and every preserved failure/version, then declare a bounded runtime capture cost/parity diagnosis using its actual full341-module/7663-function/51-image/74-or75-executable-region/11.18MB observations. Measure duplicate Python namespace/graph traversal and full physical-path/native reads before optimizing; retain every actual module/function/code/closure/default/global/namespace/entrypoint/import-state/native file/executable-memory binding and prove complete equality or explicit lossless graph equivalence, with no subset/caching-away late drift. Current shared tests168.79930429987144/180spent (11.20069570012856remaining) must not be reset or represented as passed. Finish current positive and python_a controls, malformed/continuity/owner/request/native/late-code variants and all502 related cases under a prospectively justified bounded gate protocol preserving the failed180-second requirement and receipts. Close generated/opaque source-version correspondence and MAKE_FUNCTION/other non-audited transient callable gaps before claiming full runtime closure. Then implement sequential arrival/immutable complete actual ledger, all five saved inputs/full4471 contents/13149 aliases/history/prior effects/25 Unbound helper cases and every b3 gate. Preserve original350.7925872/360spent/9.2074128remaining and held CI/P6.4; actual scientific seeds/source/arrays unset and execution false.
+
+
+### 2026-10-06T06:11:58.602950+00:00 — P6.7d2b2j1 complete runtime capture cost/parity diagnosis; preservation pending
+
+Completed IDs:[] pending whole closing; candidate:j1 only. Previous goal turn
+verified implementation progress. Revalidated operative j-v2 terminal/full closing,
+all29 documents/all60 code pins, HEAD/master13 commits since reviewed unchanged.
+Full earlier plan/log reads reconciled with exact pinned terminal appends. All376
+existing criteria, original150 closure and user changes preserved. No producer live.
+
+Declared independent entry/metadata-diagnosis/shared documents-preparation-whole-
+closing-terminal180 each including failures,32MB output before capture. Why32MB:
+complete original11.18MB estimate plus whole before docs/readback/closing would
+exceed j16MB; j16MB and its failed test/resource acceptance remain unchanged.
+No production code/test edit, dependency/config/algorithm/source/RNG/array/model/
+training/final/scoring change or actual scientific experiment. Original j tests
+168.7993043/180spent/11.2006957remaining and original scientific350.7925872/360spent/
+9.2074128remaining retain their exact failed/unaccepted scope. Diagnosis is not
+their repaired repeat or a fresh execution grant.
+
+Commands/outcomes (all scripts/argv/whole identities/raw output retained in
+artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-capture-cost):
+- `python -B .../start-runtime-capture-cost.py`: entry1.3223499/180, all29/60 pins
+  current, exact before copies and j1 declared before capture. j remains unchecked.
+- `python -B .../runtime-capture-cost/run-profile.py`: one supervised full real
+  V2/native metadata owner/current process profile exit0/8.8477034000s,
+  actual complete345 modules/7749 GC-tracked functions/
+  1650 namespaces/51 native images/
+  74 executable regions. Keep all instrumentation-added
+  members, not a filtered return to earlier341/7663/51 counts. All480 recipes/100
+  sources/400 streams/60 views/560 cells/116 contrasts and12 obligations checked by
+  unchanged real V2/native app context, scope retained. Raising science guards0.
+- Full original complete-runtime.json:10380177bytes/
+  SHA256947c89ad8109adc02fa526b4f2d34736e7327d646850913f33f4936e1bb2fe4d; actual full Python10350124,
+  native29302, entrypoint642 and all remaining schema/authority fields preserved.
+  cProfile/pstats stores all96 rows/all caller cost links. _namespace608760calls,
+  self0.567176/cumulative0.743523s; _executable_edges253171calls0.441593s cumulative;
+  whole file397reads0.641654s cumulative; junction checks3855calls0.130254s;
+  all native capture0.489800s. Do not sum overlapping cumulative times.
+- Unprofiled first Python capture0.6632985s; profiled Python/native/entrypoint
+  2.6251398s. First full snapshot retained while profiling increases live GC data
+  population; profiling adds overhead and members. These are different instrumented
+  states, not a matched throughput or original j wall estimate. Exact process
+  membership/body and all timings retained; no inference about unmeasured phases.
+- Fixed lossless subtree candidate on the whole actual body:403154 container
+  occurrences/57897 unique/345257 repeats. Raw6556528bytes (63.1639% of original),
+  zlib level6 complete920426bytes. All exact canonical original bytes/digest restored
+  from saved candidate, no module/function/code/closure/default/global/import/file/
+  namespace/native/entrypoint field removed. JSON value equality only; native/Python
+  object identities remain explicit data, no new runtime sharing/source provenance.
+- `python -B .../verify-full-readback.py`: independent complete original/candidate/
+  all96 profile rows readback exit0/5.0248867000s, original whole bytes equal;
+  six producer and seven deep controls deny missing/unused/coerced/foreign/cyclic/
+  forward/duplicate/changed/omitted members. Complete decoded identity is checked,
+  not Python loose numeric equality. These are metadata tests, not actual closure.
+- `python -B .../measure-matched-transform.py`: one matched pair on identical
+  complete input exit0/2.4649290000s. Original canonical serialization
+  0.0765709000s; candidate encode+canonical
+  1.7380842000s (22.6990x slower);
+  readback+canonical0.4565415001s.
+  Negative latency result retained; smaller bytes do not establish a faster live
+  observer or justify adopting this encoder. One pair has no variance claim.
+
+Total diagnosis16.3375191001/180, no failed
+producer/restart on this diagnostic. Whole closing/documents pending. Scripts live
+only in owned evidence namespace; all60 current source/test bytes unchanged. All
+previous589 static/16 bounded/annotation-equivalent native-failure/502 old evidence
+retained with original limitations; none represented as a new current full run.
+
+Skipped: pytest/full20/all502/current positive/python_a, project Ruff/mypy/format
+rerun (no production source/test changed; prior589 exact pins retained), full clone/
+CI/backend/CUDA/algorithm/source/final/actual independent repeat, original semantic
+reader/audit and actual closure/source-version/transient/arrival/prior/resource/b3
+admission. Profiler/subtree scripts ran actual complete self/readback/corruption
+controls and full declared caps. No source-version or precision/freshness/execution
+authority; source independence unknown. Every25 original helper cases remain Unbound;
+CI/seed-role/P6.4 proposals held. Complete prior4471 contents/13149 aliases/five full
+inputs/history/unknown effects/negative precision/failed resource gates preserved.
+
+Why next: per-object native namespace lookup dominates the profile and is repeated
+for ordinary immutable builtin data containers. Declare an exact-type shortcut
+whose old result is None, preserve subclasses/descriptor/class/proxy behavior and
+prove complete identical-input parity before editing the one non-original source
+file. No cached file/native reads, selected runtime subset or weaker late checks.
+Whole2025/history/original150/79/174/60/31/376 criteria/table/25-helper/held evidence
+and exactly one original END rebuild precede checking only j1. j/b2/b3/d2b/d2/
+P6.7/d3 stay unchecked and all original acceptance text retained.
+
+Exact next action:P6.7d2b2j2: declare and implement the smallest measured namespace lookup optimization in src/infra/runtime_python_objects.py, preserving its complete current bytes before edit and all other59 code/original150 closure. Prefer an exact-type fast path for immutable builtin containers whose native namespace is absent; subclasses/custom classes/native instance dictionaries/weak proxies/class descriptors must retain full old behavior. Use the complete original implementation and candidate on identical full live process/module/function/namespace/default/closure/import/file inputs, prove complete field/byte equality and measure benefit before replacing behavior. No filtered module/function/object graph, reduced coverage, permanent cache or source-version claim. Declare meaningful subclass/descriptor/type-drift/foreign/member/late/recheck controls and a justified bounded successor correctness protocol retaining the failed j168.7993043/180spent/11.2006957remaining and all prior receipts; do not reset or claim that gate passed. Finish current positive/python_a/full20/all502, complete transient/continuity/source-version attestation and then sequential arrival/ledger/full saved prior/b3 admission. Original350.7925872/360spent/9.2074128remaining, all25 Unbound helper cases, held CI/P6.4 and scientific seeds/source/arrays unset/execution false remain unchanged. Do not adopt the measured22.7x slower subtree encoder as an observation-speed repair.
+
+
+### 2026-10-06T06:20:00.690541+00:00 — Terminal P6.7d2b2j1 scoped diagnosis acceptance
+
+Completed IDs:[P6.7d2b2j1]; classification:verified_progress. Complete guarded actual
+process/profile and original canonical body, fixed whole lossless candidate,
+independent full readback/13 corruption denials and matched negative latency are
+verified. Only diagnosis complete; j/source-version/runtime/full20/502/resource/
+arrival/prior and every b2/b3/d2b/d2/P6.7/d3 acceptance requirement remains open.
+
+Whole preservation accepted:2025 physical files/current-historical Git, all60
+unchanged code files, original150 sources79 tests174 inputs/proofs,31 documents,
+376 earlier criteria/244 raw240 actual table rows,25 Unbound helper cases and all
+three held whole clone/commit/patch proposals. Exactly one original END rebuild;
+all24 scientific guards0. No original reader/semantic audit/new scientific source/
+model/final/RNG/array/experiment, code closure rekey, integration or budget reset.
+
+Profile/readback/matched operations all exit0 within joint16.3375191/180. Actual
+345modules/7749functions/1650namespaces/51images/74executable regions/all96 call
+rows and full10,380,177bytes retained. Instrumentation/retained first snapshot add
+members/data; no comparison to the old11.18MB scope as an optimization. Fixed
+candidate6,556,528raw/920,426compressed bytes reconstructs exact original; matched
+encode1.7380842s vs0.0765709s canonical (22.6990x slower), negative result preserved.
+No production optimization from smaller bytes. Namespace608760lookups is the next
+measured target; prefer exact immutable builtin-container behavior/full parity.
+
+Whole closing exit0/118.1018944000s; complete source
+2520208bytes/SHA2566fad169bcee7b4c2091a6252fe1ea4917e459ddcb4b8e7ef7cd181c0d8ab5013;
+validation9444bytes/SHA256f57a36e191b43fe1d8a121c2ae3da62a6f58d6fdd81a90a7a0cd6d99c39743e0.
+Shared docs/preparation/closing spent119.5978318001/180 before terminal. Final operation
+records this append's charged elapsed/current31-doc60-code checks/output<32MB.
+32MB was prospectively declared for full metadata body+before copies/closing;
+original j16MB/test168.7993043/180spent/11.2006957remaining and scientific
+350.7925872/360spent/9.2074128remaining unchanged/unaccepted. Project pytest/static/
+backend/clean-clone/actual repeat were not rerun (all production bytes unchanged).
+
+Actual scientific seeds/source/arrays unset, source independence unknown, runtime
+closure/source-version/arrival/freshness/execution/precision false. No external
+blocker; unfinished tasks stay unchecked with their exact next implementation.
+Exact next action:P6.7d2b2j2: declare and implement the smallest measured namespace lookup optimization in src/infra/runtime_python_objects.py, preserving its complete current bytes before edit and all other59 code/original150 closure. Prefer an exact-type fast path for immutable builtin containers whose native namespace is absent; subclasses/custom classes/native instance dictionaries/weak proxies/class descriptors must retain full old behavior. Use the complete original implementation and candidate on identical full live process/module/function/namespace/default/closure/import/file inputs, prove complete field/byte equality and measure benefit before replacing behavior. No filtered module/function/object graph, reduced coverage, permanent cache or source-version claim. Declare meaningful subclass/descriptor/type-drift/foreign/member/late/recheck controls and a justified bounded successor correctness protocol retaining the failed j168.7993043/180spent/11.2006957remaining and all prior receipts; do not reset or claim that gate passed. Finish current positive/python_a/full20/all502, complete transient/continuity/source-version attestation and then sequential arrival/ledger/full saved prior/b3 admission. Original350.7925872/360spent/9.2074128remaining, all25 Unbound helper cases, held CI/P6.4 and scientific seeds/source/arrays unset/execution false remain unchanged. Do not adopt the measured22.7x slower subtree encoder as an observation-speed repair.
+
+
+### 2026-10-06T06:44:15.415971+00:00 — P6.7d2b2j2 exact-type namespace optimization; whole preservation pending
+
+Completed IDs:[] until final whole closing/terminal. Implemented and verified one
+permitted old source edit; j2 remains unchecked pending full preservation. All377
+earlier criteria/table lines and unrelated edits preserved. Previous goal turn is
+verified_progress; current meaningful implementation/gates are progress.
+
+Changed:src/infra/runtime_python_objects.py (_namespace only), new
+tests/test_runtime_python_namespaces.py, new guide/ADR0188 and appended README/
+ARCHITECTURE/CHANGELOG/plan/log. Complete original source10306bytes/SHA256
+0f4d53689d7dada143e86804d300adb1ea5989d53d2655f952fa033b8d219f48 retained;
+candidate10553bytes/SHA25684110d4db394da0116d1696eab5629755f414aa2c740caf54863b086cf5afc58.
+All other59 prior code files/original150 source closure unchanged/unrekeyed.
+Why this:608760 calls/0.743523s profiled cumulative in j1. Exact five builtin type
+identities have no native instance dictionary. Their values may be mutable;
+subclasses/custom descriptors and all other native lookup paths retain behavior.
+
+Whole unfiltered45793-object native lookup parity and complete original/candidate
+10,334,507bytes/SHA25693d1e7dabbe6791b3cb94d5711c55b6a2e245ca2f42cea1ff9653c52f6b459db
+match exactly without normalization. Actual342 modules/7700 functions/1627 executable
+namespaces/51 native images/74 executable regions, full files/import/defaults/closures/
+globals/entrypoints retained. Both original/candidate/driver modules/functions stay
+in actual membership. The slotted full GC adapter supplies the identical actual
+unfiltered inventory only in this parity fixture; production still calls gc.get_objects.
+Independent whole-byte/GC-ledger readback and17 pinned-content corruption denials
+pass; these attest content fidelity, never semantic source/version/admission.
+
+Fixed original-first all-object lookup0.0182809000s
+vs candidate0.0131953000s (27.819% less),
+whole Python/native/entrypoint pair1.1505740000s vs
+1.1002188000s (4.377% less). One pair;
+OS/page/cache/order effects and variance are unmeasured. No seed/workload/repeat
+selection or future speed claim. j1 slower lossless codec is retained and unused.
+
+Current single full544 test cases pass0 failed0 errors0 skipped: original502 exact
+case IDs plus unchanged20 full runtime cases plus22 new namespace behaviors. Real
+runtime groups include positive/reacquisition, module/callable/detached/default/
+closure/instance/file/import/code/native executable memory/native loading/consumer/
+inactive/request/finally rechecks; each original40-second child limit unchanged.
+New controls retain builtin subclasses, descriptor/property/metaclass equality/
+hash denial, class/module/wrapper/native inherited dictionaries, live/dead weak
+proxies, actual compatible type/MRO drift and late callable members. No production
+cache, GC subset, file/native-read bypass, new dependency/environment/config.
+Full Ruff,2-file format, no-incremental mypy590 and diff pass. New fixture's11 static
+errors fixed using explicit dynamic setattr/delattr and three narrowly documented
+readonly-property override ignores; production has no new suppression.
+
+Commands/outcomes:
+```text
+python -B prior-evidence/start-runtime-namespace-optimization.py -> exit0
+python -B runtime-namespace-optimization/prepare-candidate.py -> exit0
+python -B runtime-namespace-optimization/run-gates.py baseline -> exit1,21 passed1 failed0 skipped
+python -B runtime-namespace-optimization/repair-baseline-fixture.py -> exit0
+python -B runtime-namespace-optimization/run-gates-v2.py baseline-v2 -> exit0,22 passed0 skipped
+python -B runtime-namespace-optimization/run-gates.py parity -> exit0
+python -B runtime-namespace-optimization/verify-full-readback.py -> exit0
+python -B runtime-namespace-optimization/adopt-candidate.py -> exit0
+python -B runtime-namespace-optimization/run-gates.py static -> exit1,Ruff/format pass,11 fixture errors/mypy590
+python -B runtime-namespace-optimization/repair-test-types.py -> exit0
+python -B runtime-namespace-optimization/run-gates-v3.py static-v2 -> exit0
+python -B runtime-namespace-optimization/run-gates.py full -> exit0,544 passed0 skipped
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m pytest -q tests/test_runtime_python_namespaces.py tests/test_prospective_runtime_closure.py tests/test_prospective_generation_ownership.py tests/test_prospective_generation_bundles.py tests/test_prospective_generation_requests.py tests/test_prospective_request_bundles.py tests/test_prospective_confirmation_inputs.py tests/test_prospective_confirmation_evidence.py tests/test_seed_usage.py tests/test_prospective_role_requests.py tests/test_prospective_stream_declarations.py tests/test_prospective_replications.py tests/test_prospective_confirmation_design.py tests/test_seed_stream_screening.py --junitxml=C:\Users\Avery\Documents\ChatGPT\Circadian\artifacts\runs\p67-untouched-seed-usage\prior-evidence\runtime-namespace-optimization\full.xml -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff check --no-cache src tests scripts -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff format --check src/infra/runtime_python_objects.py tests/test_runtime_python_namespaces.py -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m mypy --no-incremental --cache-dir nul -> exit0
+git diff --check -> exit0
+```
+All python commands use existing .venv\Scripts\python.exe and artifact paths
+under artifacts/runs/p67-untouched-seed-usage/. Single-use destinations occupied;
+full canonical bodies/full namespace ledger/XML/case results/source before copies/
+every failed receipt and exact producer versions retained in owned evidence.
+
+Initial new22-case fixture failure attempted illegal class __dict__ assignment;
+replace with legal compatible __bases__ inherited descriptor drift/restoration,
+preserving intent and failed body. Initial full static11 errors are fixture typing
+only; every22 case ID remains and current full544 includes all of them. No favorable
+result selection, optional repeat or metric/baseline/seed tuning.
+
+Family totals before docs/preparation/closing/terminal:
+- closing_and_documents_including_preparation: 0.7735241000/180 seconds
+- entry_including_failures: 1.3711895000/180 seconds
+- full_parity_and_measurement_including_preparation_and_failures: 8.5137083000/180 seconds
+- static_including_preparation_and_failures: 49.2719185001/180 seconds
+- successor_tests_including_preparation_and_failures: 230.4441878000/300 seconds
+Separate successor300s verifies current regressions only, based on prior502 alone
+131.0861267s plus five full runtime children; preserve failed original j180s criterion,
+168.7993043spent/11.2006957remaining unchanged/unaccepted. Separate64MB complete two
+bodies/before copies/results/whole closing prospectively declared; j16MB/j1_32MB
+unchanged. Original scientific350.7925872/360spent/9.2074128remaining still failed.
+
+Skipped/not run: full unrelated project suite/clean-clone/CI/optional Torch/backend,
+original saved semantic reader/audit, independent scientific repeat/source/array/RNG/
+model/train/final/scoring/algorithm experiment, sweeps. Current targeted544 have0
+skips. Prior gate evidence preserved; no actual scientific execution authorization.
+
+Remaining: app only checks outer nested runtime records; full malformed/continuity
+scope controls and trusted actual Python/native disk-to-loaded-code/source-version
+correspondence/transient MAKE_FUNCTION coverage still open. Whole observed body/
+hash/shape/metadata declaration does not provide those proofs. Full current20/502
+behaviors passed under separate successor; failed old resource acceptance remains.
+Freshness/arrival/independence/precision/execution remain unproven/false; actual
+scientific seeds/source/arrays unset. All25 original helper cases Unbound; all
+held proposals preserved. No external blocker. All parent tasks remain unfinished.
+
+Exact next action:P6.7d2b2j: prospectively declare the next nested-runtime-schema/continuity increment. The app currently checks outer payload keys but accepts nonempty foreign nested records; implement a small pure closed-schema validator for every actual module/function/code/default/closure/namespace/import/entrypoint/native-file/executable-memory record, exact types/IDs/complete membership and joins, with useful early errors and no IO. Preserve the complete prior app bytes before any permitted edit and all current61 code/original150 closure. Positive/continuity fixtures must originate from full real guarded V2/native-owner/runtime observations; mutate every malformed/foreign/omitted/boolean/float/duplicate/reordered/conflicting identity/lifetime/time/PID/nonce/request/late record and verify before-use/finally rechecks/releases without science. Prospectively justify bounded current full-regression controls, retaining original j168.7993043/180spent/11.2006957remaining and current j2 successor outcomes without declaring old resource acceptance repaired. Then close trusted whole Python/native disk-to-loaded-code/source-version correspondence and ordinary MAKE_FUNCTION/non-audited transient callable gaps before claiming full runtime closure; no recorded hash/caller manifest/shape validation substitutes. Continue sequential arrival/immutable full actual ledger, all five saved inputs/full4471 contents13149 aliases/history/prior effects/all25 Unbound cases and b3 isolation/init/parity/resource/repeat/artifact/readback admission. Preserve scientific350.7925872/360spent/9.2074128remaining, held CI/P6.4, fixed negative results and seeds/source/arrays unset/execution false until full admission passes.
+
+
+### 2026-10-06T06:50:55.305048+00:00 — Terminal P6.7d2b2j2 namespace optimization acceptance
+
+Completed IDs:[P6.7d2b2j2]; classification:verified_progress. Exact-type native
+namespace optimization, complete actual original/candidate parity, fixed measured
+lookup benefit, independent whole readback/17 corruption denials, all544 current
+cases0 skipped and full590-file static gates accepted. Only j2 complete; j/nested
+schema/source-version/transient/full runtime and all scientific parents stay open.
+
+Whole preservation accepted:2028 physical files/current-historical Git,59 unchanged
+old code files plus one preserved/changed old namespace source and one new test
+(61 current), original150 sources79 tests174 inputs/proofs,33 documents,377 prior
+acceptance lines/244 raw240 actual table rows/all25 Unbound helper cases and all
+three held whole clone/commit/patch proposals. Exactly one original END rebuild;
+all24 science guards0. No original semantic reader/audit/scientific source/RNG/array/
+model/train/final/scoring/repeat/algorithm experiment, integration or closure rekey.
+
+Complete original/candidate10,334,507bytes match with every45793 actual GC/native
+namespace result and342 modules/7700 functions/1627 namespaces/51 native images/74
+executable regions retained. Fixed all-object lookup0.0182809000s vs0.0131953000s
+(27.82% less); full capture1.1505740000s vs1.1002188000s (4.38% less). One fixed
+original-first pair, no variance/order/cache/future speed guarantee. Whole hashes/
+membership and current source/test byte pins retained. No subtree codec adoption.
+
+Commands/outcomes recorded above and in all exact owned receipts: entry/candidate/
+baseline-repair/baseline-v2/parity/independent readback/adoption/test-type repair/
+static-v2/full/docs/whole closing exit0. Initial baseline exit1 (21 pass1 invalid
+readonly fixture) and initial static exit1 (11 new fixture typing errors) retained
+with complete pre-repair bytes; no production suppression or removed controls.
+Single current full544 includes exact prior502 IDs, unchanged20 full runtime and
+all22 new namespace cases;0 failed/errors/skipped. Full Ruff/2-file format/mypy590/
+diff pass at exact current source/test bytes. Unrelated full project/clean-clone/
+CI/optional backend/source/actual independent scientific repeat were not run.
+
+Whole closing exit0/127.9966456000s (including all
+4.9468422000s preparation); complete source
+2544591bytes/SHA256595c89ca353c853804d9d3fb4a6229061a03363187fc18ce6b0b72de2def8edb;
+validation10406bytes/SHA256b3d1fc724eb3c24d53cf86607d59807dc761b6142fdc5a5c243baaa2405a0ffa.
+Shared docs/preparation/closing spent129.6295689000/180 before terminal; final operation
+charges this append and all33-doc61-code checks/diff/output<64MB. Separate j2
+successor230.4441878/300spent, parity8.5137083/180, static49.2719185/180; every failed
+attempt included. Original j168.7993043/180spent/11.2006957remaining, old j16MB/j1_32MB
+and scientific350.7925872/360spent/9.2074128remaining unchanged/unaccepted. Separate
+successor verifies this edit/current cases, never repairs old resource acceptance.
+
+Actual scientific seeds/source/arrays unset; independence unknown; freshness/
+source-version/runtime closure/arrival/precision/execution false. No external
+blocker. Every unfinished acceptance criterion remains required and unchecked.
+Exact next action:P6.7d2b2j: prospectively declare the next nested-runtime-schema/continuity increment. The app currently checks outer payload keys but accepts nonempty foreign nested records; implement a small pure closed-schema validator for every actual module/function/code/default/closure/namespace/import/entrypoint/native-file/executable-memory record, exact types/IDs/complete membership and joins, with useful early errors and no IO. Preserve the complete prior app bytes before any permitted edit and all current61 code/original150 closure. Positive/continuity fixtures must originate from full real guarded V2/native-owner/runtime observations; mutate every malformed/foreign/omitted/boolean/float/duplicate/reordered/conflicting identity/lifetime/time/PID/nonce/request/late record and verify before-use/finally rechecks/releases without science. Prospectively justify bounded current full-regression controls, retaining original j168.7993043/180spent/11.2006957remaining and current j2 successor outcomes without declaring old resource acceptance repaired. Then close trusted whole Python/native disk-to-loaded-code/source-version correspondence and ordinary MAKE_FUNCTION/non-audited transient callable gaps before claiming full runtime closure; no recorded hash/caller manifest/shape validation substitutes. Continue sequential arrival/immutable full actual ledger, all five saved inputs/full4471 contents13149 aliases/history/prior effects/all25 Unbound cases and b3 isolation/init/parity/resource/repeat/artifact/readback admission. Preserve scientific350.7925872/360spent/9.2074128remaining, held CI/P6.4, fixed negative results and seeds/source/arrays unset/execution false until full admission passes.
+
+
+### 2026-10-06T08:35:52.634681+00:00 — P6.7d2b2j3b static callback/current schema gates; whole preservation pending
+
+Completed IDs:[] until accepted whole closing/terminal; classification:verified_progress.
+AGENTS/full plan/current log and prior j2 reviewed; checkout reconciled at master
+28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8/13 commits after reviewed8793c49. Phase0
+already complete, isolation/matched baselines prioritized. Unrelated changes kept.
+
+Implemented: five pure complete V1 schema modules; exact full app current/prior
+scope/header/continuity and all failure finally checks; removed fake-positive call
+from deliberately invalid fixture, retained20 old IDs. Passive Unicode repr codec
+with compile-denial control/fixed preloaded patterns/detail text. Actual failure
+evidence then justified one static typed V2 source projection in infra and repeatable
+test output reporting/copying. Complete previous app/invalid-fixture/reader bytes
+saved; child changes only IO reader + test reporter,66 child-prior files unchanged.
+
+Current full548 cases pass0 failed0 errors0 skipped, exact previous544 IDs plus
+three original runtime-schema group IDs and one passive string-codec ID. Full65
+payload/21 continuity/10 lifecycle controls pass. Actual14-record focused lifecycle
+and20-record full groups retain complete real guarded V2/native-owner/current-process
+bodies, runtime headers, immutable whole scopes/snapshots and every control outcome.
+First malformed record yields2 actual observations; entry/final/consumer/late-request
+failures each3; all final checks/releases and native owner reacquisition verified.
+Five original40s child limits and three new180s group limits unchanged.
+
+Full Ruff/10-file format/no-incremental mypy597/diff pass at identical68 current
+source/test pins. Child changes only the V2 IO reader and new test output reporter;
+other66 current files unchanged during this increment. Across j2->current,58 old
+code files unchanged, three old app/invalid-fixture/V2-reader files preserved before
+changes and seven new pure-core/tests files (10 current contract files). No new
+dependencies/config/environment variables, production type suppression or audit change.
+
+Independent full readback validates49 complete historical records with exact raw/
+compressed identities, full headers/scopes/snapshots, every encoded child and
+representable join, sequence/time/PID/nonce consistency and96 current controls.
+Also reads all11 earlier partial failed-lifecycle bodies/snapshots. Their runtime
+headers were never saved; PID/nonce/time/sequence are not invented. Partial data
+does not repair a failed gate or grant live authority. Every snapshot contains480
+recipes100 sources400 streams60 bindings/12 unresolved actual obligations, arrays
+None/final unreleased/execution false. All guarded science counters0.
+
+
+All predecessor failures retained: red3 missing APIs; one unused Ruff import;
+five mypy annotations; initial full547 ->544 pass3 fail0 skip318.0584632s because
+literal_eval compiles text under the required audit. Passive codec fixes that;
+first-use regex references then change three marshal hashes, identified in whole
+actual before/after bodies. Fixed module-load regexes; preserved focused failure
+and preparation typo/collection errors. Complete malformed-first diagnostic locates
+runtime_object hash changing while error frames hold detail text; preloaded error
+detail and fixture consumer message preserve actual checks. Broader marshal content/
+reference-count/source-version correspondence remains an open gate.
+
+Corrective full548 ->547 pass1 fail0 skip366.2592523s; whole-suite basetemp retained
+221533189 owned bytes and failed64MB. Complete late-file diagnostic identifies the
+new V2 recheck selector lambda and containing code hash. Lifecycle-v3 then passes
+first/entry/final/consumer but fails late request (2 actual records versus required3).
+Static callback fixes this real IO boundary without filtering/normalizing observer
+bytes or weakening expected controls. Complete failed1545 regular files206148235
+bytes/462 directories and all symlink/junction declarations saved in ZIP16266229
+bytes/SHA25672ac5ab2c9a899ccc8a5a34362fdc07069aed72a6d20b1ddb3f03a74caf7d3b9,
+every archived regular byte independently checked before verified native PowerShell
+cleanup of only the named owned temp tree; link targets not followed. Original
+400s/500s/output overrun gates remain failed/unaccepted, not reset or repaired.
+
+Original j3 family320.1155096999719/400spent/79.8844903000281remaining. j3a family
+452.9516672998151/500spent/47.0483327001849remaining after separately charging the
+retained inline diagnostic quoting SyntaxError0.2935305s. Its earlier declaration
+counter452.6581367998151 is preserved as historical; no receipt rewritten. Old
+j168.7993043/180spent/11.2006957remaining, j2_230.4441878/300spent/69.5558122remaining,
+scientific350.7925872/360spent/9.2074128remaining and all failed original gates unchanged.
+
+
+Plan changes: original schema j3 and passive correction j3a added prospectively,
+then left unchecked after full active/output/resource failures. Add j3b only after
+complete late-file/owned-output evidence, explicitly permitting one additional old
+IO module outside original150 closure and bounded current500s/output routing. All380
+prior criterion lines/244 raw240 actual table rows/25 Unbound helper requirements
+preserved. Only j3b may complete after whole2039 history/original150/79/174/68-code/
+37-doc/380-prior-criteria/held-proposal preservation and exactly one original END/
+all24 science guards0. No silent cap reset, acceptance weakening or discarded failure.
+
+Actual current commands/outcomes:
+
+```text
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m pytest -q tests/test_runtime_payload_schema.py tests/test_runtime_python_namespaces.py tests/test_prospective_runtime_closure.py tests/test_prospective_generation_ownership.py tests/test_prospective_generation_bundles.py tests/test_prospective_generation_requests.py tests/test_prospective_request_bundles.py tests/test_prospective_confirmation_inputs.py tests/test_prospective_confirmation_evidence.py tests/test_seed_usage.py tests/test_prospective_role_requests.py tests/test_prospective_stream_declarations.py tests/test_prospective_replications.py tests/test_prospective_confirmation_design.py tests/test_seed_stream_screening.py --junitxml=C:\Users\Avery\Documents\ChatGPT\Circadian\artifacts\runs\p67-untouched-seed-usage\prior-evidence\runtime-reader-callbacks\full.xml -o junit_family=xunit1 -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff check --no-cache src tests scripts -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff format --check src/app/prospective_runtime_closure.py src/core/runtime_native_schema.py src/core/runtime_payload_schema.py src/core/runtime_python_schema.py src/core/runtime_record_schema.py src/core/runtime_value_schema.py tests/prospective_runtime_fixtures.py tests/runtime_payload_fixtures.py tests/test_runtime_payload_schema.py src/infra/prospective_generation_bundles.py -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m mypy --no-incremental --cache-dir nul -> exit0
+git diff --check -> exit0
+```
+
+New focused lifecycle1 case ->pass with14 real records. Current full548 includes
+every old544/original3/new codec ID;0 failures/errors/skips. Exact XML/commands/stdout/
+producer/source/test byte pins saved. New JUnit xunit1 option preserves complete
+runtime report properties; assertions/case IDs/child timeouts unchanged. Source
+callback static returns existing sources, public interfaces unchanged. New whole49
+complete-record readback plus11 partial artifacts records missing-header limits.
+
+Budgets before docs/closing (every operation/preparation/failure included):
+
+- closing_and_documents_including_preparation: 0.0009958000/180 seconds
+- current_tests_including_preparation_and_failures: 455.9322749000/500 seconds
+- entry_including_failures: 0.0421076000/180 seconds
+- metadata_including_preparation_and_failures: 47.8137769000/180 seconds
+- static_including_preparation_and_failures: 25.1083416000/180 seconds
+
+Artifacts: runtime-payload-schema/ retains red/offline probe63/profile/full547 and548
+failures/all focused/preparation/typing versions/complete drift bodies and differences,
+all membership scopes and representational limits. All actual saved body/snapshot/header
+bytes and the entire failed1545-file tree ZIP/manifest/link declarations/verification/
+native cleanup receipt retained;11 partial bodies explicitly missing unsaved headers.
+runtime-reader-callbacks/ retains pre-change68-code33-doc entry/old reader+reporter,
+focused14/full20 complete records and controls/copied group manifests/all548 XML/
+597 static/49+11 readback/whole closing/terminal receipts. Each stage's owned64MB
+cap separate; earlier221MB overrun stays failed, not erased by compression.
+
+Skipped tests/experiments: current548 zero skips. Unrelated whole project suite,
+clean clone, CI, optional Torch/backend, actual independent original scientific
+repeat and new algorithm experiment/sweep not run. Three complete CI/seed-role/P6.4
+clone/commit/patch proposals remain held, not integrated; all25 cases individually
+Unbound. Original full saved4471 contents13149 aliases/prior effects/150 sources79
+tests174 inputs and failed scientific repeat/resource records preserved. No original
+semantic reader/audit, source closure rekey or scientific source/RNG/array/model/
+train/final/scoring/repeat dispatch. Scientific seeds/source/arrays unset, independence
+unknown; freshness/runtime-source/precision/execution false. No external blocker.
+
+Unfinished: j3/j3a original correctness/output-resource gates, trusted code/source/
+marshal-refcount/transient closure, sequential arrival/ledger/full prior/all b3 and
+scientific admission. Exact next action:P6.7d2b2j: prospectively declare whole code-object/constant/reference-count controls for the observed marshal hash instability under legitimate first-use/exception paths. Inspect the complete retained drift bodies and prove actual code/constant contents versus serialization reference flags; stabilize trusted code identity/retention without graph filtering, normalization, cached source authority or source closure rekey. Preserve all current68 code/original150 closure and failed j3_400s/j3a_500s/output221533189-byte/j_180s/scientific360s gates as unaccepted. Then close trusted complete disk-to-loaded-Python/native/source-version correspondence, opaque type/omitted unreferenced membership/nested endpoint route and ordinary MAKE_FUNCTION/non-audited transient callable limits before full runtime admission. Continue sequential actual arrival/immutable full actual ledger/full five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound cases/every b3 isolation-init-parity-resource-repeat-artifact-independent-readback requirement. Scientific seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T08:44:03.816791+00:00 — Terminal P6.7d2b2j3b current callback/schema acceptance
+
+Completed IDs:[P6.7d2b2j3b]; classification:verified_progress. Static V2 callback,
+complete nested structure/exact continuity/all-failure final checks/passive codec
+and repeatable complete runtime output verified at current68 source/test bytes.
+Only j3b complete; original j3/j3a correctness/output caps remain failed/unchecked,
+all trusted source-version/marshal-reference/transient/arrival/prior/ledger/b3 and
+scientific parent criteria required. Overall development goal remains active.
+
+Single current full548 cases0 failed/errors/skipped, retaining exact previous544
+plus3 original schema groups+1 codec unit. All65 payload21 continuity10 lifecycle
+controls, compiler denial, first2/other3 real records/native releases/reacquisition
+pass. Focused lifecycle1 case/14 records and full3 groups/20 records retained whole.
+Current597-file no-incremental mypy/full Ruff/10-file format/diff pass. Exact command
+stdout/case IDs/source/test/producer/artifact pins recorded above/owned receipts.
+
+Independent readback49 complete historical records +11 partial bodies/snapshots
+passes without inventing missing runtime headers. Every provided child/representable
+join/whole raw+compressed identity/full complete header/scope/snapshot/continuity
+verified; partial artifacts stay explicitly partial. Entire earlier failed1545-file
+206148235-byte tree/462 directories/all link targets retained losslessly in verified
+16,266,229-byte ZIP; native checked cleanup follows full archive verification. The
+221533189-byte overrun and failed400s/500s gates remain unaccepted, never reset.
+
+Whole closing accepted:2039 physical files/current-historical Git,58 unchanged j2
+code plus3 preserved/changed old app/invalid-fixture/reader +7 new files (68 current),
+original150 sources79 tests174 inputs/proofs,37 documents,380 prior criterion lines/
+244 raw240 actual table rows/25 individual Unbound helpers/all three held whole
+clone-commit-patch proposals. Exactly one original END rebuild; all24 science
+guards0. Original IO reader absent from preserved150 source closure. No original
+semantic reader/audit/scientific source/RNG/array/model/train/final/scoring/repeat,
+seed/metric/baseline change, source closure rekey or held proposal integration.
+
+Whole closing exit0/115.0876037001s including all
+5.4317316000s preparation; complete source
+2643312bytes/SHA2565091d8eab1f0c9054758bfa98c61f93433153f3dc96617073c20f105874ad84f;
+validation11670bytes/SHA2563f863e17c5d8cf40680ce6465da8c6404afcbc2f994f2361be58a9d234b86ef3.
+Shared docs/preparation/closing115.9922663001/180 before terminal; final receipt charges
+this append/37-doc68-code/diff/output checks. Current correctness
+455.9322749000/500 including all
+preparation/focused/full, static25.1083416000/180,
+metadata47.8137769000/180, saved-output64MB.
+Old j3_320.1155097/400/j3a_452.9516673/500/output221533189 failure, j168.7993043/180,
+j2_230.4441878/300 and scientific350.7925872/360spent/9.2074128remaining unchanged.
+Original j3a historical452.6581368 counter plus delayed charged quoting failure
+0.2935305 retained separately, no rewritten old receipt or scientific resource reset.
+
+Skipped: unrelated whole project/clean clone/CI/optional Torch/backend/new original
+independent scientific repeat/algorithm experiment not run; current548 skips0.
+No external blocker. Scientific seeds/source/arrays unset, independence unknown,
+runtime-source/freshness/precision/execution false. Exact next action:P6.7d2b2j: prospectively declare whole code-object/constant/reference-count controls for the observed marshal hash instability under legitimate first-use/exception paths. Inspect the complete retained drift bodies and prove actual code/constant contents versus serialization reference flags; stabilize trusted code identity/retention without graph filtering, normalization, cached source authority or source closure rekey. Preserve all current68 code/original150 closure and failed j3_400s/j3a_500s/output221533189-byte/j_180s/scientific360s gates as unaccepted. Then close trusted complete disk-to-loaded-Python/native/source-version correspondence, opaque type/omitted unreferenced membership/nested endpoint route and ordinary MAKE_FUNCTION/non-audited transient callable limits before full runtime admission. Continue sequential actual arrival/immutable full actual ledger/full five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound cases/every b3 isolation-init-parity-resource-repeat-artifact-independent-readback requirement. Scientific seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T09:08:14.898138+00:00 — P6.7d2b2j4a whole marshal controls
+
+Completed IDs:[] pending whole closing; classification:verified_progress.
+
+18 current diagnostic tests pass0 failures/errors/skips; full Ruff/new-file format/
+no-incremental mypy598/diff pass. All68 earlier source/test files unchanged, with
+one new test module. Prior full548 runtime regression and49 complete+11 partial
+readback receipts stay pinned at identical68 bytes; those expensive groups are
+not reexecuted or claimed as a new566-case full gate.
+
+Six fresh non-interned str/bytes/float/tuple/frozenset/nested-code controls keep the
+same actual code/constant identity and every public native field/recursive value.
+Adding one reference changes marshal bytes (a FLAG_REF128 bit is observed); native
+decode yields the same full public contents. Reference observations2->3->2 and
+byte-for-byte reversal after release isolate the reference-lifetime mechanism.
+Six full public-field/recursive-constant retention controls preserve raw bytes on
+actual first return and release. An actual exception raised by controlled code
+retains the same message and its real traceback; raw bytes remain unchanged.
+Genuine constant/bytecode/nested-code replacements alter contents and raw identity.
+Two metadata controls show an unchanged original code's shared co_linetable alias
+changes serialization without native-field retention and stays stable with it.
+Every54 current raw serialization/complete native field snapshot/reference outcome
+is saved and independently decoded/read back; no code/graph filtering or byte
+normalization. All public native fields, including deprecated co_lnotab, inspected;
+73 deprecation warnings in the final pytest run are retained, not skipped fields.
+
+All three historical full drift groups read and independently checked: first-use
+three changed code-hash rows/no added function; malformed-first one changed row;
+late-request one changed row plus one actual lambda. Every saved related compressed
+body/difference/malformed artifact retained. Three earlier tuple/list comparison
+entries had equal saved JSON values, while three hash differences remain actual.
+Historical raw marshal/code contents were never saved: they are not reconstructed,
+and these controls do not retrospectively certify that all old drift was harmless.
+
+Initial16 gate7 pass9 fail0 skip: six fixture-return failures from an assumed None
+slot that Python3.14 omits; three shared line-table reference failures. Full v1
+test/producer/XML/outcomes and pre-correction18 raw field-probe records retained;
+the probe's None return is explicitly excluded from successful first-return proof.
+Before correction, the plan recorded actual None assignment and strengthened
+retention to every public native field/recursive constant plus two metadata cases.
+All original criteria/caps preserved. Later18 gates pass at saved source versions;
+final adds a genuine controlled-code exception/traceback and explicit type narrowing.
+First static gate fails two mypy errors (object Iterable and optional traceback),
+fixed by explicit assertions without suppressions. First independent readback fails
+an anticipated source_version_attested key; actual V1 source_attestation field is
+checked exactly in the correction. Whole failed producer and1.1282154s tool parent
+failure retained/charged. All failures remain in their original budget families.
+
+Only diagnostic j4a may complete after whole2042/current-historical Git/original150
+sources79 tests174 inputs/69 code39 docs/381 prior criteria244 tables25 Unbound/
+three held proposal preservation, one original END and24 guards0. Production
+observer retention, private localsplus/kinds/native/source-version correspondence,
+opaque/omitted/nested-route/transient gaps and all arrival/prior/ledger/b3 gates
+remain mandatory and unfinished. No production observer/audit/semantic reader,
+scientific source/RNG/arrays/model/train/final/scoring/repeat, original closure rekey,
+dependency/config/environment, held proposal integration or baseline/metric/seed
+change. Scientific execution/freshness/precision false and independence unknown.
+Original failed400s/500s/output221533189/j_180s/scientific360s gates unaccepted.
+
+Commands and observed outcomes:
+
+```text
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m pytest -q tests/test_runtime_marshal_controls.py --junitxml=C:\Users\Avery\Documents\ChatGPT\Circadian\artifacts\runs\p67-untouched-seed-usage\prior-evidence\runtime-marshal-controls\focused-v4.xml -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff check --no-cache src tests scripts -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff format --check tests/test_runtime_marshal_controls.py -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m mypy --no-incremental --cache-dir nul -> exit0
+git diff --check -> exit0
+.venv/Scripts/python.exe -B artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-marshal-controls/run-diagnostics.py -> exit0
+.venv/Scripts/python.exe -B artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-marshal-controls/verify-readback.py -> exit0 (initial failure retained)
+```
+
+Separate fixed family usage so far (preparation/failures included):
+
+- diagnostics_including_preparation_and_failures: 5.7460094000/90 seconds
+- entry: 0.1351594000/180 seconds
+- focused_tests_including_failures: 2.7820010000/60 seconds
+- static_including_preparation_and_failures: 51.3934126000/180 seconds
+
+Artifacts: all18 current controls54 whole raw serializations/native snapshots;
+18 initial probe serializations and source-v1/v2/v3; failed16 XML/producer and all
+18-case successors; full598 Ruff/format/mypy/diff; three whole historic drift groups/
+all related body/difference/malformed artifacts; complete independent readback.
+Preserved j3/j3a/output/archive, original350.7925872/360spent9.2074128remaining,
+j168.7993043/180spent11.2006957remaining and held CI/P6.4/25 Unbound requirements.
+
+Skipped: current focused18 skips0. Unchanged prior548 groups, unrelated full project/
+clean clone/CI/optional Torch/backend/original scientific repeat/new algorithm study
+not reexecuted; no sweeping, tuning or baseline/metric/seed changes.
+
+Plan amendment: split diagnostic j4a from production retention; before correction
+recorded actual None assignment/full native metadata retention and two extra controls.
+All381 old criteria preserved; parent j/source-version/private/transient/arrival/prior/
+ledger/b3 remain open. No external blocker. Exact next action:P6.7d2b2j: prospectively declare a production code/value-retention increment. Use j4a's full raw/public-field/reference controls to retain every actual observed code object, all recursive constants and native serialized metadata before the first runtime observation; inspect CPython private localsplus/kinds/alias coverage rather than assuming public fields suffice. Preserve unchanged68/current69 code, original150 source closure and all failed j3_400s/j3a_500s/output221533189/j_180s/scientific360s gates. Require complete actual whole-graph before/use/finally controls, genuine code/default/namespace/native mutation denials, lease release/reacquisition, full prior548+new18 cases (566) with0 skips at current bytes, whole preservation/one original END/all guards0 and separately justified budgets before completing stabilization. Then close trusted full disk-to-loaded-Python/native/source-version, opaque type/omitted unreferenced membership/nested endpoint route/ordinary MAKE_FUNCTION/non-audited transient gaps before runtime admission. Continue actual sequential arrival/immutable ledger/full five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound and every b3 isolation/init/parity/resource/repeat/artifact/independent-readback requirement. Scientific seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T09:13:17.453703+00:00 — Terminal P6.7d2b2j4a marshal diagnostic acceptance
+
+Completed IDs:[P6.7d2b2j4a]; classification:verified_progress.18 focused cases pass0
+failed/errors/skips; Ruff/new-file format/mypy598/diff pass. Same actual code and
+public contents can produce different marshal bytes when a unique reference becomes
+shared; retaining all public native fields/recursive constants stabilizes the
+declared controls and preserves genuine code/constant/nested-change detection.
+Metadata-only line-table alias controls disprove constants-only retention sufficiency.
+Every54 raw/current native-value/reference artifact and18 initial invalid-return probe
+raws independently read; every three whole historic body/difference/malformed group
+retained. Unsaved historical executable bytes and private fields are not invented.
+
+All68 earlier code files unchanged; prior548 full runtime/49 complete+11 partial
+gates remain pinned at their exact current bytes and are not reexecuted or called a
+new566 full-suite gate. Only one new test module and two docs added; five shared
+documents byte-appended. Every381 prior criterion/table preserved, including failed
+j3_400s/j3a_500s/output221533189/j_180s/scientific360s. Initial16 ->7 pass9 fail,
+two mypy errors and failed readback root-key assumption/source versions saved;
+all attempts charged.73 co_lnotab warnings retained because no native field skipped.
+
+Whole closing exit0/114.4174698000s including
+4.8878712000s preparation; source
+2687708bytes/SHA256dea549ec53bef65477c9b15ffd215df6a3c7b0133fbbf66b24b73b61940faedf;
+validation11919bytes/SHA256251233cc24e7ff40bfb1b11ccdcbb3d4055fc7d636e347af287e9cdc31ba5bd1.
+2042 physical/current-historical Git/original150 sources79 tests174 inputs/all69
+code39 docs/381 earlier task lines244 table rows/all25 Unbound/three held full
+clone-commit-patch proposals preserved at both boundaries. Exactly one original
+END rebuild;24 guard counters0. No original semantic reader/audit/source closure
+rekey/scientific source/RNG/arrays/model/train/final/scoring/repeat dispatch.
+
+Shared docs/preparation/closing115.1976922000/180 before this terminal; diagnostic
+including failed probe/readback5.7460094000/90;
+focused including original failure/successors2.7820010000/60;
+static including first failed typing/format51.3934126000/180;
+saved output64MB cap. This terminal/final receipt charges its complete append/pin/diff/output work.
+
+Skipped: unchanged548 expensive groups/unrelated whole project/clean clone/CI/
+optional Torch/backend/actual independent original scientific repeat/new algorithm
+experiment/sweep not run; focused skips0. No external blocker. Scientific seeds/
+source/arrays unset, independence unknown, execution/freshness/precision false.
+Production retention, private-source/native correspondence, opaque/omitted/nested/
+transient gaps and actual arrival/prior/ledger/b3 remain open. Exact next action:P6.7d2b2j: prospectively declare a production code/value-retention increment. Use j4a's full raw/public-field/reference controls to retain every actual observed code object, all recursive constants and native serialized metadata before the first runtime observation; inspect CPython private localsplus/kinds/alias coverage rather than assuming public fields suffice. Preserve unchanged68/current69 code, original150 source closure and all failed j3_400s/j3a_500s/output221533189/j_180s/scientific360s gates. Require complete actual whole-graph before/use/finally controls, genuine code/default/namespace/native mutation denials, lease release/reacquisition, full prior548+new18 cases (566) with0 skips at current bytes, whole preservation/one original END/all guards0 and separately justified budgets before completing stabilization. Then close trusted full disk-to-loaded-Python/native/source-version, opaque type/omitted unreferenced membership/nested endpoint route/ordinary MAKE_FUNCTION/non-audited transient gaps before runtime admission. Continue actual sequential arrival/immutable ledger/full five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound and every b3 isolation/init/parity/resource/repeat/artifact/independent-readback requirement. Scientific seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T10:08:45.319287+00:00 — P6.7d2b2j4b code-value retention
+
+Completed IDs:[] pending whole closing; classification:verified_progress.
+
+Current581 tests pass0 failures/errors/skips, preserving exact original548 plus
+marshal18 plus retention15 case IDs. Full Ruff/six-file format/no-incremental
+mypy602/diff pass. All96 original payload/continuity/lifecycle control names and
+passed outcomes remain exact; denial reasons/routes match, with literal diagnostic
+indices checked against their own complete process graphs. New actual retention
+contributes11 named controls.
+
+Production retains native graph code objects, recursive constants and every public
+native code field before first observation, with unchanged raw marshal identity,
+full graph/native membership, audit, scope/sequence/UTC and finally/release logic.
+Detached function globals, defaults/keyword defaults, closures, attributes and
+native namespace containers are traversed explicitly. No arbitrary descriptor or
+foreign metaclass equality/hashing runs. Original function/class lifetime remains;
+release reclaims the tuple. Local native getter warning suppression restores caller
+filters and omits no field. The old marshal controls keep their original warnings.
+
+The real V2/native-owner fixture joins every observed function and namespace code
+to the actual adapter's retained tuple, then proves full entry/use/finally bytes
+equal across six actual returns and a real controlled-code exception/traceback.
+Code/default/namespace/native changes continue to fail in the full old controls;
+the real native owner reacquires after finally. Independently read29 complete
+runtime bodies+snapshots+headers/scopes,63 whole raw code/native-value artifacts
+from both focused successors and full retention, and42 partial failed raw code
+files. Raw code hashes also join to corresponding observed function hashes.
+No unsaved failed headers or historical executable contents are reconstructed.
+
+Failures remain preserved: red controls2 pass11 fail (actual-process case excluded);
+first focused14 pass1 fail from opaque Pygments imported by a pytest helper;
+first static unused binding; next focused and mistakenly routed static-v2 each
+14 pass1 fail from fixture validator arity; static-v3 eleven type errors fixed by
+native generator/traceback assertions and typed collections, without new broad
+suppressions. The misrouted static-v2 is charged to correctness, never claimed as
+static. Missing first failure temporary directory/manifest is explicitly unknown;
+its failure preceded raw artifact writing. Two later partial directories preserve
+every21 raw code file each. All original budgets include failed attempts.
+The first independent reader failed an incorrect demand for identical sorted
+process-array indices in old/current denial strings. Its producer/traceback and
+5.5583523s metadata failure are preserved. Every old/current literal string and
+actual graph index is read; matching full reason/route and unchanged96 names/passed
+outcomes are required. No observed graph/code bytes are normalized.
+
+Before correction, the plan added detached-globals coverage (581 rather than580)
+and a pytest-free shared helper (602 static/73 code/41 docs/2048 physical rather
+than601/72/41/2047). Original18 marshal IDs/function ASTs are unchanged. Every67
+other current code file is unchanged; both permitted older files are fully saved.
+All382 prior criteria,244 table lines,25 Unbound helper rows and held proposals
+stay required. Current HEAD28e71ee has13 commits since reviewed8793c49; no new
+commit/branch/remote/CI integration in this increment and unrelated changes preserved.
+
+Private interpreter ABI/build/source-version coverage remains unproved. Public
+projection retention is not direct ownership of private localsplus/kinds storage.
+Full trusted disk-to-loaded Python/native/source-version, opaque/omitted/nested/
+transient gaps and all actual arrival/ledger/prior/b3 gates remain unchecked.
+Original failed400s/500s/output221533189/j_180s/scientific360s gates remain failed,
+without reset/rekey or semantic-corpus reader/repeat. Seeds/source/arrays unset,
+independence unknown, execution/freshness/precision false. No baseline/metric/seed/
+algorithm/dependency/config/environment change or new scientific dispatch.
+
+Commands and outcomes:
+
+```text
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m pytest -q tests/test_runtime_payload_schema.py tests/test_runtime_python_namespaces.py tests/test_prospective_runtime_closure.py tests/test_prospective_generation_ownership.py tests/test_prospective_generation_bundles.py tests/test_prospective_generation_requests.py tests/test_prospective_request_bundles.py tests/test_prospective_confirmation_inputs.py tests/test_prospective_confirmation_evidence.py tests/test_seed_usage.py tests/test_prospective_role_requests.py tests/test_prospective_stream_declarations.py tests/test_prospective_replications.py tests/test_prospective_confirmation_design.py tests/test_seed_stream_screening.py tests/test_runtime_marshal_controls.py tests/test_runtime_python_retention.py --junitxml=C:\Users\Avery\Documents\ChatGPT\Circadian\artifacts\runs\p67-untouched-seed-usage\prior-evidence\runtime-python-retention\full.xml -o junit_family=xunit1 -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m pytest -q tests/test_runtime_python_retention.py --junitxml=C:\Users\Avery\Documents\ChatGPT\Circadian\artifacts\runs\p67-untouched-seed-usage\prior-evidence\runtime-python-retention\focused-v4.xml -o junit_family=xunit1 -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff check --no-cache src tests scripts -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff format --check src/infra/runtime_python_objects.py tests/test_runtime_marshal_controls.py src/infra/runtime_python_retention.py tests/test_runtime_python_retention.py tests/runtime_retention_fixtures.py tests/runtime_marshal_value_fixtures.py -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m mypy --no-incremental --cache-dir nul -> exit0
+git diff --check -> exit0
+.venv/Scripts/python.exe -B artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-python-retention/preserve-failed-output.py -> exit0 (first missing-temp failure preserved)
+.venv/Scripts/python.exe -B artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-python-retention/verify-readback.py -> exit0
+```
+
+Fixed families, including preparation/failures so far:
+
+- current_tests_including_preparation_and_failures: 473.5903994000/600 seconds
+- entry: 0.1030469000/180 seconds
+- metadata_including_preparation_and_failures: 28.7789557000/180 seconds
+- static_including_preparation_and_failures: 46.2992429000/180 seconds
+
+Artifacts: full581 XML/all IDs and outcomes/six current code pins/67 unchanged pins;
+focused-v3/v4 full retention; four full runtime groups29 complete readback records,
+63 successful and42 failed partial rawcode bytes; whole source variants/producers/
+all failed XML and validation/static outputs. Closing and terminal still pending.
+
+Skipped: current full581 and focused15 skips0. Unrelated whole project/clean clone/CI/
+optional Torch/backend/original independent scientific repeat/new algorithm study/
+sweep not run; no scientific source or arrays used. No external blocker.
+
+Plan changes: explicit detached-globals route adds one mandatory case; before fix
+pytest-free helper extraction adds one rootfile, preserves all18 old ASTs/case IDs,
+and permits the saved old marshal test import edit. Counts strengthened to581/602/
+2048/73code41docs, unchanged original budgets.382 prior criteria/table rows remain.
+Exact next action:P6.7d2b2j: prospectively declare a bounded trusted-runtime/source-correspondence increment. Inspect the actual installed Python/native build and complete disk-to-loaded Python/native/source-version relationships, including private localsplus/kinds/public-projection aliases; produce positive and genuine mismatch controls without source manifests granting live authority. Resolve or explicitly demonstrate remaining opaque type, omitted unreferenced membership, nested endpoint route and ordinary MAKE_FUNCTION/non-audited transient limits before full runtime admission. Preserve current73 code and original150-source79-test174-input closure, every failed j3_400s/j3a_500s/output221533189/j_180s/scientific360s gate and full581 current regression IDs. Then continue actual sequential source arrival, immutable full actual ledger, full five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound cases and every b3 isolation/init/parity/resource/repeat/artifact/independent-readback requirement. Scientific seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T10:11:16.407803+00:00 — Terminal P6.7d2b2j4b code-value retention acceptance
+
+Completed IDs:[P6.7d2b2j4b]; classification:verified_progress. Full581 pass0 failures/
+errors/skips, exact previous548+18marshal+15retention IDs; full Ruff/six-file format/
+no-incremental mypy602/diff pass. Real V2/native owner proves unchanged complete
+entry/use/finally observations, actual retained function/namespace-code joins, six
+first returns, real controlled exception/traceback, release and owner reacquisition.
+Every96 original control name/passed outcome/reason/route remains, plus11 actual
+retention controls. Independent full29 body/snapshot/header/scope records and63
+raw code/native-field/control artifacts plus42 failed partial raws read and pinned.
+Literal old/current denial indices checked against each complete process graph.
+
+67 old code files unchanged; both permitted old files fully preserved, original18
+marshal case/function ASTs unchanged; four new Python files and two new docs.
+Five shared docs byte-appended, then only j4b line checked. All382 earlier task
+criteria244 table lines25 Unbound cases and three held whole clone/commit/patch
+proposals preserved. Unrelated seed-evidence doc/test changes stay byte-identical.
+HEAD28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8 remains13 commits after reviewed8793c49.
+No commit/branch/PR, dependency/environment/config or scientific method change.
+
+Failed red/focused/fixture/static/readback versions, producers, XML and outcomes
+preserved and charged. First pytest helper imported opaque Pygments: extract pure
+helpers before correction rather than weaken observer opacity. Correct arity/types
+with assertions/annotations. Misrouted static-v2 charged to correctness. Independent
+reader's identical-index mistake preserved; no graph/code normalization. First
+failed temp manifest unavailable, not fabricated; other two21-file partial groups
+preserved without inventing missing headers. Plan prospectively strengthened route/
+helper counts to581/602/2048/73code41docs at the same original budgets.
+
+Commands/outcomes are recorded in the preceding session entry and full immutable
+launch contracts. Whole closing command:
+`.venv/Scripts/python.exe -B artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-python-retention/close-session.py`
+->exit0; parent111.2586742000s including
+4.7811264000s preparation. Complete source
+2758684bytes/SHA2560789fceed7cb94856903da0ec5bb829bfc0eb42942341b270738914020112c58;
+validation12800bytes/SHA256d05093d03cecb7634fe024b79c793d423ec1d4069668cdb73fdf5a8cf03956c2.
+2048 physical/current-historical Git/original150 sources79 tests174 inputs/all73
+code41 docs/all prior criteria/held clones preserved before and after. Exactly one
+original END rebuild and24 guards0; no original semantic reader/scientific source/
+RNG/arrays/model/train/final/scoring/repeat, closure rekey or new source authority.
+
+Fixed families including failures/preparation before this terminal:
+
+- closing_and_documents_including_preparation: 112.0427538000/180 seconds
+- current_tests_including_preparation_and_failures: 473.5903994000/600 seconds
+- entry: 0.1030469000/180 seconds
+- metadata_including_preparation_and_failures: 28.7789557000/180 seconds
+- static_including_preparation_and_failures: 46.2992429000/180 seconds
+
+Terminal/final receipt charges complete append/pin/diff/output work. Owned output
+cap64MB; full correctness600s, metadata180s, static180s, shared closing/docs180s.
+Original scientific350.7925872000051/360spent9.207412799994927remaining;
+j168.79930429987144/180spent11.20069570012856remaining and failed j3_400s/j3a_500s/
+output221533189 remain unaccepted, without reset/rekey.
+
+Skipped: full581 and focused15 skips0. Unrelated whole project/clean clone/CI/optional
+Torch/backend/original independent scientific repeat/new algorithm experiment/sweep
+not run. No external blocker. Private ABI/build/source-version remains unproved,
+as do full opaque/omitted/nested/transient/actual arrival/ledger/prior/b3 admission.
+Seeds/source/arrays unset, independence unknown, execution/freshness/precision false.
+Exact next action:P6.7d2b2j: prospectively declare a bounded trusted-runtime/source-correspondence increment. Inspect the actual installed Python/native build and complete disk-to-loaded Python/native/source-version relationships, including private localsplus/kinds/public-projection aliases; produce positive and genuine mismatch controls without source manifests granting live authority. Resolve or explicitly demonstrate remaining opaque type, omitted unreferenced membership, nested endpoint route and ordinary MAKE_FUNCTION/non-audited transient limits before full runtime admission. Preserve current73 code and original150-source79-test174-input closure, every failed j3_400s/j3a_500s/output221533189/j_180s/scientific360s gate and full581 current regression IDs. Then continue actual sequential source arrival, immutable full actual ledger, full five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound cases and every b3 isolation/init/parity/resource/repeat/artifact/independent-readback requirement. Scientific seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T10:35:36.804112+00:00 — P6.7d2b2j5 actual admission limits
+
+Completed IDs:[] pending whole closing; classification:verified_progress.
+
+One real-process test passes0 failures/errors/skips and verifies7 named controls,
+five actual/structural admission gaps. Ruff/two-file format/no-incremental mypy604/
+diff pass. All73 current production/test files remain byte-identical to prior full581
+regression pins; those expensive unchanged groups are not rerun or claimed as582 full.
+
+Under real guarded full V2/native ownership, ordinary precompiled MAKE_FUNCTION
+creates/calls a diagnostic function returning23; its weak reference is dead before
+the next capture, no function.__new__ event occurs, and all three actual runtime
+bodies remain equal. Temporarily changing defaults yields9, then restoring the same
+tuple yields5 and identical subsequent whole observations. Direct FunctionType
+construction still raises the original runtime denial and its audit event is saved.
+Every event name in the three declared control intervals is retained; argument
+objects are not held because doing so would alter the tested graph/lifetime.
+
+The real loaded module names the same unchanged physical source as a matched
+function, but its native constant is100013 rather than compiled-source100003 and
+actual returns differ. Whole source/code bytes and native fields prove that mismatch;
+runtime source/execution/freshness flags remain false. Installed Python version/
+compiler/config description and every actual native image/file are retained as
+descriptive evidence; they do not certify approved build/source or memory correspondence.
+
+The complete actual body contains an unreferenced detached function. Removing only
+that row in an explicitly edited historical record passes provided-structure checks.
+Changing only a nested entrypoint name to a missing actual route also passes structure;
+the real binder rejects it. Both full original/edited graphs, headers and snapshots
+are saved, with exact edits independently reconstructed and checked. Edited records
+never stand for actual/live process proof. No production graph filtering is performed.
+
+Independent readback covers all3 actual+2 edited complete bodies/snapshots/headers/
+scopes,25 whole raw code/native-value files/source bytes/every outside-lifetime byte
+difference/audit intervals and28 failed partial files. All15 raw held baseline/use/
+pre-final bytes match; ten pre-retention/post-release probes preserve reference flag
+differences and unchanged public contents. Lease deactivation/real owner reacquisition
+pass; scientific guards remain zero. Public retention does not prove private ABI/build.
+
+Failures are retained and charged: first return-only fixture assumed a None/small-int
+constant slot; second actual None assignment still failed because LOAD_SMALL_INT keeps
+3 outside co_consts. Full v1/v2 source/XML/one-file outputs and constant probe preserved.
+Fixed static diagnostic integers100003/100013 make the source mismatch explicit,
+with no scientific metric/seed change. Third child completed controls and saved26
+files but compared raw bytes across retention boundaries; all bytes retained, missing
+headers/report not invented. Correct raw comparisons now use the actual hold and add
+all ten outside probes. One first mypy ModuleType write error fixed through its native
+namespace, without suppression; passing earlier static versions retained separately.
+Known supervisor edits reconstructed only at their exact original whole pins.
+
+Only diagnostic j5 can complete after whole2052/current-historical Git/original150
+sources79 tests174 inputs/75 code43 docs/383 earlier criteria244 tables25 Unbound/
+three held proposals/one original END/24 zero guards. Parent j/private/source-build/
+native-memory/opaque/omitted/nested/transient/arrival/ledger/prior/b3 gates remain open.
+Original failed400s/500s/output221533189/j_180s/scientific360s gates remain failed,
+without reset/rekey or original semantic reader/repeat. No production, algorithm,
+baseline/metric/seed/dependency/config/environment/held proposal change. Scientific
+seeds/source/arrays unset, independence unknown, execution/freshness/precision false.
+
+Commands/outcomes:
+
+```text
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m pytest -q tests/test_runtime_admission_limits.py --junitxml=C:\Users\Avery\Documents\ChatGPT\Circadian\artifacts\runs\p67-untouched-seed-usage\prior-evidence\runtime-admission-limits\focused-v4.xml -o junit_family=xunit1 -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff check --no-cache src tests scripts -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff format --check tests/runtime_admission_limit_fixtures.py tests/test_runtime_admission_limits.py -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m mypy --no-incremental --cache-dir nul -> exit0
+git diff --check -> exit0
+.venv/Scripts/python.exe -B artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-admission-limits/verify-readback.py -> exit0
+```
+
+Fixed family usage including failures/preparation:
+
+- controls_including_preparation_and_failures: 29.5226792002/120 seconds
+- entry: 0.0981588000/180 seconds
+- metadata_including_preparation_and_failures: 7.1980923000/180 seconds
+- static_including_preparation_and_failures: 91.2664388001/180 seconds
+
+Artifacts: current1 case XML/seven outcomes/five gaps/75 whole code pins;3 actual+2
+edited full records/25 raw code/source/audit/instruction/build descriptions/28 failed
+partial files/all v1-v3 sources/XMLs/supervisor bytes at original pins; readback.
+
+Skipped: new1 test0 skips. Prior full581 unchanged73-code gate is pinned, not rerun;
+unrelated whole project/clean clone/CI/optional Torch/backend/original scientific
+independent repeat/new algorithm study/sweep not run. No external blocker.
+
+Plan changes: split diagnostic j5 from still-required source/native/build/private/
+continuous admission. Before corrections record actual None/small-int fixture behavior
+and raw lifetime scope plus all ten outside probes. No criterion/cap removed.
+All383 previous task lines/244 tables/25 Unbound/held proposals remain required.
+Exact next action:P6.7d2b2j: prospectively declare and implement a complete guard for transient code creation/calls and callable binding changes during the real proof hold, using the five actual admission counterexamples as mandatory regressions. Measure the installed interpreter's monitoring/tracing/native boundary and reject unsupported or incomplete coverage; preserve current75 code and original150 closure, all old mutation denials and current581 unchanged-code receipt. Require genuine matched-source versus loaded-mismatch Python controls and full native memory/file/build/private localsplus/kinds correspondence before source-version admission; preserve opaque/omitted-unreferenced/nested-route requirements, and do not promote structural or point-in-time observations to continuous/source authority. Then finish actual sequential arrival, immutable full actual ledger, all five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound helpers and every b3 isolation/init/parity/resource/repeat/artifact/independent-readback gate. Original j3_400s/j3a_500s/output221533189/j_180s/scientific360s failures remain unaccepted; seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T10:44:41.440595+00:00 — Terminal P6.7d2b2j5 runtime admission counterexamples
+
+Completed IDs:[P6.7d2b2j5]; classification:verified_progress. Current1 real-process
+case pass0 failures/errors/skips, seven controls pass and five remaining admission
+gaps demonstrated. Full Ruff/two-file format/no-incremental mypy604/diff pass.
+Prior full581 regression receipt remains pinned at unchanged73 production/test
+bytes; expensive unchanged groups were not rerun or claimed as582 full cases.
+
+Ordinary precompiled MAKE_FUNCTION creates/calls a transient diagnostic function,
+return23/weakref dead/no function.__new__ audit event/three unchanged actual whole
+observations. Temporary defaults produce9 then5 after identity restoration while
+whole observations remain unchanged. Direct FunctionType construction still denied.
+Actual loaded code returns100013 while independently compiled unchanged named source
+returns100003; full raw native fields/constants/source bytes retain the mismatch.
+Explicitly edited historical unreferenced-function omission and missing nested-route
+records pass pure structure, while actual binder rejects the missing route. Every
+original/edited graph/header/snapshot and exact edit remains saved. These structural
+records are not live proof. Lease deactivation and native owner reacquisition pass.
+
+Independent readback verifies all3 actual+2 edited complete records,25 whole raw
+code/native-value artifacts/full physical source/every audit interval/native images/
+installed interpreter description and28 failed partial files. Held15 raw values match;
+all ten outside-lifetime probes and every actual raw difference are preserved. Public
+values/build strings do not attest private ABI, approved source or memory correspondence.
+No original semantic corpus reader or scientific dispatch ran;24 science guards0.
+
+73 old code files unchanged, two new Python files and two new module/decision docs.
+Six shared docs byte-appended before closing, then only j5 line checked and plan/log/
+new guide byte-appended at terminal. All383 earlier task criteria244 table lines25
+Unbound cases and three held whole clone/commit/patch proposals remain identical.
+Unrelated seed-evidence doc/test changes remain byte-identical. HEAD unchanged at
+28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8,13 commits after reviewed8793c49.
+No branch/commit/PR, dependency/environment/config, baseline/metric/seed/model change.
+
+Failures retained and charged: v1 fixture assumed None/small-int constant slot;
+v2 actually bound None but LOAD_SMALL_INT left3 outside co_consts. Both source/XML/
+one-file partial outputs and complete source-constant probe preserved. Before v3,
+fixed diagnostic100003/100013 constants made the source mismatch observable without
+changing scientific metrics/seeds. v3 completed controls and saved26 files, then raw
+comparison crossed retention boundaries. Full partial bytes retained; missing headers/
+report not invented. Before v4, align equality with actual held baseline/use/pre-final
+and add all ten outside probes, retaining every difference. First ModuleType write
+mypy error fixed through its native namespace without suppression. Passing older
+static versions remain historical at different source pins. Earlier known producer
+edits reconstructed only where whole bytes match the original recorded hashes.
+
+Commands and outcomes are in the preceding session entry and immutable launch contracts.
+Whole closing command:
+`.venv/Scripts/python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-admission-limits/close-session.py`
+->exit0; parent110.7384848000s including
+4.7078922000s preparation. Complete source
+2805473bytes/SHA256923d62ea83d9764e773378c7de1798b39ec53382b706a6e07399d89fe093537b;
+validation13528bytes/SHA2562e378bfb2bf6cd6c9b08aa4ea81b5f3918454c8967ebec999be0135dffeb1783.
+2052 physical/current-historical Git/original150/79/174/all75 code43 docs/all prior
+criteria/held clones verified before and after; exactly one original END and24 guards0.
+Terminal command:
+`.venv/Scripts/python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-admission-limits/record-terminal.py`
+records this append, exact before-terminal reconstructions/code pins/diff/output gate.
+Artifact root: `artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-admission-limits/`.
+
+Fixed families including all failures/preparation before this terminal:
+
+- closing_and_documents_including_preparation: 111.5142847000/180 seconds
+- controls_including_preparation_and_failures: 29.5226792002/120 seconds
+- entry: 0.0981588000/180 seconds
+- metadata_including_preparation_and_failures: 7.1980923000/180 seconds
+- static_including_preparation_and_failures: 91.2664388001/180 seconds
+
+Terminal/final receipt charges append/pin/diff/output work to the same shared180s.
+Owned output cap32MB; entry180s, controls120s with actual child90s, static180s,
+metadata180s. No existing caps were enlarged or failed gates reset. Original scientific
+350.7925872000051/360spent9.207412799994927remaining; original j
+168.79930429987144/180spent11.20069570012856remaining; failed j3_400s/j3a_500s/
+output221533189 remain unaccepted without closure rekey or a new semantic repeat.
+
+Skipped: new1 test skips0. Prior full581 unchanged-code groups are pinned, not rerun.
+Unrelated whole project/clean clone/CI/optional Torch/backend/original independent
+scientific repeat/new algorithm study/sweep not run. No external blocker.
+Plan changes: diagnostic j5 split from still-required complete source/native/build/
+private/continuous admission; fixture constant and raw lifetime corrections recorded
+before reruns. No criterion/cap silently removed. Five gaps are mandatory guard/source
+regressions. Parents/actual arrival/ledger/prior/b3/P6.7 remain open; seeds/source/arrays
+unset, independence unknown, execution/freshness/precision false.
+Exact next action:P6.7d2b2j: prospectively declare and implement a complete guard for transient code creation/calls and callable binding changes during the real proof hold, using the five actual admission counterexamples as mandatory regressions. Measure the installed interpreter's monitoring/tracing/native boundary and reject unsupported or incomplete coverage; preserve current75 code and original150 closure, all old mutation denials and current581 unchanged-code receipt. Require genuine matched-source versus loaded-mismatch Python controls and full native memory/file/build/private localsplus/kinds correspondence before source-version admission; preserve opaque/omitted-unreferenced/nested-route requirements, and do not promote structural or point-in-time observations to continuous/source authority. Then finish actual sequential arrival, immutable full actual ledger, all five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound helpers and every b3 isolation/init/parity/resource/repeat/artifact/independent-readback gate. Original j3_400s/j3a_500s/output221533189/j_180s/scientific360s failures remain unaccepted; seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T11:29:04.122598+00:00 — P6.7d2b2j6a installed capability measurements
+
+Completed IDs:[] pending whole closing; classification:verified_progress.
+
+One new real-process case passes0 failures/errors/skips, with seven named controls.
+Ruff/two-file format/no-incremental mypy606/diff pass at the same two new source pins.
+All75 existing source/test bytes remain unchanged. Prior full581 at unchanged73 pins
+and j5's separate single-case receipt at75 pins are preserved, not rerun or claimed
+as583 full tests. No production observer/graph/hash/audit or scientific code changes.
+
+During one real guarded V2/native-owner hold, primary tool3 records CALL/PY_START/
+INSTRUCTION plus ancillary C_RETURN, using the installed event map/mask81. Ordinary
+precompiled MAKE_FUNCTION/calls are visible while the real transient function returns23
+and dies before capture. Temporary Python defaults return9 then5 after restoration.
+Prebound public PyFunction_SetDefaults/PyFunction_GetDefaults record actual5/9/5 returns,
+seven borrowed-pointer joins and eight paired setter/getter CALL/C_RETURN boundaries.
+These VM boundary events do not observe native/internal instructions or prove source,
+build, memory/private ABI correspondence. No private layout is guessed.
+
+With tool4's actual CALL callback executing the same transient and native operations,
+the primary monitor sees none of foreign callback/factory/nested/native-operation code.
+The callback actually returns23 with the function dead, and defaults actually change9
+then5. Secondary CALL events and every primary/secondary event are retained as primitive
+identities without keeping their callable/argument objects alive. Exact primary counts:
+ordinary154 =128 INSTRUCTION+12 CALL+7 PY_START+7 C_RETURN; native352 =274+35+15+28;
+foreign51 =37+6+4+4, plus six secondary CALL events. These narrow intervals measure
+installed behavior, not monitoring of the entire proof or complete execution coverage.
+
+Outside the hold, a real trace callback raises before the target body; the caller catches
+the denial and CPython unsets tracing. The same actual target then executes17 with body
+list[17] and traceNone. Original direct FunctionType/trace/profile replacement audit
+denials remain effective inside the hold. All three actual full runtime bodies match.
+Real lease deactivation/native owner reacquisition work. Tool names/global/local masks
+are cleared, and reacquiring both IDs proves each of the five used callback slots was
+actually None; trace/profile are restored to their original None. No science dispatch.
+
+Independent readback validates3 complete actual bodies/snapshots/headers/scopes,
+32 complete raw code files/all native public fields/recursive constants/full disassembly,
+all three literal monitoring streams/counts/native pointer and event joins, the actual
+trace loss, three original audit denials, five reacquired callback slots and all39 child
+files. The16 held raw values agree;16 outside-retention values are preserved separately.
+All48 failed partial raw codes and all failed diagnostics/source versions remain saved;
+unsaved failed headers/events/terminal counters are unknown, never invented. All five
+j5 gaps retain full pinned readback. Source/private/continuous/authorization stay false.
+
+Failures are charged and retained: v1 attempted to set standalone C_RETURN and raised
+ValueError; keep its16 partial raws/source/XML and activate CALL|PY_START|INSTRUCTION
+with registered ancillary C_RETURN instead. v2 crashed0xC0000005 after the native calls;
+v3's faulthandler localized the crash after all three intervals, at the original direct
+constructor denial. Their32 partial raws/full sources/XML/diagnostic messages remain.
+A standalone setter/getter control passed. Three fixed borrower-ownership controls
+then separated monitor-only (stable refcount3), py_object borrowed return (3->2->1,
+access violation), and c_void_p borrowed pointer (stable3/exact actual tuple identity,
+denial still caught). Correct fixture borrowed ownership through the public pointer;
+no interpreter defect, private ABI or failed terminal state is inferred from the crash.
+
+First reader failed by comparing the root native field map against a typed nested-code
+wrapper; second failed on LOAD_CONST disassembly repr's new local code-object address.
+Retain both complete reader sources, full raw field diagnostic and failures. Correct
+the root read and preserve both whole repr strings with exact captured-address/code-ID/
+raw/native-value joins, requiring every other disassembly field exact. No native field,
+raw value, body, event, or difference is omitted/normalized to get a pass. Before the
+final v5, strengthen cleanup to reacquire five actual callback slots instead of inferring
+callback absence from masks/names. Final focused-v5/static-v3/readback-v2 all pass.
+
+Only measurement j6a can complete after whole2056 physical/current-historical Git/
+original150 sources79 tests174 inputs/77 code45 docs/384 prior criteria244 tables25
+Unbound/three held proposals/one original END/24 guards0 preservation. The complete
+guard remains required; measurement is a prerequisite, not its replacement. All
+source/native-memory/build/private/opaque/omitted/nested/transient/actual arrival/
+ledger/prior/b3/scientific gates remain open. Original400s/500s/output221533189/j_180s/
+scientific360s failures remain unaccepted without reset, rekey or semantic repeat.
+No seed/baseline/metric/algorithm/dependency/config/environment/held proposal change.
+Seeds/source/arrays unset, independence unknown, execution/freshness/precision false.
+
+Commands/outcomes:
+
+```text
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m pytest -q tests/test_runtime_monitoring_coverage.py --junitxml=C:\Users\Avery\Documents\ChatGPT\Circadian\artifacts\runs\p67-untouched-seed-usage\prior-evidence\runtime-monitoring-coverage\focused-v5.xml -o junit_family=xunit1 -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff check --no-cache src tests scripts -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff format --check tests/runtime_monitoring_coverage_fixtures.py tests/test_runtime_monitoring_coverage.py -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m mypy --no-incremental --cache-dir nul -> exit0
+git diff --check -> exit0
+.venv/Scripts/python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-monitoring-coverage/run-readback.py -> exit0
+```
+
+Fixed family usage including all preparation/probes/failures:
+
+- controls_including_preparation_and_failures: 45.8169380999/120 seconds
+- entry: 0.1007940000/180 seconds
+- metadata_including_preparation_and_failures: 11.6669303000/180 seconds
+- static_including_preparation_and_failures: 69.0353373000/180 seconds
+
+Artifact root: `artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-monitoring-coverage/`.
+Focused-v1 mask error; v2/v3 access violations; standalone native setter/getter and
+three causal borrowed-result controls; all v1-v4 sources and48 partial raw files;
+failed reader root-wrapper/address comparisons and their full diagnostic; historical
+v4/currentv5 focused gates, static606 and independent full readback all retained.
+Cleanup measurement was strengthened before v5 to read each reacquired callback slot.
+Current source/raw/event/body proof preserved without normalizing missing evidence.
+
+Skipped: new1 test0 skips. Old full581 at unchanged73 pins and j5 single-case at75
+remain pinned, not rerun; no claim of583 full. Whole project/clean clone/CI/optional
+Torch/backend/original scientific semantic repeat/new algorithm study/sweep not run.
+No external blocker. No baseline/metric/seed/model/algorithm/dependency/config change.
+
+Plan changes: split installed measurement j6a as a prerequisite to the still-required
+complete guard; no reduction of native/source/private/continuous acceptance. Mask,
+borrowed ownership, reader layout/address and callback cleanup corrections recorded
+before reruns, retaining every failure and budget. Preserve all384 earlier task lines/
+244 tables/25 Unbound cases/three held proposals. Exact next action:P6.7d2b2j: prospectively implement the complete continuous runtime guard using current installed measurements and all five prior actual/structural admission counterexamples as mandatory regressions. Reject foreign monitoring tools/callback execution, tracing/profile loss or replacement, unsupported native/C-API/internal execution and incomplete coverage before admission; require genuine pre-execution ordinary MAKE_FUNCTION/call/default/code/binding/native mutation denials and persistently effective enforcement after caught guard failures, with full real V2/native-owner records and cleanup. Preserve current77 code/original150 closure/prior581 plus j5/j6a receipts and all96 old controls; do not promote VM CALL/INSTRUCTION or boundary equality to native/source/continuous authority. Require genuine matched-source/loaded-mismatch Python and full native memory/file/build/private localsplus/kinds correspondence plus opaque/omitted/nested-route coverage before runtime admission. Then finish actual sequential arrival, immutable actual ledger, full five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound helpers and all b3 isolation/init/parity/resource/repeat/artifact/independent-readback gates. Original j3_400s/j3a_500s/output221533189/j_180s/scientific360s failures stay unaccepted; seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T11:34:11.436595+00:00 — Terminal P6.7d2b2j6a installed monitoring coverage
+
+Completed IDs:[P6.7d2b2j6a]; classification:verified_progress. Only installed coverage
+measurement complete; full continuous guard, runtime/source/scientific admission open.
+Current1 real-process case0 failures/errors/skips and seven named controls pass.
+Ruff/two-file format/no-incremental mypy606/diff pass at current matching two-file pins.
+
+Full actual V2/native hold saves three unchanged complete runtime bodies/snapshots/
+headers/scopes,32 whole raw codes/native public fields/recursive constants/full
+disassembly, every primary/secondary event from three declared intervals and every
+native pointer/VM call-return/trace/audit/cleanup observation. Ordinary MAKE_FUNCTION/
+transient call is visible and function returns23 then dies. Python/native defaults
+actually change9 then5 after identity restoration. Seven borrowed tuple pointers and
+eight adjacent CALL/C_RETURN pairs join to actual code/callable/argument identities.
+Primary tool3 misses all four callback/factory/nested/native-operation code objects
+actually executed inside tool4's callback. Secondary events and actual23/death/9/5
+values are saved. Primary event counts154/352/51; secondary foreign CALL6, other0.
+These narrow streams measure installed visibility, not every instruction of the hold
+or native/internal execution. Public VM boundaries grant no source/private authority.
+
+After the hold, the real trace callback denies before the body; the caller catches it,
+CPython automatically unsets tracing, and the same target then executes17/body[17].
+Original direct FunctionType/trace/profile replacement denials work inside the hold.
+Actual lease release/native owner reacquisition work; all tool names/global/local masks
+return empty/0, both tool IDs are reacquired and five callback removals actually read
+back as priorNone. Original trace/profile are restoredNone. Scientific counters0.
+
+Independent readback validates all3 actual32 raw48 failed partial39 complete files,
+every literal event/count,7 pointers/8 VM pairs,5 empty callback slots, actual trace
+loss and3 original denials. Full native root/recursive field forms and both captured/
+local code-address repr strings remain saved with exact joins, not normalized. All
+five j5 counterexamples retain complete prior pins; all77 source/test pins checked
+before/after. Source/build/private/native-memory/continuous/execution remain false.
+
+Failures retained and charged: v1 C_RETURN-only mask ValueError/16 partial raws;
+v2 access violation/16 partial raws; v3 faulthandler localized access violation after
+all intervals at original direct constructor denial/16 partial raws. Missing full
+headers/events/terminal counters were not saved and remain unknown. Standalone native
+setter/getter passed. Fixed borrower controls: monitor-only refcount3 stable/pass;
+ctypes.py_object borrowed result refs3->2->1 then native crash; c_void_p borrowed
+pointer refs3 stable/exact actual tuple pointer/denial caught/pass. Corrected fixture
+public borrowed ownership without private ABI guess or attributing interpreter defect.
+First reader root-map wrapper and second disassembly code-address failures preserved
+with full source/diagnostic. Correct root/readback native address joins preserve every
+field/string/raw/event/body. Before v5, cleanup is strengthened to observe actual
+callback slots. All earlier v4/static/reader versions remain historical, not substituted
+for current77 pins; all preparations/corrections recorded before reruns.
+
+75 earlier code files unchanged; two new Python and two guide/ADR files. Five shared
+docs byte-appended before closing; only j6a task checked at terminal, with plan/log/
+guide appends whose exact before-terminal bytes are reconstructed. All384 earlier
+criteria244 table lines25 Unbound helpers and three held whole clone/commit/patch
+proposals are unchanged. Unrelated seed-evidence doc/test bytes preserved. HEAD
+28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8 unchanged,13 commits after reviewed8793c49.
+No branch/commit/PR, new dependency/environment/config, held CI/P6.4 integration,
+scientific experiment, seed selection, baseline tuning, model or metric changes.
+
+Commands/outcomes are recorded in the preceding entry and whole launch contracts:
+`.venv/Scripts/python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-monitoring-coverage/run-gates.py focused-v5`
+->exit0; parent10.2060583000s.
+`.../run-gates.py static-v3` ->exit0; parent23.0762685000s.
+`.../run-readback.py` ->exit0; parent2.8610287000s,
+including startup/preparation/hard-wall parent; child receipt not double charged.
+Focused result12828bytes/SHA2567ef7e34e2cd5ef59ee99f91352927a212116af845b6ffcccb91c8dd0df9aedbd;
+static2452bytes/SHA256fdca39493c90326363a128835f9baeea2782be3950d34396d0184516e78c8e46;
+readback72456bytes/SHA25627a8101d81824bf7e3cf7b10ed6f535867b943f321f051243db0e10636949d7b.
+Whole closing command:
+`.venv/Scripts/python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-monitoring-coverage/close-session.py`
+->exit0; parent111.3392412000s including
+4.7779676000s preparation. Source
+2871030bytes/SHA256a795634b203f3ad9c58f36ad4c6592d03d3b291a7a24fe72b04901870ca2addc;
+validation14742bytes/SHA2562f80f8c752b933766a7b4e0d3bd01f3c2bddd17a369f36734c0e2197a3b13405.
+Whole2056/current-historical Git/original150/79/174/77 code45 docs/all criteria/held
+clones checked beforeafter; exactly one original END/all24 science guards0.
+Terminal command:
+`.venv/Scripts/python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-monitoring-coverage/record-terminal.py`
+records append/reconstruction/current-code/diff/output/budget gates.
+Artifact root: `artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-monitoring-coverage/`.
+
+Fixed family use including all preparation/probes/failures before terminal:
+
+- closing_and_documents_including_preparation: 112.1294633001/180 seconds
+- controls_including_preparation_and_failures: 45.8169380999/120 seconds
+- entry: 0.1007940000/180 seconds
+- metadata_including_preparation_and_failures: 11.6669303000/180 seconds
+- static_including_preparation_and_failures: 69.0353373000/180 seconds
+
+Terminal work is charged to the same shared180s/owned32MB cap. Entry180s, controls120s
+with actual child90s, static180s, metadata180s; no original cap enlarged or failed gate
+reset. Scientific350.7925872000051/360spent9.207412799994927remaining; original j
+168.79930429987144/180spent11.20069570012856remaining. Original j3_400s/j3a_500s/
+output221533189/scientific independent repeat remain unaccepted. No closure rekey,
+new original semantic reader, repeat, live ledger or seed/source/array admission.
+
+Skipped: current1 test0 skips. Prior full581 at unchanged73 pins and j5 single-case at
+75 pins preserved, not rerun and never claimed as583 full. Whole project/clean clone/
+CI/optional Torch/backend/original semantic scientific repeat/new algorithm study/
+sweep not run. No external blocker. Plan changes: measure installed coverage as a
+prerequisite, preserving the complete guard's acceptance. Mask/borrowed ownership/
+reader layout/address/callback cleanup corrections recorded before reruns, no weakened
+criterion or discarded failure. All five previous admission gaps and new callback/
+trace/native limitations are mandatory for complete enforcement. Parents/source/build/
+private/native/opaque/omitted/nested/arrival/ledger/prior/b3/P6.7 remain open.
+Seeds/source/arrays unset, independence unknown, execution/freshness/precision false.
+Exact next action:P6.7d2b2j: prospectively implement the complete continuous runtime guard using current installed measurements and all five prior actual/structural admission counterexamples as mandatory regressions. Reject foreign monitoring tools/callback execution, tracing/profile loss or replacement, unsupported native/C-API/internal execution and incomplete coverage before admission; require genuine pre-execution ordinary MAKE_FUNCTION/call/default/code/binding/native mutation denials and persistently effective enforcement after caught guard failures, with full real V2/native-owner records and cleanup. Preserve current77 code/original150 closure/prior581 plus j5/j6a receipts and all96 old controls; do not promote VM CALL/INSTRUCTION or boundary equality to native/source/continuous authority. Require genuine matched-source/loaded-mismatch Python and full native memory/file/build/private localsplus/kinds correspondence plus opaque/omitted/nested-route coverage before runtime admission. Then finish actual sequential arrival, immutable actual ledger, full five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound helpers and all b3 isolation/init/parity/resource/repeat/artifact/independent-readback gates. Original j3_400s/j3a_500s/output221533189/j_180s/scientific360s failures stay unaccepted; seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T12:37:07.602783+00:00 — Persistent mutation implementation and current successor
+
+Completed IDs:[] pending whole preservation; classification:verified_progress.
+
+New optional infra RuntimeExecutionGuard implements global CALL/PY_START/INSTRUCTION
+mutation enforcement over declared lifetimes. It retains every actual prepared GC
+function/recursive code in immutable maps, rejects foreign tools/tracing/profile/other
+Python threads before arming, denies creation/binding/attribute/closure/subscript writes
+and unsupported native/C-API/monitoring operations before execution, and keeps poison
+after a caught denial without resetting or returning DISABLE. It releases only through
+the exact owning with boundary and reads all used callbacks after actual reacquisition.
+
+Full corrected new case passes0 failures/errors/skips with23 actual controls and3
+complete actual V2/native-owner observations. Catalog includes7841 actual GC functions,
+8068 complete recursive raw code/native public fields/full disassembly, not a target
+subset. All84 focused raw probes, all319 failed partial raws, every delivered event,
+32 persistent denials and54 actually empty callback slots pass independent readback.
+Legitimate pure precompiled Python returns10; mutation denials preserve default/code/
+global/closure/attribute/subscript bindings, block the later target before its body,
+keep actual mask81 after caught errors and retain consumer failure/release behavior.
+
+The full case ran before one narrow inline typing directive for the actual stdlib
+Bytecode.exception_entries member omitted by typeshed. Installed dis.py assigns it and
+actual normal/exceptional with controls exercised its regions. Current609-file mypy/
+Ruff/three-file format/diff pass. Complete whole old/current module compilation, every
+recursive native code field and exact retained raw module bytes match. Both physical
+source versions and the exact comment difference remain saved. This proves executable
+identity, not new live physical-file/source correspondence: the three full records
+are historical and source/version/native/private/continuous authority remains false.
+
+Failures preserved and charged: first full47.9627813s failed on native disassembly
+arguments, second45.3513869s on an actual slice marshal constant, both before arming;
+27+292 complete partial raw files/source/XML retained, missing headers/events/terminal
+counters not invented. Add descriptive native argument identities/reprs separately
+from raw/native constants, exact slice start/stop/step and remove redundant new catalog
+tuples while retaining every identical function/code in immutable maps. First static18
+errors corrected by exact typing and nullable assertions. A0.5359952s live boundary
+probe observed actual3.14 CALL3/WITH_EXCEPT_START, then the CALL2 assumption denied
+release and lost stderr. Preserve it; correct exact owning code/guard identity/exception
+regions, retaining premature release denial. Corrected0.5574522s two-control probe and
+4.2374754s actual22-control matrix pass, explicitly without complete V2 observations.
+
+The original120s full correctness gates remain unaccepted; spend98.6684586s is retained.
+Prospectively separate200s successor includes all original failures/probes/preparation
+plus the full94.1936794s attempt and declaration: combined192.8703373/200s, not reset.
+Only correctness successor j6b1 may complete after full whole2061 preservation; original
+j6b stays unchecked. Existing entry/static/metadata/shared180s, child90s and owned32MB
+remain fixed. Failed reader7.0778772s frozenset display order retained; restricted literal
+readback preserves both complete strings and exact raw/native values. No normalization.
+
+All77 prior source/test files and original150 sources79 tests174 inputs are unchanged.
+Prior full581 at73 pins, j5 single-case75 and j6a single-case77 receipts are pinned,
+not rerun or claimed as584 full. No existing observer/graph/hash/audit edit, dependency,
+environment/config/algorithm/seed/metric/baseline change or scientific dispatch. Full
+observer-lifetime integration, implicit/native/internal/source/build/private/opaque/
+omitted/nested membership and all five j5 gaps remain mandatory in parent j. Whole
+GC maps/events/diagnostic intervals/unchanged boundary bodies do not grant admission.
+All original j3_400s/j3a_500s/output221533189/j_180s/scientific360s failures remain
+unaccepted without rekey or original semantic reader/repeat. Actual arrival/ledger/
+prior/b3 and P6.7 remain open; seeds/source/arrays unset, independence unknown and
+execution/freshness/precision false. Unrelated changes/held proposals are preserved.
+
+Commands/outcomes:
+
+```text
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m pytest -q tests/test_runtime_execution_guard.py --junitxml=C:\Users\Avery\Documents\ChatGPT\Circadian\artifacts\runs\p67-untouched-seed-usage\prior-evidence\runtime-execution-guard\focused-v3.xml -o junit_family=xunit1 -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff check --no-cache src tests scripts -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m ruff format --check src/infra/runtime_execution_guard.py tests/runtime_execution_guard_fixtures.py tests/test_runtime_execution_guard.py -> exit0
+C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -m mypy --no-incremental --cache-dir nul -> exit0
+git diff --check -> exit0
+.venv/Scripts/python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-execution-guard/run-readback-v2.py -> exit0
+```
+
+Budget use including all failures/preparation:
+
+- controls_including_preparation_and_failures: 98.6684586000 seconds
+- entry: 0.1046963000 seconds
+- metadata_including_preparation_and_failures: 18.3899393000 seconds
+- static_including_preparation_and_failures: 103.6081305000 seconds
+- successor_correctness_including_old_failures: 94.2018787000 seconds
+
+Skipped: current1 case0 skips. Old581/j5/j6a unchanged-source tests pinned, not rerun;
+whole project/clean clone/CI/optional Torch/backend/original semantic scientific repeat/
+new algorithm/sweep not run. No external blocker. Artifacts include both failed source/
+XML/319 partial raws, failed boundary/lost stderr, actual22+2 small probes, full23 case,
+complete8068 catalog/7841 joins/84 focus files/three whole records/every event/32 denial/
+54 cleanup checks, all static failures/passes, exact typing bridge and failed/passing
+reader/display strings. Source/private/native/lifetime/full admission remain open.
+Only j6b1 may complete; original j6b120s unchecked. No prior criterion silently removed.
+Exact next action:P6.7d2b2j: implement complete observer-lifetime enforcement and trusted source/native correspondence, using all23 current actual mutation controls, all five j5 gaps, j6a callback/trace failures and all96 old controls as mandatory regressions. First compose the guard with actual observer/reader/native ownership through an explicit verified support-operation contract; reject unsupported implicit/native/internal execution before admission and require effective pre-execution denial throughout entry/use/finally/consumer failure and real release. Do not exempt broad framework modules or treat guarded diagnostic intervals, GC maps, VM events, historical equal bodies or the exact comment/code bridge as complete native/source/continuous authority. Preserve current80 code/original150 closure/prior581 plus j5/j6a/j6b receipts, original120s and successor200s ledgers, all failed j3_400s/j3a_500s/output221533189/j_180s/scientific360s gates without reset/rekey. Require genuine matched-source/loaded-mismatch Python, full native memory/file/build/private localsplus/kinds correspondence and opaque/omitted/nested-route completeness. Then finish actual sequential arrival, immutable full actual ledger, all five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound helpers and every b3 isolation/init/parity/resource/repeat/artifact/independent-readback gate. Seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T12:54:42.121724+00:00 — Whole-closing failure and exact path/storage correction
+
+Completed IDs:[]; pending whole preservation.
+
+The first closing verifier failed after its initial checks because the complete
+catalog report uses8068 owned basenames; the verifier treated those as repository paths.
+Keep its whole failed producer/operation/stdout/stderr and67.7688622s spend unaccepted.
+Correct only the path join to focused-v3-execution-guard/, retaining all319 already
+repository-relative failed partial paths. All8387 exact complete byte pins validate.
+No old observer/source/test/acceptance/scientific behavior changes.
+
+The failed4,924,533-byte closing manifest is preserved in lossless zlib storage with
+both original whole-content identity and compressed-container identity. Its original
+failed receipt stays unchanged. Corrected complete source storage uses the same full
+lossless representation, with no file/reference/history field omitted. This saves
+owned output without dropping content or enlarging32MB. Before applying a future
+handoff, decode and verify both container and full contents identities. All preparation
+and both closing attempts charge the original shared180s family, with no reset or
+weakened criterion. Only j6b1 may complete if the corrected complete closing passes;
+original120s j6b and full native/source/lifetime admission remain unchecked.
+
+Commands: close-session.py -> exit1, exact FileNotFoundError retained; prepare-closing-correction.py -> exact8387 artifact pins/current80 code/two-producer compilation/lossless full failed manifest. No tests skipped by this correction, no science calls or new experiment. Next action: close-session-v2.py within the remaining original shared180s/owned32MB; record-terminal-v2.py only on acceptance, otherwise retain j6b1 unchecked. Parent next action remains:P6.7d2b2j: implement complete observer-lifetime enforcement and trusted source/native correspondence, using all23 current actual mutation controls, all five j5 gaps, j6a callback/trace failures and all96 old controls as mandatory regressions. First compose the guard with actual observer/reader/native ownership through an explicit verified support-operation contract; reject unsupported implicit/native/internal execution before admission and require effective pre-execution denial throughout entry/use/finally/consumer failure and real release. Do not exempt broad framework modules or treat guarded diagnostic intervals, GC maps, VM events, historical equal bodies or the exact comment/code bridge as complete native/source/continuous authority. Preserve current80 code/original150 closure/prior581 plus j5/j6a/j6b receipts, original120s and successor200s ledgers, all failed j3_400s/j3a_500s/output221533189/j_180s/scientific360s gates without reset/rekey. Require genuine matched-source/loaded-mismatch Python, full native memory/file/build/private localsplus/kinds correspondence and opaque/omitted/nested-route completeness. Then finish actual sequential arrival, immutable full actual ledger, all five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound helpers and every b3 isolation/init/parity/resource/repeat/artifact/independent-readback gate. Seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+### 2026-10-06T13:01:21.712496+00:00 — Session end: implementation and negative closing result
+
+Classification:verified_progress; completed task IDs:[].
+
+Implemented optional global RuntimeExecutionGuard, complete prepared GC function/
+code catalog, persistent poison, exact owning with-release and actual callback cleanup.
+One new actual-process case23 controls0 failures/errors/skips/current609 static/Ruff/
+three-file format/diff/full independent readback pass. All8068 raw code objects7841
+function joins84 focused probes319 failed partials/every literal event32 persistent
+denials54 empty callback slots/three historical V2/native-owner records are retained.
+All80 current code pins unchanged; the full typing-comment executable bridge preserves
+both physical sources and does not grant new live source/native/private provenance.
+
+Completed IDs:[] this session. Both P6.7d2b2j6b and P6.7d2b2j6b1 remain unchecked.
+Original120s correctness gates unaccepted; prospective total200s correctness passes
+at192.8703373000s including all original preparation/probes/failures. The required
+whole-closing gate is unaccepted:
+- First close-session.py -> exit1, parent67.7688622000s,
+  exact owned-catalog basename/repository-path mismatch. Full producer/operation/
+  stdout/stderr and complete4,924,533-byte manifest remain saved.
+- prepare-closing-correction.py -> exit0, all8387 complete artifact byte pins and80
+  current code pins verified. Correct only the path join and preserve the failed
+  manifest in exact lossless zlib, without dropping content or enlarging32MB.
+- close-session-v2.py -> exit1, parent110.8397933000s,
+  hard_shared_closing_timeout. Complete4,925,960-byte manifest retained losslessly.
+  No complete worker result/stdout/stderr/END/terminal guard counters were saved.
+  The timeout does not establish final beforeafter/END/guard success or failure.
+Total shared180.0175367999/180s is unaccepted. Do not reset, relabel it as passing,
+check either task or invent missing terminal counters. Both full compressed contents/
+container identities validate; output remains below32MB. All387 task lines244 tables
+and current80 code47 document pins are checked by this outcome-recording handoff.
+This limited metadata check is not complete physical/Git/clone/original-END preservation.
+
+Original j3_400s/j3a_500s/output221533189/j_180s/scientific360s failures remain
+unaccepted without rekey/reset. Prior full581 at73 pins and separate j5 at75/j6a at77
+receipts remain saved, not rerun or combined as584 full. No scientific dispatch,
+algorithm/seed/source/array/metric/baseline/dependency/environment change or sweep.
+Complete source/native/private/lifetime/support-operation/opaque/omitted/nested/
+arrival/ledger/prior/b3/P6.7 admission remains open. No external blocker; the local
+closing resource gate is exhausted. Metadata outcome recording charges the existing
+metadata180s family and grants no task or runtime admission.
+
+Commands/outcomes:
+
+```text
+.venv/Scripts/python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-execution-guard/run-successor-gates.py focused-v3 -> exit0,1 case23 controls0 skips
+.../run-gates.py static-v4 -> exit0,Ruff/three-file format/mypy609/diff
+.../run-readback-v2.py -> exit0,full content readback
+.../close-session.py -> exit1,path mismatch retained
+.../prepare-closing-correction.py -> exit0,all8387 pins/lossless full manifest
+.../close-session-v2.py -> exit1,hard shared timeout retained
+.../record-negative-handoff.py -> metadata outcome/current pins/criteria/manifests/diff only
+```
+
+Fixed-family totals before outcome recording:
+
+- closing_and_documents_including_preparation: 180.0175367999 seconds
+- controls_including_preparation_and_failures: 98.6684586000 seconds
+- entry: 0.1046963000 seconds
+- metadata_including_preparation_and_failures: 18.3899393000 seconds
+- static_including_preparation_and_failures: 103.6081305000 seconds
+- successor_correctness_including_old_failures: 94.2018787000 seconds
+
+Skipped tests: current1 case0 skips. Prior581/j5/j6a unchanged-source tests pinned, not rerun. Whole project/clean clone/CI/optional Torch/backend/original semantic scientific repeat/new algorithm/sweep not run. Artifacts: runtime-execution-guard/ contains all source versions, XML,319 partial raws, failed boundary/stderr, small probes, complete23-control case,8068 raw code7841 joins84 probes/3 records/events/32 denials54 cleanup, all static/readback failures and both closing manifests/operations. Plan change: correct exact owned paths and use whole lossless storage; preserve all original criteria. Future resource successor must be declared before launch and include all exhausted shared time. No task accepted by this partial closing.
+Exact next action:
+First prospectively declare P6.7d2b2j6b2 as a separate whole-closing resource successor
+with360s total closing INCLUDING the entire180.01753679988906s original shared family,
+all old documents/preparation/failures and every new declaration/preparation/closing/
+terminal attempt. Original shared180s and j6b1 remain unaccepted and unchecked; original
+j6b120s remains unchecked. Keep correctness192.87033730000257/200s unchanged and preserve
+all original failures. Decode both complete lossless closing manifests and verify each
+container and whole-content identity; use this negative handoff only as pinned entry
+data, never as completed preservation/runtime/scientific admission. Retain all80 current
+code47 document pins, the exact typing-comment executable bridge and the historical
+nature of all3 records. Run the corrected whole verifier with every2061 physical file/
+current-historical Git/original150 sources79 tests174 inputs/proofs/387 earlier criteria/
+244 tables25 Unbound/three held whole clone/commit/patch proposals and one actually
+completed original END/all24 actual terminal guards0. Instrument actual phase completion
+without omitting or reusing unobserved stages. Retain both failed closing attempts and
+unknown timeout terminal counters. Only the new successor may complete after full
+acceptance; do not rerun the full23 case within the remaining7.1296627s correctness
+family or broaden scientific tests. Then follow the complete observer-lifetime/trusted
+support-operation/source/native/private admission work in parent j, retaining all23
+mutation controls, five j5 gaps, j6a callback/trace failures and all96 old controls.
+No baseline/seed/metric tuning, scientific dispatch/sweep or held CI/P6.4 integration.
+
+
+### 2026-10-06T13:07:00.229469+00:00 — P6.7d2b2j6b2 prospective whole-closing declaration
+
+Completed IDs:[] pending whole preservation. Previous goal turn:verified_progress; guard and focused validation passed, both whole-closing gates unaccepted. HEAD28e71ee/13 reviewed-commit descendants unchanged; all80 code47 docs and both complete lossless failed manifests verified at entry.
+
+Why this: the first full closer failed on owned catalog path interpretation, and the
+corrected closer exhausted the remaining original shared180s before a complete result.
+The mechanism's full focused correctness/static/readback is already verified, but
+whole preservation is not. Use a separate measured resource successor that includes
+the entire exhausted family, retaining both earlier tasks and failures unaccepted.
+Fresh whole verification must observe every required before/after/END stage. Phase
+receipts diagnose actual progress; they grant no skipped or reused verification.
+The complete native/source/lifetime/scientific acceptance is unchanged.
+
+Fixed total closing360s includes all original180.01753679988906s plus this declaration and every new preparation/attempt/terminal step; correctness192.87033730000257/200s, existing static/metadata/entry envelopes and owned32MB unchanged. No full case or old581/j5/j6a reexecution, new backend or scientific sweep. No external blocker. Artifact root: runtime-execution-guard/. Exact next command: close-session-v3.py, then record-terminal-v3.py only on accepted complete preservation.
+
+
+### 2026-10-06T13:17:19.794738+00:00 — Terminal P6.7d2b2j6b2 complete whole-closing resource successor
+
+Completed IDs:[P6.7d2b2j6b2]; classification:verified_progress.
+
+Only P6.7d2b2j6b2, the prospectively declared inclusive whole-closing successor,
+completes. Original j6b120s and j6b1 shared180s remain unchecked with criteria unchanged.
+All original180.01753679988906s shared failures/documents/preparation and every new
+declaration/preparation/closing/terminal step charge the fixed360s total. Original
+correctness192.87033730000257/200s and owned32MB are unchanged; no full case rerun.
+
+Fresh complete verification observes all2061 physical files/current-historical Git,
+all80 current code47 docs/original150 sources79 tests174 inputs/proofs/387 prior
+criteria244 tables25 Unbound/three held whole clones/commits/patches beforeafter.
+One actual original END completes and all24 actual terminal scientific guards are0.
+All9 actual phase receipts are saved; no old unobserved stage or counter is reused.
+Prior full581-at73/j5-at75/j6a-at77 receipts remain pinned, not reexecuted or combined
+as584 full. Unrelated seed-evidence doc/test and all77 old code unchanged. HEAD
+28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8 remains13 commits after reviewed8793c49.
+
+Mutation mechanism's saved current1 real-process case23 controls0 skips/failures/
+errors, Ruff/three-file format/no-incremental mypy609/diff and full independent
+8068 raw/native public code/disassembly7841 joins84 probes319 failed partials/every
+literal event32 denials54 actually empty callbacks/3 complete historical V2-native
+records pass at unchanged current80 code pins. Legitimate pure Python returns10,
+denials preserve bindings/poison/mask81 and block the repeated target before its body,
+actual consumer exception/release/native ownership work and complete admission refuses.
+Both complete physical source versions and the exact comment-only whole compiled/raw/
+recursive native-field bridge remain retained. Historical records are not new live
+physical source/native/build/private/continuous correspondence.
+
+The failed basename closer and corrected original shared180s timeout stay unaccepted,
+with complete producers/operations/whole lossless manifests retained. Old timeout
+END count/terminal scientific guards remain unknown. Complete containers and full
+contents hashes validate; no artifact, reference/history field or criterion omitted.
+No scientific/algorithm/baseline/seed/metric/model/dependency/environment change,
+semantic original reader/repeat, sweep, branch/commit/PR or held CI/P6.4 integration.
+All five j5 gaps, j6a callback/trace failures and96 old controls remain mandatory for
+complete source/native/private/support-operation/observer-lifetime/opaque/omitted/
+nested/arrival/ledger/prior/b3/P6.7. All original j3_400s/j3a_500s/output221533189/
+j_180s/scientific360s failures stay unaccepted without reset/rekey. Seeds/source/
+arrays unset, independence unknown, execution/freshness/precision false.
+
+
+Changes this session: owned inclusive resource contract/declaration/complete closer/
+phase receipts/preparation/terminal producer, with plan/log/guide byte appends. All80
+production/test pins unchanged. Only new successor checkbox changes; all387 earlier
+task lines244 table lines preserved. Exact before-terminal plan/log/guide bytes are
+reconstructible from full retained hashes and complete replacement/appends.
+
+Commands and outcomes:
+
+```text
+.venv/Scripts/python.exe -B -X utf8 artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-execution-guard/declare-closing-successor.py -> exit0, total360s declared before launch
+.../prepare-closing-successor.py -> producer compilation/current80-code47-doc pins/resource contract
+.../close-session-v3.py -> exit0, full fresh preservation/nine actual phase receipts
+.../record-terminal-v3.py -> exact doc reconstruction/task/code/head/diff/output/combined resource gates
+```
+
+Full focused/static/readback commands, failures, outputs/XML, cases, schemas and both
+physical sources are retained in earlier entries and pinned artifacts, not rerun.
+Focused result2247403bytes/SHA2561d6e58be391c2f4c82e0b6ed07c0e7700f2940860573672283cf627129454da1;
+static2658bytes/SHA2562e3f798e810dad5dd52e0683f8b70c1879c450b4381f8b2d1f6ac126002786e7;
+readback summary863bytes/SHA256b2e1eb64af0582224c434380f59a53b1ea29516eb019925a1c8820850955fc8a.
+Complete readback compressed/whole contents identities remain pinned in that summary.
+Whole closing parent114.1144802000s including
+5.5176032000s preparation; compressed source
+1140245bytes/SHA256e1ff32b0668928dbde2f81c27ad44b820c611d6622e8985b4534278091ce3100;
+full source contents4933769bytes/SHA2564de84a7d598e004fadfc92bacd91f8e2bd13fc951c66305d73898807e1825956;
+validation39473bytes/SHA256cd7b31545f1b20cd07902c430c9495dff1a52659363434f2bd63bd4167826847.
+Decode and check both source identities before reading the complete manifest.
+All required stages were executed fresh; actual cumulative worker phase receipts:
+
+- all_complete_reference_and_current_code_document_pins_before: 13.1837879000s; v3-phase-01.json
+- whole2061_physical_current_historical_git_before: 27.0620065000s; v3-phase-02.json
+- all_original_helpers_and_three_held_whole_clones_before: 36.2540023000s; v3-phase-03.json
+- all_full_focused_static_readback_prior_receipts_387_criteria_and_complete_document_reconstructions: 37.0070409000s; v3-phase-04.json
+- all_complete_reference_original_and_current_pins_after: 50.0961764000s; v3-phase-05.json
+- whole2061_physical_current_historical_git_after: 63.8570766000s; v3-phase-06.json
+- all_three_held_whole_clones_commits_patches_after: 64.5427833000s; v3-phase-07.json
+- one_actual_original_END_and_all24_terminal_scientific_guards_zero: 108.2995802000s; v3-phase-08.json
+- actual_current_head_all_resource_budgets_and_diff_check: 108.4397140000s; v3-phase-09.json
+
+Fixed family use before terminal:
+
+- closing_and_documents_including_preparation: 180.0175367999/180s (unaccepted original shared family)
+- closing_successor_including_old_failures: 114.3277581000/360s
+- controls_including_preparation_and_failures: 98.6684586000/120s
+- entry: 0.1046963000/180s
+- metadata_including_preparation_and_failures: 18.6902419000/180s
+- static_including_preparation_and_failures: 103.6081305000/180s
+- successor_correctness_including_old_failures: 94.2018787000/200s
+
+Combined old+new closing before terminal:294.3452948999/360s. Terminal charges the same
+inclusive360s family and owned32MB. Old original shared180.01753679988906/180s remains
+unaccepted; neither cap nor old task is reset. Combined correctness192.8703373000/
+200s includes all prior failures/preparation. Metadata/static/entry envelopes unchanged.
+Original scientific350.7925872000051/360s spent9.207412799994927s remaining and original
+j168.79930429987144/180s spent11.20069570012856s remaining are unchanged.
+
+Skipped: no test execution this session. Current23-control case0 skips and current609
+static/reader receipts revalidated at unchanged pins; old581/j5/j6a pinned, not rerun.
+Whole project/clean clone/CI/optional Torch/backend/original semantic scientific repeat/
+new algorithm/sweep not run. All phases original science guards0; no new science calls.
+No external blocker. Plan rationale: previous corrected closer had insufficient shared
+time after first failure; prospectively separate inclusive resource successor preserves
+both failed tasks while completing the same whole verification. Phase receipts expose
+actual completion without omitted/reused stages. Two text-anchor construction errors
+while preparing the terminal producer were corrected before execution, with no worker
+started or result invented; preparation receipt retains the diagnostic.
+Artifact root: artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-execution-guard/.
+Exact next action:P6.7d2b2j: implement complete observer-lifetime enforcement and trusted source/native correspondence, using all23 current actual mutation controls, all five j5 gaps, j6a callback/trace failures and all96 old controls as mandatory regressions. First compose the guard with actual observer/reader/native ownership through an explicit verified support-operation contract; reject unsupported implicit/native/internal execution before admission and require effective pre-execution denial throughout entry/use/finally/consumer failure and real release. Do not exempt broad framework modules or treat guarded diagnostic intervals, GC maps, VM events, historical equal bodies or the exact comment/code bridge as complete native/source/continuous authority. Preserve current80 code/original150 closure/prior581 plus j5/j6a/j6b receipts, original120s and successor200s ledgers, all failed j3_400s/j3a_500s/output221533189/j_180s/scientific360s gates without reset/rekey. Require genuine matched-source/loaded-mismatch Python, full native memory/file/build/private localsplus/kinds correspondence and opaque/omitted/nested-route completeness. Then finish actual sequential arrival, immutable full actual ledger, all five saved inputs4471 contents13149 aliases/current-historical Git/prior effects/all25 Unbound helpers and every b3 isolation/init/parity/resource/repeat/artifact/independent-readback gate. Seeds/source/arrays unset, independence unknown, execution/freshness/precision false; no baseline/metric/seed tuning or held CI/P6.4 integration.
+
+
+## 2026-10-06 — deferred owning-with repair; P9.3a dependency snapshot started
+
+User instruction: "Let's skip this item and move on to the next". P6.7d2b2j6c
+is deferred unchecked. Actual saved probe confirms early nested foreign exit:
+defaults 5 -> 9, result 9/body [9], no poison/denial, callbacks removed and later
+owning exit ValueError. Complete probe110293bytes/SHA256988cace59e917ce56c2c36f2785b595a09f38c23854c9299e961418451681bad;
+saved operation child command `C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -B -X utf8 C:\Users\Avery\Documents\ChatGPT\Circadian\artifacts\runs\p67-untouched-seed-usage\prior-evidence\runtime-owning-with-contract\probe-foreign-exit.py`
+returned0, parent3.595665499975439/15s. Six complete raw/public-native/disassembly/
+exception/event objects and tool/default/body/cleanup evidence retained. All80
+source/test pins unchanged. No repair or new full V2/source/native/admission claim.
+P6.7d2b2j6b2 reopened for the correctness regression; its historical full
+preservation/23-control/static/readback evidence remains. All prior failed
+resource envelopes stay unaccepted; acceptance is unchanged. No original semantic
+reader, new scientific source/seed/score, sweep or held CI/P6.4 integration.
+
+Independent next task: P9.3a, exact current tested dependency snapshot. The
+prospective entry captures968 tracked/untracked non-ignored file pins and all25
+installed versions before edits; initial capture0.7986061999690719s. Declared
+validation family180s, each command60s, output4MB. Constraints619bytes/SHA256932a49adc4430e9816781e750012c431c81d5f85792619641008c7b33deb4b78;
+environment1716bytes/SHA2560eb67d4ae7676497ea471bbd13960a50d48919bb0680cb8f2d5774af5e57b926.
+Broad requirements and installed packages are unchanged. New constraints/JSON
+and guide plus README/CONTRIBUTING/changelog pointers are written; verification
+is pending. No production/test edits. P9.3b retains original publication and
+clean-install coverage; current versions are never assigned retrospectively.
+First document preparation failed at an LF/CRLF README anchor after plan and new
+files were saved. Exact mixed-endings anchors repaired; failure receipt retained.
+Artifacts: artifacts/runs/p93-dependencies/windows-cpu-py314-20261006/.
+
+
+### P9.3a completed: current dependency environment and session handoff
+
+Completed IDs: **P9.3a** only. P9.3/P9.3b/P9.6 remain unchecked. j6c is deferred
+at user request; j6b2 reopened for the confirmed correctness regression. Historical
+preservation/control receipts and all original acceptance/budgets remain.
+Checkout: master, HEAD28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8,13 descendants
+after reviewed8793c49; dirty changes preserved. No branch/commit/push/PR.
+
+New files: dated constraints and matching environment JSON in constraints/;
+docs/dependency-reproducibility.md. Updated plan/log, README, CONTRIBUTING and
+changelog pointers. No production/test/requirements/package edits; no new module,
+dependency or configuration variable. Architecture boundaries are unchanged.
+Extension: add separately dated validated snapshots and retain original versions.
+
+Exact check commands from repository root, all exit0:
+
+- `C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -m pip check` - 0.6845822000s; complete receipt `pip-check.json`.
+- `C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -m pip install --dry-run --no-index -r requirements.txt -r requirements-resnet.txt -c constraints/windows-cpu-py314-2026-10-06.txt` - 1.0268144000s; complete receipt `constraints-dry-run.json`.
+- `C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -m pytest -q -ra --junitxml=C:\Users\Avery\Documents\ChatGPT\Circadian\artifacts\runs\p93-dependencies\windows-cpu-py314-20261006\cpu-regressions.xml tests/test_run_environment.py tests/test_matched_head_benchmark.py tests/test_matched_head_capacity.py tests/test_isolated_head_memory.py tests/test_process_memory.py` - 38.3139648000s; complete receipt `cpu-regressions.json`.
+- `C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -m ruff check src tests scripts` - 0.1803194000s; complete receipt `ruff.json`.
+- `C:\Users\Avery\Documents\ChatGPT\Circadian\.venv\Scripts\python.exe -m mypy src tests scripts` - 3.1568913000s; complete receipt `mypy.json`.
+- `git diff --check` - 0.1489530000s; complete receipt `diff.json`.
+
+Tests:50 passed,0 failed/errors/skipped; XML retains all case names and results.
+Existing fixtures exercise actual CPU backbone/head equality, final-role isolation,
+model-order independence, fixed-capacity guarded sleep/checkpoint resume, fresh
+process memory and source provenance. These are bounded correctness fixtures;
+no new scientific experiment/candidate seed/source was dispatched. Ruff passes;
+mypy609 passes. Diff passes with existing LF/CRLF warnings retained. No source
+format check applies because no Python module/test changed.
+
+Initial and repeated `python -m pip freeze --all` match exactly. All25 complete
+distributions/versions, CPython3.14.7/WindowsAMD64, actual Torch2.14.0+cpu,
+torchvision0.29.0+cpu and torch.version.cuda=None verify. Constraints619bytes/
+SHA256932a49adc4430e9816781e750012c431c81d5f85792619641008c7b33deb4b78;
+environment1716bytes/SHA2560eb67d4ae7676497ea471bbd13960a50d48919bb0680cb8f2d5774af5e57b926.
+All963 nonpermitted original files remain exact, including original broad
+requirements and unrelated docs/p67-prior-seed-evidence.md and
+tests/test_seed_source_evidence.py. All five original edited documents reconstruct
+byte-for-byte and remain archived; original acceptance criteria are retained.
+
+Readback226366bytes/SHA25646582c1fc695ad0c7fedf9670b29513dd0c51b8ceb042155a3957438dd682db9;
+first verified checks/preparation48.995864499791374/180s. Complete all-five
+before-document archive843359bytes/SHA2565a89edb76e8065c421ff33d9ef227ba9759ea9752d023ae0c9307012827f0375;
+decoded2968083bytes. Original task-line endings were LF; current status edits
+preserve them. Preparation failures retained: README mixed-ending anchor; first
+document readback's CRLF assumption (no repository write); one JavaScript syntax
+error preparing final docs (no command started); one Python syntax error preparing
+the final log (no file write). Corrected smaller operations pass. No test gate
+failed, criterion narrowed, budget reset or installation success fabricated.
+Terminal records inclusive180s/4MB local validation use.
+
+Skipped: fresh NumPy-only/CPU Torch installations (P9.3b/P9.6), full suite,
+other Python/platform/CUDA environments, remote CI, owning-with repair/full
+runtime admission, original semantic/scientific repetition and new sweeps.
+No installed-package mutation or data/weight download. Current versions are not
+assigned to historical experiments. Plan rationale: independent dependency
+reproducibility proceeds while the user defers the guard repair and held CI/P6.4
+integration retains its admission dependency. Full runtime admission remains
+closed; no external blocker to independent P9.3b inspection.
+
+Artifacts: artifacts/runs/p93-dependencies/windows-cpu-py314-20261006/.
+Deferred probe/all six complete raw code/fields/disassembly/exception/events/state
+results remain under prior-evidence/runtime-owning-with-contract/. No guard repair
+or promised guide/ADR was written; all80 guard source/test pins stay exact.
+
+Exact next action: **P9.3b** - run `.venv\Scripts\python.exe -m pip cache list`;
+inspect retained older environments and published-run version records. Declare
+a separate clean-install budget, interpreter and target directories before
+creating environments. Validate constrained NumPy base and CPU Torch separately
+with required non-skipped fixtures and complete installed-version readback,
+coordinating P9.6. Keep missing historical versions unresolved. Resume j6c only
+if the user restores it to scope; all exact-site/parent acceptance stays intact.
+
+
+Terminal command `.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/windows-cpu-py314-20261006/verify-terminal.py`
+exits0: P9.3a accepted; all963 nonpermitted file pins/all25 packages/391 task rows,
+original criteria and complete before-document archive validate at unchangedHEAD.
+Charged50.37564279973959/180s, owned2450685/4000000bytes including terminal.
+Terminal170945bytes/SHA2562aa09f34da989c0033bbb413d25d55a80b9c88d2b746ad51ed0936befe76b132.
+This final log footer is an exact append to that verified log; session-end.json
+records its byte identity and inclusive remaining local cost. Completed only
+P9.3a; next P9.3b cache/version inspection and separately budgeted clean installs.
+All execution sessions ended; full runtime admission and deferred repair remain
+unfinished. No external blocker or new scientific experiment.
+
+
+## 2026-10-06 P9.3b1: fresh constrained environment declaration
+
+Previous turn: progress, verified current P9.3a terminal/source/package/log pins;
+all971 current files pinned, HEAD28e71ee unchanged and user changes preserved.
+Read AGENTS/current plan and log; retain user-requested j6c deferral and closed
+full runtime admission. Next concrete work is independent clean installation.
+`python -m pip cache list` exits0, no locally built wheels. `pip cache info`
+reports4405MB HTTP cache. Bounded2.644766s metadata inspection finds23 compatible
+exact runtime/test wheels; Python ensurepip bundles required pip26.2.1. Only
+setuptools84.0.0 is missing. Older Python3.11 snapshot directories currently
+report NumPy2.4.6/Torch2.14.0(+cpu or +cu130); that is today's directory metadata,
+not proof of their versions at an older experiment. No old environment changed.
+
+Split original P9.3b into b1 fresh base/CPU installation and b2 original
+publication-version reconciliation before executing new scope. Original parent
+acceptance stays unchecked/intact. Freeze base16 file/node selections and CPU12
+files (all8 actual CI suites plus gradient/atomic/components/checkpoint-memory).
+Require0 skips. New aggregate900s includes cache/declaration/preparation/failures;
+per-phase caps/target paths and exact commands are recorded in local entry/receipts.
+Only setuptools84.0.0 binary download from PyPI allowed,8MB; all installations
+and tests offline. Receipts16MB; external copied source/wheels/two fresh venvs3GiB;
+test outputs512MiB. All current environments/source/tests/constraints remain
+unchanged; no science, model/data/weight download or baseline/seed/metric tuning.
+Artifacts: artifacts/runs/p93-dependencies/clean-install-20261006/.
+Next: prepare exact cached wheelhouse/current source copy, fetch pinned missing
+tool wheel, then create and validate independent NumPy-only/CPU environments.
+
+
+### P9.3b1 completed: fresh constrained Windows installation evidence
+
+Completed IDs: P9.3b1 only; P9.3b2/P9.3b/P9.3/P9.6 remain unchecked.
+Previous turn classified progress and revalidated against original current
+terminal/log/file/package pins. Current HEAD28e71ee (13 commits after reviewed
+8793c49), existing dirty work/user edits and current environment retained.
+
+Both fresh independent venvs initially contain only pip26.2.1, have system site
+disabled and user site false. Final16 base packages match constrained versions;
+Torch/torchvision absent. Final25 CPU packages equal the complete current snapshot,
+actual Torch2.14.0+cpu/torchvision0.29.0+cpu/CUDA-build None and import locations
+are verified. Actual model code comes from the971-file copy outside the checkout.
+All184 NumPy tests and147 CPU tests pass with0 failed/errors/skipped. Every current
+8-file CPU CI suite plus full extra gradient/atomic/components/checkpoint-memory
+file is observed; required selections were frozen before execution. Both CLI help
+and pip check pass. Fresh Ruff and mypy609 pass. No Python/requirement/constraint
+edit; source-format check not applicable. Whole project suite/clean Git clone,
+other platforms/Python/CUDA/remote CI were not run; P9.6/P9.1 remain open.
+
+Commands: driver `.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/clean-install-20261006/phase.py PHASE`
+executed each phase below once. Every exact child argv/cwd/stdout/stderr and
+zero exit code is retained in its complete JSON receipt; creation uses ordinary
+`python -m venv`, installation uses pinned `pip --isolated install --no-index
+--find-links WHEELS -c CONSTRAINT` with base/optional requirements, tests use
+fresh interpreter `-I -m pytest -q -ra` with the complete frozen file lists and
+unique XML/basetemp paths. Explicit import-location and package-membership
+checks prove isolation; no existing package installation was reused.
+
+- `base_tests` - accepted, 35.2092036000s; receipt 39862bytes/SHA256ce57ddcd708dd2c434097e6aa1e5cf648db3d087c875ded086b307963b5ea9ce.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\numpy-env\\Scripts\\python.exe", "-I", "-m", "pytest", "-q", "-ra", "--junitxml=C:\\Users\\Avery\\Documents\\ChatGPT\\Circadian\\artifacts\\runs\\p93-dependencies\\clean-install-20261006\\base-tests.xml", "--basetemp=C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\base-test-output", "tests/test_numpy_training_inputs.py", "tests/test_numpy_sleep_components.py", "tests/test_numpy_full_snapshot.py", "tests/test_numpy_neuron_lineage.py", "tests/test_post_update_finite_numpy.py", "tests/test_post_update_finite_circadian.py", "tests/test_toy_checkpoint_resume.py", "tests/test_experiment_runner.py", "tests/test_run_environment.py", "tests/test_continual_arrived_checkpoint.py", "tests/test_continual_bounded_replay.py", "tests/test_replay_retention_policies.py", "tests/test_local_gradient_contracts.py::test_binary_model_step_uses_batch_mean_held_state_partials", "tests/test_local_gradient_contracts.py::test_binary_weight_step_is_invariant_to_exact_batch_duplication", "tests/test_local_gradient_contracts.py::test_multilayer_backprop_weight_step_averages_duplicate_examples", "tests/test_local_gradient_contracts.py::test_circadian_gate_scales_local_partials_after_chemical_update"]`; exit0.
+- `cpu_tests` - accepted, 106.6320323000s; receipt 28830bytes/SHA256057681431ec42fb812acbf1c1d3df912dd65095e6b58824605bec8533a4dfc46.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env\\Scripts\\python.exe", "-I", "-m", "pytest", "-q", "-ra", "--junitxml=C:\\Users\\Avery\\Documents\\ChatGPT\\Circadian\\artifacts\\runs\\p93-dependencies\\clean-install-20261006\\cpu-tests.xml", "--basetemp=C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-test-output", "tests/test_resnet50_variants.py", "tests/test_resnet50_benchmark.py", "tests/test_matched_head_benchmark.py", "tests/test_matched_head_capacity.py", "tests/test_isolated_head_memory.py", "tests/test_matched_head_tuning.py", "tests/test_repeated_head_confirmation.py", "tests/test_process_memory.py", "tests/test_local_gradient_contracts.py", "tests/test_atomic_sleep_core.py", "tests/test_torch_sleep_components.py", "tests/test_checkpoint_memory_resume.py"]`; exit0.
+- `create_base` - accepted, 7.1739976000s; receipt 5458bytes/SHA25613959cb0df59dff9302013ef61f8df02cf5784049c57f046cd0dadc75d5136c9.
+  - child argv `["C:\\Users\\Avery\\Documents\\ChatGPT\\Circadian\\.venv\\Scripts\\python.exe", "-m", "venv", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\numpy-env"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\numpy-env\\Scripts\\python.exe", "-I", "-c", "import sys; sys.path.insert(0, sys.argv[3]);\n\nfrom importlib import metadata, util\nimport json, pathlib, platform, site, sys\nprefix = pathlib.Path(sys.prefix).resolve()\nassert prefix == pathlib.Path(sys.argv[1]).resolve()\nassert sys.prefix != sys.base_prefix and site.ENABLE_USER_SITE is False\ndata = {'prefix': str(prefix), 'base_prefix': sys.base_prefix,\n        'site_packages': site.getsitepackages(), 'user_site_enabled': site.ENABLE_USER_SITE,\n        'python': platform.python_version(), 'sys_path': sys.path,\n        'packages': {d.metadata['Name']: d.version for d in metadata.distributions()}}\nif sys.argv[2] == 'installed':\n    import numpy\n    assert pathlib.Path(numpy.__file__).resolve().is_relative_to(prefix)\n    data['numpy_file'] = numpy.__file__\n    import src.core.predictive_coding as model\n    expected_source = pathlib.Path(sys.argv[3]).resolve()\n    assert pathlib.Path(model.__file__).resolve().is_relative_to(expected_source)\n    data['model_source'] = model.__file__\nelse:\n    assert util.find_spec('numpy') is None\nif sys.argv[4] == 'base':\n    assert util.find_spec('torch') is None and util.find_spec('torchvision') is None\n    data['torch_absent'] = True\nelif sys.argv[2] == 'installed':\n    import torch, torchvision\n    assert torch.version.cuda is None\n    assert pathlib.Path(torch.__file__).resolve().is_relative_to(prefix)\n    assert pathlib.Path(torchvision.__file__).resolve().is_relative_to(prefix)\n    data.update(torch_file=torch.__file__, torchvision_file=torchvision.__file__,\n                torch_version=torch.__version__, torchvision_version=torchvision.__version__,\n                cuda_build=torch.version.cuda)\nprint(json.dumps(data, sort_keys=True))\n", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\numpy-env", "empty", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source", "base"]`; exit0.
+- `create_cpu` - accepted, 7.1988971000s; receipt 5378bytes/SHA256c632b2807fa633c6983e1102b1ca7e82a695d821ebe2127674150c1d959c91d5.
+  - child argv `["C:\\Users\\Avery\\Documents\\ChatGPT\\Circadian\\.venv\\Scripts\\python.exe", "-m", "venv", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env\\Scripts\\python.exe", "-I", "-c", "import sys; sys.path.insert(0, sys.argv[3]);\n\nfrom importlib import metadata, util\nimport json, pathlib, platform, site, sys\nprefix = pathlib.Path(sys.prefix).resolve()\nassert prefix == pathlib.Path(sys.argv[1]).resolve()\nassert sys.prefix != sys.base_prefix and site.ENABLE_USER_SITE is False\ndata = {'prefix': str(prefix), 'base_prefix': sys.base_prefix,\n        'site_packages': site.getsitepackages(), 'user_site_enabled': site.ENABLE_USER_SITE,\n        'python': platform.python_version(), 'sys_path': sys.path,\n        'packages': {d.metadata['Name']: d.version for d in metadata.distributions()}}\nif sys.argv[2] == 'installed':\n    import numpy\n    assert pathlib.Path(numpy.__file__).resolve().is_relative_to(prefix)\n    data['numpy_file'] = numpy.__file__\n    import src.core.predictive_coding as model\n    expected_source = pathlib.Path(sys.argv[3]).resolve()\n    assert pathlib.Path(model.__file__).resolve().is_relative_to(expected_source)\n    data['model_source'] = model.__file__\nelse:\n    assert util.find_spec('numpy') is None\nif sys.argv[4] == 'base':\n    assert util.find_spec('torch') is None and util.find_spec('torchvision') is None\n    data['torch_absent'] = True\nelif sys.argv[2] == 'installed':\n    import torch, torchvision\n    assert torch.version.cuda is None\n    assert pathlib.Path(torch.__file__).resolve().is_relative_to(prefix)\n    assert pathlib.Path(torchvision.__file__).resolve().is_relative_to(prefix)\n    data.update(torch_file=torch.__file__, torchvision_file=torchvision.__file__,\n                torch_version=torch.__version__, torchvision_version=torchvision.__version__,\n                cuda_build=torch.version.cuda)\nprint(json.dumps(data, sort_keys=True))\n", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env", "empty", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source", "cpu"]`; exit0.
+- `install_base` - accepted, 22.5088335000s; receipt 22210bytes/SHA25698583e1da4b9501407d7054cbab9630a61f0557a76d12f0ee966f90c4a3edfff.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\numpy-env\\Scripts\\python.exe", "-m", "pip", "--isolated", "install", "--no-index", "--find-links", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\wheels", "--disable-pip-version-check", "-c", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source\\constraints\\windows-cpu-py314-2026-10-06.txt", "pip==26.2.1", "setuptools==84.0.0"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\numpy-env\\Scripts\\python.exe", "-m", "pip", "--isolated", "install", "--no-index", "--find-links", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\wheels", "--disable-pip-version-check", "-c", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source\\constraints\\windows-cpu-py314-2026-10-06.txt", "-r", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source\\requirements.txt"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\numpy-env\\Scripts\\python.exe", "-I", "-c", "import sys; sys.path.insert(0, sys.argv[3]);\n\nfrom importlib import metadata, util\nimport json, pathlib, platform, site, sys\nprefix = pathlib.Path(sys.prefix).resolve()\nassert prefix == pathlib.Path(sys.argv[1]).resolve()\nassert sys.prefix != sys.base_prefix and site.ENABLE_USER_SITE is False\ndata = {'prefix': str(prefix), 'base_prefix': sys.base_prefix,\n        'site_packages': site.getsitepackages(), 'user_site_enabled': site.ENABLE_USER_SITE,\n        'python': platform.python_version(), 'sys_path': sys.path,\n        'packages': {d.metadata['Name']: d.version for d in metadata.distributions()}}\nif sys.argv[2] == 'installed':\n    import numpy\n    assert pathlib.Path(numpy.__file__).resolve().is_relative_to(prefix)\n    data['numpy_file'] = numpy.__file__\n    import src.core.predictive_coding as model\n    expected_source = pathlib.Path(sys.argv[3]).resolve()\n    assert pathlib.Path(model.__file__).resolve().is_relative_to(expected_source)\n    data['model_source'] = model.__file__\nelse:\n    assert util.find_spec('numpy') is None\nif sys.argv[4] == 'base':\n    assert util.find_spec('torch') is None and util.find_spec('torchvision') is None\n    data['torch_absent'] = True\nelif sys.argv[2] == 'installed':\n    import torch, torchvision\n    assert torch.version.cuda is None\n    assert pathlib.Path(torch.__file__).resolve().is_relative_to(prefix)\n    assert pathlib.Path(torchvision.__file__).resolve().is_relative_to(prefix)\n    data.update(torch_file=torch.__file__, torchvision_file=torchvision.__file__,\n                torch_version=torch.__version__, torchvision_version=torchvision.__version__,\n                cuda_build=torch.version.cuda)\nprint(json.dumps(data, sort_keys=True))\n", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\numpy-env", "installed", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source", "base"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\numpy-env\\Scripts\\python.exe", "-m", "pip", "--isolated", "check"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\numpy-env\\Scripts\\python.exe", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source\\predictive_coding_experiment.py", "--help"]`; exit0.
+- `install_cpu` - accepted, 83.6602516000s; receipt 26477bytes/SHA256cfaf7f42b034bb4003d5ad65542843dcd3ed48d63c8700aec3bb29d781540440.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env\\Scripts\\python.exe", "-m", "pip", "--isolated", "install", "--no-index", "--find-links", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\wheels", "--disable-pip-version-check", "-c", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source\\constraints\\windows-cpu-py314-2026-10-06.txt", "pip==26.2.1", "setuptools==84.0.0"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env\\Scripts\\python.exe", "-m", "pip", "--isolated", "install", "--no-index", "--find-links", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\wheels", "--disable-pip-version-check", "-c", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source\\constraints\\windows-cpu-py314-2026-10-06.txt", "-r", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source\\requirements.txt", "-r", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source\\requirements-resnet.txt"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env\\Scripts\\python.exe", "-I", "-c", "import sys; sys.path.insert(0, sys.argv[3]);\n\nfrom importlib import metadata, util\nimport json, pathlib, platform, site, sys\nprefix = pathlib.Path(sys.prefix).resolve()\nassert prefix == pathlib.Path(sys.argv[1]).resolve()\nassert sys.prefix != sys.base_prefix and site.ENABLE_USER_SITE is False\ndata = {'prefix': str(prefix), 'base_prefix': sys.base_prefix,\n        'site_packages': site.getsitepackages(), 'user_site_enabled': site.ENABLE_USER_SITE,\n        'python': platform.python_version(), 'sys_path': sys.path,\n        'packages': {d.metadata['Name']: d.version for d in metadata.distributions()}}\nif sys.argv[2] == 'installed':\n    import numpy\n    assert pathlib.Path(numpy.__file__).resolve().is_relative_to(prefix)\n    data['numpy_file'] = numpy.__file__\n    import src.core.predictive_coding as model\n    expected_source = pathlib.Path(sys.argv[3]).resolve()\n    assert pathlib.Path(model.__file__).resolve().is_relative_to(expected_source)\n    data['model_source'] = model.__file__\nelse:\n    assert util.find_spec('numpy') is None\nif sys.argv[4] == 'base':\n    assert util.find_spec('torch') is None and util.find_spec('torchvision') is None\n    data['torch_absent'] = True\nelif sys.argv[2] == 'installed':\n    import torch, torchvision\n    assert torch.version.cuda is None\n    assert pathlib.Path(torch.__file__).resolve().is_relative_to(prefix)\n    assert pathlib.Path(torchvision.__file__).resolve().is_relative_to(prefix)\n    data.update(torch_file=torch.__file__, torchvision_file=torchvision.__file__,\n                torch_version=torch.__version__, torchvision_version=torchvision.__version__,\n                cuda_build=torch.version.cuda)\nprint(json.dumps(data, sort_keys=True))\n", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env", "installed", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source", "cpu"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env\\Scripts\\python.exe", "-m", "pip", "--isolated", "check"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env\\Scripts\\python.exe", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\source\\predictive_coding_experiment.py", "--help"]`; exit0.
+- `prepare` - accepted, 9.9610064000s; receipt 13569bytes/SHA2565cac064cbe2bd2d6800902246e38410895241fa94ef4fe516d64c1cedbdc2f64.
+- `setuptools_download` - accepted, 2.0830559000s; receipt 1482bytes/SHA2567bd96e9e190c14aeea76a23a4336c8f6a46f44c0449a905e01426d9410a46fe1.
+  - child argv `["C:\\Users\\Avery\\Documents\\ChatGPT\\Circadian\\.venv\\Scripts\\python.exe", "-m", "pip", "--isolated", "download", "--only-binary=:all:", "--no-deps", "--retries", "0", "--timeout", "15", "--index-url", "https://pypi.org/simple", "--dest", "C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\wheels", "setuptools==84.0.0"]`; exit0.
+- `static` - accepted, 30.7129789000s; receipt 1154bytes/SHA256fc4efc8690c58c8a92e2d8cb97d451241967e826b2f6f280a91a72682b7642e5.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env\\Scripts\\python.exe", "-m", "ruff", "check", "src", "tests", "scripts"]`; exit0.
+  - child argv `["C:\\Users\\Avery\\AppData\\Local\\Temp\\Circadian-p93-clean-20261006\\cpu-env\\Scripts\\python.exe", "-m", "mypy", "src", "tests", "scripts"]`; exit0.
+
+Only downloaded tool wheel: C:\Users\Avery\AppData\Local\Temp\Circadian-p93-clean-20261006\wheels\setuptools-84.0.0-py3-none-any.whl; 818216bytes/SHA25651a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670.
+All runtime/test wheels are exact compatible existing cache/ensurepip copies,
+with complete CRC/pin checks; current versions and all971 source copies/968
+nonpermitted main files/currentHEAD remain byte exact. Main and older environments
+are unchanged. No new experiment, seed/metric/baseline tuning, data/weight download,
+sweep, scientific reader/repetition or held CI/P6.4 integration occurred.
+
+Complete readback command `.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/clean-install-20261006/close.py`
+exits0:3581349bytes/SHA256281f836bf50aee775492839011a72640313d4dd52edd323871334807087db934;
+313.2426051000948/900s before final docs. Full external installed/source/wheel/test
+file-size inventory1271849322bytes<3GiB; receipt family16MB and test-output512MiB
+limits pass. All9 actual phases and readback succeed; no failed test/installation
+or omitted required suite. Driver CLI-help invocation was corrected before any
+installation to use the normal script-directory import path with user site and
+inherited PYTHONPATH/PYTHONHOME disabled. Closing verifier selects the actual
+file-bearing CPU CI command; the NumPy workflow's generic pytest line is not
+misidentified. These preparatory corrections preserve scope and acceptance.
+
+Plan changes: split original P9.3b into fresh installation b1 and original
+published environment reconciliation b2; full parent acceptance retained.
+Guide now distinguishes original existing-env P9.3a from the proven fresh b1
+scope. Existing snapshots' current package metadata does not establish their
+historical contents. No historical result/environment is rewritten.
+Unfinished: P9.3b2 historical tool/transitive/build/wheel coverage; broader P9.6
+installation/examples/full suite; remote CI; user-deferred j6c/general runtime
+admission. No external blocker to independent metadata reconciliation.
+Artifacts: artifacts/runs/p93-dependencies/clean-install-20261006/; external
+workspace paths are fixed in entry and retained for inspection/reproduction.
+
+Exact next action: P9.3b2, prospectively freeze the complete documented
+publication/reference list and original saved manifest/request/audit environment
+fields before bounded reconciliation. Start with P5.7 original manifest pair and
+P6.2/P6.3/P6.7/P6.12 guide/request references; report missing transitive/tool/wheel/
+build information as unresolved. Distinguish original per-run records from today's
+old-snapshot directory metadata. Do not rerun scientific readers/repeats or make
+new confirmation sources; preserve j6c deferral and all failed original budgets.
+
+
+Terminal `.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/clean-install-20261006/terminal.py`
+first exits1 during next-action metadata read: default Windows cp1252 cannot
+read the UTF-8 plan. Full v1 producer4779bytes/SHA2569a59df26aaabc9aa48a341590ab3e30d4f6c6937d942295eb118ff1fb874ac4b
+and terminal-first-failure.json retain this failure; no terminal receipt/source/
+test/installation change occurred. UTF-8 is explicit in the corrected reader.
+Corrected command exits0: terminal6050bytes/SHA2566ebcdd05e9f2351585a51161f6687a186b5a5ba9b769b0d23d4e45683c690841;
+314.46754590011454/900s includes the failed0.6885818s attempt. Receipts6733793/16MB;
+external retained assets1271849322/3GiB. All391 old criteria/statuses,968 main and
+971 copied files,25 original packages, actual331 non-skipped cases and diff pass.
+These plan/log footers are exact appends to the verified document versions;
+session-end.json records final identities and inclusive append time. All live
+execution sessions have finished; no background job or external blocker.
+Completed only P9.3b1; exact next P9.3b2 freeze documented publication references
+and original environment fields before bounded metadata reconciliation. Preserve
+missing historical versions, old envs, original failed budgets and j6c deferral.
+
+
+## 2026-10-06 P9.3b2: historical environment evidence preflight
+
+Previous turn: verified progress, P9.3b1 fresh installs331 cases0 skips; current
+session-end/document/source/package pins revalidated at unchangedHEAD28e71ee.
+Read AGENTS/current plan/log; retain j6c user deferral and closed runtime admission.
+Initial rg search used unexpanded Windows path globs and failed with error123;
+corrected rg -g patterns return document evidence. No write/test/science occurred.
+Scope discovery finds134 saved request/audit/manifest or legacy benchmark records,
+7461895 bytes, with no size sampling. Freeze all their bytes, every current
+Markdown document and971 repository files before extraction/fixtures.
+
+Acceptance preserves original P9.3b2 publication coverage. Candidate selection
+and exclusions are explicit; all document artifact-subpath references are retained,
+including unresolved nonstandard bodies. Missing/transitive/tool/wheel/build facts
+stay unknown. Request declarations are not completed-run or runtime proof; today's
+retained environment metadata is not assigned retrospectively. Local180s total,
+45s operations/64MB owned records declared before fixtures. No scientific module,
+reader/repeat, source construction, external service, source/test/dependency/seed/
+baseline/metric change or held integration. Complete before-input copies retained.
+Artifacts: artifacts/runs/p93-dependencies/historical-environments-20261006/.
+Next: derive exact saved fields/reference coverage, validate meaningful corruption
+and membership fixtures, repeat and independently read back the full ledger;
+leave original task unfinished if nonstandard publication scope remains unproven.
+
+
+## 2026-10-06 P9.3b2a: saved historical environment ledger
+
+Completed task ID: P9.3b2a only. Original P9.3b2/P9.3b/P9.3 are unchecked.
+Preserved the user-requested j6c deferral, reopened j6b2 correctness claim and
+closed full runtime admission. No guard, held CI/P6.4 integration, source/test,
+baseline, seed, metric, framework installation or scientific evidence changed.
+
+Inspection: initial134 request/audit/manifest and legacy benchmark JSON candidates
+total7461895 bytes. README also references bare root benchmarks and ignored data
+results; supplement freezes all10 nonignored JSON records (including current
+constraints,3 configurations and2 fixtures with distinct origins). Complete144
+inputs and318 Markdown bodies are retained under before-inputs. Additional420
+artifact JSON bodies total3411076715bytes, inventoried only by path/size; no
+contents/hash/run-validity assertion for them. All813 literal token groups at1339
+document locations retain exact locations and explicit unresolved classifications.
+
+Plan adjustment and rationale: split original P9.3b2 into completed scoped
+inventory P9.3b2a and unfinished full original-coverage P9.3b2b. Nonstandard legacy
+data/result schemas and large saved derivative bodies prevent complete coverage
+from the initial filename selection. Original acceptance, all unfinished work,
+negative outcomes and resource caps are preserved. The shared ledger explicitly
+sets complete_original_publication_coverage=false. Literal references are not a
+publication-authority claim. Today's old directory metadata never fills old gaps.
+
+Saved facts: P5.7 manifests and P6.2/P6.3/P6.7 requests record Python3.14.7,
+NumPy2.4.6. Legacy CUDA smoke request records Torch2.14.0+cu130 and
+torchvision0.29.0+cu130; do not assign today's CPU versions. Nested upstream
+declarations remain at exact original pointers. Complete saved transitive/tool/
+wheel/build/install/index facts are unknown; original execution remains unproven
+by this metadata-only inventory.
+
+Commands/outcomes (PowerShell repository cwd, existing .venv interpreter):
+- rg document searches: initial and subsequent unexpanded Windows glob arguments
+  failed with error123; corrected rg -g selections succeed. Read actual scope/
+  dependency guide, current plan/log and saved input structures; no science.
+- .venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/declare.py:
+  first parse failed (apostrophe in quoted prose, .2162886s); exact7436-byte
+  declare-v1.py SHA41a7fe6b649193b2f128c9fe56af917e85a2c78d628ec73d63763c3faef44837
+  and declaration-failure.json retained. No declaration/writes occurred in that
+  failed process. Corrected prose only; successful entry freezes all971 repository
+  files,134 metadata inputs and318 Markdown bodies and validates prior b1 pins.
+- Same interpreter -B supplement.py: freeze all10 additional JSON bodies before
+  extraction, inventory420 other paths/sizes; pass. All data-reference discovery
+  is descriptive; the existing CFA representative result212552bytes is unreviewed.
+- Same interpreter -B derive.py first and derive.py repeat: both pass; entire
+ 1324990-byte outputs match SHA0107b295f1b014abc0505b8715eecf677947030e4d518e2afa6bf8e8a436ff7c.
+- Same interpreter -B fixtures.py:15 behavior checks pass (nested distinct
+  contexts/nulls/types/escaped pointers, duplicate/nonfinite/overflow/malformed
+  JSON, added/missing/duplicate membership, late-byte drift, record/field/reference
+  omissions and JSON boolean/number conflation).
+- Same interpreter -B readback.py: pass; independent stack/scanner validates all
+ 144 input bodies,318 documents,893 exact saved fields,1320 full provenance value
+  identities and1339 document occurrences; complete memberships and HEAD remain
+  exact. All969 files outside preflight plan/log updates and all25 installed
+  package versions remain unchanged. Two repeated ledger bytes match.
+- Same interpreter -B publish.py: publishes only after accepted readback; current
+  receipt/document pins and final diff/compile checks are recorded below.
+
+Budget: predeclared180s aggregate,45s operations and64MB owned records. Conservative
+10s early discovery/preparation charge includes first failed parse once; successful
+declaration2.77434959996026s charged separately. Readback including supplement,
+both derivations and fixtures is15.291364000062458s; owned18075751bytes before
+publication. A separate conservative5s covers later short metadata inspections/
+publication preparation. Final measured publication/closing is charged in receipts;
+no cap increase or reset of earlier failed semantic/runtime/scientific families.
+
+Artifacts: constraints/published-run-environments-2026-10-06.json,
+docs/published-run-environments.md, and ignored local complete before-inputs,
+entry/supplement-entry/first/repeat/fixture/readback/publication/terminal receipts
+and producers under artifacts/runs/p93-dependencies/historical-environments-20261006/.
+
+Skipped tests: no rerun of331 previously passed backend tests or full suite;
+all source/test/package pins are unchanged and this stage writes only saved data/
+docs. No source type/format rerun, fresh install, clean-Git-clone/cross-platform/
+CUDA/remote-CI, original scientific reader/repeat, data/weight download or sweep.
+Meaningful local ledger behavior/readback checks replace no required backend gate.
+No new environment variable or application module. No external blocker to the
+next metadata increment; complete publication scope remains unfinished.
+
+Exact next action: P9.3b2b, freeze and inspect existing
+data/cifar-representative-confirmation-v1-result.json and its saved request,
+manifest, feasibility and gate family under a separately declared local metadata
+budget. Classify actual original-run references versus examples/diagnostics;
+add original facts to a new immutable successor ledger. Keep missing original
+files/versions unresolved and later resolve large unread-body coverage without
+scientific invocation. Do not run the original semantic repeat, renew its failed
+budget or resume j6c unless the user returns that guard fix to scope.
+
+
+### P9.3b2a session-end verification and handoff
+
+Accepted terminal: all144 selected original JSON bodies and318 original document
+bodies remain byte exact; all968 repository files outside the3 allowed existing
+document edits, complete current973-file membership, all25 package versions and
+HEAD28e71ee remain unchanged. All393 existing task statuses/acceptance rows are
+preserved; only the new scoped P9.3b2a is checked. Original P9.3b2/P9.3b/P9.3,
+P9.6/remote-CI/full runtime admission remain unfinished. The j6c user deferral
+is retained. No scientific execution, environment/source/test/baseline/seed/
+metric change or earlier failed-budget reset occurred.
+
+The15 behavior checks, both complete byte-exact ledger derivations, independent
+readback, compile of operative local producers, local Ruff and git diff --check
+pass. Complete commands/stdout/stderr and active producer identities are retained
+in static-operation.json. Git only reports existing mixed-line-ending conversion
+notices; original bytes were retained by binary copies/edits. Terminal's aggregate
+charge20.995946700044442/180s includes all measured phases plus conservative early
+10s and later5s preparation charges;22197814bytes including both new shared files
+is below64MB. Session-end accounts for this footer and final diff check separately.
+
+Exact executed producer commands (same repository cwd throughout):
+
+```powershell
+.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/declare.py
+.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/supplement.py
+.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/derive.py first
+.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/fixtures.py
+.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/derive.py repeat
+.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/readback.py
+.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/publish.py
+.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/static_check.py
+.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/terminal.py
+.venv\Scripts\python.exe -B artifacts/runs/p93-dependencies/historical-environments-20261006/finish.py
+```
+
+Original first declare.py parse failure is retained and charged, followed by the
+successful corrected invocation. All later producer commands exit0. These are
+one-time evidence producers with exclusive output names; extend in a new stage,
+preserving the original ledger rather than overwriting these outputs.
+
+The representative data family named above is CIFAR. Exact next action remains
+P9.3b2b: prospectively freeze existing
+data/cifar-representative-confirmation-v1-result.json and its saved request,
+manifest, feasibility and gate family, classify actual publication references,
+then perform a bounded metadata-only extraction into a new immutable successor
+ledger. Remaining large unreviewed bodies/missing originals stay explicit.
+No external blocker to this independent increment. Do not resume deferred j6c,
+run original scientific readers/repeats or broaden budgeted experimental scope.
+
+
+## 2026-10-06 P9.3b2b: complete available historical structured-record review
+
+Previous turn classified as verified progress: P9.3b2a ledger/current end/source/
+document/package pins and actualHEAD28e71ee match. Re-read AGENTS, current task
+rows/log, actual README result sections and original CIFAR metadata family. Initial
+lookups of nonexistent docs/experiment-ledger.md and src/infra/process_memory.py
+failed; use actual docs/result guides and src/shared/process_memory.py. No science.
+
+Completed task ID: P9.3b2b at its explicit complete-or-still-incomplete-ledger
+acceptance. All available original640 JSON (3430491542bytes) and68 JSONL
+(9166614bytes) in the declared scope are now reviewed, with no unread large
+structured result bodies. Each original remains in place with complete before/
+after SHA256 and membership proof. Smaller-than2MB bodies, all journals and319
+Markdown documents also have complete byte-exact copies. Scope exclusions are
+operational prior-evidence/native/runtime diagnostics, current p93 validation and
+the previously generated historical ledger; current constraints/fixtures/configs
+have separate labels. Original native/private/runtime/source admission stays closed.
+
+Plan rationale: full data/artifact inspection resolves the prior134-candidate
+filename restriction, adding all76 data JSON and420 unread artifact bodies.
+Full515 byte-identical JSON groups and19 journal groups share metadata analysis,
+with each640/68 original path/origin retained; no prefix/seed/metric selection.
+Largest322781259-byte source profile finishes4.97s but emits33984063 metadata
+bytes. Use complete deterministic gzip fields with lossless proof, rather than
+duplicating large containers or sampling. Add new v2 JSON and gzip sidecar; v1
+and every original body remain immutable. No criteria, cap, source/test/package,
+framework, baseline, seed, metric or scientific-result change.
+
+Failures/control evidence retained and charged to the same300s family:
+- Initial native/.NET64MiB held-allocation memory control fails: Popen.pid60008
+  is the virtual-environment launcher, actual workerPID45460. Both native/.NET
+  readings sampled the wrong process and showed only5435392byte peak. Original
+  profile parse result is valid as saved-data extraction, but its memory acceptance
+  is explicitly reopened in memory-gate-reopened.json. Keep all v1 producers,
+  full profile33984063byte output and wrong-PID receipts.
+- Corrected control uses actual worker os.getpid; native/.NET both observe
+ 81334272byte peak for held67108864bytes. Supervisor uses that PID, can terminate
+  the actual worker and retains launcher/worker IDs separately. Lower32MiB
+  negative control stops the allocating worker at36196352bytes; its expected
+  denied receipt stays accepted=false and exit1. No process restarted on an
+  observation timeout. All scientific/guard admission is still separate.
+- Corrected largest-source profile4.996s, actual worker peak1065820160bytes;
+  compressed460445byte full metadata matches the complete original raw analysis.
+- First independent full JSON forward readback hits45.002210000006016s cap,
+  actual worker1295900672byte peak, stops with no accepted readback. Retain
+  audit-json-operation.json, complete v1 producer/stdout/stderr; no success claim
+  from its partial work. Its entire45.002s remains charged.
+- Replace repeated whole-value JSON serialization with full key/item/type checks
+  preserving bool/int/float distinction and signed zero. All type/corruption
+  controls pass; the same complete515-body readback succeeds43.1729790000245s,
+  worker peak1296269312bytes. Original128MB/4GiB/45s/300s caps and full coverage
+  criteria unchanged. Earlier failed semantic/runtime/scientific budgets untouched.
+
+Commands/outcomes, using .venv\Scripts\python.exe -B and stage
+artifacts/runs/p93-dependencies/published-coverage-20261006/:
+- declare.py: pass, complete973 repository/640 JSON/68 journal/319 doc/25-package
+  pins; full-stream hashing and complete small-body copies before extraction.
+- supervise.py profile profile-selection.json: saved parse pass, memory gate
+  subsequently reopened by actual held-allocation counterexample.
+- memory_control.py: first fails; corrected v2 positive control passes. All
+  source versions and raw counter/control outputs are retained.
+- prepare_passes.py: pass; full profile parity, all515 original hash groups and
+  all68 journals declared before full repeat/readback; full-value gzip justified.
+- supervise.py memory-denial memory-denial-selection.json: expected exit1,
+  actual worker cap denial; raw receipt stays accepted=false, no scientific work.
+- supervise.py first-json full-json-selection.json and repeat-json same list:
+  both pass33.510/30.881s, observed actual peaks1177858048/1178472448bytes.
+- supervise.py first-jsonl full-jsonl-selection.json and repeat-jsonl same list:
+  both pass; all68 original journals are parsed, with19 full-byte-identical groups.
+- supervise.py audit-json audit-json-selection.json: fails45s as above.
+- supervise.py audit-jsonl audit-jsonl-selection.json: pass, every13558 line,
+ 1053 exact saved fields and84 provenance locations independently checked.
+- fixtures.py: all26 behavior cases pass, including nested contexts/nulls/types,
+  escaped pointers, extra library fields, nonfinite/duplicate/malformed bodies,
+  full-value gzip, byte drift and actual positive/negative memory controls.
+- supervise.py audit-json-v2 audit-json-selection.json: pass for exact same full
+ 515-group scope;40190 saved field locations/279384 provenance locations verified.
+- build_ledger.py: pass; whole first/repeat metadata values match, deterministic
+  lossless sidecar round-trip,708 original-record mappings and828 literal token
+  groups/1371 document occurrences with contextual classifications retained.
+- verify_ledger.py: pass20.730139199993573s, all708 original byte identities,
+ 973 repository files/319 archived docs/complete memberships/25 versions/HEAD
+  exact; full sidecar joins and1371 independently scanned references verify.
+- publish.py: publishes only after accepted full verification. Exact file/body
+  mutations, local static/diff and final preservation are recorded below.
+
+Saved dependency finding: original CIFAR feasibility request records Torch
+2.14.0+cu130/torchvision0.29.0+cu130. Later study request/selection manifest/
+confirmation aggregate and per-scope results do not record versions. Leave those
+original environments unknown; earlier feasibility or current directory facts
+do not supply confirmation's Python/NumPy/Torch/transitive/tool/wheel/build
+versions. format_version fields are schema identifiers, not dependency versions;
+all original named fields/types remain in the sidecar with exact pointers.
+
+Artifacts: immutable constraints/published-run-environments-2026-10-06.v2.json
+1690037bytes/SHA3d0a798ba0b2db69804e7436e458491435145a909248a484aebd28089e27833b;
+lossless v2.saved-fields.json.gz1951272bytes/SHAf25d3bf544d5949519e771be7a4c00d0cb4d2450acb8d34b555f6f2b54d4711c;
+original v1 unchanged. Local complete entry/small raw archives/producers/failures/
+full raw profile/compressed repeat/audit/fixture/build/verification/publication
+and terminal receipts remain in the stage. No new software dependency or envvar.
+
+Budget: declared300s aggregate,45s operations,4GiB actual worker RSS and128MB
+owned outputs. Complete verification reaches211.15016539994394s including all
+failed attempts and conservative5s initial discovery;115187097bytes before new
+shared publication. Add conservative5s later short inspection/preparation charge,
+then measured publication/static/closing in final receipts; no cap increase.
+
+Plan adjustment: original P9.3b2/P9.3b/P9.3 remain unchecked. P9.3b2c preserves
+explicit authoritative publication-register reconciliation because contextual
+token labels are heuristic: missing144 literal paths,49 embedded references,
+43 symbolic groups and119 non-JSON references are retained. None is silently
+resolved or treated as a proved publication. Full available-record coverage is
+true; complete original publication/environment facts remain false.
+
+Skipped: no331 backend/full-suite rerun, new scientific experiment/reader/replay,
+source factory/final-source construction, cross-platform/CUDA/remote-CI/clean-Git
+clone/fresh installation/type-check rerun, dataset/weight download or sweep.
+Source/test/package pins unchanged; selected ledger behavior/full readback gates
+cover this saved-data/docs increment. Deferred j6c and held CI/P6.4 stay out of
+scope; all original failed resource/scientific gates remain unaccepted.
+
+Exact next action: P9.3b2c, prospectively freeze README's actual result sections,
+docs/reproducibility-scope.md and the P6.2/P6.3/P6.7/P6.12 result guides; build an
+explicit publication-to-original-record register from complete saved document
+context under a declared metadata budget. Bind original file identities or
+explicitly absent originals; retain missing versions and distinguish examples/
+diagnostics/current metadata/prose-only claims. No external blocker to that
+independent increment. Do not repeat science or resume the deferred guard fix.
+
+
+### P9.3b2b session-end handoff
+
+Completed only P9.3b2b. Two full original metadata passes match; independent
+full original40190-field/279384-provenance JSON and13558-line/1053-field journal
+readbacks pass. All26 behavior controls, local operative-producer syntax/Ruff
+and git diff --check pass. All708 original bodies,319 archived document bodies,
+969 unmodified repository files/current975-file membership/25 package versions/
+HEAD28e71ee and prior v1 ledger remain byte exact. Only four existing docs and
+two new saved-evidence files changed. All395 original acceptance rows are preserved;
+only b2b's status changed, and new b2c remains unchecked. Original P9.3b2/P9.3b/
+P9.3/P9.6/remote-CI/full runtime admission remain unproved. No guard repair,
+scientific experiment/reader/source construction, source/test/framework/seed/
+baseline/metric change or earlier failed-family budget renewal.
+
+Terminal225.1400182999787/300s and118881851bytes<128MB include failed wrong-PID
+control/profile, expected memory denial and45.002s audit timeout, conservative
+early/later5s allowances and all measured whole readbacks/preservation/static
+phases. Corrected actual-worker positive/negative controls and full43.173s JSON
+audit pass at original45s/4GiB gates. All raw failure outputs and original producer
+versions remain retained and unaccepted; no success claim from discarded partial
+work. Final session-end adds this footer/diff bookkeeping; no cap increase.
+
+Exact commands as executed from the repository (stage prefix shown once below):
+
+```powershell
+$evidenceStage = 'artifacts/runs/p93-dependencies/published-coverage-20261006'
+.venv\Scripts\python.exe -B "$evidenceStage/declare.py"
+.venv\Scripts\python.exe -B "$evidenceStage/supervise.py" profile profile-selection.json
+.venv\Scripts\python.exe -B "$evidenceStage/memory_control.py"
+.venv\Scripts\python.exe -B "$evidenceStage/memory_control.py"
+.venv\Scripts\python.exe -B "$evidenceStage/supervise.py" profile-v2 profile-selection.json
+.venv\Scripts\python.exe -B "$evidenceStage/prepare_passes.py"
+.venv\Scripts\python.exe -B "$evidenceStage/supervise.py" memory-denial memory-denial-selection.json
+.venv\Scripts\python.exe -B "$evidenceStage/supervise.py" first-json full-json-selection.json
+.venv\Scripts\python.exe -B "$evidenceStage/supervise.py" first-jsonl full-jsonl-selection.json
+.venv\Scripts\python.exe -B "$evidenceStage/supervise.py" repeat-json full-json-selection.json
+.venv\Scripts\python.exe -B "$evidenceStage/supervise.py" repeat-jsonl full-jsonl-selection.json
+.venv\Scripts\python.exe -B "$evidenceStage/supervise.py" audit-json audit-json-selection.json
+.venv\Scripts\python.exe -B "$evidenceStage/supervise.py" audit-jsonl audit-jsonl-selection.json
+.venv\Scripts\python.exe -B "$evidenceStage/fixtures.py"
+.venv\Scripts\python.exe -B "$evidenceStage/supervise.py" audit-json-v2 audit-json-selection.json
+.venv\Scripts\python.exe -B "$evidenceStage/build_ledger.py"
+.venv\Scripts\python.exe -B "$evidenceStage/verify_ledger.py"
+.venv\Scripts\python.exe -B "$evidenceStage/publish.py"
+.venv\Scripts\python.exe -B "$evidenceStage/static_check.py"
+.venv\Scripts\python.exe -B "$evidenceStage/terminal.py"
+.venv\Scripts\python.exe -B "$evidenceStage/finish.py"
+```
+
+The first memory_control.py and first audit-json fail; memory-denial is an
+expected cap rejection. Later corrected/control/whole phases succeed. Source
+versions are pinned in each receipt; these one-time producers use exclusive
+output names, so any further check needs new targets and the remaining declared
+family rather than overwriting evidence. Complete actual Ruff/diff command
+arguments/stdout/stderr are in static-operation.json. Existing mixed-line-ending
+notices were retained; byte edits/copies preserve original document bodies.
+
+Exact next action remains P9.3b2c: freeze README's actual published-result sections,
+docs/reproducibility-scope.md and P6.2/P6.3/P6.7/P6.12 result guides; bind an
+explicit publication register to original file identities or missing originals
+from full document context under a declared local metadata budget. Contextual
+token rules alone do not prove an exhaustive authoritative publication list.
+Missing original confirmation environment versions stay unknown, even though
+the earlier feasibility request records CUDA Torch versions. No external blocker
+to this independent next task. Do not resume deferred j6c or repeat science.
+
+
+## 2026-10-06 — P9.3b2c explicit original publication register
+
+Continued the next independent item after the user's skipped owning-with guard
+repair. P6.7d2b2j6c stays deferred/unchecked; full native/private/source/runtime
+scientific admission and the held CI/P6.4 proposals remain unfinished. HEAD is
+28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8, still13 commits after reviewed8793c49.
+AGENTS and current plan/log/checkout were reconciled; prior all975 repository,
+all708 original record,25 package and completed-session pins match. All319 full
+Markdown bodies and both immutable v2 metadata files were frozen before controls.
+All production/tests and unrelated edits, including the user's prior-seed guide
+and seed-source test, are preserved. No install/upgrade/download or science.
+
+Completed task IDs: pending the terminal acceptance/footer below. Original
+P9.3b2/P9.3b/P9.3 criteria are preserved; this publication register finishes their
+documented coverage increment rather than requiring missing history to be invented.
+
+Artifacts: `artifacts/runs/p93-dependencies/publication-register-20261006/` contains
+entry/full source archive, explicit62-family catalog/definitions, frozen audit
+implementation,18 original behavior controls, two complete initial register/guide
+outputs, independent full readback and retained semantic-label review/correction.
+Separate root evidence: `constraints/published-run-environments-2026-10-06.publications.json`
+and `docs/published-experiment-register.md`. V1/v2, sidecar, all original bodies,
+historical metrics/rankings, failed attempts and older environment directories
+remain unchanged. The corrected full register uses deterministic gzip locally to
+retain the initial outputs within the unchanged32MB cap; its root JSON is complete.
+
+Outcomes:62 explicit result/evidence families;708 structured originals plus16
+original text/figure/dashboard files;319 documents;2306 complete context sections;
+1380 exact reference occurrences;848 original saved version assertions across100
+structured files. Every recorded version stays at its own file/pointer, including
+nested upstream assertions. Repeats/derived files add no independent observations.
+Historical chart/per-seed sources and the raw48-epoch record remain missing;
+the mismatched Pareto summary remains separate. Full historical execution/transitive/
+wheel/build/install facts remain unknown. Later representative CIFAR confirmation
+has no saved versions; earlier CUDA feasibility and current CPU versions are not
+assigned to it. This scope is the frozen documentation/available original inventory,
+not independent execution/source/native/fresh-role authority or cross-platform proof.
+
+Validation: two full register and guide builds are byte identical. Independent
+readback verifies every publication/record/document/reference and all848 version
+fields against original v2 saved fields, then fully hashes all708 original bodies
+and all975 repository files. All18 initial controls pass: full valid corpus plus
+publication/record/document/reference omission/duplication, source/hash/section
+drift, false complete environments, invented originals, truncated context, erased
+unknowns, dropped family membership and feasibility/current-version misattribution.
+Full context review then found13 absent named benchmark references under the
+generic prose/unresolved label. The original labels/outputs remain retained;
+a19th behavior control rejects that label and substitute originals. Both corrected
+derivations/readbacks pass, preserving every original publication/record/document/
+field value byte-exact. No criterion, original file or acceptance scope changed.
+
+Preparation searches: `rg ... references.py` found that absent filename (exit1);
+`rg ... historical-environments-20261006/derive.py` found no matching patterns
+(exit1). The actual saved producers were located and read. These discovery outcomes
+are recorded in prepare-operation.json and included in the conservative discovery
+charge. Ruff format/check of the eight initial audit scripts pass; corrected-script
+format passes. Final static/whole-preservation outputs and completion IDs follow.
+
+Commands executed from the repository (one-time evidence outputs are exclusive):
+
+```powershell
+$publicationStage = 'artifacts/runs/p93-dependencies/publication-register-20261006'
+.venv/Scripts/python.exe "$publicationStage/declare.py"
+.venv/Scripts/python.exe -m ruff format "$publicationStage/catalog.py" "$publicationStage/common.py" "$publicationStage/derive.py" "$publicationStage/verify.py" "$publicationStage/fixtures.py" "$publicationStage/build.py" "$publicationStage/readback.py" "$publicationStage/prepare.py"
+.venv/Scripts/python.exe -m ruff check "$publicationStage/catalog.py" "$publicationStage/common.py" "$publicationStage/derive.py" "$publicationStage/verify.py" "$publicationStage/fixtures.py" "$publicationStage/build.py" "$publicationStage/readback.py" "$publicationStage/prepare.py"
+.venv/Scripts/python.exe "$publicationStage/prepare.py"
+.venv/Scripts/python.exe "$publicationStage/fixtures.py"
+.venv/Scripts/python.exe "$publicationStage/build.py" first
+.venv/Scripts/python.exe "$publicationStage/build.py" repeat
+.venv/Scripts/python.exe "$publicationStage/readback.py"
+.venv/Scripts/python.exe -m ruff format "$publicationStage/correct_references.py"
+.venv/Scripts/python.exe "$publicationStage/correct_references.py"
+```
+
+Budget: original180s aggregate/45s per operation/32MB owned new evidence.
+Declaration9.7567651s and initial5s discovery charge; preparation10.0275564s
+includes conservative additional10s discovery; fixtures2.1248267s; full builds
+1.2420169/1.2466002s; independent full readback8.6997717s; semantic correction
+0.8511288s. All initial and review outcomes are charged, with no new budget.
+Further reading/formatting is conservatively charged in the static receipt.
+Earlier semantic350.7925872/360s and runtime168.7993043/180s remain spent; no
+failed scientific/native/private/source readers or sweeps were repeated.
+
+Skipped: scientific experiments/model workers/data/weight downloads; deferred
+j6c/held proposals; full original large scientific semantic-reader repeats;
+331 backend tests and609-file mypy because all source/test/package pins match
+their fresh-install passing evidence and this increment changes only evidence/
+documentation. No new production module/dependency, clean Git clone, remote CI,
+Linux/other Python/CUDA or cross-build portability claim. Local audit-script
+Ruff/format/bytecode and document diff are checked before/following publication.
+
+Plan rationale: named publication/result contexts, related original records and
+explicit absence/unknown dispositions now provide the manual register missing
+from v2's heuristic literal-reference census. The added semantic-label correction
+preserves the complete corpus and original criteria; it does not promote a command,
+diagram, fixture, current environment or derived upstream field to a scientific run.
+Acceptance statuses change only after terminal evidence is recorded below.
+
+Exact next action: P9.4. Compare docs/model-card.md and README's benchmark-track,
+data-access and backend descriptions with the actual capability matrix/current
+routes and original result limits; correct the first observed documentation mismatch
+using source/record evidence and a bounded document readback. Preserve compatibility,
+unfinished scientific gates and all unrelated edits. Do not resume deferred j6c,
+launch sweeps or change seeds/baselines/metrics. No external blocker to that audit.
+
+
+### P9.3b2c terminal acceptance and session end
+
+Completed task IDs: P9.3b2c, P9.3b2, P9.3b and P9.3 after the exact original
+acceptance audit and terminal gates. All396 original task IDs/criteria remain
+byte-reconstructible; only these four checkboxes/evidence notes change. P9.4,
+P9.6, deferred P6.7d2b2j6c and all unrelated unfinished work remain unchecked.
+No original missing environment/source fact is reclassified as known.
+
+Pre/postpublication Ruff, format,13-file bytecode compilation and git diff check
+pass. Terminal verifies all708 original complete bodies,319 archived full document
+bodies,971 unrelated repository files, all25 installed versions and HEAD exact;
+full977-file current membership is the975 prior files plus the two new evidence
+files. Published register/guide match the accepted corrected derivations. V1/v2,
+old constraints/requirements, all raw failures and all source/tests are unchanged.
+The current dirty checkout is preserved; no clean Git clone/full-suite/remote-CI/
+other-platform or independent scientific-admission claim is added.
+
+Final commands (complete actual arguments/output in static receipts):
+
+```powershell
+.venv/Scripts/python.exe "$publicationStage/static_check.py" prepublication
+.venv/Scripts/python.exe "$publicationStage/publish.py"
+.venv/Scripts/python.exe "$publicationStage/static_check.py" postpublication
+.venv/Scripts/python.exe "$publicationStage/terminal.py"
+.venv/Scripts/python.exe "$publicationStage/finish.py"
+```
+
+All operation durations/discovery charges and combined local/root evidence bytes
+are recorded in finish-operation.json and session-end.json against the unchanged
+180s/45s/32MB budget. Initial generic-label outputs remain retained and the semantic
+review/correction is charged. The earlier scientific/semantic/runtime failed
+budgets remain unchanged;19 local metadata controls pass. Backend tests/mypy and
+scientific repeats remain skipped for the documented complete source/package pin
+reason above. There is no external blocker to the next documentation audit.
+
+Exact next action: P9.4 — inspect docs/model-card.md and README against the actual
+benchmark/data-access/backend routes and existing original-result limits, then
+correct the first evidenced documentation mismatch with a bounded readback.
+Preserve compatibility and every unfinished acceptance criterion. Deferred j6c
+remains out of scope; no sweep, seed/baseline/metric or framework change.
+
+
+## 2026-10-06 — P9.4a model-card and README behavior reconciliation
+
+Previous goal turn verified progress: P9.3's original dependency/publication scope
+is complete. Revalidated prior session end and full source/document/test/package
+pins at HEAD28e71ee/master,13 commits after reviewed8793c49. AGENTS, current plan/
+log and actual checkout are authoritative. Phase0/isolation/matched-control work
+is preserved. Guard repair j6c stays user-deferred; full seed/source/native/runtime
+scientific admission and held proposals remain unfinished. No external blocker.
+
+Completed task IDs: pending live acceptance/footer below. Added P9.4a for this
+concrete model-card/three-README-delta increment. Broad P9.4 remains unchecked;
+every original acceptance criterion and unfinished task is preserved. The
+complete capability/math/workflow/configuration documentation audit remains.
+
+Frozen before publication: all977 repository whole-file pins, all25 installed
+versions and HEAD;26 initial full actual context files and11 actual extra source/
+context files. All four modified originals are archived completely. Source/tests,
+requirements/environments, original scientific artifacts, immutable v1/v2 and
+publication ledgers, protocols, seeds, baselines, metrics and unrelated user edits
+are unchanged, including prior-seed documentation and seed-source tests.
+
+Concrete work: model card now distinguishes numerical chemistry/supervised-error
+proxies, binary NumPy/multiclass Torch, shallow neutral/deeper unmatched rules,
+matched shared-feature heads/unmatched image/practical backprop tracks, guard/
+outer/final roles, training-energy/held-out CE, resource/capacity scopes, NumPy
+replay/Torch zero replay, sleep modes, trusted continuation and v14 trial-prefix/
+atomic-visibility limits. Original use/non-use/ethics text is preserved. Negative
+tuned-profile and unresolved primary confirmation evidence, missing original
+sources/environments, backend limitations and open admission remain explicit.
+No original or new winner/experiment is created.
+
+README has exactly three reversible changes: model-card/protocol/evidence links
+near the introduction; implemented guarded vision/arrived outcome scope; current
+rollback/trusted continuation instead of obsolete future-checkpoint language,
+with the actual v14 trial-prefix boundary. All other README bytes, commands,
+results, figures and unrelated edits reconstruct to the original identity.
+
+Artifacts: artifacts/runs/p94-docs/model-card-20261006/ holds entry/full snapshots,
+source-claim-evidence.json (18 complete-source/context witnesses, actual track
+constants), both drafts, exact prepared deltas, document-validation.json (source
+anchor/constant/default/use-section/local-link readback, full source/package/HEAD
+equality and actual static commands/stdout/stderr), and final live acceptance.
+These are prose/source readbacks, not new numeric/biological/scientific/runtime proof.
+
+Discovery outcomes retained/charged: head_benchmark.py read and
+versioned_v14_bundle.py search failed (absent guessed paths); rg --files located
+the actual matched/app/script sources. Two initial guessed context paths are
+recorded absent, their real files archived separately. Initial root model-card
+delete/add patch rejected two operations for one path; a combined draft/delta
+patch rejected an unprefixed multiline hunk. A later functions.exec script
+containing unescaped Markdown backticks had a JavaScript syntax rejection before
+any tool ran. All were nonmutating and corrected; original root pins still match.
+Details remain in the transcript/source evidence, within conservative charges.
+
+Actual commands (one-time exclusive evidence names):
+
+```powershell
+$docsStage = 'artifacts/runs/p94-docs/model-card-20261006'
+.venv/Scripts/python.exe "$docsStage/declare.py"
+.venv/Scripts/python.exe -m ruff format "$docsStage/declare.py" "$docsStage/common.py" "$docsStage/collect_evidence.py" "$docsStage/prepare_edit.py"
+.venv/Scripts/python.exe "$docsStage/collect_evidence.py"
+.venv/Scripts/python.exe "$docsStage/prepare_edit.py"
+.venv/Scripts/python.exe "$docsStage/validate.py"
+.venv/Scripts/python.exe "$docsStage/publish.py"
+```
+
+Declaration1.3728828s succeeds. Source evidence10.0942985s includes a conservative
+additional10s preparation/read/failure charge; initial discovery10s. All18 actual
+witnesses and three actual track constants agree. Prepare-edit0.0158363s succeeds:
+the three deltas reconstruct the whole original README. Full source/link/default/
+use-section and quality results are recorded in document-validation.json.
+Original budget180s aggregate/45s operation/16MB owned evidence includes all
+discovery/failure/preparation and actual operations; no new scientific budget.
+
+Skipped: no new unit tests for reversible prose. Prior331 NumPy/CPU tests and609-file
+mypy are not rerun because complete source/test/package pins match their passing
+fresh-install evidence. Audit scripts receive Ruff/format/bytecode and authored
+links/live document diffs are checked. No full suite/clean Git clone/remote CI/
+Linux/other Python/CUDA/cross-build or biological/effectiveness claim. No science,
+sweep, data/weight download, native/private/source reconstruction, deferred j6c or
+failed scientific reader repeat. Earlier failed semantic/runtime budgets remain
+spent and unchanged. No source/test/package/algorithm/protocol/metric change.
+
+Exact next action: continue P9.4 with docs/backend-capability-matrix.md. Audit all
+six existing capability rows against current code and the completed P5.1–P5.3
+artifact/checkpoint source/receipts; correct its stale next-Phase5/v14 continuation
+wording. Preserve NumPy-only replay/results, Torch zero replay, objective/clock/
+planner differences, historical sidecar hashes and every broader acceptance
+criterion. No mechanism port, scientific replay or user-deferred guard repair.
+
+
+### P9.4a terminal acceptance and session end
+
+Completed task ID: P9.4a only, after live-acceptance.json. All396 original task
+IDs/statuses/criteria reconstruct unchanged; the397th row records this completed
+model-card/three-README-delta increment. Broad P9.4, P9.6, deferred j6c and all
+unfinished scientific gates remain unchecked. Original use/non-use/ethics and
+all non-target README text/commands/results/figures are preserved. Immutable
+publication/metadata ledgers and all older environments/source/tests are unchanged.
+
+Actual prepublication Ruff/format/seven-script bytecode/diff pass. Live readback
+verifies accepted prose, source witnesses/track/default facts, every authored
+local link, all973 unrelated files/all977 membership,25 packages and HEAD exact.
+Postpublication and final diff pass. Existing331 backend tests and609-file mypy
+stay skipped because source/test/package pins match their prior passing evidence;
+no new tests were added for reversible prose. No scientific or cross-platform/
+clean-clone/full-suite/remote-CI/biological/effectiveness/admission claim is made.
+
+Final actual commands (complete quality arguments/output in document-validation.json):
+
+```powershell
+.venv/Scripts/python.exe -m ruff format "$docsStage/declare.py" "$docsStage/common.py" "$docsStage/collect_evidence.py" "$docsStage/prepare_edit.py" "$docsStage/validate.py" "$docsStage/publish.py" "$docsStage/finish.py"
+.venv/Scripts/python.exe "$docsStage/finish.py"
+```
+
+All measured operations and conservative discovery/read/format/failure charges,
+artifact totals and final document identities are retained in finish-operation.json
+and session-end.json against unchanged180s/45s/16MB. Earlier failed scientific/
+semantic/runtime budgets remain spent and unchanged; none was renewed or repeated.
+No external blocker to the next documentation audit.
+
+Exact next action: continue P9.4 with docs/backend-capability-matrix.md. Verify all
+six existing rows against current source and inspect completed P5.1–P5.3 artifact/
+checkpoint sources/receipts before correcting stale “next Phase5” and v14 continuation
+wording. Preserve NumPy-only replay/results, Torch zero replay, objective/clock/
+planner differences and original sidecar hashes. Keep every broad documentation
+and scientific acceptance unfinished; do not port mechanisms, replay scientific
+models or resume the user-deferred guard repair.
+
+
+## 2026-10-06 — P9.4b backend capability and v14 continuation audit
+
+Completed IDs: pending live acceptance below. Previous session P9.4a accepted;
+revalidated all977 nonignored repository pins, all25 installed versions and
+HEAD28e71ee/master,13 commits after reviewed8793c49. Current AGENTS/plan/log
+and retained checkout changes remain authoritative. Phase0/isolation/matched
+controls are preserved. The user-skipped owning-with guard repair j6c stays
+unchecked/deferred; later scientific seed/source/native/runtime admission and
+held proposals remain unfinished.
+
+Plan change/rationale: split the next concrete P9.4 increment into P9.4b.
+The existing matrix still denied v14 continuation and described Phase5 as
+future work; its blanket Torch-consolidation statement obscured implemented
+chemical/structural sleep. All six rows are audited, preserving original
+objective/default/output, core-call versus runner-epoch, replay and structural
+planner differences. Broader P9.4 acceptance and all397 original task rows
+remain byte-reconstructible and unchanged. No acceptance is weakened.
+
+Concrete work: correct current checkout stamp; distinguish successful wake
+calls from runner epochs and NumPy replay; state component/legacy/disabled
+semantics, NumPy gradual versus Torch post-split immediate pruning, narrow
+numeric fixtures/output-margin mismatch and absent Torch replay/v14. Document
+implemented manifests, recorded/measured observation streams, checked complete
+unscored-trial-prefix continuation and same-volume publication visibility.
+Trusted-local/same-environment, no mid-trial/cross-version/disk-metadata
+durability guarantee and open prospective admission limits remain explicit.
+Original protocols/baselines/seeds/metrics and negative/mixed findings remain.
+
+Artifacts: artifacts/runs/p94-docs/backend-matrix-20261006/entry.json freezes
+all977 pins/all25 versions/HEAD and42 complete source/document/original-data
+bodies. source-and-artifact-evidence.json stores43 AST-delimited full-source
+witnesses and five complete saved P5.1–P5.3 receipts. Original sidecar and both
+root v14 payloads agree byte for byte and by SHA/protocol/NumPy-only flags.
+Saved completed manifests match their raw payload hashes; measured projection
+file hashes/row counts verify, including432 wake rows. Saved resume cursor is
+completed at six trials with exact checkpoint-file SHA. No checkpoint unpickle,
+project imports, source factory, worker, model run or scientific rerun occurs.
+
+Commands/outcomes:
+
+```powershell
+$matrixStage = 'artifacts/runs/p94-docs/backend-matrix-20261006'
+.venv/Scripts/python.exe "$matrixStage/audit.py" declare
+.venv/Scripts/python.exe "$matrixStage/audit.py" evidence
+```
+
+Declaration passes in0.4950133s. The accepted evidence pass0.7473230s plus
+conservative15s read/preparation charge, initial10s discovery and0.9086197s
+failed-helper command charge totals27.1509560/180s; operation cap45s and owned
+artifact cap16MB. No scientific budget is renewed. First discovery rg named
+two absent guessed documentation paths; actual files were located with rg --files.
+An initial malformed helper patch caused a leading-plus SyntaxError; corrected
+helper then failed before evidence/publication on absent NumPy _apply_prune.
+Actual _schedule_or_prune/_apply_prune_decay_step replace that guessed witness.
+A draft functions.exec call containing unescaped Markdown backticks failed at
+JavaScript parsing before any tool/filesystem operation; corrected via string
+lines. Failed commands are retained in pre-evidence-failures-operation.json;
+later read/preparation charges include the nonmutating draft rejection.
+
+Skipped: no new tests for reversible prose; prior331 NumPy/CPU tests and609-file
+mypy are not rerun because complete source/test/package pins match their passing
+fresh-install evidence. The audit helper receives Ruff/format/bytecode checks;
+authored links and current diffs receive readback. Full suite, clean Git clone,
+remote CI, Linux/other Python/CUDA/cross-build/scientific sweeps and deferred
+j6c are skipped. No new biological/numeric effectiveness/admission claim.
+Earlier failed scientific/semantic/runtime budgets remain spent and unchanged.
+
+Blockers: none for this documentation correction. Broad scientific admission
+and historical missing evidence remain open under their original tasks.
+Exact next action: continue P9.4 with docs/learning-mathematics.md; review its
+complete equations and the stale Pending-P2.8 gate text against actual completed
+P2.8 criteria/source/evidence, then correct the first source-supported mismatch
+while preserving unresolved deeper/backend parity limits and original math.
+Do not run models, port Torch replay or resume the user-deferred guard repair.
+
+
+### P9.4b terminal acceptance and session end
+
+Completed task ID: P9.4b only, after document-validation.json and
+live-acceptance.json. All397 original task rows/statuses/criteria and the
+complete original plan/log reconstruct unchanged; new398th row closes only
+this six-row backend/artifact-scope audit. Broad P9.4 and user-deferred j6c
+remain unchecked. All974 unrelated files/977 membership,25 packages and HEAD
+match. Source/models/tests/user edits/immutable ledgers/sidecar/original data
+remain unchanged. Scientific admission and negative/mixed results keep their
+original scope; no scientific budget, baseline/seed/metric or source changes.
+
+Actual commands after evidence:
+
+```powershell
+.venv/Scripts/python.exe -m ruff format "$matrixStage/audit.py"
+.venv/Scripts/python.exe "$matrixStage/audit.py" prepare
+.venv/Scripts/python.exe "$matrixStage/audit.py" validate
+.venv/Scripts/python.exe -m ruff format "$matrixStage/audit.py" "$matrixStage/finish.py"
+.venv/Scripts/python.exe "$matrixStage/audit.py" publish
+.venv/Scripts/python.exe "$matrixStage/finish.py"
+```
+
+Draft/live/final authored local links,43 source witnesses, five saved Phase5
+receipts, both complete raw v14 bodies and immutable sidecar hashes verify.
+Pre/live/final Ruff, format, both helper bytecode compilation and git diff
+check pass. Complete actual command arguments/stdout/stderr are saved in
+document-validation.json, live-acceptance.json and terminal-acceptance.json.
+Budget remains180s aggregate/45s operations/16MB owned evidence; all prior
+failures/discovery/read/preparation charges and final identities are in
+operation receipts/session-end.json. Original failed scientific/semantic/
+runtime budgets remain spent and unchanged. No experiment or worker launched.
+
+Skipped tests remain as described above:331 prior backend tests and609-file
+mypy are not rerun with exact source/test/package pins; no new prose unit
+tests, full suite/clean Git clone/remote CI/other-platform/GPU/scientific
+repeat or deferred guard repair. No external blocker to the next audit.
+
+Exact next action: continue P9.4 with complete docs/learning-mathematics.md.
+Reconcile stale Pending-P2.8 gate text with actual completed P2.8 criteria/
+source/evidence and preserve unresolved deeper/cross-backend parity limits
+and original equations. Keep all unfinished work and deferred j6c open.
+
+
+## 2026-10-06 — P9.4c full learning-mathematics reconciliation
+
+Completed IDs: pending live acceptance below. Previous P9.4b turn verified
+progress: all977 repository whole-file pins/all25 installed versions and HEAD
+match its accepted session end. Current HEAD28e71ee/master remains13 commits
+after reviewed8793c49 with all retained checkout changes. AGENTS/current plan
+and development log remain authoritative. User-skipped guard repair j6c remains
+unchecked/deferred; all later seed/source/native/runtime scientific admission
+and held proposals remain unfinished. No source or environment drift.
+
+Plan change/rationale: split the next P9.4 increment into P9.4c. Audit the
+entire mathematics document, not just its stale Pending-P2.8 paragraph.
+P2.8/all nine parent-child rows are complete under their original local
+acceptance; older prose still described candidate/topology checks as future.
+Code also supports opt-in wake_only_adaptive_v1 replay, which preserves state
+that the original prose said all replay mutated. Original main equations,
+diagnostic IDs and shallow/deeper/backend/finite/convergence limits remain.
+P2.6a shared deeper formulation remains unchecked/deferred; broad P9.4 stays
+open. All398 original task rows and full original plan/log are preserved.
+
+Concrete source review: all16 original headings,49 full source/doc/ADR/test
+context bodies and50 complete AST source witnesses. NumPy backprop chain/B
+gradients; ordinary-PC simultaneous all-latent/fixed-prior residual updates;
+circadian final-latent/earlier-prior chain and gate placement; Torch autograd
+references/manual multiclass head updates; prediction versus target-conditioned
+states; diagnostic normalization; shallow neutrality/output-margin/structural
+limits all agree with the current kernels. Optional saturating/dual chemistry
+and min-max sensitivity rules are stated explicitly as numerical proxies.
+Default historical replay and opt-in wake-only replay retain distinct state
+effects; legacy/component/disabled sleep scope is explicit. Torch replay is
+still absent. No algorithm, objective, baseline or metric is changed.
+
+The local gradient/descent objective is clarified as unclipped logit CE.
+Source-literal arithmetic on the unchanged fixed binary fixture proves the
+existing alpha0.2 and V=[0.2,-0.3],bias0.07 have spectral-norm-squared0.13
+and uniform absolute logit bound0.7: with |o|<=1 and e0=0, the recurrence
+bounds |e_j|<=|V_j| and |p_j|<=1. The resulting sigmoid probability interval
+also avoids the diagnostic clamp. This derives the existing fixture's scope
+without a model call, tensor/array-library import or trajectory replay.
+Existing conservative Lipschitz/step-bound and original equations remain;
+it does not establish arbitrary-weight/rate, clipped-diagnostic, deeper, sleep,
+cross-backend or biological convergence/effectiveness.
+
+Artifacts: artifacts/runs/p94-docs/learning-mathematics-20261006/ contains
+entry.json/all977 pins/all25 versions/HEAD,49 complete before-inputs bodies,
+whole-math-source-review.json (all16 headings/50 witnesses/nine completed
+P2.8 rows/explicit source-literal bound), document-deltas.json, draft, and
+subsequent reversible-edit/quality/source/link/live/preservation receipts.
+Original numerical/benchmark artifacts and all immutable publication/metadata
+ledgers are unchanged; preserve prior-seed documents and seed-source tests.
+
+Commands/outcomes:
+
+```powershell
+$mathStage = 'artifacts/runs/p94-docs/learning-mathematics-20261006'
+.venv/Scripts/python.exe "$mathStage/audit.py" declare
+.venv/Scripts/python.exe "$mathStage/review.py"
+```
+
+Declaration0.4992783s passes. Full review0.7769777s plus conservative15s
+read/preparation charge and initial10s discovery totals26.2762560/180s.
+Operation cap45s; owned evidence cap16MB. All source/package/HEAD pins agree.
+Initial Python cp1252 stdout rejected Greek text while inspecting the final
+math section; explicit UTF-8 readback then succeeds. Another read guessed
+NumPy's normalizer name for Torch and stopped; the actual Torch tensor
+normalizer and remaining requested code were read successfully. Both are
+nonmutating, retained in entry.json and covered by conservative discovery/
+review charges. No failed scientific/semantic/runtime budget is renewed.
+
+Skipped: no new unit tests for reversible prose. Prior backend/fresh-install
+tests and609-file mypy are not rerun with exact source/test/package pins.
+Regression/ADR/math contracts are read as source/evidence, without claiming
+a new417-test historical gate or full mathematical/formal execution proof.
+The helpers receive Ruff/format/bytecode checks and authored links/current
+diffs are checked. No full suite, clean Git clone, remote CI, Linux/other
+Python/GPU/cross-build, model or worker run, dataset/weight download, new
+scientific experiment/sweep/source-factory/guard-repair execution.
+
+Blockers: none to this documentation increment. Broad scientific admission
+and missing historical evidence retain their original unfinished tasks.
+Exact next action: continue P9.4 with the complete docs/evaluation-protocols.md.
+Compare its current track/role/selection/replay/final-release/resource claims
+against actual runners, selection manifests and completed Phase1/4/5 evidence;
+correct source-supported stale statements while preserving held-out isolation,
+matched-baseline limits, compatibility and all unfinished acceptance criteria.
+
+
+### P9.4c terminal acceptance and session end
+
+Completed task ID: P9.4c only, after draft-validation.json and live-acceptance.json.
+All398 original task rows/statuses/criteria and complete original plan/log remain
+byte-reconstructible; the399th row records this accepted full-math increment.
+All original main equation blocks and diagnostic/algorithm IDs are unchanged.
+Ten reversible deltas correct nine completed numerical-gate rows, replay and
+sleep scope, optional state formulas/proxy terminology and unclipped local
+objective assumptions. Pure fixture-bound arithmetic adds no model run or
+new scientific result; broad P9.4/deferred P2.6a/j6c/admission gates stay open.
+
+Actual final commands:
+Before publication, the first finish attempt failed Ruff on an unused audit.ROOT
+import in the local review helper. The root math file/unfinished task were unchanged.
+The failed helper body, command outcome and diagnostic rerun are retained; the
+unused import is removed and the full draft/live/final checks pass. A later
+combined patch was rejected for a stale formatted context before changing files.
+Both ignored original v14 payloads and the result sidecar are separately frozen
+and checked against prior accepted exact identities: three extra full snapshots
+augment the49 initial bodies. No scientific replay or admission is added.
+
+```powershell
+.venv/Scripts/python.exe "$mathStage/prepare.py"
+.venv/Scripts/python.exe -m ruff format "$mathStage/audit.py" "$mathStage/review.py" "$mathStage/prepare.py" "$mathStage/finish.py"
+.venv/Scripts/python.exe "$mathStage/finish.py"
+```
+
+Draft/live/final source/constant/formula/plan/ADR/fixture-scope/local-link readback
+and all977 membership/974 unrelated-file/25-package/HEAD pins pass. Complete actual
+Ruff/format/diff commands/stdout/stderr and four-helper bytecode checks are retained
+in draft-validation.json/live-acceptance.json/terminal-acceptance.json. No source,
+test, dataset, metric, seed, baseline, raw result or environment changes. Preserve
+unrelated prior-seed/user edits and all immutable publication/dependency evidence.
+
+Budget remains180s aggregate/45s operations/16MB owned evidence; declaration,
+review, preparation, finish and conservative discovery/read/format/failure charges
+are recorded in operation receipts/session-end.json. Earlier failed scientific/
+semantic/runtime budgets remain spent and unchanged; no model worker launched.
+Prior backend tests/609-file mypy stay skipped with exact source/test/package pins;
+no new prose tests or new claim from the historical full-suite/math test results.
+Full suite/clean Git clone/remote CI/other-platform/GPU/scientific reruns/deferred
+guard repair remain skipped. No external blocker to the next documentation audit.
+
+Exact next action: continue P9.4 with the complete docs/evaluation-protocols.md;
+compare tracks/roles/selection/replay/global final-release/resource accounting
+against actual runners, selection manifests and completed Phase1/4/5 evidence.
+Correct source-supported stale statements while preserving evaluation isolation,
+matched-baseline limits, compatibility and every unfinished criterion.

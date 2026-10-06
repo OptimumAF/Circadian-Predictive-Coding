@@ -27,6 +27,14 @@ Optional benchmark dependencies:
 pip install -r requirements-resnet.txt
 ```
 
+## Dependency Reproducibility
+
+Use broad requirements for development and a dated `constraints/` snapshot for
+a recorded environment. See [the guide](docs/dependency-reproducibility.md) for
+Windows CPU commands and scope. Add a new snapshot when changing environments;
+retain the original versions and provenance for published experiments. Record
+clean-install checks separately and avoid upgrades during a benchmark campaign.
+
 ## Branch And PR Workflow
 
 1. Create a focused branch from `main`/`master`.
