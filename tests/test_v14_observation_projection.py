@@ -19,6 +19,8 @@ from src.infra.observation_projection_files import (
 )
 from src.infra.versioned_run_files import verify_run_bundle
 
+from v14_portable_value_fixtures import recorded_v14_environment
+
 
 @pytest.fixture(scope="module")
 def completed_run(tmp_path_factory: pytest.TempPathFactory) -> Path:
@@ -80,6 +82,7 @@ def test_should_project_every_observed_cell_without_inventing_wake_metrics(
 
 
 def test_should_derive_csv_only_from_raw_final_rows(completed_run: Path) -> None:
+    source_bytes = (completed_run / "outcomes.json").read_bytes()
     training, outcomes = _source_records(completed_run)
     projection = build_v14_observation_projection(training, outcomes)
     final_rows = _rows(projection.files["final-results.jsonl"])
@@ -90,6 +93,11 @@ def test_should_derive_csv_only_from_raw_final_rows(completed_run: Path) -> None
         assert summary["arm"] == source["arm"]
         assert summary["method"] == source["method"]["method"]
         assert float(summary["balanced_score"]) == source["method"]["balanced_score"]
+    assert (completed_run / "outcomes.json").read_bytes() == source_bytes
+
+
+@recorded_v14_environment
+def test_should_reproduce_recorded_outcome_projection_source(completed_run: Path) -> None:
     assert sha256((completed_run / "outcomes.json").read_bytes()).hexdigest() == (
         "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f"
     )

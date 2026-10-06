@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import replace
 from hashlib import sha256
 from math import isfinite
+import sys
 
+import numpy as np
 import pytest
 
 from scripts.run_continual_trigger_replay_outcomes import serialize_outcome_comparison
@@ -70,6 +72,20 @@ def test_should_leave_v14_training_and_scored_bytes_unchanged_when_capture_enabl
                 getattr(new.pending.state, name)
             )
     assert serialize_training_study(baseline) == serialize_training_study(measured)
+    assert serialize_outcome_comparison(
+        score_trigger_replay_training_study(baseline)
+    ) == serialize_outcome_comparison(score_trigger_replay_training_study(measured))
+
+
+@pytest.mark.skipif(
+    sys.platform != "win32" or sys.version_info[:3] != (3, 14, 7) or np.__version__ != "2.4.6",
+    reason="historical v14 byte reproduction requires Windows CPython 3.14.7 / NumPy 2.4.6",
+)
+def test_should_reproduce_recorded_v14_bytes_with_wake_capture() -> None:
+    # Why this: the recorded hashes have the scope in docs/reproducibility-scope.md.
+    measured = run_trigger_replay_training_study(
+        fixed_trigger_replay_manifest(), capture_wake_diagnostics=True
+    )
     assert sha256(serialize_training_study(measured).encode()).hexdigest() == (
         "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324"
     )

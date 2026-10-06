@@ -9,6 +9,9 @@ from typing import Any
 
 import pytest
 
+pytest.importorskip("torch")
+pytest.importorskip("torchvision")
+
 from scripts import run_cifar_representative_confirmation as confirmation
 from scripts import audit_cifar_representative_confirmation as audit
 

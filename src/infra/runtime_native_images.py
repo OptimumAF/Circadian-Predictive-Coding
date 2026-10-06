@@ -59,13 +59,27 @@ class _MemoryRegion(ctypes.Structure):
     ]
 
 
+def _load_windows_kernel() -> Any:
+    # Why this: keep ctypes' platform-only attributes in recognized branches.
+    # The constructor stays reachable to Linux typing so shared fields are checked.
+    if sys.platform != "win32":
+        raise ValueError("native runtime observation requires Windows")
+    return ctypes.WinDLL("kernel32", use_last_error=True)
+
+
+def _windows_last_error() -> int:
+    if sys.platform != "win32":
+        raise ValueError("native address-space enumeration requires Windows")
+    return ctypes.get_last_error()
+
+
 class WindowsRuntimeImages:
     """Prepare standard native APIs before freezing loaded code membership."""
 
     def __init__(self) -> None:
         if os.name != "nt" or ctypes.sizeof(ctypes.c_void_p) != 8:
             raise ValueError("complete native runtime observation requires 64-bit Windows")
-        self._kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        self._kernel = _load_windows_kernel()
         self._process = self._kernel.GetCurrentProcess
         self._process.argtypes, self._process.restype = [], wintypes.HANDLE
         self._handle = self._process()
@@ -162,7 +176,7 @@ class WindowsRuntimeImages:
             )
             if not observed:
                 # ERROR_INVALID_PARAMETER is the documented address-space end.
-                if ctypes.get_last_error() == 87:
+                if _windows_last_error() == 87:
                     break
                 raise ValueError("native address-space enumeration failed")
             base = region.base or 0

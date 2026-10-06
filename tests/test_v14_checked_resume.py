@@ -27,6 +27,8 @@ from src.infra.measured_observation_files import (
 from src.infra.v14_resume_files import V14ResumeFiles
 from src.infra.versioned_run_files import verify_run_bundle
 
+from v14_portable_value_fixtures import recorded_v14_environment
+
 
 @pytest.fixture(scope="module")
 def fresh_bytes(tmp_path_factory: pytest.TempPathFactory) -> tuple[bytes, bytes, bytes]:
@@ -132,6 +134,12 @@ def test_should_resume_only_missing_trials_and_repeat_exact_bytes(
         (run / "outcomes.json").read_bytes(),
         (run / MEASUREMENT_DIRECTORY / DIAGNOSTIC_FILE).read_bytes(),
     ) == fresh_bytes
+
+
+@recorded_v14_environment
+def test_should_reproduce_recorded_fresh_resume_control_bytes(
+    fresh_bytes: tuple[bytes, bytes, bytes],
+) -> None:
     assert [sha256(item).hexdigest() for item in fresh_bytes] == [
         "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324",
         "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f",

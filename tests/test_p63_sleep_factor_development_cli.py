@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 
 import pytest
 
@@ -16,15 +15,25 @@ from scripts import run_p63_sleep_factor_development as adapter
 from scripts import run_p63_sleep_factor_preflight as c3_adapter
 
 
-def _ensure_reference() -> None:
-    if not c3_adapter.artifact_paths(adapter.REFERENCE_DIR)["result"].is_file():
-        c3_adapter.run_bounded_preflight(adapter.REFERENCE_DIR)
+from factor_cli_value_fixtures import factor_cli_command, select_factor_reference
+
+
+@pytest.fixture(scope="module")
+def reference_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    directory = tmp_path_factory.mktemp("sleep-train-reference")
+    c3_adapter.run_bounded_preflight(directory)
+    return directory
+
+
+@pytest.fixture(autouse=True)
+def local_reference(monkeypatch: pytest.MonkeyPatch, reference_dir: Path) -> None:
+    # Why this: boundary cases need exact local pins, never ignored historic paths.
+    select_factor_reference(monkeypatch, adapter, reference_dir)
 
 
 def test_should_reject_changed_c3_result_bytes_and_audit(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _ensure_reference()
     source_paths = c3_adapter.artifact_paths(adapter.REFERENCE_DIR)
     target_paths = c3_adapter.artifact_paths(tmp_path)
     for name in ("request", "result", "audit"):
@@ -46,14 +55,9 @@ def test_should_reject_changed_c3_result_bytes_and_audit(
 def test_should_write_complete_development_result_and_reject_tampered_metrics(
     tmp_path: Path,
 ) -> None:
-    _ensure_reference()
-    command = [
-        sys.executable,
-        "-m",
-        "scripts.run_p63_sleep_factor_development",
-        "--output-dir",
-        str(tmp_path),
-    ]
+    command = factor_cli_command(
+        adapter.__name__, adapter.REFERENCE_DIR, "--output-dir", str(tmp_path)
+    )
     process = subprocess.run(command, capture_output=True, text=True, timeout=30, check=False)
     assert process.returncode == 0, process.stderr
     paths = adapter.artifact_paths(tmp_path)
@@ -91,7 +95,6 @@ def test_should_write_complete_development_result_and_reject_tampered_metrics(
 def test_should_reject_changed_scored_source_before_writing_request(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _ensure_reference()
     with monkeypatch.context() as patch:
         patch.setitem(
             adapter.ADDITIONAL_SOURCE_SHA256,
@@ -106,7 +109,6 @@ def test_should_reject_changed_scored_source_before_writing_request(
 def test_should_save_failure_after_child_timeout_without_scored_result(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _ensure_reference()
 
     def timeout(*args: object, **kwargs: object) -> None:
         raise subprocess.TimeoutExpired(cmd="worker", timeout=120)

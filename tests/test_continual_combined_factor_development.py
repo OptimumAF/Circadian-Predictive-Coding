@@ -4,14 +4,13 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass, replace
-from pathlib import Path
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
 import pytest
 
 from scripts import run_p63_combined_factor_preflight as c7_adapter
-from scripts import run_p63_sleep_factor_preflight as artifacts
 from src.app import continual_arrived_benchmark as arrived
 from src.app import continual_combined_factor_development as development
 from src.app import continual_combined_factor_preflight as preflight
@@ -22,9 +21,6 @@ from src.core.circadian_predictive_coding import CircadianPredictiveCodingNetwor
 from src.core.continual_metrics import TwoTaskAccuracy
 from src.core.predictive_coding import PredictiveCodingNetwork
 from src.infra.datasets import generate_two_cluster_dataset_with_transform
-
-
-REFERENCE_DIR = Path(__file__).resolve().parents[1] / "artifacts/runs/p63-combined-factor-preflight"
 
 
 @dataclass(frozen=True)
@@ -57,11 +53,16 @@ def _sealed_generator(**kwargs: Any) -> _SealedSource:
     return _SealedSource(data.train_input, data.train_target)
 
 
+@lru_cache(maxsize=1)
+def _local_reference() -> dict[str, Any]:
+    # Why this: exact numerical hashes are environment-specific. Boundary tests
+    # need a current-environment fixture; historical reproduction stays separate.
+    return preflight.json_value(preflight.run_combined_preflight(fixed_combined_manifest()))
+
+
 def _reference() -> dict[str, Any]:
-    paths = c7_adapter.artifact_paths(REFERENCE_DIR)
-    if not paths["result"].is_file():
-        c7_adapter.run_bounded_preflight(REFERENCE_DIR)
-    return artifacts.parse_finite_json(paths["result"].read_text(encoding="utf-8"))
+    # Individual corruption cases must not change the shared fixture.
+    return deepcopy(_local_reference())
 
 
 def test_should_reject_changed_manifest_and_reference_before_source_access(

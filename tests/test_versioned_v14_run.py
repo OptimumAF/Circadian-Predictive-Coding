@@ -9,6 +9,7 @@ from pathlib import Path
 import sys
 from typing import Any
 
+import numpy as np
 import pytest
 
 from scripts.run_continual_trigger_replay_outcomes import serialize_outcome_comparison
@@ -80,14 +81,8 @@ def test_should_bind_all_required_provenance_and_original_v14_bytes(
 ) -> None:
     manifest = _build_manifest(fixed_materials)
     _, _, training, outcomes = fixed_materials
-    assert (
-        sha256(training).hexdigest()
-        == "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324"
-    )
-    assert (
-        sha256(outcomes).hexdigest()
-        == "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f"
-    )
+    assert manifest["files"]["training"]["sha256"] == sha256(training).hexdigest()
+    assert manifest["files"]["outcomes"]["sha256"] == sha256(outcomes).hexdigest()
     assert manifest["status"] == "completed"
     assert manifest["resolved_config"] == _resolved_v14_config()
     assert manifest["source"]["dirty"] is True
@@ -101,6 +96,23 @@ def test_should_bind_all_required_provenance_and_original_v14_bytes(
                 "outer_selection",
                 "final_test",
             }
+
+
+@pytest.mark.skipif(
+    sys.platform != "win32" or sys.version_info[:3] != (3, 14, 7) or np.__version__ != "2.4.6",
+    reason="historical v14 byte reproduction requires Windows CPython 3.14.7 / NumPy 2.4.6",
+)
+def test_should_reproduce_original_v14_bytes_in_recorded_environment(
+    fixed_materials: tuple[TriggerReplayTrainingStudy, TriggerReplayComparison, bytes, bytes],
+) -> None:
+    # Why this: historical byte identity is scoped in docs/reproducibility-scope.md.
+    _, _, training, outcomes = fixed_materials
+    assert sha256(training).hexdigest() == (
+        "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324"
+    )
+    assert sha256(outcomes).hexdigest() == (
+        "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f"
+    )
 
 
 def test_should_reject_payload_or_study_identity_drift(
@@ -172,19 +184,21 @@ def test_should_refuse_existing_run_id_before_training(
 
 
 def test_should_emit_one_actual_opt_in_bundle_with_tracked_environment(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    fixed_materials: tuple[TriggerReplayTrainingStudy, TriggerReplayComparison, bytes, bytes],
 ) -> None:
     run_path = run_versioned_v14_bundle(tmp_path, "p51-v14-integration", Path.cwd())
     manifest = verify_run_bundle(run_path)
     assert manifest["run_id"] == "p51-v14-integration"
     assert manifest["source"]["commit_sha"] is not None
     assert manifest["resolved_config"] == _resolved_v14_config()
-    assert manifest["files"]["training"]["sha256"] == (
-        "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324"
-    )
-    assert manifest["files"]["outcomes"]["sha256"] == (
-        "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f"
-    )
+    _, _, training, outcomes = fixed_materials
+    assert (run_path / "training.json").read_bytes() == training
+    assert (run_path / "outcomes.json").read_bytes() == outcomes
+    assert manifest["files"]["training"]["sha256"] == sha256(training).hexdigest()
+    assert manifest["files"]["outcomes"]["sha256"] == sha256(outcomes).hexdigest()
     assert json.loads((run_path / "outcomes.json").read_text(encoding="utf-8"))["protocol_id"] == (
         "continual_trigger_replay_outcomes_v14"
     )
@@ -230,7 +244,10 @@ def test_should_reject_unknown_v14_configuration_before_training(
 
 
 def test_should_preserve_fixed_v14_bytes_with_explicit_preset(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    fixed_materials: tuple[TriggerReplayTrainingStudy, TriggerReplayComparison, bytes, bytes],
 ) -> None:
     monkeypatch.setattr(
         sys,
@@ -249,12 +266,9 @@ def test_should_preserve_fixed_v14_bytes_with_explicit_preset(
     run_path = tmp_path / "p54-fixed"
     manifest = verify_run_bundle(run_path)
     assert manifest["resolved_config"] == _resolved_v14_config()
-    assert sha256((run_path / "training.json").read_bytes()).hexdigest() == (
-        "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324"
-    )
-    assert sha256((run_path / "outcomes.json").read_bytes()).hexdigest() == (
-        "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f"
-    )
+    _, _, training, outcomes = fixed_materials
+    assert (run_path / "training.json").read_bytes() == training
+    assert (run_path / "outcomes.json").read_bytes() == outcomes
     assert json.loads(capsys.readouterr().out)["run"] == str(run_path)
 
 

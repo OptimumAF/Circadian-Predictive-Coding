@@ -93,6 +93,8 @@ def reject_nonfinite(token: str) -> Any:
 
 
 def test_public_multiseed_cli_writes_complete_synthetic_rows(tmp_path: Path) -> None:
+    pytest.importorskip("torch")
+    pytest.importorskip("torchvision")
     prefix = tmp_path / "tiny"
     process = run_tiny_multiseed(prefix)
 

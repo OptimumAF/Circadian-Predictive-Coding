@@ -10,6 +10,9 @@ from typing import Any
 
 import pytest
 
+pytest.importorskip("torch")
+pytest.importorskip("torchvision")
+
 from scripts import run_cifar_representative_selection as selection
 
 

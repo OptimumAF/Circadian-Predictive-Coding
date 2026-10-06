@@ -8,6 +8,11 @@ import subprocess
 import sys
 from typing import Any
 
+import pytest
+
+pytest.importorskip("torch")
+pytest.importorskip("torchvision")
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 HEAD_NAMES = {"backprop_mlp", "predictive_coding", "circadian_predictive_coding"}

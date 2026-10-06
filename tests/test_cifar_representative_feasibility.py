@@ -7,6 +7,9 @@ from pathlib import Path
 
 import pytest
 
+pytest.importorskip("torch")
+pytest.importorskip("torchvision")
+
 from scripts import profile_cifar_representative_feasibility as profile
 
 

@@ -22,6 +22,8 @@ from src.infra.measured_observation_files import (
 )
 from src.infra.versioned_run_files import verify_run_bundle
 
+from v14_portable_value_fixtures import fixed_v14_payloads, recorded_v14_environment
+
 
 @pytest.fixture(scope="module")
 def measured_runs(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, Path]:
@@ -56,15 +58,24 @@ def test_should_bind_complete_measured_grid_to_unchanged_v14_outputs(
         }
         assert all(isfinite(row["metric_value"]) for row in rows)
         assert rows[0]["seed"] == 47 and rows[0]["arm"] == "periodic"
+        training, outcomes, diagnostics = fixed_v14_payloads()
+        assert (run / "training.json").read_bytes() == training
+        assert (run / "outcomes.json").read_bytes() == outcomes
+        assert (run / "measurements-v1/wake-diagnostics.jsonl").read_bytes() == diagnostics
+    assert (first / "measurements-v1/wake-diagnostics.jsonl").read_bytes() == (
+        second / "measurements-v1/wake-diagnostics.jsonl"
+    ).read_bytes()
+
+
+@recorded_v14_environment
+def test_should_reproduce_recorded_measured_v14_outputs(measured_runs: tuple[Path, Path]) -> None:
+    for run in measured_runs:
         assert sha256((run / "training.json").read_bytes()).hexdigest() == (
             "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324"
         )
         assert sha256((run / "outcomes.json").read_bytes()).hexdigest() == (
             "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f"
         )
-    assert (first / "measurements-v1/wake-diagnostics.jsonl").read_bytes() == (
-        second / "measurements-v1/wake-diagnostics.jsonl"
-    ).read_bytes()
 
 
 def test_should_derive_measured_jsonl_and_csv_only_after_complete_score(

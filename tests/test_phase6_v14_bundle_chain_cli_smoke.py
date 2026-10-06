@@ -10,6 +10,8 @@ import subprocess
 import sys
 from typing import Any
 
+from v14_portable_value_fixtures import fixed_v14_payloads, recorded_v14_environment
+
 
 REPOSITORY = Path(__file__).resolve().parents[1]
 TRAINING_SHA = "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324"
@@ -79,10 +81,11 @@ def _create_bundle(tmp_path: Path) -> Path:
     manifest = _read_json(run / "manifest.json")
     assert manifest["run_id"] == run.name and manifest["status"] == "completed"
     assert set(manifest["files"]) == {"training", "outcomes"}
-    assert manifest["files"]["training"]["sha256"] == TRAINING_SHA
-    assert manifest["files"]["outcomes"]["sha256"] == OUTCOMES_SHA
-    assert sha256((run / "training.json").read_bytes()).hexdigest() == TRAINING_SHA
-    assert sha256((run / "outcomes.json").read_bytes()).hexdigest() == OUTCOMES_SHA
+    training, outcomes, _ = fixed_v14_payloads()
+    assert manifest["files"]["training"]["sha256"] == sha256(training).hexdigest()
+    assert manifest["files"]["outcomes"]["sha256"] == sha256(outcomes).hexdigest()
+    assert (run / "training.json").read_bytes() == training
+    assert (run / "outcomes.json").read_bytes() == outcomes
     assert len(_read_json(run / "training.json")["rows"]) == 6
     assert len(_read_json(run / "outcomes.json")["outcomes"]) == 6
     return run
@@ -165,8 +168,16 @@ def _assert_dashboard(run: Path) -> None:
             == dashboard_manifest["files"][name]["sha256"]
         )
     assert "<html" in (dashboard / "dashboard.html").read_text(encoding="utf-8").lower()
-    assert sha256((run / "training.json").read_bytes()).hexdigest() == TRAINING_SHA
-    assert sha256((run / "outcomes.json").read_bytes()).hexdigest() == OUTCOMES_SHA
+    training, outcomes, _ = fixed_v14_payloads()
+    assert (run / "training.json").read_bytes() == training
+    assert (run / "outcomes.json").read_bytes() == outcomes
+
+
+@recorded_v14_environment
+def test_should_reproduce_recorded_bundle_chain_control_bytes() -> None:
+    training, outcomes, _ = fixed_v14_payloads()
+    assert sha256(training).hexdigest() == TRAINING_SHA
+    assert sha256(outcomes).hexdigest() == OUTCOMES_SHA
 
 
 def test_should_verify_complete_v14_bundle_to_dashboard_chain(tmp_path: Path) -> None:

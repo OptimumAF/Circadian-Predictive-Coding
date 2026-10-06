@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, replace
+from functools import lru_cache
 import json
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -13,20 +13,17 @@ import pytest
 
 from src.app import continual_arrived_benchmark as arrived
 from src.app import continual_shift_benchmark as base
-from scripts import run_p63_sleep_factor_preflight as c3_adapter
 from src.app.continual_sleep_factor_development import (
     CONTRASTS,
     run_sleep_factor_development,
 )
-from src.app.continual_sleep_factor_preflight import ARMS, fixed_sleep_factor_manifest
+from src.app.continual_sleep_factor_preflight import (
+    ARMS,
+    fixed_sleep_factor_manifest,
+    run_sleep_factor_preflight,
+)
 from src.core.continual_metrics import TwoTaskAccuracy
 from src.infra.datasets import generate_two_cluster_dataset_with_transform
-
-
-REFERENCE = (
-    Path(__file__).resolve().parents[1]
-    / "artifacts/runs/p63-sleep-factor-preflight/sleep-factor-preflight.result.json"
-)
 
 
 @dataclass(frozen=True)
@@ -59,10 +56,15 @@ def _sealed_generator(**kwargs: object) -> _SealedSource:
     return _SealedSource(source.train_input, source.train_target)
 
 
+@lru_cache(maxsize=1)
+def _local_reference() -> dict[str, Any]:
+    # Why this: this portable gate test must not overwrite historical evidence.
+    result = run_sleep_factor_preflight(fixed_sleep_factor_manifest())
+    return json.loads(json.dumps(asdict(result), allow_nan=False))
+
+
 def _reference() -> dict[str, Any]:
-    if not REFERENCE.is_file():
-        c3_adapter.run_bounded_preflight(REFERENCE.parent)
-    return json.loads(REFERENCE.read_text(encoding="utf-8"))
+    return deepcopy(_local_reference())
 
 
 def test_should_reject_changed_reference_before_source_access(

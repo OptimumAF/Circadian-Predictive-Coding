@@ -1,6 +1,7 @@
 """Behavioral live-process controls; full fixtures execute in bounded subprocesses."""
 
 from dataclasses import replace
+import ctypes
 from pathlib import Path
 import subprocess
 import sys
@@ -11,6 +12,10 @@ from src.app.prospective_runtime_closure import validate_runtime_observation
 from src.core.prospective_runtime_closure import RuntimeCodeObservation
 
 
+@pytest.mark.skipif(
+    sys.platform != "win32" or ctypes.sizeof(ctypes.c_void_p) != 8,
+    reason="complete native runtime observations require 64-bit Windows",
+)
 @pytest.mark.parametrize("group", ["positive", "python_a", "python_b", "native", "failure"])
 def test_should_observe_or_deny_complete_live_runtime_without_science(group):
     script = Path(__file__).with_name("prospective_runtime_fixtures.py")
