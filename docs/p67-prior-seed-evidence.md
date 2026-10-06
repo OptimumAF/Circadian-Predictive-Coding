@@ -151,3 +151,170 @@ witnesses, preserving all raw inputs, expressions, declarations, failure and
 unknown records. Treat aliases and quantities conservatively. Original b2
 must bind release history and the entire prospective fixed contract; static
 expressions, declarations or green metadata gates alone admit no fresh source.
+
+
+## P6.7d2b2a1: complete saved-output and binding timing diagnosis
+
+The original first audit and failed independent repeat remain unchanged.
+This diagnosis re-encodes the entire historical saved body; it does not repeat
+the current semantic evidence reader or repair its failed resource gate.
+One metadata timing budget is hard180 total including preparation and failures,
+with durable started/completed/failed phase events and a 700,000,000-byte new
+output ceiling. The scientific caps remain600s/16000updates/512MiB.
+
+During diagnosis, the checkout advanced to `28e71ee9de46230fdd6232cca3f9f59ba8ff4fb8`
+(Add resource, findings, and seed-evidence audits). Preserve this user commit:
+13 commits after the reviewed version,109previous audit/docs/source/test files.
+The current graph has3608objects/34commits,23newobjects/3,133,713bytes; every old
+3585object whole identity and historical alias remains. Current source/test
+bytes are bound separately from historical documentary/proof snapshots.
+
+Why this: the historical source-pin validator compared live HEAD with its old
+57b6fd0 declaration. A new current contract is the complete original freeze
+cloned with only `head` set to prospectively frozen28e71ee. The entire unchanged
+validator still checks every150source/79test/174input/fourteen whole original
+body and all proof/control/guard fields. The historical freeze/function and
+every failed attempt stay immutable; this does not skip a head check or grant
+scientific/fresh-role authority. Complete current/history object/alias checks
+pass before/after. Future source changes require their own complete binding.
+
+V1 stopped before decoding because its current Git graph differed from the
+historical graph (28.1118213parent seconds). V2 stopped at the legacy HEAD check
+(19.1763013parent). V3 passes82.4092759worker/83.2362735parent under132.7118774
+remaining seconds. All attempts130.5243961<original180; no recycled budget.
+All4471historical content bodies/13149alias occurrences and every593b1 file,
+494389declaration/30318issue are checked. Canonical581,898,985-byte output equals
+the two original saved bodies in whole bytes/SHA. All24 scientific guards0.
+
+| Complete diagnostic phase | Wall seconds |
+| --- | ---: |
+| Prospective source/proof/current Git freeze | 13.5918492 |
+| Original guard and whole source-pin checks before | 9.4219942 |
+| All1949 physical files before | 10.2760355 |
+| All3608 Git objects/34commits/aliases before | 4.1533446 |
+| Entire saved JSON decode | 3.5508041 |
+| Entire canonical JSON encode | 3.9749375 |
+| Entire write/flush/fsync | 1.5874618 |
+| All1949 physical files after | 10.2707903 |
+| All3608 Git objects/34commits/aliases after | 5.1333315 |
+| All original/new pins after | 11.8028265 |
+
+These are diagnostic phase timings with journal/sampling/profiling/pin overhead,
+not the unobserved historical repeat phase timings. Serialization is a small
+measured cost; avoid an unmeasured serialization refactor. Sampled absolute
+metadata RSS peaks3,113,938,944bytes (2391samples,20ms), with GIL/native sampling
+gaps; this is not an exact peak or model/scientific memory attribution. New
+diagnostic output before receipt607,921,349bytes<700,000,000. No new dependency,
+permanent source/test modification, semantic audit or scientific run.
+
+Artifacts in the nested `prior-evidence/timing-diagnostic/` directory include
+`timing-source-v3.json`, `timing-validation-v3.json`, `timing-operation-v3.json`,
+`current-original-binding-v3.json`, `canonical-v3.json`, durable
+`phase-events-v3.jsonl`, first/second preservation maps and current Git/HEAD
+reconciliation declarations. Occupied producers are terminal; use their saved
+evidence, never restart them against occupied output names. The log records
+whole identities and exact commands. The diagnostic checkbox waits for the
+complete closing preservation gate; original b2a/b2/d2b/d2/P6.7/b3/d3 stay open.
+
+Next: measure a fixed lexical matching candidate with complete declared input
+and ASCII/Unicode/hash-rich/boundary regressions before any optimization. Full
+semantic resource acceptance remains unfinished with350.7925872/360spent and
+9.2074128remaining; do not relabel this saved-input diagnosis as that gate.
+
+
+### Terminal diagnosis acceptance
+
+P6.7d2b2a1 is complete after the full119.1020072s closing gate, with every
+original/current/history source/test/input/proof/doc/physical/Git binding and
+one complete original END rebuild preserved;24guards0. Only this diagnosis
+is checked. Original b2a repeat/resource, prior-usage and fresh-role/P6.7
+acceptance remain unfinished. Next is unchecked P6.7d2b2a2, the fixed lexical
+parity/timing benchmark; no current semantic audit, scientific source or cap
+increase is authorized. The log and final live handoff retain exact evidence.
+
+
+## P6.7d2b2a2: fixed complete lexical comparison
+
+Exact parity passes on all13 declared cases and the entire123,220,118-byte b1 text, comparing every ordered line/token/character-column/normalized UTF8 line SHA. Both full passes retain1,574,091 bearing lines/1,638,595 references; whole ordered-record SHA0a611dd98f77bdc0d102d5d3b5d221ac816675c5b21b0f19bd7f9527048b36ba. Candidate total32.9219424s versus original31.1501527s (ratio1.0568790; about5.69% slower), and slower in both balanced orders. It fails the predeclared candidate<=85% rule. Retain the original reader unchanged; no alternate case/input/metric or candidate tuning. Negative performance is a valid result.
+
+| Fixed complete-input order | Original seconds | Candidate seconds |
+| --- | ---: | ---: |
+| original -> candidate | 15.6172864 | 16.6217737 |
+| candidate -> original | 15.5328663 | 16.3001687 |
+
+The fixed protocol predates measurements: all13 deterministic ASCII/Unicode/
+hash-rich/multiline/empty/boundary cases, both balanced complete-input orders,
+complete splitlines/reference/line-hash generation and whole ordered digest.
+No casefold substitution: long-s matches Python IGNORECASE, sharp-s does not
+turn into a seed spelling. Character columns differ from UTF8 byte offsets.
+No source execution, AST/JSON semantic corpus audit or scientific dispatch.
+All original AST/default/alias/dynamic-call/malformed/duplicate CSV and metadata
+declaration fixtures remain. Eleven meaningful regression cases are added.
+
+Supervised local commands (occupied outputs are terminal; do not rerun them):
+
+```powershell
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment-v4.py freeze-v4
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment-v4.py tests-before
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment-v4.py benchmark
+.\.venv\Scripts\python.exe artifacts/runs/p67-untouched-seed-usage/prior-evidence/lexical-benchmark/run-increment-v4.py static
+```
+
+Tests174/0errors/0failures/0skips pass; Ruff all src/tests/scripts, format six
+changed-feature files, mypy535 and diff pass. The production source is byte
+identical to the saved before copy; no implementation or dependency change.
+Original b2a complete semantic repeat remains failed: first170.7777781s,
+repeat180.0148091s,350.7925872/360spent/9.2074128remaining. This lexical gate
+passes66.5231259worker/66.6846840parent<180, not that resource acceptance.
+Source freeze includes failed13.3403354+28.0401303 and passing27.7984365=
+69.1789022<shared180. Static format+checks1.9591378<180; tests12.2734379<180.
+Current HEAD28e71ee is unchanged; all prior3608objects/34commits/aliases survive.
+Eight additional retained local objects/2,355,332bytes yield3616objects, with
+every complete byte and alias pinned. No assumption about their author/release.
+The full closing preservation gate is pending; a2 is still unchecked here.
+No fresh role/P6.7 completion authority or scientific600s/16000updates/512MiB
+cap change. Exact artifacts/copies/failures/whole identities are in the log.
+
+Exact next action after closing: P6.7d2b2: implement a conservative prior-release chronology and role-admission contract from the entire saved evidence. Preserve declarations versus execution, all aliases/default/symbolic/opaque/unparsed/unknown releases and derived RNG streams; keep admission false while original b2a repeat/resource acceptance is false. Add meaningful pure/boundary/no-science fixtures under a prospectively declared local metadata budget. Preserve the failed repeat and350.7925872/360spent/9.2074128remaining; resolve its original acceptance explicitly before releasing any fresh source/value. Then complete the unchanged fixed-role/config/count/caps/analysis/stopping/source/request contract and b3 full execution fixtures. No sweep or scientific run.
+
+
+### Terminal lexical validation acceptance
+
+P6.7d2b2a2 is complete after full113.4567783s closing preservation,
+all original/current/history bindings and one complete original END rebuild
+with24guards0. Exact parity with a negative5.69% performance result keeps
+the original matcher;174targeted tests/0skips and static535pass. Only this
+scoped validation is checked. Failed whole semantic repeat/resource and
+original chronology/role/full P6.7 gates remain open. No fresh seed/source
+or scientific cap change. See final log/live handoff for whole evidence.
+
+Exact next action: P6.7d2b2: implement a conservative prior-release chronology and role-admission contract from the entire saved evidence. Preserve declarations versus execution, all aliases/default/symbolic/opaque/unparsed/unknown releases and derived RNG streams; keep admission false while original b2a repeat/resource acceptance is false. Add meaningful pure/boundary/no-science fixtures under a prospectively declared local metadata budget. Preserve the failed repeat and350.7925872/360spent/9.2074128remaining; resolve its original acceptance explicitly before releasing any fresh source/value. Then complete the unchanged fixed-role/config/count/caps/analysis/stopping/source/request contract and b3 full execution fixtures. No sweep or scientific run.
+
+
+## Complete saved chronology component (P6.7d2b2b1)
+
+The complete saved projection and its independent repeat pass in 80.0653510s and 79.2781750s, each below 120s. All projection attempts, including the failed first attempt, consume 195.2825407/240s. The entire 3,119,886-byte outputs are identical: SHA256 775765742287cb234ee744764cb90ebfd323715301eeef4b5a775129a9a95959. Every original saved witness and alias remains bound. Each accepted projection observes all 24 science guards at zero. This component verifies no new historical execution or actual release event; it does not assert that past execution was absent.
+
+This separate consumer retains the original complete 581,898,985-byte evidence, its historical 1,949 physical files and 3,585 Git objects across 33 commits. Current checkout/source/proof preservation is separately pinned. The original complete current semantic repeat stays failed, with 350.7925872/360s spent and 9.2074128s remaining. A passing saved consumer does not repair that acceptance. See the new chronology guide and session log. Closing preservation is pending here.
+
+Exact next action after closing: P6.7d2b2: bind verified execution and actual role-release chronology from the complete original raw artifact bodies and readers, preserving every saved witness, alias and unknown. Complete the unchanged prospective ordered independent role/config/count/caps/analysis/stopping/source/request contract and all b3 execution fixtures before any d3 source release. Keep admission false while original b2a repeat/resource acceptance is false; explicitly resolve that acceptance without resetting 350.7925872/360 spent or 9.2074128 remaining. No seed selection, confirmation or sweep.
+
+
+## Source-bound original release readback (P6.7d2b2b2)
+
+Each original bundle retains all60 family/seed rows,560 cells,120 release views,240 source reads,1680 endpoint calls/67200 examples and2043 causal nodes. One unchanged scoring reader reconstructs both unchanged complete training references per stage. All source/request/audit/state/failure/resource links and full original parts are bound to the prior4471-content/13149-alias ledger; every old uncertainty is preserved. Request UTC is documentary; exact actual release UTC/cross-run order/independent replication count stay unknown. The two original request/audit/resource records remain distinct even though their full causal traces agree. All24 science guards are0 in each accepted stage. Fresh admission and original resource acceptance remain false.
+
+Canonical/repeated full-reader parents pass in62.0712639s/59.9263664s, each<120s; shared121.9976303/240s including failures.
+
+The complete581,898,985-byte saved input, full witnesses/aliases and all unrecorded releases remain independently bound. These actual original traces add scoped historical readback without replacing the old ledger or accepting its failed full semantic repeat. Original350.7925872/360spent/9.2074128remaining stays unchanged. See docs/p67-original-release-witnesses.md and the session log; closing is pending.
+
+
+### Terminal original-reader preservation
+
+P6.7d2b2b2 is complete after the full145.3345128s preservation gate,
+all1968 current physical files/current/historical Git evidence, original/new
+source/test/input/proof/docs, one original END rebuild and24guards0. This
+supersedes the preceding pending-closing statement. Both actual original full
+reader stages are accepted; the entire prior witness corpus/aliases/unknowns
+and original failed resource acceptance remain unchanged. Fresh admission stays
+false. See the final live receipt and docs/p67-original-release-witnesses.md.
