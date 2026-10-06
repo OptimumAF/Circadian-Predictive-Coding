@@ -1,5 +1,10 @@
 # Implemented learning mathematics, version 1
 
+Verified against HEAD `28e71ee` plus the retained checkout changes on
+2026-10-06. The [model card](model-card.md) and
+[backend capability matrix](backend-capability-matrix.md) describe the
+current interpretation and supported routes.
+
 This is an implementation specification for the current NumPy toy/continual
 models and Torch image heads. It describes the equations the code executes;
 it does not assert that every reported `energy` is the objective differentiated
@@ -34,8 +39,9 @@ The NumPy training entry contract now requires a finite real feature
 matrix of the model's input width, a same-row one-column target matrix
 with values in `[0,1]`, and a positive finite weight learning rate. Soft
 labels inside that interval remain valid. Validation occurs before model
-state changes; see ADR-0026 and P2.8a. Torch input validation is described
-below; post-update boundaries remain P2.8c.
+state changes; see ADR-0026 and completed P2.8a. Torch input validation and
+the completed finite-update boundaries are described below. Their local
+contract is separate from arbitrary-rate stability or scientific admission.
 
 The displayed NumPy BCE clamps probabilities to `[1e-8, 1-1e-8]`; the sigmoid
 also clips its input to `[-50, 50]`. The code's `q-Y` update is the usual
@@ -158,24 +164,87 @@ latent optimization variables.
 
 In the default single-chemical mode, activity is
 `A_j=mean_i(abs(h[i,j]))` and `C_j ← chemical_decay*C_j +
-chemical_buildup_rate*A_j`. Optional dual and saturating modes replace this
-accumulator before `G` is calculated. When reward modulation is enabled,
+chemical_buildup_rate*A_j`. The optional accumulator and sensitivity
+rules below are applied before `G` is calculated. When reward modulation is enabled,
 `d=mean(abs(o))`, `R=clip((d/max(baseline,1e-8))^exponent, R_min, R_max)`;
 the baseline is then updated by an exponential moving average (the first
 baseline is `d`). Importance is also an exponential moving average of
 `R*mean(abs(∇V[j,:]))`. These states influence later gating and sleep
 decisions but are not differentiated through the current weight step.
 
+#### Chemical and sensitivity state options
+
+“Chemical” names a stored activation proxy; “reward” names the supervised
+error/difficulty scaling above. These are numerical state, without a measured
+metabolite or external reinforcement-learning reward interpretation.
+
+For each unit, the accumulator uses `D=decay*C`, `I=buildup_rate*A`,
+`M=chemical_max_value`, and `g=chemical_saturation_gain`:
+
+```text
+accumulate(C; decay, buildup_rate, A) =
+  D + I                                             (linear mode)
+  min(D + max(M-D,0)*(1-exp(-g*I/max(M,1e-8))), M)    (saturating mode).
+```
+
+`use_saturating_chemical` selects the second expression. With
+`use_dual_chemical`, both stored components use that selected accumulator:
+
+```text
+C_fast ← accumulate(C_fast; chemical_decay, chemical_buildup_rate, A)
+C_slow ← accumulate(C_slow; slow_chemical_decay,
+                    chemical_buildup_rate*slow_buildup_scale, A)
+C ← m*C_fast + (1-m)*C_slow.
+```
+
+`m=clip(dual_fast_mix,0,1)`. With dual mode off, the single accumulator
+result is also copied into the internal fast/slow buffers.
+
+When adaptive sensitivity is disabled, every `s_j` equals the configured
+`plasticity_sensitivity`. Otherwise, define a per-vector normalization
+`n(v)=0` when `max(v)-min(v)≤1e-12`, and
+`n(v)=(v-min(v))/(max(v)-min(v))` otherwise. Then
+
+```text
+w = clip(plasticity_importance_mix,0,1)
+s_j = plasticity_sensitivity_min
+      + (plasticity_sensitivity_max-plasticity_sensitivity_min)
+        * [w*n(importance)_j + (1-w)*n(age)_j].
+```
+
+The current wake gradient's importance update precedes this gate; age
+advances only after the successful wake step. The reward baseline and these
+adaptive states are not differentiated. The Torch circadian head implements
+the same scalar rules using its own tensors and multiclass residuals.
+Torch adaptive normalization reads its scalar range on the host; reward
+computation can also add host reads. Their cost belongs to training time
+when enabled.
+
 The returned diagnostic is `BCE(q,Y) + Σ_i,j e[i,j]² / (2 B H)`
 (`numpy_circadian_bce_plus_half_mean_final_hidden_error_sq_v1`) on pre-update relaxed
 outputs. Ordinary wake steps then update traffic, age, counters, and replay
 memory. A separately scheduled `sleep_event` can change topology, rescale
-weights/chemistry, and replay stored labeled wake snapshots. Replay calls the
-same training kernel with its own rates and steps: it updates weights,
-chemistry, reward/importance, cooldown/prune state, and traffic, but does not
-increment wake epoch/age/history or store another snapshot. A sleep attempt
-can return early when its trigger or structural budget blocks it. These
-operations are outside the per-batch latent/weight equations above.
+weights/chemistry, and replay stored labeled wake snapshots.
+
+The default `historical` replay policy calls the same training kernel with
+its own rates and steps. It updates weights, chemistry, reward/importance,
+cooldown/prune state, and traffic, while leaving wake counters, age, history,
+and stored snapshots unchanged. Before the first wake update, a caller can
+configure `configure_replay_side_effect_policy("wake_only_adaptive_v1")`
+once. That opt-in replay still applies local weight updates and evaluates
+reward scale against the stored baseline, but preserves chemistry, importance,
+the baseline/last-reward state, cooldowns, pending prune decay, and traffic.
+It uses the gate from the state entering the replay row. Successful replay
+updates and exposure are counted; wake counters, age, history, and retained
+snapshots remain unchanged. Other enabled sleep components can still change
+state around replay, so this policy does not make an entire sleep event inert.
+
+`sleep_mode="legacy"` keeps structural-budget gating. In `components` mode,
+enabled reset, homeostasis, and NumPy replay can run without structural
+changes; split/prune switches apply independently. A trigger or warmup can
+still skip an event, and `disabled` refuses even forced sleep. These operations
+are outside the per-batch latent/weight equations above. See the
+[backend matrix](backend-capability-matrix.md) for Torch's zero-replay boundary.
 
 ## Torch multiclass image models
 
@@ -254,6 +323,11 @@ legacy `final_energy` is only its last training-batch diagnostic; its
 `final_cross_entropy` is held-out feedforward test CE. New reports and exports
 carry the relevant identifier without modifying the numeric series.
 
+In the following local-objective statements, `CE_i` means the **unclipped
+logit-based** binary or multiclass cross-entropy. This distinguishes the
+objective used by the derivative fixtures from the NumPy probability-clamped
+diagnostic and sigmoid clipping described above.
+
 For one hidden layer with circadian scaling neutralized, a useful local
 update objective is `J = mean_i(CE_i) + Σ_i,j e[i,j]²/(2B)`. Holding weights
 and prior fixed, its latent gradient is `(o Vᵀ + e)/B`; the code omits the
@@ -293,6 +367,14 @@ executed update is `h ← h - α B ∇_h J`. For binary sigmoid or multiclass
 softmax cross-entropy, a conservative per-row gradient Lipschitz bound is
 `L ≤ 1 + ||V||₂²`. Therefore `0 < α ≤ 1/L` is a sufficient small-step
 descent condition for this fixed-weight, fixed-prior local objective.
+The NumPy drive agrees with this unclipped objective for logits strictly
+inside (-50,50); no descent claim is made for its
+probability-clamped diagnostic. In the fixed binary fixture, `α=0.2`,
+`V=[0.2,-0.3]ᵀ`, and `c=0.07`. Since `|o|≤1`, `e_0=0`, and `0<α≤1`,
+the recurrence implies `|e_j|≤|V_j|`; `|p_j|≤1` then bounds every
+`|z|≤Σ_j(1+|V_j|)|V_j|+|c|=0.7`. Its sigmoid values also remain inside
+the BCE diagnostic clamp. This source-literal bound concerns that fixture,
+without extending the claim to arbitrary weights or rates.
 `tests/test_latent_relaxation.py` checks that its explicit `α=0.2` fixtures
 satisfy this bound, that every tested local-objective step decreases, that
 the gradient norm falls below `10⁻⁴` of its initial value after 60 steps,
@@ -313,14 +395,14 @@ The training kernels reject nonfinite input data and controls before the
 parameter update, and detect nonfinite prior linears, states, or logits
 during relaxation. NumPy checks each step; Torch performs a combined final
 finite check to avoid per-step GPU synchronization. ADR-0022 records the
-decision and its timing/atomicity limits. Broader numerical input and
-post-update boundaries remain P2.8. Under P2.8c1, NumPy backprop and
-ordinary PC also reject nonfinite existing parameters, forward
-intermediates, gradients, staged parameters, traffic, or pre-update
-diagnostics before committing a step (ADR-0028). The circadian and Torch
-post-update boundaries are guarded by staged circadian and Torch PC
-candidate checks under P2.8c2 (ADR-0029); finite extreme-logit and
-topology checks remain P2.8c3. A rejected NumPy circadian wake step
+decision and its timing/atomicity limits. P2.8's input, candidate, saturation,
+topology, configuration, and constructor checks are complete in the
+[development plan](../DEVELOPMENT_PLAN.md). Under completed P2.8c1, NumPy
+backprop and ordinary PC reject nonfinite existing parameters, forward
+intermediates, gradients, staged parameters, traffic, or pre-update diagnostics
+before committing a step (ADR-0028). Completed P2.8c2 guards circadian and
+Torch PC candidate updates (ADR-0029); completed P2.8c3 covers the specified
+finite extreme-logit and post-structural topology fixtures (ADR-0030). A rejected NumPy circadian wake step
 restores provisional chemistry/reward state and any active gradual-prune
 decay. A rejected Torch head update leaves parameters and adaptive state
 unchanged. The Torch candidate reductions share the diagnostic's existing
@@ -362,12 +444,28 @@ zero-momentum backprop MLP and zero-noise split/prune fixtures compare the
 corresponding forward/update and structural boundaries. ADR-0025
 limits the result; it is not full production-backend parity.
 
-## Pending mathematical gates
+## Completed numerical gates and remaining mathematical work
+
+**P2.8 is complete in its declared local scope.** The current training
+guards and regression fixtures retain the contracts recorded in ADR-0026
+through ADR-0032 and the [development log](development-log.md):
+
+| Completed tasks | Contract | Regression fixtures |
+|---|---|---|
+| P2.8a–b | Nonempty compatible batches, finite features/rates, valid binary/soft or multiclass targets before mutation | [NumPy inputs](../tests/test_numpy_training_inputs.py), [Torch inputs](../tests/test_torch_head_training_inputs.py) |
+| P2.8c1–c2 | Finite stored/intermediate/gradient/candidate/diagnostic checks; unchanged state after the specified numeric rejections, including active NumPy prune rollback | [Ordinary NumPy](../tests/test_post_update_finite_numpy.py), [Circadian NumPy](../tests/test_post_update_finite_circadian.py), [Torch](../tests/test_post_update_finite_torch.py) |
+| P2.8c3 | Executed extreme-logit diagnostics and compatible post-split/prune widths, with intended early exceptions | [Saturation and topology](../tests/test_saturation_topology_boundaries.py) |
+| P2.8d | Nonfinite numeric circadian configuration rejection, including disabled options | [Finite configuration](../tests/test_circadian_finite_config.py) |
+| P2.8e | Positive integral constructor dimensions before allocation, with booleans/fractions rejected | [Constructor dimensions](../tests/test_constructor_dimensions.py) |
+
+These guards reject specified local numerical failures; they do not assert
+arbitrary-rate convergence or complete broader evaluation, hardware,
+checkpoint, or prospective seed/source/runtime admission gates.
+
+The remaining mathematical extension is:
 
 - **P2.6a:** Specify and verify a common deeper formulation before claiming
   matched deeper NumPy attribution. P2.6 currently limits the comparison
   scope while preserving existing numerical algorithms.
-- **P2.8:** Validate the remaining shapes, target ranges, model parameters,
-  and post-update numerical boundaries across all training paths.
 
 No numerical or benchmark result changes are made by this specification.
