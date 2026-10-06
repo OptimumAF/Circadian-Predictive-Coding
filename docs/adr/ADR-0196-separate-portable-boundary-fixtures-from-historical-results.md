@@ -73,3 +73,26 @@ reference readers, complete audit checks, corruption criteria, work/scoring coun
 memory limits and duplicate-output refusal stay unchanged. These tests exercise
 portable engineering boundaries and supply no frozen scientific admission. No
 fixture construction writes an ignored historical reference directory.
+
+
+## Preserve authored source bytes across clean Git checkouts
+
+Actual PR CI exposed a different portability boundary:14 original source paths
+have recorded CRLF/mixed-EOL working bytes while their Git blobs were normalized.
+All222 inspected production pins match the original raw snapshot; blanket LF or
+CRLF conversion would invalidate other pins, including three mixed-EOL models.
+
+Restore those14 exact snapshot bodies and declare `*.py -text` in .gitattributes.
+Why this: whole-byte protocols need Git to preserve authored Python bytes rather
+than silently transform them. Complete AST and normalized-byte equality establish
+that this restoration changes no model/update rule or scientific criterion.
+Production pins/refusals and historical evidence stay exact and unchanged.
+The new commit records a new Git identity; it does not attest old source/native
+correspondence or reopen scientific admission. Future deliberate edits, including
+format/line-ending changes, need new protocol/source identities where required.
+
+Alternatives: global EOL conversion fails mixed bodies; changing recorded hashes
+would destroy original evidence; test-only source bypasses would hide the actual
+clean-checkout defect. Raw byte preservation is the direct transport repair.
+Hosted native40s/90s timeouts remain a separate unresolved result; no deadline or
+guard change is included. Broader publication approval/validation remains pending.

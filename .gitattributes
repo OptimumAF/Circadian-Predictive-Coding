@@ -1,0 +1,2 @@
+# Whole-byte Python source protocols require authored bytes, including mixed EOL.
+*.py -text whitespace=cr-at-eol
