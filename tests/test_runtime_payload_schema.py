@@ -1,6 +1,7 @@
 """Full actual process records and failure lifecycle controls in bounded children."""
 
 import json
+import ctypes
 from pathlib import Path
 import subprocess
 import sys
@@ -11,6 +12,10 @@ from src.core.runtime_record_schema import RuntimeSchemaBindings
 from src.core.runtime_value_schema import validate_runtime_bound
 
 
+@pytest.mark.skipif(
+    sys.platform != "win32" or ctypes.sizeof(ctypes.c_void_p) != 8,
+    reason="complete native runtime observations require 64-bit Windows",
+)
 @pytest.mark.parametrize("group", ["payload", "continuity", "lifecycle"])
 def test_should_validate_whole_actual_runtime_records_without_science(
     group, tmp_path, record_property

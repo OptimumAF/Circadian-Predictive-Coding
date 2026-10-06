@@ -1,6 +1,7 @@
 """Retention behavior and full real-process proofs; no scientific admission."""
 
 import gc
+import ctypes
 import json
 import marshal
 from pathlib import Path
@@ -117,6 +118,10 @@ def test_should_collect_native_code_without_running_user_descriptors_or_metaclas
     assert subject is not None and calls == []
 
 
+@pytest.mark.skipif(
+    sys.platform != "win32" or ctypes.sizeof(ctypes.c_void_p) != 8,
+    reason="complete native runtime observations require 64-bit Windows",
+)
 def test_should_preserve_complete_actual_runtime_records_across_retained_code_use(
     tmp_path, record_property
 ):

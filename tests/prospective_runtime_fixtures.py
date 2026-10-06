@@ -243,6 +243,8 @@ def run_group(group: str) -> None:
                     dispatch.operation = forbidden
                     module_path.write_bytes(saved[2])
         elif group == "native":
+            if sys.platform != "win32":
+                raise ValueError("native runtime fixture requires Windows")
             import ctypes
             from ctypes import wintypes
 

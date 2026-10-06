@@ -7,6 +7,9 @@ from pathlib import Path
 
 import pytest
 
+pytest.importorskip("torch")
+pytest.importorskip("torchvision")
+
 from scripts import prepare_cifar_representative_study as study
 
 

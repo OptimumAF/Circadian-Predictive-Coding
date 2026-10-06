@@ -29,18 +29,22 @@ def test_should_change_only_serialization_when_unique_constant_gains_reference(k
     contents = describe_native_code(code)
     before = marshal.dumps(code)
     identity = _code_identity(code)
-    assert sys.getrefcount(code.co_consts[1]) == 2
+    # Why this: assertion rewriting can retain the constant while evaluating it.
+    reference_count = sys.getrefcount(code.co_consts[1])
+    assert reference_count == 2
 
     held = code.co_consts[1]
     during = marshal.dumps(code)
-    assert sys.getrefcount(code.co_consts[1]) == 3
+    reference_count = sys.getrefcount(code.co_consts[1])
+    assert reference_count == 3
     assert before != during and identity != _code_identity(code)
     assert describe_native_code(code) == contents
     assert describe_native_code(marshal.loads(before)) == contents
     assert describe_native_code(marshal.loads(during)) == contents
     del held
 
-    assert sys.getrefcount(code.co_consts[1]) == 2
+    reference_count = sys.getrefcount(code.co_consts[1])
+    assert reference_count == 2
     assert marshal.dumps(code) == before and _code_identity(code) == identity
 
 

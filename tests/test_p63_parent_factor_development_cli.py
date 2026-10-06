@@ -17,6 +17,7 @@ import pytest
 from scripts import run_p63_parent_factor_development as adapter
 from scripts import run_p63_parent_factor_preflight as c9b_adapter
 from scripts import run_p63_sleep_factor_preflight as artifacts
+from src.app import continual_parent_factor_development as development
 
 
 @pytest.fixture(scope="module")
@@ -35,9 +36,11 @@ def _fixture_hashes(directory: Path) -> dict[str, str]:
 
 
 def _select_fixture_reference(monkeypatch: pytest.MonkeyPatch, directory: Path) -> None:
-    # Only fixture request time/audit observations differ from canonical byte pins.
+    # Why this: local numerical result identity also differs across environments.
     monkeypatch.setattr(adapter, "REFERENCE_DIR", directory)
     monkeypatch.setattr(adapter, "REFERENCE_FILE_SHA256", _fixture_hashes(directory))
+    monkeypatch.setattr(adapter, "REFERENCE_SHA256", _fixture_hashes(directory)["result"])
+    monkeypatch.setattr(development, "REFERENCE_SHA256", _fixture_hashes(directory)["result"])
 
 
 @pytest.fixture(scope="module")
@@ -50,12 +53,15 @@ from pathlib import Path
 import sys
 from scripts import run_p63_parent_factor_development as adapter
 from scripts import run_p63_parent_factor_preflight as c9b
+from src.app import continual_parent_factor_development as development
 adapter.REFERENCE_DIR = Path(sys.argv[1])
 paths = c9b.artifact_paths(adapter.REFERENCE_DIR)
 adapter.REFERENCE_FILE_SHA256 = {
     name: sha256(paths[name].read_bytes()).hexdigest()
     for name in ('request', 'result', 'audit')
 }
+adapter.REFERENCE_SHA256 = adapter.REFERENCE_FILE_SHA256['result']
+development.REFERENCE_SHA256 = adapter.REFERENCE_SHA256
 sys.argv = [sys.argv[0], '--worker']
 adapter.main()
 """

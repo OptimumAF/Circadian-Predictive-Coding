@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 from types import SimpleNamespace
 
 import pytest
@@ -18,15 +17,25 @@ from scripts import run_p63_combined_factor_preflight as c7_adapter
 from scripts import run_p63_sleep_factor_preflight as artifacts
 
 
-def _ensure_reference() -> None:
-    if not c7_adapter.artifact_paths(adapter.REFERENCE_DIR)["result"].is_file():
-        c7_adapter.run_bounded_preflight(adapter.REFERENCE_DIR)
+from factor_cli_value_fixtures import factor_cli_command, select_factor_reference
+
+
+@pytest.fixture(scope="module")
+def reference_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    directory = tmp_path_factory.mktemp("combined-train-reference")
+    c7_adapter.run_bounded_preflight(directory)
+    return directory
+
+
+@pytest.fixture(autouse=True)
+def local_reference(monkeypatch: pytest.MonkeyPatch, reference_dir: Path) -> None:
+    # Why this: boundary cases need exact local pins, never ignored historic paths.
+    select_factor_reference(monkeypatch, adapter, reference_dir)
 
 
 def test_should_reject_changed_reference_bytes_or_audit(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _ensure_reference()
     source_paths = c7_adapter.artifact_paths(adapter.REFERENCE_DIR)
     target_paths = c7_adapter.artifact_paths(tmp_path)
     for name in ("request", "result", "audit"):
@@ -47,14 +56,9 @@ def test_should_reject_changed_reference_bytes_or_audit(
 def test_should_publish_all_score_cells_and_reject_metric_contrast_or_fact_tampering(
     tmp_path: Path,
 ) -> None:
-    _ensure_reference()
-    command = [
-        sys.executable,
-        "-m",
-        "scripts.run_p63_combined_factor_development",
-        "--output-dir",
-        str(tmp_path),
-    ]
+    command = factor_cli_command(
+        adapter.__name__, adapter.REFERENCE_DIR, "--output-dir", str(tmp_path)
+    )
     process = subprocess.run(command, capture_output=True, text=True, timeout=30, check=False)
     assert process.returncode == 0, process.stderr
     paths = adapter.artifact_paths(tmp_path)
@@ -116,7 +120,6 @@ def test_should_publish_all_score_cells_and_reject_metric_contrast_or_fact_tampe
 def test_should_reject_changed_source_before_request(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _ensure_reference()
     monkeypatch.setitem(
         adapter.ADDITIONAL_SOURCE_SHA256,
         "src/app/continual_combined_factor_development.py",
@@ -131,7 +134,6 @@ def test_should_reject_changed_source_before_request(
 def test_should_save_failure_without_result_or_audit(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure_kind: str
 ) -> None:
-    _ensure_reference()
 
     def failed(*args: object, **kwargs: object) -> SimpleNamespace:
         if failure_kind == "timeout":

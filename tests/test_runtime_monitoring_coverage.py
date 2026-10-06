@@ -1,11 +1,18 @@
 """Actual installed guard coverage must precede continuous admission claims."""
 
 import json
+import ctypes
 from pathlib import Path
 import subprocess
 import sys
 
+import pytest
 
+
+@pytest.mark.skipif(
+    sys.platform != "win32" or ctypes.sizeof(ctypes.c_void_p) != 8,
+    reason="complete native runtime observations require 64-bit Windows",
+)
 def test_should_measure_installed_guard_coverage_with_complete_actual_records(
     tmp_path, record_property
 ):

@@ -16,6 +16,7 @@ import json
 import os
 from pathlib import Path
 import re
+import sys
 import tempfile
 from typing import Any, Iterator
 from uuid import uuid4
@@ -114,7 +115,9 @@ class V14ResumeFiles:
                 stream.write(b"0")
                 stream.flush()
             stream.seek(0)
-            if os.name == "nt":
+            # Why this: use a type-checker-recognized platform boundary while
+            # retaining the same nonblocking native lock and finally release.
+            if sys.platform == "win32":
                 import msvcrt
 
                 try:
