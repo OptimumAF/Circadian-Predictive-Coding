@@ -81,5 +81,130 @@ jobs:
         run: |
           python -m mypy --platform win32 src tests scripts
           python -m mypy --platform linux src tests scripts
+      - name: Record Windows native CI environment
+        shell: pwsh
+        run: |
+          $folder = Join-Path $env:RUNNER_TEMP 'circadian-windows-native'
+          New-Item -ItemType Directory -Path $folder -Force | Out-Null
+          $facts = @{ role = 'Pre-test runner snapshot; does not measure contention during native captures' }
+          try {
+            $machine = Get-CimInstance Win32_ComputerSystem -ErrorAction Stop
+            $system = Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
+            $facts.logical_processors = $machine.NumberOfLogicalProcessors
+            $facts.physical_memory_bytes = $machine.TotalPhysicalMemory
+            $facts.free_memory_kib = $system.FreePhysicalMemory
+            $facts.os_caption = $system.Caption
+            $facts.os_version = $system.Version
+            $facts.os_build = $system.BuildNumber
+          } catch {
+            $facts.snapshot_error_type = $_.Exception.GetType().FullName
+          }
+          $facts | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $folder 'runner-before.json') -Encoding utf8
+          @'
+          import hashlib
+          import importlib.metadata as metadata
+          import json
+          import os
+          from pathlib import Path
+          import platform
+          import sys
+          import sysconfig
+          
+          versions = {}
+          for name in ("numpy", "Pillow", "pytest", "pluggy", "ruff", "mypy", "librt"):
+              try:
+                  versions[name] = metadata.version(name)
+              except metadata.PackageNotFoundError:
+                  versions[name] = None
+          plugins = sorted(entry.name for entry in metadata.entry_points(group="pytest11"))
+          source_paths = [
+              "src/infra/runtime_python_objects.py",
+              "src/infra/runtime_python_retention.py",
+              "tests/test_prospective_runtime_closure.py",
+              "tests/test_runtime_execution_guard.py",
+              "tests/prospective_runtime_fixtures.py",
+              "tests/runtime_execution_guard_fixtures.py",
+              "pyproject.toml", "requirements.txt",
+          ]
+          row = {
+              "role": "software CI environment diagnostic; no source or scientific admission",
+              "python": sys.version, "executable_basename": Path(sys.executable).name,
+              "implementation": platform.python_implementation(),
+              "architecture": platform.architecture(),
+              "gil_enabled": getattr(sys, "_is_gil_enabled", lambda: None)(),
+              "free_threaded_build": sysconfig.get_config_var("Py_GIL_DISABLED"),
+              "logical_cpu_count": os.cpu_count(),
+              "process_cpu_count": getattr(os, "process_cpu_count", os.cpu_count)(),
+              "versions": versions, "pytest_entrypoint_names": plugins,
+              "allowlisted_environment_present": {
+                  name: name in os.environ
+                  for name in ("PYTEST_ADDOPTS", "PYTEST_DISABLE_PLUGIN_AUTOLOAD", "PYTHONHASHSEED",
+                               "OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS")
+              },
+              "selected_physical_source_sha256": {
+                  name: hashlib.sha256(Path(name).read_bytes()).hexdigest()
+                  for name in source_paths
+              },
+          }
+          folder = Path(os.environ["RUNNER_TEMP"]) / "circadian-windows-native"
+          folder.mkdir(exist_ok=True)
+          (folder / "python-environment.json").write_text(json.dumps(row, indent=2), encoding="utf-8")
+          print(json.dumps(row, indent=2))
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Test native ownership and runtime observations
-        run: python -m pytest -q -ra tests/test_platform_boundaries.py tests/test_prospective_generation_ownership.py tests/test_prospective_runtime_closure.py tests/test_runtime_payload_schema.py tests/test_runtime_python_retention.py tests/test_runtime_admission_limits.py tests/test_runtime_monitoring_coverage.py tests/test_runtime_execution_guard.py
+        run: python -m pytest -q -ra tests/test_platform_boundaries.py tests/test_prospective_generation_ownership.py tests/test_prospective_runtime_closure.py tests/test_runtime_payload_schema.py tests/test_runtime_python_retention.py tests/test_runtime_admission_limits.py tests/test_runtime_monitoring_coverage.py tests/test_runtime_execution_guard.py --durations=0 --junitxml="${{ runner.temp }}/circadian-windows-native/tests.raw.xml"
+      - name: Record Windows native CI post-test snapshot
+        if: always()
+        shell: pwsh
+        run: |
+          $folder = Join-Path $env:RUNNER_TEMP 'circadian-windows-native'
+          New-Item -ItemType Directory -Path $folder -Force | Out-Null
+          $facts = @{ role = 'Post-test runner snapshot; cannot reconstruct child CPU or peak memory' }
+          try {
+            $system = Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
+            $facts.free_memory_kib = $system.FreePhysicalMemory
+          } catch {
+            $facts.snapshot_error_type = $_.Exception.GetType().FullName
+          }
+          $facts | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $folder 'runner-after.json') -Encoding utf8
+          @'
+          import json
+          import os
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          
+          folder = Path(os.environ["RUNNER_TEMP"]) / "circadian-windows-native"
+          raw = folder / "tests.raw.xml"
+          summary = {"role": "software test counts and durations; no source/native/scientific admission"}
+          if raw.is_file():
+              suites = list(ET.parse(raw).iter("testsuite"))
+              summary["suites"] = [
+                  {
+                      "counts_and_time": {key: suite.attrib.get(key) for key in ("tests", "errors", "failures", "skipped", "time")},
+                      "test_cases": [
+                          {"name": case.attrib.get("name"), "classname": case.attrib.get("classname"),
+                           "seconds": case.attrib.get("time"),
+                           "outcome": "failed" if case.find("failure") is not None else "error" if case.find("error") is not None else "skipped" if case.find("skipped") is not None else "passed"}
+                          for case in suite.findall("testcase")
+                      ],
+                  }
+                  for suite in suites
+              ]
+          else:
+              summary["junit_available"] = False
+          (folder / "tests-summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Retain Windows native CI diagnostic receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-native-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/circadian-windows-native/python-environment.json
+            ${{ runner.temp }}/circadian-windows-native/runner-before.json
+            ${{ runner.temp }}/circadian-windows-native/runner-after.json
+            ${{ runner.temp }}/circadian-windows-native/tests-summary.json
+          if-no-files-found: warn
+          retention-days: 7
