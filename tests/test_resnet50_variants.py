@@ -4,7 +4,130 @@ import pytest
 
 pytest.importorskip("torch")
 
-from src.core.resnet50_variants import CircadianHeadConfig, CircadianPredictiveCodingHead
+from src.app.matched_head_benchmark import _hash_trained_head
+from src.core.resnet50_variants import (
+    BackpropMLPHead,
+    BackpropMLPResNet50Classifier,
+    CircadianHeadConfig,
+    CircadianPredictiveCodingHead,
+    PredictiveCodingHead,
+)
+
+
+def test_split_noise_is_model_owned_under_reversed_cpu_execution() -> None:
+    torch = pytest.importorskip("torch")
+    config = CircadianHeadConfig(
+        split_threshold=0.8,
+        max_split_per_sleep=1,
+        max_prune_per_sleep=0,
+        split_noise_scale=0.05,
+    )
+
+    def run_order(order: tuple[str, str]) -> dict[str, tuple[tuple[int, ...], str]]:
+        observations: dict[str, tuple[tuple[int, ...], str]] = {}
+        for name in order:
+            head = CircadianPredictiveCodingHead(
+                feature_dim=6,
+                hidden_dim=4,
+                num_classes=2,
+                device=torch.device("cpu"),
+                seed={"first": 41, "second": 43}[name],
+                config=config,
+                min_hidden_dim=4,
+                max_hidden_dim=6,
+            )
+            head._chemical = torch.tensor([0.1, 0.95, 0.2, 0.3], dtype=torch.float32)
+            decision = head.sleep_event(force_sleep=True)
+            observations[name] = (decision.split_indices, _hash_trained_head(head))
+            _ = torch.randn(257)
+        return observations
+
+    forward = run_order(("first", "second"))
+    _ = torch.randn(509)
+    reverse = run_order(("second", "first"))
+
+    assert forward == reverse
+    assert all(indices == (1,) for indices, _ in forward.values())
+    assert forward["first"][1] != forward["second"][1]
+
+
+def test_should_match_predictive_coding_head_architecture_and_initial_tensors() -> None:
+    torch = pytest.importorskip("torch")
+    device = torch.device("cpu")
+    pc_head = PredictiveCodingHead(5, 4, 3, device, seed=53)
+    backprop_head = BackpropMLPHead(5, 4, 3, device, seed=53)
+    features = torch.tensor([[0.3, -0.2, 0.7, 0.0, -0.4]], dtype=torch.float32)
+
+    for name, expected_shape in (
+        ("weight_feature_hidden", (5, 4)),
+        ("bias_hidden", (1, 4)),
+        ("weight_hidden_output", (4, 3)),
+        ("bias_output", (1, 3)),
+    ):
+        pc_tensor = getattr(pc_head, name)
+        backprop_parameter = getattr(backprop_head, name)
+        assert tuple(backprop_parameter.shape) == expected_shape
+        assert backprop_parameter.dtype == pc_tensor.dtype == torch.float32
+        assert backprop_parameter.requires_grad
+        assert torch.equal(backprop_parameter.detach(), pc_tensor)
+        assert backprop_parameter.data_ptr() != pc_tensor.data_ptr()
+
+    assert backprop_head.hidden_dim == pc_head.hidden_dim
+    assert backprop_head.parameter_count() == pc_head.parameter_count()
+    assert torch.equal(backprop_head.forward_logits(features), pc_head.predict_logits(features))
+
+
+def test_should_update_matched_backprop_head_in_one_cpu_step() -> None:
+    torch = pytest.importorskip("torch")
+    head = BackpropMLPHead(5, 4, 3, torch.device("cpu"), seed=59)
+    features = torch.tensor(
+        [[0.3, -0.2, 0.7, 0.0, -0.4], [-0.1, 0.5, 0.2, -0.6, 0.8]],
+        dtype=torch.float32,
+    )
+    targets = torch.tensor([0, 2], dtype=torch.long)
+    optimizer = torch.optim.SGD(head.trainable_parameters(), lr=0.1)
+    initial_tensors = [parameter.detach().clone() for parameter in head.trainable_parameters()]
+    initial_loss = torch.nn.functional.cross_entropy(head.forward_logits(features), targets)
+
+    optimizer.zero_grad(set_to_none=True)
+    initial_loss.backward()
+    optimizer.step()
+
+    updated_loss = torch.nn.functional.cross_entropy(head.forward_logits(features), targets)
+    assert float(updated_loss.item()) < float(initial_loss.item())
+    assert all(
+        not torch.equal(parameter.detach(), initial)
+        for parameter, initial in zip(head.trainable_parameters(), initial_tensors)
+    )
+
+
+def test_should_wrap_matched_head_with_frozen_feature_extractor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    torch = pytest.importorskip("torch")
+    from src.core import resnet50_variants
+
+    def build_backbone(
+        device: object, freeze_backbone: bool, backbone_weights: str
+    ) -> tuple[object, int]:
+        assert freeze_backbone is True
+        assert backbone_weights == "none"
+        return torch.nn.Identity().to(device), 5
+
+    monkeypatch.setattr(resnet50_variants, "_build_resnet50_backbone", build_backbone)
+    model = BackpropMLPResNet50Classifier(
+        num_classes=3,
+        device=torch.device("cpu"),
+        head_hidden_dim=4,
+        seed=61,
+        freeze_backbone=True,
+    )
+    features = torch.ones((2, 5), dtype=torch.float32)
+
+    assert torch.equal(model.forward_logits(features), model.head.forward_logits(features))
+    assert tuple(model.forward_logits(features).shape) == (2, 3)
+    assert model.trainable_parameter_count() == model.head.parameter_count() == 39
+    assert len(model.trainable_parameters()) == 4
 
 
 def test_should_preserve_head_logits_after_function_preserving_split() -> None:

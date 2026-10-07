@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+import argparse
+from dataclasses import asdict, replace
 import json
 from pathlib import Path
 import sys
@@ -16,11 +17,14 @@ if str(REPO_ROOT) not in sys.path:
 
 from src.app.resnet50_benchmark import (  # noqa: E402
     ResNet50BenchmarkConfig,
-    _benchmark_backprop,
-    _benchmark_circadian,
-    _benchmark_predictive,
+    _training_loaders,
+    benchmark_validation_candidate,
     _resolve_device,
     _set_seed,
+)
+from src.app.sweep_work_estimate import (  # noqa: E402
+    estimate_vision_candidate_work,
+    require_planned_training_limit,
 )
 from src.infra.vision_datasets import (  # noqa: E402
     SyntheticVisionDatasetConfig,
@@ -29,12 +33,22 @@ from src.infra.vision_datasets import (  # noqa: E402
 from src.shared.torch_runtime import require_torch  # noqa: E402
 
 MULTI_SEEDS: tuple[int, ...] = (7, 13, 29)
+OUTPUT_PATH = Path("benchmark_pareto_hard_guard_selection_v2_results.json")
+DEFAULT_MAX_PLANNED_TRAINING_UPDATES = 1_000
 
 
-def main() -> None:
-    torch = require_torch()
+def main(
+    *,
+    estimate_only: bool = False,
+    max_planned_training_updates: int = DEFAULT_MAX_PLANNED_TRAINING_UPDATES,
+) -> None:
+    if type(estimate_only) is not bool:
+        raise ValueError("estimate_only must be boolean")
+    if not estimate_only and OUTPUT_PATH.exists():
+        raise FileExistsError(f"Sweep output already exists: {OUTPUT_PATH}")
     base = ResNet50BenchmarkConfig(
         train_samples=2500,
+        validation_samples=700,
         test_samples=700,
         num_classes=10,
         image_size=96,
@@ -91,19 +105,55 @@ def main() -> None:
         circadian_max_split_per_sleep=1,
         circadian_max_prune_per_sleep=1,
     )
+    seeds = MULTI_SEEDS
+    candidate_groups = {
+        "backprop": build_backprop_candidates(),
+        "predictive": build_predictive_candidates(),
+        "circadian": build_circadian_candidates(),
+    }
+    for family, candidates in candidate_groups.items():
+        if not candidates or any(
+            type(field) is not str or not field.startswith(f"{family}_")
+            for override in candidates
+            for field in override
+        ):
+            raise ValueError(f"Pareto {family} candidates may change {family} fields only")
+    estimate = estimate_vision_candidate_work(
+        tuple(
+            replace(base, **override)
+            for candidates in candidate_groups.values()
+            for override in candidates
+        ),
+        seed_count=len(seeds),
+    )
+    estimate_record = {
+        "candidate_counts": {family: len(rows) for family, rows in candidate_groups.items()},
+        **asdict(estimate),
+    }
+    print(json.dumps({"sweep": "pareto_hard", **estimate_record}, sort_keys=True))
+    if estimate_only:
+        return
+    require_planned_training_limit(estimate, max_planned_training_updates)
+    torch = require_torch()
     _set_seed(torch, base.seed)
     device = _resolve_device(torch, base.device)
-    seeds = MULTI_SEEDS
 
-    backprop_trials = run_backprop_sweep(base, torch, device, seeds)
-    predictive_trials = run_predictive_sweep(base, torch, device, seeds)
-    circadian_trials = run_circadian_sweep(base, torch, device, seeds)
+    backprop_trials = run_backprop_sweep(
+        base, torch, device, seeds, candidate_params=candidate_groups["backprop"]
+    )
+    predictive_trials = run_predictive_sweep(
+        base, torch, device, seeds, candidate_params=candidate_groups["predictive"]
+    )
+    circadian_trials = run_circadian_sweep(
+        base, torch, device, seeds, candidate_params=candidate_groups["circadian"]
+    )
 
-    output = {
+    output: dict[str, Any] = {
         "dataset": {
             "difficulty": base.dataset_difficulty,
             "noise_std": base.dataset_noise_std,
             "train_samples": base.train_samples,
+            "validation_samples": base.validation_samples,
             "test_samples": base.test_samples,
             "classes": base.num_classes,
             "image_size": base.image_size,
@@ -111,13 +161,20 @@ def main() -> None:
             "epochs": base.epochs,
             "seeds": list(seeds),
         },
+        "selection_metric": "validation_accuracy",
+        "protocol_id": base.protocol_id,
+        "final_test_usage": "none",
+        "final_test_confirmation": "pending",
+        "inference_split": "validation",
+        "prelaunch_estimate": estimate_record,
+        "max_planned_training_updates": max_planned_training_updates,
         "backprop": summarize_model_trials(backprop_trials),
         "predictive": summarize_model_trials(predictive_trials),
         "circadian": summarize_model_trials(circadian_trials),
     }
     all_trial_reports = collect_all_trial_reports(output)
-    output["global_best_accuracy"] = best_from_all_trials(
-        all_trial_reports, key="test_accuracy"
+    output["global_best_validation_accuracy"] = best_from_all_trials(
+        all_trial_reports, key="validation_accuracy"
     )
     output["global_best_train_speed"] = best_from_all_trials(
         all_trial_reports, key="train_samples_per_second"
@@ -125,26 +182,19 @@ def main() -> None:
     output["global_best_inference_speed"] = best_from_all_trials(
         all_trial_reports, key="inference_samples_per_second"
     )
-    output["global_best_efficiency"] = best_from_all_trials(
-        all_trial_reports, key="balanced_score"
-    )
+    output["global_best_efficiency"] = best_from_all_trials(all_trial_reports, key="balanced_score")
 
-    output_path = Path("benchmark_pareto_hard_results.json")
-    output_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
-    print(f"Wrote {output_path}")
-    print("Best by accuracy:", output["global_best_accuracy"]["model_name"])
+    with OUTPUT_PATH.open("x", encoding="utf-8") as output_file:
+        output_file.write(json.dumps(output, indent=2))
+    print(f"Wrote {OUTPUT_PATH}")
+    print("Best by validation accuracy:", output["global_best_validation_accuracy"]["model_name"])
     print("Best by train speed:", output["global_best_train_speed"]["model_name"])
     print("Best by inference speed:", output["global_best_inference_speed"]["model_name"])
     print("Best by balanced score:", output["global_best_efficiency"]["model_name"])
 
 
-def run_backprop_sweep(
-    base: ResNet50BenchmarkConfig,
-    torch_module: Any,
-    device: Any,
-    seeds: tuple[int, ...],
-) -> list[dict[str, Any]]:
-    candidates: list[dict[str, Any]] = []
+def build_backprop_candidates() -> list[dict[str, Any]]:
+    """Return the original ordered backprop search cells without training."""
     candidate_params = [
         (0.003, 0.9),
         (0.005, 0.9),
@@ -157,33 +207,45 @@ def run_backprop_sweep(
         (0.02, 0.85),
         (0.02, 0.95),
     ]
-    for index, (lr, momentum) in enumerate(candidate_params, start=1):
-        override: dict[str, Any] = {"backprop_learning_rate": lr, "backprop_momentum": momentum}
+    return [
+        {"backprop_learning_rate": lr, "backprop_momentum": momentum}
+        for lr, momentum in candidate_params
+    ]
+
+
+def run_backprop_sweep(
+    base: ResNet50BenchmarkConfig,
+    torch_module: Any,
+    device: Any,
+    seeds: tuple[int, ...],
+    *,
+    candidate_params: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    if candidate_params is None:
+        candidate_params = build_backprop_candidates()
+    for index, override in enumerate(candidate_params, start=1):
         trial = _run_multiseed_trial(
             base=base,
             override=override,
             seeds=seeds,
             torch_module=torch_module,
             device=device,
-            benchmark_fn=_benchmark_backprop,
+            variant="backprop",
         )
         candidates.append({"trial": index, "params": override, **trial})
         report = trial["report"]
         print(
             f"backprop {index}/{len(candidate_params)} "
-            f"acc={report['test_accuracy']:.4f}+/-{report['test_accuracy_std']:.4f} "
+            f"validation_acc={report['validation_accuracy']:.4f}"
+            f"+/-{report['validation_accuracy_std']:.4f} "
             f"train_sps={report['train_samples_per_second']:.1f}+/-{report['train_samples_per_second_std']:.1f}"
         )
     return candidates
 
 
-def run_predictive_sweep(
-    base: ResNet50BenchmarkConfig,
-    torch_module: Any,
-    device: Any,
-    seeds: tuple[int, ...],
-) -> list[dict[str, Any]]:
-    candidates: list[dict[str, Any]] = []
+def build_predictive_candidates() -> list[dict[str, Any]]:
+    """Return the original ordered predictive search cells without training."""
     candidate_params = [
         (256, 0.008, 10, 0.09),
         (256, 0.01, 10, 0.10),
@@ -198,38 +260,50 @@ def run_predictive_sweep(
         (512, 0.015, 12, 0.12),
         (512, 0.02, 14, 0.12),
     ]
-    for index, (hidden, lr, steps, inf_lr) in enumerate(candidate_params, start=1):
-        override: dict[str, Any] = {
+    return [
+        {
             "predictive_head_hidden_dim": hidden,
             "predictive_learning_rate": lr,
             "predictive_inference_steps": steps,
             "predictive_inference_learning_rate": inf_lr,
         }
+        for hidden, lr, steps, inf_lr in candidate_params
+    ]
+
+
+def run_predictive_sweep(
+    base: ResNet50BenchmarkConfig,
+    torch_module: Any,
+    device: Any,
+    seeds: tuple[int, ...],
+    *,
+    candidate_params: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    if candidate_params is None:
+        candidate_params = build_predictive_candidates()
+    for index, override in enumerate(candidate_params, start=1):
         trial = _run_multiseed_trial(
             base=base,
             override=override,
             seeds=seeds,
             torch_module=torch_module,
             device=device,
-            benchmark_fn=_benchmark_predictive,
+            variant="predictive",
         )
         candidates.append({"trial": index, "params": override, **trial})
         report = trial["report"]
         print(
             f"predictive {index}/{len(candidate_params)} "
-            f"acc={report['test_accuracy']:.4f}+/-{report['test_accuracy_std']:.4f} "
+            f"validation_acc={report['validation_accuracy']:.4f}"
+            f"+/-{report['validation_accuracy_std']:.4f} "
             f"train_sps={report['train_samples_per_second']:.1f}+/-{report['train_samples_per_second_std']:.1f}"
         )
     return candidates
 
 
-def run_circadian_sweep(
-    base: ResNet50BenchmarkConfig,
-    torch_module: Any,
-    device: Any,
-    seeds: tuple[int, ...],
-) -> list[dict[str, Any]]:
-    candidates: list[dict[str, Any]] = []
+def build_circadian_candidates() -> list[dict[str, Any]]:
+    """Return the original ordered circadian search cells without training."""
     candidate_params: list[dict[str, Any]] = [
         {
             "circadian_head_hidden_dim": 384,
@@ -422,6 +496,20 @@ def run_circadian_sweep(
             "circadian_max_hidden_dim": 1024,
         },
     ]
+    return candidate_params
+
+
+def run_circadian_sweep(
+    base: ResNet50BenchmarkConfig,
+    torch_module: Any,
+    device: Any,
+    seeds: tuple[int, ...],
+    *,
+    candidate_params: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    if candidate_params is None:
+        candidate_params = build_circadian_candidates()
     for index, override in enumerate(candidate_params, start=1):
         trial = _run_multiseed_trial(
             base=base,
@@ -429,13 +517,14 @@ def run_circadian_sweep(
             seeds=seeds,
             torch_module=torch_module,
             device=device,
-            benchmark_fn=_benchmark_circadian,
+            variant="circadian",
         )
         candidates.append({"trial": index, "params": override, **trial})
         report = trial["report"]
         print(
             f"circadian {index}/{len(candidate_params)} "
-            f"acc={report['test_accuracy']:.4f}+/-{report['test_accuracy_std']:.4f} "
+            f"validation_acc={report['validation_accuracy']:.4f}"
+            f"+/-{report['validation_accuracy_std']:.4f} "
             f"train_sps={report['train_samples_per_second']:.1f}+/-{report['train_samples_per_second_std']:.1f} "
             f"hidden={report['circadian_hidden_dim_start']:.1f}->{report['circadian_hidden_dim_end']:.1f} "
             f"split={report['circadian_total_splits']:.2f} prune={report['circadian_total_prunes']:.2f} "
@@ -450,7 +539,7 @@ def _run_multiseed_trial(
     seeds: tuple[int, ...],
     torch_module: Any,
     device: Any,
-    benchmark_fn: Any,
+    variant: str,
 ) -> dict[str, Any]:
     if len(seeds) == 0:
         raise ValueError("seeds must be non-empty.")
@@ -460,8 +549,16 @@ def _run_multiseed_trial(
         config = replace(base, seed=seed, **override)
         _set_seed(torch_module, seed)
         loaders = _build_loaders_for_config(config)
-        report = benchmark_fn(torch=torch_module, device=device, loaders=loaders, config=config)
-        reports.append(report_to_dict(report))
+        report = benchmark_validation_candidate(
+            variant=variant,
+            torch=torch_module,
+            device=device,
+            loaders=_training_loaders(loaders),
+            config=config,
+        )
+        report_row = report_to_dict(report)
+        report_row["split_hashes"] = dict(loaders.split_hashes)
+        reports.append(report_row)
 
     aggregate = _aggregate_reports(reports)
     return {"report": aggregate, "seed_reports": reports}
@@ -471,6 +568,8 @@ def _build_loaders_for_config(config: ResNet50BenchmarkConfig) -> Any:
     return build_synthetic_vision_dataloaders(
         SyntheticVisionDatasetConfig(
             train_samples=config.train_samples,
+            validation_samples=config.validation_samples,
+            guard_samples=config.guard_samples,
             test_samples=config.test_samples,
             num_classes=config.num_classes,
             image_size=config.image_size,
@@ -487,11 +586,10 @@ def _aggregate_reports(seed_reports: list[dict[str, Any]]) -> dict[str, Any]:
         raise ValueError("seed_reports must be non-empty.")
 
     model_name = seed_reports[0]["model_name"]
-    final_metric_name = seed_reports[0]["final_metric_name"]
     numeric_keys = [
         "epochs_ran",
-        "final_metric_value",
-        "test_accuracy",
+        "validation_accuracy",
+        "validation_cross_entropy",
         "train_seconds",
         "train_samples_per_second",
         "mean_train_step_ms",
@@ -500,11 +598,10 @@ def _aggregate_reports(seed_reports: list[dict[str, Any]]) -> dict[str, Any]:
         "inference_samples_per_second",
         "total_parameters",
         "trainable_parameters",
-        "accuracy_per_train_second",
-        "accuracy_per_million_trainable_params",
+        "validation_accuracy_per_train_second",
+        "validation_accuracy_per_million_trainable_params",
     ]
     optional_numeric_keys = [
-        "final_cross_entropy",
         "final_energy",
         "circadian_hidden_dim_start",
         "circadian_hidden_dim_end",
@@ -515,9 +612,19 @@ def _aggregate_reports(seed_reports: list[dict[str, Any]]) -> dict[str, Any]:
 
     aggregate: dict[str, Any] = {
         "model_name": model_name,
-        "final_metric_name": final_metric_name,
         "seed_count": len(seed_reports),
     }
+    for metadata in (
+        "benchmark_track",
+        "backbone_trainable",
+        "backbone_pretraining",
+        "head_type",
+        "training_energy_id",
+    ):
+        metadata_values = {row[metadata] for row in seed_reports}
+        if len(metadata_values) != 1:
+            raise ValueError(f"Cannot aggregate mixed {metadata} for {model_name}.")
+        aggregate[metadata] = seed_reports[0][metadata]
 
     for key in numeric_keys:
         values = [float(report[key]) for report in seed_reports]
@@ -540,12 +647,15 @@ def _aggregate_reports(seed_reports: list[dict[str, Any]]) -> dict[str, Any]:
 def report_to_dict(report: Any) -> dict[str, Any]:
     row = {
         "model_name": report.model_name,
+        "benchmark_track": report.benchmark_track,
+        "backbone_trainable": report.backbone_trainable,
+        "backbone_pretraining": report.backbone_pretraining,
+        "head_type": report.head_type,
         "epochs_ran": report.epochs_ran,
-        "final_metric_name": report.final_metric_name,
-        "final_metric_value": report.final_metric_value,
-        "final_cross_entropy": report.final_cross_entropy,
+        "validation_cross_entropy": report.validation_cross_entropy,
         "final_energy": report.final_energy,
-        "test_accuracy": report.test_accuracy,
+        "training_energy_id": report.training_energy_id,
+        "validation_accuracy": report.validation_accuracy,
         "train_seconds": report.train_seconds,
         "train_samples_per_second": report.train_samples_per_second,
         "mean_train_step_ms": report.mean_train_step_ms,
@@ -560,13 +670,13 @@ def report_to_dict(report: Any) -> dict[str, Any]:
         "circadian_total_prunes": report.circadian_total_prunes,
         "circadian_total_rollbacks": report.circadian_total_rollbacks,
     }
-    row["accuracy_per_train_second"] = (
-        0.0 if row["train_seconds"] == 0.0 else row["test_accuracy"] / row["train_seconds"]
+    row["validation_accuracy_per_train_second"] = (
+        0.0 if row["train_seconds"] == 0.0 else row["validation_accuracy"] / row["train_seconds"]
     )
-    row["accuracy_per_million_trainable_params"] = (
+    row["validation_accuracy_per_million_trainable_params"] = (
         0.0
         if row["trainable_parameters"] == 0
-        else row["test_accuracy"] / (row["trainable_parameters"] / 1_000_000.0)
+        else row["validation_accuracy"] / (row["trainable_parameters"] / 1_000_000.0)
     )
     return row
 
@@ -576,8 +686,13 @@ def summarize_model_trials(trials: list[dict[str, Any]]) -> dict[str, Any]:
     for trial, score in zip(trials, scores):
         trial["report"]["balanced_score"] = score
 
-    top10_by_accuracy = sorted(
-        trials, key=lambda row: (row["report"]["test_accuracy"], row["report"]["train_samples_per_second"]), reverse=True
+    top10_by_validation_accuracy = sorted(
+        trials,
+        key=lambda row: (
+            row["report"]["validation_accuracy"],
+            row["report"]["train_samples_per_second"],
+        ),
+        reverse=True,
     )[:10]
     top10_by_train_speed = sorted(
         trials, key=lambda row: row["report"]["train_samples_per_second"], reverse=True
@@ -595,7 +710,7 @@ def summarize_model_trials(trials: list[dict[str, Any]]) -> dict[str, Any]:
         "model_name": best_balanced["report"]["model_name"],
         "trials": trials,
         "pareto_front": pareto_trials,
-        "top10_by_accuracy": top10_by_accuracy,
+        "top10_by_validation_accuracy": top10_by_validation_accuracy,
         "top10_by_train_speed": top10_by_train_speed,
         "top10_by_inference_speed": top10_by_inference_speed,
         "top10_by_balanced_score": top10_by_balanced_score,
@@ -604,7 +719,8 @@ def summarize_model_trials(trials: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def compute_balanced_scores(trials: list[dict[str, Any]]) -> list[float]:
-    accuracies = [trial["report"]["test_accuracy"] for trial in trials]
+    # Candidate reports contain validation metrics only.
+    accuracies = [trial["report"]["validation_accuracy"] for trial in trials]
     train_speeds = [trial["report"]["train_samples_per_second"] for trial in trials]
     inference_speeds = [trial["report"]["inference_samples_per_second"] for trial in trials]
 
@@ -633,7 +749,7 @@ def pareto_front(trials: list[dict[str, Any]]) -> list[dict[str, Any]]:
     front_sorted = sorted(
         front,
         key=lambda row: (
-            row["report"]["test_accuracy"],
+            row["report"]["validation_accuracy"],
             row["report"]["train_samples_per_second"],
             row["report"]["inference_samples_per_second"],
         ),
@@ -649,12 +765,12 @@ def is_dominated(candidate: dict[str, Any], trials: list[dict[str, Any]]) -> boo
             continue
         o = other["report"]
         no_worse = (
-            o["test_accuracy"] >= c["test_accuracy"]
+            o["validation_accuracy"] >= c["validation_accuracy"]
             and o["train_samples_per_second"] >= c["train_samples_per_second"]
             and o["inference_samples_per_second"] >= c["inference_samples_per_second"]
         )
         strictly_better = (
-            o["test_accuracy"] > c["test_accuracy"]
+            o["validation_accuracy"] > c["validation_accuracy"]
             or o["train_samples_per_second"] > c["train_samples_per_second"]
             or o["inference_samples_per_second"] > c["inference_samples_per_second"]
         )
@@ -686,5 +802,20 @@ def best_from_all_trials(all_trial_reports: list[dict[str, Any]], key: str) -> d
 
 
 if __name__ == "__main__":
-    main()
-
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--estimate-only",
+        action="store_true",
+        help="print planned training work without opening Torch, weights, or datasets",
+    )
+    parser.add_argument(
+        "--max-planned-training-updates",
+        type=int,
+        default=DEFAULT_MAX_PLANNED_TRAINING_UPDATES,
+        help="prelaunch upper bound on all seed-candidate training batches (default: 1000)",
+    )
+    options = parser.parse_args()
+    main(
+        estimate_only=options.estimate_only,
+        max_planned_training_updates=options.max_planned_training_updates,
+    )

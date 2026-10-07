@@ -3,21 +3,31 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
+from numbers import Integral
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.core.activations import sigmoid, tanh, tanh_derivative_from_linear
+from src.core.dimension_validation import require_positive_integer_dimension
 from src.core.neuron_adaptation import LayerTraffic, NeuronChangeProposal
+from src.core.training_validation import (
+    require_finite_training_arrays,
+    validate_binary_training_batch,
+    validate_positive_finite_learning_rate,
+)
 
 Array = NDArray[np.float64]
+NUMPY_PC_ENERGY_ID = "numpy_pc_bce_plus_half_mean_all_hidden_error_sq_v1"
 
 
 @dataclass(frozen=True)
 class PredictiveCodingTrainResult:
-    """Metrics from one predictive-coding optimization epoch."""
+    """Pre-update training diagnostic from one predictive-coding step."""
 
     energy: float
+    energy_definition: str = NUMPY_PC_ENERGY_ID
 
 
 class PredictiveCodingNetwork:
@@ -30,8 +40,8 @@ class PredictiveCodingNetwork:
         seed: int,
         hidden_dims: list[int] | tuple[int, ...] | None = None,
     ) -> None:
-        if input_dim <= 0:
-            raise ValueError("input_dim must be positive")
+        input_dim = require_positive_integer_dimension(input_dim, "input_dim")
+        self.input_dim = input_dim
         resolved_hidden_dims = self._resolve_hidden_dims(
             hidden_dim=hidden_dim,
             hidden_dims=hidden_dims,
@@ -70,18 +80,24 @@ class PredictiveCodingNetwork:
         inference_steps: int,
         inference_learning_rate: float,
     ) -> PredictiveCodingTrainResult:
-        if learning_rate <= 0.0:
-            raise ValueError("learning_rate must be positive")
-        if inference_steps <= 0:
-            raise ValueError("inference_steps must be positive")
-        if inference_learning_rate <= 0.0:
-            raise ValueError("inference_learning_rate must be positive")
+        validate_positive_finite_learning_rate(learning_rate)
+        if not isinstance(inference_steps, Integral) or inference_steps <= 0:
+            raise ValueError("inference_steps must be a positive integer")
+        if not isfinite(inference_learning_rate) or inference_learning_rate <= 0.0:
+            raise ValueError("inference_learning_rate must be positive and finite")
+        validate_binary_training_batch(input_batch, target_batch, self.input_dim)
+        require_finite_training_arrays(
+            [*self._hidden_weights, *self._hidden_biases, self.weight_hidden_output, self.bias_output],
+            "model parameter before training",
+        )
 
         hidden_linear_priors: list[Array] = []
         hidden_priors: list[Array] = []
         prior_activation = input_batch
         for layer_weight, layer_bias in zip(self._hidden_weights, self._hidden_biases):
             hidden_linear = prior_activation @ layer_weight + layer_bias
+            if not np.all(np.isfinite(hidden_linear)):
+                raise FloatingPointError("nonfinite latent prior during relaxation")
             hidden_prior = tanh(hidden_linear)
             hidden_linear_priors.append(hidden_linear)
             hidden_priors.append(hidden_prior)
@@ -90,6 +106,8 @@ class PredictiveCodingNetwork:
         hidden_states = [hidden_prior.copy() for hidden_prior in hidden_priors]
         for _ in range(inference_steps):
             output_linear = hidden_states[-1] @ self.weight_hidden_output + self.bias_output
+            if not np.all(np.isfinite(output_linear)):
+                raise FloatingPointError("nonfinite latent relaxation logits")
             output_prediction = sigmoid(output_linear)
             output_error = output_prediction - target_batch
 
@@ -104,8 +122,12 @@ class PredictiveCodingNetwork:
                 hidden_gradients[layer_index] = hidden_errors[layer_index] + topdown
             for layer_index, hidden_gradient in enumerate(hidden_gradients):
                 hidden_states[layer_index] -= inference_learning_rate * hidden_gradient
+            if any(not np.all(np.isfinite(state)) for state in hidden_states):
+                raise FloatingPointError("nonfinite latent state during relaxation")
 
         output_linear = hidden_states[-1] @ self.weight_hidden_output + self.bias_output
+        if not np.all(np.isfinite(output_linear)):
+            raise FloatingPointError("nonfinite latent relaxation logits")
         output_prediction = sigmoid(output_linear)
         output_error = output_prediction - target_batch
         hidden_errors = [
@@ -128,19 +150,45 @@ class PredictiveCodingNetwork:
             grad_hidden_biases.append(np.sum(hidden_prior_gradient, axis=0, keepdims=True) / sample_count)
             previous_prior_activation = hidden_priors[layer_index]
 
-        self.weight_hidden_output -= learning_rate * grad_hidden_output
-        self.bias_output -= learning_rate * grad_output_bias
-        for layer_index in range(len(self._hidden_weights)):
-            self._hidden_weights[layer_index] -= learning_rate * grad_hidden_weights[layer_index]
-            self._hidden_biases[layer_index] -= learning_rate * grad_hidden_biases[layer_index]
-
-        self._record_hidden_traffic(hidden_states)
         energy = self._compute_energy(
             output_prediction=output_prediction,
             target_batch=target_batch,
             hidden_errors=hidden_errors,
         )
-        return PredictiveCodingTrainResult(energy=energy)
+        if not np.isfinite(energy):
+            raise FloatingPointError("nonfinite training diagnostic")
+        require_finite_training_arrays(
+            [grad_hidden_output, grad_output_bias, *grad_hidden_weights, *grad_hidden_biases],
+            "training gradient",
+        )
+        with np.errstate(over="ignore", invalid="ignore"):
+            new_hidden_output = self.weight_hidden_output - learning_rate * grad_hidden_output
+            new_output_bias = self.bias_output - learning_rate * grad_output_bias
+            new_hidden_weights = [
+                weight - learning_rate * gradient
+                for weight, gradient in zip(self._hidden_weights, grad_hidden_weights)
+            ]
+            new_hidden_biases = [
+                bias - learning_rate * gradient
+                for bias, gradient in zip(self._hidden_biases, grad_hidden_biases)
+            ]
+            new_traffic = [
+                traffic + np.mean(np.abs(state), axis=0)
+                for traffic, state in zip(self._traffic_sums, hidden_states)
+            ]
+        require_finite_training_arrays(
+            [new_hidden_output, new_output_bias, *new_hidden_weights, *new_hidden_biases],
+            "parameter update",
+        )
+        require_finite_training_arrays(new_traffic, "traffic update")
+        np.copyto(self.weight_hidden_output, new_hidden_output)
+        np.copyto(self.bias_output, new_output_bias)
+        for old, new in zip(self._hidden_weights, new_hidden_weights):
+            np.copyto(old, new)
+        for old, new in zip(self._hidden_biases, new_hidden_biases):
+            np.copyto(old, new)
+        self._record_hidden_traffic(hidden_states)
+        return PredictiveCodingTrainResult(energy=energy, energy_definition=NUMPY_PC_ENERGY_ID)
 
     def predict_proba(self, input_batch: Array) -> Array:
         activation = input_batch
@@ -213,14 +261,14 @@ class PredictiveCodingNetwork:
         hidden_dim: int,
         hidden_dims: list[int] | tuple[int, ...] | None,
     ) -> list[int]:
+        require_positive_integer_dimension(hidden_dim, "hidden_dim")
         if hidden_dims is None:
-            if hidden_dim <= 0:
-                raise ValueError("hidden_dim must be positive")
             return [hidden_dim]
 
-        resolved = [int(value) for value in hidden_dims]
+        resolved = [
+            require_positive_integer_dimension(value, f"hidden_dims[{index}]")
+            for index, value in enumerate(hidden_dims)
+        ]
         if not resolved:
             raise ValueError("hidden_dims cannot be empty")
-        if any(value <= 0 for value in resolved):
-            raise ValueError("all hidden_dims values must be positive")
         return resolved

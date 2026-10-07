@@ -29,8 +29,11 @@ def test_should_run_indepth_comparison_and_return_aggregate_stats() -> None:
     assert 0.0 <= first_scenario.predictive_coding.mean_test_accuracy <= 1.0
     assert 0.0 <= first_scenario.circadian_predictive_coding.mean_test_accuracy <= 1.0
     assert first_scenario.circadian_predictive_coding.mean_hidden_dim_end >= 4.0
+    assert first_scenario.predictive_coding.training_metric_id == "numpy_pc_bce_plus_half_mean_all_hidden_error_sq_v1"
+    assert first_scenario.circadian_predictive_coding.training_metric_id == "numpy_circadian_bce_plus_half_mean_final_hidden_error_sq_v1"
 
     report_text = format_indepth_comparison_result(result)
     assert "In-Depth Model Comparison" in report_text
     assert "Circadian predictive coding" in report_text
+    assert "training_metric[numpy_pc_bce_plus_half_mean_all_hidden_error_sq_v1]" in report_text
 

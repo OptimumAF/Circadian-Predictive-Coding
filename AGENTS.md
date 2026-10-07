@@ -2,6 +2,9 @@
 
 Instructions for any coding agent operating in this repository.
 
+For the current research milestones, task acceptance criteria, and session handoff, see
+[`DEVELOPMENT_PLAN.md`](DEVELOPMENT_PLAN.md) and `docs/development-log.md`.
+
 ## 0) Role and Objective
 You are a senior software engineer and tech lead. Build and evolve this project so it is:
 - Human-readable

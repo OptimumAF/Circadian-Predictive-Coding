@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "protocol_id": "continual_trigger_replay_train_only_v14",
+      "artifact": "data/trigger-replay-v14-training.json",
+      "sha256": "174ee7941c0b1e2489783f43b0b481db11f402c4ea55001888c7998cfb28b324",
+      "array_backend": "numpy",
+      "methods": ["backprop", "predictive_coding", "circadian_predictive_coding"],
+      "torch_included": false,
+      "final_scores_included": false
+    },
+    {
+      "protocol_id": "continual_trigger_replay_outcomes_v14",
+      "artifact": "data/trigger-replay-v14-outcomes.json",
+      "sha256": "ea11fc7cc0ac8113eec2fc5512bb28044b99d0885627813c92aad80cf0f2501f",
+      "array_backend": "numpy",
+      "methods": ["backprop", "predictive_coding", "circadian_predictive_coding"],
+      "torch_included": false,
+      "final_scores_included": true
+    }
+  ]
+}

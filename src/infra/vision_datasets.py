@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from hashlib import sha256
+from types import MappingProxyType
+from typing import Any, Mapping
 
 from src.shared.torch_runtime import (
     require_torch,
@@ -17,6 +19,8 @@ class SyntheticVisionDatasetConfig:
     """Config for synthetic classification datasets."""
 
     train_samples: int = 2000
+    validation_samples: int = 64
+    guard_samples: int = 0
     test_samples: int = 500
     num_classes: int = 10
     image_size: int = 96
@@ -39,17 +43,33 @@ class TorchVisionDatasetConfig:
     num_workers: int = 0
     download: bool = True
     train_subset_size: int = 0
+    validation_subset_size: int = 1000
+    guard_subset_size: int = 0
     test_subset_size: int = 0
     use_augmentation: bool = True
 
 
 @dataclass(frozen=True)
 class VisionDataLoaders:
-    """Container for benchmark dataloaders."""
+    """Role-separated loaders and immutable identities for their samples."""
 
     train_loader: Any
+    validation_loader: Any
+    guard_loader: Any
     test_loader: Any
     num_classes: int
+    sample_ids: Mapping[str, tuple[str, ...]]
+    split_hashes: Mapping[str, str]
+
+
+class _UnavailableFinalTestLoader:
+    """Fail if a development-only loader is accidentally used for scoring."""
+
+    def __iter__(self) -> Any:
+        raise RuntimeError("final test is unavailable in this development-only loader")
+
+    def __len__(self) -> int:
+        raise RuntimeError("final test is unavailable in this development-only loader")
 
 
 class SyntheticPatternDataset:
@@ -107,8 +127,12 @@ class SyntheticPatternDataset:
 
             jitter_limit = self._resolve_jitter_limit(patch_size)
             if jitter_limit > 0:
-                offset_y = int(torch.randint(-jitter_limit, jitter_limit + 1, (1,), generator=generator).item())
-                offset_x = int(torch.randint(-jitter_limit, jitter_limit + 1, (1,), generator=generator).item())
+                offset_y = int(
+                    torch.randint(-jitter_limit, jitter_limit + 1, (1,), generator=generator).item()
+                )
+                offset_x = int(
+                    torch.randint(-jitter_limit, jitter_limit + 1, (1,), generator=generator).item()
+                )
                 start_y = max(1, min(start_y + offset_y, image_size - patch_size - 1))
                 start_x = max(1, min(start_x + offset_x, image_size - patch_size - 1))
 
@@ -157,7 +181,9 @@ class SyntheticPatternDataset:
             )
 
         effective_noise = noise_std * self._resolve_noise_multiplier()
-        noise = effective_noise * torch.randn(self.images.shape, generator=generator, dtype=torch.float32)
+        noise = effective_noise * torch.randn(
+            self.images.shape, generator=generator, dtype=torch.float32
+        )
         self.images = torch.clamp(self.images + noise, min=0.0, max=1.0)
 
     def __len__(self) -> int:
@@ -266,7 +292,11 @@ class SyntheticPatternDataset:
 
 
 def build_synthetic_vision_dataloaders(config: SyntheticVisionDatasetConfig) -> VisionDataLoaders:
-    """Create deterministic train/test dataloaders for speed benchmarking."""
+    """Create independent deterministic train/validation/test datasets."""
+    if config.validation_samples <= 0:
+        raise ValueError("validation_samples must be positive.")
+    if config.guard_samples < 0:
+        raise ValueError("guard_samples must be non-negative.")
     torch = require_torch()
 
     train_dataset = SyntheticPatternDataset(
@@ -276,6 +306,25 @@ def build_synthetic_vision_dataloaders(config: SyntheticVisionDatasetConfig) -> 
         noise_std=config.noise_std,
         difficulty=config.difficulty,
         seed=config.seed,
+    )
+    validation_dataset = SyntheticPatternDataset(
+        sample_count=config.validation_samples,
+        num_classes=config.num_classes,
+        image_size=config.image_size,
+        noise_std=config.noise_std,
+        difficulty=config.difficulty,
+        seed=config.seed + 3,
+    )
+    guard_dataset = (
+        SyntheticPatternDataset(
+            sample_count=config.guard_samples,
+            num_classes=config.num_classes,
+            image_size=config.image_size,
+            noise_std=config.noise_std,
+            difficulty=config.difficulty,
+            seed=config.seed + 4,
+        )
+        if config.guard_samples > 0 else None
     )
     test_dataset = SyntheticPatternDataset(
         sample_count=config.test_samples,
@@ -297,6 +346,20 @@ def build_synthetic_vision_dataloaders(config: SyntheticVisionDatasetConfig) -> 
         pin_memory=False,
         generator=loader_generator,
     )
+    validation_loader = torch.utils.data.DataLoader(
+        validation_dataset,
+        batch_size=config.batch_size,
+        shuffle=False,
+        num_workers=config.num_workers,
+        pin_memory=False,
+    )
+    guard_loader = (
+        torch.utils.data.DataLoader(
+            guard_dataset, batch_size=config.batch_size, shuffle=False,
+            num_workers=config.num_workers, pin_memory=False,
+        )
+        if guard_dataset is not None else validation_loader
+    )
     test_loader = torch.utils.data.DataLoader(
         test_dataset,
         batch_size=config.batch_size,
@@ -304,15 +367,45 @@ def build_synthetic_vision_dataloaders(config: SyntheticVisionDatasetConfig) -> 
         num_workers=config.num_workers,
         pin_memory=False,
     )
+    dataset_tag = (
+        f"synthetic/classes={config.num_classes}/size={config.image_size}"
+        f"/noise={config.noise_std!r}/difficulty={config.difficulty}"
+    )
+    sample_ids = {
+        "train": tuple(
+            f"{dataset_tag}/train/seed={config.seed}/{index}" for index in range(len(train_dataset))
+        ),
+        "validation": tuple(
+            f"{dataset_tag}/validation/seed={config.seed + 3}/{index}"
+            for index in range(len(validation_dataset))
+        ),
+        "test": tuple(
+            f"{dataset_tag}/test/seed={config.seed + 1}/{index}"
+            for index in range(len(test_dataset))
+        ),
+    }
+    if guard_dataset is not None:
+        sample_ids["guard"] = tuple(
+            f"{dataset_tag}/guard/seed={config.seed + 4}/{index}"
+            for index in range(len(guard_dataset))
+        )
     return VisionDataLoaders(
         train_loader=train_loader,
+        validation_loader=validation_loader,
+        guard_loader=guard_loader,
         test_loader=test_loader,
         num_classes=config.num_classes,
+        sample_ids=MappingProxyType(sample_ids),
+        split_hashes=_hash_splits(sample_ids),
     )
 
 
-def build_torchvision_vision_dataloaders(config: TorchVisionDatasetConfig) -> VisionDataLoaders:
-    """Create train/test dataloaders backed by torchvision datasets."""
+def build_torchvision_vision_dataloaders(
+    config: TorchVisionDatasetConfig, *, include_final_test: bool = True
+) -> VisionDataLoaders:
+    """Create role-separated dataloaders backed by torchvision datasets."""
+    if type(include_final_test) is not bool:
+        raise ValueError("include_final_test must be a boolean")
     if config.dataset_name not in {"cifar10", "cifar100"}:
         raise ValueError("dataset_name must be one of: cifar10, cifar100.")
     if config.batch_size <= 0:
@@ -321,6 +414,10 @@ def build_torchvision_vision_dataloaders(config: TorchVisionDatasetConfig) -> Vi
         raise ValueError("image_size must be at least 32 for ResNet-50.")
     if config.train_subset_size < 0 or config.test_subset_size < 0:
         raise ValueError("train/test subset sizes must be non-negative.")
+    if config.validation_subset_size <= 0:
+        raise ValueError("validation_subset_size must be positive.")
+    if config.guard_subset_size < 0:
+        raise ValueError("guard_subset_size must be non-negative.")
 
     torch = require_torch()
     datasets = require_torchvision_datasets()
@@ -352,27 +449,76 @@ def build_torchvision_vision_dataloaders(config: TorchVisionDatasetConfig) -> Vi
         download=config.download,
         transform=train_transform,
     )
-    test_dataset = dataset_class(
+    validation_dataset = dataset_class(
         root=config.data_root,
-        train=False,
-        download=config.download,
+        train=True,
+        download=False,
         transform=test_transform,
     )
+    # Both held-out roles use the same deterministic source view, avoiding
+    # another in-memory CIFAR copy while keeping their indices disjoint.
+    guard_dataset = validation_dataset if config.guard_subset_size > 0 else None
+    test_dataset = (
+        dataset_class(
+            root=config.data_root,
+            train=False,
+            download=config.download,
+            transform=test_transform,
+        )
+        if include_final_test
+        else None
+    )
 
+    total_train_size = len(train_dataset)
+    if len(validation_dataset) != total_train_size:
+        raise ValueError("Training and validation views must have the same source size.")
+    required_roles = 3 if guard_dataset is not None else 2
+    if total_train_size < required_roles:
+        raise ValueError(f"At least {required_roles} source training examples are required.")
+
+    # Why this: a requested training subset keeps its original size when the
+    # source has room, while validation always uses different source examples.
+    generator = torch.Generator()
+    generator.manual_seed(config.seed)
+    ordered_indices = torch.randperm(total_train_size, generator=generator).tolist()
     if config.train_subset_size > 0:
-        train_dataset = _select_subset(
-            dataset=train_dataset,
-            subset_size=config.train_subset_size,
-            seed=config.seed,
-            torch_module=torch,
+        train_count = min(config.train_subset_size, total_train_size - required_roles + 1)
+        remaining = total_train_size - train_count
+        validation_count = min(
+            config.validation_subset_size,
+            remaining - (1 if guard_dataset is not None else 0),
         )
-    if config.test_subset_size > 0:
-        test_dataset = _select_subset(
-            dataset=test_dataset,
-            subset_size=config.test_subset_size,
-            seed=config.seed + 1,
-            torch_module=torch,
-        )
+    else:
+        validation_count = min(config.validation_subset_size, total_train_size - required_roles + 1)
+        if guard_dataset is not None:
+            guard_count = min(config.guard_subset_size, total_train_size - validation_count - 1)
+            train_count = total_train_size - validation_count - guard_count
+        else:
+            train_count = total_train_size - validation_count
+    if guard_dataset is not None and config.train_subset_size > 0:
+        guard_count = min(config.guard_subset_size, total_train_size - train_count - validation_count)
+    train_indices = ordered_indices[:train_count]
+    validation_indices = ordered_indices[train_count : train_count + validation_count]
+    guard_indices = ordered_indices[
+        train_count + validation_count : train_count + validation_count + guard_count
+    ] if guard_dataset is not None else []
+    train_dataset = torch.utils.data.Subset(train_dataset, train_indices)
+    validation_dataset = torch.utils.data.Subset(validation_dataset, validation_indices)
+    if guard_dataset is not None:
+        guard_dataset = torch.utils.data.Subset(guard_dataset, guard_indices)
+
+    test_indices: Any = ()
+    if test_dataset is not None:
+        if config.test_subset_size > 0:
+            test_dataset = _select_subset(
+                dataset=test_dataset,
+                subset_size=config.test_subset_size,
+                seed=config.seed + 1,
+                torch_module=torch,
+            )
+            test_indices = test_dataset.indices
+        else:
+            test_indices = range(len(test_dataset))
 
     loader_generator = torch.Generator()
     loader_generator.manual_seed(config.seed + 2)
@@ -384,19 +530,63 @@ def build_torchvision_vision_dataloaders(config: TorchVisionDatasetConfig) -> Vi
         pin_memory=False,
         generator=loader_generator,
     )
-    test_loader = torch.utils.data.DataLoader(
-        test_dataset,
+    validation_loader = torch.utils.data.DataLoader(
+        validation_dataset,
         batch_size=config.batch_size,
         shuffle=False,
         num_workers=config.num_workers,
         pin_memory=False,
     )
+    guard_loader = (
+        torch.utils.data.DataLoader(
+            guard_dataset, batch_size=config.batch_size, shuffle=False,
+            num_workers=config.num_workers, pin_memory=False,
+        )
+        if guard_dataset is not None else validation_loader
+    )
+    test_loader = (
+        torch.utils.data.DataLoader(
+            test_dataset,
+            batch_size=config.batch_size,
+            shuffle=False,
+            num_workers=config.num_workers,
+            pin_memory=False,
+        )
+        if test_dataset is not None
+        else _UnavailableFinalTestLoader()
+    )
 
     num_classes = 100 if config.dataset_name == "cifar100" else 10
+    sample_ids = {
+        "train": tuple(f"{config.dataset_name}/train/{index}" for index in train_indices),
+        "validation": tuple(f"{config.dataset_name}/train/{index}" for index in validation_indices),
+    }
+    if test_dataset is not None:
+        sample_ids["test"] = tuple(
+            f"{config.dataset_name}/test/{index}" for index in test_indices
+        )
+    if guard_dataset is not None:
+        sample_ids["guard"] = tuple(
+            f"{config.dataset_name}/train/{index}" for index in guard_indices
+        )
     return VisionDataLoaders(
         train_loader=train_loader,
+        validation_loader=validation_loader,
+        guard_loader=guard_loader,
         test_loader=test_loader,
         num_classes=num_classes,
+        sample_ids=MappingProxyType(sample_ids),
+        split_hashes=_hash_splits(sample_ids),
+    )
+
+
+def _hash_splits(sample_ids: Mapping[str, tuple[str, ...]]) -> Mapping[str, str]:
+    """Hash ordered, namespaced identities without reading labels or images."""
+    return MappingProxyType(
+        {
+            role: sha256("\n".join(ids).encode("utf-8")).hexdigest()
+            for role, ids in sample_ids.items()
+        }
     )
 
 

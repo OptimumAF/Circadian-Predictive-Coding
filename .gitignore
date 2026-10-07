@@ -1,10 +1,16 @@
 .venv/
+.venv-py311-snapshot/
+.venv-cuda/
+.venv-cuda-py311-snapshot/
+/gpu-venv/
+gpu-venv-py311-snapshot/
 __pycache__/
 *.py[cod]
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
 data/
+/artifacts/runs/
 benchmark_multiseed_*.json
 benchmark_multiseed_*_seed.csv
 benchmark_multiseed_*_summary.csv

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 from pathlib import Path
 import sys
@@ -18,10 +18,22 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from src.core.backprop_mlp import BackpropMLP  # noqa: E402
-from src.core.circadian_predictive_coding import CircadianConfig, CircadianPredictiveCodingNetwork  # noqa: E402
-from src.core.predictive_coding import PredictiveCodingNetwork  # noqa: E402
-from src.infra.datasets import DatasetSplit, generate_two_cluster_dataset_with_transform  # noqa: E402
+from src.core.backprop_mlp import BackpropMLP, NUMPY_BACKPROP_LOSS_ID  # noqa: E402
+from src.app.comparison_scope import NumpyComparisonScope, scope_for_hidden_dims  # noqa: E402
+from src.core.circadian_predictive_coding import (  # noqa: E402
+    CircadianConfig,
+    CircadianPredictiveCodingNetwork,
+    NUMPY_CIRCADIAN_ENERGY_ID,
+)
+from src.core.predictive_coding import NUMPY_PC_ENERGY_ID, PredictiveCodingNetwork  # noqa: E402
+from src.infra.datasets import (  # noqa: E402
+    DatasetSplit,
+    LabeledData,
+    RoleSeparatedDataset,
+    generate_two_cluster_dataset_with_transform,
+    make_role_separated_dataset,
+    split_training_validation,
+)
 
 Array = NDArray[np.float64]
 DecisionMap = NDArray[np.float32]
@@ -35,14 +47,18 @@ MODEL_COLORS = {
     "Predictive": (61, 157, 86),
     "Circadian": (189, 102, 36),
 }
+VALIDATION_PROTOCOL = "validation_dynamics_v1"
+LEGACY_PROTOCOL = "legacy_test_informed_v0"
 
 
 @dataclass(frozen=True)
 class HardestModeConfig:
+    protocol_id: str = VALIDATION_PROTOCOL
     seed: int = 7
     sample_count_phase_a: int = 700
     sample_count_phase_b: int = 700
     test_ratio: float = 0.25
+    validation_fraction: float = 0.20
     phase_b_train_fraction: float = 0.05
     hidden_dim: int = 24
     hidden_dims: tuple[int, ...] = (24, 24, 24)
@@ -89,6 +105,31 @@ class HardestModeSnapshot:
     probe_output_probability: float
 
 
+@dataclass(frozen=True)
+class HardestModeRun:
+    """Snapshot data and the final-only test result for one versioned protocol."""
+
+    snapshots: list[HardestModeSnapshot]
+    phase_b_evaluation: LabeledData
+    evaluation_split: str
+    x_bounds: tuple[float, float]
+    y_bounds: tuple[float, float]
+    split_hashes: dict[str, str]
+    final_test_accuracy: dict[str, float]
+    protocol_id: str
+    comparison_scope: NumpyComparisonScope
+
+
+@dataclass(frozen=True)
+class _DynamicsTrainingOutcome:
+    """Snapshot models returned before final-test data become available."""
+
+    snapshots: list[HardestModeSnapshot]
+    backprop: BackpropMLP
+    predictive: PredictiveCodingNetwork
+    circadian: CircadianPredictiveCodingNetwork
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate hardest-case train+inference dynamics GIF + interactive plotly page."
@@ -96,17 +137,46 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--gif-output-path",
         type=str,
-        default="docs/figures/hardest_mode_dynamics.gif",
+        default=None,
     )
     parser.add_argument(
         "--interactive-output-path",
         type=str,
-        default="docs/figures/interactive_hardest_mode_dynamics.html",
+        default=None,
+    )
+    parser.add_argument(
+        "--protocol-id",
+        choices=[VALIDATION_PROTOCOL, LEGACY_PROTOCOL],
+        default=VALIDATION_PROTOCOL,
     )
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--snapshot-interval", type=int, default=4)
     parser.add_argument("--gif-duration-ms", type=int, default=120)
+    parser.add_argument(
+        "--tiny-smoke",
+        action="store_true",
+        help="Use a labeled 40-row, four-epoch CPU fixture; keep the chosen evaluation protocol.",
+    )
     return parser.parse_args()
+
+
+def build_tiny_smoke_config(base: HardestModeConfig) -> HardestModeConfig:
+    """Bound the public visual producer without changing its evaluation route."""
+    # Why this: default 120/180-epoch dynamics are a study, not an output smoke.
+    return replace(
+        base,
+        sample_count_phase_a=40,
+        sample_count_phase_b=40,
+        phase_b_train_fraction=0.5,
+        hidden_dim=4,
+        hidden_dims=(4,),
+        phase_a_epochs=2,
+        phase_b_epochs=2,
+        decision_grid_size=8,
+        latency_repeats=1,
+        sleep_interval_phase_a=1,
+        sleep_interval_phase_b=1,
+    )
 
 
 def build_hardest_circadian_config() -> CircadianConfig:
@@ -163,6 +233,7 @@ def sample_balanced_subset(
 
 
 def build_datasets(config: HardestModeConfig) -> tuple[DatasetSplit, DatasetSplit]:
+    """Historical test-informed splits, retained for explicit reproduction only."""
     phase_a = generate_two_cluster_dataset_with_transform(
         sample_count=config.sample_count_phase_a,
         noise_scale=config.phase_a_noise,
@@ -190,6 +261,54 @@ def build_datasets(config: HardestModeConfig) -> tuple[DatasetSplit, DatasetSpli
         test_target=phase_b_full.test_target,
     )
     return phase_a, phase_b
+
+
+def build_validation_datasets(
+    config: HardestModeConfig,
+) -> tuple[RoleSeparatedDataset, RoleSeparatedDataset]:
+    """Reserve phase-local validation before sampling scarce phase-B training data."""
+    phase_a_source = generate_two_cluster_dataset_with_transform(
+        sample_count=config.sample_count_phase_a, noise_scale=config.phase_a_noise,
+        seed=config.seed, test_ratio=config.test_ratio,
+    )
+    phase_b_source = generate_two_cluster_dataset_with_transform(
+        sample_count=config.sample_count_phase_b, noise_scale=config.phase_b_noise,
+        seed=config.seed + 101, test_ratio=config.test_ratio,
+        rotation_degrees=config.phase_b_rotation_degrees,
+        translation=(config.phase_b_translation_x, config.phase_b_translation_y),
+    )
+    phase_a = split_training_validation(
+        phase_a_source, validation_fraction=config.validation_fraction, seed=config.seed + 17,
+    )
+    phase_b_full = split_training_validation(
+        phase_b_source, validation_fraction=config.validation_fraction, seed=config.seed + 118,
+    )
+    train_input, train_target = sample_balanced_subset(
+        input_batch=phase_b_full.train.input,
+        target_batch=phase_b_full.train.target,
+        fraction=config.phase_b_train_fraction,
+        seed=config.seed + 31,
+    )
+    phase_b = make_role_separated_dataset(
+        train=LabeledData(train_input, train_target),
+        validation=phase_b_full.validation,
+        test=phase_b_full.test,
+    )
+    return phase_a, phase_b
+
+
+def compute_validation_bounds(
+    phase_a: RoleSeparatedDataset, phase_b: RoleSeparatedDataset,
+) -> tuple[tuple[float, float], tuple[float, float]]:
+    """Keep even plot-domain bounds independent of final-test inputs."""
+    joined = np.vstack((
+        phase_a.train.input, phase_a.validation.input,
+        phase_b.train.input, phase_b.validation.input,
+    ))
+    return (
+        (float(np.min(joined[:, 0])) - 0.4, float(np.max(joined[:, 0])) + 0.4),
+        (float(np.min(joined[:, 1])) - 0.4, float(np.max(joined[:, 1])) + 0.4),
+    )
 
 
 def create_decision_map(
@@ -242,10 +361,70 @@ def compute_bounds(phase_a: DatasetSplit, phase_b: DatasetSplit) -> tuple[tuple[
 
 def collect_hardest_mode_snapshots(
     config: HardestModeConfig,
-) -> tuple[list[HardestModeSnapshot], Array, Array, tuple[float, float], tuple[float, float]]:
-    phase_a, phase_b = build_datasets(config)
-    x_bounds, y_bounds = compute_bounds(phase_a, phase_b)
+) -> HardestModeRun:
+    if config.protocol_id == VALIDATION_PROTOCOL:
+        phase_a_roles, phase_b_roles = build_validation_datasets(config)
+        phase_a_train = phase_a_roles.train
+        phase_b_train = phase_b_roles.train
+        phase_b_evaluation = phase_b_roles.validation
+        x_bounds, y_bounds = compute_validation_bounds(phase_a_roles, phase_b_roles)
+        split_hashes = {
+            f"phase_a_{role}": digest for role, digest in phase_a_roles.split_hashes.items()
+        } | {
+            f"phase_b_{role}": digest for role, digest in phase_b_roles.split_hashes.items()
+        }
+        evaluation_split = "validation"
+    elif config.protocol_id == LEGACY_PROTOCOL:
+        phase_a, phase_b = build_datasets(config)
+        phase_a_train = LabeledData(phase_a.train_input, phase_a.train_target)
+        phase_b_train = LabeledData(phase_b.train_input, phase_b.train_target)
+        phase_b_evaluation = LabeledData(phase_b.test_input, phase_b.test_target)
+        x_bounds, y_bounds = compute_bounds(phase_a, phase_b)
+        split_hashes = {}
+        evaluation_split = "test (legacy, intermediate access)"
+    else:
+        raise ValueError(f"Unknown hardest-mode protocol: {config.protocol_id}")
 
+    trained = _train_dynamics_models(
+        config=config, phase_a_train=phase_a_train, phase_b_train=phase_b_train,
+        phase_b_evaluation=phase_b_evaluation, x_bounds=x_bounds, y_bounds=y_bounds,
+    )
+    phase_b_final_test = (
+        phase_b_roles.test if config.protocol_id == VALIDATION_PROTOCOL
+        else phase_b_evaluation
+    )
+
+    # Final-test labels are first consumed after the last training/sleep event.
+    final_test_accuracy = {
+        "Backprop": trained.backprop.compute_accuracy(
+            phase_b_final_test.input, phase_b_final_test.target
+        ),
+        "Predictive": trained.predictive.compute_accuracy(
+            phase_b_final_test.input, phase_b_final_test.target
+        ),
+        "Circadian": trained.circadian.compute_accuracy(
+            phase_b_final_test.input, phase_b_final_test.target
+        ),
+    }
+    return HardestModeRun(
+        snapshots=trained.snapshots,
+        phase_b_evaluation=phase_b_evaluation,
+        evaluation_split=evaluation_split,
+        x_bounds=x_bounds,
+        y_bounds=y_bounds,
+        split_hashes=split_hashes,
+        final_test_accuracy=final_test_accuracy,
+        protocol_id=config.protocol_id,
+        comparison_scope=scope_for_hidden_dims(config.hidden_dims),
+    )
+
+
+def _train_dynamics_models(
+    *, config: HardestModeConfig, phase_a_train: LabeledData,
+    phase_b_train: LabeledData, phase_b_evaluation: LabeledData,
+    x_bounds: tuple[float, float], y_bounds: tuple[float, float],
+) -> _DynamicsTrainingOutcome:
+    """Train and snapshot using permitted inputs, without a final-test role."""
     backprop = BackpropMLP(
         input_dim=2,
         hidden_dim=config.hidden_dim,
@@ -270,28 +449,28 @@ def collect_hardest_mode_snapshots(
     total_splits = 0
     total_prunes = 0
     total_epochs = config.phase_a_epochs + config.phase_b_epochs
-    probe_input = phase_b.test_input[:1]
+    probe_input = phase_b_evaluation.input[:1]
 
     for epoch in range(1, total_epochs + 1):
         in_phase_b = epoch > config.phase_a_epochs
-        active_split = phase_b if in_phase_b else phase_a
+        active_train = phase_b_train if in_phase_b else phase_a_train
         phase_name = "Phase B (Hard Drift)" if in_phase_b else "Phase A (Base)"
 
         backprop_step = backprop.train_epoch(
-            input_batch=active_split.train_input,
-            target_batch=active_split.train_target,
+            input_batch=active_train.input,
+            target_batch=active_train.target,
             learning_rate=0.12,
         )
         predictive_step = predictive.train_epoch(
-            input_batch=active_split.train_input,
-            target_batch=active_split.train_target,
+            input_batch=active_train.input,
+            target_batch=active_train.target,
             learning_rate=0.05,
             inference_steps=25,
             inference_learning_rate=0.2,
         )
         circadian_step = circadian.train_epoch(
-            input_batch=active_split.train_input,
-            target_batch=active_split.train_target,
+            input_batch=active_train.input,
+            target_batch=active_train.target,
             learning_rate=0.05,
             inference_steps=25,
             inference_learning_rate=0.2,
@@ -319,22 +498,28 @@ def collect_hardest_mode_snapshots(
         ):
             continue
 
-        backprop_acc = backprop.compute_accuracy(phase_b.test_input, phase_b.test_target)
-        predictive_acc = predictive.compute_accuracy(phase_b.test_input, phase_b.test_target)
-        circadian_acc = circadian.compute_accuracy(phase_b.test_input, phase_b.test_target)
+        backprop_acc = backprop.compute_accuracy(
+            phase_b_evaluation.input, phase_b_evaluation.target
+        )
+        predictive_acc = predictive.compute_accuracy(
+            phase_b_evaluation.input, phase_b_evaluation.target
+        )
+        circadian_acc = circadian.compute_accuracy(
+            phase_b_evaluation.input, phase_b_evaluation.target
+        )
         backprop_latency = measure_latency_ms(
             model_predictor=backprop.predict_proba,
-            input_batch=phase_b.test_input,
+            input_batch=phase_b_evaluation.input,
             repeats=config.latency_repeats,
         )
         predictive_latency = measure_latency_ms(
             model_predictor=predictive.predict_proba,
-            input_batch=phase_b.test_input,
+            input_batch=phase_b_evaluation.input,
             repeats=config.latency_repeats,
         )
         circadian_latency = measure_latency_ms(
             model_predictor=circadian.predict_proba,
-            input_batch=phase_b.test_input,
+            input_batch=phase_b_evaluation.input,
             repeats=config.latency_repeats,
         )
 
@@ -344,7 +529,7 @@ def collect_hardest_mode_snapshots(
             y_bounds=y_bounds,
             grid_size=config.decision_grid_size,
         )
-        predictions = circadian.predict_label(phase_b.test_input).reshape(-1).astype(np.int8)
+        predictions = circadian.predict_label(phase_b_evaluation.input).reshape(-1).astype(np.int8)
         _, _, probe_adaptive_input = circadian._forward_pre_hidden(probe_input)
         hidden_linear = probe_adaptive_input @ circadian.weight_input_hidden + circadian.bias_hidden
         probe_hidden_activation = np.tanh(hidden_linear).reshape(-1).astype(np.float32)
@@ -384,7 +569,10 @@ def collect_hardest_mode_snapshots(
             )
         )
 
-    return snapshots, phase_b.test_input, phase_b.test_target, x_bounds, y_bounds
+    return _DynamicsTrainingOutcome(
+        snapshots=snapshots, backprop=backprop,
+        predictive=predictive, circadian=circadian,
+    )
 
 
 def normalize_series(values: list[float]) -> list[float]:
@@ -475,15 +663,18 @@ def map_point_to_panel(
 
 def render_hardest_mode_gif(
     snapshots: list[HardestModeSnapshot],
-    phase_b_test_input: Array,
-    phase_b_test_target: Array,
+    phase_b_evaluation_input: Array,
+    phase_b_evaluation_target: Array,
     x_bounds: tuple[float, float],
     y_bounds: tuple[float, float],
     output_path: Path,
     frame_duration_ms: int,
+    evaluation_split: str = "test (legacy)",
+    comparison_scope: NumpyComparisonScope | None = None,
 ) -> None:
     if not snapshots:
         raise ValueError("snapshots cannot be empty.")
+    scope = comparison_scope or scope_for_hidden_dims(None)
 
     width = 1180
     height = 680
@@ -508,7 +699,7 @@ def render_hardest_mode_gif(
             phase_b_start_index = index
             break
 
-    phase_b_target = phase_b_test_target.reshape(-1)
+    phase_b_target = phase_b_evaluation_target.reshape(-1)
     frames: list[Image.Image] = []
     for frame_index, snapshot in enumerate(snapshots):
         image = Image.new("RGB", (width, height), (244, 248, 253))
@@ -520,10 +711,11 @@ def render_hardest_mode_gif(
             fill=(78, 84, 95),
             font=font,
         )
+        draw.text((30, 60), f"Comparison: {scope.description}", fill=(78, 84, 95), font=font)
 
         draw_line_panel(
             draw=draw,
-            title="Training Signal (normalized objective)",
+            title="Training metrics (normalized per model)",
             panel_box=training_panel,
             series=normalized_objective,
             frame_index=frame_index,
@@ -531,12 +723,12 @@ def render_hardest_mode_gif(
             total_frame_count=max(len(snapshots) - 1, 1),
             y_min=0.0,
             y_max=1.0,
-            y_label="Normalized objective value",
+            y_label="Per-model normalized metric",
             font=font,
         )
         draw_line_panel(
             draw=draw,
-            title="Inference Accuracy on Phase-B Test Set",
+            title=f"Inference Accuracy on Phase-B {evaluation_split.title()}",
             panel_box=accuracy_panel,
             series=inference_accuracy,
             frame_index=frame_index,
@@ -557,7 +749,7 @@ def render_hardest_mode_gif(
         )
         draw.text(
             (inference_panel[0] + 10, inference_panel[1] + 8),
-            "Inference View (Circadian decision map on Phase-B test domain)",
+            f"Inference View (Circadian decision map on Phase-B {evaluation_split} domain)",
             fill=(20, 20, 26),
             font=font,
         )
@@ -573,8 +765,11 @@ def render_hardest_mode_gif(
         image.paste(decision_image, (map_left, map_top))
         draw.rectangle([(map_left, map_top), (map_right, map_bottom)], outline=(215, 220, 228), width=1)
 
-        for index in range(phase_b_test_input.shape[0]):
-            point = (float(phase_b_test_input[index, 0]), float(phase_b_test_input[index, 1]))
+        for index in range(phase_b_evaluation_input.shape[0]):
+            point = (
+                float(phase_b_evaluation_input[index, 0]),
+                float(phase_b_evaluation_input[index, 1]),
+            )
             px, py = map_point_to_panel(
                 point=point,
                 panel_box=(map_left, map_top, map_right, map_bottom),
@@ -588,7 +783,10 @@ def render_hardest_mode_gif(
             draw.ellipse([(px - 3, py - 3), (px + 3, py + 3)], fill=point_fill, outline=outline, width=1)
 
         legend_y = map_bottom + 10
-        draw.text((map_left, legend_y), "Inference metrics (Phase-B test):", fill=(30, 32, 38), font=font)
+        draw.text(
+            (map_left, legend_y), f"Inference metrics (Phase-B {evaluation_split}):",
+            fill=(30, 32, 38), font=font,
+        )
         draw.text(
             (map_left, legend_y + 16),
             (
@@ -616,6 +814,7 @@ def render_hardest_mode_gif(
         append_images=other_frames,
         duration=frame_duration_ms,
         loop=0,
+        comment=json.dumps(asdict(scope), sort_keys=True).encode("utf-8"),
     )
 
 
@@ -625,20 +824,28 @@ def _round_list(values: list[float], precision: int = 4) -> list[float]:
 
 def build_interactive_payload(
     snapshots: list[HardestModeSnapshot],
-    phase_b_test_input: Array,
-    phase_b_test_target: Array,
+    phase_b_evaluation_input: Array,
+    phase_b_evaluation_target: Array,
     x_bounds: tuple[float, float],
     y_bounds: tuple[float, float],
+    evaluation_split: str = "test (legacy)",
+    protocol_id: str = LEGACY_PROTOCOL,
+    split_hashes: dict[str, str] | None = None,
+    final_test_accuracy: dict[str, float] | None = None,
+    comparison_scope: NumpyComparisonScope | None = None,
 ) -> dict[str, object]:
+    scope = comparison_scope or scope_for_hidden_dims(None)
     normalized_objective = {
         "Backprop": normalize_series([snapshot.backprop_metric for snapshot in snapshots]),
         "Predictive": normalize_series([snapshot.predictive_metric for snapshot in snapshots]),
         "Circadian": normalize_series([snapshot.circadian_metric for snapshot in snapshots]),
     }
 
-    phase_b_target = [int(value >= 0.5) for value in phase_b_test_target.reshape(-1).tolist()]
-    phase_b_x = _round_list(phase_b_test_input[:, 0].tolist(), precision=4)
-    phase_b_y = _round_list(phase_b_test_input[:, 1].tolist(), precision=4)
+    phase_b_target = [
+        int(value >= 0.5) for value in phase_b_evaluation_target.reshape(-1).tolist()
+    ]
+    phase_b_x = _round_list(phase_b_evaluation_input[:, 0].tolist(), precision=4)
+    phase_b_y = _round_list(phase_b_evaluation_input[:, 1].tolist(), precision=4)
     frame_payload: list[dict[str, object]] = []
     for snapshot in snapshots:
         frame_payload.append(
@@ -668,6 +875,16 @@ def build_interactive_payload(
         )
 
     return {
+        "protocol_id": protocol_id,
+        "comparison_scope": asdict(scope),
+        "evaluation_split": evaluation_split,
+        "split_hashes": split_hashes or {},
+        "final_test_accuracy": final_test_accuracy or {},
+        "training_metric_ids": {
+            "Backprop": NUMPY_BACKPROP_LOSS_ID,
+            "Predictive": NUMPY_PC_ENERGY_ID,
+            "Circadian": NUMPY_CIRCADIAN_ENERGY_ID,
+        },
         "epochs": [snapshot.epoch for snapshot in snapshots],
         "phase_b_start_index": next(
             (index for index, snap in enumerate(snapshots) if "Phase B" in snap.phase_name),
@@ -689,9 +906,9 @@ def build_interactive_payload(
         },
         "x_bounds": [round(x_bounds[0], 4), round(x_bounds[1], 4)],
         "y_bounds": [round(y_bounds[0], 4), round(y_bounds[1], 4)],
-        "phase_b_test_points_x": phase_b_x,
-        "phase_b_test_points_y": phase_b_y,
-        "phase_b_test_labels": phase_b_target,
+        "phase_b_evaluation_points_x": phase_b_x,
+        "phase_b_evaluation_points_y": phase_b_y,
+        "phase_b_evaluation_labels": phase_b_target,
         "frames": frame_payload,
         "model_colors": {
             "Backprop": "#2e61ad",
@@ -703,21 +920,42 @@ def build_interactive_payload(
 
 def write_interactive_hardest_mode_html(
     snapshots: list[HardestModeSnapshot],
-    phase_b_test_input: Array,
-    phase_b_test_target: Array,
+    phase_b_evaluation_input: Array,
+    phase_b_evaluation_target: Array,
     x_bounds: tuple[float, float],
     y_bounds: tuple[float, float],
     output_path: Path,
+    evaluation_split: str = "test (legacy)",
+    protocol_id: str = LEGACY_PROTOCOL,
+    split_hashes: dict[str, str] | None = None,
+    final_test_accuracy: dict[str, float] | None = None,
+    comparison_scope: NumpyComparisonScope | None = None,
+    smoke_config: HardestModeConfig | None = None,
 ) -> None:
     if not snapshots:
         raise ValueError("snapshots cannot be empty.")
+    scope = comparison_scope or scope_for_hidden_dims(None)
     payload = build_interactive_payload(
         snapshots=snapshots,
-        phase_b_test_input=phase_b_test_input,
-        phase_b_test_target=phase_b_test_target,
+        phase_b_evaluation_input=phase_b_evaluation_input,
+        phase_b_evaluation_target=phase_b_evaluation_target,
         x_bounds=x_bounds,
         y_bounds=y_bounds,
+        evaluation_split=evaluation_split,
+        protocol_id=protocol_id,
+        split_hashes=split_hashes,
+        final_test_accuracy=final_test_accuracy,
+        comparison_scope=scope,
     )
+    smoke_banner = ""
+    if smoke_config is not None:
+        # Why this: detached HTML must carry the tiny fixture identity too.
+        payload["fixture_id"] = "tiny_smoke_v1"
+        payload["fixture_config"] = asdict(smoke_config)
+        smoke_banner = (
+            '<p class="subtitle">Tiny smoke fixture: 40 rows per phase, '
+            "four total epochs. Descriptive output only.</p>"
+        )
 
     html = f"""<!doctype html>
 <html lang="en">
@@ -817,7 +1055,10 @@ def write_interactive_hardest_mode_html(
   <div class="wrap">
     <section class="hero">
       <h2 style="margin:0 0 6px;">Hardest-Case Dynamics (Interactive)</h2>
-      <p class="subtitle">Replay circadian adaptation over hardest-case training: objective, accuracy, latency, decision boundary, and model internals.</p>
+      <p class="subtitle">Protocol: {protocol_id}. Intermediate accuracy uses Phase-B {evaluation_split} data; final-test scores are computed after training.</p>
+      <p class="subtitle">Comparison scope: {scope.scope_id}. {scope.description}</p>
+      {smoke_banner}
+      <p class="subtitle">Final test accuracy (B/P/C): {json.dumps(final_test_accuracy or {})}</p>
       <div class="controls">
         <button id="playBtn" type="button">Play</button>
         <button id="pauseBtn" type="button">Pause</button>
@@ -908,9 +1149,9 @@ def write_interactive_hardest_mode_html(
     }}
 
     function drawDecisionMap(frame) {{
-      const symbols = payload.phase_b_test_labels.map((label) => label === 1 ? "circle" : "square");
+      const symbols = payload.phase_b_evaluation_labels.map((label) => label === 1 ? "circle" : "square");
       const markerColor = frame.circadian_predictions.map((prediction, idx) => {{
-        return prediction === payload.phase_b_test_labels[idx] ? "#27ae60" : "#d64541";
+        return prediction === payload.phase_b_evaluation_labels[idx] ? "#27ae60" : "#d64541";
       }});
       const heat = {{
         z: frame.decision_map,
@@ -922,8 +1163,8 @@ def write_interactive_hardest_mode_html(
         showscale: false
       }};
       const scatter = {{
-        x: payload.phase_b_test_points_x,
-        y: payload.phase_b_test_points_y,
+        x: payload.phase_b_evaluation_points_x,
+        y: payload.phase_b_evaluation_points_y,
         mode: "markers",
         type: "scatter",
         marker: {{
@@ -932,12 +1173,12 @@ def write_interactive_hardest_mode_html(
           symbol: symbols,
           line: {{width: 1.2, color: "#121212"}}
         }},
-        text: payload.phase_b_test_labels.map((label, idx) => {{
+        text: payload.phase_b_evaluation_labels.map((label, idx) => {{
           const correct = frame.circadian_predictions[idx] === label;
           return "true=" + label + " pred=" + frame.circadian_predictions[idx] + " " + (correct ? "correct" : "wrong");
         }}),
         hoverinfo: "text",
-        name: "Phase-B test points"
+        name: "Phase-B " + payload.evaluation_split + " points"
       }};
       const layout = {{
         title: {{text: "Circadian Inference Map (current frame)"}},
@@ -1097,8 +1338,8 @@ def write_interactive_hardest_mode_html(
       frameLabel.textContent = "Frame " + (currentFrameIndex + 1) + " / " + payload.frames.length;
 
       const frame = payload.frames[currentFrameIndex];
-      drawLineChart("objectiveChart", "Training Signal (normalized)", payload.objective_series, "Normalized objective", [0, 1], currentFrameIndex);
-      drawLineChart("accuracyChart", "Phase-B Test Accuracy", payload.accuracy_series, "Accuracy", [0, 1], currentFrameIndex);
+      drawLineChart("objectiveChart", "Training metrics (normalized per model)", payload.objective_series, "Per-model normalized metric", [0, 1], currentFrameIndex);
+      drawLineChart("accuracyChart", "Phase-B " + payload.evaluation_split + " Accuracy", payload.accuracy_series, "Accuracy", [0, 1], currentFrameIndex);
       const maxLatency = Math.max(
         ...payload.latency_series.Backprop,
         ...payload.latency_series.Predictive,
@@ -1141,33 +1382,61 @@ def write_interactive_hardest_mode_html(
 
 def main() -> None:
     args = parse_args()
+    output_stem = (
+        "hardest_mode_validation_v1"
+        if args.protocol_id == VALIDATION_PROTOCOL
+        else "hardest_mode_legacy_test_informed_v0"
+    )
+    if args.tiny_smoke:
+        output_stem += "_tiny_smoke"
+    gif_output_path = Path(args.gif_output_path or f"docs/figures/{output_stem}.gif")
+    interactive_output_path = Path(
+        args.interactive_output_path or f"docs/figures/interactive_{output_stem}.html"
+    )
+    for output_path in (gif_output_path, interactive_output_path):
+        if output_path.exists():
+            raise FileExistsError(f"Dynamics output already exists: {output_path}")
     config = HardestModeConfig(
+        protocol_id=args.protocol_id,
         seed=args.seed,
         snapshot_interval=args.snapshot_interval,
         gif_duration_ms=args.gif_duration_ms,
     )
-    snapshots, phase_b_test_input, phase_b_test_target, x_bounds, y_bounds = collect_hardest_mode_snapshots(config)
-    gif_output_path = Path(args.gif_output_path)
+    if args.tiny_smoke:
+        config = build_tiny_smoke_config(config)
+    run = collect_hardest_mode_snapshots(config)
     render_hardest_mode_gif(
-        snapshots=snapshots,
-        phase_b_test_input=phase_b_test_input,
-        phase_b_test_target=phase_b_test_target,
-        x_bounds=x_bounds,
-        y_bounds=y_bounds,
+        snapshots=run.snapshots,
+        phase_b_evaluation_input=run.phase_b_evaluation.input,
+        phase_b_evaluation_target=run.phase_b_evaluation.target,
+        x_bounds=run.x_bounds,
+        y_bounds=run.y_bounds,
         output_path=gif_output_path,
         frame_duration_ms=config.gif_duration_ms,
+        evaluation_split=run.evaluation_split,
+        comparison_scope=run.comparison_scope,
     )
-    interactive_output_path = Path(args.interactive_output_path)
     write_interactive_hardest_mode_html(
-        snapshots=snapshots,
-        phase_b_test_input=phase_b_test_input,
-        phase_b_test_target=phase_b_test_target,
-        x_bounds=x_bounds,
-        y_bounds=y_bounds,
+        snapshots=run.snapshots,
+        phase_b_evaluation_input=run.phase_b_evaluation.input,
+        phase_b_evaluation_target=run.phase_b_evaluation.target,
+        x_bounds=run.x_bounds,
+        y_bounds=run.y_bounds,
         output_path=interactive_output_path,
+        evaluation_split=run.evaluation_split,
+        protocol_id=run.protocol_id,
+        split_hashes=run.split_hashes,
+        final_test_accuracy=run.final_test_accuracy,
+        comparison_scope=run.comparison_scope,
+        smoke_config=config if args.tiny_smoke else None,
     )
     print(f"Wrote {gif_output_path}")
     print(f"Wrote {interactive_output_path}")
+    print(f"Protocol: {run.protocol_id}; intermediate split: {run.evaluation_split}")
+    print(f"Comparison scope: {run.comparison_scope.scope_id}. {run.comparison_scope.description}")
+    if args.tiny_smoke:
+        print(f"Fixture: tiny_smoke_v1 {json.dumps(asdict(config), sort_keys=True)}")
+    print(f"Final test accuracy: {run.final_test_accuracy}")
 
 
 if __name__ == "__main__":

@@ -2,18 +2,66 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from hashlib import sha256
+from json import dumps
+from math import isfinite
+import random
 from time import perf_counter
 from typing import Any, Callable
 
 import numpy as np
 
+from src.app.seeded_vision_loader import (
+    SeededEpochLoaderState,
+    SeededEpochTrainLoader as _SeededEpochTrainLoader,
+)
+from src.app.shared_vision_loader import (
+    SharedEpochLoaderState,
+    SharedEpochTrainLoader as _SharedEpochTrainLoader,
+)
+from src.app.vision_checkpoint import (
+    VisionCheckpointStore,
+    VisionCircadianCheckpointContext,
+    VisionCircadianProgress,
+    capture_vision_checkpoint,
+    restore_completed_vision_outcome,
+    restore_vision_process_rng,
+    snapshot_completed_vision_outcome,
+    validate_vision_checkpoint,
+    vision_config_digest,
+    vision_development_data_digest,
+)
+from src.app.vision_sleep_history import (
+    selected_vision_guard_batch_sizes,
+    validate_vision_sleep_history,
+)
+from src.app.sleep_schedule import (
+    SleepAttemptDecision,
+    SleepRollbackCooldown,
+    SleepRollbackCooldownState,
+    decide_sleep_attempt,
+    resolve_rollback_cooldown_epochs,
+)
+from src.app.torch_sleep_decisions import (
+    describe_failed_torch_sleep_decision,
+    describe_guarded_torch_sleep_decision,
+    describe_skipped_torch_sleep_decision,
+    describe_unguarded_torch_sleep_decision,
+)
+from src.app.torch_sleep_transaction import (
+    capture_torch_sleep_process_random,
+    restore_torch_sleep_process_random,
+)
 from src.core.resnet50_variants import (
     BackpropResNet50Classifier,
     CircadianHeadConfig,
     CircadianPredictiveCodingResNet50Classifier,
     PredictiveCodingResNet50Classifier,
+    TORCH_PC_ENERGY_ID,
 )
+from src.core.sleep_clocks import SleepEpochProgress
+from src.core.sleep_telemetry import SleepEventTelemetry
 from src.infra.vision_datasets import (
     SyntheticVisionDatasetConfig,
     TorchVisionDatasetConfig,
@@ -22,12 +70,26 @@ from src.infra.vision_datasets import (
 )
 from src.shared.torch_runtime import require_torch, sync_device
 
+VISION_VALIDATION_UNMATCHED_PROTOCOL = "vision_validation_unmatched_v1"
+VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL = "vision_guard_separated_unmatched_v2"
+VISION_SEEDED_UNMATCHED_PROTOCOL = "vision_guard_separated_seeded_unmatched_v3"
+GUARD_SEPARATED_VISION_PROTOCOLS = {
+    VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+    VISION_SEEDED_UNMATCHED_PROTOCOL,
+}
+VISION_UNMATCHED_REFERENCE_TRACK = "unmatched_reference"
+VISION_END_TO_END_BACKPROP_TRACK = "end_to_end_backprop"
+VISION_DEFAULT_MODEL_ORDER = ("backprop", "predictive", "circadian")
+
 
 @dataclass(frozen=True)
 class ResNet50BenchmarkConfig:
     """Configurable benchmark settings for all three ResNet-50 variants."""
 
     train_samples: int = 2000
+    protocol_id: str = VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL
+    validation_samples: int = 64
+    guard_samples: int = 64
     test_samples: int = 500
     num_classes: int = 10
     image_size: int = 96
@@ -36,6 +98,8 @@ class ResNet50BenchmarkConfig:
     dataset_data_root: str = "data"
     dataset_download: bool = True
     dataset_train_subset_size: int = 0
+    dataset_validation_subset_size: int = 1000
+    dataset_guard_subset_size: int = 1000
     dataset_test_subset_size: int = 0
     dataset_num_workers: int = 0
     dataset_use_augmentation: bool = True
@@ -79,6 +143,7 @@ class ResNet50BenchmarkConfig:
     circadian_sleep_rollback_tolerance: float = 0.002
     circadian_sleep_rollback_metric: str = "cross_entropy"
     circadian_sleep_rollback_eval_batches: int = 2
+    circadian_sleep_rollback_cooldown_epochs: int | None = None
     circadian_min_hidden_dim: int = 384
     circadian_max_hidden_dim: int = 640
     circadian_chemical_decay: float = 0.995
@@ -125,6 +190,11 @@ class ResNet50BenchmarkConfig:
     circadian_max_prune_per_sleep: int = 1
     circadian_split_noise_scale: float = 0.01
     circadian_sleep_reset_factor: float = 0.45
+    circadian_sleep_mode: str = "legacy"
+    circadian_sleep_enable_chemical_reset: bool = True
+    circadian_sleep_enable_homeostasis: bool = True
+    circadian_sleep_enable_split: bool = True
+    circadian_sleep_enable_prune: bool = True
     circadian_homeostatic_downscale_factor: float = 1.0
     circadian_homeostasis_target_input_norm: float = 0.0
     circadian_homeostasis_target_output_norm: float = 0.0
@@ -139,6 +209,7 @@ class ModelSpeedReport:
     epochs_ran: int
     final_metric_name: str
     final_metric_value: float
+    validation_accuracy: float
     test_accuracy: float
     train_seconds: float
     train_samples_per_second: float
@@ -148,13 +219,22 @@ class ModelSpeedReport:
     inference_samples_per_second: float
     total_parameters: int
     trainable_parameters: int
+    benchmark_track: str = VISION_UNMATCHED_REFERENCE_TRACK
+    backbone_trainable: bool = False
+    backbone_pretraining: str = "none"
+    head_type: str = "unknown"
     final_cross_entropy: float | None = None
     final_energy: float | None = None
+    training_energy_id: str | None = None
     circadian_hidden_dim_start: int | None = None
     circadian_hidden_dim_end: int | None = None
     circadian_total_splits: int = 0
     circadian_total_prunes: int = 0
     circadian_total_rollbacks: int = 0
+    circadian_sleep_attempts: int = 0
+    circadian_sleep_cooldown_suppressions: int = 0
+    circadian_sleep_retry_cooldown_epochs: int = 0
+    sleep_events: tuple[SleepEventTelemetry, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -164,43 +244,615 @@ class ResNet50BenchmarkResult:
     device: str
     config: ResNet50BenchmarkConfig
     reports: list[ModelSpeedReport]
+    split_hashes: dict[str, str]
+    training_order: tuple[str, ...] = ()
+    trained_model_hashes: dict[str, str] | None = None
 
 
-def run_resnet50_benchmark(config: ResNet50BenchmarkConfig) -> ResNet50BenchmarkResult:
+@dataclass(frozen=True)
+class _TrainingLoaders:
+    """Only the roles that may affect model state or stopping."""
+
+    train_loader: Any
+    validation_loader: Any
+    guard_loader: Any
+    num_classes: int
+    guard_role_hash: str | None = None
+
+
+@dataclass(frozen=True)
+class _TrainingOutcome:
+    model_name: str
+    model: Any
+    epochs_ran: int
+    validation_accuracy: float
+    train_seconds: float
+    seen_samples: int
+    step_times_ms: tuple[float, ...]
+    uses_backprop_metric: bool = False
+    final_energy: float | None = None
+    circadian_hidden_dim_start: int | None = None
+    circadian_total_splits: int = 0
+    circadian_total_prunes: int = 0
+    circadian_total_rollbacks: int = 0
+    circadian_sleep_attempts: int = 0
+    circadian_sleep_cooldown_suppressions: int = 0
+    circadian_sleep_retry_cooldown_epochs: int = 0
+    sleep_events: tuple[SleepEventTelemetry, ...] = ()
+
+
+@dataclass(frozen=True)
+class ModelDevelopmentReport:
+    """Validation-only metrics for tuning; no final-test result is available."""
+
+    model_name: str
+    epochs_ran: int
+    validation_accuracy: float
+    validation_cross_entropy: float
+    train_seconds: float
+    train_samples_per_second: float
+    mean_train_step_ms: float
+    inference_latency_mean_ms: float
+    inference_latency_p95_ms: float
+    inference_samples_per_second: float
+    total_parameters: int
+    trainable_parameters: int
+    benchmark_track: str = VISION_UNMATCHED_REFERENCE_TRACK
+    backbone_trainable: bool = False
+    backbone_pretraining: str = "none"
+    head_type: str = "unknown"
+    final_energy: float | None = None
+    training_energy_id: str | None = None
+    circadian_hidden_dim_start: int | None = None
+    circadian_hidden_dim_end: int | None = None
+    circadian_total_splits: int = 0
+    circadian_total_prunes: int = 0
+    circadian_total_rollbacks: int = 0
+    circadian_sleep_attempts: int = 0
+    circadian_sleep_cooldown_suppressions: int = 0
+    circadian_sleep_retry_cooldown_epochs: int = 0
+    sleep_events: tuple[SleepEventTelemetry, ...] = ()
+
+
+def _training_loaders(loaders: Any) -> _TrainingLoaders:
+    split_hashes = getattr(loaders, "split_hashes", {})
+    return _TrainingLoaders(
+        train_loader=loaders.train_loader,
+        validation_loader=loaders.validation_loader,
+        guard_loader=loaders.guard_loader,
+        num_classes=loaders.num_classes,
+        guard_role_hash=split_hashes.get("guard", split_hashes.get("validation")),
+    )
+
+
+def benchmark_validation_candidate(
+    variant: str,
+    torch: Any,
+    device: Any,
+    loaders: _TrainingLoaders,
+    config: ResNet50BenchmarkConfig,
+) -> ModelDevelopmentReport:
+    """Train one candidate without accepting or reading a final-test loader."""
+    if (
+        config.protocol_id in GUARD_SEPARATED_VISION_PROTOCOLS
+        and loaders.guard_loader is loaders.validation_loader
+    ):
+        raise ValueError("Guard-separated protocol requires a distinct guard loader.")
+    trainers = {
+        "backprop": _train_backprop,
+        "predictive": _train_predictive,
+        "circadian": _train_circadian,
+    }
+    if variant not in trainers:
+        raise ValueError(f"Unknown benchmark variant: {variant}")
+    if config.protocol_id == VISION_SEEDED_UNMATCHED_PROTOCOL:
+        outcome = _train_seeded_variant(variant, torch, device, loaders, config)
+    else:
+        outcome = trainers[variant](torch, device, loaders, config)
+    return _finalize_validation_report(torch, device, outcome, loaders.validation_loader, config)
+
+
+def run_resnet50_benchmark(
+    config: ResNet50BenchmarkConfig,
+    *,
+    model_order: tuple[str, ...] | None = None,
+    checkpoint_store: VisionCheckpointStore | None = None,
+    resume_from_checkpoint: bool = False,
+) -> ResNet50BenchmarkResult:
     """Benchmark all three model families on the same vision task."""
+    default_order = VISION_DEFAULT_MODEL_ORDER
+    if model_order is not None:
+        if config.protocol_id != VISION_SEEDED_UNMATCHED_PROTOCOL:
+            raise ValueError("A custom model_order requires the seeded vision protocol.")
+        if len(model_order) != 3 or set(model_order) != set(default_order):
+            raise ValueError("model_order must be a permutation of the three variants.")
+    training_order = model_order or default_order
     _validate_benchmark_config(config)
+    if resume_from_checkpoint and checkpoint_store is None:
+        raise ValueError("resume_from_checkpoint requires a vision checkpoint store")
+    if checkpoint_store is not None:
+        return _run_checkpointed_resnet50_benchmark(
+            config, training_order, checkpoint_store, resume_from_checkpoint
+        )
     torch = require_torch()
     _set_seed(torch, config.seed)
     device = _resolve_device(torch, config.device)
     loaders = _build_benchmark_loaders(config)
+    if config.protocol_id in GUARD_SEPARATED_VISION_PROTOCOLS:
+        if "guard" not in loaders.split_hashes or loaders.guard_loader is loaders.validation_loader:
+            raise ValueError("Guard-separated protocol requires a distinct guard split.")
 
+    training_loaders = _training_loaders(loaders)
+    if config.protocol_id == VISION_SEEDED_UNMATCHED_PROTOCOL:
+        trained = [
+            _train_seeded_variant(name, torch, device, training_loaders, config)
+            for name in training_order
+        ]
+        trained_model_hashes = {
+            outcome.model_name: _hash_trained_model(outcome.model) for outcome in trained
+        }
+    else:
+        trained = [
+            _train_backprop(torch=torch, device=device, loaders=training_loaders, config=config),
+            _train_predictive(torch=torch, device=device, loaders=training_loaders, config=config),
+            _train_circadian(torch=torch, device=device, loaders=training_loaders, config=config),
+        ]
+        trained_model_hashes = None
+    # Final labels are first available after every model has stopped learning.
     reports = [
-        _benchmark_backprop(torch=torch, device=device, loaders=loaders, config=config),
-        _benchmark_predictive(torch=torch, device=device, loaders=loaders, config=config),
-        _benchmark_circadian(torch=torch, device=device, loaders=loaders, config=config),
+        _finalize_test_report(
+            torch=torch,
+            device=device,
+            outcome=outcome,
+            test_loader=loaders.test_loader,
+            config=config,
+        )
+        for outcome in trained
     ]
     _validate_report_models(reports)
-    return ResNet50BenchmarkResult(device=str(device), config=config, reports=reports)
+    return ResNet50BenchmarkResult(
+        device=str(device),
+        config=config,
+        reports=reports,
+        split_hashes=dict(loaders.split_hashes),
+        training_order=training_order,
+        trained_model_hashes=trained_model_hashes,
+    )
+
+
+def _run_checkpointed_resnet50_benchmark(
+    config: ResNet50BenchmarkConfig,
+    training_order: tuple[str, ...],
+    checkpoint_store: VisionCheckpointStore,
+    resume_from_checkpoint: bool,
+) -> ResNet50BenchmarkResult:
+    """Continue unmatched variants before final-test scoring."""
+    seeded_protocol = config.protocol_id == VISION_SEEDED_UNMATCHED_PROTOCOL
+    torch = require_torch()
+    device = _resolve_device(torch, config.device)
+    if device.type not in {"cpu", "cuda"}:
+        raise ValueError("vision checkpoints require a CPU or CUDA device")
+    cuda_device = None
+    if device.type == "cuda":
+        if not torch.cuda.is_available():
+            raise ValueError("vision checkpoint CUDA device is unavailable")
+        device_index = device.index if device.index is not None else torch.cuda.current_device()
+        if device_index >= torch.cuda.device_count():
+            raise ValueError("vision checkpoint CUDA device is unavailable")
+        cuda_device = f"cuda:{device_index}"
+        device = torch.device(cuda_device)
+    saved = checkpoint_store.load() if resume_from_checkpoint else None
+    if saved is not None and (
+        saved.protocol_id != config.protocol_id
+        or saved.training_order != training_order
+        or saved.config_digest != vision_config_digest(config, training_order)
+    ):
+        raise ValueError("incompatible vision checkpoint config or order")
+    if saved is None:
+        _set_seed(torch, config.seed)
+    previous_random = (
+        (
+            random.getstate(),
+            np.random.get_state(),
+            torch.get_rng_state().clone(),
+            torch.cuda.get_rng_state(cuda_device).clone() if cuda_device is not None else None,
+        )
+        if saved is not None
+        else None
+    )
+    restored_outcomes: list[_TrainingOutcome] = []
+    try:
+        loaders = _build_benchmark_loaders(config)
+        if config.protocol_id in GUARD_SEPARATED_VISION_PROTOCOLS and (
+            "guard" not in loaders.split_hashes or loaders.guard_loader is loaders.validation_loader
+        ):
+            raise ValueError("guard-separated vision checkpoint requires a distinct guard split")
+        if seeded_protocol:
+            _SeededEpochTrainLoader(
+                torch, loaders.train_loader, config.seed + 3_001
+            ).snapshot_state()
+        else:
+            _SharedEpochTrainLoader(torch, loaders.train_loader).snapshot_state()
+        data_digest = vision_development_data_digest(loaders)
+        if saved is not None:
+            validate_vision_checkpoint(
+                saved,
+                config=config,
+                data_digest=data_digest,
+                training_order=training_order,
+                torch=torch,
+                shared_train_loader=not seeded_protocol,
+                cuda_device=cuda_device,
+            )
+            restored_outcomes = _restore_completed_vision_outcomes(
+                saved, training_order, config, device, loaders
+            )
+            if saved.active_circadian is not None:
+                _preflight_active_circadian(saved, config, device, loaders)
+    except Exception:
+        if previous_random is not None:
+            python_state, numpy_state, torch_state, cuda_state = previous_random
+            random.setstate(python_state)
+            np.random.set_state(numpy_state)
+            torch.set_rng_state(torch_state)
+            if cuda_state is not None:
+                assert cuda_device is not None
+                torch.cuda.set_rng_state(cuda_state, cuda_device)
+        raise
+    outcomes = restored_outcomes
+    if saved is not None:
+        restore_vision_process_rng(saved, torch)
+        if not seeded_protocol:
+            loaders.train_loader.generator.set_state(saved.shared_train_generator_state)
+    training_loaders = _training_loaders(loaders)
+    legacy_trainers = {
+        "backprop": _train_backprop,
+        "predictive": _train_predictive,
+    }
+    for name in training_order[len(outcomes) :]:
+        if name == "circadian":
+            preceding = tuple(
+                snapshot_completed_vision_outcome(item, training_order[index])
+                for index, item in enumerate(outcomes)
+            )
+            active = saved if saved is not None and saved.active_circadian is not None else None
+            context = VisionCircadianCheckpointContext(
+                store=checkpoint_store,
+                config=config,
+                data_digest=data_digest,
+                training_order=training_order,
+                completed_outcomes=preceding,
+                completed_hashes=tuple(_hash_trained_model(item.model) for item in outcomes),
+                outer_entry_torch_state=(
+                    active.active_circadian.outer_entry_torch_state
+                    if active is not None and active.active_circadian is not None
+                    else torch.get_rng_state().clone()
+                ),
+                outer_entry_torch_cuda_state=(
+                    active.active_circadian.outer_entry_torch_cuda_state
+                    if active is not None and active.active_circadian is not None
+                    else torch.cuda.get_rng_state(cuda_device).clone()
+                    if cuda_device is not None
+                    else None
+                ),
+                resume_checkpoint=active,
+            )
+            if seeded_protocol:
+                outcome = _train_seeded_variant(
+                    name,
+                    torch,
+                    device,
+                    training_loaders,
+                    config,
+                    checkpoint_context=context,
+                )
+            else:
+                shared_loaders = replace(
+                    training_loaders,
+                    train_loader=_SharedEpochTrainLoader(torch, training_loaders.train_loader),
+                )
+                outcome = _train_circadian(
+                    torch, device, shared_loaders, config, checkpoint_context=context
+                )
+        elif seeded_protocol:
+            outcome = _train_seeded_variant(name, torch, device, training_loaders, config)
+        else:
+            outcome = legacy_trainers[name](torch, device, training_loaders, config)
+        outcomes.append(outcome)
+        checkpoint_store.save(
+            capture_vision_checkpoint(
+                config=config,
+                data_digest=data_digest,
+                training_order=training_order,
+                completed_outcomes=tuple(
+                    snapshot_completed_vision_outcome(item, training_order[index])
+                    for index, item in enumerate(outcomes)
+                ),
+                completed_hashes=tuple(_hash_trained_model(item.model) for item in outcomes),
+                torch=torch,
+                cuda_device=cuda_device,
+                shared_train_generator_state=(
+                    loaders.train_loader.generator.get_state() if not seeded_protocol else None
+                ),
+            )
+        )
+    trained_hashes = {item.model_name: _hash_trained_model(item.model) for item in outcomes}
+    reports = [
+        _finalize_test_report(torch, device, item, loaders.test_loader, config) for item in outcomes
+    ]
+    _validate_report_models(reports)
+    return ResNet50BenchmarkResult(
+        device=str(device),
+        config=config,
+        reports=reports,
+        split_hashes=dict(loaders.split_hashes),
+        training_order=training_order,
+        trained_model_hashes=trained_hashes,
+    )
+
+
+def _restore_completed_vision_outcomes(
+    checkpoint: Any,
+    training_order: tuple[str, ...],
+    config: ResNet50BenchmarkConfig,
+    device: Any,
+    loaders: Any,
+) -> list[_TrainingOutcome]:
+    expected = {
+        "backprop": ("BackpropResNet50", BackpropResNet50Classifier),
+        "predictive": ("PredictiveCodingResNet50", PredictiveCodingResNet50Classifier),
+        "circadian": (
+            "CircadianPredictiveCodingResNet50",
+            CircadianPredictiveCodingResNet50Classifier,
+        ),
+    }
+    restored: list[_TrainingOutcome] = []
+    train_loader = loaders.train_loader
+    train_batch_count = len(train_loader)
+    batch_size = train_loader.batch_size
+    if batch_size is None:
+        raise ValueError("vision checkpoint requires fixed training batches")
+    train_sample_count = (
+        train_batch_count * batch_size if train_loader.drop_last else len(train_loader.dataset)
+    )
+    for variant, stored, saved_hash in zip(
+        training_order, checkpoint.completed_outcomes, checkpoint.completed_hashes
+    ):
+        name, model_type = expected[variant]
+        if (
+            not isinstance(stored, _TrainingOutcome)
+            or stored.model_name != name
+            or type(stored.epochs_ran) is not int
+            or not 1 <= stored.epochs_ran <= config.epochs
+            or type(stored.seen_samples) is not int
+            or stored.seen_samples != stored.epochs_ran * train_sample_count
+        ):
+            raise ValueError("incompatible vision checkpoint completed model")
+        _preflight_completed_vision_report(
+            stored, variant, train_batch_count * stored.epochs_ran, config
+        )
+        if variant == "circadian":
+            guard_role, guard_hash = _vision_guard_identity(config, loaders)
+            validate_vision_sleep_history(
+                stored.sleep_events,
+                config=config,
+                guard_role=guard_role,
+                guard_role_hash=guard_hash,
+                guard_batch_sizes=_vision_guard_batch_sizes(config, loaders.guard_loader),
+                resolved_epochs=stored.epochs_ran,
+                batches_per_epoch=train_batch_count,
+                sleep_attempts=stored.circadian_sleep_attempts,
+                sleep_rollbacks=stored.circadian_total_rollbacks,
+                sleep_splits=stored.circadian_total_splits,
+                sleep_prunes=stored.circadian_total_prunes,
+                cooldown_suppressions=stored.circadian_sleep_cooldown_suppressions,
+            )
+        elif stored.sleep_events != ():
+            raise ValueError("incompatible vision checkpoint baseline sleep history")
+        try:
+            outcome = restore_completed_vision_outcome(
+                stored,
+                variant=variant,
+                config=config,
+                device=device,
+                num_classes=loaders.num_classes,
+                circadian_config=_build_circadian_head_config(config),
+            )
+            if not isinstance(outcome.model, model_type):
+                raise ValueError("incompatible vision checkpoint model type")
+            actual_hash = _hash_trained_model(outcome.model)
+        except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
+            raise ValueError("incompatible vision checkpoint completed model") from exc
+        if actual_hash != saved_hash:
+            raise ValueError("incompatible vision checkpoint completed model hash")
+        restored.append(outcome)
+    return restored
+
+
+def _preflight_completed_vision_report(
+    stored: _TrainingOutcome,
+    variant: str,
+    expected_steps: int,
+    config: ResNet50BenchmarkConfig,
+) -> None:
+    """A completed model's learning report must match its saved train cursor."""
+    if (
+        not isinstance(stored.step_times_ms, tuple)
+        or len(stored.step_times_ms) != expected_steps
+        or any(not _finite_nonnegative(value) for value in stored.step_times_ms)
+        or not _finite_nonnegative(stored.train_seconds)
+        or not isinstance(stored.validation_accuracy, (int, float))
+        or not isfinite(stored.validation_accuracy)
+        or not 0 <= stored.validation_accuracy <= 1
+        or stored.uses_backprop_metric != (variant == "backprop")
+    ):
+        raise ValueError("incompatible vision checkpoint completed report")
+    if variant == "backprop":
+        if stored.final_energy is not None:
+            raise ValueError("incompatible vision checkpoint backprop report")
+    elif not isinstance(stored.final_energy, (int, float)) or not isfinite(stored.final_energy):
+        raise ValueError("incompatible vision checkpoint model energy")
+    sleep_counts = (
+        stored.circadian_total_splits,
+        stored.circadian_total_prunes,
+        stored.circadian_total_rollbacks,
+        stored.circadian_sleep_attempts,
+        stored.circadian_sleep_cooldown_suppressions,
+        stored.circadian_sleep_retry_cooldown_epochs,
+    )
+    if any(type(value) is not int or value < 0 for value in sleep_counts):
+        raise ValueError("incompatible vision checkpoint sleep report")
+    if variant == "circadian":
+        if (
+            stored.circadian_hidden_dim_start != config.circadian_head_hidden_dim
+            or stored.circadian_total_rollbacks > stored.circadian_sleep_attempts
+            or stored.circadian_sleep_attempts > stored.epochs_ran
+        ):
+            raise ValueError("incompatible vision checkpoint circadian report")
+    elif stored.circadian_hidden_dim_start is not None or any(sleep_counts):
+        raise ValueError("incompatible vision checkpoint baseline sleep report")
+
+
+def _finite_nonnegative(value: Any) -> bool:
+    return isinstance(value, (int, float)) and isfinite(value) and value >= 0
+
+
+def _vision_guard_identity(config: ResNet50BenchmarkConfig, loaders: Any) -> tuple[str, str]:
+    role = (
+        "validation"
+        if config.protocol_id == VISION_VALIDATION_UNMATCHED_PROTOCOL
+        else "inner_guard"
+    )
+    split_name = "validation" if role == "validation" else "guard"
+    role_hash = loaders.split_hashes.get(split_name)
+    if role_hash is None:
+        raise ValueError("incompatible vision checkpoint sleep history role")
+    return role, role_hash
+
+
+def _vision_guard_batch_sizes(config: ResNet50BenchmarkConfig, loader: Any) -> tuple[int, ...]:
+    limit = _resolve_eval_batches(config.circadian_sleep_rollback_eval_batches)
+    if limit is None:
+        limit = _resolve_eval_batches(config.evaluation_batches)
+    return selected_vision_guard_batch_sizes(loader, limit)
+
+
+def _train_seeded_variant(
+    variant: str,
+    torch: Any,
+    device: Any,
+    loaders: _TrainingLoaders,
+    config: ResNet50BenchmarkConfig,
+    *,
+    checkpoint_context: VisionCircadianCheckpointContext | None = None,
+) -> _TrainingOutcome:
+    trainers = {
+        "backprop": _train_backprop,
+        "predictive": _train_predictive,
+        "circadian": _train_circadian,
+    }
+    seed_offsets = {"backprop": 2_101, "predictive": 2_102, "circadian": 2_103}
+    variant_loaders = replace(
+        loaders,
+        train_loader=_SeededEpochTrainLoader(torch, loaders.train_loader, config.seed + 3_001),
+    )
+    cuda_devices = list(range(torch.cuda.device_count())) if torch.cuda.is_available() else []
+    if checkpoint_context is not None and checkpoint_context.resume_checkpoint is not None:
+        torch.set_rng_state(checkpoint_context.outer_entry_torch_state.detach().clone())
+        outer_cuda_state = checkpoint_context.outer_entry_torch_cuda_state
+        if outer_cuda_state is not None:
+            torch.cuda.set_rng_state(outer_cuda_state.detach().clone(), device)
+    with torch.random.fork_rng(devices=cuda_devices):
+        _set_seed(torch, config.seed + seed_offsets[variant])
+        if checkpoint_context is not None:
+            if variant != "circadian":
+                raise ValueError("vision training checkpoint context requires circadian variant")
+            return _train_circadian(
+                torch, device, variant_loaders, config, checkpoint_context=checkpoint_context
+            )
+        return trainers[variant](torch, device, variant_loaders, config)
+
+
+def _hash_trained_model(model: Any) -> str:
+    torch = require_torch()
+    named_tensors = [
+        (f"backbone.{name}", tensor) for name, tensor in model.backbone.state_dict().items()
+    ]
+    named_scalars: list[tuple[str, Any]] = []
+    if hasattr(model, "classifier"):
+        named_tensors.extend(
+            (f"classifier.{name}", tensor) for name, tensor in model.classifier.state_dict().items()
+        )
+    else:
+        head = model.head
+        if hasattr(head, "snapshot_state"):
+            # Chemical, traffic, and cooldown state affects later learning even when weights match.
+            for name, value in head.snapshot_state().items():
+                target = named_tensors if torch.is_tensor(value) else named_scalars
+                target.append((f"head.{name}", value))
+            named_tensors.append(("head.split_generator", head._split_generator.get_state()))
+        else:
+            named_tensors.extend(
+                (f"head.{name}", getattr(head, name))
+                for name in (
+                    "weight_feature_hidden",
+                    "bias_hidden",
+                    "weight_hidden_output",
+                    "bias_output",
+                    "_traffic_sum",
+                )
+            )
+            named_scalars.append(("head.traffic_steps", head._traffic_steps))
+    digest = sha256()
+    for name, tensor in sorted(named_tensors):
+        value = tensor.detach().cpu().contiguous().numpy()
+        digest.update(name.encode("utf-8"))
+        digest.update(str(value.dtype).encode("utf-8"))
+        digest.update(str(value.shape).encode("utf-8"))
+        digest.update(value.tobytes())
+    for name, value in sorted(named_scalars):
+        digest.update(name.encode("utf-8"))
+        digest.update(dumps(value, sort_keys=True, allow_nan=False).encode("utf-8"))
+    return digest.hexdigest()
 
 
 def format_resnet50_benchmark_result(result: ResNet50BenchmarkResult) -> str:
     """Create a readable benchmark report."""
     lines = [
-        "ResNet-50 Speed Benchmark (Backprop vs Predictive vs Circadian)",
-        "---------------------------------------------------------------",
+        "ResNet-50 Reference Benchmark (Backprop, Predictive, Circadian)",
+        "------------------------------------------------------------",
+        f"Protocol: {result.config.protocol_id}",
+        f"Circadian sleep mode: {result.config.circadian_sleep_mode}",
+        "Repeated stopping and rollback decisions use guard examples; "
+        "outer validation is measured after training."
+        if result.config.protocol_id in GUARD_SEPARATED_VISION_PROTOCOLS
+        else "Legacy validation also supplied repeated stopping and rollback decisions.",
+        "Comparison status: legacy unmatched heads and backbone state; deltas are descriptive.",
+        "Legacy linear-head reference: BackpropResNet50.",
         f"Device: {result.device}",
         _format_dataset_summary(result.config),
+        f"Split hashes: {result.split_hashes}",
+        f"Training order: {result.training_order}",
         "",
     ]
+    if result.trained_model_hashes is not None:
+        lines.insert(-1, f"Trained model hashes: {result.trained_model_hashes}")
     backprop_report = _find_report_by_name(result.reports, "BackpropResNet50")
     for report in result.reports:
         lines.extend(
             [
                 f"{report.model_name}",
                 (
+                    f"  track={report.benchmark_track}, "
+                    f"backbone_trainable={report.backbone_trainable}, "
+                    f"pretraining={report.backbone_pretraining}, "
+                    f"head={report.head_type}"
+                ),
+                (
                     f"  epochs={report.epochs_ran}, "
                     f"{report.final_metric_name}={report.final_metric_value:.4f}, "
-                    f"acc={report.test_accuracy:.3f}"
+                    f"validation_acc={report.validation_accuracy:.3f}, "
+                    f"test_acc={report.test_accuracy:.3f}"
                 ),
                 (
                     f"  training: {report.train_seconds:.2f}s total, "
@@ -223,34 +875,50 @@ def format_resnet50_benchmark_result(result: ResNet50BenchmarkResult) -> str:
             speed_delta = report.train_samples_per_second - backprop_report.train_samples_per_second
             lines.append(
                 (
-                    "  vs backprop: "
+                    "  vs legacy linear backprop (descriptive): "
                     f"acc_delta={accuracy_delta:+.3f}, "
                     f"train_samples_per_second_delta={speed_delta:+.1f}"
                 )
             )
         if report.final_cross_entropy is not None and report.final_metric_name != "cross_entropy":
             lines.append(f"  cross_entropy={report.final_cross_entropy:.4f}")
-        if report.final_energy is not None and report.final_metric_name != "energy":
-            lines.append(f"  energy={report.final_energy:.4f}")
-        if report.circadian_hidden_dim_start is not None and report.circadian_hidden_dim_end is not None:
+        if report.final_energy is not None:
+            energy_id = report.training_energy_id or "legacy_unlabeled"
+            lines.append(f"  last training diagnostic [{energy_id}]={report.final_energy:.4f}")
+        if (
+            report.circadian_hidden_dim_start is not None
+            and report.circadian_hidden_dim_end is not None
+        ):
             lines.append(
                 (
                     "  circadian sleep: "
                     f"hidden={report.circadian_hidden_dim_start}->{report.circadian_hidden_dim_end}, "
                     f"splits={report.circadian_total_splits}, "
                     f"prunes={report.circadian_total_prunes}, "
-                    f"rollbacks={report.circadian_total_rollbacks}"
+                    f"rollbacks={report.circadian_total_rollbacks}, "
+                    f"attempts={report.circadian_sleep_attempts}, "
+                    f"cooldown_skips={report.circadian_sleep_cooldown_suppressions}, "
+                    f"cooldown_epochs={report.circadian_sleep_retry_cooldown_epochs}"
                 )
             )
         lines.append("")
     return "\n".join(lines).strip()
 
 
-def _build_benchmark_loaders(config: ResNet50BenchmarkConfig) -> Any:
+def _build_benchmark_loaders(
+    config: ResNet50BenchmarkConfig, *, include_final_test: bool = True
+) -> Any:
+    if type(include_final_test) is not bool:
+        raise ValueError("include_final_test must be a boolean")
+    guard_separated = config.protocol_id in GUARD_SEPARATED_VISION_PROTOCOLS
     if config.dataset_name == "synthetic":
+        if not include_final_test:
+            raise ValueError("development-only source loading requires a torchvision dataset")
         return build_synthetic_vision_dataloaders(
             SyntheticVisionDatasetConfig(
                 train_samples=config.train_samples,
+                validation_samples=config.validation_samples,
+                guard_samples=config.guard_samples if guard_separated else 0,
                 test_samples=config.test_samples,
                 num_classes=config.num_classes,
                 image_size=config.image_size,
@@ -271,17 +939,24 @@ def _build_benchmark_loaders(config: ResNet50BenchmarkConfig) -> Any:
             num_workers=config.dataset_num_workers,
             download=config.dataset_download,
             train_subset_size=config.dataset_train_subset_size,
+            validation_subset_size=config.dataset_validation_subset_size,
+            guard_subset_size=config.dataset_guard_subset_size if guard_separated else 0,
             test_subset_size=config.dataset_test_subset_size,
             use_augmentation=config.dataset_use_augmentation,
-        )
+        ),
+        include_final_test=include_final_test,
     )
 
 
 def _format_dataset_summary(config: ResNet50BenchmarkConfig) -> str:
+    guard_separated = config.protocol_id in GUARD_SEPARATED_VISION_PROTOCOLS
     if config.dataset_name == "synthetic":
+        guard_summary = f"{config.guard_samples} guard / " if guard_separated else ""
         return (
             "Dataset: synthetic"
-            f" ({config.train_samples} train / {config.test_samples} test, "
+            f" ({config.train_samples} train / {config.validation_samples} validation / "
+            f"{guard_summary}"
+            f"{config.test_samples} test, "
             f"classes={config.num_classes}, size={config.image_size}, "
             f"difficulty={config.dataset_difficulty}, noise={config.dataset_noise_std:.3f})"
         )
@@ -294,7 +969,9 @@ def _format_dataset_summary(config: ResNet50BenchmarkConfig) -> str:
     return (
         f"Dataset: {config.dataset_name} "
         f"(root={config.dataset_data_root}, size={config.image_size}, "
-        f"batch={config.batch_size}, augmentation={config.dataset_use_augmentation}"
+        f"batch={config.batch_size}, validation={config.dataset_validation_subset_size}, "
+        f"guard={config.dataset_guard_subset_size if guard_separated else 0}, "
+        f"augmentation={config.dataset_use_augmentation}"
         f"{subset_suffix})"
     )
 
@@ -305,6 +982,28 @@ def _benchmark_backprop(
     loaders: Any,
     config: ResNet50BenchmarkConfig,
 ) -> ModelSpeedReport:
+    """Compatibility entry point for historical single-variant scripts."""
+    training_loaders = _training_loaders(loaders)
+    outcome = (
+        _train_seeded_variant("backprop", torch, device, training_loaders, config)
+        if config.protocol_id == VISION_SEEDED_UNMATCHED_PROTOCOL
+        else _train_backprop(torch, device, training_loaders, config)
+    )
+    return _finalize_test_report(
+        torch=torch,
+        device=device,
+        outcome=outcome,
+        test_loader=loaders.test_loader,
+        config=config,
+    )
+
+
+def _train_backprop(
+    torch: Any,
+    device: Any,
+    loaders: _TrainingLoaders,
+    config: ResNet50BenchmarkConfig,
+) -> _TrainingOutcome:
     model = BackpropResNet50Classifier(
         num_classes=loaders.num_classes,
         device=device,
@@ -349,7 +1048,7 @@ def _benchmark_backprop(
 
         epochs_ran = epoch
         eval_accuracy, _ = _compute_backprop_metrics(
-            torch, model, loaders.test_loader, device, max_batches=eval_batches
+            torch, model, loaders.guard_loader, device, max_batches=eval_batches
         )
         if _should_stop_early(
             target_accuracy=config.target_accuracy,
@@ -360,32 +1059,18 @@ def _benchmark_backprop(
 
     model.backbone.eval()
     model.classifier.eval()
-    test_accuracy, final_cross_entropy = _compute_backprop_metrics(
-        torch, model, loaders.test_loader, device, max_batches=None
+    validation_accuracy, _ = _compute_backprop_metrics(
+        torch, model, loaders.validation_loader, device, max_batches=None
     )
-    inference_metrics = _benchmark_inference(
-        torch=torch,
-        device=device,
-        loader=loaders.test_loader,
-        forward_logits=lambda x: model.forward_logits(x),
-        warmup_batches=config.warmup_batches,
-        benchmark_batches=config.inference_batches,
-    )
-    return ModelSpeedReport(
+    return _TrainingOutcome(
         model_name="BackpropResNet50",
+        model=model,
         epochs_ran=epochs_ran,
-        final_metric_name="cross_entropy",
-        final_metric_value=final_cross_entropy,
-        final_cross_entropy=final_cross_entropy,
-        test_accuracy=test_accuracy,
+        validation_accuracy=validation_accuracy,
         train_seconds=train_seconds,
-        train_samples_per_second=_safe_div(seen_samples, train_seconds),
-        mean_train_step_ms=float(np.mean(step_times_ms)) if step_times_ms else 0.0,
-        inference_latency_mean_ms=inference_metrics["latency_mean_ms"],
-        inference_latency_p95_ms=inference_metrics["latency_p95_ms"],
-        inference_samples_per_second=inference_metrics["samples_per_second"],
-        total_parameters=model.parameter_count(),
-        trainable_parameters=model.trainable_parameter_count(),
+        seen_samples=seen_samples,
+        step_times_ms=tuple(step_times_ms),
+        uses_backprop_metric=True,
     )
 
 
@@ -395,6 +1080,28 @@ def _benchmark_predictive(
     loaders: Any,
     config: ResNet50BenchmarkConfig,
 ) -> ModelSpeedReport:
+    """Compatibility entry point for historical single-variant scripts."""
+    training_loaders = _training_loaders(loaders)
+    outcome = (
+        _train_seeded_variant("predictive", torch, device, training_loaders, config)
+        if config.protocol_id == VISION_SEEDED_UNMATCHED_PROTOCOL
+        else _train_predictive(torch, device, training_loaders, config)
+    )
+    return _finalize_test_report(
+        torch=torch,
+        device=device,
+        outcome=outcome,
+        test_loader=loaders.test_loader,
+        config=config,
+    )
+
+
+def _train_predictive(
+    torch: Any,
+    device: Any,
+    loaders: _TrainingLoaders,
+    config: ResNet50BenchmarkConfig,
+) -> _TrainingOutcome:
     model = PredictiveCodingResNet50Classifier(
         num_classes=loaders.num_classes,
         device=device,
@@ -433,7 +1140,7 @@ def _benchmark_predictive(
 
         epochs_ran = epoch
         eval_accuracy, _ = _compute_pc_metrics(
-            torch, model, loaders.test_loader, device, max_batches=eval_batches
+            torch, model, loaders.guard_loader, device, max_batches=eval_batches
         )
         if _should_stop_early(
             target_accuracy=config.target_accuracy,
@@ -442,33 +1149,18 @@ def _benchmark_predictive(
             break
     train_seconds = perf_counter() - train_timer_start
 
-    test_accuracy, final_cross_entropy = _compute_pc_metrics(
-        torch, model, loaders.test_loader, device, max_batches=None
+    validation_accuracy, _ = _compute_pc_metrics(
+        torch, model, loaders.validation_loader, device, max_batches=None
     )
-    inference_metrics = _benchmark_inference(
-        torch=torch,
-        device=device,
-        loader=loaders.test_loader,
-        forward_logits=lambda x: model.predict_logits(x),
-        warmup_batches=config.warmup_batches,
-        benchmark_batches=config.inference_batches,
-    )
-    return ModelSpeedReport(
+    return _TrainingOutcome(
         model_name="PredictiveCodingResNet50",
+        model=model,
         epochs_ran=epochs_ran,
-        final_metric_name="cross_entropy",
-        final_metric_value=final_cross_entropy,
-        final_cross_entropy=final_cross_entropy,
         final_energy=final_energy,
-        test_accuracy=test_accuracy,
+        validation_accuracy=validation_accuracy,
         train_seconds=train_seconds,
-        train_samples_per_second=_safe_div(seen_samples, train_seconds),
-        mean_train_step_ms=float(np.mean(step_times_ms)) if step_times_ms else 0.0,
-        inference_latency_mean_ms=inference_metrics["latency_mean_ms"],
-        inference_latency_p95_ms=inference_metrics["latency_p95_ms"],
-        inference_samples_per_second=inference_metrics["samples_per_second"],
-        total_parameters=model.parameter_count(),
-        trainable_parameters=model.trainable_parameter_count(),
+        seen_samples=seen_samples,
+        step_times_ms=tuple(step_times_ms),
     )
 
 
@@ -478,7 +1170,25 @@ def _benchmark_circadian(
     loaders: Any,
     config: ResNet50BenchmarkConfig,
 ) -> ModelSpeedReport:
-    circadian_config = CircadianHeadConfig(
+    """Compatibility entry point for historical single-variant scripts."""
+    training_loaders = _training_loaders(loaders)
+    outcome = (
+        _train_seeded_variant("circadian", torch, device, training_loaders, config)
+        if config.protocol_id == VISION_SEEDED_UNMATCHED_PROTOCOL
+        else _train_circadian(torch, device, training_loaders, config)
+    )
+    return _finalize_test_report(
+        torch=torch,
+        device=device,
+        outcome=outcome,
+        test_loader=loaders.test_loader,
+        config=config,
+    )
+
+
+def _build_circadian_head_config(config: ResNet50BenchmarkConfig) -> CircadianHeadConfig:
+    """Keep circadian dynamics identical across image and fixed-feature tracks."""
+    return CircadianHeadConfig(
         chemical_decay=config.circadian_chemical_decay,
         chemical_buildup_rate=config.circadian_chemical_buildup_rate,
         use_saturating_chemical=config.circadian_use_saturating_chemical,
@@ -523,6 +1233,11 @@ def _benchmark_circadian(
         max_prune_per_sleep=config.circadian_max_prune_per_sleep,
         split_noise_scale=config.circadian_split_noise_scale,
         sleep_reset_factor=config.circadian_sleep_reset_factor,
+        sleep_mode=config.circadian_sleep_mode,
+        sleep_enable_chemical_reset=config.circadian_sleep_enable_chemical_reset,
+        sleep_enable_homeostasis=config.circadian_sleep_enable_homeostasis,
+        sleep_enable_split=config.circadian_sleep_enable_split,
+        sleep_enable_prune=config.circadian_sleep_enable_prune,
         homeostatic_downscale_factor=config.circadian_homeostatic_downscale_factor,
         homeostasis_target_input_norm=config.circadian_homeostasis_target_input_norm,
         homeostasis_target_output_norm=config.circadian_homeostasis_target_output_norm,
@@ -538,152 +1253,727 @@ def _benchmark_circadian(
         adaptive_sleep_budget_plateau_weight=config.circadian_adaptive_sleep_budget_plateau_weight,
         adaptive_sleep_budget_variance_weight=config.circadian_adaptive_sleep_budget_variance_weight,
     )
-    model = CircadianPredictiveCodingResNet50Classifier(
-        num_classes=loaders.num_classes,
+
+
+def _new_circadian_classifier(
+    device: Any,
+    num_classes: int,
+    config: ResNet50BenchmarkConfig,
+) -> CircadianPredictiveCodingResNet50Classifier:
+    return CircadianPredictiveCodingResNet50Classifier(
+        num_classes=num_classes,
         device=device,
         head_hidden_dim=config.circadian_head_hidden_dim,
         seed=config.seed + 23,
         freeze_backbone=True,
         backbone_weights=config.backbone_weights,
-        circadian_config=circadian_config,
+        circadian_config=_build_circadian_head_config(config),
         min_hidden_dim=config.circadian_min_hidden_dim,
         max_hidden_dim=config.circadian_max_hidden_dim,
     )
+
+
+def _preflight_active_circadian(
+    checkpoint: Any,
+    config: ResNet50BenchmarkConfig,
+    device: Any,
+    loaders: Any,
+) -> None:
+    """Reject malformed progress and model state before restoring process RNG."""
+    torch = require_torch()
+    progress = checkpoint.active_circadian
+    if not isinstance(progress, VisionCircadianProgress):
+        raise ValueError("incompatible vision checkpoint circadian progress")
+    train_loader = loaders.train_loader
+    batch_count = len(train_loader)
+    batch_size = train_loader.batch_size
+    if batch_size is None:
+        raise ValueError("vision checkpoint requires fixed training batches")
+    sample_count = len(train_loader.dataset)
+    batch_sizes = tuple(
+        min(batch_size, sample_count - index * batch_size) for index in range(batch_count)
+    )
+    if train_loader.drop_last:
+        batch_sizes = tuple(batch_size for _ in range(batch_count))
+    counters = (
+        progress.completed_epoch,
+        progress.next_batch_index,
+        progress.initial_hidden_dim,
+        progress.epochs_ran,
+        progress.wake_batches,
+        progress.seen_samples,
+        progress.sleep_attempts,
+        progress.sleep_rollbacks,
+        progress.sleep_splits,
+        progress.sleep_prunes,
+    )
+    if any(type(value) is not int or value < 0 for value in counters):
+        raise ValueError("incompatible vision checkpoint circadian counters")
+    if progress.stage == "wake":
+        if not (
+            progress.completed_epoch < config.epochs
+            and 1 <= progress.next_batch_index <= batch_count
+            and progress.epochs_ran == progress.completed_epoch
+        ):
+            raise ValueError("incompatible vision checkpoint wake cursor")
+        prefix = progress.next_batch_index
+    elif progress.stage in {"before_sleep", "after_sleep"}:
+        if not (
+            1 <= progress.completed_epoch <= config.epochs
+            and progress.next_batch_index == 0
+            and progress.epochs_ran == progress.completed_epoch - 1
+        ):
+            raise ValueError("incompatible vision checkpoint sleep cursor")
+        prefix = 0
+    else:
+        raise ValueError("incompatible vision checkpoint sleep stage")
+    expected_batches = progress.completed_epoch * batch_count + prefix
+    expected_samples = progress.completed_epoch * sum(batch_sizes) + sum(batch_sizes[:prefix])
+    if (
+        progress.initial_hidden_dim != config.circadian_head_hidden_dim
+        or progress.wake_batches != expected_batches
+        or progress.seen_samples != expected_samples
+        or progress.sleep_rollbacks > progress.sleep_attempts
+        or not isinstance(progress.step_times_ms, tuple)
+        or len(progress.step_times_ms) != progress.wake_batches
+        or any(not _finite_nonnegative(value) for value in progress.step_times_ms)
+        or not isinstance(progress.final_energy, (int, float))
+        or not isfinite(progress.final_energy)
+        or not _finite_nonnegative(progress.elapsed_seconds)
+    ):
+        raise ValueError("incompatible vision checkpoint circadian report")
+    expected_loader_epoch = progress.completed_epoch
+    loader_state_type = (
+        SeededEpochLoaderState
+        if config.protocol_id == VISION_SEEDED_UNMATCHED_PROTOCOL
+        else SharedEpochLoaderState
+    )
+    if (
+        not isinstance(progress.loader_state, loader_state_type)
+        or not isinstance(progress.retry_state, SleepRollbackCooldownState)
+        or progress.loader_state.epoch != expected_loader_epoch
+        or progress.loader_state.next_batch_index != prefix
+    ):
+        raise ValueError("incompatible vision checkpoint loader cursor")
+    try:
+        if config.protocol_id == VISION_SEEDED_UNMATCHED_PROTOCOL:
+            if not isinstance(progress.loader_state, SeededEpochLoaderState):
+                raise ValueError("incompatible seeded vision checkpoint loader state")
+            _SeededEpochTrainLoader(torch, train_loader, config.seed + 3_001).restore_state(
+                progress.loader_state
+            )
+        else:
+            if not isinstance(progress.loader_state, SharedEpochLoaderState):
+                raise ValueError("incompatible shared vision checkpoint loader state")
+            _SharedEpochTrainLoader(torch, train_loader).restore_state(progress.loader_state)
+    except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
+        raise ValueError("incompatible vision checkpoint loader state") from exc
+    if config.protocol_id != VISION_SEEDED_UNMATCHED_PROTOCOL and not torch.equal(
+        progress.loader_state.generator_state, checkpoint.shared_train_generator_state
+    ):
+        raise ValueError("incompatible vision checkpoint shared loader state")
+    retry = SleepRollbackCooldown(
+        resolve_rollback_cooldown_epochs(
+            config.circadian_sleep_mode, config.circadian_sleep_rollback_cooldown_epochs
+        )
+    )
+    try:
+        retry.restore_state(progress.retry_state)
+    except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
+        raise ValueError("incompatible vision checkpoint rollback state") from exc
+    if retry.snapshot_state().rejected_attempts != progress.sleep_rollbacks:
+        raise ValueError("incompatible vision checkpoint rollback counters")
+    guard_role, guard_hash = _vision_guard_identity(config, loaders)
+    validate_vision_sleep_history(
+        progress.sleep_events,
+        config=config,
+        guard_role=guard_role,
+        guard_role_hash=guard_hash,
+        guard_batch_sizes=_vision_guard_batch_sizes(config, loaders.guard_loader),
+        resolved_epochs=progress.completed_epoch - int(progress.stage == "before_sleep"),
+        pending_epoch=(progress.completed_epoch if progress.stage == "before_sleep" else None),
+        batches_per_epoch=batch_count,
+        sleep_attempts=progress.sleep_attempts,
+        sleep_rollbacks=progress.sleep_rollbacks,
+        sleep_splits=progress.sleep_splits,
+        sleep_prunes=progress.sleep_prunes,
+        cooldown_suppressions=progress.retry_state.suppressed_due_attempts,
+    )
+    entry = progress.outer_entry_torch_state
+    if not torch.is_tensor(entry) or entry.dtype != torch.uint8:
+        raise ValueError("incompatible vision checkpoint outer Torch RNG")
+    try:
+        torch.Generator(device="cpu").set_state(entry.detach().clone())
+    except RuntimeError as exc:
+        raise ValueError("incompatible vision checkpoint outer Torch RNG") from exc
+    outer_cuda_state = getattr(progress, "outer_entry_torch_cuda_state", None)
+    if device.type == "cuda":
+        if (
+            outer_cuda_state is None
+            or not torch.is_tensor(outer_cuda_state)
+            or outer_cuda_state.dtype != torch.uint8
+            or outer_cuda_state.device.type != "cpu"
+        ):
+            raise ValueError("incompatible vision checkpoint outer CUDA RNG")
+        try:
+            torch.Generator(device=device).set_state(outer_cuda_state.detach().clone())
+        except (RuntimeError, ValueError) as exc:
+            raise ValueError("incompatible vision checkpoint outer CUDA RNG") from exc
+    elif outer_cuda_state is not None:
+        raise ValueError("unexpected vision checkpoint outer CUDA RNG")
+    candidate = _new_circadian_classifier(device, loaders.num_classes, config)
+    try:
+        candidate.restore_full_state(progress.classifier_state)
+    except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
+        raise ValueError("incompatible vision checkpoint classifier state") from exc
+    if candidate.get_sleep_clocks().wake_batches != progress.wake_batches:
+        raise ValueError("incompatible vision checkpoint classifier wake clock")
+
+
+def _train_circadian(
+    torch: Any,
+    device: Any,
+    loaders: _TrainingLoaders,
+    config: ResNet50BenchmarkConfig,
+    *,
+    checkpoint_context: VisionCircadianCheckpointContext | None = None,
+) -> _TrainingOutcome:
+    model = _new_circadian_classifier(device, loaders.num_classes, config)
     hidden_dim_start = model.head.hidden_dim
     sleep_splits = 0
     sleep_prunes = 0
     sleep_rollbacks = 0
+    sleep_attempts = 0
+    sleep_events: list[SleepEventTelemetry] = []
+    wake_batches = 0
+    retry = SleepRollbackCooldown(
+        resolve_rollback_cooldown_epochs(
+            config.circadian_sleep_mode, config.circadian_sleep_rollback_cooldown_epochs
+        ),
+    )
 
     step_times_ms: list[float] = []
     seen_samples = 0
     epochs_ran = 0
     final_energy = 0.0
-    eval_batches = _resolve_eval_batches(config.evaluation_batches)
-    rollback_eval_batches = _resolve_eval_batches(
-        config.circadian_sleep_rollback_eval_batches
+    resume_checkpoint = (
+        checkpoint_context.resume_checkpoint if checkpoint_context is not None else None
     )
+    resume_progress = resume_checkpoint.active_circadian if resume_checkpoint is not None else None
+    if resume_progress is not None:
+        model.restore_full_state(resume_progress.classifier_state)
+        loaders.train_loader.restore_state(resume_progress.loader_state)
+        retry.restore_state(resume_progress.retry_state)
+        hidden_dim_start = resume_progress.initial_hidden_dim
+        sleep_splits = resume_progress.sleep_splits
+        sleep_prunes = resume_progress.sleep_prunes
+        sleep_rollbacks = resume_progress.sleep_rollbacks
+        sleep_attempts = resume_progress.sleep_attempts
+        sleep_events = list(resume_progress.sleep_events)
+        wake_batches = resume_progress.wake_batches
+        step_times_ms = list(resume_progress.step_times_ms)
+        seen_samples = resume_progress.seen_samples
+        epochs_ran = resume_progress.epochs_ran
+        final_energy = resume_progress.final_energy
+        assert resume_checkpoint is not None
+        restore_vision_process_rng(resume_checkpoint, torch)
+    eval_batches = _resolve_eval_batches(config.evaluation_batches)
+    rollback_eval_batches = _resolve_eval_batches(config.circadian_sleep_rollback_eval_batches)
     if rollback_eval_batches is None:
         rollback_eval_batches = eval_batches
 
     train_timer_start = perf_counter()
-    for epoch in range(1, config.epochs + 1):
-        for images, labels in loaders.train_loader:
-            images = images.to(device)
-            labels = labels.to(device)
+    elapsed_before = resume_progress.elapsed_seconds if resume_progress is not None else 0.0
+    checkpoint_pause = 0.0
 
-            sync_device(torch, device)
-            step_start = perf_counter()
-            energy = model.train_step(
-                images=images,
-                targets=labels,
-                learning_rate=config.circadian_learning_rate,
-                inference_steps=config.circadian_inference_steps,
-                inference_learning_rate=config.circadian_inference_learning_rate,
-            )
-            sync_device(torch, device)
+    def active_elapsed() -> float:
+        replay = getattr(loaders.train_loader, "replay_seconds", 0.0)
+        return elapsed_before + perf_counter() - train_timer_start - checkpoint_pause - replay
 
-            step_times_ms.append((perf_counter() - step_start) * 1000.0)
-            final_energy = float(energy)
-            seen_samples += int(labels.shape[0])
-
-        interval_triggered = (
-            config.circadian_sleep_interval > 0 and epoch % config.circadian_sleep_interval == 0
+    def save_checkpoint(stage: str, completed_epoch: int, next_batch_index: int) -> None:
+        nonlocal checkpoint_pause
+        if checkpoint_context is None:
+            return
+        pause_start = perf_counter()
+        elapsed = active_elapsed()
+        progress = VisionCircadianProgress(
+            stage=stage,
+            completed_epoch=completed_epoch,
+            next_batch_index=next_batch_index,
+            classifier_state=model.snapshot_full_state(),
+            loader_state=loaders.train_loader.snapshot_state(),
+            retry_state=retry.snapshot_state(),
+            outer_entry_torch_state=checkpoint_context.outer_entry_torch_state.detach().clone(),
+            # The seeded variant's fork restores this outer stream on exit.
+            outer_entry_torch_cuda_state=(
+                checkpoint_context.outer_entry_torch_cuda_state.detach().clone()
+                if checkpoint_context.outer_entry_torch_cuda_state is not None
+                else None
+            ),
+            initial_hidden_dim=hidden_dim_start,
+            epochs_ran=epochs_ran,
+            wake_batches=wake_batches,
+            seen_samples=seen_samples,
+            sleep_attempts=sleep_attempts,
+            sleep_events=tuple(sleep_events),
+            sleep_rollbacks=sleep_rollbacks,
+            sleep_splits=sleep_splits,
+            sleep_prunes=sleep_prunes,
+            final_energy=final_energy,
+            step_times_ms=tuple(step_times_ms),
+            elapsed_seconds=elapsed,
         )
-        adaptive_triggered = (
-            config.circadian_use_adaptive_sleep_trigger and model.should_trigger_sleep()
-        )
-        if interval_triggered or adaptive_triggered:
-            maybe_snapshot = None
-            pre_sleep_accuracy = 0.0
-            pre_sleep_cross_entropy = 0.0
-            if config.circadian_enable_sleep_rollback:
-                maybe_snapshot = model.snapshot_state()
-                pre_sleep_accuracy, pre_sleep_cross_entropy = _compute_pc_metrics(
-                    torch,
-                    model,
-                    loaders.test_loader,
-                    device,
-                    max_batches=rollback_eval_batches,
-                )
-
-            force_sleep = config.circadian_force_sleep and interval_triggered
-            sleep_result = model.sleep_event(
-                current_step=epoch,
-                total_steps=config.epochs,
-                force_sleep=force_sleep,
+        checkpoint_context.store.save(
+            capture_vision_checkpoint(
+                config=config,
+                data_digest=checkpoint_context.data_digest,
+                training_order=checkpoint_context.training_order,
+                completed_outcomes=checkpoint_context.completed_outcomes,
+                completed_hashes=checkpoint_context.completed_hashes,
+                torch=torch,
+                cuda_device=str(device) if device.type == "cuda" else None,
+                active_circadian=progress,
+                shared_train_generator_state=(
+                    loaders.train_loader.loader.generator.get_state()
+                    if config.protocol_id != VISION_SEEDED_UNMATCHED_PROTOCOL
+                    else None
+                ),
             )
+        )
+        checkpoint_pause += perf_counter() - pause_start
 
-            if config.circadian_enable_sleep_rollback and maybe_snapshot is not None:
-                post_sleep_accuracy, post_sleep_cross_entropy = _compute_pc_metrics(
+    first_epoch = (
+        resume_progress.completed_epoch + (1 if resume_progress.stage == "wake" else 0)
+        if resume_progress is not None
+        else 1
+    )
+    for epoch in range(first_epoch, config.epochs + 1):
+        stage = resume_progress.stage if resume_progress is not None else None
+        if stage not in {"before_sleep", "after_sleep"}:
+            for images, labels in loaders.train_loader:
+                images = images.to(device)
+                labels = labels.to(device)
+
+                sync_device(torch, device)
+                step_start = perf_counter()
+                energy = model.train_step(
+                    images=images,
+                    targets=labels,
+                    learning_rate=config.circadian_learning_rate,
+                    inference_steps=config.circadian_inference_steps,
+                    inference_learning_rate=config.circadian_inference_learning_rate,
+                )
+                sync_device(torch, device)
+
+                step_times_ms.append((perf_counter() - step_start) * 1000.0)
+                final_energy = float(energy)
+                seen_samples += int(labels.shape[0])
+                wake_batches += 1
+                if checkpoint_context is not None:
+                    cursor = loaders.train_loader.snapshot_state()
+                    save_checkpoint("wake", epoch - 1, cursor.next_batch_index)
+            if checkpoint_context is not None:
+                save_checkpoint("before_sleep", epoch, 0)
+
+        if stage != "after_sleep":
+            adaptive_triggered = (
+                config.circadian_use_adaptive_sleep_trigger and model.should_trigger_sleep()
+            )
+            sleep_decision = decide_sleep_attempt(
+                sleep_mode=config.circadian_sleep_mode,
+                completed_epochs=epoch,
+                interval_epochs=config.circadian_sleep_interval,
+                adaptive_due=adaptive_triggered,
+                force_periodic=config.circadian_force_sleep,
+            )
+            if retry.allow_due_attempt(
+                sleep_decision, completed_epochs=epoch, wake_batches=wake_batches
+            ):
+                sleep_attempts += 1
+
+                def record_failed_sleep(failed: SleepEventTelemetry) -> None:
+                    # Why this: the same completed wake epoch remains retryable
+                    # while its failed sleep attempt stays visible after restart.
+                    sleep_events.append(failed)
+                    save_checkpoint("before_sleep", epoch, 0)
+
+                sleep_result, rolled_back = _guarded_circadian_sleep_event(
                     torch,
-                    model,
-                    loaders.test_loader,
                     device,
-                    max_batches=rollback_eval_batches,
+                    model,
+                    loaders.guard_loader,
+                    config,
+                    epoch,
+                    sleep_decision.force_sleep,
+                    rollback_eval_batches,
+                    decision=sleep_decision,
+                    guard_role_hash=loaders.guard_role_hash,
+                    guard_role=(
+                        "validation"
+                        if config.protocol_id == VISION_VALIDATION_UNMATCHED_PROTOCOL
+                        else "inner_guard"
+                    ),
+                    on_error=record_failed_sleep,
                 )
-                rollback_delta = _compute_rollback_delta(
-                    metric_name=config.circadian_sleep_rollback_metric,
-                    pre_accuracy=pre_sleep_accuracy,
-                    post_accuracy=post_sleep_accuracy,
-                    pre_cross_entropy=pre_sleep_cross_entropy,
-                    post_cross_entropy=post_sleep_cross_entropy,
-                )
-                if rollback_delta > config.circadian_sleep_rollback_tolerance:
-                    model.restore_state(maybe_snapshot)
-                    sleep_rollbacks += 1
-                    sleep_result = type(sleep_result)(
-                        old_hidden_dim=model.head.hidden_dim,
-                        new_hidden_dim=model.head.hidden_dim,
-                        split_indices=(),
-                        pruned_indices=(),
+                if sleep_result.telemetry is None:
+                    raise ValueError("vision sleep result is missing typed telemetry")
+                sleep_events.append(sleep_result.telemetry)
+                sleep_rollbacks += int(rolled_back)
+                if rolled_back:
+                    retry.record_rejection(completed_epochs=epoch, wake_batches=wake_batches)
+                sleep_splits += len(sleep_result.split_indices)
+                sleep_prunes += len(sleep_result.pruned_indices)
+            else:
+                sleep_events.append(
+                    describe_skipped_torch_sleep_decision(
+                        model.head,
+                        sleep_decision,
+                        completed_epoch=epoch,
+                        cooldown_suppressed=sleep_decision.attempted,
                     )
-
-            sleep_splits += len(sleep_result.split_indices)
-            sleep_prunes += len(sleep_result.pruned_indices)
+                )
+            if checkpoint_context is not None:
+                save_checkpoint("after_sleep", epoch, 0)
 
         epochs_ran = epoch
         eval_accuracy, _ = _compute_pc_metrics(
-            torch, model, loaders.test_loader, device, max_batches=eval_batches
+            torch, model, loaders.guard_loader, device, max_batches=eval_batches
         )
         if _should_stop_early(
             target_accuracy=config.target_accuracy,
             accuracy=eval_accuracy,
         ):
             break
-    train_seconds = perf_counter() - train_timer_start
+        resume_progress = None
+    train_seconds = active_elapsed()
 
-    test_accuracy, final_cross_entropy = _compute_pc_metrics(
-        torch, model, loaders.test_loader, device, max_batches=None
+    validation_accuracy, _ = _compute_pc_metrics(
+        torch, model, loaders.validation_loader, device, max_batches=None
+    )
+    return _TrainingOutcome(
+        model_name="CircadianPredictiveCodingResNet50",
+        model=model,
+        epochs_ran=epochs_ran,
+        final_energy=final_energy,
+        validation_accuracy=validation_accuracy,
+        train_seconds=train_seconds,
+        seen_samples=seen_samples,
+        step_times_ms=tuple(step_times_ms),
+        circadian_hidden_dim_start=hidden_dim_start,
+        circadian_total_splits=sleep_splits,
+        circadian_total_prunes=sleep_prunes,
+        circadian_total_rollbacks=sleep_rollbacks,
+        circadian_sleep_attempts=sleep_attempts,
+        circadian_sleep_cooldown_suppressions=retry.snapshot_state().suppressed_due_attempts,
+        circadian_sleep_retry_cooldown_epochs=retry.cooldown_epochs,
+        sleep_events=tuple(sleep_events),
+    )
+
+
+def _guarded_circadian_sleep_event(
+    torch: Any,
+    device: Any,
+    model: CircadianPredictiveCodingResNet50Classifier,
+    guard_loader: Any,
+    config: ResNet50BenchmarkConfig,
+    epoch: int,
+    force_sleep: bool,
+    rollback_eval_batches: int | None,
+    *,
+    decision: SleepAttemptDecision | None = None,
+    guard_role_hash: str | None = None,
+    guard_role: str = "inner_guard",
+    on_error: Callable[[SleepEventTelemetry], None] | None = None,
+) -> tuple[Any, bool]:
+    attempt_started = perf_counter()
+    snapshot = model.snapshot_state()
+    process_random = capture_torch_sleep_process_random(torch, device)
+    guarded = config.circadian_enable_sleep_rollback
+    pre_accuracy: float | None = None
+    pre_cross_entropy: float | None = None
+    post_accuracy: float | None = None
+    post_cross_entropy: float | None = None
+    core_result: Any = None
+    examples_scored = 0
+    stage = "inner_guard_pre" if guarded else "sleep_core"
+
+    def record_scored_batch(count: int) -> None:
+        nonlocal examples_scored
+        examples_scored += count
+
+    def score_guard() -> tuple[float, float]:
+        if decision is None:
+            return _compute_pc_metrics(
+                torch, model, guard_loader, device, max_batches=rollback_eval_batches
+            )
+        return _compute_pc_metrics(
+            torch,
+            model,
+            guard_loader,
+            device,
+            max_batches=rollback_eval_batches,
+            on_examples_scored=record_scored_batch,
+        )
+
+    try:
+        if guarded:
+            accuracy, cross_entropy = score_guard()
+            _require_finite_guard_scores(accuracy, cross_entropy)
+            pre_accuracy, pre_cross_entropy = accuracy, cross_entropy
+            pre_guard_examples = examples_scored
+        stage = "sleep_core"
+        core_result = model.sleep_event(
+            force_sleep=force_sleep,
+            epoch_progress=SleepEpochProgress(epoch, config.epochs),
+        )
+        if guarded:
+            stage = "inner_guard_post"
+            accuracy, cross_entropy = score_guard()
+            _require_finite_guard_scores(accuracy, cross_entropy)
+            post_accuracy, post_cross_entropy = accuracy, cross_entropy
+            stage = "inner_guard_delta"
+            assert pre_accuracy is not None and pre_cross_entropy is not None
+            rollback_delta = _compute_rollback_delta(
+                metric_name=config.circadian_sleep_rollback_metric,
+                pre_accuracy=pre_accuracy,
+                post_accuracy=post_accuracy,
+                pre_cross_entropy=pre_cross_entropy,
+                post_cross_entropy=post_cross_entropy,
+            )
+            if not isfinite(rollback_delta):
+                raise FloatingPointError("nonfinite guard rollback delta")
+    except Exception as error:
+        model.restore_state(snapshot)
+        restore_torch_sleep_process_random(torch, device, process_random)
+        if decision is not None and on_error is not None:
+            reason = (
+                f"{stage}_nonfinite"
+                if stage in {"inner_guard_pre", "inner_guard_post"}
+                and isinstance(error, FloatingPointError)
+                else f"{stage}_exception"
+            )
+            on_error(
+                describe_failed_torch_sleep_decision(
+                    model.head,
+                    decision,
+                    completed_epoch=epoch,
+                    guard_role_hash=guard_role_hash if guarded else None,
+                    guard_role=guard_role,
+                    metric_name=config.circadian_sleep_rollback_metric,
+                    tolerance=config.circadian_sleep_rollback_tolerance,
+                    pre_accuracy=pre_accuracy,
+                    pre_cross_entropy=pre_cross_entropy,
+                    post_accuracy=post_accuracy,
+                    post_cross_entropy=post_cross_entropy,
+                    examples_scored=examples_scored,
+                    reason=reason,
+                    attempt_seconds=perf_counter() - attempt_started,
+                    result=core_result,
+                )
+            )
+        raise
+
+    event = core_result
+    if guarded and rollback_delta > config.circadian_sleep_rollback_tolerance:
+        model.restore_state(snapshot)
+        rejected = type(event)(
+            old_hidden_dim=model.head.hidden_dim,
+            new_hidden_dim=model.head.hidden_dim,
+            split_indices=(),
+            pruned_indices=(),
+        )
+        if decision is not None:
+            assert pre_accuracy is not None and pre_cross_entropy is not None
+            assert post_accuracy is not None and post_cross_entropy is not None
+            rejected = replace(
+                rejected,
+                telemetry=describe_guarded_torch_sleep_decision(
+                    decision,
+                    event,
+                    completed_epoch=epoch,
+                    guard_role_hash=guard_role_hash,
+                    guard_role=guard_role,
+                    pre_accuracy=pre_accuracy,
+                    post_accuracy=post_accuracy,
+                    pre_cross_entropy=pre_cross_entropy,
+                    post_cross_entropy=post_cross_entropy,
+                    metric_name=config.circadian_sleep_rollback_metric,
+                    tolerance=config.circadian_sleep_rollback_tolerance,
+                    guard_examples=pre_guard_examples,
+                    guard_examples_scored=examples_scored,
+                    accepted=False,
+                    attempt_seconds=perf_counter() - attempt_started,
+                ),
+            )
+        return rejected, True
+    if decision is not None:
+        if guarded:
+            assert pre_accuracy is not None and pre_cross_entropy is not None
+            assert post_accuracy is not None and post_cross_entropy is not None
+            telemetry = describe_guarded_torch_sleep_decision(
+                decision,
+                event,
+                completed_epoch=epoch,
+                guard_role_hash=guard_role_hash,
+                guard_role=guard_role,
+                pre_accuracy=pre_accuracy,
+                post_accuracy=post_accuracy,
+                pre_cross_entropy=pre_cross_entropy,
+                post_cross_entropy=post_cross_entropy,
+                metric_name=config.circadian_sleep_rollback_metric,
+                tolerance=config.circadian_sleep_rollback_tolerance,
+                guard_examples=pre_guard_examples,
+                guard_examples_scored=examples_scored,
+                accepted=True,
+                attempt_seconds=perf_counter() - attempt_started,
+            )
+        else:
+            telemetry = describe_unguarded_torch_sleep_decision(
+                decision,
+                event,
+                completed_epoch=epoch,
+                attempt_seconds=perf_counter() - attempt_started,
+            )
+        event = replace(event, telemetry=telemetry)
+    return event, False
+
+
+def _require_finite_guard_scores(accuracy: float, cross_entropy: float) -> None:
+    if not isfinite(accuracy) or not isfinite(cross_entropy):
+        raise FloatingPointError("nonfinite guard score")
+
+
+def _finalize_test_report(
+    torch: Any,
+    device: Any,
+    outcome: _TrainingOutcome,
+    test_loader: Any,
+    config: ResNet50BenchmarkConfig,
+    benchmark_track: str = VISION_UNMATCHED_REFERENCE_TRACK,
+) -> ModelSpeedReport:
+    """Evaluate a trained model after the learning and selection boundary."""
+    model = outcome.model
+    if outcome.uses_backprop_metric:
+        metric_fn = _compute_backprop_metrics
+        forward_logits = model.forward_logits
+    else:
+        metric_fn = _compute_pc_metrics
+        forward_logits = model.predict_logits
+    test_accuracy, final_cross_entropy = metric_fn(
+        torch, model, test_loader, device, max_batches=None
     )
     inference_metrics = _benchmark_inference(
         torch=torch,
         device=device,
-        loader=loaders.test_loader,
-        forward_logits=lambda x: model.predict_logits(x),
+        loader=test_loader,
+        forward_logits=forward_logits,
         warmup_batches=config.warmup_batches,
         benchmark_batches=config.inference_batches,
     )
     return ModelSpeedReport(
-        model_name="CircadianPredictiveCodingResNet50",
-        epochs_ran=epochs_ran,
+        model_name=outcome.model_name,
+        epochs_ran=outcome.epochs_ran,
         final_metric_name="cross_entropy",
         final_metric_value=final_cross_entropy,
-        final_cross_entropy=final_cross_entropy,
-        final_energy=final_energy,
+        validation_accuracy=outcome.validation_accuracy,
         test_accuracy=test_accuracy,
-        train_seconds=train_seconds,
-        train_samples_per_second=_safe_div(seen_samples, train_seconds),
-        mean_train_step_ms=float(np.mean(step_times_ms)) if step_times_ms else 0.0,
+        train_seconds=outcome.train_seconds,
+        train_samples_per_second=_safe_div(outcome.seen_samples, outcome.train_seconds),
+        mean_train_step_ms=(
+            float(np.mean(outcome.step_times_ms)) if outcome.step_times_ms else 0.0
+        ),
         inference_latency_mean_ms=inference_metrics["latency_mean_ms"],
         inference_latency_p95_ms=inference_metrics["latency_p95_ms"],
         inference_samples_per_second=inference_metrics["samples_per_second"],
         total_parameters=model.parameter_count(),
         trainable_parameters=model.trainable_parameter_count(),
-        circadian_hidden_dim_start=hidden_dim_start,
-        circadian_hidden_dim_end=model.head.hidden_dim,
-        circadian_total_splits=sleep_splits,
-        circadian_total_prunes=sleep_prunes,
-        circadian_total_rollbacks=sleep_rollbacks,
+        benchmark_track=benchmark_track,
+        backbone_trainable=outcome.uses_backprop_metric and not config.backprop_freeze_backbone,
+        backbone_pretraining=config.backbone_weights,
+        head_type=_head_type(outcome),
+        final_cross_entropy=final_cross_entropy,
+        final_energy=outcome.final_energy,
+        training_energy_id=(TORCH_PC_ENERGY_ID if outcome.final_energy is not None else None),
+        circadian_hidden_dim_start=outcome.circadian_hidden_dim_start,
+        circadian_hidden_dim_end=(
+            model.head.hidden_dim if outcome.circadian_hidden_dim_start is not None else None
+        ),
+        circadian_total_splits=outcome.circadian_total_splits,
+        circadian_total_prunes=outcome.circadian_total_prunes,
+        circadian_total_rollbacks=outcome.circadian_total_rollbacks,
+        circadian_sleep_attempts=outcome.circadian_sleep_attempts,
+        circadian_sleep_cooldown_suppressions=outcome.circadian_sleep_cooldown_suppressions,
+        circadian_sleep_retry_cooldown_epochs=outcome.circadian_sleep_retry_cooldown_epochs,
+        sleep_events=outcome.sleep_events,
+    )
+
+
+def _head_type(outcome: _TrainingOutcome) -> str:
+    if outcome.uses_backprop_metric:
+        return "linear"
+    if outcome.circadian_hidden_dim_start is not None:
+        return "circadian_predictive_coding"
+    return "predictive_coding"
+
+
+def _finalize_validation_report(
+    torch: Any,
+    device: Any,
+    outcome: _TrainingOutcome,
+    validation_loader: Any,
+    config: ResNet50BenchmarkConfig,
+) -> ModelDevelopmentReport:
+    """Measure a tuning candidate using only the validation split."""
+    model = outcome.model
+    if outcome.uses_backprop_metric:
+        metric_fn = _compute_backprop_metrics
+        forward_logits = model.forward_logits
+    else:
+        metric_fn = _compute_pc_metrics
+        forward_logits = model.predict_logits
+    validation_accuracy, validation_cross_entropy = metric_fn(
+        torch, model, validation_loader, device, max_batches=None
+    )
+    inference_metrics = _benchmark_inference(
+        torch=torch,
+        device=device,
+        loader=validation_loader,
+        forward_logits=forward_logits,
+        warmup_batches=config.warmup_batches,
+        benchmark_batches=config.inference_batches,
+    )
+    return ModelDevelopmentReport(
+        model_name=outcome.model_name,
+        epochs_ran=outcome.epochs_ran,
+        validation_accuracy=validation_accuracy,
+        validation_cross_entropy=validation_cross_entropy,
+        train_seconds=outcome.train_seconds,
+        train_samples_per_second=_safe_div(outcome.seen_samples, outcome.train_seconds),
+        mean_train_step_ms=(
+            float(np.mean(outcome.step_times_ms)) if outcome.step_times_ms else 0.0
+        ),
+        inference_latency_mean_ms=inference_metrics["latency_mean_ms"],
+        inference_latency_p95_ms=inference_metrics["latency_p95_ms"],
+        inference_samples_per_second=inference_metrics["samples_per_second"],
+        total_parameters=model.parameter_count(),
+        trainable_parameters=model.trainable_parameter_count(),
+        benchmark_track=VISION_UNMATCHED_REFERENCE_TRACK,
+        backbone_trainable=outcome.uses_backprop_metric and not config.backprop_freeze_backbone,
+        backbone_pretraining=config.backbone_weights,
+        head_type=_head_type(outcome),
+        final_energy=outcome.final_energy,
+        training_energy_id=(TORCH_PC_ENERGY_ID if outcome.final_energy is not None else None),
+        circadian_hidden_dim_start=outcome.circadian_hidden_dim_start,
+        circadian_hidden_dim_end=(
+            model.head.hidden_dim if outcome.circadian_hidden_dim_start is not None else None
+        ),
+        circadian_total_splits=outcome.circadian_total_splits,
+        circadian_total_prunes=outcome.circadian_total_prunes,
+        circadian_total_rollbacks=outcome.circadian_total_rollbacks,
+        circadian_sleep_attempts=outcome.circadian_sleep_attempts,
+        circadian_sleep_cooldown_suppressions=outcome.circadian_sleep_cooldown_suppressions,
+        circadian_sleep_retry_cooldown_epochs=outcome.circadian_sleep_retry_cooldown_epochs,
+        sleep_events=outcome.sleep_events,
     )
 
 
@@ -742,9 +2032,7 @@ def _benchmark_inference(
 
 
 def _compute_backprop_accuracy(torch: Any, model: Any, loader: Any, device: Any) -> float:
-    accuracy, _ = _compute_backprop_metrics(
-        torch, model, loader, device=device, max_batches=None
-    )
+    accuracy, _ = _compute_backprop_metrics(torch, model, loader, device=device, max_batches=None)
     return accuracy
 
 
@@ -758,21 +2046,27 @@ def _compute_backprop_metrics(
     correct = 0
     total = 0
     total_loss = 0.0
+    backbone_training = model.backbone.training
+    classifier_training = model.classifier.training
     model.backbone.eval()
     model.classifier.eval()
     criterion = torch.nn.CrossEntropyLoss(reduction="sum")
-    with torch.no_grad():
-        for batch_index, (images, labels) in enumerate(loader):
-            images = images.to(device)
-            labels = labels.to(device)
-            logits = model.forward_logits(images)
-            batch_loss = criterion(logits, labels)
-            predictions = torch.argmax(logits, dim=1)
-            correct += int((predictions == labels).sum().item())
-            total += int(labels.shape[0])
-            total_loss += float(batch_loss.item())
-            if max_batches is not None and batch_index + 1 >= max_batches:
-                break
+    try:
+        with torch.no_grad():
+            for batch_index, (images, labels) in enumerate(loader):
+                images = images.to(device)
+                labels = labels.to(device)
+                logits = model.forward_logits(images)
+                batch_loss = criterion(logits, labels)
+                predictions = torch.argmax(logits, dim=1)
+                correct += int((predictions == labels).sum().item())
+                total += int(labels.shape[0])
+                total_loss += float(batch_loss.item())
+                if max_batches is not None and batch_index + 1 >= max_batches:
+                    break
+    finally:
+        model.backbone.train(backbone_training)
+        model.classifier.train(classifier_training)
     return _safe_div(correct, total), _safe_div(total_loss, total)
 
 
@@ -787,6 +2081,8 @@ def _compute_pc_metrics(
     loader: Any,
     device: Any,
     max_batches: int | None,
+    *,
+    on_examples_scored: Callable[[int], None] | None = None,
 ) -> tuple[float, float]:
     correct = 0
     total = 0
@@ -802,6 +2098,8 @@ def _compute_pc_metrics(
             correct += int((predictions == labels).sum().item())
             total += int(labels.shape[0])
             total_loss += float(batch_loss.item())
+            if on_examples_scored is not None:
+                on_examples_scored(int(labels.shape[0]))
             if max_batches is not None and batch_index + 1 >= max_batches:
                 break
     return _safe_div(correct, total), _safe_div(total_loss, total)
@@ -824,9 +2122,7 @@ def _compute_rollback_delta(
         return pre_accuracy - post_accuracy
     if metric_name == "cross_entropy":
         return post_cross_entropy - pre_cross_entropy
-    raise ValueError(
-        "circadian_sleep_rollback_metric must be one of: accuracy, cross_entropy."
-    )
+    raise ValueError("circadian_sleep_rollback_metric must be one of: accuracy, cross_entropy.")
 
 
 def _resolve_device(torch: Any, requested_device: str) -> Any:
@@ -857,14 +2153,27 @@ def _validate_report_models(reports: list[ModelSpeedReport]) -> None:
 
 
 def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
+    if config.protocol_id not in {
+        VISION_VALIDATION_UNMATCHED_PROTOCOL,
+        VISION_GUARD_SEPARATED_UNMATCHED_PROTOCOL,
+        VISION_SEEDED_UNMATCHED_PROTOCOL,
+    }:
+        raise ValueError(f"Unknown vision benchmark protocol: {config.protocol_id}")
+    if config.protocol_id in GUARD_SEPARATED_VISION_PROTOCOLS:
+        if config.guard_samples <= 0 or config.dataset_guard_subset_size <= 0:
+            raise ValueError("Guard-separated protocol requires positive guard sample counts.")
     if config.dataset_name not in {"synthetic", "cifar10", "cifar100"}:
         raise ValueError("dataset_name must be one of: synthetic, cifar10, cifar100.")
     if config.dataset_num_workers < 0:
         raise ValueError("dataset_num_workers must be non-negative.")
     if config.dataset_train_subset_size < 0:
         raise ValueError("dataset_train_subset_size must be non-negative.")
+    if config.dataset_validation_subset_size <= 0:
+        raise ValueError("dataset_validation_subset_size must be positive.")
     if config.dataset_test_subset_size < 0:
         raise ValueError("dataset_test_subset_size must be non-negative.")
+    if config.validation_samples <= 0:
+        raise ValueError("validation_samples must be positive.")
     if config.dataset_name != "synthetic":
         expected_classes = 10 if config.dataset_name == "cifar10" else 100
         if config.num_classes != expected_classes:
@@ -885,6 +2194,21 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         raise ValueError("evaluation_batches must be non-negative.")
     if config.circadian_sleep_interval < 0:
         raise ValueError("circadian_sleep_interval must be non-negative.")
+    if config.circadian_sleep_mode not in {"legacy", "components", "disabled"}:
+        raise ValueError("circadian_sleep_mode must be one of: legacy, components, disabled.")
+    sleep_switches = (
+        "circadian_sleep_enable_chemical_reset",
+        "circadian_sleep_enable_homeostasis",
+        "circadian_sleep_enable_split",
+        "circadian_sleep_enable_prune",
+    )
+    for field_name in sleep_switches:
+        if type(getattr(config, field_name)) is not bool:
+            raise ValueError(f"{field_name} must be a bool.")
+    if config.circadian_sleep_mode == "legacy" and any(
+        not getattr(config, field_name) for field_name in sleep_switches
+    ):
+        raise ValueError("circadian_sleep_mode='components' is required for component switches.")
     if config.backbone_weights not in {"none", "imagenet"}:
         raise ValueError("backbone_weights must be one of: none, imagenet.")
     if config.circadian_chemical_max_value <= 0.0:
@@ -951,22 +2275,22 @@ def _validate_benchmark_config(config: ResNet50BenchmarkConfig) -> None:
         raise ValueError("circadian_adaptive_sleep_budget_plateau_weight must be non-negative.")
     if config.circadian_adaptive_sleep_budget_variance_weight < 0.0:
         raise ValueError("circadian_adaptive_sleep_budget_variance_weight must be non-negative.")
-    if config.circadian_sleep_rollback_tolerance < 0.0:
-        raise ValueError("circadian_sleep_rollback_tolerance must be non-negative.")
+    if (
+        not isfinite(config.circadian_sleep_rollback_tolerance)
+        or config.circadian_sleep_rollback_tolerance < 0.0
+    ):
+        raise ValueError("circadian_sleep_rollback_tolerance must be finite and non-negative.")
     if config.circadian_sleep_rollback_eval_batches < 0:
         raise ValueError("circadian_sleep_rollback_eval_batches must be non-negative.")
+    resolve_rollback_cooldown_epochs(
+        config.circadian_sleep_mode, config.circadian_sleep_rollback_cooldown_epochs
+    )
     if config.circadian_sleep_rollback_metric not in {"accuracy", "cross_entropy"}:
-        raise ValueError(
-            "circadian_sleep_rollback_metric must be one of: accuracy, cross_entropy."
-        )
+        raise ValueError("circadian_sleep_rollback_metric must be one of: accuracy, cross_entropy.")
     if config.circadian_min_hidden_dim > config.circadian_head_hidden_dim:
-        raise ValueError(
-            "circadian_min_hidden_dim cannot exceed circadian_head_hidden_dim."
-        )
+        raise ValueError("circadian_min_hidden_dim cannot exceed circadian_head_hidden_dim.")
     if config.circadian_max_hidden_dim < config.circadian_head_hidden_dim:
-        raise ValueError(
-            "circadian_max_hidden_dim cannot be lower than circadian_head_hidden_dim."
-        )
+        raise ValueError("circadian_max_hidden_dim cannot be lower than circadian_head_hidden_dim.")
 
 
 def _set_seed(torch: Any, seed: int) -> None:

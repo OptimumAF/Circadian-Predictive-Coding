@@ -1,0 +1,457 @@
+{
+  "accepted_whole_markdown_identity": {
+    "byte_count": 1305992,
+    "sha256": "5110e724a82452d7d7d53bb8ffd4f4ee654f9bc6e38be6b6a54812d2248dd8af"
+  },
+  "accepted_whole_result_identity": {
+    "byte_count": 322781259,
+    "sha256": "a090ecf6c16bd20c46af71b6bb625aec7f5cabd5b53fdb114bcb482f6468e743"
+  },
+  "budget_rationale": "Sum all unchanged independent inner ceilings (720) plus120 for complete current before/after/final source/input/environment/byte/marker and owned artifact checks. Observed original outcome operations215-216s, matrix under180s, development6.6s and pure synthesis35.4s remain evidence, not retrospective caps. No cached/narrower reader, new science, profiling, seed/metric/baseline/interval change or cap increase after an attempt. Four actual operations maximum3360s.",
+  "budget_seconds": {
+    "current_bindings_and_artifacts_allowance": 120,
+    "development_reader": 120,
+    "matrix_reader": 180,
+    "outcome_cost_reader": 240,
+    "outer_operation": 840,
+    "pure_synthesis_and_presentation": 180
+  },
+  "current_bundles": [
+    {
+      "directory": "artifacts/runs/p610-outcome-costs-v2",
+      "kind": "outcome_costs",
+      "parts": {
+        "audit": {
+          "identity": {
+            "byte_count": 159854,
+            "sha256": "0045c66aefa7414364ce076c7479419a7c3e825905fe93590dfb2cfb5ded610c"
+          },
+          "path": "artifacts/runs/p610-outcome-costs-v2/outcome-costs.audit.json"
+        },
+        "markdown": {
+          "identity": {
+            "byte_count": 397929,
+            "sha256": "9173df3cd6d0921baf699c890d03f88ca61ad46c44ebe6aa0468b7a3b51b4d12"
+          },
+          "path": "artifacts/runs/p610-outcome-costs-v2/outcome-costs.md"
+        },
+        "request": {
+          "identity": {
+            "byte_count": 173475,
+            "sha256": "c883f343e33287048ead17eaa85890dc01af79e8c45cc91f3051b0a1e01d148c"
+          },
+          "path": "artifacts/runs/p610-outcome-costs-v2/outcome-costs.request.json"
+        },
+        "result": {
+          "identity": {
+            "byte_count": 39956601,
+            "sha256": "5ba4d44772838113a244807b2033e8e24ef3a77ec8fe74bb967b795f7f1d4bfd"
+          },
+          "path": "artifacts/runs/p610-outcome-costs-v2/outcome-costs.result.json"
+        }
+      },
+      "prefix": "outcome-costs"
+    },
+    {
+      "directory": "artifacts/runs/p610-outcome-costs-v2-repeat",
+      "kind": "outcome_costs",
+      "parts": {
+        "audit": {
+          "identity": {
+            "byte_count": 159853,
+            "sha256": "4d9de8791aaf0f867de38d504b972ea0b4c7dd8e88b6a3420a29068dfb23eb5e"
+          },
+          "path": "artifacts/runs/p610-outcome-costs-v2-repeat/outcome-costs.audit.json"
+        },
+        "markdown": {
+          "identity": {
+            "byte_count": 397929,
+            "sha256": "9173df3cd6d0921baf699c890d03f88ca61ad46c44ebe6aa0468b7a3b51b4d12"
+          },
+          "path": "artifacts/runs/p610-outcome-costs-v2-repeat/outcome-costs.md"
+        },
+        "request": {
+          "identity": {
+            "byte_count": 173482,
+            "sha256": "5d5bcb3b081928f8f2721b52e4dde665e58b765c273bf16dd7ebf82a6484bf38"
+          },
+          "path": "artifacts/runs/p610-outcome-costs-v2-repeat/outcome-costs.request.json"
+        },
+        "result": {
+          "identity": {
+            "byte_count": 39956601,
+            "sha256": "5ba4d44772838113a244807b2033e8e24ef3a77ec8fe74bb967b795f7f1d4bfd"
+          },
+          "path": "artifacts/runs/p610-outcome-costs-v2-repeat/outcome-costs.result.json"
+        }
+      },
+      "prefix": "outcome-costs"
+    },
+    {
+      "directory": "artifacts/runs/p69-confirmation-matrix",
+      "kind": "matrix",
+      "parts": {
+        "audit": {
+          "identity": {
+            "byte_count": 5985,
+            "sha256": "4b3143a6a154c0237ead843769d694c4e24cb55e85a1d5dcf645505db1511a76"
+          },
+          "path": "artifacts/runs/p69-confirmation-matrix/confirmation-matrix.audit.json"
+        },
+        "markdown": {
+          "identity": {
+            "byte_count": 749183,
+            "sha256": "8acd86ca2566b3b40e55fa5aa9bd30944162a720f6950e6a56472e03c3f742a0"
+          },
+          "path": "artifacts/runs/p69-confirmation-matrix/confirmation-matrix.md"
+        },
+        "request": {
+          "identity": {
+            "byte_count": 18704,
+            "sha256": "e6d42168f7e3229d4ec32ac02443778dd1ffe2318d10a266cd7a8c7e1915f9ba"
+          },
+          "path": "artifacts/runs/p69-confirmation-matrix/confirmation-matrix.request.json"
+        },
+        "result": {
+          "identity": {
+            "byte_count": 1973394,
+            "sha256": "a1e968677a7ff98ee0c8b43b3ed3945aef34547d3f7c835edccc9f564d06a086"
+          },
+          "path": "artifacts/runs/p69-confirmation-matrix/confirmation-matrix.result.json"
+        }
+      },
+      "prefix": "confirmation-matrix"
+    },
+    {
+      "directory": "artifacts/runs/p69-confirmation-matrix-repeat",
+      "kind": "matrix",
+      "parts": {
+        "audit": {
+          "identity": {
+            "byte_count": 5987,
+            "sha256": "23e512ddc340c3c66d453d315c7b2a84995f4c2537922b87326c4d73feb86e3a"
+          },
+          "path": "artifacts/runs/p69-confirmation-matrix-repeat/confirmation-matrix.audit.json"
+        },
+        "markdown": {
+          "identity": {
+            "byte_count": 749183,
+            "sha256": "8acd86ca2566b3b40e55fa5aa9bd30944162a720f6950e6a56472e03c3f742a0"
+          },
+          "path": "artifacts/runs/p69-confirmation-matrix-repeat/confirmation-matrix.md"
+        },
+        "request": {
+          "identity": {
+            "byte_count": 18711,
+            "sha256": "f3a455eb13c3c198f6f9057a2869d6f8097f43cbf3fac17c37216590425ff881"
+          },
+          "path": "artifacts/runs/p69-confirmation-matrix-repeat/confirmation-matrix.request.json"
+        },
+        "result": {
+          "identity": {
+            "byte_count": 1973394,
+            "sha256": "a1e968677a7ff98ee0c8b43b3ed3945aef34547d3f7c835edccc9f564d06a086"
+          },
+          "path": "artifacts/runs/p69-confirmation-matrix-repeat/confirmation-matrix.result.json"
+        }
+      },
+      "prefix": "confirmation-matrix"
+    }
+  ],
+  "declared_before_b3_fixture_or_actual_operation": true,
+  "development_input_files": {
+    "artifacts/runs/p63-combined-factor-development-repeat/combined-factor-development.audit.json": {
+      "byte_count": 1202,
+      "sha256": "0f444e61f25ee2bb378567134cc253c39f23cbcb7f1e21cfdc3ea054ffb22963"
+    },
+    "artifacts/runs/p63-combined-factor-development-repeat/combined-factor-development.request.json": {
+      "byte_count": 47939,
+      "sha256": "d0a841c73a065a63c277a467df8106eb6319825821319357bf795e59be5b7848"
+    },
+    "artifacts/runs/p63-combined-factor-development-repeat/combined-factor-development.result.json": {
+      "byte_count": 4922095,
+      "sha256": "2e32c5d7b98b5798f45f5e9b7734088950eec1ef0ae5f19420a282321f3f8714"
+    },
+    "artifacts/runs/p63-combined-factor-development/combined-factor-development.audit.json": {
+      "byte_count": 1201,
+      "sha256": "7327ea48d2dbde60f9c4c82935983a7b3a8741d2770d3805f5812db753a8b02d"
+    },
+    "artifacts/runs/p63-combined-factor-development/combined-factor-development.request.json": {
+      "byte_count": 47939,
+      "sha256": "ad334c090bb554ba5051366bf745aad6ae9127707397f8a33e9700592bea67b1"
+    },
+    "artifacts/runs/p63-combined-factor-development/combined-factor-development.result.json": {
+      "byte_count": 4922095,
+      "sha256": "2e32c5d7b98b5798f45f5e9b7734088950eec1ef0ae5f19420a282321f3f8714"
+    },
+    "artifacts/runs/p63-combined-factor-preflight-repeat/combined-factor-preflight.audit.json": {
+      "byte_count": 1024,
+      "sha256": "1a37a5fe7b76c5dbeb1283233b4d537ee79d3352240a5074df325803da4adf3b"
+    },
+    "artifacts/runs/p63-combined-factor-preflight-repeat/combined-factor-preflight.request.json": {
+      "byte_count": 46108,
+      "sha256": "6453651598f794926fe3d1de93febe4994e75615e61f50793233efda2ea54acb"
+    },
+    "artifacts/runs/p63-combined-factor-preflight-repeat/combined-factor-preflight.result.json": {
+      "byte_count": 4635365,
+      "sha256": "79a7d7e09f0ada01ff72d6e266ddee7576aca52316a0f9a8e2ab3dd402251d13"
+    },
+    "artifacts/runs/p63-combined-factor-preflight/combined-factor-preflight.audit.json": {
+      "byte_count": 1024,
+      "sha256": "08d34e448d01f1286c255d72cfa5ae9554dd431acc923325786ff12c57ad9b99"
+    },
+    "artifacts/runs/p63-combined-factor-preflight/combined-factor-preflight.request.json": {
+      "byte_count": 46108,
+      "sha256": "9001aeee45dceba0286f3bbd97eb1c77bab5fcf550b935588e365529dc2d44bf"
+    },
+    "artifacts/runs/p63-combined-factor-preflight/combined-factor-preflight.result.json": {
+      "byte_count": 4635365,
+      "sha256": "79a7d7e09f0ada01ff72d6e266ddee7576aca52316a0f9a8e2ab3dd402251d13"
+    },
+    "artifacts/runs/p63-gating-pilot-repeat/gating-pilot.audit.json": {
+      "byte_count": 405,
+      "sha256": "f8747696884dcba410429ac0e6ef52c3966f7133c5826923834856f537d547b5"
+    },
+    "artifacts/runs/p63-gating-pilot-repeat/gating-pilot.request.json": {
+      "byte_count": 6288,
+      "sha256": "e4de6af19bab9207819bbaeee2cd801b65d5708b7df82f1af8bdf5673e8905a6"
+    },
+    "artifacts/runs/p63-gating-pilot-repeat/gating-pilot.result.json": {
+      "byte_count": 15918,
+      "sha256": "ede5ebcd618c663c6cc34a142f81ea6fef8ead627069edc0019ac8e5dda516f7"
+    },
+    "artifacts/runs/p63-gating-pilot/gating-pilot.audit.json": {
+      "byte_count": 405,
+      "sha256": "998b65533b9b52fb659ae2e5524932273e6dc29dade052ee07648c6b87d45e42"
+    },
+    "artifacts/runs/p63-gating-pilot/gating-pilot.request.json": {
+      "byte_count": 6288,
+      "sha256": "f59f0ea68ede111de3545ffec5060fb999cee1395f805adab15e05e85b3294c3"
+    },
+    "artifacts/runs/p63-gating-pilot/gating-pilot.result.json": {
+      "byte_count": 15918,
+      "sha256": "ede5ebcd618c663c6cc34a142f81ea6fef8ead627069edc0019ac8e5dda516f7"
+    },
+    "artifacts/runs/p63-parent-factor-development-repeat/parent-factor-development.audit.json": {
+      "byte_count": 1346,
+      "sha256": "6fe0a947685c1157e4f1153c98f9b9286f2d930801a6f788534832cffdb4f1c4"
+    },
+    "artifacts/runs/p63-parent-factor-development-repeat/parent-factor-development.request.json": {
+      "byte_count": 25348,
+      "sha256": "75631e6c286958ad43b576b09a1aa76d9e988f9d8b5949cb2d81fe9ba4d83009"
+    },
+    "artifacts/runs/p63-parent-factor-development-repeat/parent-factor-development.result.json": {
+      "byte_count": 3242560,
+      "sha256": "7f76e793eaf123b30116f57d68aa755962d63a56e4bba4b29703ae37b16e2040"
+    },
+    "artifacts/runs/p63-parent-factor-development/parent-factor-development.audit.json": {
+      "byte_count": 1346,
+      "sha256": "c98f6cdd6fa5295b08f91dd9f5daeded9a74c393e2c6b1777182371bcaa7dc79"
+    },
+    "artifacts/runs/p63-parent-factor-development/parent-factor-development.request.json": {
+      "byte_count": 25348,
+      "sha256": "c4654667f4f358cb36bed0a767232181c69f732729fd57a09773fad2f8421fc8"
+    },
+    "artifacts/runs/p63-parent-factor-development/parent-factor-development.result.json": {
+      "byte_count": 3242560,
+      "sha256": "7f76e793eaf123b30116f57d68aa755962d63a56e4bba4b29703ae37b16e2040"
+    },
+    "artifacts/runs/p63-parent-factor-preflight-repeat/parent-factor-preflight.audit.json": {
+      "byte_count": 981,
+      "sha256": "c094eabc07ba98c301a0930d2ecbc4885437f4eb89c5f4a1b9cc6fcdca790286"
+    },
+    "artifacts/runs/p63-parent-factor-preflight-repeat/parent-factor-preflight.request.json": {
+      "byte_count": 23255,
+      "sha256": "e269fc8216a5e6b67d85c817daba0e866f7ff8d8c442a5286a80c59faf44f92a"
+    },
+    "artifacts/runs/p63-parent-factor-preflight-repeat/parent-factor-preflight.result.json": {
+      "byte_count": 3045849,
+      "sha256": "555fc2fe5dfd86981d87af2d0c15bd8ab925417d9ad748783d95cee95f5a1874"
+    },
+    "artifacts/runs/p63-parent-factor-preflight/parent-factor-preflight.audit.json": {
+      "byte_count": 980,
+      "sha256": "c872792099a2ab5c772df69fac532b0205b2c33000112fb976219115b7a366d7"
+    },
+    "artifacts/runs/p63-parent-factor-preflight/parent-factor-preflight.request.json": {
+      "byte_count": 23255,
+      "sha256": "e5c7f0c49d34896409614383db728798bb33cb1b50de239a2a98cad036cfb385"
+    },
+    "artifacts/runs/p63-parent-factor-preflight/parent-factor-preflight.result.json": {
+      "byte_count": 3045849,
+      "sha256": "555fc2fe5dfd86981d87af2d0c15bd8ab925417d9ad748783d95cee95f5a1874"
+    },
+    "artifacts/runs/p63-replay-factor-pilot-repeat/replay-factor-pilot.audit.json": {
+      "byte_count": 418,
+      "sha256": "f1446f2885305df8f5175f82d7aa4dff4964a100811a1d5650b45b7a6a472f6c"
+    },
+    "artifacts/runs/p63-replay-factor-pilot-repeat/replay-factor-pilot.request.json": {
+      "byte_count": 6986,
+      "sha256": "e4a856c685d6ed1d799aba2b4fffeb028635935d008ac5b6c8d3a6c3315d30cc"
+    },
+    "artifacts/runs/p63-replay-factor-pilot-repeat/replay-factor-pilot.result.json": {
+      "byte_count": 65458,
+      "sha256": "ecf3f868c96779507e30328f73070edfbdfce0e255dd76eb12bd3d707c3b1de5"
+    },
+    "artifacts/runs/p63-replay-factor-pilot/replay-factor-pilot.audit.json": {
+      "byte_count": 418,
+      "sha256": "4d9b4814bff7db7575fa40d22453d49f8d25b7d9d6d9d5fad2c0d0c820fa1fff"
+    },
+    "artifacts/runs/p63-replay-factor-pilot/replay-factor-pilot.request.json": {
+      "byte_count": 6986,
+      "sha256": "8a2a9528ea01081756ca33df4e4e5b2775c0ce5c7479606299cf4061c1fff512"
+    },
+    "artifacts/runs/p63-replay-factor-pilot/replay-factor-pilot.result.json": {
+      "byte_count": 65458,
+      "sha256": "ecf3f868c96779507e30328f73070edfbdfce0e255dd76eb12bd3d707c3b1de5"
+    },
+    "artifacts/runs/p63-schedule-factor-development-repeat/schedule-factor-development.audit.json": {
+      "byte_count": 951,
+      "sha256": "dd8151925fc945ebfd5c0fae885210d37d85e617d457ae0ca1c3b9868171e5f8"
+    },
+    "artifacts/runs/p63-schedule-factor-development-repeat/schedule-factor-development.request.json": {
+      "byte_count": 18364,
+      "sha256": "1c4470dbaf747840462460f2f887e851836a85c746fbf5dac259837d957769e4"
+    },
+    "artifacts/runs/p63-schedule-factor-development-repeat/schedule-factor-development.result.json": {
+      "byte_count": 491701,
+      "sha256": "776df6a47efd452a9eb33aced8fa74b1938608637109bd716333fafb2edae689"
+    },
+    "artifacts/runs/p63-schedule-factor-development/schedule-factor-development.audit.json": {
+      "byte_count": 952,
+      "sha256": "736cc0fd7a5a3140adfc9effcb923db8101c1f53b5ae95a767955f7d78af0acf"
+    },
+    "artifacts/runs/p63-schedule-factor-development/schedule-factor-development.request.json": {
+      "byte_count": 18364,
+      "sha256": "f3b2bf5a92c99932b62679cafc6db9cf75fef7ade542400220951c7ca6c221ef"
+    },
+    "artifacts/runs/p63-schedule-factor-development/schedule-factor-development.result.json": {
+      "byte_count": 491701,
+      "sha256": "776df6a47efd452a9eb33aced8fa74b1938608637109bd716333fafb2edae689"
+    },
+    "artifacts/runs/p63-schedule-factor-preflight-repeat/schedule-factor-preflight.audit.json": {
+      "byte_count": 801,
+      "sha256": "223b779d88cea030a7959402256ad1c2e177c2a191f7fbaf03ea7615d8d0d12c"
+    },
+    "artifacts/runs/p63-schedule-factor-preflight-repeat/schedule-factor-preflight.request.json": {
+      "byte_count": 17134,
+      "sha256": "4b5c2837c66493a714349b8dff83abb153a66d01ea6e5c639add01d7e1e53299"
+    },
+    "artifacts/runs/p63-schedule-factor-preflight-repeat/schedule-factor-preflight.result.json": {
+      "byte_count": 451657,
+      "sha256": "87931c5fc3fad5bf50d5b18d07901d04b8a8e827ab4fce4429c0f1644c813c41"
+    },
+    "artifacts/runs/p63-schedule-factor-preflight/schedule-factor-preflight.audit.json": {
+      "byte_count": 801,
+      "sha256": "5d7831305bac6cac9fafba77f02bf5505f1c9bcfee35bdbf544c49e826822482"
+    },
+    "artifacts/runs/p63-schedule-factor-preflight/schedule-factor-preflight.request.json": {
+      "byte_count": 17134,
+      "sha256": "131a4f62dd8929056a0541acd102fca00a3ff25cbd7ef4e5ec7cb0213d606ef7"
+    },
+    "artifacts/runs/p63-schedule-factor-preflight/schedule-factor-preflight.result.json": {
+      "byte_count": 451657,
+      "sha256": "87931c5fc3fad5bf50d5b18d07901d04b8a8e827ab4fce4429c0f1644c813c41"
+    },
+    "artifacts/runs/p63-sleep-factor-development-repeat/sleep-factor-development.audit.json": {
+      "byte_count": 735,
+      "sha256": "e2a84acec8647de22c6a4eab19aeffa146b18358244a2e5f5f3fc08ce037584c"
+    },
+    "artifacts/runs/p63-sleep-factor-development-repeat/sleep-factor-development.request.json": {
+      "byte_count": 7764,
+      "sha256": "16b327f095d509f7fded69f5ced3526060f624af426776471a6911dc18ff397b"
+    },
+    "artifacts/runs/p63-sleep-factor-development-repeat/sleep-factor-development.result.json": {
+      "byte_count": 58476,
+      "sha256": "e0795b279346054d9c4e4c680e3aea103e347e3dd49960c44b93f8b642eaa9b6"
+    },
+    "artifacts/runs/p63-sleep-factor-development/sleep-factor-development.audit.json": {
+      "byte_count": 735,
+      "sha256": "476a334e70a781d1d29aa95d889a6122dc80babe8419a5e440d40cb41c1a31bc"
+    },
+    "artifacts/runs/p63-sleep-factor-development/sleep-factor-development.request.json": {
+      "byte_count": 7764,
+      "sha256": "8bba0112aac729afb8ddc959b4be99a5bbdf0c706b93c4872471404f3ce4a553"
+    },
+    "artifacts/runs/p63-sleep-factor-development/sleep-factor-development.result.json": {
+      "byte_count": 58476,
+      "sha256": "e0795b279346054d9c4e4c680e3aea103e347e3dd49960c44b93f8b642eaa9b6"
+    },
+    "artifacts/runs/p63-sleep-factor-preflight-repeat/sleep-factor-preflight.audit.json": {
+      "byte_count": 616,
+      "sha256": "7592848822b87bffb80ceee4528246f8818a8663f574892432b1f77784cb4b7f"
+    },
+    "artifacts/runs/p63-sleep-factor-preflight-repeat/sleep-factor-preflight.request.json": {
+      "byte_count": 7139,
+      "sha256": "949f9a6a474484b832d584afc016ee0dc3d9aa595b02bbbb1966180077d7b227"
+    },
+    "artifacts/runs/p63-sleep-factor-preflight-repeat/sleep-factor-preflight.result.json": {
+      "byte_count": 45189,
+      "sha256": "e3140d5a0529dc3023b90b60801d8f9caf2e15dd8edb4a85fa875f76f60d624d"
+    },
+    "artifacts/runs/p63-sleep-factor-preflight/sleep-factor-preflight.audit.json": {
+      "byte_count": 616,
+      "sha256": "2892e7fb4585f4e253235a3be88af4f12513b63d7adfbb8ecc3fcee38d44e610"
+    },
+    "artifacts/runs/p63-sleep-factor-preflight/sleep-factor-preflight.request.json": {
+      "byte_count": 7139,
+      "sha256": "2edce528fbb161439959fe695fc918dc859febb48a39bce99305248dfe39a2d2"
+    },
+    "artifacts/runs/p63-sleep-factor-preflight/sleep-factor-preflight.result.json": {
+      "byte_count": 45189,
+      "sha256": "e3140d5a0529dc3023b90b60801d8f9caf2e15dd8edb4a85fa875f76f60d624d"
+    },
+    "artifacts/runs/p67-confirmation-scope-repeat.json": {
+      "byte_count": 119067,
+      "sha256": "622feead54f155521928341151c8496c23c02a54b355b1b3b1e0f68b76c5772f"
+    },
+    "artifacts/runs/p67-confirmation-scope.json": {
+      "byte_count": 119067,
+      "sha256": "622feead54f155521928341151c8496c23c02a54b355b1b3b1e0f68b76c5772f"
+    }
+  },
+  "fresh_current_readers_per_operation": {
+    "complete_development_ledger": 1,
+    "expected_complete_original_report_readers": 2,
+    "matrix_bundle": 1,
+    "outcome_cost_bundle": 1
+  },
+  "prior_b2_handoff": {
+    "identity": {
+      "byte_count": 59195,
+      "sha256": "00c8e085819eebcf7c5b18de1f20461f7717fb9c55a5bd1577590a7d0cf0eb60"
+    },
+    "path": "artifacts/runs/p612-complete-findings-handoff-validation.json"
+  },
+  "schema_id": "p612_complete_findings_current_publication_catalog_v1",
+  "source_scope": "all144 accepted b2 source pins plus only new ports/IO/CLI/catalog sources; no old source mutation",
+  "synthesis_catalog": {
+    "identity": {
+      "byte_count": 23515,
+      "sha256": "55ed0854de4235a6f3daffe8f69b59ccf38a4db796a9baa62861a40424581d6e"
+    },
+    "path": "src/config/p612_findings_inputs.json"
+  },
+  "upstream_handoffs": {
+    "development": {
+      "identity": {
+        "byte_count": 49827,
+        "sha256": "1bb5417d9e8bd03d6134624bdd408d7694b9aca0fafb98e6f08c11ce3e78dbba"
+      },
+      "path": "artifacts/runs/p612-development-findings-handoff-validation.json"
+    },
+    "matrix": {
+      "identity": {
+        "byte_count": 26130,
+        "sha256": "ce733130f93cacfa7346192605c21ff781a7b9485f514428a56d032421f83f25"
+      },
+      "path": "artifacts/runs/p69-confirmation-matrix-handoff-validation.json"
+    },
+    "outcome_costs": {
+      "identity": {
+        "byte_count": 439666,
+        "sha256": "fec68a6506066e089a65bb7fee3b2a5c99adbc6bd0db47b5f47ecba4d7e035e3"
+      },
+      "path": "artifacts/runs/p610-outcome-costs-v2-handoff-validation.json"
+    }
+  }
+}
