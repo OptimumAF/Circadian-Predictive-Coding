@@ -153,7 +153,142 @@ jobs:
           '@ | python -
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Test native ownership and runtime observations
-        run: python -m pytest -q -ra tests/test_platform_boundaries.py tests/test_prospective_generation_ownership.py tests/test_prospective_runtime_closure.py tests/test_runtime_payload_schema.py tests/test_runtime_python_retention.py tests/test_runtime_admission_limits.py tests/test_runtime_monitoring_coverage.py tests/test_runtime_execution_guard.py --durations=0 --junitxml="${{ runner.temp }}/circadian-windows-native/tests.raw.xml"
+        shell: pwsh
+        run: |
+          $interpreter = (Get-Command python -ErrorAction Stop).Source
+          $testArguments = @(
+            '-m'
+            'pytest'
+            '-q'
+            '-ra'
+            'tests/test_platform_boundaries.py'
+            'tests/test_prospective_generation_ownership.py'
+            'tests/test_prospective_runtime_closure.py'
+            'tests/test_runtime_payload_schema.py'
+            'tests/test_runtime_python_retention.py'
+            'tests/test_runtime_admission_limits.py'
+            'tests/test_runtime_monitoring_coverage.py'
+            'tests/test_runtime_execution_guard.py'
+            '--durations=0'
+            '--junitxml=${{ runner.temp }}/circadian-windows-native/tests.raw.xml'
+          )
+          $receiptFolder = Join-Path $env:RUNNER_TEMP 'circadian-windows-native'
+          $ErrorActionPreference = 'Stop'
+          $SamplePeriodSeconds = 5
+          $SamplingLimitSeconds = 900
+          $MaxSamples = 4096
+          $MaxChildren = 256
+          if ($SamplePeriodSeconds -le 0 -or $SamplingLimitSeconds -le 0 -or $MaxSamples -lt 1 -or $MaxChildren -lt 1) { throw 'Invalid sampler bounds' }
+          New-Item -ItemType Directory -Path $ReceiptFolder -Force | Out-Null
+          $samplePath = Join-Path $ReceiptFolder 'owned-child-samples.jsonl'
+          $writer = [IO.StreamWriter]::new($samplePath, $false, [Text.UTF8Encoding]::new($false))
+          # Arguments are supplied by the fixed workflow, not process command-line reads.
+          $quotedArguments = foreach ($argument in $TestArguments) {
+            '"' + ([regex]::Replace(([regex]::Replace($argument, '(\\*)"', '$1$1\"')), '(\\+)$', '$1$1')) + '"'
+          }
+          $clock = [Diagnostics.Stopwatch]::StartNew()
+          $root = Start-Process -FilePath $Interpreter -ArgumentList ($quotedArguments -join ' ') -PassThru -WindowStyle Hidden -RedirectStandardOutput (Join-Path $ReceiptFolder 'tests.output.txt') -RedirectStandardError (Join-Path $ReceiptFolder 'tests.error.txt')
+          $runner = $root
+          $rootCreated = $root.StartTime.ToUniversalTime()
+          $forwardingLauncher = Test-Path -LiteralPath (Join-Path (Split-Path (Split-Path $Interpreter -Parent) -Parent) 'pyvenv.cfg')
+          $children = [Collections.Generic.List[object]]::new()
+          $errors = [Collections.Generic.List[string]]::new()
+          $properties = @('ProcessId','ParentProcessId','CreationDate','Name','UserModeTime','KernelModeTime','WorkingSetSize','PrivatePageCount','ReadTransferCount','WriteTransferCount')
+          $samples = 0
+          $probeSeconds = 0.0
+          $maxProbeSeconds = 0.0
+          $boundsReached = $false
+          $nextProbe = 0.0
+          function Write-ChildRow($row) {
+            if ($script:samples -ge $MaxSamples) { $script:boundsReached = $true; return }
+            $writer.WriteLine(($row | ConvertTo-Json -Compress -Depth 5))
+            $writer.Flush()
+            $script:samples += 1
+          }
+          function Get-OwnRows([string]$Filter) {
+            Get-CimInstance Win32_Process -Filter $Filter -Property $properties -ErrorAction Stop
+          }
+          try {
+            while (-not $root.HasExited) {
+              if ($clock.Elapsed.TotalSeconds -ge $SamplingLimitSeconds -or $samples -ge $MaxSamples -or $children.Count -ge $MaxChildren -or $errors.Count -ge 3) { $boundsReached = $true; break }
+              if ($clock.Elapsed.TotalSeconds -lt $nextProbe) { [void]$root.WaitForExit(200); continue }
+              $probeClock = [Diagnostics.Stopwatch]::StartNew()
+              try {
+                if ($forwardingLauncher) {
+                  # CPython venv forwarders create the real pytest interpreter first.
+                  $forwardRows = @(Get-OwnRows "ParentProcessId = $($root.Id)")
+                  $forwardRows = @($forwardRows | Where-Object { $_.Name -in @('python.exe','pythonw.exe') -and $_.CreationDate.ToUniversalTime() -ge $rootCreated })
+                  if ($forwardRows.Count -eq 1) {
+                    $candidateRunner = [Diagnostics.Process]::GetProcessById([int]$forwardRows[0].ProcessId)
+                    [void]$candidateRunner.Handle
+                    if ([math]::Abs(($candidateRunner.StartTime.ToUniversalTime() - $forwardRows[0].CreationDate.ToUniversalTime()).Ticks) -le 10000 -and -not $root.HasExited) { $runner = $candidateRunner; $forwardingLauncher = $false }
+                  }
+                }
+                if (-not $forwardingLauncher -and -not $runner.HasExited) {
+                  $observedRows = @{}
+                  $parents = @(@{ Handle = $runner; Created = $runner.StartTime.ToUniversalTime(); Depth = 0 }) + @($children | Where-Object { -not $_.ExitRecorded })
+                  foreach ($parent in $parents) {
+                    if ($parent.Handle.HasExited) { continue }
+                    $rows = @(Get-OwnRows "ParentProcessId = $($parent.Handle.Id)")
+                    if ($parent.Handle.HasExited) { continue }
+                    foreach ($row in $rows) {
+                      if ($row.Name -notin @('python.exe','pythonw.exe') -or $row.CreationDate.ToUniversalTime() -lt $parent.Created) { continue }
+                      $observedRows["$($row.ProcessId):$($row.CreationDate.ToUniversalTime().Ticks)"] = $row
+                      $known = @($children | Where-Object { $_.Id -eq [int]$row.ProcessId -and $_.Created -eq $row.CreationDate.ToUniversalTime() })
+                      if ($known.Count -eq 0 -and $children.Count -lt $MaxChildren) {
+                        try {
+                          $handle = [Diagnostics.Process]::GetProcessById([int]$row.ProcessId)
+                          # Force a held OS handle; a reused PID cannot replace this child.
+                          [void]$handle.Handle
+                          if ([math]::Abs(($handle.StartTime.ToUniversalTime() - $row.CreationDate.ToUniversalTime()).Ticks) -gt 10000 -or $handle.HasExited -or $parent.Handle.HasExited) { $handle.Dispose(); continue }
+                          $entry = [pscustomobject]@{ Id=[int]$row.ProcessId; ParentId=$parent.Handle.Id; Created=$row.CreationDate.ToUniversalTime(); Handle=$handle; Depth=($parent.Depth+1); ExitRecorded=$false }
+                          $children.Add($entry)
+                        } catch [ArgumentException] { continue } catch [InvalidOperationException] { continue }
+                      }
+                    }
+                  }
+                  foreach ($child in $children) {
+                    if ($child.ExitRecorded) { continue }
+                    if ($child.Handle.HasExited) {
+                      Write-ChildRow ([ordered]@{ elapsed_seconds=$clock.Elapsed.TotalSeconds; process_id=$child.Id; owned_parent_id=$child.ParentId; depth=$child.Depth; state='exited'; exit_code=$child.Handle.ExitCode })
+                      $child.ExitRecorded = $true
+                      continue
+                    }
+                    $rowKey = "$($child.Id):$($child.Created.Ticks)"
+                    $row = if ($observedRows.ContainsKey($rowKey)) { @($observedRows[$rowKey]) } else { @(Get-OwnRows "ProcessId = $($child.Id)") }
+                    if ($row.Count -ne 1 -or $row[0].CreationDate.ToUniversalTime() -ne $child.Created -or $child.Handle.HasExited) { continue }
+                    $row = $row[0]
+                    $child.Handle.Refresh()
+                    Write-ChildRow ([ordered]@{ elapsed_seconds=$clock.Elapsed.TotalSeconds; process_id=$child.Id; owned_parent_id=$child.ParentId; depth=$child.Depth; state='running'; user_cpu_seconds=([double]$row.UserModeTime/10000000); kernel_cpu_seconds=([double]$row.KernelModeTime/10000000); working_set_bytes=[uint64]$row.WorkingSetSize; private_bytes=[uint64]$row.PrivatePageCount; observed_os_peak_working_set_bytes=$child.Handle.PeakWorkingSet64; io_read_bytes=[uint64]$row.ReadTransferCount; io_write_bytes=[uint64]$row.WriteTransferCount })
+                  }
+                }
+              } catch { $errors.Add($_.Exception.GetType().FullName) }
+              $probeClock.Stop()
+              $probeSeconds += $probeClock.Elapsed.TotalSeconds
+              $maxProbeSeconds = [math]::Max($maxProbeSeconds,$probeClock.Elapsed.TotalSeconds)
+              $nextProbe = $clock.Elapsed.TotalSeconds + $SamplePeriodSeconds
+            }
+            # A sampler bound stops observation only; original test deadlines still own execution.
+            $root.WaitForExit()
+            foreach ($child in $children) {
+              if (-not $child.ExitRecorded -and $child.Handle.HasExited) {
+                Write-ChildRow ([ordered]@{ elapsed_seconds=$clock.Elapsed.TotalSeconds; process_id=$child.Id; owned_parent_id=$child.ParentId; depth=$child.Depth; state='exited'; exit_code=$child.Handle.ExitCode })
+                $child.ExitRecorded = $true
+              }
+            }
+            $summary = [ordered]@{ role='External owned-child software diagnostics; no causal or scientific admission'; period_seconds=$SamplePeriodSeconds; sampling_limit_seconds=$SamplingLimitSeconds; max_samples=$MaxSamples; max_children=$MaxChildren; samples=$samples; observed_children=$children.Count; probe_wall_seconds=$probeSeconds; maximum_probe_wall_seconds=$maxProbeSeconds; total_wall_seconds=$clock.Elapsed.TotalSeconds; bounds_reached=$boundsReached; error_types=@($errors); pytest_exit_code=$root.ExitCode; child_source_injection=$false; all_existing_test_deadlines_unchanged=$true; missed_short_children_possible=$true }
+            $summary | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $ReceiptFolder 'owned-child-sampler.json') -Encoding utf8
+            Get-Content -LiteralPath (Join-Path $ReceiptFolder 'tests.output.txt')
+            Get-Content -LiteralPath (Join-Path $ReceiptFolder 'tests.error.txt')
+            Write-Output ('SAMPLER ' + ($summary | ConvertTo-Json -Compress -Depth 5))
+            $testExitCode = $root.ExitCode
+          } finally {
+            $writer.Dispose()
+            foreach ($child in $children) { $child.Handle.Dispose() }
+            if ($runner.Id -ne $root.Id) { $runner.Dispose() }
+            $root.Dispose()
+          }
+          exit $testExitCode
       - name: Record Windows native CI post-test snapshot
         if: always()
         shell: pwsh
@@ -206,5 +341,7 @@ jobs:
             ${{ runner.temp }}/circadian-windows-native/runner-before.json
             ${{ runner.temp }}/circadian-windows-native/runner-after.json
             ${{ runner.temp }}/circadian-windows-native/tests-summary.json
+            ${{ runner.temp }}/circadian-windows-native/owned-child-samples.jsonl
+            ${{ runner.temp }}/circadian-windows-native/owned-child-sampler.json
           if-no-files-found: warn
           retention-days: 7
