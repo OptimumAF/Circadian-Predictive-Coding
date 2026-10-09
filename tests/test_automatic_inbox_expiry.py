@@ -65,8 +65,11 @@ def test_should_preserve_original_large_policy_integer_domain_before_optional_ob
     from src.app.expiry_history_birth import expiry_policy_birth
 
     original = DataRetentionPolicy(
-        2**64, 2**64, PayloadOwnershipLimits(16, 64),
-        owned_payload_copies=PayloadCopyLimits(2**64), max_retention_seconds=2**64,
+        2**64,
+        2**64,
+        PayloadOwnershipLimits(16, 64),
+        owned_payload_copies=PayloadCopyLimits(2**64),
+        max_retention_seconds=2**64,
     )
     snapshot = expiry_policy_birth(original)
     assert snapshot[3][:2] == (2**64, 2**64)

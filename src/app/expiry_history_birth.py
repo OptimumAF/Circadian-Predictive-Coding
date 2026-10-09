@@ -48,8 +48,7 @@ def expiry_policy_birth(policy: Any) -> tuple:
             raise ValueError("expiry birth requires original nonnegative copy allowance")
     seconds = policy.max_retention_seconds
     if seconds is not None and (
-        (type(seconds) is not int and type(seconds) is not float)
-        or not isfinite(seconds)
+        (type(seconds) is not int and type(seconds) is not float) or not isfinite(seconds)
     ):
         raise ValueError("expiry birth requires bounded finite original retention time")
     DataRetentionPolicy.__post_init__(policy)
