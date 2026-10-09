@@ -82,4 +82,58 @@ jobs:
           python -m mypy --platform win32 src tests scripts
           python -m mypy --platform linux src tests scripts
       - name: Test native ownership and runtime observations
-        run: python -m pytest -q -ra tests/test_platform_boundaries.py tests/test_prospective_generation_ownership.py tests/test_prospective_runtime_closure.py tests/test_runtime_payload_schema.py tests/test_runtime_python_retention.py tests/test_runtime_admission_limits.py tests/test_runtime_monitoring_coverage.py tests/test_runtime_execution_guard.py
+        shell: pwsh
+        run: |
+          $nativeEvidenceRoot = 'artifacts/runs/windows-native-ci'
+          New-Item -ItemType Directory -Path $nativeEvidenceRoot -Force | Out-Null
+          $nativeTestExit = 1
+          $nativeTestFailure = $null
+          try {
+              python -m pytest -q -ra --junitxml="$nativeEvidenceRoot/junit.xml" --basetemp="$nativeEvidenceRoot/cases" tests/test_platform_boundaries.py tests/test_prospective_generation_ownership.py tests/test_prospective_runtime_closure.py tests/test_runtime_payload_schema.py tests/test_runtime_python_retention.py tests/test_runtime_admission_limits.py tests/test_runtime_monitoring_coverage.py tests/test_runtime_execution_guard.py
+              $nativeTestExit = $LASTEXITCODE
+          } catch {
+              # Preserve native nonzero status under either PowerShell native-error policy.
+              if ($LASTEXITCODE -is [int] -and $LASTEXITCODE -ne 0) {
+                  $nativeTestExit = $LASTEXITCODE
+              }
+              $nativeTestFailure = $_
+          } finally {
+              try {
+                  $nativeEvidenceBase = (Resolve-Path -LiteralPath $nativeEvidenceRoot).Path
+                  $nativeEvidenceRows = @(Get-ChildItem -LiteralPath $nativeEvidenceRoot -Recurse -File |
+                      Sort-Object FullName | ForEach-Object {
+                          [ordered]@{
+                              path = [IO.Path]::GetRelativePath($nativeEvidenceBase, $_.FullName).Replace('\', '/')
+                              bytes = $_.Length
+                              modified_utc = $_.LastWriteTimeUtc.ToString('O')
+                          }
+                      })
+                  [long]$nativeTotalBytes = 0
+                  foreach ($nativeEvidenceRow in $nativeEvidenceRows) {
+                      $nativeTotalBytes += [long]$nativeEvidenceRow.bytes
+                  }
+                  $nativeEvidenceReport = [ordered]@{
+                      schema = 'windows_native_ci_file_metadata_v1'
+                      pytest_exit_status = $nativeTestExit
+                      file_count = $nativeEvidenceRows.Count
+                      total_file_bytes = $nativeTotalBytes
+                      files = $nativeEvidenceRows
+                      limits = 'Metadata only; no true-child resources or correctness attestation.'
+                  }
+                  $nativeEvidenceJson = $nativeEvidenceReport | ConvertTo-Json -Depth 5
+                  if ([Text.Encoding]::UTF8.GetByteCount($nativeEvidenceJson) -gt 4 * 1024 * 1024) {
+                      throw 'Native CI metadata exceeds its 4 MiB log allowance.'
+                  }
+                  $nativeEvidenceJson | Set-Content -LiteralPath "$nativeEvidenceRoot/native-diagnostics.json" -Encoding utf8
+                  Write-Output 'WINDOWS_NATIVE_DIAGNOSTICS_BEGIN'
+                  Write-Output $nativeEvidenceJson
+                  Write-Output 'WINDOWS_NATIVE_DIAGNOSTICS_END'
+              } catch {
+                  Write-Error -ErrorRecord $_ -ErrorAction Continue
+                  if ($nativeTestExit -eq 0) { $nativeTestExit = 1 }
+              }
+          }
+          if ($null -ne $nativeTestFailure) {
+              Write-Error -ErrorRecord $nativeTestFailure -ErrorAction Continue
+          }
+          exit $nativeTestExit

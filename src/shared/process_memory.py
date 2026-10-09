@@ -11,13 +11,14 @@ from __future__ import annotations
 import ctypes
 import os
 import sys
+from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import lru_cache
 from math import isfinite
 from os import getpid
-from threading import Event, Lock, Thread
+from threading import Event, Lock, Thread, get_ident
 from types import TracebackType
-from typing import Any, Callable
+from typing import Any, Callable, Iterator
 
 
 @dataclass(frozen=True)
@@ -121,15 +122,105 @@ class ProcessRssSampler:
     def snapshot(self) -> ProcessRssSegment:
         """Capture a consistent observation through the latest explicit sample."""
         with self._lock:
-            if self.start_bytes is None or self.peak_bytes is None or self.sample_count < 1:
-                raise RuntimeError("Process RSS is unavailable for checkpoint telemetry.")
-            return ProcessRssSegment(
-                pid=getpid(),
-                start_bytes=self.start_bytes,
-                peak_bytes=self.peak_bytes,
-                sample_count=self.sample_count,
-                interval_seconds=self.interval_seconds,
-            )
+            return self._snapshot_leased()
+
+    def _snapshot_leased(self) -> ProcessRssSegment:
+        if self.start_bytes is None or self.peak_bytes is None or self.sample_count < 1:
+            raise RuntimeError("Process RSS is unavailable for checkpoint telemetry.")
+        return ProcessRssSegment(
+            getpid(), self.start_bytes, self.peak_bytes, self.sample_count, self.interval_seconds
+        )
+
+    @contextmanager
+    def _lease_observation(self) -> Iterator[Callable[[], ProcessRssSegment | None]]:
+        """Internal capture port: freeze original counters before reading RSS.
+
+        Why: public sample/snapshot reacquire a nonreentrant lock. Keep this
+        capability within one original thread/source interval, without renewing
+        baseline or allowing a blocked capture to invoke its reader first.
+        """
+        gate, reader, interval, thread = (
+            self._lock,
+            self.read_rss_bytes,
+            self.interval_seconds,
+            get_ident(),
+        )
+        active = False
+        reading = False
+        stop, worker = self._stop, self._thread
+
+        def observe() -> ProcessRssSegment | None:
+            nonlocal reading
+            if not active or get_ident() != thread:
+                raise ValueError("RSS observation outside original lease/thread")
+            if reading:
+                self._error = ValueError("reentrant original RSS reader")
+                stop.set()
+                raise self._error
+            if (
+                self._lock is not gate
+                or self.read_rss_bytes is not reader
+                or self.interval_seconds != interval
+                or self._stop is not stop
+                or self._thread is not worker
+            ):
+                raise ValueError("original RSS gate/reader/interval changed")
+            self._require_capture_open()
+            assert self.peak_bytes is not None
+            counters = (self.start_bytes, self.peak_bytes, self.sample_count)
+            try:
+                reading = True
+                value = reader()
+                if value is None:
+                    self._error = RuntimeError("original RSS observation unavailable")
+                    self._stop.set()
+                    return None
+                if type(value) is not int or value < 0:
+                    raise ValueError("original RSS observation requires nonnegative exact bytes")
+                if (
+                    self._lock is not gate
+                    or self.read_rss_bytes is not reader
+                    or self.interval_seconds != interval
+                    or self._stop is not stop
+                    or self._thread is not worker
+                    or (self.start_bytes, self.peak_bytes, self.sample_count) != counters
+                ):
+                    raise ValueError("original RSS source changed during reader callback")
+                self._require_capture_open()
+                self.peak_bytes = max(self.peak_bytes, value)  # baseline was checked, never reset
+                self.sample_count += 1
+                return self._snapshot_leased()
+            except Exception as error:
+                if self._error is None:
+                    self._error = error
+                stop.set()
+                raise
+            finally:
+                reading = False
+
+        if not gate.acquire(blocking=False):
+            raise ValueError("original RSS sampler is busy")
+        try:
+            active = True
+            yield observe
+        finally:
+            active = False
+            gate.release()
+
+    def _require_capture_open(self) -> None:
+        if self._error is not None:
+            raise RuntimeError("original RSS sampler failed") from self._error
+        if self._stop.is_set() or (self._thread is not None and not self._thread.is_alive()):
+            raise ValueError("original RSS sampler is terminal")
+        if (
+            type(self.start_bytes) is not int
+            or type(self.peak_bytes) is not int
+            or self.start_bytes < 0
+            or self.peak_bytes < self.start_bytes
+            or type(self.sample_count) is not int
+            or self.sample_count < 1
+        ):
+            raise ValueError("original RSS baseline/peak/count is unavailable or corrupt")
 
     def __enter__(self) -> ProcessRssSampler:
         self.sample()
@@ -156,6 +247,7 @@ class ProcessRssSampler:
             try:
                 self.sample()
             except Exception as error:
-                self._error = error
-                self._stop.set()
+                with self._lock:
+                    self._error = error
+                    self._stop.set()
                 return

@@ -295,6 +295,29 @@ class ToyBudgetSession:
         self._check_memory()
         self._check_wall(self._elapsed())
 
+    def _before_final_leased(self, observe: Callable[[], ProcessRssSegment | None] | None) -> None:
+        """Internal capture uses the original sampler's already-held lease.
+
+        Preserve cumulative segment/progress before cap refusal, just like normal
+        final admission. A supplied port cannot replace an absent original sampler.
+        """
+        if self.process_rss_sampler is None:
+            if observe is not None:
+                raise ValueError("foreign RSS port cannot replace original sampler")
+        else:
+            if observe is None:
+                raise ValueError("original sampler requires its leased observation")
+            segment = observe()
+            if segment is None:
+                raise ToyProcessRssUnavailable("toy process RSS became unavailable during capture")
+            if type(segment) is not ProcessRssSegment:
+                raise ValueError("original RSS port requires a complete segment")
+            self.process_rss_segment = segment
+            if self.progress is not None:
+                self.progress.process_rss_segment = segment
+            self._stop_if_memory_over_cap()
+        self._check_wall(self._elapsed())
+
     def _check_wall(self, elapsed: float) -> None:
         limit = self.budget.max_wall_seconds
         if limit is not None and elapsed >= limit:

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections import deque
-from copy import deepcopy
 from dataclasses import dataclass, field as dataclass_field, fields
 from hashlib import sha256
 from math import isfinite
@@ -48,6 +47,9 @@ from src.core.training_validation import (
     validate_positive_finite_learning_rate,
 )
 from src.core.dimension_validation import require_positive_integer_dimension
+from src.core.data_erasure import ReplayPayloadErasure
+from src.core.replay_write_origin import begin_replay_write
+from src.core.native_state_copy import copy_native_state
 
 Array = NDArray[np.float64]
 NUMPY_CIRCADIAN_ENERGY_ID = "numpy_circadian_bce_plus_half_mean_final_hidden_error_sq_v1"
@@ -534,7 +536,7 @@ class CircadianPredictiveCodingNetwork:
             min_hidden_dim=self._min_hidden_dim,
             max_hidden_dim=self.max_hidden_dim,
             config=self.config,
-            state=deepcopy(self.__dict__),
+            state=copy_native_state(self.__dict__, producer=self, kind="native_snapshot"),
         )
 
     def restore_state(self, snapshot: CircadianNetworkSnapshot) -> None:
@@ -549,7 +551,7 @@ class CircadianPredictiveCodingNetwork:
             or snapshot.config != self.config
         ):
             raise ValueError("Circadian snapshot config or model dimensions are incompatible")
-        restored = deepcopy(snapshot.state)
+        restored = copy_native_state(snapshot.state, producer=self, kind="native_restore")
         if restored.keys() != self.__dict__.keys():
             raise ValueError("Circadian snapshot fields are incompatible")
         if restored.get("_replay_side_effect_policy") != getattr(
@@ -2075,8 +2077,48 @@ class CircadianPredictiveCodingNetwork:
         scale = np.clip(raw_scale, 0.5, 2.0)
         return matrix * scale[:, np.newaxis]
 
+    def replay_payload_footprint(self) -> ReplayPayloadErasure:
+        """Validate and count owned replay arrays without copying or mutation."""
+        return self._describe_replay_payloads()
+
+    def erase_replay_payloads(self) -> ReplayPayloadErasure:
+        """Drop every owned replay batch, preserving weights/policy/RNG/telemetry.
+
+        Why: historical batches have no subject index. Clearing all retained
+        batches avoids pretending to erase only a row we cannot identify. Caller
+        snapshots and parameter influence are outside this reference erasure.
+        The enclosing owner must provide exclusive/quiescent mutation authority.
+        """
+        erased = self._describe_replay_payloads()
+        self._replay_memory.clear()
+        return erased
+
+    def _describe_replay_payloads(self) -> ReplayPayloadErasure:
+        if type(self._replay_memory) is not deque:
+            raise ValueError("replay erasure requires the native replay deque")
+        examples, payload_bytes = 0, 0
+        for item in self._replay_memory:
+            if (
+                type(item) is not ReplaySnapshot
+                or not isinstance(item.input_batch, np.ndarray)
+                or not isinstance(item.target_batch, np.ndarray)
+            ):
+                raise ValueError("replay erasure requires valid native snapshot arrays")
+            validate_binary_training_batch(item.input_batch, item.target_batch, self.input_dim)
+            examples += item.input_batch.shape[0]
+            payload_bytes += item.input_batch.nbytes + item.target_batch.nbytes
+        return ReplayPayloadErasure(len(self._replay_memory), examples, payload_bytes)
+
     def _store_replay_snapshot(self, input_batch: Array, target_batch: Array) -> None:
         budget = getattr(self, "_replay_retention_budget", None)
+        window = begin_replay_write(
+            self,
+            input_batch,
+            target_batch,
+            self._replay_memory,
+            int(input_batch.shape[0]),
+            "rows" if budget is not None else "batch",
+        )
         if budget is not None:
             policy = getattr(self, "_replay_retention_policy", DEFAULT_REPLAY_RETENTION_POLICY)
             predictions = self.predict_proba(input_batch)
@@ -2085,6 +2127,8 @@ class CircadianPredictiveCodingNetwork:
                 for item in self._replay_memory
             }
             for index in range(input_batch.shape[0]):
+                if window is not None:
+                    window.before_copy(index, 1)
                 input_row = input_batch[index : index + 1].copy()
                 target_row = target_batch[index : index + 1].copy()
                 sample_id = replay_sample_id(input_row, target_row)
@@ -2098,12 +2142,15 @@ class CircadianPredictiveCodingNetwork:
                     continue
                 if policy.name == "recent_fifo":
                     retained.pop(sample_id, None)
-                retained[sample_id] = ReplaySnapshot(
+                snapshot = ReplaySnapshot(
                     input_batch=input_row,
                     target_batch=target_row,
                     priority=float(np.abs(predictions[index, 0] - target_row[0, 0])),
                     positive_fraction=float(target_row[0, 0]),
                 )
+                if window is not None:
+                    window.copied(snapshot)
+                retained[sample_id] = snapshot
                 while (
                     len(retained) > budget.max_examples
                     or sum(
@@ -2116,20 +2163,29 @@ class CircadianPredictiveCodingNetwork:
                     # only eviction order differs between declared policies.
                     del retained[policy.eviction_id(retained)]
             self._replay_memory = deque(retained.values())
+            if window is not None:
+                window.finish(self._replay_memory)
             return
         if self.config.replay_memory_size <= 0:
+            if window is not None:
+                window.finish(self._replay_memory)
             return
         output_prediction = self.predict_proba(input_batch)
         priority = float(np.mean(np.abs(output_prediction - target_batch)))
         positive_fraction = float(np.mean(target_batch))
-        self._replay_memory.append(
-            ReplaySnapshot(
-                input_batch=input_batch.copy(),
-                target_batch=target_batch.copy(),
-                priority=priority,
-                positive_fraction=positive_fraction,
-            )
+        if window is not None:
+            window.before_copy(0, int(input_batch.shape[0]))
+        snapshot = ReplaySnapshot(
+            input_batch=input_batch.copy(),
+            target_batch=target_batch.copy(),
+            priority=priority,
+            positive_fraction=positive_fraction,
         )
+        if window is not None:
+            window.copied(snapshot)
+        self._replay_memory.append(snapshot)
+        if window is not None:
+            window.finish(self._replay_memory)
 
     def _run_replay_consolidation(
         self, replay_snapshots: list[ReplaySnapshot] | None = None
