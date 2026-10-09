@@ -1,5 +1,21 @@
 # ADR-0195 — Poison runtime mutation enforcement after caught denials
 
+
+## Current status amendment — 2026-10-06
+
+The decision below records the implemented mechanism and its historical finite controls.
+Its claimed restriction to the prepared owning `with` boundary is contradicted by the
+retained foreign nested-exit probe: same owner code and guard identity permit an
+unrelated exceptional exit to disable monitoring, then defaults 5 -> 9 and body [9]
+execute before genuine cleanup. General j6b2 correctness is reopened; j6c's exact-entry
+repair is user-deferred and unchecked. No implementation or acceptance is changed by
+this amendment. All historical receipts/budgets and full source/native/private/lifetime
+obligations remain mandatory; complete scientific admission stays unavailable.
+See [current guard status](../p67-runtime-execution-guard.md) and
+[the plan](../../DEVELOPMENT_PLAN.md).
+
+## Historical decision
+
 Status: implemented mechanism; complete runtime admission remains unavailable.
 
 ## Context

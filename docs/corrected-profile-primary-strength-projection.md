@@ -1,0 +1,23 @@
+# Complete primary strength-case source projection
+
+P9.5b35c8a validates every complete saved source value; parent c8 and all actual rendering/family/physical/scientific criteria remain open.
+
+Complete original source/counts/identity: `{"source": "artifacts/runs/p62-profiles/strength-case.json", "original_identity": {"byte_count": 4466030, "sha256": "1198c5e35cc8959a677a0840fecb8d99ea83bd4fcf94d0a8735d06d61f6d1827"}, "seeds": [3, 7, 11, 19, 23, 31, 37], "counts": {"typed_nodes": 107042, "container_occurrences": 32054, "unique_containers": 4394, "schemas": 24, "seed_rows": 7, "events": 1330}}`.
+
+Complete lossless measured layout: `{"records": 4425, "physical_rows": 5919, "complete_body_pages": 135, "characters": 685633, "width": 1500, "height": 1230, "provisional_font_pixels": 16, "body_rows_per_page": 44, "full_source_alias_schema_child_value_coverage": true, "pages_rendered": 0, "font_geometry_decoded_pixels_actual_review_passed": false}`. ZERO pages rendered; all135 actual source/font/origin/glyph/geometry/decoded-pixel/whole-page review gates remain REQUIRED before presentation acceptance.
+
+Every original scalar/container/type/literal/key/list order/source occurrence/alias/schema/ref/duration/seven original seeds/all1330 events reconstructs independently. Every full fragment rejoins. All38 controls pass, including coherent rehashed wrong metric/duration/chemistry, strict duplicate/nonfinite/overflow refusal, full-sized escaped Unicode lexical fixture and forced digest collision/type/key-order fixture. No selected fields, shortened aliases/literals or deleted timing.
+
+Why this: complete the next registered original after the accepted c7 parent while preserving human-deferred c5b/c6b/c1. Reuse only entire current-source/preformatter AST validated modules. Primary strength has4394 unique containers versus4395 in the repeat; derive counts independently, never transplant repeat counts or physical provenance.
+
+Artifact directory: artifacts/runs/p95-corrected-profile-primary-strength-20261007. Modules: graph.py pure ordered typed graph; codec.py complete schemas/ref edges; layout.py full literal fragment/measurement; decode.py independent expansion/packing/refusals; audit.py saved-source orchestration; run.py finite exclusive command capture. Production layers/interfaces unchanged, no new dependency/config/env var.
+
+Commands: `.venv/Scripts/python.exe <stage>/run.py -B -X utf8 <stage>/audit.py --build` and `--validate`; static.py.txt --before/--after; -m ruff check/format --check, -m py_compile, -m mypy --follow-imports=silent on all6 complete modules. Exact expanded argv/stdout/stderr/status/duration retained in command-NNN and commands-before-closure.json. Receipts are exclusive; do not blindly rerun completed operations.
+
+Source evidence: full current24 originals/eight references/31 producer texts/full128-line context/registration/coverage/documents/checkout, complete3750-file accepted preceding parent archive, fresh111 prior formatter pairs, all6 current preformat/entire incoming-module ports, strict source-contract/graph/codec/fragments/layout/validation, criterion-ledger, scope/closure/postlog full-byte inverses, terminal/accounting. All preceding construction/preflight/repair/capture gaps/failures/resource charges frozen and disclosed; no missing capture reconstruction.
+
+Saved-only600 engineering seconds/hard60 per child/256MiB owned; fixed100 construction plus every attempt plus60 current/final reserve. Cached running byte total follows measured archival failure without renewing old caps. Scientific350.7925872/360 and runtime168.7993043/180 unchanged. No browser/producer/model/data/default factory/native/CPU/CI/experiment/installation/delegation/commit/publication. Scoped static/source/control gates ran; full repository tests/clean clone/repository-wide static skipped for this saved-source increment.
+
+Saved strength circadian balanced0.9434285714285714 remains below PC0.9457142857142858 and its signed mean change versus saved baseline remains0.0. Seeds/metrics/baselines unchanged. Physical process/interpreter/stdout/RNG/access/init/capacity/work/replay/test-seal/fairness/confirmation origins remain unknown, never inferred from bytes.
+
+Exact next: prospectively budget all135 primary-strength pages from full admitted source and observed original browser/storage costs before rendering; then independently bind every source/unit/font/origin/glyph/geometry/decoded pixel and actually inspect every whole original PNG, meaningful renderer controls/all helpers/static/source/task/checkout/inverse/resource gates. Keep c8 and every remaining parent/claim/companion/family/deferred criterion unchecked until its original acceptance passes.

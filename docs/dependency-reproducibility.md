@@ -1,5 +1,55 @@
 # Tested dependency environments
 
+
+## Latest gate status — 2026-10-06
+
+R0.3/G0 is reopened for clean-checkout and hosted native CI diagnosis. The local
+exit described in the earlier reading guide below is a retained validation stage.
+R3.1's locally tested port work remains unchecked pending that dependency; no
+source-pin bypass, deadline increase or scientific admission is inferred. See
+[the current roadmap](../RESEARCH_ROADMAP.md).
+
+## Current reading guide — 2026-10-06
+
+The dated snapshot and installation observations below retain their original
+source/environment/test scope. The eight-suite CPU workflow described in P9.3b1
+was the workflow at that validation. [Current CI](../.github/workflows/ci.yml)
+declares fifteen required CPU suites with a zero-skip JUnit gate, general Linux
+checks on Python 3.11/3.12/3.14, and Windows-native platform checks. The earlier
+147-case install receipt does not validate the seven later-added CPU suites or
+prove that current remote jobs passed. [Contribution guidance](../CONTRIBUTING.md)
+records current commands and the provenance-sensitive source-stability rule.
+
+P9.3/P9.3b2's original-record reconciliation is complete for its accepted available-
+record/register scope. Earlier unchecked/next-action statements below describe
+their historical stage. Missing execution-time transitive/tool/build/wheel facts
+remain unknown; today's constraints are not assigned retrospectively to old runs.
+
+The independent frozen Linux general matrix now accounts for all 4,425 cases once
+per version, with zero failures/errors/missing/extra/duplicates:
+
+| Frozen baseline | Passed | Skipped |
+|---|---:|---:|
+| Python 3.11 | 4,295 | 130 |
+| Python 3.12 | 4,295 | 130 |
+| Python 3.14 | 4,294 | 131 |
+
+Required CPU coverage has 133 passes without skips; retained NumPy/Torch smokes
+have five passes without skips. R0.3 and G0's local engineering exit are complete
+within the [active roadmap](../RESEARCH_ROADMAP.md)'s declared scope. These receipts
+bind their frozen checkout. Six later R0.6 resource-preflight files have separately
+bound validation and are outside that baseline inventory. Current remote CI, a
+full Windows general suite and P9.6's broader installation/examples acceptance
+remain unverified. Fresh scientific admission remains closed. No engineering pass
+or current constraint establishes cross-build numerical equivalence.
+
+See P9.4h in [the plan](../DEVELOPMENT_PLAN.md) and [the log](development-log.md)
+for exact original receipts, current evidence and documentary audit scope.
+Why this: installation, portable correctness, historical reproduction and original
+publication metadata answer different questions. Retain each claim's own evidence
+without assigning one environment's success to another campaign.
+
+
 Supported ranges remain in `requirements.txt` and `requirements-resnet.txt`.
 The dated files in `constraints/` record exact installed versions from a tested
 local environment. They constrain installation; they do not change the supported
@@ -179,3 +229,16 @@ build/wheel/install facts remain unknown where absent; older environments and al
 original records are retained. P9.6's broader installation/example/platform gate
 and full scientific admission remain unfinished. Final checklist status is
 recorded after this session's terminal acceptance check.
+
+
+## Later engineering gate update — 2026-10-06
+
+The local baseline counts and earlier exit statement above describe the recorded
+frozen-copy validation stage. The active R0.3/G0 engineering exit is now reopened
+for clean-checkout source-pin refusals and hosted native-test timeouts in the
+repair PR CI. Those passing local scopes do not establish clean remote checkout
+compatibility. The existing owner retains diagnosis; no deadline increase, source
+pin bypass or blanket normalization is an accepted correction. R3.1 port code
+is locally implemented/tested, but its parent acceptance awaits this dependency.
+Scientific/runtime/source/native admission stays closed and j6c stays deferred.
+See the [active roadmap](../RESEARCH_ROADMAP.md) and [development log](development-log.md).

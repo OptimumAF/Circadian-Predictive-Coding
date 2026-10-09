@@ -2,7 +2,8 @@
 
 Instructions for any coding agent operating in this repository.
 
-For the current research milestones, task acceptance criteria, and session handoff, see
+For the compact active research index, start with [`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md).
+For preserved historical milestones, task acceptance criteria, and session handoff, see
 [`DEVELOPMENT_PLAN.md`](DEVELOPMENT_PLAN.md) and `docs/development-log.md`.
 
 ## 0) Role and Objective

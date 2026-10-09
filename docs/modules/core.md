@@ -293,3 +293,187 @@ seed/role hashes, finite resolved config, output paths/protocols, and
 timing scope. It produces stable UTF-8/LF manifest bytes. It accepts
 facts from app/infra and does not inspect Git, train, or write files
 (ADR-0120).
+
+`local_pilot_budget.py` validates typed planned resources against fixed first-pilot
+ceilings and local/simulation/CPU context, returning an immutable request or typed
+excess error. It uses only the standard library. Why this: budget policy must be
+independent of model objectives and request flags. It performs no measurement,
+execution, permission change or promotion; see `docs/local-pilot-budget.md`.
+
+
+`learner_ports.py` defines a generic native learner port and finite, named training
+diagnostic. Inputs, predictions and snapshots are opaque separate type parameters;
+no shared loss, array layout, IO, budget clock or promotion belongs here. Outer
+adapters implement the port and retain native objectives (ADR-0197).
+
+
+`experience.py` defines local immutable sample/episode/actor/candidate/action/reward
+metadata, source and label arrival ticks, declared train/replay/evaluate flags and
+applied native diagnostics. `LogicalClock` supplies explicit monotonic integer
+ticks. Inputs/targets remain opaque; validation concerns identifiers/times/roles,
+not payload layout, physical provenance, IO or scientific release (ADR-0199).
+
+
+actor_ports.py defines an owned-fork extension of the existing native port,
+versioned prediction/state/candidate records and detached consolidation result/
+receipt records. Inputs and state remain native generic payloads; it owns no
+threads, clocks, budgets, IO, promotion or scientific release. Fork implementors
+prove full model ownership and preserved policy (ADR-0200).
+
+
+promotion_guard.py defines immutable guard metadata, prospective utility/
+retention/numerical/latency/resource/action policy, measured scalar evidence,
+deterministic rejection and report bindings. Inputs/predictions remain opaque;
+no model operation, IO, serving mutation or scientific release belongs here.
+Utility definitions remain separate from native training diagnostics (ADR-0201).
+
+
+## Serving transaction records
+
+`src/core/serving_ports.py` defines positive TTL/entry configuration, owned cache/snapshot/frame values and local promotion handles/receipts. Inputs are declared configuration and app observations; outputs contain no native learner handle. No IO, model mutation, final-label release or publication belongs in core. See docs/serving-promotion.md.
+
+
+## Resource sharing records
+
+`src/core/resource_sharing.py` validates declared serving/work/poll bounds and defines detached admission, cumulative priority observations and native update polls. No model/clock/IO/sampler/scheduler/persistence or timing statistic belongs here. These observations do not authorize checkpoint resume or quota renewal.
+
+
+## Complete inbox cursor
+
+`src/core/inbox_cursor.py` validates exact-format metadata for full source/label/applied histories and capacity/arrival/stopped/work observations. Payloads stay opaque; validation does not copy or score them. Outputs are domain records, not model/time/budget/ownership restore capabilities. No IO, native model or outer app dependency belongs in this module.
+
+
+### Actual live serving measurement
+
+The generic app native observer/shared-request harness and pure core timing/
+nearest-rank/overlap records are documented in docs/live-serving-measurement.md
+and ADR-0206. The reserved script boundary executes the finite declared matched
+two-native protocol after full correctness/source binding. Retain all raw requests,
+native windows and incomplete worker status; no automatic repeat/outcome filtering.
+Current measurement acceptance is pending; no scientific advantage is claimed.
+
+R3.5c/original R3.5 current acceptance:396 cases,full651-file platform types/static/source/resource gates and one reserved actual native serving run pass;96/96 shared requests per method fully native-contained. Negative circadian p95 slowdown retained. Evidence:artifacts/runs/r35c-live-serving-20261007/measurement-summary.md. Next R3.6 privacy/replay lifecycle;durable R3.5b2 and broader guards remain open.
+
+
+## 2026-10-07 — R3.6a permanent data admission (validation pending)
+
+Optional managed local admission: [guide](../managed-experience.md). Pure src/core/data_lifecycle.py metadata and src/app/managed_experience.py original authority install permanent hooks on a fresh ExperienceInbox; legacy uninstalled behavior stays intact. Requires declared training/replay consent and permissions, bounded lifetime grant counts and explicit synthetic/unverified policy. Supported checkpoint handoff retains authority. Opt-out stops future training; native/inbox/checkpoint erasure and unlearning are not claimed. No new environment variables/dependencies. Full R3.6b deletion controls remain the next extension.
+
+
+R3.6a acceptance:433 passing cases,current654-file Windows/Linux types/static/AST/executed guide/source/resource gates. See artifacts/runs/r36a-data-admission-20261007/admission-summary.md and validation.json. Full R3.6/R3.6b erasure remains unchecked. Exact next action: Prospectively scope R3.6b actual native replay/inbox erasure: inspect replay snapshot identity and full InboxCursor/applied receipt references; design payload-free tombstones preserving consumed IDs, enforce retention lifetimes/quotas, invalidate pending checkpoint payload copies, and test refused resurrection across owned handoff with original clocks/budgets/gates. Start with fake deletion controls, then fixed native controls; do not call erasure parameter unlearning or erase caller-held copies by implication. Preserve original full R3.6 acceptance and durable R3.5b2/R3.7/G3/human-deferred/scientific work.
+
+
+## 2026-10-07 — R3.6b1 erasure prerequisites (validation pending)
+
+[Payload erasure primitives](../data-erasure.md): core data_erasure.py provides tombstones/counts/optional ReplayPayloadOwner port;InboxCursor format2 and private ExperienceInbox erasure preserve consumed IDs/applied work;NumPy adapters expose native whole-buffer erasure. Only raw replay references are removed;native weights/RNG/policy/counters and exposure hashes remain. Format1 unerased histories remain supported. No new dependencies/environment variables. Full original-authority deletion,quotas/lifetimes/checkpoint/promotion cleanup/non-resurrection is unfinished R3.6b2.
+
+
+R3.6b1 acceptance:488 passing cases,current656-file win/linux types/static/AST/guide/source/resource gates. Evidence:artifacts/runs/r36b1-erasure-primitives-20261007/validation.json and erasure-summary.md. Full original R3.6/R3.6b/R3.6b2 remains unchecked. Exact next action: R3.6b2: prospectively scope original-authority coordinated deletion. Inspect all owners of payload copies: live/retired candidate and inbox, pending/inspected checkpoints and prepared/failed models, serving promotion/rollback bundles and pending tickets. Define owned-versus-caller copies and bounded supported native/payload measurement ports; implement deletion/expiry/opt-out coordination plus declared record/byte/time policies under original manager/candidate/serving/checkpoint leases. Tests first for partial cleanup failure and refused resurrection; retain budgets/clocks/gates/consumed IDs and weights. Keep transient/audit-only admission disabled until purge semantics pass, and original R3.6/R3.6b unchecked until the complete criteria are proven.
+
+
+## 2026-10-07 — R3.6b2a retained-copy ownership (validation pending)
+
+[Retained payload ownership](../payload-ownership.md):core metadata/reference ports and app weak registry enumerate supported actor/candidate/checkpoint/promotion owners under nonblocking all-holder quiescence. One opt-in live/lifetime registration allowance survives handoff and GC without renewal. Existing native/budget/serving semantics remain;no new dependencies/environment variables. This is a cleanup prerequisite,not complete deletion or byte/time policy;R3.6b2b retains original-authority all-copy cleanup/non-resurrection acceptance.
+
+
+R3.6b2a acceptance:512 current tests,full659-file win/linux types/static/AST/guide/source/resource gates;zero NEW native work. Evidence:artifacts/runs/r36b2a-payload-ownership-20261007/validation.json and ownership-summary.md. Full original R3.6/R3.6b/R3.6b2 remains unchecked. Exact next action: R3.6b2b: prospectively scope original-authority coordinated cleanup and retention. Bind current ownership registry and manager plus native replay/inbox tombstone ports; use all-holder references under the existing nonblocking lease, deduplicate by identity, acquire the original sharing/consent authority, and avoid public methods that reacquire leased locks. Define supported native/payload byte measurement and cumulative holder/record/byte/time policies; tests first for pending checkpoint/prepared/failed/retired/promotion/rollback copies, partial cleanup failure, stopped/retired inbox ledger accounting and refused resurrection. Integrate deletion/expiry/opt-out without resetting budgets/clocks/gates/IDs or parameters; keep transient/audit-only admission disabled until actual purge semantics pass. Preserve full original R3.6/R3.6b/R3.6b2 criteria and caller-copy/RAM/unlearning limits.
+
+
+### Managed cleanup integration — 2026-10-07
+
+data_retention:immutable validated retention policy and payload-free cleanup report;data_erasure replay footprint port observes native array counts without copying. Inputs/outputs and non-responsibilities: [managed lifecycle guide](../managed-data-lifecycle.md). No native learning-equation/dependency/environment-variable change. Aggregate retained bytes,automatic elapsed-time purge,caller-copy deletion and unlearning remain unimplemented;full R3.6b2b is unchecked.
+
+
+### Owned payload copy byte policy — 2026-10-07
+
+payload_bytes:validated immutable PayloadCopyLimits/PayloadByteSnapshot;data_retention accepts an optional typed owned copy allowance. Inputs/outputs/non-responsibilities and extension guidance:[retained payload guide](../retained-payload-budget.md). No dependency/environment-variable change. Parameters/temporary/caller/Python/RSS memory,unlearning and automatic elapsed purge are outside this increment;full R3.6b2b unchecked.
+
+
+### Elapsed retention driver — 2026-10-07
+
+retention_driver:typed bounded timing/poll/cleanup observations;data_retention optionally declares elapsed seconds.No IO/threads/payloads. Inputs/outputs/non-responsibilities,tree and commands:[retention expiry guide](../retention-expiry.md). No dependency/environment change. Scalar-only auxiliary expiry remains unfinished;full R3.6 parents unchecked. Clock/OS attestation,caller-copy deletion,RAM/unlearning,durable restart are excluded.
+
+
+### Owned auxiliary age correction — 2026-10-07
+
+The existing DataRetentionPolicy and immutable driver/copy limits remain unchanged;numeric bytes and content age have distinct meanings. Inputs/outputs/limits/commands:[auxiliary retention guide](../auxiliary-retention.md). No new interface/environment/dependency. Full R3.6 audit passes;durable/R3.7/R3.8/G3 and caller/RAM/unlearning/scientific limits remain separate.
+
+
+### Recovery admission metadata
+
+`recovery_admission` validates exact bounded saved records against independently trusted fencing/clock/resource facts,without payload IO/copies/native work. Its output is an accounting observation,no restore/training capability. Original limits,spent reservations and downtime remain represented;authentic OS/coordinator adapters and crash integration are unfinished. See [guide](../recovery-admission.md) and ADR-0215.
+
+
+### Windows recovery observations — 2026-10-07
+
+[Observation guide](../windows-recovery-observation.md) documents core bounded records/port and infra documented API/registered-handle/anchored-clock adapters. Typed observations convey no owner fence or native restore capability. Fake/current-process gates pass;real launcher/payload mismatch retained,corrected worker capture unrun. R3.5b2b/full durable/coordinator-loss recovery remains open. No inherited module changes.
+
+
+### Direct-worker observation successor — 2026-10-07
+
+R3.5b2b scoped validation now passes strict actual worker identity/time/exit/RSS/cleanup under original coordinator anchor,with unchanged production/test source and280current cases. Prior failed launcher scope/costs retained. No interfaces/dependencies change;transactional independent authority/CAS/live lease/native codec/recovery remain unfinished. See [guide](../windows-recovery-observation.md) and successor evidence.
+
+
+### recovery_authority
+
+Pure exact AuthorityRecord/AuthorityChange,monotone reservations/conditional handoff,independent high-water validation and RecoveryAuthorityPort. Inputs:original trusted coordinator records and host observations. Outputs:validated metadata changes;no IO,OS handles,live capability or native completion. Original manifest/caps/counters remain bound;uncertain work stops. See [guide](../recovery-authority-journal.md).
+
+
+### recovery_coordination
+
+Exact bounded RecoveryCosts,closable RecoveryRegistration protocol and host relationship validation. Inputs:independently known authority record,trusted observations and cumulative coordinator clock/RSS floor;outputs:validated sequencing relationships. No IO,process fact authentication,completion receipt or live lease. See [guide](../recovery-coordinator.md).
+
+
+### recovery_reporting
+
+Exact AuthorityReport,RecoveryReportingPort,FailureWitness and bounded terminal state relationships. Inputs:independent original records/validated attempts and host observations or unavailable facts;outputs:monotone time/RSS/stop reports,never completion/work/cap renewal. Terminal-only RSS overshoot preserves negative evidence. No IO,source authentication,live lease or restart admission. See [guide](../recovery-terminal-authority.md).
+
+
+## Recovery publication guard port
+
+`recovery_publication.py` defines `RecoveryPublicationPort` and pure original
+authority/fresh observation validation. Input:independent exact record and trusted
+registered host facts. Output:validated relationship/guard context contract. No IO,
+authentication,native completion,callback preemption or side-effect undo. See
+../recovery-publication-guard.md and ADR-0220.
+
+
+## Leased publication reports
+
+RecoveryLeasedPublicationPort extends reporting with a scoped publication lease;
+RecoveryPublicationLease exposes read and nonterminal observation reports only.
+No work admission/completion/refunds/reopening/IO or process authentication.
+Legacy transaction-guard port remains distinct. See ../guarded-recovery-coordinator.md.
+
+
+`checkpoint_codec.py`: `CodecBinding`,`CodecLimits`,`CheckpointCodec` define
+independently supplied source/policy/content comparisons and bounded byte ports.
+No filesystem,untrusted object loader,model restoration or ownership authority.
+See docs/durable-checkpoint-codecs.md and ADR-0223.
+
+
+### consolidation_cursor and consolidation_codec_policy
+
+Pure complete immutable ten-field ledger validation and original two-field
+attempt/string codec bounds. Inputs:exact typed metadata;outputs:validated records
+or ValueError. All failed/consumed IDs,ordered successful receipt/diagnostic fields
+and owner flags/counters stay explicit. Native finite diagnostic values/types
+are preserved. No copying,clock,model,IO or restore authority.
+
+
+### managed_lifecycle_state and managed_lifecycle_validation
+
+Complete immutable catalog/lifecycle/driver/registry/copy records and named
+original authority references. Validate exact native nested schemas,independent
+record/UTF8 bounds,original policies/counters/epochs/aliases and port presence.
+No callbacks,clock reads,locks,IO or live restore. Opaque reference equality is
+never invoked. Full schemas and explicit absence semantics are documented in
+docs/managed-lifecycle-state.md.
+
+managed_lifecycle_validation.require_lifecycle_capture_limits exposes the existing strict independent bound validator for preflight capture. Complete driver original reference contract adds _state_gate;current67source fields/48references. Core still performs no locking,IO,port calls or native work.
+
+lifecycle_codec_policy:complete independent owner/retention/optional driver policies and record/string bounds. Validates original typed native policy rules without wire data,ports or IO;does not authorize restore or budget renewal.
+
+managed_record_state:RuntimeRecordObservation,ManagedRecordMetadata,ManagedRecordCapture and pure joint bounded validation. Complete cursor/lifecycle fields retained;checks matching revisions,flags,enrollment,consumed budget and original authority aliases. Does not attest capture provenance or authorize restore.
+
+managed_record_codec_policy:complete independent lifecycle/consolidation policies;exact native schemas and matching component UTF8 capacities. No wire construction,live reference,port,IO,clock or restore authorization.

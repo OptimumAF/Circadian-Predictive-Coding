@@ -1,5 +1,23 @@
 # P6.7d2b2b2: original observed execution and release witnesses
 
+
+## Current interpretation — 2026-10-06
+
+P6.7d2b2b2 is complete for its recorded original-reader witness scope; earlier pending
+sections below retain the validation chronology. Pure decoded consumers and private
+reader-spy ports report original-reader verification false. Only the fixed public
+adapter sets that readback flag after calling the complete original scoring/training
+readers. It does not grant fresh roles, independent replications or precise release
+UTC; the current chronology retains unknown values for the latter two facts.
+
+The usage example below invokes original readers and is not a cheap admission check.
+This documentation audit performs no such replay. Retain original failed resource
+acceptance and every prospective gate; see [current runtime limits](p67-runtime-execution-guard.md)
+for the reopened guard correctness and user-deferred repair. No seed, metric, baseline,
+result, tolerance, execution authority or original budget is changed here.
+
+## Historical original-reader witness record
+
 ## Responsibilities and boundaries
 
 ```text

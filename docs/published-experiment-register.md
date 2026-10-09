@@ -101,3 +101,11 @@ Scope counts: registered_families=62, original_saved_records=708, all_record_row
 ## Final reference label readback
 
 Absent explicitly named benchmark files have their own unresolved-original disposition. The initial generic labels and both complete initial outputs are retained locally; no original record, dependency fact, publication binding or acceptance scope changed.
+
+
+## 2026-10-06 - Complete presentation inventory and saved matched confirmation
+
+See [research presentation coverage](research-presentation-coverage.md) for
+all62 original families,341 entry documents/12 legacy assets and the complete
+saved matched confirmation figures. Original negative outcomes, uncertainty and
+resource limits remain; P9.5/P9.5b remain unfinished. No new scientific run.

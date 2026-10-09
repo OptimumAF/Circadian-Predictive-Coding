@@ -6,6 +6,32 @@ metrics, and learning settings. A different model order is a different
 protocol request and is rejected before training. The two fresh P5.7 runs
 below repeat this preset; they do not retune it or select a favorable seed.
 
+## Current evidence boundaries — 2026-10-06
+
+The P5.7 observation below belongs to its recorded 2026-09-29 source/environment.
+Its hashes, preset, seeds, role/config facts and zero-byte tolerance are unchanged.
+Current source and metadata readback are separate from rerunning that experiment.
+
+Portable regression tests require exact payload and manifest invariance within the
+same environment. Historical SHA literals remain in separately marked recorded-
+environment tests. Their Windows / CPython 3.14.7 / NumPy 2.4.6 marker is a necessary
+test-selection condition; it does not certify matching CPU, library build, source
+or complete execution history. Unsupported environments report reproduction tests
+as skipped. Test-local fixture pins do not replace production canonical references
+or grant scientific admission ([ADR-0196](adr/ADR-0196-separate-portable-boundary-fixtures-from-historical-results.md)).
+
+Serialize deterministic training and wake-diagnostic evidence before final scoring
+seals the study. Keep the source identity stable throughout a run: tracked diffs
+and nonignored untracked files, including documentation, enter the v14 source digest.
+The CLI refuses source changes before publishing a completed bundle. For concurrent
+edits, finish that run or use an independent frozen copy; preserve the failed run
+and its original spent budget. See [contribution guidance](../CONTRIBUTING.md).
+
+Current portable tests and a passing installation/baseline component do not validate
+cross-build numerical equivalence or a stronger final-role/source/native/runtime
+contract. All original tolerance rows below remain; fresh scientific
+admission remains closed, with the owning-with repair user-deferred in the plan.
+
 ## Verified same-environment repeat
 
 On 2026-09-29, two separate processes wrote ignored local bundles
@@ -74,3 +100,11 @@ PyTorch likewise does not guarantee identical results across releases or
 CPU/GPU execution ([PyTorch reproducibility notes](https://docs.pytorch.org/docs/2.14/notes/randomness.html)).
 The project therefore claims the observed local NumPy repeat only. A
 future cross-platform or cross-version claim needs its own checked study.
+
+
+## 2026-10-06 - Fixed-v14 saved-repeat presentation complement
+
+See [fixed-v14 repeat figures](fixed-v14-repeat-figures.md): six original
+repeat bodies/old dashboard chains and complete uncovered work/contrast/history
+presentation. Original two seeds stay two; no new statistics or experiment.
+P9.5b3 complete for this scope, parent P9.5/P9.5b remain open.

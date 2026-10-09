@@ -7,6 +7,25 @@ The repository is designed to evolve Circadian Predictive Coding as the main alg
 - traditional backpropagation
 - traditional predictive coding
 
+## Current scope and chronology
+
+This guide includes historical milestone observations and current implementation
+boundaries. Historical test counts, timings, payload hashes and numerical results
+below retain their original scope; they are not fresh validation of this checkout.
+The current audit is P9.4f in [the development plan](DEVELOPMENT_PLAN.md), with
+evidence and the session handoff in [the log](docs/development-log.md).
+The full R0 baseline, G0 and independent source/native/runtime scientific admission
+remain open. P6.7d2b2j6b2 correctness is reopened for premature instrumentation
+release; its owning-with repair P6.7d2b2j6c is deferred at the user's request.
+
+Current portable fixture boundary (ADR-0196): factor CLI tests bind exact
+test-local request/audit/file and internal result pins in the parent and real
+worker. Production canonical pins and historical files remain unchanged.
+These tests establish same-environment engineering invariance, not historical
+reproduction or scientific admission. The module register below preserves its
+older request/audit-only fixture description as historical chronology; the public
+CLI continues to require its declared canonical files.
+
 ## Layer Boundaries
 
 - `src/core`
@@ -28,13 +47,27 @@ The repository is designed to evolve Circadian Predictive Coding as the main alg
 ## Dependency Direction
 
 ```text
+Arrow means imports / depends on:
+
 adapters -> app -> core
-config   -> adapters
-infra    -> app
-shared   -> core + app + infra
+adapters -> config
+infra    -> app + core
+core + app + infra + adapters -> shared
 
 core must not depend on app/infra/adapters.
 ```
+
+The diagram describes the intended inward dependency policy. The current source
+also contains 44 direct app-to-infra import statements, chiefly dataset and
+continual-role types/functions. This is existing boundary debt, recorded as P9.4g;
+the static audit finds no direct core import of app/infra/adapters/config. Counts
+include guarded and type-only statements. Literal import inspection does not prove
+dynamic or native runtime isolation.
+
+Why this: moving declarations to inner ports and injecting outer dataset/role
+implementations requires a separate behavior-preserving change. Preserve protocol,
+role, checkpoint and result identities while doing that work; do not claim the
+existing app imports satisfy the policy in AGENTS.md.
 
 ## Core Domain Components
 
@@ -69,8 +102,10 @@ core must not depend on app/infra/adapters.
 ### Continual shift
 
 1. `infra.datasets` regenerates phase-A and phase-B roles per seed
-2. `app.continual_shift_benchmark` trains both phases, freezes A-only
-   state, and scores final tests after each seed finishes training
+2. Descriptive v1-v4 paths in `app.continual_shift_benchmark` train both
+   phases, freeze A-only state, and score final tests after each seed finishes
+   training. The separate v5 global-seal path trains every declared seed before
+   scoring any final test; older paths do not inherit that stronger seal
 3. `app.continual_checkpoint` validates seed/phase progress and committed
    reports; `infra.circadian_checkpoint_files` persists its trusted payload
 4. Opt-in v6 uses `infra.continual_roles` for four phase-local identities,
@@ -84,13 +119,19 @@ core must not depend on app/infra/adapters.
    ordinary v6 can retry locally by explicit bound, while checkpointed v6
    raises and resumes later without repeating wake work
 5. Opt-in v7 uses `app.continual_arrived_selection` above the v6 training
-   boundary to predeclare equal-work candidates, score only arrived outer
-   roles, freeze independent per-method choices, and then release final
+   boundary to predeclare candidates with the same fixed training/role/guard
+   settings except method learning rates and the same candidate/seed trial count.
+   It scores only arrived outer roles, freezes independent per-method choices,
+   and then releases final
    tests. `app.continual_arrived_selection_checkpoint` defines a distinct
    candidate-manifest cursor; `app.continual_arrived_selection_resume`
    embeds v6 active transactions and validates completed trials and their
    independent sleep-history provenance before continuation. The trusted
-   file layer persists format 8 separately
+   file layer persists format 8 separately. The bounded selector permits two to
+   four candidates and at most eight candidate/seed trials per method; the first
+   predeclared candidate wins an exact outer-score tie. Trial records retain
+   training, guard, outer-score and sleep/replay facts; disclose their actual costs
+   rather than infer equal work across methods
 6. `scripts.run_continual_arrived_confirmation` fixes and persists one
    small study request, invokes the v7 app through ordinary and interrupted
    checkpoint paths, and writes a full result artifact. Its source seals
@@ -285,8 +326,9 @@ labels missing wake metrics explicitly. `infra/observation_projection_files.py`
 verifies the completed P5.1 source, writes derived JSONL/CSV beside it,
 and verifies each byte against a fresh derivation. The
 `scripts/project_v14_observations.py` adapter exposes local create/verify
-commands. No app logic depends on infra; the fixed v14 scoring and role
-release paths are unchanged (ADR-0121).
+commands. This pure app projection does not depend on infra; the fixed v14
+scoring and role release paths are unchanged (ADR-0121). The statement does not
+describe the legacy dataset/role imports elsewhere in app.
 
 P5.6a adds `app/v14_artifact_report.py` as a pure aggregate over all
 declared v14 seeds, arms, and methods. `infra/v14_artifact_report_files.py`
@@ -1337,9 +1379,498 @@ source authority (ADR-0194).
 
 ### Global mutation mechanism before complete admission
 
-Optional infra enforcement captures the complete actual GC function/code catalog and
-monitors global before-call/instruction events over explicit lifetimes. It rejects
-unsupported tools/tracing/native calls, retains poison and verifies exact with release
-plus callback removal. Existing observer and inward dependencies remain unchanged.
-Trusted support-operation/source/native/private/full-lifetime integration still required
-(ADR-0195); no diagnostic lifetime grants scientific authority.
+Optional infra enforcement captures the prepared GC-visible function/recursive-code
+catalog and monitors delivered global before-call/instruction events over explicit
+lifetimes. Its bounded controls reject unsupported tools/tracing/native calls and
+retain poison after caught denials (ADR-0195). Their measured scope remains.
+The confirmed foreign nested owning-with exit can release instrumentation early,
+allow parameter mutation and body execution, then fail cleanup. General j6b2
+correctness is reopened; j6c repair is user-deferred. Exact owning-boundary release
+is therefore an unfinished requirement. Existing observer behavior is unchanged.
+Trusted support-operation/source/native/private/full-lifetime integration remains
+required; these controls grant no fresh scientific or runtime admission.
+
+### First local pilot resource planning
+
+The new standard-library-only `core/local_pilot_budget.py` owns typed resource
+values and fixed local/simulation/CPU ceilings. Its CLI adapter maps flags to
+requests and emits JSON/status; the public script delegates to that adapter.
+Dependency direction is script → adapter → core, with no execution app/infra
+path yet. Why this: resource policy can be tested independently of native model
+objectives. Measurement, enforcement and promotion remain separate R3 work.
+See `docs/local-pilot-budget.md` for limits, commands and extension boundaries.
+
+
+### Native learner ports (R3.1)
+
+`core/learner_ports.py` defines generic input/target/prediction/state types and
+native diagnostic IDs. `app/learner_step.py` composes one complete wake call with
+unchanged ToyBudgetSession. `adapters/numpy_learners.py` owns detached existing
+CPC/backprop models; it reuses CPC snapshots and validates full ordinary state
+before restore. Dependencies are adapter -> core and app -> core/app budget. No
+core/app import bypasses that boundary. Existing44 app-to-infra statements remain
+P9.4g debt; this addition does not claim to migrate them. Losses, tensor layouts,
+old models/checkpoints/protocols and scientific admission remain unchanged.
+Actor/shadow state, experience permissions and serving resource contention need
+separate contracts; see docs/learner-ports.md and ADR-0197.
+
+Current dependency status: R3.1 remains unchecked pending the reopened R0.3/G0
+clean-checkout/native CI diagnosis. Its local port implementation and85-case
+validation are preserved; no further dependent implementation or experiment is
+launched from this work. See the active RESEARCH_ROADMAP.md.
+
+
+## Historical presentation boundary (P9.5a)
+
+`src/app/historical_outcome_view.py` is a pure ordered presentation projection
+with original uncertainty/cost preservation and padded, unclipped plot limits.
+`scripts/export_historical_outcome_figures.py` binds the complete accepted local
+artifact before optional ReportLab rendering and write-once filesystem export.
+Dependency direction: script -> app -> stdlib; optional graphics remain at the
+outer boundary. No app import of infra/adapters, scientific reader dispatch,
+source admission, changed model/objective or new estimator. Full original state
+proofs stay in the immutable source; the JSON view retains every plotted vector,
+all resource fields/history points and original analysis records. See
+[the workflow and limits](docs/historical-outcome-figures.md) and ADR-0198.
+
+
+## Local experience arrival boundary (R3.2)
+
+`core/experience.py` holds immutable role/permission/sample/episode/candidate/action/
+reward/version metadata and a logical event clock. `app/experience_inbox.py` owns
+bounded train-role delivery, detached payload copies, identity history, stable
+eligibility ordering and failure bookkeeping. It calls the existing native
+`app/learner_step.py`; optional start/completion hooks preserve old callers and
+record completed work before the existing post-update budget check.
+
+Dependency direction: inbox -> core contracts and app learner/budget; outer
+native adapters -> core port. No infra import or IO is added. Trusted tags do not
+attest physical provenance or release evaluation/final roles. Byte/RSS bounds,
+actor concurrency, promotion, persistence/replay/privacy and scientific/native
+guards remain separate. See ADR-0199 and docs/experience-contracts.md.
+
+
+## Stable actor and shadow ownership (R3.3)
+
+core/actor_ports.py adds a separate owned-fork port and versioned results; the
+old native port remains unchanged. Native adapters preserve full model state
+and policy through existing owned constructors. app/actor_shadow.py keeps a
+private stable serving fork and independently gated candidate fork. Actor
+reads and candidate writes have separate locks; wake work reuses the accepted
+experience inbox and budget. Trusted consolidation receives detached state,
+never a mutable learner handle. App -> core/app contracts; outer adapters ->
+core. No infra dependency, algorithm or service is added. Construction requires
+a quiescent source; promotion/rollback and live contention remain R3.4/R3.5.
+See ADR-0200 and docs/actor-shadow-runtime.md for complete boundaries.
+
+
+## Matched promotion guard boundary (R3.4a)
+
+core/promotion_guard.py owns pure policy/evidence/decision and role-tagged guard
+metadata. app/promotion_guard_evaluation.py restores independent native predictor
+copies and measures the same new/old inner inputs under identical utility/action
+callbacks. App -> core ports; no infra, IO, actor setter or training is added.
+Role/time/ID/base-version refusals precede payload access. Frozen reports bind
+policy, snapshot digests, versions/revision and declared data IDs; they remain
+trusted local evidence, not global release or a promotion ticket. R3.4b retains
+atomic complete serving transitions/rollback. See ADR-0201 and promotion-guards.md.
+
+
+## R3.4b complete serving transactions
+
+`core/serving_ports.py` owns configuration, detached serving/cache records and local ticket/receipt types. `app/serving_promotion.py` composes the native builder and existing guard evaluator with optional actor composition and candidate leases in `app/actor_shadow.py`. Dependency flow: serving app -> actor/evaluator app -> core native/experience/promotion/serving contracts; core imports no infra/adapter/IO. One serving slot owns current model/cache/context/version, monotone generation and one complete prior bundle. All reads/cache fills/swaps use the same gate. Candidate/controller gates refuse reentrance; preparation does not hold the serving gate. See ADR-0202 and docs/serving-promotion.md. Metadata is passive audit context; algorithm-affecting routing is unsupported pending matched guard extension.
+
+
+## R3.5a cooperative work admission
+
+`core/resource_sharing.py` owns positive sharing limits and detached admission/poll/counter records. `app/resource_sharing.py` composes actor serving and candidate updates with a short-lock priority gate; native ownership remains in the existing runtime. `ExperienceInbox.drain` optionally bounds polls and leases each update through an exact-bool context before payload/native access. Flow: sharing app -> actor/inbox/serving app -> core ports. Core and inner app import no infra/adapter. Resource probes run outside the gate lock then contention is rechecked. Active native calls finish; subsequent updates defer. Complete supported checkpoint/restore and actual live p50/p95 remain R3.5b/c; see ADR-0203.
+
+
+## R3.5b1 inbox history format
+
+`core/inbox_cursor.py` owns exact-version complete metadata validation and opaque train payload records. `app/experience_inbox.py` checks quiescent owner indexes, validates metadata before payload copying and returns a detached cursor. Flow: inbox app -> cursor/experience/native diagnostic core; no infra/adapter imports. Model/time/budget/sharing owner transfer remains a separate outer R3.5b transaction. See ADR-0204; a cursor grants no resume/final authority.
+
+
+### Complete candidate checkpoint ownership
+
+Supported same-process full candidate handoff is implemented through app/candidate_checkpoint.py; see docs/candidate-checkpoints.md and ADR-0205. Retain original cumulative budget/clocks/RSS sampler/resource gate and stable actor, restore independent native state plus full inbox/consolidation histories, retire old owner and invalidate its promotion authority. Identity tokens and preparation work are bounded. R3.5b acceptance remains pending current full validation; durable process recovery and actual live latency remain unfinished.
+
+R3.5b current supported owned checkpoint acceptance:371 tests,647-file Windows/Linux types,full scoped/static/source/resource/guide gates pass. Evidence:artifacts/runs/r35b-owned-handoff-20261007/. Actual live R3.5c latency and durable R3.5b2 recovery remain unfinished.
+
+
+### Actual live serving measurement
+
+The generic app native observer/shared-request harness and pure core timing/
+nearest-rank/overlap records are documented in docs/live-serving-measurement.md
+and ADR-0206. The reserved script boundary executes the finite declared matched
+two-native protocol after full correctness/source binding. Retain all raw requests,
+native windows and incomplete worker status; no automatic repeat/outcome filtering.
+Current measurement acceptance is pending; no scientific advantage is claimed.
+
+R3.5c/original R3.5 current acceptance:396 cases,full651-file platform types/static/source/resource gates and one reserved actual native serving run pass;96/96 shared requests per method fully native-contained. Negative circadian p95 slowdown retained. Evidence:artifacts/runs/r35c-live-serving-20261007/measurement-summary.md. Next R3.6 privacy/replay lifecycle;durable R3.5b2 and broader guards remain open.
+
+
+## 2026-10-07 — R3.6a permanent data admission (validation pending)
+
+Optional managed local admission: [guide](docs/managed-experience.md). Pure src/core/data_lifecycle.py metadata and src/app/managed_experience.py original authority install permanent hooks on a fresh ExperienceInbox; legacy uninstalled behavior stays intact. Requires declared training/replay consent and permissions, bounded lifetime grant counts and explicit synthetic/unverified policy. Supported checkpoint handoff retains authority. Opt-out stops future training; native/inbox/checkpoint erasure and unlearning are not claimed. No new environment variables/dependencies. Full R3.6b deletion controls remain the next extension.
+
+
+R3.6a acceptance:433 passing cases,current654-file Windows/Linux types/static/AST/executed guide/source/resource gates. See artifacts/runs/r36a-data-admission-20261007/admission-summary.md and validation.json. Full R3.6/R3.6b erasure remains unchecked. Exact next action: Prospectively scope R3.6b actual native replay/inbox erasure: inspect replay snapshot identity and full InboxCursor/applied receipt references; design payload-free tombstones preserving consumed IDs, enforce retention lifetimes/quotas, invalidate pending checkpoint payload copies, and test refused resurrection across owned handoff with original clocks/budgets/gates. Start with fake deletion controls, then fixed native controls; do not call erasure parameter unlearning or erase caller-held copies by implication. Preserve original full R3.6 acceptance and durable R3.5b2/R3.7/G3/human-deferred/scientific work.
+
+
+## 2026-10-07 — R3.6b1 erasure prerequisites (validation pending)
+
+[Payload erasure primitives](docs/data-erasure.md): core data_erasure.py provides tombstones/counts/optional ReplayPayloadOwner port;InboxCursor format2 and private ExperienceInbox erasure preserve consumed IDs/applied work;NumPy adapters expose native whole-buffer erasure. Only raw replay references are removed;native weights/RNG/policy/counters and exposure hashes remain. Format1 unerased histories remain supported. No new dependencies/environment variables. Full original-authority deletion,quotas/lifetimes/checkpoint/promotion cleanup/non-resurrection is unfinished R3.6b2.
+
+
+R3.6b1 acceptance:488 passing cases,current656-file win/linux types/static/AST/guide/source/resource gates. Evidence:artifacts/runs/r36b1-erasure-primitives-20261007/validation.json and erasure-summary.md. Full original R3.6/R3.6b/R3.6b2 remains unchecked. Exact next action: R3.6b2: prospectively scope original-authority coordinated deletion. Inspect all owners of payload copies: live/retired candidate and inbox, pending/inspected checkpoints and prepared/failed models, serving promotion/rollback bundles and pending tickets. Define owned-versus-caller copies and bounded supported native/payload measurement ports; implement deletion/expiry/opt-out coordination plus declared record/byte/time policies under original manager/candidate/serving/checkpoint leases. Tests first for partial cleanup failure and refused resurrection; retain budgets/clocks/gates/consumed IDs and weights. Keep transient/audit-only admission disabled until purge semantics pass, and original R3.6/R3.6b unchecked until the complete criteria are proven.
+
+
+## 2026-10-07 — R3.6b2a retained-copy ownership (validation pending)
+
+[Retained payload ownership](docs/payload-ownership.md):core metadata/reference ports and app weak registry enumerate supported actor/candidate/checkpoint/promotion owners under nonblocking all-holder quiescence. One opt-in live/lifetime registration allowance survives handoff and GC without renewal. Existing native/budget/serving semantics remain;no new dependencies/environment variables. This is a cleanup prerequisite,not complete deletion or byte/time policy;R3.6b2b retains original-authority all-copy cleanup/non-resurrection acceptance.
+
+
+R3.6b2a acceptance:512 current tests,full659-file win/linux types/static/AST/guide/source/resource gates;zero NEW native work. Evidence:artifacts/runs/r36b2a-payload-ownership-20261007/validation.json and ownership-summary.md. Full original R3.6/R3.6b/R3.6b2 remains unchecked. Exact next action: R3.6b2b: prospectively scope original-authority coordinated cleanup and retention. Bind current ownership registry and manager plus native replay/inbox tombstone ports; use all-holder references under the existing nonblocking lease, deduplicate by identity, acquire the original sharing/consent authority, and avoid public methods that reacquire leased locks. Define supported native/payload byte measurement and cumulative holder/record/byte/time policies; tests first for pending checkpoint/prepared/failed/retired/promotion/rollback copies, partial cleanup failure, stopped/retired inbox ledger accounting and refused resurrection. Integrate deletion/expiry/opt-out without resetting budgets/clocks/gates/IDs or parameters; keep transient/audit-only admission disabled until actual purge semantics pass. Preserve full original R3.6/R3.6b/R3.6b2 criteria and caller-copy/RAM/unlearning limits.
+
+
+## Managed cleanup integration (R3.6b2b acceptance open)
+
+Core data_retention defines immutable policies/reports. App managed_data_lifecycle coordinates the original manager,actor ownership registry and paused sharing leases;it accepts trusted native footprint/erasure and ingress measurement ports. Outer adapters/numpy_learners.make_managed_data_lifecycle composes exact NumPy ports;dependency arrows point inward. Why:unkeyed replay requires explicit conservative whole-buffer deletion,token invalidation and fail-closed partial cleanup. Guide/ADR-0210 document caller-copy/unlearning exclusions and unfinished aggregate retained-byte/automatic-time enforcement.
+
+
+### Owned payload copy bytes
+
+Core payload_bytes defines immutable limits/observations;app payload_copy_budget owns a nonblocking monotonic reservation ledger. ManagedDataLifecycle composes original-authority admission at existing copy boundaries;outer NumPy ports inspect supported graphs and builder sources. Why:conservative no-refund accounting avoids reclaiming capacity while retired/failed owners retain copies. Measured raw replay/inbox/checkpoint and auxiliary arrays are bounded;parameter/temporary/caller/Python/RSS memory and arbitrary graph attestation are excluded. Guide/ADR-0211 document limits;automatic elapsed purge/full R3.6b2b acceptance remain open.
+
+
+### Bounded elapsed retention
+
+Core retention_driver defines immutable policy/results;app retention_expiry owns one non-daemon bounded worker per original lifecycle. Lifecycle anchors original elapsed/logical clocks;sharing adds an independent hold and quiescent retry. Why:preserve original consent/budget/manual pause authority while clearing overdue owned copies. Callback publication guards revalidate deadlines. No inner-to-adapter dependency or new package. Physical purge requires responsive quiescent owners/process;caller copies/RAM/unlearning/durable recovery are excluded. Scalar-only auxiliary metadata has a confirmed missing anchor and prevents full R3.6 acceptance. Guide/ADR-0212 and acceptance audit record the exact repair.
+
+
+### Auxiliary content presence versus array bytes
+
+ManagedDataLifecycle now validates every exact initial auxiliary dictionary and anchors nonempty content,including scalar metadata/nested empty values/zero arrays,independently of measured numeric bytes. Promotion uses the same focused helper. Why:array size cannot identify owned data and short-circuit validation skipped later graphs. Existing inward measurement ports,original clocks/quotas and byte metric remain unchanged. No new interface/dependency. Full R3.6 acceptance audit passes;runtime matrices,durable restart,R3.7/R3.8/G3,caller/RAM/unlearning remain separate. Guide/ADR-0213 document usage/limits.
+
+
+### Finite repeated runtime faults
+
+No production architectural change:R3.7a composes existing trusted fake/native ports in deterministic finite tests. Original ownership,budgets,IDs and actor availability are checked across rejection,corruption,stopped handoff and growth refusal. Why:isolated failures cannot establish repeated behavior;processRSS,traced allocation and owned-array accounting are distinct. Eight-cycle Native checks are not authentic OS-crash recovery or sustained deployment. Existing label-first version-neutral behavior is preserved. Guide/ADR-0214 and acceptance audit retain full R3.7/R3.5b2 unfinished authority/recovery work.
+
+
+### Durable metadata admission boundary
+
+`src/core/recovery_admission.py` validates bounded original-accounting/component/epoch/next-owner relationships and returns typed accounting facts. No outer imports,IO,callback/native state or copy/restore capability. Why:restart observations cannot recreate original authority. Independent transactional coordinator,OS epoch/resource/ownership adapters and complete state codec remain future infra work through inward ports;full crash acceptance stays open. See recovery-admission guide and ADR-0215.
+
+
+### Windows observation adapter boundary
+
+`core.recovery_observation` defines bounded identity/observation values and inward port;`infra.windows_process_handles` owns documented API bindings/live registered handles;`infra.windows_recovery_observer` returns time/RSS/liveness under retained coordinator anchor. No fence/codec/native restore integration. Why:PID reuse/timeout cannot establish predecessor death. Coordinator loss remains unsupported/unfinished. Negative venv launcher capture retained;corrected harness unrun,full durable authority/crash acceptance stays open. See guide/ADR-0216.
+
+
+### Windows observation validation accepted
+
+No source/interface changes. A separately declared one-worker successor validates the original observation port/adapter policy with exact same-version direct interpreter identity,time bracketing,original live anchor,retained exit and bounded RSS/cleanup. Prior failed launcher capture retained. R3.5b2b scoped acceptance complete;full transactional authority/live fencing/codec/durable model recovery/coordinator loss unfinished. Next add journal adapter through inward authority ports.
+
+
+### Coordinator metadata transaction boundary
+
+`core/recovery_authority` defines exact records,monotone transitions and read/advance port;`infra/recovery_authority_codec` encodes bounded metadata and `infra/sqlite_recovery_journal` implements transactional CAS. Dependency direction:infra -> core. Independent surviving coordinator witness/trusted host observations/private disk are required. Commit charges before future app dispatch;uncertain outcomes cannot retry. Why SQLite:existing stdlib transaction boundary without a dependency. Live handle ownership,app dispatch/publication,native completion/component codecs and coordinator-loss recovery remain future boundaries. See [ADR-0217](docs/adr/ADR-0217-persist-monotone-authority-before-worker-actions.md).
+
+
+### Local recovery coordinator boundary
+
+`app/recovery_coordinator` -> `core/recovery_coordination`,authority/observation ports;infrastructure implements the ports. App retains independent original witness and registrations,commits costs before trusted callbacks and rechecks around publication. Why:a local sequencing prerequisite before native codecs/live lease integration. No native controller changes. Current lock is one lane;terminal/high-water memory and callback side effects do not establish restart safety or an external-writer publication lease. See [ADR-0218](docs/adr/ADR-0218-sequence-coordinator-actions-under-original-authority.md).
+
+
+### Durable reporting and terminal reconciliation
+
+Core recovery_reporting defines report/witness/extended reporting port. App persists observations/stops through the inner port;infra SQLite shares bounded CAS and offers explicit fresh-connection terminal-only reconciliation of exact independently known states. Dependencies point inward;storage schema unchanged. Why:retain unknown-commit and measured overshoot evidence without refunds,retries,cap increases or invented completion. Actual publication lease/live composition/native/coordinator-loss recovery remains separate. See [ADR-0219](docs/adr/ADR-0219-persist-terminal-facts-without-renewing-authority.md).
+
+
+## Private journal publication serialization
+
+`RecoveryPublicationPort` in core extends reporting;the SQLite adapter holds a
+writer reservation across trusted publication and fresh entry/exit validation.
+App coordinator now depends on RecoveryLeasedPublicationPort without importing
+infrastructure;its lease commits fresh observations under shared writer ownership. See docs/recovery-publication-guard.md and
+ADR-0220. Guard writes no authority and cannot undo callback side effects.
+
+
+## Durable observations under publication ownership
+
+Core defines RecoveryLeasedPublicationPort/RecoveryPublicationLease;app checks its
+retained probes and reports under that lease. Infrastructure uses a permanent
+one-byte native writer lock shared by every supported private journal writer,
+plus existing bounded SQLite observation transactions. Legacy publication_guard
+stays supported. See docs/guarded-recovery-coordinator.md and ADR-0221.
+
+
+## Original Windows recovery composition boundary
+
+Infrastructure windows_recovery_composition.py combines the existing private
+journal,original retained Windows registrations and observation adapter with the
+app coordinator through inner leased/report ports. The current physical anchor
+identity and exact original journal are required. No registration/process launch/
+journal bootstrap or native restore is performed. See docs/windows-recovery-composition.md
+and ADR-0222 for ownership/error cleanup and separate actual crash validation.
+
+
+## Metadata boundary actual process validation
+
+Original surviving-coordinator/leased publication boundary now has one strict
+actual Windows worker pre-COMMIT interruption/contended lock/released ownership
+capture,with exact prior committed records and no refunds. Fresh observers retain
+independent original RSS high water. Native/component digest markers in that
+metadata fixture are explicitly absent states;they cannot grant model restore or
+complete codec authority. See docs/windows-recovery-process-capture.md. Native
+complete codecs/stable actor/coordinator-loss/model acceptance remains open.
+
+
+### Explicit durable component codecs (R3.5b2e1)
+
+`core/checkpoint_codec` owns typed binding/limit/byte ports. The separate
+`adapters/backprop_checkpoint_codec` implements an exact complete native schema
+using the existing adapter snapshot type; dependency direction stays inward.
+No disk/network/live owner or learner-policy reconstruction enters core. Unknown
+fields/aliases fail before copies. Array/wire size limits do not reserve original
+lifetime copy capacity or certify cumulative native restoration. Full component
+and actor/lifecycle ownership work remains in R3.5b2e. Why/alternatives:
+ADR-0223 and docs/durable-checkpoint-codecs.md.
+
+
+### Complete circadian native byte component
+
+Three separate adapter responsibilities are NumPy frame validation/encoding,
+frozen circadian native schema/relations,and byte orchestration. All depend
+inward on existing native/core contracts;no core-to-adapter dependency or disk
+operation added. Complete native payloads remain independent of runtime/consent/
+resource authority. ADR-0224 and docs/durable-checkpoint-codecs.md record why
+explicit current variants precede composite recovery admission.
+
+
+### Circadian checkpoint C/F layout qualification
+
+CPC codec wire v2 (`circadian_full_v2`) records exact C/F array order and rejects
+old v1,unknown/missing order and unsupported noncontiguous storage. Native
+snapshotv2/API/equations remain unchanged. Separate34layout controls compare
+fixed native structural continuation across8variants. Frame validation,
+native schema and byte orchestration retain their existing inward boundaries;
+no dependency/configuration change. See docs/durable-checkpoint-codecs.md and
+ADR-0225 for tree,commands,limits,ownership and extension details. Backprop layout
+qualification and full composite/native/live recovery remain unfinished.
+
+
+### Explicit Backprop layout codec qualification
+
+`LayoutBackpropCheckpointCodec` adds separately selected `backprop_layout_v2`
+wire frames preserving supported C/F array storage,canonical bytes and native
+required aliases. The existing v1 codec remains available for its original
+noncontiguous logical-value scope. Exact schema/shared C/F frames depend inward
+on existing native contracts and typed codec ports. Every bounded payload is
+validated before detached NumPy materialization. Fixed native continuation uses
+existing Backprop BCE loss/state/predictions;no model metric/API/equation or
+configuration/dependency change. Newmodule tree,examples,commands,limits and
+extension path:docs/durable-checkpoint-codecs.md;decision:ADR-0226. Full durable
+composite/owner/copy/lifecycle/model/scientific acceptance remains unfinished.
+
+
+### Complete supported NumPy inbox byte component
+
+NumpyInboxCheckpointCodec wirev2 preserves complete native cursorv1/v2 events,
+permissions,unmatched/consumed/applied/tombstone history and actual supported real
+numeric C/F payload dtype/byteorder/bytes/ownership. Inner InboxCodecPolicy binds
+original independent shape/dtype/record/string/candidate bounds. Role/permission/
+metadata checks precede payload inspection;all raw validation precedes detached
+NumPy materialization. Existing native/inbox/source/test/API bytes retained;
+no dependency/configuration/learning change. Tree/commands/zero-native example/
+extension and authority limits:docs/durable-checkpoint-codecs.md andADR0227.
+Lifecycle/consolidation/consent/revocation/retention/copy/actor/sharing/Torch/full
+composite/singleowner/native/model/coordinatorloss/scientific/human work stays open.
+
+
+### Consolidation observation boundary
+
+ActorShadowRuntime -> core ConsolidationCursor validates complete ledger metadata;
+ConsolidationCheckpointCodec -> core cursor/policy/checkpoint port encodes explicit
+canonical bounded bytes. Core imports no outer layer. Capture uses the existing
+nonblocking candidate lease;typed records and codec hold no clock,budget,model,
+callback or live authority. Lifecycle/retention/copy/owner capture remains a
+separate required component before composition. See docs/consolidation-cursors.md
+and ADR0228 for tree,independent bindings,aliases and rationale.
+
+
+### Lifecycle record and authority boundary
+
+managed_lifecycle_schema (app) -> managed_lifecycle_state/validation (core) ->
+existing inner policy/consent/retention/copy/ownership records. Exact source-field
+guards cover all66 current private fields. Metadata copies preserve original
+policy aliases;47 reference slots retain original live objects without copying
+or invoking them. No live capture lease,IO,serialization or restore authority
+is provided. Driver mutator synchronization and actual capture remain required.
+Why and alternatives:ADR0229;tree and workflow:docs/managed-lifecycle-state.md.
+
+Lifecycle capture:src/app/managed_lifecycle_capture.py orchestrates original app owner leases and inward core records/validation. Driver state transitions share a short original RLock;cleanup callbacks and joins run outside it. No infra or adapters import into core. See ADR-0230 and docs/managed-lifecycle-state.md.
+
+Lifecycle byte component:core/lifecycle_codec_policy holds independent original policies;adapters/lifecycle_checkpoint_schema owns explicit wire preflight/immutable aliases;adapters/lifecycle_checkpoint_codec implements the inner CheckpointCodec[ManagedLifecycleCapture]. No outer import enters core. Original app capture and every prior source/API byte remain unchanged. See ADR0231.
+
+Paired record capture:core/managed_record_state defines full immutable records and pure bounded relationship checks;app/managed_record_capture uses the original lifecycle lease interval and internal leased cursor reader. One metadata graph is detached;59live reference slots retain identity. Existing public capture signatures remain stable. Promotable slot versions are read under the already-held actor gate. See ADR0232.
+
+Paired byte component:core/managed_record_codec_policy validates independent complete component policies;adapters/managed_record_checkpoint_schema enumerates24native records and raw relationships;adapters/managed_record_checkpoint_codec implements CheckpointCodec[ManagedRecordCapture]. Existing lifecycle walkers accept trusted schema/prefix parameters with unchanged defaults. Entire original metadata/alias graph and59original refs are independently bound;no inward layer imports adapters or app. See ADR0233.
+
+
+### Original-owner composite capture
+
+`core/managed_composite_state.py` defines bounded records and inward projection,
+preflight and copy ports. `app/managed_composite_sources.py` enumerates exact
+source-field roles; `app/managed_composite_capture.py` owns original lease and
+admission orchestration. `adapters/numpy_composite_capture.py` validates complete
+native states and copies one assembled graph. App/core do not import NumPy
+adapters. Why: one admitted graph copy preserves cross-component aliases without
+renewing original live authority. Full pending/sampler/native-variant qualification
+and canonical bytes/restore remain unfinished;see ADR-0235 and module guide.
+
+
+Managed capture resource admission (ADR-0236): shared ProcessRssSampler supplies
+an expiring internal observation port under its original nonblocking gate. The
+app consumes that port with the original budget/progress and rechecks retention
+after payload copying. The inward copy port receives one shared memo; the outer
+NumPy adapter reuses detached payloads while final observation records refresh.
+No replacement sampler/owner or dependency reversal is introduced.
+
+
+Managed capture retained-source bindings (ADR-0237):explicit original enrolled
+runtime/controller/pending/token relationships and installed consent/copy guards
+now precede holder payload ports and projection. Complete graph bounds precede
+checkpoint measurement,integrity and pure promotion checks. Retained checkpoint
+payloads require live consent even when the current inbox is empty. Final pending
+references and consent are rechecked without invoking controller restore guards.
+See docs/managed-composite-capture.md and src/app/managed_composite_bindings.py.
+Portable tickets preserve fields/aliases;original ticket and rollback receipt
+remain live authority references. Actual promotion issuance/native provenance/
+all variants/replay consent/bytes/recovery remain unfinished.
+
+
+Original managed native update observation (ADR-0238):optional native_observer
+ports in inbox/runtime/sharing/managed owner expose original source/label/learner,
+actual detached inputs and committed receipt/spent count through synchronous
+expiring access. See docs/native-update-origin.md. Original consent/admission,
+owner instance fields,default calls and update order remain unchanged. Callback
+faults preserve original failure/receipt/resources;returned references remain
+caller-owned. No new configuration/dependency/environment variable. Core defines
+the reference contract;app manages lifetime;neither imports adapters/infra.
+Persistent replay origin and every storage/retention/dedup/eviction/fork/checkpoint/
+promotion/restore/erase path remain open under R3.5b2e5b3. Complete compoundcapture,
+canonical bytes and recovery gates remain unchecked. Do not infer row lineage
+from content hashes or treat these observations as consent/restore permission.
+Tests:fixed fake-only origin controls +five selected fake inbox controls +990
+current composite/resource/codec controls;both742types/wholeRuff/check format.
+For safe extension:add a bounded original replay-write/row port with weak or
+owned-accounted payload references;preserve terminal failures and original gates.
+
+
+Original replay-write observation (ADR0239):core/replay_write_origin defines
+a bounded original model/input window;app/replay_write_origin composes it with
+the original managed producer. Native copy ranges,new snapshot references and
+final retained identities are observed without extra array copies/native fields.
+Explicit original ContextVar token/thread/callback lifetime survives refused
+close;all default storage/policy/RNG rules preserved. See docs/replay-write-origin.md.
+Pure/current gates precede a separately declared tiny native storage-only parity
+fixture. No dependency/env/config changes. This is not a persistent row ledger or
+consent/restore certificate. Full b3/e5b/e5 retained variants/lineage/bytes/recovery
+remain open. Next consume actual copy identity under bounded weak/owned-accounted
+retention and original consent/terminal-outcome authority before broadening capture.
+
+
+### Bounded current-candidate replay origins
+
+`src/core/replay_origin.py` defines metadata/admission and injected ports;
+`src/app/managed_replay_origins.py` composes original owner/runtime gates and
+weak row records; `src/adapters/numpy_replay_origins.py` implements native reference/
+integrity ports. Dependencies point inward. Existing source/schema fields stay
+unchanged. Why this: exact observed copy identities establish producer binding;
+hashes only verify already-bound contents. See ADR-0240 and the row-origin guide.
+
+
+### Replay capture boundary
+
+App `replay_capture_origins` validates the original ledger under already held
+owner/runtime leases. Adapter `numpy_replay_capture` supplies bounded original
+model/snapshot rows before projection/copy. Capture repeats checks around callbacks;
+ledger capture uses its own nonblocking gate and existing lifetime charges.
+Native schemas/fields unchanged. Rationale: ADR-0241 and replay-capture guide.
+
+
+Replay capture lifecycle repair: original runtime open/consent checks use
+leased elapsed access during capture; public default reads keep ordinary access.
+See docs/replay-capture-origins.md and current development log for qualification.
+
+
+### Original model-copy observation boundary
+
+`src/core/native_model_copy.py` defines local source-bound observation ports;
+`src/adapters/numpy_learners.py` supplies the actual native copier memo. No model
+fields or adapter policy change. Original-context Token validation is required
+because inherited ContextVar values alone do not establish original context.
+Borrowed references expire per callback;caller retention requires separate owned
+accounting. Original managed consent,copy budgets and registered holder lineage
+remain application responsibilities and are unfinished for copied replay holders.
+
+
+### Managed replay-copy witnesses
+
+`src/app/managed_replay_copies.py` composes the original ledger and registered
+checkpoint controller with `src/core/native_model_copy.py` observations. The
+NumPy builder-source port lives in `src/adapters/numpy_replay_copies.py`. Metadata
+uses the original row ledger admission;raw replay copies use the original lifecycle
+payload budget. Copies hold original owner/runtime/registry/time/resource gates
+through admission and copier completion;persistent targets/rows are weak.
+Why this:failed checkpoint preparations can retain genuine copied models before
+policy checking. Actual memo and holder position/history bind their row origins.
+The observer closure keeps raw references and leases local to one invocation;
+helpers handle admission,binding and history validation. Copied metadata slots
+stay reserved after faults or collection. Full restored snapshot/inbox/receipt
+lineage and ledger transition remain separate unfinished work.
+
+
+### Native state copy boundaries
+
+`core/native_state_copy.py` reuses the bounded copy-window implementation in
+`core/native_model_copy.py` through an independent context channel. CPC snapshot
+and restore depend inward on that core port. Original validation and native state
+publication remain in CPC; admission and retained lineage remain application
+responsibilities. No native field or checkpoint schema is added. Why this: fork
+and state copies have different roots and can occur within the same preparation.
+
+
+### Actual copy sequences
+
+`core/native_graph_copy.py` reuses a single bounded copy window across changing
+actual roots;app checkpoint/inbox copy sites and core native-state copies depend
+on this inward port. State/sequence observers share the original copier memo.
+Why this: separate allowances for each root would renew limits within one real
+checkpoint operation. Original holder fields,validation/enrollment and publication
+remain in their owners;original authority/admission/ledger transition remain app
+responsibilities. Purpose labels cannot serve as provenance.
+
+`core/replay_graph_origin.py` defines borrowed inventory ports;
+`adapters/numpy_replay_graphs.py` implements native state dictionary/snapshot
+inspection through existing exact NumPy payload validation. Dependencies point
+inward. It retains no payload, performs no native model operation and grants no
+authority. Replay-only byte counts are separate from complete model/heap/RSS
+accounting. See docs/replay-graph-origins.md for caller responsibilities.
+
+### Managed checkpoint replay publication
+
+`app/managed_replay_checkpoints.py` composes original admission and native/fork/
+inbox witnesses; `app/checkpoint_replay_handoff.py` defines the trusted lease at
+the controller's original publication point. `core/checkpoint_content.py` reads
+bounded exact core records and numeric buffers after opaque ports; it provides
+local integrity, never provenance. Adapters supply original borrowed graph
+ports. Dependencies point inward; no adapter is imported by the application.
+The original controller owns preparation and the four publication statements.
+Why this: final probes run after graph-copy observations, so authority must be
+rechecked and held through publication. Exclusive cleanup releases the actual
+lexically acquired lock even if a callback replaces its field. ADR-0242 records
+this boundary; full copied-holder/compound/canonical/recovery gates remain open.

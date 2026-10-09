@@ -1,5 +1,20 @@
 # P6.7d2b2b1: conservative saved seed chronology and stream screen
 
+
+## Current interpretation — 2026-10-06
+
+The saved chronology component is complete for its retained historical input scope.
+Its earlier pending sections below are chronological records, superseded by the
+terminal component acceptance. The current source still reports fresh-role authority
+false; numeric collisions, copied outputs and declared timestamps establish no
+independent source count or actual final-release time. Separate
+[original-reader witnesses](p67-original-release-witnesses.md) support only their
+recorded within-run order. This audit does not invoke either saved projection or
+the original readers. Original resource failures and full prospective role/execution
+requirements remain unchanged; the deferred guard repair does not grant admission.
+
+## Historical saved chronology record
+
 ## Scope and boundaries
 
 This component consumes the entire581,898,985-byte historical saved evidence and

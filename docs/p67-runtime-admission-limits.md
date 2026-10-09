@@ -1,5 +1,18 @@
 # Runtime admission counterexamples (P6.7d2b2j5)
 
+
+## Current interpretation — 2026-10-06
+
+P6.7d2b2j5 remains complete for its diagnostic counterexamples. Its five gaps remain
+requirements for complete admission. Later finite mutation controls did not close
+general correctness: the foreign nested exit releases monitoring early, and the
+owning-entry repair is user-deferred. See [current guard status](p67-runtime-execution-guard.md).
+Edited historical records, boundary equality and these diagnostic tests establish
+neither continuous enforcement nor approved source/native/build correspondence.
+The historical evidence and commands below keep their original acceptance and budgets.
+
+## Historical diagnostic record
+
 ## Responsibilities
 
 The pytest-free fixture exercises real Windows process observation and real V2/native

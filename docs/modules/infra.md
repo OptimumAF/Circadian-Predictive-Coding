@@ -116,3 +116,68 @@ or atomically replaces a trusted local pickle file (ADR-0104).
 - Training orchestration
 - Model internals
 - CLI concerns
+
+
+### Windows recovery observations — 2026-10-07
+
+[Observation guide](../windows-recovery-observation.md) documents core bounded records/port and infra documented API/registered-handle/anchored-clock adapters. Typed observations convey no owner fence or native restore capability. Fake/current-process gates pass;real launcher/payload mismatch retained,corrected worker capture unrun. R3.5b2b/full durable/coordinator-loss recovery remains open. No inherited module changes.
+
+
+### Direct-worker observation successor — 2026-10-07
+
+R3.5b2b scoped validation now passes strict actual worker identity/time/exit/RSS/cleanup under original coordinator anchor,with unchanged production/test source and280current cases. Prior failed launcher scope/costs retained. No interfaces/dependencies change;transactional independent authority/CAS/live lease/native codec/recovery remain unfinished. See [guide](../windows-recovery-observation.md) and successor evidence.
+
+
+### recovery_authority_codec and sqlite_recovery_journal
+
+Infrastructure owns exact bounded canonical JSON and private one-record SQLite CAS through the inner authority port. Inputs:independently known floor,trusted host-derived changes and private path. Outputs:typed metadata/read or committed CAS success;stale false,errors disable instance. Exclusive create/existing-only open,DELETE/FULL/immediate/no retry. No native codec,worker lease/dispatch or coordinator-loss bootstrap. See [guide](../recovery-authority-journal.md).
+
+
+### SQLite terminal reporting/reconciliation
+
+SqliteRecoveryJournal adds report through the existing bounded full-record CAS and explicit reconcile_terminal through a fresh existing-file connection. Exact independent witness states only;preserve actual committed charges/uncertainty and force stopped. Missing/stale/unwitnessed state refuses;no resumed work,automatic retry,migration or new dependency. Source/host authenticity and power-loss/process/native recovery remain unproven. See [guide](../recovery-terminal-authority.md).
+
+
+## Private SQLite publication reservation
+
+`SqliteRecoveryJournal.publication_guard` holds BEGIN IMMEDIATE around exact
+authority comparison,entry/exit host validation and a trusted callback. All
+supported writers contend on that private database with zero timeout. It writes
+no records;exceptions disable the adapter and close the connection. It cannot
+authenticate callers,undo publication or prove native/coordinator-loss recovery.
+The coordinator now uses the shared observation-report lease;see ../guarded-recovery-coordinator.md.
+
+
+## Shared private journal writer ownership
+
+sqlite_recovery_lock.py owns bounded permanent native lock descriptors;
+sqlite_recovery_publication.py exposes restricted durable observation reports
+under ownership. Ordinary writes,terminal reconciliation and the legacy guard
+share that lock;publication reports use the held capability without reacquisition.
+Inactive/cross-thread lease use refuses. Trusted canonical private path only;
+no hostile disk/alias/remote-filesystem/native/coordinator-loss claim. See
+../guarded-recovery-coordinator.md and ADR-0221.
+
+
+## Retained original Windows composition
+
+windows_recovery_composition.py accepts independent original AuthorityRecord,
+existing canonical private journal and exact retained Windows anchor/worker
+registrations. It verifies current physical observer/anchor,PID/creation/shared API,
+liveness,terminal flags and exact journal;returns the app coordinator over inner
+leased ports. Invalid initial record/types retain caller ownership;later failures
+deduplicate closure and preserve primary/all close errors. It does not launch/
+repin/terminate workers,bootstrap authority,complete native updates or refund
+work. Concrete adapters are tested with private fake API hooks;actual worker/crash
+proof is separate. See ../windows-recovery-composition.md and ADR-0222.
+
+
+## Original RSS floor and actual metadata worker capture
+
+WindowsRecoveryObserver accepts a bounded exact initial peak;composition seeds
+it from independent known usage,retaining original caps/regression checks. The
+actual native/SQLite composition and writer ownership were exercised with one
+strict direct worker and pre-COMMIT process exit. Original charges/uncertainty
+persisted;owned native process handles/pipes/reader/Popenhandle cleaned. Capture
+markers are absent native components,not codecs;hot replay/power-loss/native/model/
+coordinator-loss recovery remains unproven. See ../windows-recovery-process-capture.md.

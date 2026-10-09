@@ -1,5 +1,21 @@
 # Circadian Predictive Coding
 
+For active work, start with the [research roadmap](RESEARCH_ROADMAP.md).
+The [R0 baseline audit](docs/r0-baseline-audit.md) records the checkout delta,
+platform-specific checks, supported test environments and remaining gates.
+
+Later Phase 6 progress notes and their “exact next action” passages record
+historical handoffs. Use the active roadmap and the latest
+[development log](docs/development-log.md) for current work. The owning-with
+guard repair is user-deferred; its counterexample keeps scientific admission
+closed. The supported local Linux baseline now passes; see the audit for exact
+counts, skips and remaining limits. The [first local pilot preflight](docs/local-pilot-budget.md)
+checks fixed CPU/simulation resource plans before any new pilot is dispatched.
+
+```powershell
+python -m scripts.run_local_pilot_preflight
+```
+
 [![CI](https://github.com/OptimumAF/Circadian-Predictive-Coding/actions/workflows/ci.yml/badge.svg)](https://github.com/OptimumAF/Circadian-Predictive-Coding/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
@@ -88,7 +104,7 @@ This lets model capacity adapt over time instead of staying fixed.
 - NumPy circadian predictive coding baseline for small-scale experiments
 - Torch ResNet-50 benchmark pipeline for speed and accuracy comparisons
 - Adaptive sleep triggers, adaptive split/prune thresholds, dual-timescale chemical dynamics
-- Reward-modulated wake learning and adaptive sleep budget scaling (NumPy + ResNet circadian head)
+- Supervised difficulty modulation of wake learning and adaptive sleep budget scaling (NumPy + ResNet circadian head); the reward proxy uses labeled training error.
 - Function-preserving split behavior and guarded sleep rollback
 - Multi-seed benchmark runner with JSON/CSV output
 
@@ -111,6 +127,7 @@ sleep attempts, and due attempts suppressed by cooldown. See
 An interval schedules a sleep attempt after that many completed runner
 epochs. In component mode, adaptive-ready sleep can also be attempted
 between intervals; a forced periodic call bypasses the adaptive check.
+The configured warmup and guarded retry cooldown still apply.
 Disabled mode schedules no attempts. See
 [ADR-0034](docs/adr/ADR-0034-sleep-attempt-scheduling.md).
 
@@ -266,6 +283,16 @@ Raw benchmark output: [`docs/benchmarks/benchmark_master_cifar100_subset_2026-02
 
 ## Strengths and Weaknesses
 
+The observations in this section describe the retained February 2026 runs;
+“latest” refers to that historical master check. The corrected September 30
+hardest-profile reproduction reports PC `0.786122` and circadian `0.768163`.
+That tuned profile is descriptive. The retained H1–H4 confirmation leaves
+105 simultaneous intervals including zero and 11 statements ineligible;
+advantage and equivalence remain unresolved. See the
+[corrected profiles](docs/p62-corrected-profile-results.md),
+[current findings](docs/p612-current-findings-publication.md), and
+[model card](docs/model-card.md) for current claim scope.
+
 Strengths:
 
 - Competitive retention/adaptation behavior under hard continual shift.
@@ -310,10 +337,20 @@ py -3.14 -m venv .venv
 pip install -r requirements.txt
 ```
 
-The current local environments use Python 3.14.7. The original Python 3.11
-environments are retained as ignored `*-py311-snapshot` folders for reproducing
-older runs. CI continues checking Python 3.11, 3.12, and 3.14; the project’s
-minimum syntax and type-check target remains Python 3.11.
+The audited Windows CPU `.venv` uses Python 3.14.7, NumPy 2.4.6,
+Torch 2.14.0+cpu and torchvision 0.29.0+cpu. Original Python 3.11
+environments remain in ignored `*-py311-snapshot` folders. The configured
+Linux CI matrix targets Python 3.11, 3.12 and 3.14; minimum syntax and the
+configured type target remain Python 3.11. At committed HEAD `1820775`,
+[CI run 37511207519](https://github.com/OptimumAF/Circadian-Predictive-Coding/actions/runs/37511207519)
+passed its eight-module Torch CPU job with Torch 2.14.1+cpu / torchvision
+0.29.1+cpu. All three general jobs failed type checking and skipped testing;
+the inspected 3.11 log reports eight Windows-only ctypes/msvcrt errors.
+The subsequent uncommitted R0 platform repair has scoped local Linux/Windows
+validation. Its expanded CPU and Windows-native jobs await remote execution.
+R0.3 and G0 remain open after the general suites exceeded their storage
+allowance and Linux emitted three unresolved failure markers. The
+[R0 audit](docs/r0-baseline-audit.md) records exact scopes and environments.
 
 For exact versions from the tested Windows CPU environment, use the dated
 [dependency constraints and reproduction guide](docs/dependency-reproducibility.md).
@@ -326,11 +363,28 @@ Optional torch benchmark dependencies:
 pip install -r requirements-resnet.txt
 ```
 
-For NVIDIA GPUs (example CUDA wheels):
+For NVIDIA GPUs, use the separate [recorded CUDA environment](#recorded-cuda-environment)
+and [dependency guide](docs/dependency-reproducibility.md). Keep the exact
+versions of a retained experiment with that experiment's environment record.
 
-```powershell
-python -m pip install --upgrade --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu128
-```
+## Configuration defaults
+
+The toy CLI reads integer defaults from the process environment before
+applying explicit command arguments. [`.env.example`](.env.example) lists
+those names; copying it does not load values automatically. Invalid integer
+values raise a named configuration error.
+
+| Variable | Default | Meaning |
+| --- | ---: | --- |
+| `PC_BASE_SEED` | 7 | Toy source/model base seed |
+| `PC_DATASET_SIZE` | 400 | Toy sample count |
+| `PC_EPOCHS` | 160 | Toy training epochs |
+
+For example, set `$env:PC_EPOCHS = "2"` in PowerShell before invoking the toy
+CLI. An explicit `--epochs` takes precedence over that valid default. The
+versioned fixed studies retain their own sealed configurations; these variables
+do not rewrite their requests or budgets. See
+[configuration contracts](docs/configuration-entrypoint-audit.md).
 
 ## Main Commands
 
@@ -652,7 +706,8 @@ For a local JSON artifact of a completed v0–v5 continual result, add
 decision per completed phase A/B epoch for each seed, including skipped
 epochs. These historical routes do not pass an inner sleep guard, so their
 event `guard` is `null`; arrived v6 now records its own inner-guard history,
-while v7 selection propagation remains under development. The existing
+while v7 propagates candidate/trial/frozen-selection sleep history under
+its current format-8 checkpoint (ADRs 0094–0095). The existing
 `--output-file` continues to write the human
 summary, and neither file is overwritten. See
 [ADR-0091](docs/adr/ADR-0091-historical-continual-sleep-history.md).
@@ -804,8 +859,9 @@ but records no applied changes after restoration. A failed guard or core
 attempt restores the model, records known facts with an `error` reason, and
 raises. A successful retry keeps that failed event followed by the final
 decision for the same epoch. The existing guard ledger and all-seed
-final-test release rules still apply. V7 selection propagation remains
-open; see [ADR-0092](docs/adr/ADR-0092-arrived-guarded-sleep-history.md)
+final-test release rules still apply. V7 selection history and provenance
+are implemented; old format-7 files are rejected by format 8 (ADR-0095).
+For the v6 history boundary, see [ADR-0092](docs/adr/ADR-0092-arrived-guarded-sleep-history.md)
 and [ADR-0093](docs/adr/ADR-0093-arrived-failed-sleep-attempts.md).
 
 Ordinary v6 raises on sleep errors by default. For a bounded local retry of
@@ -938,8 +994,9 @@ different retained/exposed IDs but identical balanced scores for FIFO and
 reservoir on both seeds; it is a tiny synthetic null result, not a policy
 ranking. The audit's observed/exposed ID sets are reporting memory outside
 the retained-array byte cap. The earlier v6/v7 config and checkpoint formats
-keep their original meaning (ADR-0103). Replay-capable PC/backprop controls
-remain P4.4.
+keep their original meaning (ADR-0103). This v8 comparison retains wake-only
+PC/backprop controls. The separate completed v9 schedule/training/outcome
+routes below implement matched replay-capable PC/backprop controls (P4.4).
 
 For trusted local continuation inside an active A/B trial or after a
 completed v8 policy/seed trial, use its separate format-9 store with a fixed
@@ -1325,7 +1382,9 @@ command or `--protocol-id continual_legacy_train_test_v0` on the continual
 command to reproduce the former train/test routing. The continual output
 command refuses to overwrite an existing file. Validation data in these
 small NumPy runners are descriptive; their current sleep decisions use only
-training-derived state. A strict-online continual protocol remains open.
+training-derived state. These v1 routes remain descriptive. The arrived
+v6/v7 routes above implement local role isolation and outer selection;
+independent fresh-source/native/runtime scientific admission remains open.
 New toy, in-depth, and continual outputs also report NumPy algorithm IDs
 and comparison scope without changing their evaluation protocol IDs.
 One-hidden runs are descriptive because model seeds and controls differ;
@@ -1387,7 +1446,9 @@ CPU forward/reverse check matched state hashes and metrics within `1e-7`.
 The v2 default remains available unchanged for reproduction. v3 still uses
 unmatched heads and separately initialized backbones, so its deltas remain
 descriptive. A local two-worker stochastic-image fixture replayed Torch,
-NumPy, and Python draws; CIFAR-transform and GPU reproducibility remain open.
+NumPy, and Python draws. That CPU fixture covers neither CIFAR transforms
+nor CUDA. The later saved seed-149 CIFAR/CUDA forward/reverse check below
+supplies bounded order evidence; broader GPU/platform parity remains open.
 The internal v3 training loader can also resume a bounded epoch/batch cursor
 with zero or two workers, preserving the subsequent augmentation and process
 draws (ADR-0057). The Python runner can persist the complete seeded v3 CPU
@@ -1708,7 +1769,9 @@ Each head trains alone in a fresh spawned process using the same frozen
 train, guard, and validation feature hashes and initial tensors. The parent
 verifies those hashes before returning. Each report separates setup RSS,
 cached feature bytes, and trainer RSS/CUDA allocator observations. This
-memory-only route never opens final test. The local gate requires an
+route never materializes final-test features or scores them. The ordinary
+CIFAR loader builder still constructs the official final-test dataset/loader.
+The local gate requires an
 explicit CPU/CUDA device and zero loader workers. CIFAR-10 also requires a
 complete local cache with `dataset_download=False`; unsupported datasets
 and implicit downloads fail before spawning. It does
@@ -1731,7 +1794,8 @@ heads; `result.confirmations` is separate from the trial ledger. Candidates
 may change only their own learning rates, inference steps, or backprop
 momentum. The route caps candidate-by-seed trials at eight per head and is
 for correctness checks before larger experiments. It does not establish a
-head-family ranking; larger-data confirmation remains open.
+head-family ranking. The later bounded pretrained CIFAR confirmation below
+has saved larger-data evidence; broader head-family ranking remains open.
 [ADR-0015](docs/adr/ADR-0015-matched-head-tuning-ledger.md)
 records the selection and test-sealing rules.
 
@@ -1740,8 +1804,9 @@ provides the separate `vision_end_to_end_backprop_v1` practical track with a
 trainable ResNet and linear head. Pass a guarded `ResNet50BenchmarkConfig` with
 `backprop_freeze_backbone=False`. Both tracks report backbone trainability,
 pretraining, head type, and parameter counts. The practical result is not a
-learning-rule attribution baseline; fairness budgets and larger experiments
-remain open.
+learning-rule attribution baseline. The matched-budget studies below cover
+frozen shared features. This trainable-backbone practical track requires its
+own prospective fairness and larger-experiment design.
 
 For a budgeted local check:
 
@@ -1887,11 +1952,15 @@ declared protocol; the CUDA result is described below, and no full-data
 ranking has been established. See
 [ADR-0063](docs/adr/ADR-0063-pretrained-cifar-matched-budgets.md).
 
-For an isolated local CUDA environment, the verified CPU `.venv` can stay in
-place. The historical P1.7f smoke used Python 3.11; the current local CUDA
-environments use Python 3.14.7 and matching
-[PyTorch 2.14 CUDA 13.0 wheels](https://pytorch.org/blog/pytorch-2-14-release-blog/).
-Create a fresh CUDA environment with:
+### Recorded CUDA environment
+
+The historical P1.7f smoke used Python 3.11. The recipe below records the
+Python 3.14 setup used locally with interpreter 3.14.7, PyTorch 2.14.0 CUDA
+13.0 wheels (`torch==2.14.0+cu130`) and `torchvision==0.29.0+cu130`.
+Retained CUDA observations keep their own original environment facts and
+unknown fields. The audited CPU environment and the newer R0 CPU packages
+supply separate evidence. This documentation audit executes no fresh CUDA
+installation or experiment. For a separate environment, the recorded commands are:
 
 ```powershell
 py -3.14 -m venv .venv-cuda
@@ -2031,9 +2100,11 @@ Deploy dashboard via GitHub Pages:
 ## Quality Commands
 
 ```powershell
-ruff check .
-mypy src tests scripts
-pytest -q
+python -m ruff check .
+python -m ruff format --check src tests scripts
+python -m mypy --platform win32 src tests scripts
+python -m mypy --platform linux src tests scripts
+python -m pytest -q
 ```
 
 ## Open Source Standards
@@ -2936,3 +3007,1107 @@ guard/source/scientific admission remains open.
 persistent poison and actual callback cleanup on measured CPython3.14. Full runtime/
 source/native/lifetime admission remains unavailable. Original120s gates remain open;
 current23-control successor and complete readback pass (ADR-0195).
+
+Those controls retain their measured scope. A confirmed foreign nested
+owning-with exit can release instrumentation prematurely, allow parameter
+mutation, and leave genuine cleanup failing. P6.7d2b2j6b2's broader release
+correctness claim is reopened; P6.7d2b2j6c's repair remains user-deferred.
+Full source/native/lifetime and independent scientific admission remain closed.
+The latest development log retains the counterexample and the unspent/failed
+historical budget distinctions.
+
+
+## Native learner ports
+
+The existing CPC and ordinary NumPy backprop models can use the same synchronous
+learner step with native diagnostic IDs, detached model state and existing wake
+budget checks. See [learner ports](docs/learner-ports.md) for the API, tests and
+extension example. Actor concurrency, label-arrival permissions and promotion
+remain separate work. [Documentation coverage](docs/development-documentation-coverage.md)
+binds the completed P9.4 topics to their current guidance and retained evidence.
+
+Current dependency status: R3.1 remains unchecked pending the reopened R0.3/G0
+clean-checkout/native CI diagnosis. Its local port implementation and85-case
+validation are preserved; no further dependent implementation or experiment is
+launched from this work. See the active RESEARCH_ROADMAP.md.
+
+
+## Historical outcome and cost figure export
+
+The optional [historical exporter](docs/historical-outcome-figures.md) renders the
+complete accepted P6.10 outcome/cost artifact into 18 standalone SVGs, a vector
+PDF and an exact numerical view. It preserves original uncertainty, negative/null
+results and separate work/storage scopes. Every page is labelled historical;
+there is no new experiment or new protocol reproduction. Use an existing Python
+with ReportLab; project dependencies and default test/help/refusal paths are
+unchanged. Parent P9.5 and reopened G0/R3.1 acceptance remain unfinished.
+
+
+Windows-native CI diagnostics retain JUnit and bounded fixture-file metadata in
+log markers `WINDOWS_NATIVE_DIAGNOSTICS_BEGIN/END` while preserving failed pytest
+status. The local retention increment is not yet published. See
+[the R0 baseline audit](docs/r0-baseline-audit.md) for scope, commands and limits.
+
+
+## 2026-10-06 - Complete presentation inventory and saved matched confirmation
+
+See [research presentation coverage](docs/research-presentation-coverage.md) for
+all62 original families,341 entry documents/12 legacy assets and the complete
+saved matched confirmation figures. Original negative outcomes, uncertainty and
+resource limits remain; P9.5/P9.5b remain unfinished. No new scientific run.
+
+
+## 2026-10-06 - Fixed-v14 saved-repeat presentation complement
+
+See [fixed-v14 repeat figures](docs/fixed-v14-repeat-figures.md): six original
+repeat bodies/old dashboard chains and complete uncovered work/contrast/history
+presentation. Original two seeds stay two; no new statistics or experiment.
+P9.5b3 complete for this scope, parent P9.5/P9.5b remain open.
+
+
+## 2026-10-06 - Saved CUDA order-control figures
+
+See [saved order-control figures](docs/vision-order-control-figures.md): four exact
+original seed149 bodies, three pages covering scores/capacity/both timing orders
+and original control facts. Nine declared score deltas are zero at original
+1e-6 tolerance; all test accuracies zero, unequal capacities, timings vary.
+Single-seed unmatched reference only; no fresh isolation/scientific admission.
+P9.5b4 complete for saved presentation; parent P9.5/P9.5b remain open.
+
+
+## 2026-10-06 - Saved CIFAR loader-control figures
+
+See [saved loader-control figures](docs/vision-loader-control-figures.md): two
+exact original seed73 bodies, original counts and complete saved identity table.
+Same-worker objects repeat; cross-worker batch IDs/role hashes equal but view
+hashes differ. Only first file has a separate training_seal. Single-seed saved
+metadata only, no fresh isolation/scientific admission. P9.5b5 complete for this
+presentation; parents P9.5/P9.5b unfinished.
+
+
+## 2026-10-06 - Saved CIFAR memory-control figures
+
+See [saved memory-control figures](docs/vision-memory-control-figures.md): one
+exact original seed83 body, three pages preserving sampled RSS, separate cached
+feature bytes, sampling/capacity/native work and nine null CUDA fields. Equal
+saved head/initial/feature identities and three recorded PIDs are descriptive;
+no continuous peak, memory winner or fresh isolation/scientific admission.
+P9.5b6 complete for saved presentation; parents P9.5/P9.5b unfinished.
+
+
+## 2026-10-06 - Saved CUDA environment-smoke figures
+
+See [saved environment-smoke figures](docs/vision-environment-smoke-figures.md):
+four exact original seed109 failure/request/retry bodies, full failure and
+synthetic telemetry. First failure preserved; retry is not independent seed
+replication, dataset scoring, supported-baseline or fresh scientific evidence.
+P9.5b7 complete for saved presentation; parents P9.5/P9.5b unfinished.
+
+
+## 2026-10-06 - Saved development-only feature-profile figures
+
+See [saved feature-profile figures](docs/vision-feature-profile-figures.md):
+both exact original seed101 request/result bodies, development counts/payload/
+setup/weight/hash/counter facts. Recorded zero test iterations is saved metadata,
+not fresh whole-lifetime isolation or held-out construction proof. No training,
+accuracy, RSS/allocator or supported-baseline conclusion. P9.5b8 complete for
+saved presentation; parents P9.5/P9.5b unfinished.
+
+
+### Saved representative feasibility figures (P9.5b9)
+
+See [saved feasibility guide](docs/vision-feasibility-figures.md): original seed173
+development-role/timing/sampled-RSS/allocator/GPU/source scopes in five saved
+pages. No head/test score, new model run or fresh scientific admission.
+
+
+### Saved representative selection figures (P9.5b10)
+
+See [selection guide](docs/vision-selection-figures.md): all six original seed179
+candidates, twelve-event journal and frozen choices in seven pages. Original CPC
+negative validation ranking retained; no new tuning/test score/admission.
+
+
+### Saved synthetic matched-head smoke figures (P9.5b11)
+
+See [synthetic smoke guide](docs/vision-synthetic-smoke-figures.md): selection47 and
+reported confirmation53/59/61 across fixed-data/wall-time/sampled-memory scopes.
+Seven saved pages; original fixed-data tie/wall-time CPC lower/nulls retained.
+No new model run, CIFAR ranking or scientific admission.
+
+
+### Saved random-backbone CIFAR smoke figures (P9.5b12)
+
+See [guide](docs/vision-random-cifar-smoke-figures.md): ten pages preserve early/v2
+requests and selections, the recorded failure and retry2 confirmations. Original
+negative/tied accuracy results and unknowns retained; saved presentation only.
+
+
+### Saved pretrained CPU CIFAR smoke figures (P9.5b13)
+
+[Guide](docs/vision-pretrained-cifar-smoke-figures.md): selection113 and reported
+confirmations127/131/137; seven saved pages. CPC below both baselines in original
+accuracy scopes, null wall capacity-control and memory/weight/source limits retained.
+
+
+### Saved pretrained CUDA CIFAR smoke figures (P9.5b14)
+
+[Guide](docs/vision-pretrained-cuda-smoke-figures.md): nine saved pages preserve
+selection151/confirmation157/163/167, original deferred/quiet/after snapshots and
+negative accuracy versus both baselines. RSS/CUDA allocator scopes kept distinct.
+
+
+## P9.5b15 — registered presentation reconciliation (2026-10-06)
+
+This is saved presentation metadata and derived-artifact consistency validation.
+All 62 original family rows and publication bodies are preserved; 13 have declared
+accepted saved scopes across 14 stage groups and 15 task IDs. The canonical
+P6.10 aggregate view (560 cells/626 vectors) remains separate. The other 49
+families retain pending original coverage; no family receives fresh scientific
+admission. 463 whole metadata files were bound before joins and 142 accepted
+presentation files were checked by exact bytes/hash. This does not revalidate
+all original scientific sources, unregistered binaries or private attempts.
+Frozen original coverage flags are retained verbatim; current checks are separate receipts.
+
+Concrete next validation executed: nine original legacy-multiseed-charts artifacts
+bound before parsing: four PNGs, four HTMLs and docs/index.html. The four complete
+PNG images were visually inspected; independent PNG checks validated every chunk
+CRC and decompressed scanline extent. Full HTML bodies and exact payloads were
+preserved and the three detail vectors matched the overview. Browser/CDN code
+was not executed; hardest-case animation/dashboard scope remains unvalidated.
+Both benchmark_multiseed_cifar100_summary.csv and benchmark_multiseed_cifar100.json
+remain absent. Per-seed source filenames, seed N/IDs, uncertainty, original
+execution environment and corrected-protocol provenance remain unknown.
+Charts are unchanged, with nonzero throughput/latency axes explicitly unsuitable
+for bar-length ratio claims. The dashboard warns about test-label-informed
+stopping/sleep rollback and unmatched baselines. No recomputed means, uncertainty,
+composite, chosen seeds, changed metrics or new experiment.
+
+Evidence: `artifacts/runs/p95-coverage-reconciliation-20261006/{inputs,coverage-index,derived-chart-validation,readback,static-validation-v2,acceptance,terminal,final-accounting}.json`; guide `docs/research-presentation-index.md`. Six helper static gates pass; failed initial F401 candidate/receipt retained and charged. The v2 preformatter AST proves formatting preservation after the explicit unused-import/path repair, not equivalence with the failed candidate.
+
+Budget: original 600 aggregate engineering seconds, 60-second hard child cap,
+64 MiB owned stage, fixed 160-second manual/discovery/visual/closing reserve plus
+all captured attempts including the failed lint gate. Final accounting reserves
+its own full 60-second child cap; no whole-session walltime or process RSS claim.
+Science 350.7925872/360 and runtime 168.7993043/180 remain spent, no reset/rekey.
+Full pytest/native/Torch/CI/mypy/clean-clone and old semantic readers skipped in
+this ignored helper/additive-document scope; original full gates remain required.
+No installs, downloads, new dependencies, datasets, weights, arrays, device jobs,
+sweeps, algorithm/config/baseline changes, publication, commit, push or merge.
+G0/R0.3/full R3.1 and P9.5/P9.5b remain open. Owning-with j6c repair remains
+human-deferred; R0 publication remains separate.
+
+Why this plan change: full membership reconciliation reveals original-source coverage gaps even after accepted vision presentation scopes. Validate the already present legacy charts before selecting the next independently bound text family; retain parent acceptance and unfinished coverage. No rerender of covered scope or missing-source reconstruction.
+
+Exact next P9.5b16: bind the frozen legacy-master-subset original docs/benchmarks/benchmark_master_cifar100_subset_2026-02-28.txt under a fresh small engineering scope before parsing; inspect the complete non-JSON text, historical test-informed protocol, baseline capacities, original units, environment/resource/failure limits and existing figures. Validate and present only uncovered saved values; preserve unknown fields and original acceptance. No model, old semantic reader, CI or scientific execution.
+
+
+## P9.5b16 — historical master-subset saved presentation (2026-10-06)
+
+P9.5b16 is a saved presentation scope. The original is 2,438 bytes, UTF-16
+little-endian with BOM; whole CRLF text roundtrips exactly. SHA256:
+d22ec86990860ab4a8535f93a8ac67ab221d1fd9672efd1a56f744c379ec9db2.
+All 24 nonempty lines and 44 numeric literals are preserved, including the whole
+decoded body/full publication record. Five metadata bodies bound before parsing.
+Registered same-family paths contain only this text: no same-family existing
+figure. Older multi-seed charts/P6.10 aggregate have different sources, not reused.
+
+Original setup: CUDA, CIFAR100/root data/size96/batch32/augmentationTrue/subsets
+20000/5000,12 epochs each. Trainable parameters BP204900 versus PC/CPC825316;
+total BP23712932 versus PC/CPC24333348. README labels single-seed but source seed
+ID is unrecorded. Historical runner used test-label-informed early stopping/sleep
+rollback and unmatched head/backbone states. Historical command declares ImageNet
+weights/frozen BP backbone; declarations are not actual version/weight-byte proof.
+Dependency inventory, original source commit, exact weight archive, complete
+execution environment, energy units, RSS/allocator/sampler, attempts/failure
+history unknown. No source failure lines does not prove a complete failure ledger.
+
+Circadian reported throughput delta -107.0 is unchanged; rounded displayed
+874.2 minus981.3 is -107.1. This inconsistency is flagged without explaining it
+with invented missing sources. PC delta -16.1 retained. Saved accuracy:
+PC0.692>CPC0.685>BP0.678; cross-entropy CPC1.1082<PC1.1175<BP1.7144;
+throughput BP981.3>PC965.2>CPC874.2; p95 PC20.77<BP23.03<CPC23.27ms.
+All values/units and sleep counts/energies are retained. Unrecorded BP energy,
+sleep or delta fields are not filled with zero. Six panels show exact saved
+literals with explicit zero baselines/historical/unmatched limitations.
+No new means/uncertainty/composite/independent replication or scientific admission.
+
+Evidence: docs/legacy-master-subset-figures.md; artifacts/runs/p95-master-subset-20261006/{scope,inputs,view,visual-review,readback,static-validation,acceptance,terminal,final-accounting}.json and saved-values.{md,svg,png}.
+
+Prospective local engineering scope:600 aggregate seconds,60-second hard child,
+64MiB owned stage; fixed160-second manual/discovery/visual/closing reserve plus
+all captured attempts. The manual documentation SyntaxError is retained separately
+and included in that original fixed reserve; no reset/rekey. Final accounting
+reserves its own full60-second cap. Not whole-session walltime or process RSS.
+Science350.7925872/360 and runtime168.7993043/180 remain spent.
+Full pytest/native/Torch/CI/mypy/clean-clone and original semantic readers skipped
+in this ignored helper/additive-document scope; original full gates remain open.
+Pillow12.3.0 already installed; no new dependency or install/download/model/dataset/
+archive/array/device/CI/sweep/algorithm/config/baseline/seed/metric change, guard
+repair, publication/commit/push/merge/delegation/other-chat message.
+P9.5/P9.5b/G0/R0.3/fullR3.1 remain open; owning-with j6c human-deferred;
+R0 publication separate. Source/test/architecture boundaries unchanged.
+
+Plan rationale: uncovered master text has UTF16 encoding, unmatched capacities and an original rounding inconsistency. Preserve rather than normalize or borrow another family. Only this saved scope complete after gates, parent criteria retained. The48-epoch README family has no named original artifact and remains unresolved. Next Pareto JSON and separately registered known-mismatched summary need whole-source comparison.
+
+Exact next P9.5b17: freeze complete legacy-pareto and legacy-pareto-summary publication/coverage metadata and whole benchmark_pareto_hard_results.json plus benchmark_pareto_hard_summary.md before parsing. Independently compare every summary claim against the JSON; preserve known mismatches, all configurations/results/seed/resource/failure/environment limits and historical test-informed protocol. Inspect registered figures and present only uncovered validated saved values. No inferred missing provenance, corrected-protocol/source/execution admission, old semantic reader/model/CI/scientific dispatch.
+
+
+## P9.5b17 — historical Pareto JSON and mismatched summary (2026-10-06)
+
+Only P9.5b17 saved JSON/summary comparison scope is complete after gates.
+Two whole originals pinned before parsing: benchmark_pareto_hard_results.json
+1,076,676 bytes/SHA0b5ffedfbee82c7de0a458246dd0cd0a41b0aefb26fa993126b246b639f30f10;
+benchmark_pareto_hard_summary.md36,906 bytes/SHA2edd3ccf722b7f0315b7ae1e637bcc2cb9af69605b86360f614d54a511e4d067.
+Full original publication bodies remain distinct. Full parsed JSON body and whole
+summary text are retained, with independently checked20,210 typed leaves, all
+34 primary trials,102 seed-report positions,136 duplicate ranked/front/best trial
+copies and four global-report references. Duplicate presentations are not new
+experiments. Stored means/std/nulls/energies/capacities/configs and all saved
+fronts/rankings/winners are unchanged; no new score/front/selection/statistic.
+Registered same-family paths contain those originals only, no existing figure;
+older family figures/canonical P6.10 aggregate are separate and not reused.
+
+JSON dataset declaration: hard/noise0.08/train2500/test700/classes10/image96/
+CUDA/20epochs/seeds7,13,29. Summary declares14epochs and no seeds; it does not
+identify the same run. Numeric seed IDs exist only in JSON dataset declaration;
+individual seed reports have positions and no seed ID, so association or fresh
+independence is unproved. Actual dataset name, dependency inventory, source/weight
+identity, complete attempt/failure history, sampler/environment and corrected
+baseline/isolation provenance unrecorded. Do not call this a corrected CIFAR run.
+Both families retain historical test-informed provenance/unmatched capacities.
+Original BP trainable count20490; PC527114/790666/1054218; CPC varies with source
+adaptive state; copied reports preserve float aggregates and every seed-position
+integer/null rather than converting types or claiming equal capacities.
+
+All120 summary rows were compared.80 exact-parameter matches (40BP,40PC) disagree
+on all320 displayed metric claims at the original summary precision.40CPC rows
+have no exact JSON configuration match: summary thresholds/sleep intervals differ
+from adaptive percentile/cooldown/dual-chemical/homeostasis JSON configurations.
+Front sizesBP5=5,PC4=4,CPCsummary5 versusJSON4; equal counts do not prove equal
+front membership. Every global-winner leaf/presence/type difference is recorded,
+including summary14epoch/loss versusJSON20epoch/cross_entropy/aggregate fields.
+Summary Best balanced score compared explicitly to source global_best_efficiency;
+labels differ and identical score semantics are not inferred. JSON reports BP for
+accuracy/train/inference globals and CPC for efficiency; summary reports BP for
+all four. Preserve both claims rather than tune or select a preferred result.
+
+Evidence: docs/legacy-pareto-figures.md; artifacts/runs/p95-pareto-20261006/{scope,inputs,view,visual-review,readback,static-validation,acceptance,terminal,final-accounting}.json, all-trials.md and three PNG/SVG pairs.
+
+Scope600 aggregate local engineering seconds/60-second hard child/64MiB owned;
+fixed160-second manual/discovery/visual/closing reserve plus every captured
+attempt/failure; final command reserves its full60-second cap. No whole-session
+walltime/processRSS claim. Science350.7925872/360 and runtime168.7993043/180 remain
+spent, no reset/rekey. Full pytest/native/Torch/CI/mypy/clean-clone and original
+scientific readers skipped for ignored helpers/additive docs; original gates open.
+Pillow12.3.0 already installed; no dependencies/install/download/model/dataset/
+archive/array/device/CI/sweep/baseline/seed/metric/algorithm/config change or guard
+repair/publication/commit/push/merge/delegation/other-chat message.
+P9.5/P9.5b/G0/R0.3/fullR3.1 remain open; j6c owning-with repair human-deferred,
+R0 publication separate. All unrelated changes preserved.
+
+Plan rationale: known summary mismatch is now checked across all claims, not only a headline. Keep the two source identities/epochs/configs distinct; preserve missing provenance and unknown report-seed association. Boolean source flag is a supported exact type, not numeric zero; malformed text is refused rather than coerced. Only b17 saved scope complete after gates, all parent criteria retained. Legacy-policy-sweep is another independently bound family; no carryover of its source or claims. Full48epoch family still lacks a named original and stays unresolved.
+
+Exact next P9.5b18: freeze complete legacy-policy-sweep publication/coverage metadata and whole benchmark_circadian_policy_sweep_results.json before parsing under a fresh small engineering scope. Inspect all saved configurations/results/seed/resource/failure/environment/unknown limits and registered existing figures; independently validate complete bodies and present only uncovered saved values. Preserve historical test-informed protocol and all parent acceptance. No old semantic reader/model/dataset/CI/scientific dispatch or inferred missing provenance.
+
+
+## P9.5b18 — historical circadian policy saved reports (2026-10-06)
+
+This completes only P9.5b18 saved policy-report validation/presentation after gates.
+The whole 53,335-byte source benchmark_circadian_policy_sweep_results.json was
+bound before parsing, SHA256 cb1b0a8ed0d766d2907e44ff2e45763dc5344eda0c4aa02668eeb922f10b2d2f.
+Five whole metadata bodies, full original publication record, full parsed source
+and all 1,091 typed leaves are retained. All 18 original trials and 24 repeated
+ranking/winner records are checked; repeated copies are not additional experiments.
+All 396 report/configuration table rows and 108 plotted saved values are retained.
+Registered same-family paths contain only this JSON and no preexisting figure.
+The Pareto JSON, its mismatched summary, older charts and canonical P6.10 aggregate
+are separate sources and were not used to fill missing values.
+
+Original declaration: hard difficulty, noise 0.08, 2,500 training / 700 test
+samples, 10 classes, image size 96, CUDA, 14 epochs, ImageNet backbone weights.
+These declarations do not establish dataset name, actual archive/weight bytes,
+dependency inventory, code/build identity or complete execution environment.
+No seed IDs/count or per-seed reports/std/uncertainty are recorded. There is one
+report per configuration; this does not prove one seed or fresh independence.
+No BP/PC comparator exists here, so no matched-baseline victory is inferred.
+Historical test-label-informed stopping/sleep rollback limitations remain.
+Actual defaults, complete attempt/failure history, RSS/allocator/resource sampling
+and energy units are unknown. No failure field is not a full attempt ledger.
+Original publication's Pareto-summary mismatch warning is preserved; it does not
+prove that the separate summary belongs to this policy file.
+
+Trial 1 params={} remains empty; no current-default backfill. Trial 7/8 dual-
+chemical true and trial 9 dual-chemical false/adaptive-threshold true preserve
+boolean type. All saved configurations, integer counts, exact float values and
+missing fields remain unchanged. Trial 3 reports hidden 384->376 with 8 splits
+and 16 prunes; this contraction is preserved. All recorded rollbacks are 0,
+without inferring the absence of every historical failure or rollback opportunity.
+The source contains no explicit null numeric values; absent provenance fields
+remain absent rather than manufactured nulls, zeros or values from other runs.
+
+Stored accuracy winner is trial 5 (0.93), training-speed winner trial 16
+(2899.73672296097 samples/s), inference-speed winner trial 15
+(4850.372532536333 samples/s), balanced winner trial 3 (0.8571817530350816).
+Every stored top-10 record equals its original primary record; existing rank
+metric order/cutoff and winner maxima are checked against all 18 saved records.
+Only these existing claims were validated: no new selection, tie rule, balanced
+formula, score, mean, uncertainty, confidence claim or experiment. Tie execution
+rules and balanced-score execution provenance remain unproved. All trials are
+presented in original trial order, including lower-accuracy/faster configurations.
+Both complete PNG pages were visually checked; 12 panels have explicit zero
+ranges and original labels/units, with energy units explicitly unrecorded.
+
+Evidence: docs/legacy-policy-sweep-figures.md; artifacts/runs/p95-policy-sweep-20261006/{scope,inputs,view,visual-review,readback,static-validation,acceptance,terminal,final-accounting}.json, all-reports.md and two PNG/SVG pairs.
+
+Prospective engineering scope: 600 aggregate seconds, 60-second hard child cap,
+64 MiB owned stage; fixed 160-second manual/discovery/visual/closing reserve plus
+every captured attempt/failure. Final accounting reserves its own full 60-second
+cap. Not whole-session walltime or process RSS. Science 350.7925872/360 and
+runtime 168.7993043/180 remain spent without reset/rekey.
+Full pytest/native/Torch/CI/mypy/clean-clone and original scientific readers skipped
+in this ignored helper/additive-document scope; original full gates remain open.
+Pillow 12.3.0 already installed; no dependency/install/download/model/dataset/
+archive/array/device/CI/sweep/algorithm/config/baseline/seed/metric change or guard
+repair/publication/commit/push/merge/delegation/other-chat message.
+P9.5/P9.5b/G0/R0.3/full R3.1 remain open; owning-with j6c repair remains
+human-deferred; R0 publication remains separate. Unrelated user changes preserved.
+
+Plan rationale: this independent policy family has no comparator or seed-report data; preserve partial configuration/default/boolean provenance and every stored policy, then validate existing claims across the full file. Presentation completion does not close baseline/isolation/scientific requirements. Next legacy-tuning-hardest is independently registered and requires its own whole source/metadata validation. No parent criteria weakened; unresolved full48epoch/missing-source work preserved.
+
+Exact next P9.5b19: freeze the full legacy-tuning-hardest publication/coverage metadata and whole benchmark_tuning_hardest_results.json before parsing under a fresh small engineering scope. Inspect every saved configuration/result/seed/resource/failure/environment/unknown limit and registered existing figure; independently validate complete bodies and present only uncovered saved values. Preserve original historical test-informed protocol and all parent acceptance. No model, original semantic reader, dataset, CI or scientific dispatch; no source borrowing or inferred independence/provenance.
+
+
+## P9.5b19 — hardest-tuning original claims and saved figures (2026-10-06)
+
+Only P9.5b19 saved source/claim validation and presentation is complete after gates.
+Whole original benchmark_tuning_hardest_results.json: 38,191 bytes, SHA256
+0525882a061092d29b84e3c488c5d632930861f2ce06c64f18db4601bee5d905.
+Five complete metadata bodies bound before parsing. Full original publication,
+whole JSON body and all 794 typed leaves retained; 24 original configurations
+(BP6/PC8/CPC10), three family-best copies and four global report copies checked.
+All 480 report/configuration table rows preserve original values/types/nulls.
+Registered same-family paths contain only this JSON and no preexisting figures.
+Pareto/summary/policy and canonical P6.10 aggregate sources remain separate.
+
+Dataset declaration: hard/noise0.08/train2500/test700/classes10/image96/CUDA.
+Every saved report records14epochs; requested epoch configuration is absent.
+Dataset name, requested weights/defaults, actual archive/code/build/dependency
+identity, seed IDs/count, per-seed reports/std/uncertainty and complete attempts/
+failure/rollback/resource sampling/environment are unrecorded. Historical
+protocol remains test-label informed with unmatched baselines/backbone states.
+BP trainable parameters20490; PC527114/790666/1054218; CPC551822–1078926.
+BP final metric is loss; PC/CPC final metric is energy. Units/reduction and
+comparability are not proved; those scalar values are not renamed cross-entropy.
+Loss and energy panels retain distinct source labels/ranges. No corrected-protocol
+fairness, independent replication or scientific/source/execution admission.
+
+Family-best copies are accuracy-selected BP trial2 (0.19), PC trial1
+(0.11714285714285715), CPC trial10 (0.13428571428571429).
+Source global accuracy and accuracy-per-training-second labels hold among all24
+stored reports. Source global training speed and inference speed labels do not:
+training record BP2=1417.3156399752304 samples/s is exceeded by BP5 and BP6;
+inference record PC1=2030.5368152032515 samples/s is exceeded by BP4, PC2, CPC4
+and CPC7. Every counterexample/value is retained below. All four stored global
+records are maxima within the three accuracy-selected family records. This
+observed narrower scope does not prove the original algorithm or tie rule; no
+source winner is replaced and no new policy is selected. Negative claim evidence
+is accepted for this saved validation scope; parent scientific criteria unchanged.
+
+Existing accuracy/time and accuracy/million-trainable-parameter values match
+arithmetic checks for all24 reports (48 boolean checks, relative tolerance1e-12).
+Original ratio values unchanged; no new reported score/mean/std/uncertainty.
+Primary BP/PC hidden start/end values are null;40 null leaves across whole source
+including copies remain null.14 plotted hidden-end nulls have no numeric axis or
+bars. CPC trials7/10 retain contractions384->382/512->510 with26splits/28prunes.
+Rollback fields are absent, not zero-filled.Three full PNGs visually checked:
+18panels,130 saved numeric labels and14 unknown null labels, explicit zero ranges
+only for numeric panels. All24 trials shown in original order.
+
+Evidence: docs/legacy-hardest-tuning-figures.md; artifacts/runs/p95-hardest-tuning-20261006/{scope,inputs,view,visual-review,readback,static-validation,acceptance,terminal,final-accounting,diagnostic-claim-control}.json, all-reports.md and three PNG/SVG pairs.
+
+Prospective engineering scope:600 aggregate seconds,60-second hard child cap,
+64MiB owned stage; fixed160-second manual/discovery/visual/closing reserve plus
+all captured attempts/failures. Final command reserves its whole60-second cap;
+not whole-session walltime or processRSS. Science350.7925872/360 and
+runtime168.7993043/180 remain spent, no reset/rekey. One failed audit retained.
+Full pytest/native/Torch/CI/mypy/clean-clone and original scientific readers skipped
+in this ignored helper/additive-doc scope; original full gates remain open.
+Pillow12.3.0 already installed; no dependency/install/download/model/dataset/archive/
+array/device/CI/sweep/algorithm/config/baseline/seed/metric change or guard repair/
+publication/commit/push/merge/delegation/other-chat message.
+P9.5/P9.5b/G0/R0.3/full R3.1 remain open; owning-with j6c human-deferred,
+R0 publication separate. Source/test/architecture/unrelated changes preserved.
+
+Plan rationale: exhaustive source inspection found broad speed labels that fail over all24 records but hold over accuracy-selected family records. Preserve negative evidence and scope instead of correcting/tuning source. Acceptance is original saved validation/presentation, not a silently weakened scientific gate. Next historical continual-strength text is independently registered and distinct from corrected profile repeats. All parent criteria and unresolved missing full48epoch source retained.
+
+Exact next P9.5b20: freeze full legacy-continual-strength publication/coverage metadata and whole docs/benchmarks/benchmark_continual_shift_strength_case_2026-02-28.txt before parsing under a fresh small engineering scope. Inspect the complete text, exact original configurations/results/protocol/seed/resource/failure/history/environment/unknown limits and registered figures; independently validate all saved values and present only uncovered views. Preserve the historical tuned profile versus corrected profile-repeat distinction. No current-default backfill, other-family borrowing, inferred independence/source/execution admission or original semantic reader/model/dataset/CI/scientific dispatch.
+
+
+## P9.5b20 — original continual-strength text and saved presentation (2026-10-06)
+
+Only this saved text validation/presentation scope is complete after its gates.
+The exact original UTF-8 CRLF text is 735 bytes, SHA-256
+`d2411f42266801d22f87ef4442b064c4f0f814460bd98c28091640acd886cdd4`.
+Five complete metadata bodies and the original text were bound before parsing.
+Nine nonempty lines, seven declared seed IDs, four setup literals, 15 original
+center/+/- pairs and four Circadian sleep literals are preserved (45 numeric
+literals total). The complete source body and publication record remain in the
+view; 27 table rows include all values and explicitly unrecorded BP/PC sleep fields.
+One PNG/SVG pair presents six panels; every label, bar, whisker coordinate and
+PNG decode/pixel check passed, with the full PNG visually inspected.
+
+The source declares seeds [3,7,11,19,23,31,37], rotation 40.0 degrees,
+translation (0.90,-0.70), and Phase B train fraction 0.14. Translation units are
+unrecorded. Seed IDs do not prove seven actual independent executions. Original
+`+/-` is not defined as SD, SEM, CI or another statistic; figures reproduce the
+notation without statistical reinterpretation. Retention and balanced formulas,
+aggregation, full tuned configuration/baseline capacities, dataset/build/code/
+dependencies/weights, per-seed results, execution environment, timing/memory/work
+and attempt/failure history are unknown. No means, spreads, seeds or metrics were
+recomputed, selected or substituted. BP/PC sleep fields remain unrecorded;
+Circadian preserves sleep_events=5.00, splits=5.00, prunes=0.00, hidden_end=17.00.
+The exact zero prune field has no drawn PNG bar; translation sign is retained.
+Retention +/- may extend above 1; original center+/- values are retained on a
+0–1.05 display range rather than clipped. Statistical meaning remains unknown.
+
+Mixed outcomes are preserved: recorded B_post BP0.933/CPC0.930/PC0.927;
+retention PC0.997/CPC0.993/BP0.985; balanced CPC0.949/PC0.947/BP0.946.
+These rounded differences support no significance or fair performance ranking.
+Registry kind is `historical_tuned`; corrected profile repeats are distinct.
+This text does not independently establish exact stopping/test-label use.
+Historical protocol limitations remain; no corrected evaluation isolation,
+matched capacity, complete provenance, replication or scientific admission claim.
+Original registry missing-path lists are empty, not evidence of complete execution
+provenance. Only this family is covered; parent P9.5/P9.5b remain unchecked.
+
+Evidence: [saved presentation guide](docs/legacy-continual-strength-figures.md),
+`artifacts/runs/p95-continual-strength-20261006/` complete source/metadata copies,
+view, all-values table, saved-summary PNG/SVG, visual-review, readback/readback-v2,
+static-validation, acceptance, coverage-delta, terminal and final-accounting.
+Seven malformed-text refusal controls and a signed-translation positive control
+passed. No existing scientific result or publication was rewritten.
+
+Budget: prospectively 600 aggregate engineering seconds, hard 60 seconds per
+child, 64 MiB owned artifacts; fixed 160 seconds for manual/discovery/visual/
+closing work plus every captured attempt. Final accounting reserves its entire
+60-second command cap; this is not whole-session elapsed time or process RSS.
+Science350.7925872/360 and runtime168.7993043/180 remain spent without reset.
+Full pytest/native/Torch/CI/mypy/clean-clone and original scientific readers were
+skipped in this ignored-helper/additive-document scope; their gates remain open.
+Existing Pillow used, no new dependency/download/model/dataset/device/sweep.
+Whole checkout, HEAD and installed packages preserved except the new guide and
+seven reversible additive documentation edits. Owning-with repair j6c remains
+human-deferred; G0/R0.3/fullR3.1 and all other unfinished tasks remain open.
+
+Plan rationale: original text has undefined spread notation and incomplete
+execution evidence. Present its exact values and unknowns without inventing
+uncertainty semantics, favorable winners or corrected-profile equivalence.
+This is a separate saved-presentation increment; no scientific acceptance
+criterion is weakened. Remaining missing original sources/work is preserved.
+
+Exact next P9.5b21: freeze complete legacy-continual-hardest publication/coverage metadata and whole docs/benchmarks/benchmark_continual_shift_hardest_case_2026-02-28.txt before parsing in a fresh small engineering scope. Inspect complete original text/config/results/protocol/seed/resource/failure/environment/unknowns and registered figures; independently validate saved values and present uncovered views. Preserve historical tuned versus corrected-profile-repeat distinctions; no default backfill, seed selection, source borrowing, inferred independence/admission or original semantic-reader/model/dataset/CI dispatch.
+
+
+## P9.5b21 — original continual-hardest text and saved presentation (2026-10-06)
+
+Completed scope: saved original text validation and uncovered presentation only.
+Full original `docs/benchmarks/benchmark_continual_shift_hardest_case_2026-02-28.txt`
+is UTF-8 CRLF, 861 bytes, SHA-256
+`6f167aedc3ebbb3762612a127a8ec0341a715c37fbce2a2602fd8f02cda29f1a`.
+Five complete metadata bodies and exact source bytes bound before parsing;
+checkout reconciled exactly with the P9.5b20 terminal (1023 files/25 packages,
+HEAD182077). Whole original publication and text retained. Ten nonempty lines,
+seven seed-ID literals, eight partial setup literals, four transform/fraction
+literals, 15 center/+/- pairs and four sleep literals yield 53 numeric literals.
+All 35 table rows retain recorded notation, list positions and unknown fields.
+One six-panel PNG/SVG pair validated by independent original values/full header,
+labels, axis extents, all 15 bars/45 whisker lines/four sleep bars and PNG decode/
+pixels; full PNG visually inspected for legibility and clipping.
+
+Partial setup records hidden_dim=24, hidden_dims=[24,24,24], Phase A/B epochs
+120/180, and noise0.80/1.45. Exact per-method assignment and complete configurations
+are unrecorded; these declarations do not prove matched baseline capacities.
+Transform rotation68.0deg, translation(1.60,-1.30), train fraction0.05 retained;
+translation units unknown. Seed IDs[3,7,11,19,23,31,37] are declarations, not evidence
+of seven actually executed independent runs. `+/-` definition is unknown: no SD,
+SEM, CI or aggregation formula inferred. Retention/balanced formulas and per-seed
+outputs, actual dataset/source/code/build/dependencies/weights/device/environment,
+time/memory/work/attempt/failure/rollback history are unknown. Original fractional
+Circadian scalars sleep_events24.43/splits48.57/prunes0.00/hidden_end72.57 remain
+fractional; neither rounded to event counts nor assigned a new aggregation meaning.
+BP/PC sleep fields unrecorded, not zero. The zero prune bar has width0 in SVG and
+no colored PNG bar. No source statistic, seed, metric or baseline was changed.
+
+Recorded mixed outcomes preserved: PC A_post0.793 > CPC0.784 > BP0.699;
+PC retention0.815 > CPC0.804 > BP0.718; CPC B_post0.841 > PC0.823 > BP0.808;
+CPC balanced0.812 > PC0.808 > BP0.753. These rounded summaries/undefined spreads
+support no significance, independent replication or fair general ranking.
+Registered kind `historical_tuned`, distinct from corrected profile repeats and
+the earlier hardest animation. Exact stopping/test-label access is not established
+by this text; historical protocol limitations remain. No corrected isolation,
+matched capacity, complete execution/source provenance or scientific admission.
+Registry empty missing-path lists do not establish execution completeness.
+
+Evidence: `docs/legacy-continual-hardest-figures.md`;
+`artifacts/runs/p95-continual-hardest-20261006/` whole source/metadata copies, view,
+all-values table, saved-summary PNG/SVG, visual-review/readback/static-validation/
+acceptance/coverage-delta/terminal/final-accounting receipts. Nine malformed-text
+refusal controls and a signed-translation positive control passed. One failed
+audit retained/charged; its helper expected10 lines per panel instead of9 (three
+whisker lines times three methods). Small assertion repair changed no source,
+view or figures. Failed helper candidate retained; final six-helper AST comparison
+uses the complete snapshot after logic repair, not the earlier failed candidate.
+
+Engineering budget: prospective600 aggregate seconds/hard60 per child/64MiB
+owned stage, fixed160 manual/discovery/visual/closing reserve plus all captures
+including failure; final accounting reserves its full60-second cap. Not entire
+session elapsed time or processRSS. Science350.7925872/360 and
+runtime168.7993043/180 remain spent, no reset. Full pytest/native/Torch/CI/mypy/
+clean-clone and original scientific-reader gates skipped for this ignored-helper/
+additive-document scope; original gates stay open. Existing Pillow, no dependency
+installation/download/sweep/model/dataset/device dispatch or publication.
+Whole checkout/source/test/architecture/unrelated user changes preserved except
+new guide and seven reversible additive docs. Parent P9.5/P9.5b/G0/R0.3/fullR3.1
+remain open; owning-with j6c human-deferred. Unfinished original-source work stays.
+
+Why this plan increment: the hardest text includes additional partial setup and
+fractional sleep fields; exact literals and unknown statistical/configuration
+meaning need explicit preservation. No scientific criterion is weakened.
+Next historical animation has original registered visuals requiring validation;
+illustrative-circadian remains a separate uncompleted family, not experiment data.
+
+Exact next P9.5b22: bind complete legacy-hardest-animation publication/coverage metadata and whole docs/figures/hardest_mode_dynamics.gif plus docs/figures/interactive_hardest_mode_dynamics.html before decoding under a fresh small engineering scope. Inspect every original GIF frame and complete static HTML data/configuration/label payload, exact original source/configuration/seed/protocol/environment/failure/missing/unknown provenance and registered figures. Validate and document original presentation without browser execution or inferred telemetry/current-default reconstruction. Keep earlier test-informed visualization, tuned hardest text, illustrative-circadian and corrected repeats separate; no model/scientific-reader/dataset/CI dispatch or admission.
+
+
+## P9.5b22 — original earlier hardest visualization validation (2026-10-06)
+
+Completed original visualization validation scope, not scientific execution or
+browser functionality certification. Complete sources bound before decoding:
+GIF3,530,592 bytes/SHA256 aa338c5051f3cb90447df0b2e972ea6b93a9e08a2e2707d89822e3bb11504ee8;
+HTML21,352,286 bytes/SHA256 222abd3f0281ece0b6404fb4ed72afde470c2a055df02b0f6e55edf268d42b7e.
+Five whole metadata bodies and exact source copies retained. Reconciled against
+P9.5b21 terminal:1024 nonignored files/25 packages/HEAD182077, full AGENTS/plan/log.
+Registry `legacy-hardest-animation`, kind `historical_visualization`, earlier
+profile/test-informed frames, original invocation/dependencies unknown. Separate
+from the tuned hardest text, illustrative-circadian and corrected profile repeats.
+
+All76 GIF frames decoded at1180x680 RGB, all canonical pixel hashes/durations/
+disposal values independently checked. Every duration120ms and loop0, recorded
+encoding properties rather than training wall time. Four contact sheets cover all
+76frames with every thumbnail pixel checked; full original RGB copies at indices
+0/30/31/75 (epochs1/120/124/300) match exact decoded pixels. All contact sheets
+visually inspected; those four full originals inspected for labels/structure.
+Original metric footer extends past right edge and clips Circadian latency in all
+four full samples. Original unchanged. Thumbnail overview does not certify every
+small numeric GIF label. HTML contains all recorded per-frame scalars separately.
+
+Complete embedded JSON span:21,338,385 bytes; full source retains every array
+without copying a second21MB payload. View records exact byte offsets, raw/canonical
+payload identity, all root values, all76 scalar records, and identities/shapes/
+typed counts for every full frame/array. Independent whole-source parser checked
+1,035,935 leaves (13,856ints/1,022,000floats/79strings), no boolean/null coercion.
+Every decision map110x110;175 Phase-B test points/labels/predictions per frame,
+24 adaptive input values and24-by-hidden weight matrices, hidden-length state/
+activation/weight vectors. All912 original scalar cells in76 table rows preserved.
+Every accuracy/latency frame field matches its original series position;76 existing
+Circadian prediction/label accuracy rounding checks (absolute tolerance0.00005)
+and76 hidden=24+splits-prunes checks passed. No new reported score/statistic/winner.
+
+Epoch series[1,4,8,...,300], Phase B begins index31/epoch124. Final saved accuracies
+BP0.8286/PC0.7486/CPC0.7771, latency(ms)0.1343/0.1434/0.2127; Circadian hidden74,
+splits50,prunes0. These earlier-profile values are not substituted for the tuned
+hardest text summaries. Saved normalized objectives are not raw loss/energy;
+normalization procedure, comparability and execution provenance unknown.
+Source explicitly displays Phase-B test accuracy/labels during Phase-A snapshots;
+this is historical test-informed visualization, not corrected arrival/isolation.
+No seed identity/count/per-seed independence, full original configuration/baseline
+capacity, code/build/dependency/device/weights, original measurement method/hardware/
+resources or full stopping/selection/rollback/attempt/failure history established.
+No matched fairness, significance, replication or scientific admission asserted.
+
+HTML inspected statically only: declares Plotly2.35.2 CDN URL (not fetched),
+260ms playback interval, source numeric axis labels/bounds and all original code.
+Its heatmap supplies z but no declared x/y coordinates, while scatter/layout use
+physical bounds. Alignment is not certified; original source unmodified. Browser
+rendering/controls/network/CDN availability not exercised. Same76frame count and
+four sampled matching headers do not prove identical original GIF/HTML backing
+execution. Complete HTML shell saved separately; no reconstructed plots/telemetry.
+Nine refusal controls passed: nonfinite JSON,duplicate keys,unknown root,epoch
+mismatch,boolean hidden size,accuracy-series mismatch,wrong decision map shape,
+missing hidden activation values,wrong prediction count. Diagnostic mutations were
+restored and whole canonical payload rechecked; original bytes remain unchanged.
+
+Evidence: `docs/legacy-hardest-animation-validation.md`;
+`artifacts/runs/p95-hardest-animation-20261006/` whole source/metadata copies,
+view/reference/76-row table/complete HTML shell/eight inspection PNGs,
+visual-review/readback/static-validation/acceptance/coverage-delta/terminal/
+final-accounting. Only saved original coverage complete; P9.5/P9.5b/G0/R0.3/fullR3.1
+remain open. Owning-with j6c repair remains human-deferred; missing sources retained.
+
+Budget: prospective600aggregate engineering seconds/hard60 per child/64MiB owned,
+fixed160manual/discovery/visual/closing reserve plus every captured attempt; final
+accounting reserves entire own60second cap. Not whole-session time or processRSS.
+Science350.7925872/360 and runtime168.7993043/180 remain spent without reset.
+Full pytest/native/Torch/CI/mypy/clean-clone/scientific-reader gates skipped in this
+ignored-helper/additive-doc scope and remain required. Existing Pillow used;
+no new dependency/download/model/dataset/device/browser/CI/sweep/publication.
+New guide/seven reversible additive docs only; unrelated checkout/source/tests/
+architecture and all other task rows preserved.
+
+Why this increment: existing GIF/HTML already present the saved visualization.
+Validate originals and document clipping/coordinate/provenance limitations instead
+of generating replacement telemetry or favorably selecting snapshots. Keep the
+full large arrays in the exact original HTML to stay within64MiB owned storage;
+all payload values still independently checked. This changes no scientific gate.
+
+Exact next P9.5b23: freeze complete illustrative-circadian publication/coverage metadata and whole docs/figures/circadian_sleep_dynamics.gif before decoding under a fresh small engineering scope. Inspect all original frames/labels and full illustration provenance/missing/unknown limits; independently validate frame dimensions/durations/pixels and document existing views. Preserve illustration-not-experiment distinction; no invented telemetry, new experiment, scientific source/execution/replication admission or browser/model/original scientific-reader/dataset/CI dispatch.
+
+
+## P9.5b23 — illustration validation (2026-10-06)
+
+[Guide](docs/circadian-illustration-validation.md): all25 original GIF frames/labels/pixels validated, including two downward width steps. The original remains illustration-not-experiment; constant split/prune labels are not live counters, and chemical telemetry is absent. Plan/log hold complete evidence. P9.5/P9.5b remain open; next P9.5b24 arrived-v1 request/result inspection.
+
+
+### Saved arrived-v1 confirmation fixture
+
+See [the whole-source validation guide](docs/arrived-confirmation-figures.md) for all seeds/candidates/orders, negative outcomes, figures and explicit checkpoint/environment gaps. P9.5b24 completes saved presentation only; no new scientific or runtime admission. Next: replay-v8 source validation.
+
+
+### Saved replay-v8 smoke fixture
+
+See [the complete validation and figures](docs/replay-v8-smoke-figures.md) for both replay policies, all seeds/events, retention above 1 and explicit physical memory/runtime gaps. P9.5b25 completes saved presentation only. Next: replay-v9 continuation source validation.
+
+
+### Saved replay-v9 continuation bodies
+
+See [the complete three-source validation](docs/replay-v9-continuation-figures.md) for exact whole-file equality, all duration differences, figures and the original v8 protocol retained inside v9 filenames. P9.5b26 completes saved presentation only; physical continuation remains unverified. Next: matched-replay schedule/training/outcome source inventory.
+
+
+### Matched replay planned schedules
+
+See [the complete source validation guide](docs/matched-replay-schedule-figures.md) for all nine originals and five validated planned schedules. P9.5b27a completes inventory/schedules only; inference counts differ and the parent remains open. Next: P9.5b27b applied training and cross-schedule validation.
+
+
+### Matched replay saved training records
+
+See [the complete training validation guide](docs/matched-replay-training-figures.md) for both whole training bodies, all five schedule comparisons, applied work and clock limits. P9.5b27b completes saved training relations only; unequal inference work is retained. Parent remains open; next P9.5b27c outcome/telemetry validation.
+
+
+### Matched replay complete saved outcomes
+
+See [the complete outcome and family reconciliation guide](docs/matched-replay-outcome-figures.md) for all scores, telemetry and remaining physical/provenance gaps. P9.5b27c and saved-family P9.5b27 are complete; CPC's negative aggregate result is preserved. Broad scientific parents remain open. Next: P9.5b28 side-effects-v10 originals.
+
+
+## Saved replay side-effect comparison (P9.5b28)
+
+[Complete guide](docs/replay-side-effect-figures.md): both whole originals and
+both conditions validated; scores/work identical, chemistry differs. CPC's
+lower aggregate scores and the FIFO seed exception remain. Fourteen figures
+and complete evidence are local saved presentation, with physical execution
+and independent repetition unproved. Next: P9.5b29 difficulty-v11 full bodies.
+
+
+## Saved difficulty modulation comparison (P9.5b29)
+
+[Complete guide](docs/difficulty-modulation-figures.md): both whole difficulty-v11
+originals, all conditions/backends/seeds/arms and diagnostics validated. Final
+modulation/control differences are zero; negative forgetting and failures remain.
+Twenty figures preserve every recorded value. Physical execution and independent
+repetition are unproved; no superiority claim or new heuristic. Next: P9.5b30
+whole structural-ranking-v12 training/outcome originals.
+
+
+Saved structural-ranking figures: [complete v12 scope and limits](docs/structural-ranking-figures.md). All factor cells and negative differences retained; no fresh scientific admission.
+
+
+Saved trigger-timing v13 figures: [complete historical scope and limits](docs/sleep-trigger-figures.md), preserving every condition/seed/arm and mixed result.
+
+
+### Local delayed-label runtime contracts
+
+R3.2 adds a bounded trusted-local experience inbox over the existing native learner
+ports. It waits for source/label logical arrivals, rejects duplicate/conflicting
+identities and held-out learning, and records completed work before a late budget
+stop. Existing models and scientific final-role/source gates remain unchanged.
+See [experience contracts](docs/experience-contracts.md) for metadata, permissions,
+clock/failure policy and usage. Verify with `python -m pytest -q
+tests/test_experience_contracts.py tests/test_experience_inbox.py`; run configured
+`python -m mypy --platform win32` and `--platform linux`, plus Ruff lint and scoped
+formatting. No environment variable or new dependency is required.
+
+
+### Stable actor and shadow learner
+
+R3.3 adds versioned actor predictions while an independently owned candidate
+trains through the arrived-event inbox or consolidates a detached snapshot.
+Actor reads remain available during candidate mutation; candidate contention
+is an explicit refusal. See [actor/shadow guide](docs/actor-shadow-runtime.md)
+for a local runnable example, ownership/budget/failure policy and test/lint/
+format/type commands. No promotion, new dependency/configuration, algorithm or
+scientific advantage is introduced.
+
+
+### Matched local promotion guards
+
+R3.4a measures frozen actor/candidate copies on identical arrived inner guards
+under one declared utility/action policy. Utility, old-task retention, numerical,
+latency and explicit resource-byte failures reject candidates. See
+[promotion guards](docs/promotion-guards.md) for a local example, probe definitions
+and test/lint/format/type commands. Guard reports do not authorize serving;
+R3.4b atomic model/cache/state promotion and complete rollback remain unfinished.
+No dependency or environment variable is added.
+
+
+### Guarded serving promotion
+
+`PromotableActor` composes the actor/shadow runtime with matched inner guard approvals, exact revision/state/generation checks, a bounded TTL prediction cache and complete atomic rollback. See [serving promotion](docs/serving-promotion.md) for the runnable example, configuration, commands and supported ownership/resource limits. Standalone reports do not authorize serving.
+
+
+### Cooperative serving priority
+
+Use `ResourceSharedRuntime`/`ServingPriorityGate` for bounded serving admission and per-update pause/resource/quota defer over the existing actor/candidate runtime. [Resource sharing](docs/resource-sharing.md) documents the runnable example, limits, monitoring callback, commands and complete-checkpoint/live-latency next gates. R3.5 remains open pending those criteria.
+
+
+### Complete inbox cursor capture
+
+`ExperienceInbox.capture_cursor()` validates and detaches full pending/duplicate/applied/arrival/stopped histories for the next supported checkpoint handoff. See [inbox cursors](docs/inbox-cursors.md) for format, ownership, commands and runnable example. R3.5b native/budget/sharing restore and R3.5c live timing remain unfinished.
+
+
+### Complete candidate checkpoint ownership
+
+Supported same-process full candidate handoff is implemented through app/candidate_checkpoint.py; see docs/candidate-checkpoints.md and ADR-0205. Retain original cumulative budget/clocks/RSS sampler/resource gate and stable actor, restore independent native state plus full inbox/consolidation histories, retire old owner and invalidate its promotion authority. Identity tokens and preparation work are bounded. R3.5b acceptance remains pending current full validation; durable process recovery and actual live latency remain unfinished.
+
+R3.5b current supported owned checkpoint acceptance:371 tests,647-file Windows/Linux types,full scoped/static/source/resource/guide gates pass. Evidence:artifacts/runs/r35b-owned-handoff-20261007/. Actual live R3.5c latency and durable R3.5b2 recovery remain unfinished.
+
+
+### Actual live serving measurement
+
+The generic app native observer/shared-request harness and pure core timing/
+nearest-rank/overlap records are documented in docs/live-serving-measurement.md
+and ADR-0206. The reserved script boundary executes the finite declared matched
+two-native protocol after full correctness/source binding. Retain all raw requests,
+native windows and incomplete worker status; no automatic repeat/outcome filtering.
+Current measurement acceptance is pending; no scientific advantage is claimed.
+
+R3.5c/original R3.5 current acceptance:396 cases,full651-file platform types/static/source/resource gates and one reserved actual native serving run pass;96/96 shared requests per method fully native-contained. Negative circadian p95 slowdown retained. Evidence:artifacts/runs/r35c-live-serving-20261007/measurement-summary.md. Next R3.6 privacy/replay lifecycle;durable R3.5b2 and broader guards remain open.
+
+
+## 2026-10-07 — R3.6a permanent data admission (validation pending)
+
+Optional managed local admission: [guide](docs/managed-experience.md). Pure src/core/data_lifecycle.py metadata and src/app/managed_experience.py original authority install permanent hooks on a fresh ExperienceInbox; legacy uninstalled behavior stays intact. Requires declared training/replay consent and permissions, bounded lifetime grant counts and explicit synthetic/unverified policy. Supported checkpoint handoff retains authority. Opt-out stops future training; native/inbox/checkpoint erasure and unlearning are not claimed. No new environment variables/dependencies. Full R3.6b deletion controls remain the next extension.
+
+
+R3.6a acceptance:433 passing cases,current654-file Windows/Linux types/static/AST/executed guide/source/resource gates. See artifacts/runs/r36a-data-admission-20261007/admission-summary.md and validation.json. Full R3.6/R3.6b erasure remains unchecked. Exact next action: Prospectively scope R3.6b actual native replay/inbox erasure: inspect replay snapshot identity and full InboxCursor/applied receipt references; design payload-free tombstones preserving consumed IDs, enforce retention lifetimes/quotas, invalidate pending checkpoint payload copies, and test refused resurrection across owned handoff with original clocks/budgets/gates. Start with fake deletion controls, then fixed native controls; do not call erasure parameter unlearning or erase caller-held copies by implication. Preserve original full R3.6 acceptance and durable R3.5b2/R3.7/G3/human-deferred/scientific work.
+
+
+## 2026-10-07 — R3.6b1 erasure prerequisites (validation pending)
+
+[Payload erasure primitives](docs/data-erasure.md): core data_erasure.py provides tombstones/counts/optional ReplayPayloadOwner port;InboxCursor format2 and private ExperienceInbox erasure preserve consumed IDs/applied work;NumPy adapters expose native whole-buffer erasure. Only raw replay references are removed;native weights/RNG/policy/counters and exposure hashes remain. Format1 unerased histories remain supported. No new dependencies/environment variables. Full original-authority deletion,quotas/lifetimes/checkpoint/promotion cleanup/non-resurrection is unfinished R3.6b2.
+
+
+R3.6b1 acceptance:488 passing cases,current656-file win/linux types/static/AST/guide/source/resource gates. Evidence:artifacts/runs/r36b1-erasure-primitives-20261007/validation.json and erasure-summary.md. Full original R3.6/R3.6b/R3.6b2 remains unchecked. Exact next action: R3.6b2: prospectively scope original-authority coordinated deletion. Inspect all owners of payload copies: live/retired candidate and inbox, pending/inspected checkpoints and prepared/failed models, serving promotion/rollback bundles and pending tickets. Define owned-versus-caller copies and bounded supported native/payload measurement ports; implement deletion/expiry/opt-out coordination plus declared record/byte/time policies under original manager/candidate/serving/checkpoint leases. Tests first for partial cleanup failure and refused resurrection; retain budgets/clocks/gates/consumed IDs and weights. Keep transient/audit-only admission disabled until purge semantics pass, and original R3.6/R3.6b unchecked until the complete criteria are proven.
+
+
+## 2026-10-07 — R3.6b2a retained-copy ownership (validation pending)
+
+[Retained payload ownership](docs/payload-ownership.md):core metadata/reference ports and app weak registry enumerate supported actor/candidate/checkpoint/promotion owners under nonblocking all-holder quiescence. One opt-in live/lifetime registration allowance survives handoff and GC without renewal. Existing native/budget/serving semantics remain;no new dependencies/environment variables. This is a cleanup prerequisite,not complete deletion or byte/time policy;R3.6b2b retains original-authority all-copy cleanup/non-resurrection acceptance.
+
+
+R3.6b2a acceptance:512 current tests,full659-file win/linux types/static/AST/guide/source/resource gates;zero NEW native work. Evidence:artifacts/runs/r36b2a-payload-ownership-20261007/validation.json and ownership-summary.md. Full original R3.6/R3.6b/R3.6b2 remains unchecked. Exact next action: R3.6b2b: prospectively scope original-authority coordinated cleanup and retention. Bind current ownership registry and manager plus native replay/inbox tombstone ports; use all-holder references under the existing nonblocking lease, deduplicate by identity, acquire the original sharing/consent authority, and avoid public methods that reacquire leased locks. Define supported native/payload byte measurement and cumulative holder/record/byte/time policies; tests first for pending checkpoint/prepared/failed/retired/promotion/rollback copies, partial cleanup failure, stopped/retired inbox ledger accounting and refused resurrection. Integrate deletion/expiry/opt-out without resetting budgets/clocks/gates/IDs or parameters; keep transient/audit-only admission disabled until actual purge semantics pass. Preserve full original R3.6/R3.6b/R3.6b2 criteria and caller-copy/RAM/unlearning limits.
+
+
+## Optional original-authority payload cleanup
+
+The fresh managed runtime can install [coordinated cleanup](docs/managed-data-lifecycle.md) through the NumPy adapter factory. Delete/opt-out/explicit expiry clears discovered retained replay/inbox/checkpoint/promotion/rollback copies and preserves budgets/clocks/IDs/parameters. Legacy admission-only behavior stays until installation. Aggregate retained-byte enforcement and automatic elapsed-time purging remain unfinished;full R3.6 acceptance is open. The guide includes structure,commands and extension boundaries.
+
+
+### Optional retained payload copy byte quota
+
+[Owned payload byte allowance](docs/retained-payload-budget.md) adds shared original-authority pre-copy admission and measured retained replay/inbox/checkpoint/promotion/rollback/cache arrays. Failed copies and deletion never refund capacity. Supported NumPy preparations use ManagedNumpyBuilder;opaque graphs/builders are refused. No parameter/RSS/caller-copy/unlearning claim. Automatic elapsed purge remains open;guide includes commands,structure and next extension.
+
+
+### Optional bounded elapsed retention driver
+
+[Retention expiry](docs/retention-expiry.md) adds original-clock deadlines for declarations/owned auxiliary arrays,automatic quiescent retries and explicit bounded shutdown. Manual pause,work/byte limits and IDs persist across handoff. Overdue publication/access fails closed. Supported scalar-only metadata still needs an elapsed anchor;full R3.6 remains unchecked. See the latest development-log handoff and r36b2b-expiry-20261007 acceptance audit.
+
+
+### Owned auxiliary retention correction and R3.6 acceptance
+
+[Auxiliary retention](docs/auxiliary-retention.md) now anchors supported nonempty scalar metadata and zero-size arrays independently of byte accounting,validates every initial graph and preserves first-copy age until actual purge. Full original R3.6 cleanup/consent/retention criteria now pass641 current cases/types/static/source/guide/resource audit. Earlier missing-anchor handoffs are historical. Numeric-array/RSS/caller/RAM/unlearning limitations remain explicit;next original R3.7 failure/long-run validation and durable R3.5b2/R3.8/G3 are unfinished.
+
+
+### Repeated runtime fault validation
+
+[Runtime fault sequences](docs/runtime-failure-sequences.md) document nine repeated controls plus a reserved eight-cycle Native stream for BP/CPC,observed resource bounds,original authority/actor preservation and exact commands.650 current cases/type/static/source/guide pass;production interfaces/label-first semantics stay unchanged. R3.7a is accepted within its finite scope;full R3.7 actual crash/durable recovery and sustained scope remain unfinished. Next R3.5b2 authority specification and concrete validation before disk restore.
+
+
+### Durable recovery metadata validation
+
+[Recovery admission](docs/recovery-admission.md) adds a pure bounded typed metadata gate with75new controls,229affected passing cases and documented future coordinator/clock/owner policy. It performs no payload IO or runtime restore;full R3.5b2/R3.7 actual authority/process-crash recovery remain unfinished. Existing runtime behavior is unchanged.
+
+
+### Windows recovery observations
+
+[Windows host observations](docs/windows-recovery-observation.md) add bounded inner records and documented API/process-handle adapters.279fake/affected cases/type/static/source/example gates pass. The sole real worker capture failed launcher/payload identity;the corrected direct-base harness awaits a separately budgeted successor. R3.5b2b/full R3.5b2/R3.7 remain unchecked. No legacy runtime or native experiment changes.
+
+
+### Corrected Windows worker validation — 2026-10-07
+
+The separately budgeted direct-worker successor passes strict process identity/time/exit/RSS/cleanup checks. R3.5b2b is accepted after280current cases and unchanged-source type/static/source/example evidence;original failed launcher capture/costs remain preserved. Full native durable recovery,transactional fencing and coordinator-loss work stay unfinished. See [guide](docs/windows-recovery-observation.md).
+
+
+### Coordinator metadata journal
+
+The surviving-coordinator metadata prerequisite now validates monotone reservations and conditional owner generations using a private bounded SQLite compare-and-swap journal. See [usage and validation](docs/recovery-authority-journal.md). 335 current affected tests,both682-file type targets and static/source/example gates pass. Worker dispatch,live leases,native completion/recovery and coordinator loss remain unfinished. No new dependency or environment configuration.
+
+
+### Coordinator sequencing prerequisite
+
+A local coordinator now commits costs before trusted preparation and checks retained process/journal/time/RSS authority around callbacks. Native updates remain uncertain and cannot publish. See [usage and commands](docs/recovery-coordinator.md).385current tests,both685types and static/source/guide pass. Durable terminal/high-water state,external publication lease,live composition and native recovery remain unfinished. No new dependencies or configuration.
+
+
+### Durable terminal metadata
+
+Coordinator observation reports and terminal stops now persist without changing original caps or spent work. Unknown commit outcomes retain independent witnesses for explicit terminal-only reconciliation;they cannot resume native work. See [usage and validation](docs/recovery-terminal-authority.md).433current tests,both687type targets,static/source/two guides pass. Live publication lease/process/native/coordinator-loss recovery remains unfinished;no new dependency/configuration.
+
+
+## Private recovery publication guard
+
+[Guard guide](docs/recovery-publication-guard.md) documents the inner port,SQLite
+writer exclusion,tests and example. R3.5b2d3a is scoped engineering validation;
+live composition/actual crash/native recovery remain open;coordinator lease integration is complete.
+
+
+## Guarded coordinator publication
+
+[Leased coordinator guide](docs/guarded-recovery-coordinator.md) includes modules,
+commands,example and limits. Coordinator publication now holds private writer
+ownership while fresh observation reports commit. Live composition/actual crash/
+native model and coordinator-loss recovery remain unfinished.
+
+
+## Retained Windows recovery composition
+
+[Composition guide](docs/windows-recovery-composition.md) documents the new
+factory,ownership,modules,commands and example. It accepts original retained
+Windows registrations and an exact independently known existing journal. Concrete
+adapter/fake-API correctness gates pass;actual physical-worker/crash capture and
+full native/model/coordinator-loss recovery remain unfinished.
+
+
+## Actual metadata journal/worker capture
+
+[Capture guide](docs/windows-recovery-process-capture.md) records the one-worker
+pre-COMMIT interruption,exact surviving state,spent/uncertain terminal facts and
+cleanup. Surviving-coordinator publication metadata gates are complete. Full
+native/model restore,coordinator loss and power-loss recovery remain unfinished;
+next implement complete versioned checkpoint codecs. This process allowance is spent.
+
+
+### Durable native codec increment
+
+A bounded complete backprop snapshot codec now preserves every native field and
+required array alias with independent source/policy/content comparisons. See
+[the codec guide](docs/durable-checkpoint-codecs.md) for structure,example and
+verification commands. Full durable candidate/lifecycle/actor recovery remains
+unfinished; this byte codec grants no restore or completed-work authority.
+
+
+The durable byte component also supports complete current circadian v2 native
+snapshots,including RNG/replay/lineage and optional retention/exposure policies.
+[Codec examples,limits and commands](docs/durable-checkpoint-codecs.md) describe
+its exact supported variants. Full durable runtime recovery remains unfinished.
+
+
+### Circadian checkpoint C/F layout qualification
+
+CPC codec wire v2 (`circadian_full_v2`) records exact C/F array order and rejects
+old v1,unknown/missing order and unsupported noncontiguous storage. Native
+snapshotv2/API/equations remain unchanged. Separate34layout controls compare
+fixed native structural continuation across8variants. Frame validation,
+native schema and byte orchestration retain their existing inward boundaries;
+no dependency/configuration change. See docs/durable-checkpoint-codecs.md and
+ADR-0225 for tree,commands,limits,ownership and extension details. Backprop layout
+qualification and full composite/native/live recovery remain unfinished.
+
+
+### Explicit Backprop layout codec qualification
+
+`LayoutBackpropCheckpointCodec` adds separately selected `backprop_layout_v2`
+wire frames preserving supported C/F array storage,canonical bytes and native
+required aliases. The existing v1 codec remains available for its original
+noncontiguous logical-value scope. Exact schema/shared C/F frames depend inward
+on existing native contracts and typed codec ports. Every bounded payload is
+validated before detached NumPy materialization. Fixed native continuation uses
+existing Backprop BCE loss/state/predictions;no model metric/API/equation or
+configuration/dependency change. Newmodule tree,examples,commands,limits and
+extension path:docs/durable-checkpoint-codecs.md;decision:ADR-0226. Full durable
+composite/owner/copy/lifecycle/model/scientific acceptance remains unfinished.
+
+
+### Complete supported NumPy inbox byte component
+
+NumpyInboxCheckpointCodec wirev2 preserves complete native cursorv1/v2 events,
+permissions,unmatched/consumed/applied/tombstone history and actual supported real
+numeric C/F payload dtype/byteorder/bytes/ownership. Inner InboxCodecPolicy binds
+original independent shape/dtype/record/string/candidate bounds. Role/permission/
+metadata checks precede payload inspection;all raw validation precedes detached
+NumPy materialization. Existing native/inbox/source/test/API bytes retained;
+no dependency/configuration/learning change. Tree/commands/zero-native example/
+extension and authority limits:docs/durable-checkpoint-codecs.md andADR0227.
+Lifecycle/consolidation/consent/revocation/retention/copy/actor/sharing/Torch/full
+composite/singleowner/native/model/coordinatorloss/scientific/human work stays open.
+
+
+### Complete consolidation ledger observations
+
+The candidate can capture all consumed attempts,complete native diagnostics and
+original stop/retirement/revision/ready flags under its original exclusive lease.
+The explicit bounded byte codec returns detached records with shared diagnostic
+aliases and exact numeric values. It performs no model operation or live restore.
+Structure,example,commands and extension: [consolidation cursors](docs/consolidation-cursors.md).
+Full lifecycle and recovery acceptance remain unfinished.
+
+
+### Complete lifecycle state contract
+
+Typed lifecycle records preserve catalog/consent/revocation/clocks,retention driver
+epoch/events/thread observations,copy charges and enrollment history. Explicit
+original reference slots retain live authority by identity;only validated metadata
+is detached. Actual coherent capture and durable encoding remain unfinished.
+Structure,example,commands and exact next step:docs/managed-lifecycle-state.md.
+
+Coherent original-owner lifecycle metadata capture is described in [managed lifecycle state](docs/managed-lifecycle-state.md#coherent-actual-capture-r35b2e4b2). It uses original nonblocking leases and does not encode or restore live authority.
+
+Complete lifecycle metadata bytes through the existing checkpoint port are documented in [lifecycle checkpoint codec](docs/lifecycle-checkpoint-codec.md). Original live authority remains supplied separately;no model restore or budget renewal.
+
+Complete consolidation/lifecycle observation under one original owner interval is documented in [managed record capture](docs/managed-record-checkpoints.md). Paired byte encoding remains the next acceptance increment.
+
+Complete original-observation-bound paired consolidation/lifecycle bytes are documented in [paired checkpoint codec](docs/managed-record-checkpoint-codec.md). Original live authority remains separate;full native recovery is unfinished.
+
+
+### Managed composite capture (qualification in progress)
+
+The new internal NumPy capture assembles complete retained source records under
+original leases and copy admission, preserving cross-component aliases.
+See [managed composite capture](docs/managed-composite-capture.md) for boundaries,
+limits,commands and unfinished qualification. It is not a recovery permission.
+
+
+Managed capture now checks original sampler/RSS/wall/retention admission before
+and after payload copying, with final observations refreshed through the same
+copy memo. See docs/managed-composite-capture.md and ADR-0236. Full capture and
+recovery qualification remain unfinished; injected resource controls are not a
+hard physical memory ceiling or scientific evidence.
+
+
+Managed capture retained-source bindings (ADR-0237):explicit original enrolled
+runtime/controller/pending/token relationships and installed consent/copy guards
+now precede holder payload ports and projection. Complete graph bounds precede
+checkpoint measurement,integrity and pure promotion checks. Retained checkpoint
+payloads require live consent even when the current inbox is empty. Final pending
+references and consent are rechecked without invoking controller restore guards.
+See docs/managed-composite-capture.md and src/app/managed_composite_bindings.py.
+Portable tickets preserve fields/aliases;original ticket and rollback receipt
+remain live authority references. Actual promotion issuance/native provenance/
+all variants/replay consent/bytes/recovery remain unfinished.
+
+
+Original managed native update observation (ADR-0238):optional native_observer
+ports in inbox/runtime/sharing/managed owner expose original source/label/learner,
+actual detached inputs and committed receipt/spent count through synchronous
+expiring access. See docs/native-update-origin.md. Original consent/admission,
+owner instance fields,default calls and update order remain unchanged. Callback
+faults preserve original failure/receipt/resources;returned references remain
+caller-owned. No new configuration/dependency/environment variable. Core defines
+the reference contract;app manages lifetime;neither imports adapters/infra.
+Persistent replay origin and every storage/retention/dedup/eviction/fork/checkpoint/
+promotion/restore/erase path remain open under R3.5b2e5b3. Complete compoundcapture,
+canonical bytes and recovery gates remain unchecked. Do not infer row lineage
+from content hashes or treat these observations as consent/restore permission.
+Tests:fixed fake-only origin controls +five selected fake inbox controls +990
+current composite/resource/codec controls;both742types/wholeRuff/check format.
+For safe extension:add a bounded original replay-write/row port with weak or
+owned-accounted payload references;preserve terminal failures and original gates.
+
+
+Original replay-write observation (ADR0239):core/replay_write_origin defines
+a bounded original model/input window;app/replay_write_origin composes it with
+the original managed producer. Native copy ranges,new snapshot references and
+final retained identities are observed without extra array copies/native fields.
+Explicit original ContextVar token/thread/callback lifetime survives refused
+close;all default storage/policy/RNG rules preserved. See docs/replay-write-origin.md.
+Pure/current gates precede a separately declared tiny native storage-only parity
+fixture. No dependency/env/config changes. This is not a persistent row ledger or
+consent/restore certificate. Full b3/e5b/e5 retained variants/lineage/bytes/recovery
+remain open. Next consume actual copy identity under bounded weak/owned-accounted
+retention and original consent/terminal-outcome authority before broadening capture.
+
+
+### Original candidate replay row ledger
+
+Opt-in `ManagedReplayOrigins` binds actual current-candidate copies to original
+managed consent and final receipts with bounded weak records. Enroll before work
+and use its `train_ready()`. See [guide](docs/managed-replay-origins.md) for ports,
+limits, failures, validation commands and unfinished holder/recovery contracts.
+No environment variables or dependency/default changes.
+
+
+### Composite replay capture admission
+
+Nonempty candidate replay now requires its original row ledger via
+`capture_numpy_managed_composite(..., replay_origins=ledger)`. Empty replay
+remains supported. See [capture guide](docs/replay-capture-origins.md); copied
+other-holder replay awaits original lineage witnesses. No env/dependency changes.
+
+
+Replay capture lifecycle repair: original runtime open/consent checks use
+leased elapsed access during capture; public default reads keep ordinary access.
+See docs/replay-capture-origins.md and current development log for qualification.
+
+
+### Local original model-copy observations
+
+See [native model-copy observations](docs/native-model-copy.md) for bounded
+constructor/fork memo callbacks and their limits. The primitive grants no retained
+holder permission. Focused checks use `python -m pytest tests/test_native_model_copy.py
+-q`; native fork qualification is separately budgeted. Current exact commands and
+evidence are in the development log.
+
+
+### Original managed replay-copy witnesses
+
+See [managed replay copies](docs/managed-replay-copies.md) for checkpoint
+preparation fork observation,shared lifetime accounting and copied row metadata.
+The existing controller owns preparation and its errors. Snapshot/restore/handoff
+lineage and full copied-holder capture remain unfinished. Focused fake checks:
+`python -m pytest tests/test_managed_replay_copies.py -q`;native controls require
+a separately declared budget. Exact current commands/evidence are in the log.
+
+
+### Native snapshot/restore observation
+
+See [native state copy observation](docs/native-state-copy.md) for explicit,
+bounded source/target/memo observations at actual CPC dictionary copy boundaries.
+This primitive supports lineage work; it grants no copied-holder capture authority.
+
+
+See [actual graph copy sequences](docs/native-graph-copies.md) for bounded
+observations spanning native state, checkpoint and inbox copies. The primitive
+does not transfer the original replay ledger or authorize copied-holder capture.
+
+See [borrowed replay graph inventories](docs/replay-graph-origins.md) for bounded
+original row references and replay array byte counts from native state roots.
+These support the next original ledger admission step; full checkpoint handoff
+admission and ledger transition remain unfinished.
+
+### Original managed checkpoint publication
+
+See [managed replay checkpoints](docs/managed-replay-checkpoints.md) for original
+per-copy admission, weak actual memo lineage and final publication guards.
+Implementation acceptance and remaining supported variants are recorded in the
+current development-log handoff. Pure checks: `python -B -m pytest
+tests/test_checkpoint_content.py tests/test_checkpoint_replay_handoff.py
+tests/test_checkpoint_gate_cleanup.py -q -o addopts= -p no:cacheprovider`.
+Native tests require their own prospectively declared small local budget.

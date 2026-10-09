@@ -1,5 +1,39 @@
 # Runtime mutation enforcement (P6.7d2b2j6b / j6b1)
 
+
+## Current status — 2026-10-06
+
+The confirmed foreign nested-context exit invalidates the earlier claim of release
+only at the exact owning `with` boundary. Current `_exit_offsets` accepts exit sites
+across the owner's code without binding them to the actual guard entry. The retained
+probe assigns this same guard's bound `__exit__` to a preconstructed nested context;
+its exceptional exit removes monitoring before the genuine owning context ends.
+Defaults change from 5 to 9 and the target body runs with 9, without poison or denial;
+the genuine later cleanup raises `ValueError`. The probe performed no scientific
+calls or complete V2/native observation.
+
+P6.7d2b2j6b2's general correctness acceptance is reopened. Its historical 23 controls,
+three recorded observations and whole-closing evidence remain preserved, with their
+original scope and spent budgets. They do not establish this missing owning-entry
+contract. P6.7d2b2j6c is unchecked and user-deferred; no repair is implemented here.
+Complete runtime/source/native/private/lifetime and scientific admission remain
+unavailable; `require_complete_admission()` still raises.
+
+The recorded commands and outcomes below describe historical validation. The current
+native guard test has an explicit platform skip on unsupported native configurations;
+a skip is neither positive coverage nor admission. This documentation audit reruns
+neither the probe nor the full native case. Resume the deferred task only on user
+instruction: bind actual entry to genuine normal/exception/return exits, then satisfy
+all original and new controls under its prospectively declared budget. Full composition
+and every remaining source/native/continuous proof obligation stay mandatory.
+
+Why this: a negative execution witness overrides a broader correctness claim even
+when the previous finite controls passed. See [the plan](../DEVELOPMENT_PLAN.md),
+[the log](development-log.md) and the original local probe receipt at
+`artifacts/runs/p67-untouched-seed-usage/prior-evidence/runtime-owning-with-contract/foreign-exit-probe-validation.json`.
+
+## Historical mechanism and validation record
+
 Status: mechanism implemented and independently verified; complete runtime admission
 and whole observer-lifetime integration are unavailable. Original120s gates remain open.
 

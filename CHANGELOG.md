@@ -9,6 +9,21 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- Native CPC/backprop learner ports with separate diagnostics, full detached
+  model state and one existing-budget wake step; targeted parity/refusal tests.
+
+- Model-independent local CPU/simulation pilot resource preflight, with fixed
+  ceilings, typed refusals and JSON CLI; this does not dispatch or enforce a run.
+- Portable exact fixture/resume controls separated from historical environment
+  fingerprints, preserving original result bytes and production comparisons.
+
+- Compact research roadmap and checkout/claims audit preserving historical task
+  IDs, protocols, negative evidence and deferred scientific-admission gates.
+- Cross-process native lock regression and a Windows native-observation CI job;
+  explicit optional Torch/backend test boundaries and required CIFAR CPU coverage.
+- Windows ctypes/msvcrt type boundaries checked for both Linux and Windows,
+  without type-check configuration suppression or scientific algorithm changes.
+
 - Dated Windows CPU dependency constraints and exact installed environment
   metadata, with reproduction commands and explicit clean-install/historical
   provenance limits. Broad supported ranges and installed packages are unchanged.
@@ -899,3 +914,386 @@ with-exit semantics and full native/slice catalog serialization. New23-control c
 8068 raw codes/7841 function joins/3 historical records/current609 static/independent
 content readback pass; exact typing-comment executable parity retained with differing
 source bytes. Original120s and full admission requirements remain open.
+
+
+### 2026-10-06 - Historical outcome and cost export (P9.5a)
+
+- Add pure historical view, optional write-once ReportLab export and 20 focused
+  presentation/IO tests. Preserve all 560 cells, 626 original metric vectors,
+  116 primary statements, negative/null results and separate resource scopes.
+- Export 18 standalone SVGs and an 18-page PDF with exact numerical sidecars.
+  All pages are historical; no model/dependency/protocol/experiment change.
+- Parent P9.5 remains open for remaining report/figure coverage; R3.1 remains
+  held by reopened G0 and the existing baseline owner's separate diagnosis.
+
+
+### 2026-10-07 — Local experience arrival contracts
+
+Added typed logical-clock and experience/label/permission metadata, with a bounded
+local train-role inbox that supports label-first delivery, deterministic per-drain
+ordering, duplicate/conflict refusals and detached payloads. Native completion
+identity survives post-update resource stops; uncertain partial learner failures
+stop the inbox. Added optional lifecycle hooks to the shared native step without
+changing existing callers. Existing algorithms, evaluation seals and scientific
+authority are unchanged. No dependency/configuration or experiment was added.
+
+
+### 2026-10-07 — Stable actor and shadow ownership
+
+Added owned native forks, immutable versioned serving results and separate actor/
+candidate gates. Candidate learning reuses delayed-label permissions; detached
+consolidation tracks bounded attempt IDs and preserves committed late-stop work.
+Uncertain native restore/cancellation stops the candidate while actor serving
+remains available. No existing equation, scientific policy, dependency/config,
+promotion or rollback behavior is introduced.
+
+
+### 2026-10-07 — Matched promotion guards
+
+Added explicit local utility/retention/numerical/latency/byte/action criteria and
+matched detached actor/candidate guard measurement. Deny unauthorized/future/
+overlapping data and stale base versions before payload access; retain complete
+policy/state/revision/identity/measurement reports with negative outcomes.
+Original R3.4 acceptance stays split across guards and unfinished atomic serving
+transactions/rollback. Existing actor/models/protocols/configuration are unchanged.
+
+
+### Local development: R3.4b guarded serving transactions
+
+Added compatible promotable actor, identity-checked approvals bound to matched policy/candidate revision/full state/actor generation, atomic model/cache/context publication and complete one-step rollback. Added real bounded TTL cache and fixed candidate base version/exclusive snapshot callbacks. Native algorithms/defaults/scientific protocols remain unchanged. Serving latency sharing benchmarks and global final-release authority remain separate.
+
+
+### Local development: R3.5a cooperative resource admission
+
+Added bounded active/queued shared serving, per-update cooperative pause/resource/quota checks, admitted-failure accounting and detached poll/priority records. Existing default inbox/runtime drain APIs remain compatible. No native algorithm or scientific protocol changes. Complete resume/checkpoints and actual idle/training serving p50/p95 remain unfinished R3.5 tasks.
+
+
+### Local development: R3.5b1 inbox capture
+
+Added validated owned full inbox history capture, including pending/future/label-first records, consumed identity/receipt history, observed work/time and stopped state. Metadata corruption/role/index checks precede payload copy. Native algorithms and current owner/budget remain unchanged; complete atomic checkpoint restore and live timing are still required.
+
+
+### Complete candidate checkpoint ownership
+
+Supported same-process full candidate handoff is implemented through app/candidate_checkpoint.py; see docs/candidate-checkpoints.md and ADR-0205. Retain original cumulative budget/clocks/RSS sampler/resource gate and stable actor, restore independent native state plus full inbox/consolidation histories, retire old owner and invalidate its promotion authority. Identity tokens and preparation work are bounded. R3.5b acceptance remains pending current full validation; durable process recovery and actual live latency remain unfinished.
+
+R3.5b current supported owned checkpoint acceptance:371 tests,647-file Windows/Linux types,full scoped/static/source/resource/guide gates pass. Evidence:artifacts/runs/r35b-owned-handoff-20261007/. Actual live R3.5c latency and durable R3.5b2 recovery remain unfinished.
+
+
+### Actual live serving measurement
+
+The generic app native observer/shared-request harness and pure core timing/
+nearest-rank/overlap records are documented in docs/live-serving-measurement.md
+and ADR-0206. The reserved script boundary executes the finite declared matched
+two-native protocol after full correctness/source binding. Retain all raw requests,
+native windows and incomplete worker status; no automatic repeat/outcome filtering.
+Current measurement acceptance is pending; no scientific advantage is claimed.
+
+R3.5c/original R3.5 current acceptance:396 cases,full651-file platform types/static/source/resource gates and one reserved actual native serving run pass;96/96 shared requests per method fully native-contained. Negative circadian p95 slowdown retained. Evidence:artifacts/runs/r35c-live-serving-20261007/measurement-summary.md. Next R3.6 privacy/replay lifecycle;durable R3.5b2 and broader guards remain open.
+
+
+## 2026-10-07 — R3.6a permanent data admission (validation pending)
+
+Optional managed local admission: [guide](docs/managed-experience.md). Pure src/core/data_lifecycle.py metadata and src/app/managed_experience.py original authority install permanent hooks on a fresh ExperienceInbox; legacy uninstalled behavior stays intact. Requires declared training/replay consent and permissions, bounded lifetime grant counts and explicit synthetic/unverified policy. Supported checkpoint handoff retains authority. Opt-out stops future training; native/inbox/checkpoint erasure and unlearning are not claimed. No new environment variables/dependencies. Full R3.6b deletion controls remain the next extension.
+
+
+R3.6a acceptance:433 passing cases,current654-file Windows/Linux types/static/AST/executed guide/source/resource gates. See artifacts/runs/r36a-data-admission-20261007/admission-summary.md and validation.json. Full R3.6/R3.6b erasure remains unchecked. Exact next action: Prospectively scope R3.6b actual native replay/inbox erasure: inspect replay snapshot identity and full InboxCursor/applied receipt references; design payload-free tombstones preserving consumed IDs, enforce retention lifetimes/quotas, invalidate pending checkpoint payload copies, and test refused resurrection across owned handoff with original clocks/budgets/gates. Start with fake deletion controls, then fixed native controls; do not call erasure parameter unlearning or erase caller-held copies by implication. Preserve original full R3.6 acceptance and durable R3.5b2/R3.7/G3/human-deferred/scientific work.
+
+
+## 2026-10-07 — R3.6b1 erasure prerequisites (validation pending)
+
+[Payload erasure primitives](docs/data-erasure.md): core data_erasure.py provides tombstones/counts/optional ReplayPayloadOwner port;InboxCursor format2 and private ExperienceInbox erasure preserve consumed IDs/applied work;NumPy adapters expose native whole-buffer erasure. Only raw replay references are removed;native weights/RNG/policy/counters and exposure hashes remain. Format1 unerased histories remain supported. No new dependencies/environment variables. Full original-authority deletion,quotas/lifetimes/checkpoint/promotion cleanup/non-resurrection is unfinished R3.6b2.
+
+
+R3.6b1 acceptance:488 passing cases,current656-file win/linux types/static/AST/guide/source/resource gates. Evidence:artifacts/runs/r36b1-erasure-primitives-20261007/validation.json and erasure-summary.md. Full original R3.6/R3.6b/R3.6b2 remains unchecked. Exact next action: R3.6b2: prospectively scope original-authority coordinated deletion. Inspect all owners of payload copies: live/retired candidate and inbox, pending/inspected checkpoints and prepared/failed models, serving promotion/rollback bundles and pending tickets. Define owned-versus-caller copies and bounded supported native/payload measurement ports; implement deletion/expiry/opt-out coordination plus declared record/byte/time policies under original manager/candidate/serving/checkpoint leases. Tests first for partial cleanup failure and refused resurrection; retain budgets/clocks/gates/consumed IDs and weights. Keep transient/audit-only admission disabled until purge semantics pass, and original R3.6/R3.6b unchecked until the complete criteria are proven.
+
+
+## 2026-10-07 — R3.6b2a retained-copy ownership (validation pending)
+
+[Retained payload ownership](docs/payload-ownership.md):core metadata/reference ports and app weak registry enumerate supported actor/candidate/checkpoint/promotion owners under nonblocking all-holder quiescence. One opt-in live/lifetime registration allowance survives handoff and GC without renewal. Existing native/budget/serving semantics remain;no new dependencies/environment variables. This is a cleanup prerequisite,not complete deletion or byte/time policy;R3.6b2b retains original-authority all-copy cleanup/non-resurrection acceptance.
+
+
+R3.6b2a acceptance:512 current tests,full659-file win/linux types/static/AST/guide/source/resource gates;zero NEW native work. Evidence:artifacts/runs/r36b2a-payload-ownership-20261007/validation.json and ownership-summary.md. Full original R3.6/R3.6b/R3.6b2 remains unchecked. Exact next action: R3.6b2b: prospectively scope original-authority coordinated cleanup and retention. Bind current ownership registry and manager plus native replay/inbox tombstone ports; use all-holder references under the existing nonblocking lease, deduplicate by identity, acquire the original sharing/consent authority, and avoid public methods that reacquire leased locks. Define supported native/payload byte measurement and cumulative holder/record/byte/time policies; tests first for pending checkpoint/prepared/failed/retired/promotion/rollback copies, partial cleanup failure, stopped/retired inbox ledger accounting and refused resurrection. Integrate deletion/expiry/opt-out without resetting budgets/clocks/gates/IDs or parameters; keep transient/audit-only admission disabled until actual purge semantics pass. Preserve full original R3.6/R3.6b/R3.6b2 criteria and caller-copy/RAM/unlearning limits.
+
+
+### 2026-10-07 — Tested managed cleanup integration
+
+Added optional original-authority delete/opt-out/explicit expiry across discovered replay/inbox/checkpoint/retired/promotion/rollback copies,retired work-ledger preservation,expired retained-state access refusal and fail-closed partial cleanup retry. Validated556 cases,662-file platform type targets,static/source gates and one six-wake native capture. Full R3.6b2b remains open on aggregate retained bytes and automatic elapsed purge. See docs/managed-data-lifecycle.md and ADR-0210.
+
+
+### 2026-10-07 — Original-authority payload copy byte allowance
+
+Added optional monotonic pre-copy quota,quiescent retained-array observations,strict bounded NumPy graph/builder ports and alternate checkpoint sharing-wrapper refusal. Validated586 cases,both665-file type targets/static/source/guide and one fixed four-wake/two-prediction capture. Failed copies/discard/cleanup never refund;automatic elapsed purge remains unfinished. See docs/retained-payload-budget.md and ADR-0211.
+
+
+### 2026-10-07 — Bounded original-clock elapsed retention driver
+
+Added optional elapsed policy,original-age handoff,bounded automatic worker,independent sharing hold,explicit stop/join/failure handling and post-callback publication guards.624 current passing cases,both668-file types/static/source/guide;one fixed four-wake capture. Acceptance audit confirms scalar-only auxiliary metadata expiry remains unfinished;all original R3.6 parents unchecked. See docs/retention-expiry.md and ADR-0212.
+
+
+### 2026-10-07 — Auxiliary content retention and full R3.6 acceptance
+
+Fixed zero-array scalar metadata/cache ages and initial graph validation short circuit. Copies/discard/rejection do not renew first-copy age;only actual purge resets.641 current cases,both669-file type/static/source/guide/resource gates and11-group original-criteria audit pass. R3.6b2b/R3.6b2/R3.6b/R3.6 complete for supported local policy;durable/failure-long-run/extension/scientific work remains unfinished. See docs/auxiliary-retention.md and ADR-0213.
+
+
+### 2026-10-07 — R3.7a finite repeated fault/native validation
+
+Added9 repeated supported-process controls and one reserved8cycle-per-model stream with observed RSS/tracing/copy caps and original quota/actor/retired-work checks.650 current cases,both670-file type/static/AST/source/guide/resource gates pass. No final production change;initial incompatible label-version restriction reverted byte exact. Full R3.7 OS-crash/durable recovery/sustained scope remains unfinished. See docs/runtime-failure-sequences.md and ADR-0214.
+
+
+### 2026-10-07 — R3.5b2a durable metadata prerequisite
+
+Added pure typed bounded recovery metadata admission,75new controls and guide/ADR-0215.229affected cases,both672-file types/static/AST/source/guide gates pass;three failed child receipts and one refused wrapper retained. No inherited production behavior or dependencies change;zero new native work. Full R3.5b2/R3.7 authentic durable authority/process-crash acceptance remains open.
+
+
+### 2026-10-07 — Windows host observation boundary
+
+Added bounded observation port,documented Windows time/RSS/process-handle adapters and50new controls;279fake/affected cases,both677type/static/source/current-process guide gates pass. Preserve actual failed one-worker capture (venv launcher/payload mismatch) and precise API-set binding diagnosis. Harness corrected,successor unrun;R3.5b2b/full durable recovery unchecked. Zero new native work or dependencies.
+
+
+### 2026-10-07 — R3.5b2b corrected worker successor
+
+Validated one strict direct-base same-version Windows worker after current gates:280current cases,unchanged677type inputs/current static/source/guide pass. Mark original R3.5b2b scoped criteria complete;preserve negative launcher capture and original costs. No source/native/dependency changes. Full durable authority/model recovery remains open.
+
+
+### 2026-10-07 — R3.5b2c metadata authority journal
+
+Added inner authority transitions/port,bounded canonical metadata codec and private SQLite CAS. Original caps/charges remain spent;stale/rollback/ambiguous work refuses retry. 56 new +279 affected tests,both682 types and static/source/guide pass. Broader native/live-lease/coordinator-loss recovery stays unfinished;no model/baseline/dependency changes.
+
+
+### 2026-10-08 — R3.5b2d1 coordinator sequencing
+
+Added exact costs/registration port and local coordinator with commit-before-prepare,host/journal checks,conditional handoff and all-probe cleanup.50new+335affected tests,both685types and static/source/guide pass. Preserve full recovery criteria;durable terminal/high-water authority and publication lease/live process evidence remain unfinished.
+
+
+### 2026-10-08 — R3.5b2d2 terminal/high-water authority
+
+Added monotone report/terminal transitions,coordinator persistence and independent exact terminal-only SQLite reconciliation. Preserve original caps/counters/uncertainty;keep measured overshoot as stopped facts.48new+385affected tests,both687types/static/source/two guides pass. No native/evaluation/baseline/dependency changes. Lease/live/process/native/coordinator-loss recovery remains open.
+
+
+## Local development — 2026-10-08 (R3.5b2d3a)
+
+Added inner publication port/pure host validation and private SQLite held writer
+guard. Thirty new controls plus433affected pass;both689file type targets,lint,
+scoped format,source/AST preservation and executable guide pass. Coordinator
+integration,live composition and actual crash/native/coordinator-loss remain open.
+
+
+## Local development — 2026-10-08 (R3.5b2d3b)
+
+Connected coordinator publication to restricted observation-report ownership.
+Added permanent nonblocking native journal writer lock and lease adapter. Thirty
+new/493current cases,both692types,static/source/AST/three guides pass;original d2
+durable before-publication test remains exact. Live composition/crash/native/
+coordinator-loss acceptance remains open.
+
+
+## Local development — 2026-10-08 (R3.5b2d3c)
+
+Added original retained Windows composition factory and24concrete-adapter/fake-API
+controls.517current cases,both694type targets,static/source/AST/executable guide
+pass. Existing source/test bodies/package identities unchanged. Actual physical
+worker/journal crash and native/model/coordinator-loss acceptance remain open.
+
+
+## Local development — 2026-10-08 (R3.5b2d3d/d3/d)
+
+Fixed fresh composition RSS high-water initialization from independently known
+usage;five new/522current tests,both694types/static/source/AST/guide pass. Completed
+one separately budgeted actual Windows worker pre-COMMIT metadata transaction
+exit17,publication contention,lock release,exact prior state/no refunds/uncertain
+stops/cleanup. No hot-header/main-page replay,power-loss,native model restore or
+coordinator-loss claim. Next complete durable native/state codecs.
+
+
+### 2026-10-08 - Complete bounded backprop snapshot byte component
+
+- Added inward codec ports and explicit canonical backprop schema for all model
+  fields/traffic and required aliases,with detached finite float64 arrays and
+  independent source/policy/content comparisons.
+- Added51round-trip/refusal controls and complete component source census/guide.
+  No algorithm or learner behavior changed;full durable restore remains open.
+
+
+### 2026-10-08 - Complete current circadian native bytes
+
+- Added explicit complete circadian v2 byte variants,RNG/replay/lineage/config
+  preservation,independent bindings and bounded detached native array frames.
+- Added full native round-trip/continuation and malformed/unsupported/resource/
+  ownership controls. No existing model or algorithm behavior changed.
+- Full composite durable runtime/lifecycle/actor restoration remains open.
+
+
+### Circadian checkpoint C/F layout qualification
+
+CPC codec wire v2 (`circadian_full_v2`) records exact C/F array order and rejects
+old v1,unknown/missing order and unsupported noncontiguous storage. Native
+snapshotv2/API/equations remain unchanged. Separate34layout controls compare
+fixed native structural continuation across8variants. Frame validation,
+native schema and byte orchestration retain their existing inward boundaries;
+no dependency/configuration change. See docs/durable-checkpoint-codecs.md and
+ADR-0225 for tree,commands,limits,ownership and extension details. Backprop layout
+qualification and full composite/native/live recovery remain unfinished.
+
+
+### Explicit Backprop layout codec qualification
+
+`LayoutBackpropCheckpointCodec` adds separately selected `backprop_layout_v2`
+wire frames preserving supported C/F array storage,canonical bytes and native
+required aliases. The existing v1 codec remains available for its original
+noncontiguous logical-value scope. Exact schema/shared C/F frames depend inward
+on existing native contracts and typed codec ports. Every bounded payload is
+validated before detached NumPy materialization. Fixed native continuation uses
+existing Backprop BCE loss/state/predictions;no model metric/API/equation or
+configuration/dependency change. Newmodule tree,examples,commands,limits and
+extension path:docs/durable-checkpoint-codecs.md;decision:ADR-0226. Full durable
+composite/owner/copy/lifecycle/model/scientific acceptance remains unfinished.
+
+
+### Complete supported NumPy inbox byte component
+
+NumpyInboxCheckpointCodec wirev2 preserves complete native cursorv1/v2 events,
+permissions,unmatched/consumed/applied/tombstone history and actual supported real
+numeric C/F payload dtype/byteorder/bytes/ownership. Inner InboxCodecPolicy binds
+original independent shape/dtype/record/string/candidate bounds. Role/permission/
+metadata checks precede payload inspection;all raw validation precedes detached
+NumPy materialization. Existing native/inbox/source/test/API bytes retained;
+no dependency/configuration/learning change. Tree/commands/zero-native example/
+extension and authority limits:docs/durable-checkpoint-codecs.md andADR0227.
+Lifecycle/consolidation/consent/revocation/retention/copy/actor/sharing/Torch/full
+composite/singleowner/native/model/coordinatorloss/scientific/human work stays open.
+
+
+### Complete consolidation observations (local development)
+
+Added original-lease candidate consolidation capture and explicit versioned byte
+codec preserving all consumed attempts,complete diagnostics,shared diagnostic
+identity and original closed-owner flags/counters. Native finite wider Python
+integers and float signed zero stay exact. Existing native behavior retained;
+no dependency,configuration,learning equation or experiment change. Full lifecycle
+and recovery remain open. See docs/consolidation-cursors.md and ADR0228.
+
+
+### Complete lifecycle state contract (local development)
+
+Added complete typed metadata/reference records,strict original policy/epoch/
+charge/identity validation,full native source-schema guards and metadata-only
+detachment. Existing source bytes and working behavior preserved. No dependency,
+configuration,algorithm,seed,metric or baseline change. Live coherent capture,
+encoding and recovery remain unfinished. See docs/managed-lifecycle-state.md.
+
+Unreleased:R3.5b2e4b2 adds complete coherent lifecycle metadata capture and driver transition synchronization;preserves original clocks,limits,copy charges,weak enrollment history and live authority identities. Durable lifecycle encoding and recovery remain unfinished.
+
+Unreleased:R3.5b2e4b3 adds complete lifecycle_full_v1 bytes,original source/policy/content/reference bindings,immutable metadata alias records and raw refusal before typed construction. All48original live reference slots remain caller-supplied;no portable authority or restore claim.
+
+Unreleased:R3.5b2e4c1 implements complete common-interval consolidation/lifecycle capture,13runtime observations,59original reference slots and joint capacity/relationship checks. Managed transform refusal remains unchanged. Complete paired bytes and restore remain unfinished.
+
+Unreleased:R3.5b2e4c2 adds managed_record_pair_v1,complete bounded original-observation-bound paired bytes with24explicit schemas,all13runtime observations,all59original reference manifest slots,and metadata/tuple aliases across components. Full raw refusal before materialization;no model/clock/callback/IO/worker/restore or authority renewal.
+
+
+### 2026-10-08 — managed composite capture in progress
+
+- Added inward complete-source records,original owner orchestration and NumPy
+  graph capture with original raw-payload admission and independent total-array
+  bounds. Qualified current Backprop/CPC/inbox/actor alias and refusal controls.
+- Retained R3.5b2e5b unchecked for populated pending/retired/native variants and
+  sampler/resource qualification;full composite bytes and recovery remain open.
+
+
+- Managed capture: acquire the original sampler gate before RSS observation;
+  refuse reentry/changed/terminal/unavailable sources; enforce original pre/post
+  copy resource checks and refresh final metadata without a second array copy.
+  Added bounded contention/failure/cap controls and ADR-0236. Full composite
+  qualification and recovery authorization remain unfinished.
+
+
+Managed capture retained-source bindings (ADR-0237):explicit original enrolled
+runtime/controller/pending/token relationships and installed consent/copy guards
+now precede holder payload ports and projection. Complete graph bounds precede
+checkpoint measurement,integrity and pure promotion checks. Retained checkpoint
+payloads require live consent even when the current inbox is empty. Final pending
+references and consent are rechecked without invoking controller restore guards.
+See docs/managed-composite-capture.md and src/app/managed_composite_bindings.py.
+Portable tickets preserve fields/aliases;original ticket and rollback receipt
+remain live authority references. Actual promotion issuance/native provenance/
+all variants/replay consent/bytes/recovery remain unfinished.
+
+
+Original managed native update observation (ADR-0238):optional native_observer
+ports in inbox/runtime/sharing/managed owner expose original source/label/learner,
+actual detached inputs and committed receipt/spent count through synchronous
+expiring access. See docs/native-update-origin.md. Original consent/admission,
+owner instance fields,default calls and update order remain unchanged. Callback
+faults preserve original failure/receipt/resources;returned references remain
+caller-owned. No new configuration/dependency/environment variable. Core defines
+the reference contract;app manages lifetime;neither imports adapters/infra.
+Persistent replay origin and every storage/retention/dedup/eviction/fork/checkpoint/
+promotion/restore/erase path remain open under R3.5b2e5b3. Complete compoundcapture,
+canonical bytes and recovery gates remain unchecked. Do not infer row lineage
+from content hashes or treat these observations as consent/restore permission.
+Tests:fixed fake-only origin controls +five selected fake inbox controls +990
+current composite/resource/codec controls;both742types/wholeRuff/check format.
+For safe extension:add a bounded original replay-write/row port with weak or
+owned-accounted payload references;preserve terminal failures and original gates.
+
+
+Original replay-write observation (ADR0239):core/replay_write_origin defines
+a bounded original model/input window;app/replay_write_origin composes it with
+the original managed producer. Native copy ranges,new snapshot references and
+final retained identities are observed without extra array copies/native fields.
+Explicit original ContextVar token/thread/callback lifetime survives refused
+close;all default storage/policy/RNG rules preserved. See docs/replay-write-origin.md.
+Pure/current gates precede a separately declared tiny native storage-only parity
+fixture. No dependency/env/config changes. This is not a persistent row ledger or
+consent/restore certificate. Full b3/e5b/e5 retained variants/lineage/bytes/recovery
+remain open. Next consume actual copy identity under bounded weak/owned-accounted
+retention and original consent/terminal-outcome authority before broadening capture.
+
+
+### 2026-10-08 — original candidate replay origin ledger
+
+Added opt-in bounded metadata admission, managed weak original row/consent/receipt
+ledger and NumPy descriptor/integrity ports. Native defaults/schemas unchanged.
+Current-process candidate only; retained holder/capture/recovery qualification open.
+
+
+### 2026-10-08 — mandatory composite replay origin admission
+
+Added bounded inventory and original ledger capture lease before projection/copy.
+Empty native replay remains supported; untracked or other-holder nonempty replay
+refuses pending original lineage qualification. Native fields/defaults unchanged.
+
+
+Replay capture lifecycle repair: original runtime open/consent checks use
+leased elapsed access during capture; public default reads keep ordinary access.
+See docs/replay-capture-origins.md and current development log for qualification.
+
+
+- Added bounded original CPC constructor/fork copy observations with synchronous
+  memo lookups,per-callback expiry and original-context validation. Native schemas,
+  policy and unobserved copy behavior preserved. Retained-holder authorization
+  remains unfinished;1066 targeted controls and both type targets qualified.
+
+
+- Added original managed checkpoint-preparation fork admission and weak copied
+  replay-row witnesses. Shares original metadata and raw-copy quotas,including
+  monotone original budget binding and conservative no-refund metadata slots.
+  Qualified1167 targeted controls/both764-file type targets. Snapshot/restore/
+  handoff and full copied-holder capture remain unfinished.
+
+
+- Added explicit bounded observations at CPC native snapshot/restore dictionary
+  copy boundaries, with an independent channel alongside constructor observation.
+  Default fields, policies, validation and publication remain unchanged. Full
+  checkpoint/inbox/handoff lineage remains unfinished.
+
+
+- Added one bounded observation sequence across actual native dictionary,outer
+  checkpoint and inbox cursor copies,sharing the actual native-state copier memo.
+  Original fields,policy,validation and publication remain unchanged. Original
+  ledger transition and copied-holder authority remain unfinished.
+
+- Added bounded borrowed replay row inventories and replay-only array byte
+  counts for exact native state dictionaries/snapshots. No model copies or
+  authority are created. Full original checkpoint admission/handoff stays open.
+- Added bounded original replay checkpoint copy admission and a final trusted publication lease, with fixed content integrity and lexical original-lock cleanup. Current acceptance/remaining variants are recorded in the development log.
