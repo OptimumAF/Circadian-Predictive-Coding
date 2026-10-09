@@ -1,4 +1,4 @@
-"""Two actual original retained-target automatic expiry boundaries.
+"""Three actual original retained-target automatic expiry boundaries.
 
 Why this: history is enabled at original birth and ordinary direct expiry must
 clean the canonical and failed preparation targets before publishing lineage.
@@ -29,21 +29,21 @@ ARRIVALS = (("e1", "s2"), ("e1", "s3"), ("e1", "s4"))
 @pytest.fixture(scope="module", autouse=True)
 def bounded_native_automatic_expiry_work(tmp_path_factory):
     limits = dict(
-        models=2,
-        learners=8,
-        forks=6,
-        wakes=2,
-        steps=4,
-        stores=2,
-        predicts=2,
-        array_copies=10,
-        captures=2,
-        preparations=2,
-        native_restores=2,
+        models=3,
+        learners=12,
+        forks=9,
+        wakes=3,
+        steps=6,
+        stores=3,
+        predicts=3,
+        array_copies=15,
+        captures=3,
+        preparations=3,
+        native_restores=3,
         handoffs=0,
         graph_events=64,
         source_array_bytes=1024 * 1024,
-        cleanup_attempts=2,
+        cleanup_attempts=3,
     )
     yield from observe_native_work(tmp_path_factory, limits)
 
@@ -85,9 +85,9 @@ def _queue_arrivals(owner, clock):
     assert all(owner._declaration_ticks[key] == 3 for key in ARRIVALS)
 
 
-def _retained_original():
+def _retained_original(*, live_records=16):
     owner, life, runtime, ledger, controller, manager = setup(
-        replay_examples=1, retain_inbox_origins=True
+        replay_examples=1, retain_inbox_origins=True, live_records=live_records
     )
     history = ledger._inbox_origins
     assert history is not None and history is ledger._inbox_history_birth()
@@ -200,12 +200,14 @@ def _assert_raw_cleanup(
 
 def test_should_publish_all_four_original_histories_after_actual_retained_native_expiry():
     owner, life, runtime, ledger, controller, manager, history, token, checkpoint, child, copy = (
-        _retained_original()
+        # Permanent copy reservations need headroom for four prepaid histories.
+        # The conservative source bound is declared before constructing this graph.
+        _retained_original(live_records=23)
     )
     receipt = runtime._inbox._applied[FIRST]
     data = next(iter(history._records.values())).data
     maps = history._storage, history._erased_storage, history._untrained_storage
-    paid = _original_allowances(ledger, life, runtime)
+    paid = _original_allowances(ledger, life, runtime, expected_live_records=23)
     native, inbox = _weak_owned_payloads(runtime, child)
     runtime._inbox._clock.advance_to(123)
     with pytest.raises(ValueError, match="expired"):
@@ -297,6 +299,56 @@ def test_should_clean_actual_retained_native_targets_when_original_history_bridg
         == paid["accounting"].metadata_bytes_charged
     )
     assert ledger._admission._progress.invocations_started == paid["accounting"].invocations_started
+    assert not ledger._poisoned
+    with pytest.raises(ValueError):
+        history.verify(ledger, owner, runtime, 123)
+
+
+def test_should_clean_original_native_targets_without_publication_at_birth_record_ceiling():
+    owner, life, runtime, ledger, controller, manager, history, token, checkpoint, child, copy = (
+        _retained_original()
+    )
+    original_maps = history._storage, history._erased_storage, history._untrained_storage
+    identity, original_record = next(iter(history._records.items()))
+    assert original_record.data.key == FIRST and history._sealed[identity] is original_record
+    paid = _original_allowances(ledger, life, runtime)
+    native, inbox = _weak_owned_payloads(runtime, child)
+    runtime._inbox._clock.advance_to(123)
+
+    with pytest.raises(ExpiryObservationError) as failure:
+        life.expire()
+
+    error = failure.value
+    assert (
+        type(error) is ExpiryObservationError and type(error.code) is str and len(error.code) <= 64
+    )
+    assert error.__cause__ is None and error.__context__ is None
+    _assert_raw_cleanup(
+        owner,
+        life,
+        runtime,
+        ledger,
+        controller,
+        manager,
+        token,
+        checkpoint,
+        child,
+        copy,
+        error.report,
+        paid,
+        native,
+        inbox,
+    )
+    assert history._storage is original_maps[0] and history._erased_storage is original_maps[1]
+    assert history._untrained_storage is original_maps[2]
+    assert history._records == {identity: original_record}
+    assert history._sealed[identity] is original_record
+    assert not history._erased_records and not history._untrained_records
+    # Successful prepayments remain spent even though no persistent maps publish.
+    progress, before = ledger._admission._progress, paid["accounting"]
+    assert 0 < progress.records_created - before.records_created < 4
+    assert progress.metadata_bytes_charged > before.metadata_bytes_charged
+    assert progress.invocations_started == before.invocations_started
     assert not ledger._poisoned
     with pytest.raises(ValueError):
         history.verify(ledger, owner, runtime, 123)

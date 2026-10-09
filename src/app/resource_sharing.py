@@ -188,3 +188,8 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
             native_observer=native_observer,
         )
         return TrainingPoll(updates, deferred[-1] if deferred else None)
+
+
+from src.app.expiry_release_proof import pin_release_methods as _pin_release_methods
+
+_EXPIRY_RELEASE_PINS = _pin_release_methods(ServingPriorityGate, ("_checkpoint_lease",))

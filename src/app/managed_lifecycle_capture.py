@@ -113,9 +113,9 @@ def _lease_holders(lifecycle, stack):
 
 
 def _require_original_relationships(lifecycle) -> None:
-    from src.app.expiry_history_birth import require_expiry_birth_source
+    from src.app.expiry_history_birth import require_expiry_capture_source
 
-    require_expiry_birth_source(lifecycle)
+    require_expiry_capture_source(lifecycle)
     runtime = lifecycle._shared._runtime
     if (
         runtime._payload_lineage is not lifecycle._lineage

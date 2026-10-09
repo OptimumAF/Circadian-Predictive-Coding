@@ -108,6 +108,26 @@ def automatic_work(tmp_path_factory):
     assert work.consumed_bytes == work.native_copy_bytes == 576
 
 
+@pytest.fixture(scope="module")
+def partial_work(tmp_path_factory):
+    # Keep the reused learner's original per-counter quota. Both counters are
+    # emitted separately and the run audit bounds their combined actual work.
+    work = AutomaticWork()
+    try:
+        yield work
+    finally:
+        (tmp_path_factory.mktemp("automatic-expiry-partial-work") / "work.json").write_text(
+            json.dumps(asdict(work), indent=2),
+            encoding="utf8",
+        )
+    assert work.graphs == work.updates == 1
+    assert work.learners == 3 and work.forks == 2
+    assert work.arrays == 10 and work.array_bytes == 120
+    assert work.consumed_arrays == work.native_copy_arrays == 2
+    assert work.consumed_bytes == work.native_copy_bytes == 24
+    assert work.pending_consumed is None
+
+
 class CleanupPorts:
     """Fault controls live behind the SAME original birth-installed ports."""
 
@@ -143,13 +163,26 @@ class CleanupPorts:
         return result
 
 
-def _fresh_automatic(work, *, history=True, records=64, actor=False):
+def _fresh_automatic(
+    work,
+    *,
+    history=True,
+    records=64,
+    actor=False,
+    metadata_bytes=128 * 1024,
+    holder_limits=None,
+    wall_clock=None,
+    max_retention_seconds=None,
+):
     # Same accepted numeric factory/ports/birth limits, with genuine supported
     # cleanup ports fixed BEFORE lifecycle construction. No later port swapping.
     assert work.graphs + 1 <= 24
     work.graphs += 1
     clock = LogicalClock()
-    budget = ToyBudgetSession(ToyExecutionBudget(max_training_updates=2), lambda: 0.0)
+    budget = ToyBudgetSession(
+        ToyExecutionBudget(max_training_updates=2),
+        (lambda: 0.0) if wall_clock is None else wall_clock,
+    )
     learner = NumericFakeLearner(work)
     original_actor = (
         None
@@ -179,7 +212,11 @@ def _fresh_automatic(work, *, history=True, records=64, actor=False):
     life: Any = ManagedDataLifecycle(
         owner,
         policy=DataRetentionPolicy(
-            4096, 10, PayloadOwnershipLimits(16, 64), owned_payload_copies=PayloadCopyLimits(4096)
+            4096,
+            10,
+            PayloadOwnershipLimits(16, 64) if holder_limits is None else holder_limits,
+            owned_payload_copies=PayloadCopyLimits(4096),
+            max_retention_seconds=max_retention_seconds,
         ),
         measure_payload_bytes=_measure,
         native_footprint=ports.footprint,
@@ -193,7 +230,7 @@ def _fresh_automatic(work, *, history=True, records=64, actor=False):
     ledger: Any = ManagedReplayOrigins(
         owner,
         ReplayOriginPorts(_model_reference, _retained, _copy_bytes, _payloads, _fingerprint),
-        ReplayOriginLimits(16, records, 8, 128 * 1024, 120, 4096),
+        ReplayOriginLimits(16, records, 8, metadata_bytes, 120, 4096),
         ReplayWriteLimits(4, 2, 64),
         retain_inbox_origins=history,
     )
@@ -201,6 +238,7 @@ def _fresh_automatic(work, *, history=True, records=64, actor=False):
     ports.graph = graph
     _queue(graph)
     receipt = _train(graph)
+    graph.owner._shared._sharing.pause()
     assert receipt is runtime._inbox._applied[FIRST] and receipt.update_number == 1
     assert life._admitted_bytes == 24 and life._copy_budget._charged == 48
     assert runtime._budget.updates_completed == runtime._candidate.calls == 1
@@ -429,7 +467,7 @@ def test_should_refuse_equal_valued_replacement_of_original_expiry_birth_tuple(a
     _observer_refusal(graph, before)
 
 
-def test_should_keep_original_partial_record_charges_after_automatic_mixed_reservation_exhaustion(
+def test_should_refuse_original_history_capacity_before_charging_mixed_erasure(
     automatic_work,
 ):
     graph, ports = _fresh_automatic(automatic_work, records=3)
@@ -438,7 +476,24 @@ def test_should_keep_original_partial_record_charges_after_automatic_mixed_reser
     graph.clock.advance_to(122)
     _observer_refusal(graph, before)
     progress = graph.ledger._admission._progress
-    assert progress.records_created == 3 == before["progress"].records_created + 1
+    assert progress is before["progress"]
+    assert progress.records_created == 2
+    assert progress.metadata_bytes_charged == before["progress"].metadata_bytes_charged
+    assert progress.invocations_started == before["progress"].invocations_started
+
+
+def test_should_keep_original_partial_record_charges_after_automatic_mixed_reservation_exhaustion(
+    partial_work,
+):
+    # Four original history slots admit this complete partition. The remaining
+    # two cumulative reservations are spent before the next reservation fails.
+    graph, ports = _fresh_automatic(partial_work, records=4)
+    _queue_all_forms(graph)
+    before = _authority(graph)
+    graph.clock.advance_to(122)
+    _observer_refusal(graph, before)
+    progress = graph.ledger._admission._progress
+    assert progress.records_created == 4 == before["progress"].records_created + 2
     assert progress.metadata_bytes_charged > before["progress"].metadata_bytes_charged
     assert progress.invocations_started == before["progress"].invocations_started
 

@@ -7,7 +7,7 @@ acquire a coherent live capture,invoke ports,serialize authority or restore stat
 
 from copy import deepcopy
 
-from src.app.expiry_history_birth import EPHEMERAL_LIFECYCLE_FIELDS, require_expiry_birth_source
+from src.app.expiry_history_birth import EPHEMERAL_LIFECYCLE_FIELDS, require_expiry_capture_source
 
 from src.app.managed_data_lifecycle import ManagedDataLifecycle
 from src.app.managed_experience import ManagedExperienceOwner
@@ -101,7 +101,7 @@ def require_lifecycle_source_schema(owner, lifecycle, registry, *, copy=None, dr
         raise ValueError(
             "lifecycle source roots differ from original complete authority relationships"
         )
-    require_expiry_birth_source(lifecycle)
+    require_expiry_capture_source(lifecycle)
 
 
 def detach_lifecycle_record(

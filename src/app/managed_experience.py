@@ -193,3 +193,8 @@ class ManagedExperienceOwner(Generic[Features, Targets, Prediction, State]):
         """Observe native inputs under the original managed and sharing gates."""
         with self._operation():
             return self._shared.train_ready(native_observer=native_observer)
+
+
+from src.app.expiry_release_proof import pin_release_methods as _pin_release_methods
+
+_EXPIRY_RELEASE_PINS = _pin_release_methods(ManagedExperienceOwner, ("_operation",))

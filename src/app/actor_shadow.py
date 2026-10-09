@@ -358,3 +358,14 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
         )
         self._consolidations.append(receipt)
         return receipt
+
+
+from src.app.expiry_release_proof import pin_release_methods as _pin_release_methods
+
+_EXPIRY_ACTOR_RELEASE_PINS = _pin_release_methods(
+    StableActor, ("_payload_exclusive", "_payload_references")
+)
+_EXPIRY_PROMOTABLE_LEASE_PINS = (_EXPIRY_ACTOR_RELEASE_PINS[0],)
+_EXPIRY_CANDIDATE_RELEASE_PINS = _pin_release_methods(
+    ActorShadowRuntime, ("_payload_exclusive", "_payload_references", "_exclusive")
+)

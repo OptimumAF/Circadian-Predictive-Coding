@@ -274,12 +274,13 @@ class ServingPromotionController(Generic[Features, Targets, Prediction, State]):
 
     @contextmanager
     def _exclusive(self) -> Iterator[None]:
-        if not self._gate.acquire(blocking=False):
+        acquired_gate = self._gate
+        if not acquired_gate.acquire(blocking=False):
             raise ValueError("promotion controller is busy; nested/concurrent operations refused")
         try:
             yield
         finally:
-            self._gate.release()
+            acquired_gate.release()
 
     def _require_runtime(
         self, runtime: ActorShadowRuntime[Features, Targets, Prediction, State]
@@ -476,3 +477,11 @@ class ServingPromotionController(Generic[Features, Targets, Prediction, State]):
             generation = self._actor._rollback(receipt)
             self._latest = None
             return generation
+
+
+from src.app.expiry_release_proof import pin_release_methods as _pin_release_methods
+
+_EXPIRY_ACTOR_RELEASE_PINS = _pin_release_methods(PromotableActor, ("_payload_references",))
+_EXPIRY_RELEASE_PINS = _pin_release_methods(
+    ServingPromotionController, ("_payload_exclusive", "_payload_references", "_exclusive")
+)

@@ -456,3 +456,10 @@ class CandidateCheckpointController(Generic[Features, Targets, Prediction, State
                         if transition is not None:
                             commit_replay_transition(transition)
                 return prepared
+
+
+from src.app.expiry_release_proof import pin_release_methods as _pin_release_methods
+
+_EXPIRY_RELEASE_PINS = _pin_release_methods(
+    CandidateCheckpointController, ("_payload_exclusive", "_payload_references", "_exclusive")
+)

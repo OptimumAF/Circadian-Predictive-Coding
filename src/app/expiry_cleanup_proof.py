@@ -16,6 +16,7 @@ from src.app.candidate_checkpoint import CandidateCheckpointController
 from src.app.erased_inbox_origins import _counter, _schema
 from src.app.serving_promotion import PromotableActor, ServingPromotionController, _Bundle, _Slot
 from src.core.circadian_predictive_coding import CircadianPredictiveCodingNetwork
+from src.core.checkpoint_content import CheckpointContentLimits
 from src.core.payload_ownership import OwnedPayloadGroup, PayloadHolderMetadata, PayloadReferences
 
 
@@ -47,6 +48,7 @@ def _native(learner: Any) -> tuple:
     name = "_model" if "_model" in fields else "model"
     model = fields[name]
     native = _plain(model)
+    kind: type
     if type(model) is CircadianPredictiveCodingNetwork:
         field, kind = "_replay_memory", deque
     elif native.keys() == {"rows"}:
@@ -85,6 +87,224 @@ def _inventory(life: Any) -> tuple:
         if holder is not None:
             result.append((number, entry[0], entry[1], holder))
     return tuple(result)
+
+
+class _ProjectionBudget:
+    """Conservative metadata grammar, including simultaneous reproof indexes.
+
+    These are logical metadata units, not a measurement of Python heap bytes.
+    A model occurrence includes its six-field weak proof and the temporary
+    identity/reference indexes used during reproof. Aliases still cost each
+    occurrence; no growing projection or weak witness is allocated here.
+    """
+
+    def __init__(self, limits: CheckpointContentLimits) -> None:
+        _schema(limits, CheckpointContentLimits)
+        CheckpointContentLimits.__post_init__(limits)
+        self.limits = limits
+        self.nodes = self.metadata = 0
+        # Why: original due results, the lexical scalar timing token and final
+        # scratch coexist with the weak graph. Reserve before any projection.
+        self.add(24, 1024)
+
+    def add(self, nodes: int, metadata: int) -> None:
+        self.nodes += nodes
+        self.metadata += metadata
+        if (
+            self.nodes > self.limits.max_nodes
+            or self.metadata > self.limits.max_metadata_bytes
+            or self.limits.max_depth < 6
+        ):
+            raise ValueError("expiry cleanup projection exceeds aggregate original limits")
+
+
+def _preflight_projection(life: Any, budget: _ProjectionBudget) -> None:
+    """Count exact supported fields before building the first graph projection."""
+    registry = life._registry
+    _counter(registry._total)
+    holders = registry._holders
+    maximum = min(life._policy.holders.max_lifetime_enrollments, 4096)
+    if type(holders) is not dict or len(holders) > min(life._policy.holders.max_live_holders, 4096):
+        raise ValueError("expiry cleanup holder inventory exceeds original bound")
+    for number, entry in holders.items():
+        _counter(number)
+        if (
+            type(entry) is not tuple
+            or len(entry) != 2
+            or type(entry[0]) is not str
+            or entry[0] not in ("actor", "candidate", "checkpoint", "promotion")
+            or type(entry[1]) is not ReferenceType
+        ):
+            raise ValueError("expiry cleanup requires closed original weak holder entries")
+        holder = entry[1]()
+        if holder is None:
+            continue
+        budget.add(24, 2048)
+        _preflight_holder(budget, entry[0], holder, maximum)
+
+
+def _preflight_models(budget: _ProjectionBudget, models: Any, maximum: int) -> None:
+    if type(models) not in (tuple, list) or len(models) > maximum:
+        raise ValueError("expiry cleanup retained model inventory exceeds original bound")
+    for learner in models:
+        # Charge before inspecting the occurrence; no _native weak tuple yet.
+        budget.add(12, 1024)
+        fields = _plain(learner)
+        model = fields["_model" if "_model" in fields else "model"]
+        native = _plain(model)
+        kind: type
+        if type(model) is CircadianPredictiveCodingNetwork:
+            field, kind = "_replay_memory", deque
+        elif native.keys() == {"rows"}:
+            field, kind = "rows", list
+        else:
+            raise ValueError("expiry cleanup native family lacks a pure replay container proof")
+        if type(native[field]) is not kind:
+            raise ValueError("expiry cleanup replay container is unsupported")
+
+
+def _preflight_bundle(budget: _ProjectionBudget, bundle: Any, maximum: int) -> None:
+    budget.add(8, 512)
+    _schema(bundle, _Bundle)
+    if type(bundle.cache) is not dict or type(bundle.metadata) is not dict:
+        raise ValueError("expiry cleanup requires exact auxiliary dictionaries")
+    _preflight_models(budget, (bundle.learner,), maximum)
+
+
+def _preflight_holder(budget: _ProjectionBudget, kind: str, holder: Any, maximum: int) -> None:
+    fields = _plain(holder)
+    pending = None
+    if kind == "actor" and type(holder) is StableActor:
+        gate = fields["_read_gate"]
+        _preflight_models(budget, (fields["_learner"],), maximum)
+    elif kind == "actor" and type(holder) is PromotableActor:
+        gate, slot = fields["_read_gate"], fields["_slot"]
+        _schema(slot, _Slot)
+        _counter(slot.generation)
+        budget.add(6, 256)
+        _preflight_bundle(budget, slot.bundle, maximum)
+        if slot.previous is not None:
+            _preflight_bundle(budget, slot.previous, maximum)
+    elif kind == "candidate" and type(holder) is ActorShadowRuntime:
+        gate = fields["_write_gate"]
+        _counter(fields["_revision"])
+        budget.add(4, 256)
+        _preflight_models(budget, (fields["_candidate"],), maximum)
+    elif kind == "checkpoint" and type(holder) is CandidateCheckpointController:
+        gate, pending = fields["_gate"], fields["_pending"]
+        if type(fields["_models"]) is not list:
+            raise ValueError("expiry cleanup requires original retained model list")
+        _preflight_models(budget, fields["_models"], maximum)
+    elif kind == "promotion" and type(holder) is ServingPromotionController:
+        gate, pending = fields["_gate"], fields["_pending"]
+        if type(pending) is not dict or len(pending) > maximum:
+            raise ValueError("expiry cleanup promotion inventory exceeds original bound")
+        for item in pending.values():
+            _preflight_bundle(budget, _plain(item)["bundle"], maximum)
+    else:
+        raise ValueError("expiry cleanup holder family is unsupported")
+    if type(gate) is not type(Lock()):
+        raise ValueError("expiry cleanup requires original plain gates")
+    if pending is not None:
+        if type(pending) is not dict or len(pending) > maximum:
+            raise ValueError("expiry cleanup requires bounded original pending maps")
+        budget.add(4, 256)
+
+
+def _saved_models(budget: _ProjectionBudget, models: Any, maximum: int) -> None:
+    if type(models) is not tuple or len(models) > maximum:
+        raise ValueError("expiry cleanup saved models exceed original bound")
+    budget.add(len(models) * 12, len(models) * 1024)
+    for row in models:
+        if (
+            type(row) is not tuple
+            or len(row) != 6
+            or type(row[0]) is not ReferenceType
+            or type(row[1]) is not str
+            or row[1] not in ("_model", "model")
+            or type(row[2]) is not ReferenceType
+            or type(row[3]) is not str
+            or row[3] not in ("_replay_memory", "rows")
+            or (row[4] is not list and row[4] is not deque)
+        ):
+            raise ValueError("expiry cleanup saved native proof requires closed exact fields")
+        _counter(row[5])
+
+
+def _saved_holder(budget: _ProjectionBudget, row: Any, maximum: int) -> None:
+    budget.add(24, 2048)
+    if (
+        type(row) is not tuple
+        or len(row) != 9
+        or type(row[0]) is not ReferenceType
+        or type(row[1]) is not str
+        or row[1] not in ("actor", "candidate", "checkpoint", "promotion")
+    ):
+        raise ValueError("expiry cleanup saved holder requires closed exact fields")
+    _counter(row[2])
+    _saved_models(budget, row[3], maximum)
+    inboxes, bundles, revision, pending, slot = row[4:]
+    if type(inboxes) is not tuple or len(inboxes) > 1:
+        raise ValueError("expiry cleanup saved inbox proof exceeds original bound")
+    budget.add(len(inboxes) * 4, len(inboxes) * 256)
+    if any(type(value) is not ReferenceType for value in inboxes):
+        raise ValueError("expiry cleanup saved inbox requires original weak fields")
+    if type(bundles) is not tuple or len(bundles) > maximum:
+        raise ValueError("expiry cleanup saved bundles exceed original bound")
+    budget.add(len(bundles) * 8, len(bundles) * 512)
+    for bundle in bundles:
+        if type(bundle) is not tuple or len(bundle) != 3 or type(bundle[0]) is not ReferenceType:
+            raise ValueError("expiry cleanup saved bundle requires exact weak/scalar fields")
+        _counter(bundle[1])
+        _counter(bundle[2])
+    if revision is not None:
+        _counter(revision)
+    if pending is not None:
+        budget.add(4, 256)
+        if type(pending) is not tuple or len(pending) != 2:
+            raise ValueError("expiry cleanup saved pending schema changed")
+        _counter(pending[0])
+        _counter(pending[1])
+        if pending[1] > maximum:
+            raise ValueError("expiry cleanup saved pending exceeds original bound")
+    if slot is not None:
+        budget.add(6, 256)
+        if (
+            type(slot) is not tuple
+            or len(slot) != 4
+            or type(slot[1]) is not ReferenceType
+            or (slot[2] is not None and type(slot[2]) is not ReferenceType)
+        ):
+            raise ValueError("expiry cleanup saved slot schema changed")
+        _counter(slot[0])
+        _counter(slot[3])
+
+
+def _preflight_saved(proof: Any, life: Any, budget: _ProjectionBudget) -> None:
+    """Bound retained proof even if actual promotion/previous state has shrunk."""
+    for value in (proof.registry_id, proof.holder_map_id, proof.total):
+        _counter(value)
+    maximum = min(life._policy.holders.max_lifetime_enrollments, 4096)
+    if (
+        type(proof.entries) is not tuple
+        or type(proof.holders) is not tuple
+        or len(proof.entries) != len(proof.holders)
+        or len(proof.entries) > min(life._policy.holders.max_live_holders, 4096)
+    ):
+        raise ValueError("expiry cleanup saved holder inventory exceeds original bound")
+    for entry, holder in zip(proof.entries, proof.holders):
+        if (
+            type(entry) is not tuple
+            or len(entry) != 4
+            or type(entry[1]) is not str
+            or entry[1] not in ("actor", "candidate", "checkpoint", "promotion")
+        ):
+            raise ValueError("expiry cleanup saved enrollment schema changed")
+        for value in (entry[0], entry[2], entry[3]):
+            _counter(value)
+        _saved_holder(budget, holder, maximum)
+        if entry[1] != holder[1]:
+            raise ValueError("expiry cleanup saved holder kind differs from enrollment")
 
 
 def _holder(kind: str, holder: Any, maximum: int) -> tuple:
@@ -149,10 +369,13 @@ class CleanupGraphProof(NamedTuple):
     total: int
     entries: tuple
     holders: tuple
+    limits: Any
+    limit_values: tuple
 
 
-def observe_cleanup_graph(life: Any) -> CleanupGraphProof:
+def observe_cleanup_graph(life: Any, limits: CheckpointContentLimits) -> CleanupGraphProof:
     """Borrow exact fields before opaque enumeration; retain weak/scalar pins."""
+    _preflight_projection(life, _ProjectionBudget(limits))
     entries = _inventory(life)
     maximum = min(life._policy.holders.max_lifetime_enrollments, 4096)
     holders = tuple(_holder(kind, holder, maximum) for _, kind, _, holder in entries)
@@ -165,13 +388,32 @@ def observe_cleanup_graph(life: Any) -> CleanupGraphProof:
             (number, kind, id(reference), id(holder)) for number, kind, reference, holder in entries
         ),
         holders,
+        ref(limits),
+        (limits.max_nodes, limits.max_metadata_bytes, limits.max_array_bytes, limits.max_depth),
     )
 
 
-def require_cleanup_graph(proof: Any, life: Any, *, final: bool, groups: Any) -> None:
+def require_cleanup_graph(
+    proof: Any, life: Any, limits: CheckpointContentLimits, *, final: bool, groups: Any
+) -> None:
     """Allow only actual invalidation/replacement, then require empty raw state."""
     if type(proof) is not CleanupGraphProof:
         raise ValueError("expiry cleanup lost its original graph proof")
+    _schema(limits, CheckpointContentLimits)
+    CheckpointContentLimits.__post_init__(limits)
+    if (
+        type(proof.limits) is not ReferenceType
+        or proof.limits() is not limits
+        or type(proof.limit_values) is not tuple
+        or len(proof.limit_values) != 4
+        or any(type(value) is not int or not 0 < value < 2**63 for value in proof.limit_values)
+        or proof.limit_values
+        != (limits.max_nodes, limits.max_metadata_bytes, limits.max_array_bytes, limits.max_depth)
+    ):
+        raise ValueError("expiry cleanup original projection limits changed")
+    budget = _ProjectionBudget(limits)
+    _preflight_saved(proof, life, budget)
+    _preflight_projection(life, budget)
     entries = _inventory(life)
     current = tuple(
         (number, kind, id(reference), id(holder)) for number, kind, reference, holder in entries
@@ -209,6 +451,7 @@ def require_cleanup_graph(proof: Any, life: Any, *, final: bool, groups: Any) ->
             if (
                 type(values) is not tuple
                 or len(values) > 4096
+                or len(values) != len(identities)
                 or tuple(id(value) for value in values) != identities
             ):
                 raise ValueError("expiry cleanup opaque ownership differs from original fields")

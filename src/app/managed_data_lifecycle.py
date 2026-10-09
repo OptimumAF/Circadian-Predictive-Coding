@@ -5,15 +5,22 @@ Cleanup clears all delivered raw records; it does not unlearn model parameters,
 overwrite RAM or erase caller snapshots/callback-owned data. No worker or IO.
 """
 
+from contextlib import ExitStack
 from dataclasses import replace
 from math import isfinite
 from threading import Lock
+from types import FunctionType
 from typing import Any, Callable
 
 from src.app.actor_shadow import ActorShadowRuntime, StableActor
 from src.app.candidate_checkpoint import CandidateCheckpointController
 from src.app.managed_experience import ManagedExperienceOwner
 from src.app.experience_inbox import ExperienceInbox
+from src.app.expiry_release_proof import (
+    pin_release_methods,
+    require_cleanup_release_dispatch,
+    require_release_methods,
+)
 from src.app.payload_copy_budget import PayloadCopyBudget
 from src.app.serving_promotion import PromotableActor, ServingPromotionController
 from src.core.data_erasure import ReplayPayloadErasure
@@ -268,12 +275,19 @@ class ManagedDataLifecycle:
         try:
             if self._budget.clock is not self._wall_clock:
                 raise ValueError("original retention clock changed")
+            # Why: the provider can mutate the live latch; compare its result
+            # against the accepted prior captured before that opaque call.
+            previous = self._last_seconds
+            if previous is not None and (
+                type(previous) not in (int, float) or not isfinite(previous) or previous < 0
+            ):
+                raise ValueError("original elapsed retention clock invalid or backwards")
             value = self._wall_clock()
             if (
                 type(value) not in (int, float)
                 or not isfinite(value)
                 or value < 0
-                or (self._last_seconds is not None and value < self._last_seconds)
+                or (previous is not None and value < previous)
             ):
                 raise ValueError("original elapsed retention clock invalid or backwards")
             self._last_seconds = float(value)
@@ -320,9 +334,14 @@ class ManagedDataLifecycle:
         ):
             raise ValueError("retention driver terminal; raw admission/access is closed")
 
-    def _due(self):
+    def _due(self, *, with_time=False):
+        if type(with_time) is not bool:
+            raise ValueError("expiry due time option requires exact boolean")
         with self._owner._operation():
-            now, seconds = self._tick(), self._elapsed()
+            time_fault = _ORIGINAL_EXPIRY_TIME_DISPATCH(self)
+            now = self._tick()
+            time_fault = _ORIGINAL_EXPIRY_TIME_DISPATCH(self) or time_fault
+            seconds = self._elapsed()
             keys = tuple(
                 sorted(
                     k
@@ -330,7 +349,10 @@ class ManagedDataLifecycle:
                     if k not in self._owner._revoked_keys and self._expired(k, now, seconds)
                 )
             )
-            return keys, self._auxiliary_expired(seconds)
+            auxiliary = self._auxiliary_expired(seconds)
+            if with_time:
+                return keys, auxiliary, None if time_fault else now, seconds
+            return keys, auxiliary
 
     def _expire_all(self):
         keys = tuple(sorted(k for k in self._owner._catalog if k not in self._owner._revoked_keys))
@@ -477,14 +499,11 @@ class ManagedDataLifecycle:
         return self._cleanup(keys, "opt_out", subject_id)
 
     def expire(self) -> DataCleanupReport:
-        from src.app.expiry_inbox_observation import (
-            ExpiryObservationError,
-            _ExpiryObservation,
-            expiry_observation,
-        )
-
-        observation = expiry_observation(self)
-        _ExpiryObservation.__enter__(observation)
+        # Private lexical kernel: opaque ports cannot replace its code through
+        # a public/class alias before the mandatory original gate release.
+        close = FunctionType(_ORIGINAL_EXPIRY_CLOSE_CODE, _ORIGINAL_EXPIRY_CLOSE.__globals__)
+        observation = _ORIGINAL_EXPIRY_FACTORY(self)
+        _ORIGINAL_EXPIRY_ENTER(observation)
         proof, gate, context, access = (
             observation.proof,
             observation.gate,
@@ -494,19 +513,45 @@ class ManagedDataLifecycle:
         active = observation.active
         thread = observation.thread
         fault = False
+        release_fault = observation.fault is not False
+        time_gate = None
+        timing = None
         try:
-            keys, auxiliary = self._due()
+            release_fault = _ORIGINAL_EXPIRY_TIME_DISPATCH(self) or release_fault
+            # A refused descriptor cannot run before lexical scope cleanup.
+            time_gate = _original_expiry_fields(self)["_time_gate"]
+            if active and proof is not None:
+                keys, auxiliary, now, seconds = self._due(with_time=True)
+                if now is None:
+                    release_fault = True
+                    _ORIGINAL_EXPIRY_MARK_FAULT(observation)
+                else:
+                    # The graph preflight reserved this fixed scalar token.
+                    timing = (id(time_gate), now, seconds)
+            else:
+                keys, auxiliary = self._due()
+            if active:
+                try:
+                    require_cleanup_release_dispatch(self)
+                except BaseException:
+                    release_fault = True
+                    _ORIGINAL_EXPIRY_MARK_FAULT(observation)
             if not keys and not auxiliary:
                 report = DataCleanupReport("expired", (), (), 0, 0, 0, 0)
             else:
                 report = self._cleanup(
-                    keys, "expired", allow_empty=auxiliary, expiry=(observation, proof)
+                    keys,
+                    "expired",
+                    allow_empty=auxiliary,
+                    expiry=(observation, proof, release_fault, timing),
                 )
-                fault = observation.fault is not False or (active and proof is None)
+                fault = (
+                    release_fault or observation.fault is not False or (active and proof is None)
+                )
         finally:
             # Lexical original gate/tokens survive mutable observer fields and
             # releases never replace a primary native/holder cleanup exception.
-            _ExpiryObservation.close(observation, gate, context, access, thread)
+            close(observation, gate, context, access, thread)
         if fault:
             raise ExpiryObservationError("expiry-observation-refused", report)
         return report
@@ -521,57 +566,99 @@ class ManagedDataLifecycle:
     ) -> DataCleanupReport:
         if not (allow_empty and keys == ()):
             self._validate_keys(keys)
-        with (
-            self._owner._operation(),
-            self._registry._lease() as groups,
-            self._shared._sharing._checkpoint_lease(),
-        ):
-            if expiry is not None:
-                from src.app.expiry_inbox_observation import _ExpiryObservation
-
-                _ExpiryObservation.before_cleanup(expiry[0], expiry[1], groups)
-            self._tick()
-            holders = self._registry._live()
-            for _, kind, holder in holders:
-                self._require_holder(kind, holder)
-            models = self._models(groups)
-            for model in models:
-                self._describe(model)
-            for group in groups:
-                for auxiliary in group.references.auxiliary:
-                    if type(auxiliary) is not dict:
-                        raise ValueError("unsupported retained auxiliary data")
-            plans = self._prepare_inboxes(groups, reason)
-            revoked = set(keys) | {key for _, inbox_keys, _, _ in plans for key in inbox_keys}
-            self._owner._revoked_keys.update(revoked)
-            if subject_id is not None:
-                self._owner._opted_out.add(subject_id)
-            checkpoints, promotions = self._invalidate(holders)
+        release_fault = False
+        if expiry is not None and expiry[0].active:
             try:
-                erased = self._clear_payloads(models, plans, groups)
-                self._failed = False
-                self._retention_fault = False
-                self._auxiliary_started_at = None
+                require_cleanup_release_dispatch(self)
             except BaseException:
-                self._failed = True
-                for _, kind, holder in holders:
-                    if kind == "candidate":
-                        assert isinstance(holder, ActorShadowRuntime)
-                        holder._stopped = True
+                release_fault = True
+                _ORIGINAL_EXPIRY_MARK_FAULT(expiry[0])
+        primary: BaseException | None = None
+        report = None
+        try:
+            with ExitStack() as stack:
+                try:
+                    stack.enter_context(self._owner._operation())
+                    groups = stack.enter_context(self._registry._lease())
+                    stack.enter_context(self._shared._sharing._checkpoint_lease())
+                    report = self._cleanup_leased(
+                        keys, reason, subject_id, groups, expiry, release_fault
+                    )
+                except BaseException as error:
+                    primary = error
+                    raise
+        except BaseException:
+            if primary is None:
                 raise
-            staged = None if expiry is None else expiry[0].staged
-            report = DataCleanupReport(
-                reason,
-                tuple(sorted(keys)),
-                tuple(sorted(revoked)),
-                erased,
-                len(plans),
-                checkpoints,
-                promotions,
-            )
-            if expiry is not None:
-                _ExpiryObservation.finish(expiry[0], expiry[1], report, staged, groups)
-            return report
+        # Why: an unsafe legacy context exit must not mask or suppress the
+        # genuine native cleanup failure. Never retain this error on an owner.
+        if primary is not None:
+            raise primary
+        assert report is not None
+        return report
+
+    def _cleanup_leased(self, keys, reason, subject_id, groups, expiry, release_fault):
+        if expiry is not None:
+            release_fault = _ORIGINAL_EXPIRY_TIME_DISPATCH(self) or release_fault
+            try:
+                require_release_methods(expiry[0], _EXPIRY_OBSERVER_PINS, slotted=True)
+            except BaseException:
+                release_fault = True
+                _ORIGINAL_EXPIRY_MARK_FAULT(expiry[0])
+            else:
+                _ORIGINAL_EXPIRY_BEFORE(expiry[0], expiry[1], groups)
+        if expiry is not None:
+            release_fault = _ORIGINAL_EXPIRY_TIME_DISPATCH(self) or release_fault
+        self._tick()
+        holders = self._registry._live()
+        for _, kind, holder in holders:
+            self._require_holder(kind, holder)
+        models = self._models(groups)
+        for model in models:
+            self._describe(model)
+        for group in groups:
+            for auxiliary in group.references.auxiliary:
+                if type(auxiliary) is not dict:
+                    raise ValueError("unsupported retained auxiliary data")
+        plans = self._prepare_inboxes(groups, reason)
+        revoked = set(keys) | {key for _, inbox_keys, _, _ in plans for key in inbox_keys}
+        self._owner._revoked_keys.update(revoked)
+        if subject_id is not None:
+            self._owner._opted_out.add(subject_id)
+        checkpoints, promotions = self._invalidate(holders)
+        try:
+            erased = self._clear_payloads(models, plans, groups)
+            self._failed = False
+            self._retention_fault = False
+            self._auxiliary_started_at = None
+        except BaseException:
+            self._failed = True
+            for _, kind, holder in holders:
+                if kind == "candidate":
+                    assert isinstance(holder, ActorShadowRuntime)
+                    holder._stopped = True
+            raise
+        staged = None if expiry is None else expiry[0].staged
+        report = DataCleanupReport(
+            reason,
+            tuple(sorted(keys)),
+            tuple(sorted(revoked)),
+            erased,
+            len(plans),
+            checkpoints,
+            promotions,
+        )
+        if expiry is not None:
+            try:
+                require_release_methods(expiry[0], _EXPIRY_OBSERVER_PINS, slotted=True)
+            except BaseException:
+                release_fault = True
+                _ORIGINAL_EXPIRY_MARK_FAULT(expiry[0])
+            if release_fault or expiry[2]:
+                _ORIGINAL_EXPIRY_MARK_FAULT(expiry[0])
+            else:
+                _ORIGINAL_EXPIRY_FINISH(expiry[0], expiry[1], report, staged, groups)
+        return report
 
     def _clear_payloads(self, models, plans, groups) -> int:
         erased = 0
@@ -637,3 +724,46 @@ class ManagedDataLifecycle:
             if kind == "candidate":
                 holder._revision += 1
         return checkpoints, promotions
+
+
+# Why: an active original frame keeps this code even if a later port replaces
+# the class method. Authorization must not rebase onto that replacement.
+_ORIGINAL_EXPIRY_CODE = ManagedDataLifecycle.expire.__code__
+_ORIGINAL_EXPIRY_DICT = ManagedDataLifecycle.__dict__["__dict__"]
+
+
+def _original_expiry_fields(life: Any) -> dict:
+    """Borrow original plain fields without resolving a replaced getter."""
+    values = _ORIGINAL_EXPIRY_DICT.__get__(life, ManagedDataLifecycle)
+    if (
+        type(values) is not dict
+        or len(values) > 512
+        or any(type(key) is not str or len(key) > 128 for key in values)
+    ):
+        raise ValueError("expiry requires bounded original lifecycle fields")
+    return values
+
+
+# Eager defining-module pins precede every lifecycle constructor callback.
+from src.app.expiry_inbox_observation import (
+    ExpiryObservationError,
+    _ORIGINAL_EXPIRY_ENTER,
+    _ORIGINAL_EXPIRY_CLOSE,
+    _ORIGINAL_EXPIRY_BEFORE,
+    _ORIGINAL_EXPIRY_FINISH,
+    _ORIGINAL_EXPIRY_FACTORY,
+    observe_expiry_time_dispatch as _ORIGINAL_EXPIRY_TIME_DISPATCH,
+    mark_expiry_fault as _ORIGINAL_EXPIRY_MARK_FAULT,
+    _EXPIRY_RELEASE_PINS as _EXPIRY_OBSERVER_PINS,
+)
+from src.app.expiry_validation_proof import pin_validation_types
+
+_ORIGINAL_EXPIRY_CLOSE_CODE = _ORIGINAL_EXPIRY_CLOSE.__code__
+_EXPIRY_EXIT_STACK = ExitStack
+_EXPIRY_RELEASE_PINS = pin_release_methods(
+    ManagedDataLifecycle, ("expire", "_cleanup", "_cleanup_leased", "_due")
+)
+_EXPIRY_TIME_PINS = pin_release_methods(
+    ManagedDataLifecycle, ("_tick", "_elapsed", "_elapsed_leased")
+)
+_EXPIRY_GETTER_PINS = pin_validation_types((ManagedDataLifecycle,), getters_only=True)

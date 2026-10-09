@@ -52,6 +52,7 @@ from src.core.replay_origin import ReplayOriginLimits, ReplayOriginPorts
 from src.core.resource_sharing import SharingLimits
 from test_managed_replay_origins import WINDOW
 from test_native_managed_replay_origins import queue
+from native_work_profile import bind_original_calls, count_original_calls
 
 FAIL_RESTORE_COPY = [False]
 
@@ -105,6 +106,15 @@ def observe_native_work(tmp_path_factory, limits):
     )
     work = dict.fromkeys(limits, 0)
     previous = sys.getprofile()
+    # Preserve the public dispatch that expiry attests while measuring its entries.
+    original_calls = bind_original_calls(
+        (
+            (CandidateCheckpointController, "capture", "captures"),
+            (CandidateCheckpointController, "restore", "preparations"),
+            (ExperienceInbox, "_retire_ledger", "handoffs"),
+            (ManagedDataLifecycle, "_cleanup", "cleanup_attempts"),
+        )
+    )
 
     def counted(key, original):
         def call(*args, **kwargs):
@@ -118,6 +128,7 @@ def observe_native_work(tmp_path_factory, limits):
         return call
 
     def profile(frame, event, function):
+        count_original_calls(original_calls, work, limits, frame, event)
         if (
             event == "c_call"
             and frame.f_code.co_filename.endswith("circadian_predictive_coding.py")
@@ -165,11 +176,7 @@ def observe_native_work(tmp_path_factory, limits):
             (CircadianPredictiveCodingNetwork, "train_epoch", "wakes"),
             (CircadianPredictiveCodingNetwork, "_store_replay_snapshot", "stores"),
             (CircadianPredictiveCodingNetwork, "predict_proba", "predicts"),
-            (CandidateCheckpointController, "capture", "captures"),
-            (CandidateCheckpointController, "restore", "preparations"),
             (CircadianPredictiveCodingNetwork, "restore_state", "native_restores"),
-            (ExperienceInbox, "_retire_ledger", "handoffs"),
-            (ManagedDataLifecycle, "_cleanup", "cleanup_attempts"),
         ]:
             stack.enter_context(patch.object(cls, method, counted(key, getattr(cls, method))))
         stack.enter_context(patch.object(checkpoint_module, "observe_graph_copies", traced))

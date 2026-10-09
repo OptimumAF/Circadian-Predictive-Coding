@@ -48,7 +48,7 @@ def bounded_native_expiry_work(tmp_path_factory):
         )
 
 
-def _original_allowances(ledger, life, runtime):
+def _original_allowances(ledger, life, runtime, *, expected_live_records=16):
     raw_budget = life._copy_budget
     assert raw_budget is not None
     limits = ledger._admission.limits
@@ -59,7 +59,7 @@ def _original_allowances(ledger, life, runtime):
         limits.max_metadata_bytes,
         limits.max_age_ticks,
         limits.max_payload_bytes,
-    ) == (16, 64, 32, 128 * 1024, 120, 4096)
+    ) == (expected_live_records, 64, 32, 128 * 1024, 120, 4096)
     assert raw_budget._limits.max_lifetime_owned_bytes == 4096
     return dict(
         admission=ledger._admission,

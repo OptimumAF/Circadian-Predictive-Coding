@@ -255,13 +255,29 @@ def require_expiry_birth_source(life: Any) -> None:
         raise ValueError("expiry original history/lifecycle birth peer changed")
 
 
+def require_expiry_capture_source(life: Any) -> None:
+    """Validate ephemeral capture fields without adding OFF port restrictions."""
+    from src.app.managed_data_lifecycle import ManagedDataLifecycle
+
+    if type(life) is not ManagedDataLifecycle or type(life._expiry_history_on) is not bool:
+        raise ValueError("expiry capture requires exact lifecycle fields")
+    _require_birth_tuple(life._expiry_authority)
+    if life._expiry_history_on:
+        require_expiry_birth_source(life)
+    elif life._expiry_history_birth is not None:
+        raise ValueError("expiry OFF capture cannot carry enrolled history")
+    # Why: original OFF captures support replaced diagnostic/cleanup ports.
+    # Only enrolled history needs the added original birth authority proof.
+
+
 def bind_expiry_history(life: Any, ledger: Any) -> None:
     """Only final fresh original ledger construction installs the weak bridge."""
     from src.app.managed_replay_origins import ManagedReplayOrigins
 
     caller = sys._getframe(1)
     if (
-        type(ledger) is not ManagedReplayOrigins
+        ledger is None
+        or type(ledger) is not ManagedReplayOrigins
         or caller.f_code is not ManagedReplayOrigins.__init__.__code__
         or caller.f_locals.get("self") is not ledger
     ):

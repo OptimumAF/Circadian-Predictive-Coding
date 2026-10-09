@@ -39,6 +39,7 @@ from src.app.managed_inbox_origins import (
 )
 from src.app.managed_replay_origins import _Row
 from src.app.untrained_inbox_origins import UntrainedInboxOrigin, untrained_inbox_origin_stamp
+from src.app.expiry_validation_proof import pin_validation_types, require_validation_types
 from src.core.checkpoint_content import CheckpointContentLimits, checkpoint_content_stamp
 from src.core.data_erasure import ErasedExperience
 from src.core.data_lifecycle import (
@@ -501,9 +502,20 @@ def prepay_expiry_transition(
 
 
 def require_final_expiry_transition(
-    staged: Any, history: Any, ledger: Any, owner: Any, runtime: Any, now: int, report: Any
+    staged: Any,
+    history: Any,
+    ledger: Any,
+    owner: Any,
+    runtime: Any,
+    now: int,
+    report: Any,
+    *,
+    pure_final: bool = False,
 ) -> None:
     """Prove saved weak/scalar lineage after raw removal, with no publication."""
+    if type(pure_final) is not bool:
+        raise ValueError("expiry final proof option requires exact boolean")
+    require_validation_types(_TRANSITION_GETTER_PINS)
     if type(staged) is not _ExpiryTransition:
         raise ValueError("expiry transition requires exact original staged type")
     life = _require_original_bindings(history, ledger, owner, runtime)
@@ -569,6 +581,8 @@ def require_final_expiry_transition(
             raise ValueError("expiry transition requires bounded report keys")
         for key in keys:
             _require_key(key, staged.limits.max_metadata_bytes)
+        if keys != tuple(sorted(set(keys))):
+            raise ValueError("expiry transition report identities must be sorted and unique")
     if type(report.reason) is not str:
         raise ValueError("expiry transition report reason requires exact string")
     for counter in (
@@ -590,7 +604,9 @@ def require_final_expiry_transition(
         ),
         staged.limits,
     )
-    DataCleanupReport.__post_init__(report)
+    if not pure_final:
+        # Why: this public validator is opaque and must precede final time lease.
+        DataCleanupReport.__post_init__(report)
     if (
         report.reason != "expired"
         or not set(staged.keys) <= set(report.revoked_keys)
@@ -601,3 +617,6 @@ def require_final_expiry_transition(
         tombstone = inbox._erased[key]
         if tombstone.reason != "expired" or tombstone.erased_at != now:
             raise ValueError("expiry transition actual current expiry tombstone changed")
+
+
+_TRANSITION_GETTER_PINS = pin_validation_types((_ExpiryTransition,))

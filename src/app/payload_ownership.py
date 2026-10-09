@@ -109,21 +109,43 @@ class PayloadOwnershipRegistry:
         controller->candidate->actor orders and avoids partial cleanup on refusal.
         Strong references live only in this lease; metadata snapshots retain none.
         """
-        with lease_payload_lock(self._gate, "ownership registry"), ExitStack() as stack:
-            live = self._live()
-            for _, _, owner in live:
-                if type(owner._payload_ready) is not bool or not owner._payload_ready:
-                    raise ValueError("payload holder initialization is incomplete")
+        primary: BaseException | None = None
+        try:
+            with lease_payload_lock(self._gate, "ownership registry"), ExitStack() as stack:
                 try:
-                    stack.enter_context(owner._payload_exclusive())
-                except ValueError as error:
-                    raise PayloadOwnershipBusy(str(error)) from error
-            groups = []
-            for number, kind, owner in live:
-                references = owner._payload_references()
-                if type(references) is not PayloadReferences:
-                    raise ValueError("holder enumeration requires exact PayloadReferences")
-                groups.append(
-                    OwnedPayloadGroup(PayloadHolderMetadata(number, kind, True), references)
-                )
-            yield tuple(groups)
+                    live = self._live()
+                    for _, _, owner in live:
+                        if type(owner._payload_ready) is not bool or not owner._payload_ready:
+                            raise ValueError("payload holder initialization is incomplete")
+                        try:
+                            stack.enter_context(owner._payload_exclusive())
+                        except ValueError as error:
+                            raise PayloadOwnershipBusy(str(error)) from error
+                    groups = []
+                    for number, kind, owner in live:
+                        references = owner._payload_references()
+                        if type(references) is not PayloadReferences:
+                            raise ValueError("holder enumeration requires exact PayloadReferences")
+                        groups.append(
+                            OwnedPayloadGroup(PayloadHolderMetadata(number, kind, True), references)
+                        )
+                    yield tuple(groups)
+                except BaseException as error:
+                    primary = error
+                    raise
+        except BaseException:
+            if primary is None:
+                raise
+        # Preserve the first visible entry/body error across unsafe old exits.
+        if primary is not None:
+            raise primary
+
+
+from src.app.expiry_release_proof import pin_release_methods as _pin_release_methods
+
+_EXPIRY_RELEASE_PINS = _pin_release_methods(PayloadOwnershipRegistry, ("_lease", "_live"))
+_EXPIRY_LOCK_HELPER = lease_payload_lock
+_EXPIRY_LOCK_CODE = lease_payload_lock.__code__
+_EXPIRY_LOCK_GENERATOR: Any = lease_payload_lock.__dict__["__wrapped__"]
+_EXPIRY_LOCK_GENERATOR_CODE = _EXPIRY_LOCK_GENERATOR.__code__
+_EXPIRY_EXIT_STACK = ExitStack
