@@ -1,6 +1,6 @@
 """Finite entry measurement for disposable test subprocesses.
 
-Inputs: original raw Python functions/C callables, labels, limits and a fresh
+Inputs: original raw Python functions/code objects/C callables, labels, limits and a fresh
 breach receipt path. Outputs: scalar entry counts or process exit73 on breach.
 This preserves dispatch identities and covers the main thread and future workers.
 It does not cover pre-existing workers, argument evaluation or work dispatched
@@ -26,7 +26,7 @@ class ProviderEntryProfile:
 
     def __init__(
         self,
-        entries: tuple[tuple[Callable, str, int], ...],
+        entries: tuple[tuple[Callable | CodeType, str, int], ...],
         receipt: Path,
     ) -> None:
         if not 0 < len(entries) <= 64:
@@ -47,10 +47,14 @@ class ProviderEntryProfile:
             token: object
             if type(function) is FunctionType:
                 token, event = function.__code__, "call"
+            elif type(function) is CodeType:
+                # Why raw code: nested callbacks can be bound from the original
+                # factory's constants before the factory allocates a closure.
+                token, event = function, "call"
             elif type(function) is BuiltinFunctionType:
                 token, event = function, "c_call"
             else:
-                raise TypeError("entry binding requires a raw Python function or C callable")
+                raise TypeError("entry binding requires a raw Python function/code or C callable")
             if any(token is prior or label == key for prior, key, _, _ in table):
                 raise ValueError("entry bindings require distinct identities and labels")
             table.append((token, label, limit, event))

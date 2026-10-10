@@ -1,4 +1,4 @@
-"""Twelve pure guard controls; seven disposable negative children, no native work."""
+"""Fourteen pure guard controls; eight disposable negative children, no native work."""
 
 import json
 from pathlib import Path
@@ -6,7 +6,7 @@ import subprocess
 import sys
 import threading
 import time
-from types import FunctionType
+from types import CodeType, FunctionType
 
 import pytest
 
@@ -121,7 +121,7 @@ def test_should_cover_future_worker_and_restore_both_profiles_after_join(tmp_pat
 
 
 def run_negative_case(mode, directory):
-    """Only called by seven disposable control children; exit73 is expected."""
+    """Only called by eight disposable control children; exit73 is expected."""
     path = Path(directory)
 
     def provider():
@@ -148,7 +148,8 @@ def run_negative_case(mode, directory):
         receipt = path / "missing-parent" / "breach.json"
     if mode in ("prior-error", "setup-error"):
         sys.setprofile(prior)
-    guard = ProviderEntryProfile(((provider, "calls", int(mode == "prior-error")),), receipt)
+    entry = provider.__code__ if mode == "code-cap" else provider
+    guard = ProviderEntryProfile(((entry, "calls", int(mode == "prior-error")),), receipt)
     with guard.measure():
         if mode == "sys-mutation":
             sys.setprofile(None)
@@ -274,3 +275,46 @@ def test_should_refuse_existing_worker_before_installation(tmp_path):
         admission_refused=True,
         restored=True,
     )
+
+
+def test_should_bind_original_nested_code_before_factory_and_ignore_foreign_equal_code(tmp_path):
+    observed = []
+
+    def factory(value):
+        def provider():
+            observed.append(guard.counts["nested"])
+            return value
+
+        return provider
+
+    (code,) = tuple(value for value in factory.__code__.co_consts if type(value) is CodeType)
+    guard = ProviderEntryProfile(((code, "nested", 2),), tmp_path / "breach.json")
+    previous_main, previous_thread = sys.getprofile(), threading.getprofile()
+    with guard.measure():
+        callback = factory(17)
+        alias = callback
+        assert alias() == callback() == 17
+        foreign = FunctionType(code.replace(), callback.__globals__, closure=callback.__closure__)
+        assert foreign() == 17
+    assert callback.__code__ is code and alias is callback
+    assert foreign.__code__ == code and foreign.__code__ is not code
+    assert guard.counts == {"nested": 2} and observed == [1, 2, 2]
+    assert code is next(value for value in factory.__code__.co_consts if type(value) is CodeType)
+    assert sys.getprofile() is previous_main and threading.getprofile() is previous_thread
+    with pytest.raises(ValueError, match="distinct identities"):
+        ProviderEntryProfile(
+            ((callback, "first", 1), (code, "second", 1)), tmp_path / "invalid.json"
+        )
+    write_work(
+        tmp_path / "work.json",
+        calls=2,
+        bodies=4,
+        original_nested_code=True,
+        foreign_ignored=True,
+        metadata=True,
+        restored=True,
+    )
+
+
+def test_should_terminate_raw_code_cap_before_original_nested_body(tmp_path):
+    assert_negative("code-cap", tmp_path)
