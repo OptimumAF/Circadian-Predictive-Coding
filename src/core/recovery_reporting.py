@@ -1,6 +1,6 @@
 """Monotone observed/terminal facts and independent terminal-only witnesses.
 
-No IO, live lease, native completion or restart admission. Unknown facts may stop
+No IO, live lease, native execution or restart admission. Unknown facts may stop
 work using the last known stamp; they never authorize resumed work.
 """
 
@@ -15,6 +15,7 @@ from src.core.recovery_authority import (
     validate_authority_record,
 )
 from src.core.recovery_observation import RecoveryHostObservation
+from src.core.recovery_completion import AuthorityCompletion, validate_authority_completion
 
 
 @dataclass(frozen=True)
@@ -133,7 +134,7 @@ def select_report_observation(
 @dataclass(frozen=True)
 class FailureWitness:
     expected: AuthorityRecord
-    attempted: AuthorityChange | AuthorityReport | None = None
+    attempted: AuthorityChange | AuthorityReport | AuthorityCompletion | None = None
     terminal_attempt: AuthorityReport | None = None
     observation: RecoveryHostObservation | None = None
 
@@ -150,6 +151,8 @@ def validate_failure_witness(witness: object) -> None:
     if attempt is not None:
         if type(attempt) is AuthorityChange:
             validate_authority_change(attempt)
+        elif type(attempt) is AuthorityCompletion:
+            validate_authority_completion(attempt)
         else:
             validate_authority_report(attempt)
         if attempt.expected != witness.expected:

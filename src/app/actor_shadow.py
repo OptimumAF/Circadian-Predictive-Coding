@@ -71,8 +71,20 @@ class StableActor(Generic[Features, Targets, Prediction, State]):
 
     def predict(self, features: Features) -> VersionedPrediction[Prediction]:
         with self._read_gate:
-            prediction = self._learner.predict(deepcopy(features))
-            return VersionedPrediction(self._version, deepcopy(prediction))
+            lifecycle = self._payload_registry._lifecycle
+            if lifecycle is not None:
+                lifecycle._require_access()
+            owned_features = deepcopy(features)
+            if lifecycle is not None:
+                lifecycle._require_access()
+            prediction = self._learner.predict(owned_features)
+            if lifecycle is not None:
+                lifecycle._require_access()
+            result = VersionedPrediction(self._version, deepcopy(prediction))
+            # Trusted copying/prediction callbacks can advance the original clock.
+            if lifecycle is not None:
+                lifecycle._require_access()
+            return result
 
     def snapshot_state(self) -> VersionedState[State]:
         with self._read_gate:

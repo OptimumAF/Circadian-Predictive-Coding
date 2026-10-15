@@ -2,12 +2,15 @@
 
 Owns original high-water witness and retained probes; commits before preparation,
 checks host/persisted facts around trusted callbacks. Publication uses an inward
-writer lease; no native completion protocol or rollback of side effects.
+writer lease. Explicit native-only completion is opt-in through trusted checkpoint
+validation; no actor publication, retry or rollback of side effects is implied.
 """
 
 from contextlib import contextmanager
 from threading import Lock
-from typing import Callable, Iterator, TypeVar
+from typing import Callable, Iterator, TypeVar, cast
+
+from src.core.recovery_admission import RecoveryManifest
 
 from src.core.recovery_authority import (
     AuthorityRecord,
@@ -34,6 +37,11 @@ from src.core.recovery_reporting import (
     select_report_observation,
 )
 from src.core.recovery_publication import RecoveryPublicationLease, RecoveryLeasedPublicationPort
+from src.core.recovery_completion import (
+    AuthorityCompletion,
+    RecoveryCompletionPort,
+    plan_completion,
+)
 
 Value = TypeVar("Value")
 
@@ -55,7 +63,7 @@ class RecoveryCoordinator:
         self._closed = self._failed = False
         self._now = known_authority.metadata.observed_ns
         self._peak = known_authority.metadata.usage.peak_rss_bytes
-        self._attempt: AuthorityChange | AuthorityReport | None = None
+        self._attempt: AuthorityChange | AuthorityReport | AuthorityCompletion | None = None
         self._failure_observation: RecoveryHostObservation | None = None
         self._failure_witness: FailureWitness | None = None
         self._terminal_confirmed = False
@@ -135,12 +143,16 @@ class RecoveryCoordinator:
 
     def _commit(
         self,
-        change: AuthorityChange | AuthorityReport,
+        change: AuthorityChange | AuthorityReport | AuthorityCompletion,
         lease: RecoveryPublicationLease | None = None,
     ) -> None:
         self._attempt = change
         if isinstance(change, AuthorityReport):
             committed = self._authority.report(change) if lease is None else lease.report(change)
+        elif isinstance(change, AuthorityCompletion):
+            if lease is not None:
+                raise ValueError("publication lease cannot complete native work")
+            committed = cast(RecoveryCompletionPort, self._authority).complete(change)
         else:
             if lease is not None:
                 raise ValueError("publication lease cannot reserve native work")
@@ -214,13 +226,56 @@ class RecoveryCoordinator:
             value = prepare()
             self._check(pending=pending)
             if publish is not None:
-                # No native completion codec exists: pending work cannot publish.
+                # Legacy execution does not complete pending work for publication.
                 self._check()
                 with self._authority.publication_lease(self._current) as lease:
                     self._check(lease=lease)
                     publish(value)
                     self._check(lease=lease)
                 self._check()
+            return value
+
+    def execute_native_update(
+        self,
+        costs: RecoveryCosts,
+        prepare: Callable[[], Value],
+        validate_checkpoint: Callable[[Value], RecoveryManifest],
+    ) -> Value:
+        """Complete one reserved update only after trusted full checkpoint validation.
+
+        Failure keeps admissions spent and enters existing terminal reporting.
+        A checkpoint file or matching digest alone cannot establish completion.
+        """
+        with self._exclusive():
+            if type(costs) is not RecoveryCosts:
+                raise ValueError("native update requires exact RecoveryCosts")
+            RecoveryCosts.__post_init__(costs)
+            if costs.updates != 1 or not callable(prepare) or not callable(validate_checkpoint):
+                raise ValueError("native update requires one update and trusted callable actions")
+            if not callable(getattr(self._authority, "complete", None)):
+                raise ValueError("authority does not support explicit native completion")
+            manifest = self._current.metadata.manifest
+            if manifest.payload_sha256 != manifest.native_sha256:
+                raise ValueError("native completion requires an original native-only payload")
+            self._read_exact()
+            observation = self._sample()
+            admission = plan_reservation(
+                self._current,
+                observation,
+                updates=1,
+                copy_bytes=costs.copy_bytes,
+                grants=costs.grants,
+                checkpoint_attempts=costs.checkpoint_attempts,
+            )
+            self._commit(admission)
+            self._check(pending=True)
+            value = prepare()
+            self._check(pending=True)
+            manifest = validate_checkpoint(value)
+            self._check(pending=True)
+            observation = self._sample(pending=True)
+            self._commit(plan_completion(admission, self._current, observation, manifest))
+            self._check()
             return value
 
     def handoff(self, replacement: RecoveryRegistration, owner_id: str) -> None:

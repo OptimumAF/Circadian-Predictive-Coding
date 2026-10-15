@@ -46,6 +46,28 @@ Prediction = TypeVar("Prediction")
 State = TypeVar("State")
 
 
+class PromotionRejected(ValueError):
+    """A measured guard refusal with detached evidence, never a serving ticket.
+
+    Why: callers need the original measurements to explain a refusal without
+    evaluating again against potentially changed candidate or serving state.
+    Existing ValueError handlers and the rejection message remain compatible.
+    """
+
+    def __init__(self, report: PromotionGuardReport) -> None:
+        self._report = deepcopy(report)
+        super().__init__("candidate rejected: " + ", ".join(self._report.decision.reasons))
+
+    @property
+    def report(self) -> PromotionGuardReport:
+        return deepcopy(self._report)
+
+    def __reduce__(self) -> tuple[type["PromotionRejected"], tuple[PromotionGuardReport]]:
+        # Exception.args contains the compatible message; reconstruction needs
+        # the report instead. Preserve ordinary local exception pickling.
+        return type(self), (self._report,)
+
+
 def _digest(probe: Callable[[State], str], state: State) -> str:
     value = probe(deepcopy(state))
     if type(value) is not str or re.fullmatch(r"[0-9a-f]{64}", value) is None:
@@ -119,8 +141,20 @@ class PromotableActor(StableActor[Features, Targets, Prediction, State]):
     def predict(self, features: Features) -> VersionedPrediction[Prediction]:
         with self._read_gate:
             bundle = self._slot.bundle
-            prediction = deepcopy(bundle.learner.predict(deepcopy(features)))
-            return VersionedPrediction(bundle.version, prediction)
+            lifecycle = self._payload_registry._lifecycle
+            if lifecycle is not None:
+                lifecycle._require_access()
+            owned_features = deepcopy(features)
+            if lifecycle is not None:
+                lifecycle._require_access()
+            prediction = bundle.learner.predict(owned_features)
+            if lifecycle is not None:
+                lifecycle._require_access()
+            result = VersionedPrediction(bundle.version, deepcopy(prediction))
+            # Trusted copying/prediction callbacks can advance the original clock.
+            if lifecycle is not None:
+                lifecycle._require_access()
+            return result
 
     def snapshot_state(self) -> VersionedState[State]:
         with self._read_gate:
@@ -347,7 +381,7 @@ class ServingPromotionController(Generic[Features, Targets, Prediction, State]):
             report.decision != decide_promotion(self._policy, report.evidence)
             or not report.decision.accepted
         ):
-            raise ValueError("candidate rejected: " + ", ".join(report.decision.reasons))
+            raise PromotionRejected(report)
         if _digest(self._digest, actor.model_state) != report.actor_snapshot_digest:
             raise ValueError("controller and evaluator actor state digests disagree")
         if _digest(self._digest, candidate.state) != report.candidate_snapshot_digest:

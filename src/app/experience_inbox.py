@@ -86,10 +86,19 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         records cannot use checkpoint capture to access forbidden data. Native
         state and budget/clock restoration require the outer owner handoff.
         """
+        return copy_graph(self, "inbox_capture", self._borrow_cursor())
+
+    def _borrow_cursor(self) -> InboxCursor[Features, Targets]:
+        """Borrow validated history while the caller keeps the owner quiescent.
+
+        Why: checkpoint integrity checks must not clone raw arrays before copy
+        admission. Public capture still returns detached data; this private view
+        is used only synchronously under the existing candidate owner lease.
+        """
         if self._draining:
             raise ValueError("inbox cursor capture requires a quiescent drain")
         self._require_history_indexes()
-        cursor = InboxCursor(
+        return InboxCursor(
             2 if self._erased else 1,
             self._learner_version,
             self._capacity,
@@ -101,7 +110,6 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
             self._completed_updates(),
             tuple(self._erased[k] for k in sorted(self._erased)),
         )
-        return copy_graph(self, "inbox_capture", cursor)
 
     def _require_history_indexes(self) -> None:
         if (

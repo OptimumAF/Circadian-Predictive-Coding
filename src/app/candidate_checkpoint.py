@@ -350,7 +350,7 @@ class CandidateCheckpointController(Generic[Features, Targets, Prediction, State
         ):
             raise ValueError("checkpoint native policy/state or event chronology changed")
         if (
-            _integrity(owner._inbox.capture_cursor()) != _integrity(view.inbox)
+            _integrity(owner._inbox._borrow_cursor()) != _integrity(view.inbox)
             or tuple(sorted(owner._attempted_ids)) != view.attempted_ids
             or _integrity(tuple(owner._consolidations)) != _integrity(view.consolidations)
             or owner._consolidation_limit != view.consolidation_limit

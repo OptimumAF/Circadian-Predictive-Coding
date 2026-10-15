@@ -1,7 +1,8 @@
 """Single-session private SQLite metadata CAS; no native restore or owner lease.
 
-Requires independently known live-coordinator authority floor, trusted local disk
-and OS observations supplied by the coordinator. No automatic retry/bootstrap.
+Requires an independently known authority floor, trusted local disk and host
+observations. Anchor transfer additionally requires the separate surviving
+supervisor witness; generic reads cannot acquire it. No automatic retry/bootstrap.
 """
 
 from pathlib import Path
@@ -27,6 +28,13 @@ from src.core.recovery_reporting import (
     witnessed_terminal_states,
 )
 from src.core.recovery_observation import RecoveryHostObservation
+from src.core.recovery_completion import AuthorityCompletion, validate_authority_completion
+from src.core.coordinator_transfer import (
+    CoordinatorTransfer,
+    CoordinatorTransferFailure,
+    transfer_failure_states,
+    validate_coordinator_transfer,
+)
 from src.core.recovery_publication import RecoveryPublicationLease, validate_publication_observation
 from src.infra.sqlite_recovery_lock import authority_writer_lock
 
@@ -144,6 +152,78 @@ class SqliteRecoveryJournal:
         self._require_ready()
         validate_authority_report(report)
         return self._swap(report.expected, report.proposed)
+
+    def complete(self, completion: AuthorityCompletion) -> bool:
+        """Explicitly advance this live floor after validated native completion CAS.
+
+        Generic read/floor validation stays unchanged: a stale adapter cannot
+        learn permission to clear uncertainty or replace manifests from disk.
+        """
+        self._require_ready()
+        validate_authority_completion(completion)
+        return self._swap(completion.expected, completion.proposed)
+
+    def transfer_coordinator(self, change: CoordinatorTransfer) -> bool:
+        """Apply a separately trusted supervisor's exact anchor transition.
+
+        Why an explicit path: disk state cannot teach an old floor to trust a
+        new coordinator. Only this instance's acknowledged CAS advances it.
+        """
+        self._require_ready()
+        validate_coordinator_transfer(change)
+        if self._floor != change.expected:
+            raise ValueError("coordinator transfer requires exact independent supervisor floor")
+        return self._swap(change.expected, change.proposed)
+
+    @classmethod
+    def reconcile_coordinator_transfer(
+        cls, path: str | Path, failure: CoordinatorTransferFailure
+    ) -> AuthorityRecord:
+        """Resolve an ambiguous transfer to stopped metadata, never live work.
+
+        The independent witness enumerates both possible commit outcomes; a
+        different or newer disk record cannot establish a trusted floor.
+        """
+        stopped_before, stopped_after = transfer_failure_states(failure)
+        resolved = Path(path).resolve()
+        with authority_writer_lock(resolved):
+            return cls._reconcile_transfer_unlocked(
+                resolved, failure, stopped_before, stopped_after
+            )
+
+    @classmethod
+    def _reconcile_transfer_unlocked(
+        cls,
+        path: Path,
+        failure: CoordinatorTransferFailure,
+        stopped_before: AuthorityRecord,
+        stopped_after: AuthorityRecord,
+    ) -> AuthorityRecord:
+        connection = _connect(path)
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            current = _read(connection)
+            if current in (failure.transfer.expected, stopped_before):
+                target = stopped_before
+            elif current in (failure.transfer.proposed, stopped_after):
+                target = stopped_after
+            else:
+                raise ValueError("coordinator reconciliation requires exact witnessed disk state")
+            if current != target:
+                changed = connection.execute(
+                    "UPDATE authority SET record=? WHERE singleton=1 AND record=?",
+                    (encode_authority(target), encode_authority(current)),
+                )
+                if changed.rowcount != 1:
+                    raise ValueError("coordinator reconciliation compare-and-swap changed")
+            connection.execute("COMMIT")
+            return target
+        except BaseException:
+            if connection.in_transaction:
+                connection.execute("ROLLBACK")
+            raise
+        finally:
+            connection.close()
 
     def _swap(self, before: AuthorityRecord, after: AuthorityRecord) -> bool:
         try:
