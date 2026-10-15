@@ -1,5 +1,10 @@
 # Implemented learning mathematics, version 1
 
+For the separate opt-in `numpy_coupled_binary_energy_v1` learner, use the
+[coupled objective specification](coupled-predictive-coding.md). It defines
+current-latent coupling and exact partials. The historical diagnostic formulas
+and shallow parity boundaries below retain their original scope.
+
 Verified against HEAD `28e71ee` plus the retained checkout changes on
 2026-10-06. The [model card](model-card.md) and
 [backend capability matrix](backend-capability-matrix.md) describe the

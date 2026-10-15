@@ -9,6 +9,172 @@ for versioning even while in research-stage development.
 
 ### Added
 
+- Explicit coupled elapsed-retention composition and a local deadline/purge/stop
+  control; direct actor prediction now enforces lifecycle access through callbacks.
+
+- Opt-in coupled retained raw-copy byte measurements and inspectable builder,
+  with before-clone refusal and no lifetime refund after managed cleanup.
+
+- Coupled native lifecycle ports and an opt-in managed raw-payload cleanup
+  control preserving learned state and original ingress/holder/update quotas.
+
+- Opt-in coupled managed-consent handoff control retaining original consent
+  guards, lifetime quotas and opt-out while refusing held-out/unmanaged ingress.
+
+- Fixed16-cycle coupled handoff endurance with original monotonic/RSS resources
+  and bounded compact telemetry through the existing repeated runner.
+
+- Coupled handoff elapsed/RSS controls preserving original resource origins and
+  spent attempts/admissions through deterministic cap refusals.
+
+- Opt-in repeated coupled handoff control with one controller, original resources
+  and cumulative preparation/update exhaustion.
+
+- Policy-bound coupled candidate checkpoint callbacks and a six-case same-process
+  handoff example retaining original actor, delayed labels and cumulative quotas.
+
+- Complete coupled learner policy/state checkpoints, with bounded canonical
+  encoding and explicit restoration of learning and guarded inference settings.
+
+- Optional native replacement interruption after mutation and before completion,
+  preserving completed B, original spent uncertainty and unchanged actor A.
+
+- Complete native checkpoint continuation after physical coordinator loss, with
+  charged restoration, original quotas and exact PC/neutral/active references.
+
+- Retained Windows transfer supervisor and fixed physical coordinator crash/
+  replacement example, preserving final supervisor time/RSS and original quotas.
+
+- Explicit witnessed coordinator transfer with original time/quota preservation,
+  exact-floor SQLite CAS and terminal-only reconciliation of ambiguous commits.
+
+- Real native pre-receipt and committed-observer failure controls, with complete
+  stopped-state accounting, blocked retry and stable actor/cache observations.
+
+- Native delayed-feedback integration across promotion and rollback, preserving
+  producing versions, causal arrival, candidate quota and complete serving state.
+
+- Fixed native cache expiry/eviction and backward-tick controls through guarded
+  promotion and complete serving-bundle rollback, with bounded local evidence.
+
+- Fixed native growth/refusal endurance workload with bounded streaming summaries,
+  original attempt limits and cached actor/state/resource checks throughout.
+
+- Optional owner width ceiling before coupled split expansion, with native growth,
+  refusal, spent-attempt and continued-candidate-training controls.
+
+- Bounded repeated native consolidation refusal example with retained failed IDs,
+  original attempt quota, unchanged serving cache and observed resource sizes.
+
+- Explicit corrupted native candidate checkpoint control in the completion CLI,
+  retaining actor A, original digest refusal and spent uncertain authority.
+
+- Native-worker interruption control after admitted computation and before B
+  delivery, with retained uncertain authority/charges and unchanged parent actor.
+
+- Explicit original-admission native-only update completion with trusted full
+  checkpoint validation, completion-aware terminal witnesses, SQLite CAS and
+  three-family native success plus valid-written-checkpoint refusal example.
+
+- Supervised Windows native checkpoint writer interruption example with bounded
+  child IO, unchanged parent actor, full read-only model restoration and retained
+  checkpoint/copy charges through supported coordinator handoff.
+
+- Generic bounded checkpoint file storage through existing codec ports, atomic
+  replacement after complete staged writes, expected-digest reads and a native
+  three-family example verifying old-file recovery after an injected IO failure.
+
+- Complete native coupled PC/CPC snapshot byte codec through existing bounded
+  ports, with canonical array frames, full chemistry/policy state, corruption
+  refusal and a local restored-continuation example.
+
+- Optional complete-iteration timing admission/qualification and a distinct
+  30ms/3ms inference comparison CLI flag, with strict complete-seed summaries.
+  Original10ms timing protocol and its failed row remain available unchanged.
+
+- Isolated linear MLP/residual projected-merge damage gate with inclusive
+  prediction/half-MSE/full-equilibrium limits, complete source recovery and a
+  bounded runnable example retaining the original amplification counterexample.
+
+- Rooted mixed raw structural snapshots and fixed-origin learner reconstruction,
+  split/merge/prune consolidation, invalid-inverse refusal and a bounded guarded
+  serving/rollback example. Existing strict adapters and native defaults remain.
+
+- Raw coupled nonlinear dyadic split and exact compatible merge, with scalar
+  precision compensation, complete CPC trace mapping, representability refusal
+  and a bounded owned-continuation example. Existing runtime bindings remain.
+
+- Raw coupled PC/CPC uniform-width pruning with new-factor weight/bias rebinding,
+  complete chemical state, representation refusal, isolated train/validation
+  damage decisions and an owned continuation example.
+
+- Isolated nonlinear raw scaling runner with copied checkpoint probes, matched
+  BP/PC/CPC factories, complete seed/failure summaries and a frozen local CLI.
+  A separate legacy-only extension completes the retained 144-case three-scheme
+  matrix without rerunning original cells. No circadian benefit is demonstrated.
+
+- Matched raw-coordinate feedforward BP control with shared initialization/rate
+  factors, complete raw state/ports and native/fork matching CLI.
+
+- Opt-in nonlinear coupled raw/effective coordinate mapping, explicit bias/rate
+  policy, stable gated updates, full raw state/ports and fixed equation example.
+
+- Opt-in complete coupled topology state/learner, accepted-prune consolidation,
+  and native guarded serving promotion/rollback integration example.
+
+- Native coupled PC/CPC one-unit pruning with complete chemical/gate/count transfer,
+  bounded probe damage scoring, retained source and a continuation example.
+
+- Pure linear MLP/residual width pruning with a training/validation damage gate,
+  retained source on rejection/fault, and a runnable accepted/rejected/failed demo.
+
+- Opt-in isometric width split and numerically compatible merge for linear MLP/
+  residual states, with raw-factor rebinding, coordinate lineage and CLI example.
+
+- Fixed/adaptive coupled PC comparison CLI with whole allocated training windows,
+  deferred heldout scores, explicit overrun failures and complete seed summaries.
+
+- Opt-in bounded coupled latent inference with explicit stopping/fallback work
+  diagnostics, native PC/CPC integration, owned adapter policy and fixed CLI trace.
+
+- Residual scaling measurement CLI through shared native model ports, preserving
+  MLP evaluation behavior and complete fixed-grid seed/resource accounting.
+
+- Opt-in residual linear PC with fixed middle identities, explicit depth-aware
+  branch scaling/raw SGD, owned state and a runnable exact-control example.
+
+- Fixed linear scaling measurement CLI with copied regression roles, deferred
+  heldout scoring, full seed/failure summaries and one bounded 81-case report.
+
+- Opt-in linear PC mean-field scaling with explicit raw/effective tensors and
+  SGD factors, local initialization controls and stable representable updates.
+
+- Fixed stationary/recurring attribution runner with deferred held-out scoring,
+  complete seed/failure summaries and a budgeted three-seed exploratory report.
+  The first pilot retains a negative/inconclusive gated-CPC result.
+
+- Opt-in stable-BCE backprop with exact coupled initial tensors, complete owned
+  state/learner ports and a `matched-baselines` delayed-label CLI scenario.
+
+- Tiny published linear PC equilibrium reference and runnable JSON calculation,
+  with independent least-squares and Torch derivative checks.
+
+- Complete coupled PC/CPC in-memory state ports, owned native learner forks and
+  a `coupled-neutral` delayed-label runtime CLI scenario.
+
+- Coupled CPC wake chemistry and selective plasticity, with an explicit unit-gate
+  preset and exact multilayer neutral parity controls against coupled PC.
+
+- Opt-in coupled binary predictive-coding energy and alternating learner, with
+  independent multilayer finite-difference/autodiff checks and explicit formulas.
+
+- Inspectable `PromotionRejected(ValueError)` with detached measured guard reports,
+  plus a local `--scenario promotion-rejection` native stream example.
+
+- Runnable local native adapter stream (`python -m scripts.run_native_stream_demo`)
+  with delayed labels, stable actor traces, separate experiment/model version
+  metadata, and focused integration tests for backprop and CPC.
+
 - Native CPC/backprop learner ports with separate diagnostics, full detached
   model state and one existing-budget wake step; targeted parity/refusal tests.
 
@@ -1297,3 +1463,10 @@ See docs/replay-capture-origins.md and current development log for qualification
   counts for exact native state dictionaries/snapshots. No model copies or
   authority are created. Full original checkpoint admission/handoff stays open.
 - Added bounded original replay checkpoint copy admission and a final trusted publication lease, with fixed content integrity and lexical original-lock cleanup. Current acceptance/remaining variants are recorded in the development log.
+## R1.6f raw topology runtime — 2026-10-15
+
+- Add opt-in owned raw topology state and width-aware learner reconstruction,
+  preserving scaling configuration, CPC history and ordered prune coordinates.
+- Add coherent gate-to-candidate consolidation and bounded runnable serving
+  promotion/rollback example. Strict default restore and independent guard
+  selection remain; no scientific benefit or general split/merge claim.

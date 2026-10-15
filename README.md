@@ -1,5 +1,177 @@
 # Circadian Predictive Coding
 
+For candidate handoff preserving complete learner policy, delayed-label cursor
+and original actor/resources, see [coupled candidate handoff](docs/coupled-candidate-handoff.md).
+`python -m scripts.run_coupled_candidate_handoff --describe` previews the fixed
+six-case refusal, ownership transfer and matched continuation example.
+Add `--repeat-handoffs` for three successive transfers under one controller and
+the original cumulative preparation/update limits; the default stays unchanged.
+Use `--resource-stops` for deterministic inherited wall/RSS refusal controls
+across handoffs, with injected resource values clearly identified in the output.
+Use `--endurance` for a fixed16-transfer control with real monotonic time and
+OS RSS sampling. Each optional control is selected separately.
+Use `--managed-consent` to demonstrate original consent guards and permanent
+opt-out over a stale checkpoint refusal and fresh handoff. This blocks future
+training use; raw records remain and no deletion or unlearning is claimed.
+Use `--managed-cleanup` for the separate registry-owned raw cleanup control:
+retired/current inboxes and pending checkpoints are cleared conservatively while
+learned state and spent quotas remain. Caller-owned copies remain outside cleanup.
+Use `--managed-copies` for the separate retained raw-copy byte control. It counts
+inbox/checkpoint copies, refuses exhausted capacity before cloning, and preserves
+spent byte capacity after cleanup. These logical bytes exclude learned weights
+and process memory.
+Use `--elapsed-retention` for original-clock deadline refusal, automatic owned raw
+cleanup and bounded worker shutdown across a coupled handoff. The clock is injected;
+this validates deadline semantics and local threading without a physical-latency claim.
+
+For checkpoints containing complete coupled learner state and update settings,
+see [learner checkpoints](docs/coupled-learner-checkpoint.md).
+`python -m scripts.run_coupled_learner_checkpoint --describe` previews six fixed
+PC/neutral/active continuation controls under fixed and guarded inference.
+
+For complete native checkpoint continuation after a physical coordinator crash,
+see [native coordinator transfer](docs/native-coordinator-transfer.md).
+`python -m scripts.run_native_transfer --describe` previews the fixed PC/neutral/
+active example, including original quotas and its 18 native training calls.
+Add `--interrupt-after-train` to preview or run the fixed replacement-interruption
+control, which preserves B and spent uncertain work before refusing C/retry.
+
+For a physical Windows coordinator crash and replacement under original quotas,
+see [Windows transfer](docs/windows-coordinator-transfer.md).
+`python -m scripts.run_windows_transfer --describe` previews the fixed four-child,
+zero-native engineering example.
+
+For an explicit witnessed coordinator transfer preserving original time and
+quotas, see [coordinator transfer](docs/coordinator-transfer.md). Its SQLite path
+and terminal reconciliation are composed by the physical supervisor adapter above.
+
+For actual native failures before and after an applied receipt, see
+[native failure accounting](docs/coupled-native-failures.md).
+`python -m scripts.run_coupled_native_failures --describe` previews the fixed
+local failure and actor-availability controls without constructing models.
+
+For valid old-version feedback arriving while a promoted native actor serves,
+see [delayed feedback](docs/coupled-delayed-feedback.md).
+`python -m scripts.run_coupled_delayed_feedback --describe` previews its fixed
+chronology, refusal checks and original-quota controls without constructing models.
+
+For native cache expiry/eviction controls followed by guarded promotion and exact
+rollback, see [cache transactions](docs/coupled-cache-transactions.md).
+`python -m scripts.run_coupled_cache_transactions --describe` previews the fixed
+local engineering protocol without constructing models.
+
+For a fixed native growth/refusal endurance workload with bounded streaming
+summaries, see [finite endurance](docs/coupled-growth-endurance.md).
+`python -m scripts.run_coupled_growth_endurance --describe` previews its budget;
+actual execution is a separately budgeted local engineering run.
+
+For an explicit width ceiling before coupled split allocation, see
+[bounded split growth](docs/coupled-growth-limit.md).
+`python -m scripts.run_coupled_growth_limit --describe` previews the fixed local
+growth/refusal/continued-training example.
+
+For repeated rejected native consolidations with consumed attempt IDs and stable
+actor/cache state, see [bounded refusals](docs/rejected-consolidations.md).
+`python -m scripts.run_coupled_rejected_consolidations --describe` previews the
+fixed local engineering stream.
+
+To exercise actual candidate checkpoint corruption before native completion,
+use `python -m scripts.run_coupled_update_completion --corrupt-checkpoint --describe`.
+See [native completion](docs/native-update-completion.md#corrupted-candidate-checkpoint-control)
+for the bounded Windows refusal example and new-directory execution command.
+
+For actual native-worker termination after computation but before checkpoint
+delivery, see [native update interruption](docs/native-update-interruption.md).
+`python -m scripts.run_coupled_update_interruption --describe` previews the bounded
+Windows example; actual execution requires a new `--directory`.
+
+For explicit completion of an admitted native-only candidate update while actor A
+stays unchanged, see [native completion](docs/native-update-completion.md).
+`python -m scripts.run_coupled_update_completion --describe` previews the bounded
+success/refusal example; actual execution requires a new `--directory`.
+
+For a Windows checkpoint writer interruption with a surviving native actor and
+retained attempt counters, see [writer interruption](docs/checkpoint-writer-interruption.md).
+`python -m scripts.run_coupled_checkpoint_interruption --describe` previews the
+bounded example; actual execution requires a new `--directory`.
+
+For bounded native checkpoint files and recovery after a failed replacement,
+see [checkpoint files](docs/checkpoint-files.md).
+`python -m scripts.run_coupled_checkpoint_files --describe` previews the example;
+use `--directory <new-directory>` to write and verify all three model families.
+
+For complete native coupled PC/CPC snapshot bytes and restored continuation,
+see [coupled snapshot codec](docs/coupled-checkpoint-codec.md).
+`python -m scripts.run_coupled_checkpoint_codec --describe` previews the bounded
+round-trip example; the full command includes PC, neutral CPC and active CPC.
+
+For the separate30ms allocated-time inference comparison with observed iteration
+qualification, use `python -m scripts.run_coupled_inference_comparison --granularity-aware --describe`.
+See [timing comparison](docs/coupled-inference-comparison.md) for budgets and the
+preserved original10ms protocol; actual runs are prospectively budgeted experiments.
+
+For tolerant linear MLP/residual merge with isolated observed damage limits,
+see [linear merge gate](docs/linear-merge-gate.md).
+`python -m scripts.run_linear_width_merge --describe` previews the fixed example;
+run without `--describe` for acceptance, amplification rejection and source recovery.
+
+For mixed raw split/merge/prune candidate learning and guarded serving rollback,
+see [mixed structural runtime](docs/coupled-structural-runtime.md).
+`python -m scripts.run_coupled_structural_runtime --describe` previews the fixed
+example; run without `--describe` for full histories, refusals and serving states.
+
+For raw nonlinear split/compatible merge with explicit precision and CPC-state
+mapping, see [raw coupled structure](docs/coupled-scaling-structure.md).
+`python -m scripts.run_coupled_scaling_structure --describe` previews the local
+example; run without `--describe` for energy/gradient and continued-learner checks.
+
+For complete raw-state pruning, candidate consolidation and guarded serving
+commit/rollback, see [raw topology runtime](docs/coupled-raw-topology-runtime.md).
+Preview with `python -m scripts.run_coupled_raw_topology_runtime --describe`;
+run without `--describe` for the bounded PC/neutral/active CPC engineering example.
+
+For raw PC/CPC uniform-width prune candidates with factor rebinding, retained
+chemistry and isolated damage checks, see [raw scaling pruning](docs/coupled-scaling-pruning.md).
+`python -m scripts.run_coupled_scaling_pruning --describe` previews the engineering
+example; it includes accepted, rejected and failed cases with owned continuation.
+
+For isolated measurements of the local nonlinear raw mapping, see the
+[measurement guide](docs/nonlinear-scaling-measurement.md) and the retained
+[complete three-scheme study](docs/reports/nonlinear-scaling-complete-20261015.md).
+`python -m scripts.run_nonlinear_scaling_pilot --describe` previews its frozen
+protocol; `--legacy-only --describe` previews the separate extension. The completed
+study found no circadian benefit. Actual studies require a prospective local budget.
+
+For BP matched to the nonlinear raw-coordinate initialization and update factors,
+see [scaled matched BP](docs/scaled-matched-backprop.md).
+`python -m scripts.run_scaled_matched_backprop --describe` previews the local check.
+
+For opt-in raw/effective scaling of coupled tanh/BCE PC/CPC, see
+[coupled scaling](docs/coupled-pc-scaling.md).
+`python -m scripts.run_coupled_pc_scaling --describe` previews the local equation check.
+
+For opt-in native PC/CPC width changes through consolidation, guarded serving
+promotion and rollback, see [coupled topology runtime](docs/coupled-topology-runtime.md).
+`python -m scripts.run_coupled_topology_runtime --describe` previews the local example.
+
+For complete native PC/CPC pruning with retained chemistry and a probe damage
+gate, see [coupled width pruning](docs/coupled-width-pruning.md).
+`python -m scripts.run_coupled_width_pruning --describe` previews the local example.
+
+For linear pruning with validation damage limits and source retention on failure,
+see [linear width pruning](docs/linear-width-pruning.md).
+`python -m scripts.run_linear_width_pruning --describe` previews the local example.
+
+For opt-in linear MLP/residual width splitting and compatible merging, see
+[linear width structure](docs/linear-width-structure.md).
+`python -m scripts.run_linear_width_structure --describe` previews the local
+equation check; the full command prints tensors and four real SGD continuations.
+
+For the fixed/adaptive PC timing CLI, see
+[allocated-time inference comparison](docs/coupled-inference-comparison.md).
+`python -m scripts.run_coupled_inference_comparison --describe` prints the frozen
+protocol without training. Actual runs are local, prospectively budgeted experiments.
+
 For active work, start with the [research roadmap](RESEARCH_ROADMAP.md).
 The [R0 baseline audit](docs/r0-baseline-audit.md) records the checkout delta,
 platform-specific checks, supported test environments and remaining gates.
@@ -30,6 +202,62 @@ and retained negative or unresolved results. Use the named
 [evaluation protocol](docs/evaluation-protocols.md) and
 [original publication evidence](docs/published-experiment-register.md) when
 interpreting a comparison.
+
+## Small local runtime example
+
+Run `python -m scripts.run_linear_pc_reference` for the fixed
+[published linear equilibrium reference](docs/linear-pc-reference.md), including
+optimal hidden states, local gradients and a small weight update. This is a
+correctness calculation; scaling and comparative studies remain separate.
+The [linear scaling controls](docs/linear-pc-scaling.md) now include the published
+mean-field raw/effective SGD mapping alongside explicit initialization controls.
+Run `python -m scripts.run_linear_pc_scaling` for exact tensors and one step;
+use `python -m scripts.run_linear_scaling_pilot --describe` for the fixed
+[measurement protocol](docs/linear-scaling-measurement.md). Its first
+[81-case report](docs/reports/linear-scaling-measurement-20261014.md) retains
+all seeds, norms, cost and isolated heldout results. Residual depth scaling
+and broader scientific acceptance remain unfinished.
+Run `python -m scripts.run_residual_linear_pc` for exact fixed-identity residual
+[scaling and SGD controls](docs/residual-linear-pc.md). Residual width/depth
+measurements require their own fixed protocol after these equation checks.
+Use `python -m scripts.run_residual_scaling_pilot --describe` to inspect the
+[isolated residual measurement protocol](docs/residual-scaling-measurement.md).
+Omitting `--describe` runs its fixed local grid with complete seed/failure output.
+The first [residual report](docs/reports/residual-scaling-measurement-20261014.md)
+retains all 81 cases, exact initial tensors, norms, costs and heldout intervals.
+
+For an opt-in learner with one explicit differentiated scalar energy, see the
+[coupled predictive-coding guide](docs/coupled-predictive-coding.md). It includes
+the complete binary objective, native update example and numerical checks;
+legacy models and scientific comparison results remain separate.
+Run `python -m scripts.run_coupled_inference` for the
+[bounded inference example](docs/coupled-bounded-inference.md): fixed steps,
+early stopping and explicit fallback with native PC/neutral-CPC parity. The
+default remains fixed-step; this example makes no efficiency or benefit claim.
+The [coupled neutral CPC control](docs/coupled-neutral-control.md) runs real
+chemistry while preserving exact PC wake updates at unit plasticity.
+Use `python -m scripts.run_native_stream_demo --scenario coupled-neutral --seed 23`
+to run them through the existing delayed-label runtime with
+[complete state-owning adapters](docs/coupled-learner-ports.md).
+Use `--scenario matched-baselines` for [stable-BCE backprop](docs/matched-backprop.md),
+PC and neutral CPC from exact shared initial tensors at two hidden layers. Their
+native objectives and work still differ; this is an integration example.
+
+For the fixed stationary/recurring comparison, run
+`python -m scripts.run_coupled_attribution --describe` to inspect the protocol,
+then omit `--describe` to execute it. The [runner guide](docs/coupled-attribution.md)
+documents deferred held-out scoring and budgets. The first
+[exploratory report](docs/reports/coupled-attribution-20261014.md) retains the
+negative/inconclusive gated-CPC result and every seed outcome.
+
+Run `python -m scripts.run_native_stream_demo --seed 23` for a CPU-only JSON
+trace of the existing backprop and CPC adapters learning from the same four
+delayed-label arrivals while their serving actors remain stable. See the
+[native stream guide](docs/native-stream-demo.md) for the schedule, separate
+experiment/model versions, checks and extension points. This is an integration
+example; its native diagnostics are not comparative learning evidence.
+Add `--scenario promotion-rejection` to inspect a real guard refusal and verify
+the original serving actor/cache remain available.
 
 ## Why This Repo
 

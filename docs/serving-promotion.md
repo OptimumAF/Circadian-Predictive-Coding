@@ -1,5 +1,16 @@
 # Guarded serving promotion and rollback
 
+## Inspectable measured rejection
+
+`ServingPromotionController.prepare` raises `PromotionRejected`, a `ValueError`
+subclass, when measured guards refuse a candidate. Its unchanged message remains
+compatible with existing handlers; `error.report` returns a detached copy of the
+original complete `PromotionGuardReport`. This permits explanation without a
+second evaluation against changed state. Rejection creates no ticket or serving
+transition. Invalid requests and native failures retain their existing errors.
+See the [local rejection scenario](native-stream-demo.md#inspect-a-rejected-candidate)
+for a runnable example using only arrived inner-guard data.
+
 R3.4b adds a compatible `PromotableActor` and `ServingPromotionController` to the
 existing actor/shadow runtime. It uses the R3.4a matched inner guards; a standalone
 guard report cannot authorize a swap. No learning equation or scientific protocol

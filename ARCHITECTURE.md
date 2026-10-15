@@ -1,5 +1,386 @@
 # Architecture
 
+### Coupled elapsed retention
+
+A separate adapter supplies accepted coupled measurement ports to the existing
+ManagedDataLifecycle. Callers explicitly own the RetentionExpiryDriver lifetime.
+The example preserves original elapsed authority and copy accounting across
+handoff, then exercises automatic purge and bounded stop. Both direct actor
+prediction paths check lifecycle access before copying and recheck after trusted
+callbacks before publication. Dependencies point from adapters to app/core; the
+existing lifecycle owns cleanup and scheduling. See ADR-0296.
+
+### Coupled candidate checkpoint callbacks
+
+The adapter binds a detached complete update policy and codec limits to the
+existing candidate controller's state/build/policy callbacks. Dependencies point
+from adapter to existing app/core and codec; no app/core behavior changes. The
+controller retains preparation charging, cursor/resource checks and single-point
+owner publication. The fixed integration retains the surviving actor, budget,
+clock and sharing gate; disk/process/lifecycle authority is outside this slice.
+See ADR-0289 and [coupled handoff](docs/coupled-candidate-handoff.md).
+
+An opt-in repeated integration reuses this same composition and original live
+objects across three transfers, ending in spent preparation/update refusals.
+It adds no app/core contract or recovery authority; see ADR-0290.
+
+The resource-control mode retains the existing budget clock and RSS sampler/
+reader across owners. Stable fields remain equal while legitimate cumulative
+telemetry advances; deterministic injected limits are separate from actual host
+RSS boundary telemetry. Existing refusal/accounting behavior is preserved;
+see ADR-0291.
+
+The repeated adapter also exposes a fixed16-cycle endurance mode through the
+same internal loop, retaining original monotonic/RSS resources and compacting
+records only after complete state/cursor checks. Existing modes keep their
+schemas; no new controller or recovery framework is introduced. See ADR-0292.
+
+The managed-consent adapter installs the existing ManagedExperienceOwner before
+registration. Its original catalog, opt-out sets and bound admission/eligibility
+guards survive candidate replacement. A consent change invalidates a captured
+checkpoint before preparation; fresh transfer preserves authorized continuation.
+This composes existing app/core behavior, retains raw records and makes no
+deletion/unlearning/process-authority claim. See ADR-0293.
+
+The coupled lifecycle adapter supplies exact-learner zero-replay callbacks and
+real numeric NumPy byte measurement to existing ManagedDataLifecycle. Coupled
+native models keep no raw replay batches, so erasure leaves learned state intact.
+The cleanup integration exercises registry-owned retired/current inbox erasure
+and pending-token invalidation with original resource/ingress/holder accounting.
+This basic factory refuses owned-copy/elapsed policies; the separate factories
+above supply those ports explicitly. No app/core dependency points outward.
+See ADR-0294.
+
+The opt-in coupled copy adapter supplies bounded typed graph/checkpoint/growth/
+preparation/prediction measurements to the existing lifecycle copy ledger. An
+exact inspectable builder delegates complete-policy reconstruction to existing
+checkpoint callbacks. The basic lifecycle factory stays unchanged. The shared
+cleanup loop adds a separate fixed byte-limit variant and retains its original
+default interface/schema; both modes are exercised after this change. Raw array
+copy bytes exclude learned parameters, caller copies and OS memory. See ADR-0295.
+The controller's integrity check uses a private borrowed validated inbox cursor
+under its existing exclusive owner/gate leases. Public captures remain detached;
+this avoids a raw inbox clone before byte admission while retaining full hashing.
+Temporary serialization bytes remain outside the retained-array ledger.
+
+### Complete coupled learner checkpoints
+
+Core records describe native state plus fixed learning/inference policy without
+IO or array copying. The owned adapter exposes a detached policy getter while
+preserving its native snapshot API. A separate envelope codec deducts exact
+metadata overhead before existing native codec work and validates all bytes
+before explicit model reconstruction. The file store is unchanged; no runtime
+authority is reconstructed. See ADR-0288 and
+[learner checkpoints](docs/coupled-learner-checkpoint.md).
+
+### Native continuation through coordinator loss
+
+The native transfer session composes existing coordinator reservations, complete
+native codec/store and acknowledged SQLite completion. Its strict wire preserves
+actual completion proofs; the fixed worker/example retains independently known B
+and live physical handles before coordinator loss, transfers explicitly, charges
+full B restoration and completes B → C under the original allowance. Existing
+core transition rules remain pure and unchanged. No journal bootstrap, actor
+publication or full managed lifecycle restore is introduced. See ADR-0286 and
+[native transfer](docs/native-coordinator-transfer.md).
+
+The optional interruption wrapper pauses after delegated native training and
+cannot return its result to the session. A separate adapter validates full C
+telemetry against the independent reference, terminates only its owned peer and
+uses existing terminal reconciliation for exact pending authority. Completed B
+and spent uncertainty remain; later supervisor observations are recorded
+separately from the last child stamp. See ADR-0287.
+
+### Retained physical transfer supervision
+
+The Windows supervisor retains original live registrations and independently
+known authority across a coordinator crash. A directly owned replacement child
+observes its own registered worker over the bounded private channel; the final
+supervisor sample records later time/RSS separately. Existing SQLite CAS precedes
+child adoption and existing coordinator continuation. All process lifetimes stay
+with the outer example, all pure transition rules in core. The native adapter
+above adds bounded checkpoint restoration. See ADR0285 and
+[physical transfer](docs/windows-coordinator-transfer.md).
+
+### Explicit coordinator transfer
+
+The pure `core/coordinator_transfer` module validates a separately witnessed
+anchor/worker transition without IO or physical capabilities. The SQLite adapter
+adds an exact-floor CAS and terminal-only ambiguity reconciliation; existing
+generic authority paths stay strict. Original absolute start, full manifest and
+cumulative usage survive the transition. Physical supervisor binding belongs in
+the outer Windows layer described above. See ADR0284 and
+[coordinator transfer](docs/coordinator-transfer.md).
+
+### Native failure accounting control
+
+The native-failure adapter composes existing structural native ports and actual
+inbox observer stages. A local wrapper injects a failure after delegate mutation;
+an observer injects the separate post-receipt failure. Original runtime/inbox
+stop and accounting rules remain authoritative. Complete private forensic reads
+are local observations only; actor cache serving remains independent. See
+ADR0283 and [native failures](docs/coupled-native-failures.md).
+
+### Delayed feedback through serving transitions
+
+The fixed delayed-feedback adapter composes existing inbox producer-version
+pairing, raw structural native ports and serving transactions. Candidate learning
+after promotion stays independent of the published bundle; rollback restores
+the prior bundle without renewing training allowance. Refused registration's
+spent revision is tracked separately from preserved native/inbox state. No new
+feedback or authority layer is introduced. See ADR0282 and
+[delayed feedback](docs/coupled-delayed-feedback.md).
+
+### Native cache transactions
+
+The fixed cache-transaction adapter composes existing raw structural native
+ports, ActorShadowRuntime, PromotionGuardEvaluator and ServingPromotionController.
+It exercises cache expiry/eviction/refusal and complete bundle publication/rollback
+without adding a transaction layer or changing native learning rules. CLI output
+is bounded; full native and serving observations stay local. See ADR0281 and
+[native cache transactions](docs/coupled-cache-transactions.md).
+
+### Finite growth endurance
+
+The endurance adapter composes existing growth/native/runtime/cache policies and
+streams fixed counters, blocks and scalar samples. Complete states and final
+cursors are retained separately; per-request native payloads are not accumulated.
+The aggregate summary and original attempt quota remain bounded. A tiny test
+prefix is separate from the single budgeted full run. See ADR0280 and
+[finite endurance](docs/coupled-growth-endurance.md).
+
+### Coupled split width ceiling
+
+The existing split consolidator optionally owns a narrower max_width. Current
+state and target metadata validation precede the check; expanded kernel work
+follows only if admitted. Defaults and inner split mathematics remain unchanged.
+An outer integration demonstrates accepted growth, retained failed attempts and
+native continuation with a stable actor/cache. See ADR0279 and
+[bounded split growth](docs/coupled-growth-limit.md).
+
+### Repeated rejected native consolidations
+
+The outer rejected-consolidations adapter composes existing native learner ports,
+actor/shadow runtime, serving cache, consolidation cursor and boundary RSS sampler.
+Failed detached transforms retain original consumed IDs and quota while native
+candidate state and actor/cache stay unchanged. Attempt/revision changes are
+reported separately; no inner runtime or model change. See ADR0278 and
+[bounded refusals](docs/rejected-consolidations.md).
+
+### Native candidate checkpoint corruption
+
+The existing outer completion adapter/CLI adds explicit owned-file corruption
+after verifying and saving a complete healthy B, before bounded reload with the
+original expected digest. The unchanged store refuses damaged bytes and the
+unchanged coordinator records terminal uncertainty with all costs retained.
+Default healthy completion remains separate from the forensic damaged file;
+actor A stays unchanged. No inner-layer or dependency change. See ADR0277 and
+the native completion guide's corruption control.
+
+### Native update interruption
+
+The outer update worker exposes an explicit engineering pause after computation
+and bounded encoding, before full B response. The interruption adapter terminates
+its owned registered child inside preparation, exercising existing coordinator
+live-process guards before validation. Actor A remains usable; all admission,
+copy and attempt charges remain terminal and uncertain. No inner-layer or journal
+rule changes. Separate ended observations do not invent a fresh terminal stamp.
+See ADR0276 and [native interruption](docs/native-update-interruption.md).
+
+### Explicit native-only completion
+
+`core/recovery_completion.py` binds one original admission, live registered host
+facts and an exact candidate-only completion transition. The coordinator's new
+opt-in method calls trusted complete-checkpoint validation before a fresh sample
+and explicit journal CAS. Reporting witnesses include pending/completed ambiguity
+for terminal-only reconciliation. Generic floor validation, legacy execute and
+authority wire fields remain unchanged. New outer native worker/demo compose
+complete model bytes and Windows authority while actor A remains unchanged; full
+managed-bundle/actor promotion/coordinator-loss recovery remain separate. See
+ADR0275 and [native completion](docs/native-update-completion.md).
+
+### Supervised checkpoint writer interruption
+
+`infra/bounded_json_child.py` owns bounded JSON pipe/process IO without native or
+authority imports. `adapters/coupled_checkpoint_worker.py` stages bytes without
+publication or restores/predicts a complete model without training. The outer
+interruption adapter composes unchanged codec/file storage, Windows retained
+registrations, SQLite journal and surviving coordinator. Native A/B preparation
+precedes authority creation; spent checkpoint/copy charges survive writer exit
+and handoff. Uncertain native completion and coordinator-loss/full lifecycle
+recovery remain separate. See ADR0274 and the writer interruption guide.
+
+### Bounded checkpoint files
+
+`infra/checkpoint_files.py` composes the existing core codec port with bounded
+regular-file reads and caller-known digest checks. Save completes a same-directory
+temporary write, flush, fsync and close before atomic replacement; failure cleans
+only owned resources. The outer CLI selects the native codec and verifies complete
+restored continuation. Trusted parent directories and one cooperating writer are
+required. Runtime ownership, process recovery and power-loss durability remain
+separate. See ADR0273 and [checkpoint files](docs/checkpoint-files.md).
+
+### Complete coupled native snapshot bytes
+
+`adapters/coupled_checkpoint_codec.py` implements the existing inward
+`CheckpointCodec[CoupledSnapshot]` port with explicit canonical JSON and existing
+NumPy frame helpers. Aggregate topology/encoded/array bounds precede scans or
+payload decoding; native policy/gates and every complete field are validated.
+Returned arrays are detached. The outer CLI composes unchanged native models
+for round-trip and continued learning. No model construction, IO, runtime
+authority or adapter settings enter the codec. See ADR0272 and the codec guide;
+full disk/crash and lifecycle recovery remain separate.
+
+### Optional whole-iteration timing qualification
+
+`app/timed_coupled_inference.py` accepts an optional iteration ceiling, validates
+granularity before external work, and observes full intervals inside the existing
+allocated wall window. Known records survive failure; scores are suppressed.
+`app/coupled_inference_summary.py` checks explicit window/ceiling metadata before
+complete-seed aggregation. The outer adapter/CLI alone choose the frozen v2
+30ms/3ms protocol; default v1/native inference remains. No calibration or score
+feedback enters timing admission. See ADR0271 and the timing comparison guide.
+
+### Observed linear merge damage
+
+`app/linear_merge_gate.py` composes the existing linear admission/scoring helpers
+with the unchanged core projected merge. Owned full configurations and lineage
+bind the candidate; every declared train/validation probe must satisfy inclusive
+prediction, half-MSE and full-equilibrium energy limits. Rejected or failed work
+returns the owned source and completed diagnostic prefix. This application
+boundary grants no serving authority or global damage guarantee. The outer CLI
+demonstrates both families without introducing an inward adapter dependency.
+See ADR0270 and docs/linear-merge-gate.md.
+
+### Mixed raw structural runtime
+
+`core/coupled_structural_state.py` owns full origin/raw/CPC state and a bounded
+joined tagged configuration chain. `adapters/structural_coupled_scaling_learner.py`
+composes strict raw ports with full-origin binding and one private payload swap.
+`app/coupled_structural_consolidation.py` uses accepted split/merge kernels and
+delegates pruning through an internal temporary prune envelope, preserving the
+full mixed history. The outer demo composes unchanged candidate/serving ports,
+whole-envelope digests, declared selection exclusions and independent guards.
+No app/adapter dependency enters core; prior strict precision bindings remain.
+See ADR0269 and docs/coupled-structural-runtime.md for sequence/refusal semantics.
+
+### Raw coupled dyadic structure
+
+`core/coupled_scaling_structure.py` owns uniform factor2 replication, compensated
+scalar precisions, exact compatible merge and detached full raw/CPC state. It
+reuses the core raw pruning encoding guard; no app/adapter or IO dependency enters
+core. Target configuration/caps validate before expansion, reversible effective
+halves before raw encoding, and complete target/pair compatibility before merge.
+The outer CLI composes existing raw learner/fork ports for continuation. Existing
+runtime precision binding remains strict; mixed-history publication needs a
+separate configuration-transfer contract. See ADR0268 and
+docs/coupled-scaling-structure.md for exact-arithmetic identities and limits.
+
+### Raw coupled structural transfer
+
+`core/coupled_scaling_pruning.py` selects old effective coordinates, rebinds the
+new uniform width's raw weight/bias factors, validates representation error and
+owns complete chemical/coordinate state. It imports core only.
+`app/coupled_scaling_pruning_gate.py` owns probe admission, independent native
+scoring copies, observed limits and complete raw fallback. It reuses existing
+native score/diagnostic helpers; no adapter is imported by the application.
+The CLI fixes engineering fixtures and constructs new raw learners for accepted
+continuation. Why this: effective-only geometry changes cannot preserve raw
+configuration or width-dependent factors. Publication/rollback remains a separate
+runtime boundary; strict existing raw restore remains unchanged. See ADR-0266.
+
+### Isolated nonlinear scaling measurements
+
+`app/nonlinear_scaling_measurement.py` composes existing owned raw ports, copied
+checkpoint observers and the delayed actor/shadow stream. `app/coupled_attribution.py`
+keeps all final scoring after training. The application owns role/shape/storage
+validation, target-free initial and arrived-training diagnostic probes, and
+failure suppression of partial final scores. `app/nonlinear_scaling_summary.py`
+retains exact complete seed vectors. The adapter fixes data/factories/protocol;
+the CLI owns numerical threads, encoding and command resource telemetry. Why this:
+new measurements need copied observation, not a second training runtime or access
+to final labels during updates. Dependencies point inward; see ADR-0265.
+The adapter/CLI select either the original protocol or a separate fixed legacy-only
+extension. Summary axes admit only three canonical groups; saved-data aggregation
+checks each source's declared cases before union validation. No experiment settings
+are inferred from prior scores and the original 96 cells are not rerun.
+
+### Scaled matched BP
+
+`core/scaled_matched_backprop.py` composes the existing full feedforward BCE
+derivative with shared raw config/state/chain/update helpers. Precision remains
+matching metadata; CPC state is refused. `adapters/scaled_matched_backprop_learner.py`
+owns fixed base rate, strict raw restore and forks. The CLI fixes matching data
+and checks continuation/native agreement. Why this: initialization and per-layer
+optimizer factors both need matching before a scaling comparison. Algorithms and
+native objective/work diagnostics stay distinct; see ADR-0264 and the guide.
+
+### Nonlinear coupled raw coordinates
+
+`core/coupled_pc_scaling.py` owns explicit raw config/state, effective mapping,
+held-latent partials and stable functional updates using the existing objective/
+inference/CPC policy. `adapters/coupled_scaling_learner.py` owns fixed training
+settings, raw snapshots and forks. The CLI supplies fixed equation controls.
+Why this: initialization and optimizer factors must agree, while raw state cannot
+be replaced by an effective-only snapshot. Existing native/topology ports and
+defaults stay separate. Bias/precision/objective choices are local extensions;
+see ADR-0263 and docs/coupled-pc-scaling.md.
+
+### Coupled topology runtime ports
+
+`core/coupled_topology.py` owns complete geometry/native state/coordinate metadata.
+`adapters/topology_coupled_learner.py` composes native ports with explicit bounded
+width reconstruction and a single replacement payload. Fixed bindings/settings
+remain adapter-owned. `app/coupled_prune_consolidation.py` translates an accepted
+isolated gate into existing consolidation state; refusals retain diagnostic
+evidence. The demo adapter/CLI uses existing actor/shadow, promotion guards and
+serving commit/rollback. Why this: changed geometry needs an explicit constructor
+boundary without duplicating publication or changing strict adapter defaults.
+Managed retention still refuses arbitrary transforms; see ADR-0262 and
+docs/coupled-topology-runtime.md.
+
+### Native coupled structural transfer
+
+`core/coupled_width_pruning.py` copies validated native PC/CPC state and constructs
+owned one-unit prune candidates, preserving precision and adaptive association.
+`app/coupled_pruning_gate.py` owns declared probes, bounded scoring, damage decisions
+and retained source on failure. The CLI composes fixed engineering scenarios.
+Why this: topology and wake state must be complete before selecting a replacement.
+Core grants no runtime authority; shared-holder publication and nonlinear scaling
+are separate integrations. Existing native/adapter restore behavior is unchanged.
+See ADR-0261 and docs/coupled-width-pruning.md.
+
+### Linear pruning gate
+
+`core/linear_width_pruning.py` constructs an owned raw-axis candidate and coordinate
+lineage using the structural numerical helpers. `app/linear_pruning_gate.py` owns
+declared train/validation probes, damage limits, budget checks and complete
+replacement selection. It retains the source on rejection/fault. The CLI supplies
+fixed engineering examples and JSON. Why this: proposing a structure must not
+authorize its publication or let final-test data choose it. No shared runtime
+holder is mutated by this functional API; see ADR-0260.
+
+### Linear width structure
+
+`core/linear_width_structure.py` composes owned linear scaling/residual states,
+axis isometries, raw-factor conversion and coordinate-lineage validation. It
+imports core only and performs no IO or training. The standalone CLI composes
+equilibrium diagnostics and existing SGD continuation. Why this: raw width changes
+must preserve the complete effective objective, including residual identities,
+without embedding runtime consent, data-role or publication authority in lineage.
+See ADR-0259 and docs/linear-width-structure.md for merge/error/rate limitations.
+
+### Allocated-time coupled inference comparison
+
+`app/timed_coupled_inference.py` copies native PC state and declared role batches,
+times whole training windows, then scores detached states. It depends on core
+models and the existing application budget/metric helpers. Pure
+`app/coupled_inference_summary.py` retains complete ordered seed vectors.
+`adapters/coupled_inference_comparison.py` composes fixed data/resources; the script
+owns thread settings and JSON. Why this: all policy/check/bookkeeping cost must
+be timed together while final labels stay outside training/stopping decisions.
+The application does not import its adapter. See ADR-0258.
+
 ## Objective
 
 The repository is designed to evolve Circadian Predictive Coding as the main algorithm while preserving reproducible comparisons with:
@@ -27,6 +408,75 @@ older request/audit-only fixture description as historical chronology; the publi
 CLI continues to require its declared canonical files.
 
 ## Layer Boundaries
+
+`src/core/linear_pc_reference.py` is a pure scalar-output clamped linear
+equilibrium and local-gradient reference. The outer script owns its fixed
+synthetic inputs and JSON presentation. It depends only inward on core; there
+is no learner/runtime state, dataset access or change to binary objectives.
+See [the reference map](docs/linear-pc-reference.md) and ADR-0250.
+
+`src/core/linear_pc_scaling.py` composes that pure reference with validated raw
+weights, forward factors and raw-coordinate SGD. Configuration and tensor state
+remain separate from effective gradients; the outer script owns fixed example
+inputs and JSON. ADR-0253 records the squared effective-rate mapping and stable
+product repair. This does not modify binary or legacy learner defaults.
+
+`app/linear_scaling_measurement.py` owns copied regression roles, train-only
+diagnostics and deferred target-free checkpoint scoring. Its summary module
+uses the existing core seed statistics. The outer `linear_scaling_pilot.py`
+owns the fixed grid/data/initialization and wall/RSS composition; the script
+owns CLI/JSON. See [the measurement guide](docs/linear-scaling-measurement.md)
+and ADR-0254. Dependencies point inward; no tuning enters this fixed protocol.
+`LinearMeasurementPorts` now supplies copied state/effective maps/advance through
+trusted native MLP and residual wrappers. `residual_scaling_pilot.py` composes
+the same outer case/grid boundary and seed summaries with the residual factory.
+See [residual measurements](docs/residual-scaling-measurement.md) and ADR-0256;
+the public MLP API/protocol remain compatible, with focused regression coverage.
+
+`core/residual_linear_pc.py` composes the unchanged MLP domain/draw/delta helpers
+and equilibrium kernel. Raw branch state is separate from fixed middle identity
+maps, so complete effective matrices enter the equilibrium while only branch
+weights receive updates. The outer `run_residual_linear_pc.py` owns fixed data
+and JSON. See [the residual guide](docs/residual-linear-pc.md) and ADR-0255;
+residual measurement and nonlinear/CPC applicability remain separate.
+
+`src/core/coupled_energy.py` supplies a pure binary energy/gradient kernel;
+`src/core/coupled_predictive_coding.py` owns the opt-in alternating learner.
+`src/core/coupled_inference.py` adds a pure guarded policy/kernel on that same
+energy. Per-call native PC/CPC policies run before existing atomic publication;
+the default fixed loop and native snapshot formats stay compatible. Adapter
+fixed policies are independently copied through forks. See
+[bounded inference](docs/coupled-bounded-inference.md) and ADR-0257 for fallback,
+counter scope and the unfinished matched work/time comparison.
+Both depend only on NumPy and the standard library. They neither alter legacy
+learners nor import orchestration, adapters or storage. See
+[the objective specification](docs/coupled-predictive-coding.md) and ADR-0247.
+The separate `coupled_circadian_predictive_coding.py` shares its inference and
+candidate checks, adding only the declared final-layer wake trace/gate. Its
+[neutral control](docs/coupled-neutral-control.md) tests genuine unit-gate parity;
+ADR-0248 records supported scope and failure semantics.
+`CoupledSnapshot` and `CoupledWakeState` define complete compatible local native
+state; `src/adapters/coupled_learners.py` reconstructs owned forks through those
+ports and composes the existing actor/shadow runtime. ADR-0249 separates model
+continuation from budgets, permissions and durable recovery.
+
+`src/core/matched_backprop.py` consumes owned `CoupledParameters` and differentiates
+the entire shared tanh/BCE feedforward graph. Its family-specific state contains
+only model parameters. The outer `matched_backprop_learner.py` adapter supplies
+owned forks with fixed rate. ADR-0251 and the [baseline guide](docs/matched-backprop.md)
+separate likelihood/tensor matching from total PC energy and runtime work.
+
+`app/coupled_attribution.py` validates disjoint role batches and orchestrates
+delayed training before scoring detached fixed checkpoints. Its summary module
+reuses pure `core/seed_statistics.py`, preserving all planned failures. The outer
+`coupled_attribution_pilot.py` owns fixed synthetic data, model composition and
+existing wall/RSS budget integration. ADR-0252 separates scoring from training;
+the [pilot guide](docs/coupled-attribution.md) documents scientific limits.
+
+The [native stream example](docs/native-stream-demo.md) composes the existing
+NumPy learner adapters and actor/shadow application runtime from the outer
+adapter layer. Its script only parses arguments and presents JSON. It adds no
+core learning rule, persistence mechanism or dependency from app/core to adapters.
 
 - `src/core`
   - Pure model logic, learning dynamics, typed model configs, and validated sleep-event facts
@@ -1874,3 +2324,14 @@ Why this: final probes run after graph-copy observations, so authority must be
 rechecked and held through publication. Exclusive cleanup releases the actual
 lexically acquired lock even if a callback replaces its field. ADR-0242 records
 this boundary; full copied-holder/compound/canonical/recovery gates remain open.
+## Raw topology runtime extension
+
+`core/coupled_scaling_topology.py` owns full raw config/parameters/wake state and
+bounded joined prune history. `adapters/topology_coupled_scaling_learner.py`
+composes existing strict raw ports, validating complete private replacements
+before one swap and pinning every non-width field. The app raw prune consolidator
+checks owned, coherent accepted evidence and returns candidate state only.
+The adapter demo composes existing runtime and independent serving guards with
+whole-envelope digests, disjoint selection IDs and complete-bundle rollback.
+No runtime dependency enters core; defaults/managed retention remain unchanged.
+See docs/coupled-raw-topology-runtime.md and ADR0267 for usage and limitations.
