@@ -1,5 +1,10 @@
 # Circadian Predictive Coding
 
+Track current work and agent progress in the
+[GitHub project tracker](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/18).
+See [the issue workflow](docs/github-issue-tracking.md); the plans and development
+log preserve historical evidence rather than live task status.
+
 For candidate handoff preserving complete learner policy, delayed-label cursor
 and original actor/resources, see [coupled candidate handoff](docs/coupled-candidate-handoff.md).
 `python -m scripts.run_coupled_candidate_handoff --describe` previews the fixed
@@ -172,13 +177,13 @@ For the fixed/adaptive PC timing CLI, see
 `python -m scripts.run_coupled_inference_comparison --describe` prints the frozen
 protocol without training. Actual runs are local, prospectively budgeted experiments.
 
-For active work, start with the [research roadmap](RESEARCH_ROADMAP.md).
+For active work, start with the [GitHub tracker](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/18).
 The [R0 baseline audit](docs/r0-baseline-audit.md) records the checkout delta,
 platform-specific checks, supported test environments and remaining gates.
 
 Later Phase 6 progress notes and their “exact next action” passages record
-historical handoffs. Use the active roadmap and the latest
-[development log](docs/development-log.md) for current work. The owning-with
+historical handoffs. Use the owning GitHub issue and its latest comments
+for current work; the roadmap and development log preserve evidence. The owning-with
 guard repair is user-deferred; its counterexample keeps scientific admission
 closed. The supported local Linux baseline now passes; see the audit for exact
 counts, skips and remaining limits. The [first local pilot preflight](docs/local-pilot-budget.md)

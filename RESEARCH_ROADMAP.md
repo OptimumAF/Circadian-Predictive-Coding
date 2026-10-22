@@ -1,5 +1,13 @@
 # Circadian Predictive Coding
 
+> **Tracking moved to GitHub issues (2026-10-22).** Start with the
+> [project tracker](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/18)
+> and owning issue comments for current scope, progress, blockers and handoff.
+> The body below preserves historical evidence, original acceptance criteria
+> and negative results. Its old current/next-action and plan/log-update
+> instructions are superseded by AGENTS.md and the GitHub issue workflow.
+> Do not append new live status here.
+
 - [x] **R3.7w — Native managed-consent handoff, accepted.** Original
   declarations/opt-out/guards/quotas over stale refusal and freshtransfer, no
   held-out/native admission. Scope: artifacts/runs/coupled-managed-consent-20261015/SCOPE.md.

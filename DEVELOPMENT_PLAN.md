@@ -1,5 +1,13 @@
 # Circadian Predictive Coding — Living Development and Research Plan
 
+> **Tracking moved to GitHub issues (2026-10-22).** Start with the
+> [project tracker](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/18)
+> and owning issue comments for current scope, progress, blockers and handoff.
+> The body below preserves historical evidence, original acceptance criteria
+> and negative results. Its old current/next-action and plan/log-update
+> instructions are superseded by AGENTS.md and the GitHub issue workflow.
+> Do not append new live status here.
+
 ## Completed increment — R3.7w native managed consent, 2026-10-15
 
 - [x] **R3.7w — Preserve managed consent/opt-out through coupled handoff.**

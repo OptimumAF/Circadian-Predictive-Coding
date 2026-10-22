@@ -2,9 +2,38 @@
 
 Instructions for any coding agent operating in this repository.
 
-For the compact active research index, start with [`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md).
-For preserved historical milestones, task acceptance criteria, and session handoff, see
-[`DEVELOPMENT_PLAN.md`](DEVELOPMENT_PLAN.md) and `docs/development-log.md`.
+For current work and handoff, start with the
+[GitHub project tracker](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/18)
+and [issue workflow](docs/github-issue-tracking.md).
+`RESEARCH_ROADMAP.md`, `DEVELOPMENT_PLAN.md` and `docs/development-log.md`
+preserve historical requirements and evidence; they are no longer live trackers.
+
+## Project tracking — GitHub issues (2026-10-22)
+
+GitHub issues are the source of truth for task scope, status, acceptance criteria,
+dependencies, blockers, progress and handoff. This instruction supersedes older
+directions to update current sections, checkboxes or session logs in the plans.
+
+- Before substantive work, read the tracker and owning issue, including comments;
+  reuse an existing ticket or create a bounded one with its stable legacy task ID.
+- Post a start comment identifying the agent/chat, scope, dependencies, affected
+  files and exact next action. Do not claim another agent's active issue silently.
+- Update the issue at meaningful milestones, scope changes, failed checks,
+  blockers and before ending a session. Record exact commands/outcomes/skips,
+  artifacts/costs, unmet criteria and one precise next action. Amend scope before
+  executing a changed protocol. Keep comments concise and evidence-linked.
+- Close only after the scoped acceptance criteria are evidenced and self-reviewed;
+  keep broader parents open. Reopen regressions. Record deferred, duplicate or
+  canceled work explicitly; it is not completed implementation. Link relevant PRs.
+- Retain protocols, scientific results, ADRs and substantial evidence in their
+  existing repository/artifact locations. Do not duplicate live status in the
+  three historical tracking files or rewrite frozen evidence.
+- If GitHub is unavailable, retain a clearly marked pending update locally and
+  disclose the failure; sync it to the issue when access returns. Never claim a
+  successful issue update without a receipt. Keep secrets/private raw data local.
+
+Why this: one visible task history replaces three competing current handoffs,
+while preserving original scientific criteria, budgets and negative results.
 
 ## 0) Role and Objective
 You are a senior software engineer and tech lead. Build and evolve this project so it is:

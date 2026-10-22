@@ -2,6 +2,8 @@
 
 Describe what changed and why.
 
+Tracking issue: <!-- Link the owning issue; use Closes #N only when all scoped criteria pass. -->
+
 ## Checklist
 
 - [ ] I ran `pytest -q`
