@@ -1,6 +1,7 @@
 """Fixed coupled PC/neutral-CPC early-stop and fallback engineering trace."""
 
 from dataclasses import asdict
+import argparse
 import json
 import os
 
@@ -9,6 +10,8 @@ os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 
 import numpy as np
+
+from src.adapters.coupled_inference_stream import run_stream_example
 
 from src.core.coupled_circadian_predictive_coding import (
     CoupledCircadianConfig,
@@ -91,7 +94,13 @@ def run_example() -> dict[str, object]:
 
 
 def main() -> None:
-    print(json.dumps(run_example(), allow_nan=False, indent=2))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--stream", action="store_true", help="run the fixed recurring stream demo")
+    args = parser.parse_args()
+    result = run_stream_example() if args.stream else run_example()
+    print(json.dumps(result, allow_nan=False, indent=2))
+    if args.stream and result.get("status") != "complete":
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from src.core.native_graph_copy import copy_graph
-from dataclasses import replace
+from dataclasses import fields, replace
 from contextlib import nullcontext
 from typing import Callable, ContextManager, Generic, TypeVar
 
@@ -19,15 +19,26 @@ from src.app.inbox_erasure_observation import prepare_inbox_erasure, commit_inbo
 from src.core.native_update_origin import NativeUpdateObserver, NativeUpdateOrigin
 from src.app.toy_execution_budget import ToyBudgetSession, ToyExecutionStopped
 from src.core.experience import (
+    AcknowledgedExperience,
     AppliedExperience,
     EventClock,
     Experience,
+    ExperiencePermissions,
     LabelArrival,
     SampleKey,
     require_identifier,
     require_tick,
+    require_training_role,
+    validate_experience,
+    validate_experience_permissions,
+    validate_label_arrival,
 )
-from src.core.learner_ports import NativeLearner, TrainingDiagnostic
+from src.core.learner_ports import (
+    NativeLearner,
+    TrainingDiagnostic,
+    validate_learning_rate_multiplier,
+    validate_gate_setting,
+)
 from src.core.inbox_cursor import InboxCursor, validate_inbox_cursor
 from src.core.data_erasure import ErasedExperience, ErasureReason
 
@@ -36,8 +47,84 @@ Targets = TypeVar("Targets")
 Prediction = TypeVar("Prediction")
 State = TypeVar("State")
 
+_SOURCE_FIELDS = frozenset(field.name for field in fields(Experience))
+_PERMISSION_FIELDS = frozenset(field.name for field in fields(ExperiencePermissions))
+_LABEL_FIELDS = frozenset(field.name for field in fields(LabelArrival))
+
+
+def _plain_record_fields(record, names: frozenset[str]) -> bool:
+    attributes = vars(record)
+    # Missing fields must preserve replace's capture/error order, including
+    # opaque payload presence. Custom dictionary keys must add no callbacks.
+    return (
+        type(attributes) is dict
+        and all(type(key) is str for key in attributes)
+        and names <= attributes.keys()
+    )
+
+
+def _plain_source_metadata(source: Experience) -> bool:
+    """Keep opaque callbacks on the original captured-constructor path."""
+    return (
+        _plain_record_fields(source, _SOURCE_FIELDS)
+        and all(
+            type(getattr(source, name)) is str
+            for name in ("sample_id", "episode_id", "model_version")
+        )
+        and type(source.observed_at) is int
+        and type(source.role) is str
+        and type(source.permissions) is ExperiencePermissions
+        and _plain_record_fields(source.permissions, _PERMISSION_FIELDS)
+        and all(
+            type(flag) is bool
+            for flag in (
+                source.permissions.training,
+                source.permissions.replay,
+                source.permissions.evaluation,
+            )
+        )
+        and type(source.candidate_ids) is tuple
+        and all(type(candidate) is str for candidate in source.candidate_ids)
+        and (source.action_id is None or type(source.action_id) is str)
+        and (source.reward is None or type(source.reward) is int or type(source.reward) is float)
+    )
+
+
+def _plain_label_metadata(label: LabelArrival) -> bool:
+    return (
+        _plain_record_fields(label, _LABEL_FIELDS)
+        and all(
+            type(getattr(label, name)) is str
+            for name in ("event_id", "sample_id", "episode_id", "model_version")
+        )
+        and type(label.arrived_at) is int
+        and type(label.role) is str
+    )
+
 
 class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
+    # Why: ordinary TRAIN owners keep their exact historical field schema and
+    # capture bytes. Only explicitly scoped probe owners add role fields.
+    @property
+    def _training_role(self) -> str:
+        return vars(self).get("_training_role", "train")
+
+    @_training_role.setter
+    def _training_role(self, value: str) -> None:
+        if type(value) is str and value == "train" and "_training_role" not in vars(self):
+            return
+        vars(self)["_training_role"] = value
+
+    @property
+    def _original_training_role(self) -> str:
+        return vars(self).get("_original_training_role", "train")
+
+    @_original_training_role.setter
+    def _original_training_role(self, value: str) -> None:
+        if type(value) is str and value == "train" and "_original_training_role" not in vars(self):
+            return
+        vars(self)["_original_training_role"] = value
+
     def __init__(
         self,
         learner: NativeLearner[Features, Targets, Prediction, State],
@@ -46,12 +133,22 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         budget: ToyBudgetSession,
         learner_version: str,
         max_experiences: int = 1024,
+        training_role: str = "train",
     ) -> None:
         require_identifier(learner_version, "learner_version")
         if type(max_experiences) is not int or max_experiences <= 0:
             raise ValueError("max_experiences must be a positive integer")
         if not callable(getattr(clock, "now", None)) or type(budget) is not ToyBudgetSession:
             raise ValueError("experience inbox requires an event clock and ToyBudgetSession")
+        role = require_training_role(training_role)
+        if role == "probe_train" and (
+            max_experiences > 16
+            or budget.budget.max_training_updates != max_experiences
+            or budget.updates_completed != 0
+            or budget.replay_examples_completed != 0
+        ):
+            raise ValueError("probe inbox requires a fresh exact budget for at most 16 episodes")
+        self._training_role = self._original_training_role = role
         self._learner, self._clock, self._budget = learner, clock, budget
         self._learner_version, self._capacity = learner_version, max_experiences
         self._experiences: dict[SampleKey, Experience[Features]] = {}
@@ -75,6 +172,61 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         return tuple(self._applied.values())
 
     @property
+    def acknowledged_experiences(self) -> tuple[AcknowledgedExperience, ...]:
+        return tuple(getattr(self, "_acknowledged", {}).values())
+
+    def _acknowledge_ready(self, key, verify, *, actor_version, revision):
+        """Called only under the enclosing candidate lease; verifier is trusted."""
+        self._require_open()
+        if self._training_role != "train" or self._erased:
+            raise ValueError("acknowledgement requires ordinary unerased TRAIN")
+        now = self._read_clock()
+        ready = self._ready(now)
+        if not ready or ready[0] != key:
+            raise ValueError("acknowledgement requires the oldest ready unconsumed packet")
+        source, label = self._experiences[key], self._labels[key]
+        self._require_pair(source, label)
+        if source.model_version != actor_version:
+            raise ValueError("acknowledgement source version is stale")
+        self._budget.before_final()
+        budget_updates = self._budget.updates_completed
+        self._draining = True
+        try:
+            if self._payload_copy_guard is not None:
+                self._payload_copy_guard(source, label)
+            accepted = verify(deepcopy(source), deepcopy(label))
+            if type(accepted) is not bool:
+                raise ValueError("acknowledgement verifier must return an exact boolean")
+            self._require_training_scope()
+            self._budget.before_final()
+            if self._budget.updates_completed != budget_updates:
+                raise ValueError("acknowledgement verifier changed optimizer accounting")
+            if self._read_clock() != now:
+                raise ValueError("acknowledgement clock changed during verification")
+            if not accepted:
+                return None
+            receipt = AcknowledgedExperience(
+                source.sample_id,
+                source.episode_id,
+                label.event_id,
+                actor_version,
+                self._learner_version,
+                source.observed_at,
+                label.arrived_at,
+                now,
+                self._budget.updates_completed,
+                revision,
+            )
+            # Why: lazy history preserves the exact default owner/cursor schema.
+            # Opt-in histories are bounded by existing identity capacity.
+            if not hasattr(self, "_acknowledged"):
+                self._acknowledged: dict[SampleKey, AcknowledgedExperience] = {}
+            self._acknowledged[key] = receipt
+            return receipt
+        finally:
+            self._draining = False
+
+    @property
     def stopped(self) -> bool:
         """Expose uncertain native failure to an enclosing candidate owner."""
         return self._stopped
@@ -95,6 +247,8 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         admission. Public capture still returns detached data; this private view
         is used only synchronously under the existing candidate owner lease.
         """
+        if self.acknowledged_experiences:
+            raise ValueError("acknowledgement history is unsupported by the existing cursor")
         if self._draining:
             raise ValueError("inbox cursor capture requires a quiescent drain")
         self._require_history_indexes()
@@ -111,7 +265,38 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
             tuple(self._erased[k] for k in sorted(self._erased)),
         )
 
+    def _require_training_scope(self) -> None:
+        if (
+            require_training_role(self._training_role) != self._original_training_role
+            or self._training_role is not self._original_training_role
+        ):
+            raise ValueError("inbox requires its original training role")
+        for source in self._experiences.values():
+            if type(source) is not Experience:
+                raise ValueError("inbox source must remain an exact Experience")
+            if _plain_source_metadata(source):
+                # Why: these validation-only constructors allocate hundreds of
+                # records in each completed guard. Plain metadata cannot execute
+                # callbacks while fields are read; opaque metadata keeps capture.
+                validate_experience(source)
+                validate_experience_permissions(source.permissions)
+            else:
+                replace(source)
+                replace(source.permissions)
+            if source.role != self._training_role or not source.permissions.training:
+                raise ValueError("inbox source differs from its original training role")
+        for label in self._labels.values():
+            if type(label) is not LabelArrival:
+                raise ValueError("inbox label must remain an exact LabelArrival")
+            if _plain_label_metadata(label):
+                validate_label_arrival(label)
+            else:
+                replace(label)
+            if label.role != self._training_role:
+                raise ValueError("inbox label differs from its original training role")
+
     def _require_history_indexes(self) -> None:
+        self._require_training_scope()
         if (
             any(k != value.key for k, value in self._experiences.items())
             or any(k != value.key for k, value in self._labels.items())
@@ -125,11 +310,18 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
 
     def _materialize_cursor(self, learner, cursor):
         """Internal owned handoff only; no native calls or fresh budget/clock."""
+        if self.acknowledged_experiences:
+            raise ValueError("acknowledgement history is unsupported by cursor handoff")
+        self._require_training_scope()
         validate_inbox_cursor(cursor)
+        if any(item.role != self._training_role for item in (*cursor.experiences, *cursor.labels)):
+            raise ValueError("cursor differs from the owner training role")
         if cursor.completed_updates != self._budget.updates_completed:
             raise ValueError("cursor work differs from the original cumulative budget")
         owned = copy_graph(self, "inbox_materialize", cursor)
         prepared = object.__new__(type(self))
+        prepared._training_role = self._training_role
+        prepared._original_training_role = self._original_training_role
         prepared._learner, prepared._clock, prepared._budget = learner, self._clock, self._budget
         prepared._learner_version, prepared._capacity = owned.learner_version, owned.capacity
         prepared._experiences = {s.key: s for s in owned.experiences}
@@ -150,6 +342,7 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         return prepared
 
     def _require_open(self) -> None:
+        self._require_training_scope()
         if self._historical_completed_updates is not None:
             raise ValueError("experience inbox is retired after owner handoff")
         if self._stopped:
@@ -175,10 +368,12 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
             self._registration_guard(source)
         if (
             type(source) is not Experience
-            or source.role != "train"
+            or source.role != self._training_role
             or not source.permissions.training
         ):
-            raise ValueError("experience inbox requires train-role training permission")
+            raise ValueError("experience inbox requires its original role training permission")
+        replace(source)
+        replace(source.permissions)
         key = source.key
         if key in self._experiences or key in self._erased:
             raise ValueError(f"duplicate experience identity: {key}")
@@ -191,8 +386,11 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         self._require_open()
         if self._registration_guard is not None:
             self._registration_guard(label)
-        if type(label) is not LabelArrival or label.role != "train":
-            raise ValueError("label must have the train role before payload access")
+        if type(label) is not LabelArrival or label.role != self._training_role:
+            raise ValueError(
+                f"label must have the {self._training_role} role before payload access"
+            )
+        replace(label)
         key = label.key
         if key in self._labels or key in self._erased or label.event_id in self._event_ids:
             raise ValueError(f"duplicate label or event identity: {key}, {label.event_id}")
@@ -265,6 +463,8 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
     def _prepare_erased_history(
         self, keys: tuple[SampleKey, ...], now: int, reason: ErasureReason
     ) -> dict[SampleKey, ErasedExperience]:
+        if self.acknowledged_experiences:
+            raise ValueError("acknowledgement history is unsupported by erasure cursors")
         prepared = self._erased.copy()
         for key in keys:
             if key not in prepared:
@@ -291,11 +491,11 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         if source is not None:
             replace(source)
             replace(source.permissions)
-            if source.role != "train" or not source.permissions.training:
+            if source.role != self._training_role or not source.permissions.training:
                 raise ValueError("erasure source metadata must remain train-authorized")
         if label is not None:
             replace(label)
-            if label.role != "train":
+            if label.role != self._training_role:
                 raise ValueError("erasure label metadata must retain train role")
         if source is not None and label is not None:
             self._require_pair(source, label)
@@ -330,6 +530,7 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
             key
             for key in self._experiences.keys() & self._labels.keys()
             if key not in self._applied
+            and key not in getattr(self, "_acknowledged", {})
             and self._labels[key].arrived_at <= now
             and self._experiences[key].observed_at <= now
             and self._training_allowed(key)
@@ -356,8 +557,12 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         key: SampleKey,
         now: int,
         native_observer: NativeUpdateObserver[Features, Targets] | None = None,
+        learning_rate_multiplier: float = 1.0,
+        gate_setting: str = "unchanged",
     ) -> AppliedExperience:
+        self._require_training_scope()
         source, label = self._experiences[key], self._labels[key]
+        self._require_pair(source, label)
         started = False
         access: NativeUpdateAccess[Features, Targets] | None = None
 
@@ -388,6 +593,7 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         if self._payload_copy_guard is not None:
             self._payload_copy_guard(source, label)
         features, targets = deepcopy((source.features, label.targets))
+        self._require_training_scope()
         if native_observer is not None:
 
             def read_origin() -> NativeUpdateOrigin[Features, Targets]:
@@ -411,6 +617,8 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
                 self._budget,
                 on_started=entering,
                 on_completed=completed,
+                learning_rate_multiplier=learning_rate_multiplier,
+                gate_setting=gate_setting,
             )
         except ToyExecutionStopped as error:
             if started and key not in self._applied:
@@ -448,7 +656,22 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         max_updates: int | None = None,
         before_each_update: Callable[[], ContextManager[bool]] | None = None,
         native_observer: NativeUpdateObserver[Features, Targets] | None = None,
+        learning_rate_multiplier: float = 1.0,
+        gate_setting: str = "unchanged",
     ) -> tuple[AppliedExperience, ...]:
+        validate_learning_rate_multiplier(learning_rate_multiplier)
+        validate_gate_setting(gate_setting)
+        if gate_setting != "unchanged" and learning_rate_multiplier != 1:
+            raise ValueError("gate/rate combination is unsupported")
+        if gate_setting != "unchanged":
+            validator = getattr(self._learner, "validate_gate_setting", None)
+            if not callable(validator) or not callable(
+                getattr(self._learner, "train_batch_with_gate_setting", None)
+            ):
+                raise ValueError("native gate executor is unsupported")
+            # Direct inbox/runtime callers get the same pre-payload refusal as
+            # finite-action callers. Capability checks read only bound policy.
+            validator(gate_setting)
         if max_updates is not None and (type(max_updates) is not int or max_updates <= 0):
             raise ValueError("max_updates must be a positive integer or None")
         if before_each_update is not None and not callable(before_each_update):
@@ -470,7 +693,11 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
                         raise ValueError("update admission must yield an exact boolean")
                     if not allowed:
                         break
-                    updates.append(self._apply(key, now, native_observer))
+                    updates.append(
+                        self._apply(
+                            key, now, native_observer, learning_rate_multiplier, gate_setting
+                        )
+                    )
             return tuple(updates)
         finally:
             self._draining = False

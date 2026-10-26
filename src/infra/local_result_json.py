@@ -26,6 +26,23 @@ def write_local_json_payload(record: Any, path: str | Path) -> None:
         output.write(payload + "\n")
 
 
+def encode_bounded_local_json(record: Any, *, max_bytes: int) -> bytes:
+    """Encode every value compactly; refuse oversize before opening a file.
+
+    Why this: deeply nested scientific evidence can exceed an output allowance
+    through indentation alone. Whitespace is disposable; evidence is not.
+    The original pretty local writer remains unchanged for existing callers.
+    """
+    if type(max_bytes) is not int or max_bytes < 1:
+        raise ValueError("local JSON byte cap must be an exact positive integer")
+    payload = (
+        json.dumps(record, default=_encode_numpy, separators=(",", ":"), allow_nan=False) + "\n"
+    ).encode("utf-8")
+    if len(payload) > max_bytes:
+        raise ValueError(f"local JSON is {len(payload)} bytes; exceeds {max_bytes}-byte output cap")
+    return payload
+
+
 def _encode_numpy(value: object) -> object:
     if isinstance(value, np.ndarray):
         return value.tolist()

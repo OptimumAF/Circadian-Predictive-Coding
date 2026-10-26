@@ -9,6 +9,7 @@ from collections import deque
 from copy import deepcopy
 from dataclasses import fields
 from math import isfinite
+from types import MappingProxyType
 
 import numpy as np
 
@@ -185,6 +186,12 @@ def _validate_native(snapshot, limits):
 
 
 class GraphPreflight:
+    # Trusted adapter subclasses extend immutable schemas, never a global registry.
+    _record_types = frozenset(RECORDS)
+    _source_schemas = MappingProxyType(
+        {kind: frozenset(spec) for kind, spec in SOURCE_FIELDS.items()}
+    )
+
     def __init__(self, limits):
         self.limits = limits
         self.nodes = 0
@@ -225,24 +232,32 @@ class GraphPreflight:
             else:
                 for item in value:
                     self.visit(item, depth + 1)
-        elif type(value) in RECORDS:
+        elif type(value) in self._record_types:
             if vars(value).keys() != {field.name for field in fields(value)}:
                 raise ValueError("complete composite record fields changed")
             if type(value) is SourceRecord:
+                if (
+                    type(value.kind) is not str
+                    or type(value.fields) is not tuple
+                    or any(
+                        type(pair) is not tuple or len(pair) != 2 or type(pair[0]) is not str
+                        for pair in value.fields
+                    )
+                ):
+                    raise ValueError("complete projected source requires exact named field tuples")
                 names = tuple(name for name, _ in value.fields)
-                if value.kind not in SOURCE_FIELDS or names != tuple(
-                    sorted(SOURCE_FIELDS[value.kind])
+                if value.kind not in self._source_schemas or names != tuple(
+                    sorted(self._source_schemas[value.kind])
                 ):
                     raise ValueError("unknown or incomplete projected source fields")
                 self.source(value)
-            if type(value) in (BackpropSnapshot, CircadianNetworkSnapshot):
-                _validate_native(value, self.limits)
+            self._validate_native_record(value)
             for field in fields(value):
                 self.visit(getattr(value, field.name), depth + 1)
             if type(value) is InboxCursor:
                 validate_inbox_cursor(value)
             if type(value) is CandidateCheckpointView:
-                _preflight_checkpoint_inbox(value, self.limits)
+                self._preflight_checkpoint(value)
                 _validate_view(value)
         else:
             raise ValueError("unsupported complete composite payload value")
@@ -272,7 +287,7 @@ class GraphPreflight:
                 tuple(inbox["_erased"].values()),
             )
             policy = InboxCodecPolicy(
-                native.input_dim,
+                self._native_input_dim(native),
                 self.limits.max_dimension,
                 self.limits.records.max_records,
                 self.limits.records.max_identifier_bytes,
@@ -281,6 +296,36 @@ class GraphPreflight:
             raw = native_data(cursor, policy)
             metadata_cursor(raw, policy)
             specifications(raw, policy, _native_limits(self.limits), False)
+
+    def _validate_native_record(self, value):
+        if type(value) in (BackpropSnapshot, CircadianNetworkSnapshot):
+            _validate_native(value, self.limits)
+
+    def _native_input_dim(self, native):
+        return native.input_dim
+
+    def _preflight_checkpoint(self, view):
+        _preflight_checkpoint_inbox(view, self.limits)
+
+    def preflight(self, state):
+        if (
+            type(state) is not ManagedCompositeState
+            or type(state.format_version) is not int
+            or state.format_version != 1
+        ):
+            raise ValueError("unsupported complete composite format")
+        self.budget_updates = _budget_updates(state)
+        self.visit(state)
+
+    def copy(self, state, memo):
+        self.preflight(state)
+        detached = deepcopy(state, memo)
+        for original in self.arrays:
+            copied = memo[id(original)]
+            if type(copied) is not np.ndarray:
+                raise ValueError("complete array copy changed native type")
+            copied.flags.writeable = original.flags.writeable
+        return detached
 
     def scalar(self, value):
         if type(value) is float and not isfinite(value):
@@ -310,28 +355,11 @@ class GraphPreflight:
 
 
 def preflight_numpy_composite(state, limits):
-    if (
-        type(state) is not ManagedCompositeState
-        or type(state.format_version) is not int
-        or state.format_version != 1
-    ):
-        raise ValueError("unsupported complete composite format")
-    graph = GraphPreflight(limits)
-    graph.budget_updates = _budget_updates(state)
-    graph.visit(state)
+    GraphPreflight(limits).preflight(state)
 
 
 def copy_numpy_composite(state, limits, memo):
-    graph = GraphPreflight(limits)
-    graph.budget_updates = _budget_updates(state)
-    graph.visit(state)
-    detached = deepcopy(state, memo)
-    for original in graph.arrays:
-        copied = memo[id(original)]
-        if type(copied) is not np.ndarray:
-            raise ValueError("complete array copy changed native type")
-        copied.flags.writeable = original.flags.writeable
-    return detached
+    return GraphPreflight(limits).copy(state, memo)
 
 
 def _budget_updates(state) -> int:
@@ -342,12 +370,12 @@ def _budget_updates(state) -> int:
     return value
 
 
-def _preflight_checkpoint_inbox(view, limits):
+def _preflight_checkpoint_inbox(view, limits, input_dim=None):
     snapshot = view.state
-    if type(snapshot) not in (BackpropSnapshot, CircadianNetworkSnapshot):
+    if input_dim is None and type(snapshot) not in (BackpropSnapshot, CircadianNetworkSnapshot):
         raise ValueError("retained checkpoint requires complete supported native snapshot")
     policy = InboxCodecPolicy(
-        snapshot.input_dim,
+        snapshot.input_dim if input_dim is None else input_dim,
         limits.max_dimension,
         limits.records.max_records,
         limits.records.max_identifier_bytes,
@@ -358,7 +386,9 @@ def _preflight_checkpoint_inbox(view, limits):
     specifications(raw, policy, _native_limits(limits), False)
 
 
-def capture_numpy_managed_composite(owner, *, limits, replay_origins=None):
+def capture_numpy_managed_composite(
+    owner, *, limits, replay_origins=None, replay_copies=None, replay_checkpoints=None
+):
     """Compose supported NumPy ports with the inward original-owner coordinator."""
     return capture_managed_composite(
         owner,
@@ -368,4 +398,6 @@ def capture_numpy_managed_composite(owner, *, limits, replay_origins=None):
         copy_state=copy_numpy_composite,
         replay_inventory=numpy_replay_inventory,
         replay_origins=replay_origins,
+        replay_copies=replay_copies,
+        replay_checkpoints=replay_checkpoints,
     )

@@ -11,6 +11,7 @@ from typing import Self
 from typing import Any
 
 from src.core.dimension_validation import require_positive_integer_dimension
+from src.core.learner_ports import validate_gate_setting
 from src.core.neuron_adaptation import NeuronLineageSnapshot, PruneOutcome
 from src.core.sleep_clocks import SleepClockSnapshot, SleepEpochProgress
 from src.core.sleep_telemetry import (
@@ -410,6 +411,29 @@ class PredictiveCodingHead:
         grad_feature_hidden = (features.T @ hidden_prior_grad) / sample_count
         grad_hidden_bias = torch.mean(hidden_prior_grad, dim=0, keepdim=True)
 
+        return self._apply_training_gradients(
+            hidden_state,
+            output_error,
+            hidden_error,
+            (grad_feature_hidden, grad_hidden_bias, grad_hidden_output, grad_output_bias),
+            learning_rate,
+        )
+
+    def _apply_training_gradients(
+        self,
+        hidden_state: Any,
+        output_error: Any,
+        hidden_error: Any,
+        gradients: tuple[Any, Any, Any, Any],
+        learning_rate: float,
+    ) -> float:
+        """Apply validated native partials; callers own relaxation/admission.
+
+        Why: ordinary and explicit weighted PC must share state bookkeeping,
+        finite candidate checks and the original legacy diagnostic definition.
+        """
+        torch = self._torch
+        grad_feature_hidden, grad_hidden_bias, grad_hidden_output, grad_output_bias = gradients
         new_hidden_output = self.weight_hidden_output - learning_rate * grad_hidden_output
         new_output_bias = self.bias_output - learning_rate * grad_output_bias
         new_feature_hidden = self.weight_feature_hidden - learning_rate * grad_feature_hidden
@@ -693,7 +717,10 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         learning_rate: float,
         inference_steps: int,
         inference_learning_rate: float,
+        *,
+        gate_setting: str = "unchanged",
     ) -> float:
+        validate_gate_setting(gate_setting)
         torch = self._torch
         functional = torch.nn.functional
         self._validate_training_inputs(
@@ -729,6 +756,28 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         grad_feature_hidden = (features.T @ hidden_prior_grad) / sample_count
         grad_hidden_bias = torch.mean(hidden_prior_grad, dim=0, keepdim=True)
 
+        return self._apply_training_gradients(
+            hidden_state,
+            output_error,
+            hidden_error,
+            (grad_feature_hidden, grad_hidden_bias, grad_hidden_output, grad_output_bias),
+            learning_rate,
+            gate_setting=gate_setting,
+        )
+
+    def _apply_training_gradients(
+        self,
+        hidden_state: Any,
+        output_error: Any,
+        hidden_error: Any,
+        gradients: tuple[Any, Any, Any, Any],
+        learning_rate: float,
+        *,
+        gate_setting: str = "unchanged",
+    ) -> float:
+        """Keep the native adaptive transition for an already relaxed proposal."""
+        torch = self._torch
+        grad_feature_hidden, grad_hidden_bias, grad_hidden_output, grad_output_bias = gradients
         adaptive_before = (
             self._chemical,
             self._chemical_fast,
@@ -742,7 +791,11 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
             reward_scale = self._compute_reward_scale(output_error)
             self._last_reward_scale = reward_scale
             self._update_importance_ema(grad_hidden_output, reward_scale=reward_scale)
-            plasticity = self._plasticity()
+            # Neutral bypasses only this update's plasticity multiplication.
+            # Chemistry, reward, importance and clocks retain their native rules.
+            plasticity = (
+                torch.ones_like(self._chemical) if gate_setting == "neutral" else self._plasticity()
+            )
 
             grad_hidden_output = grad_hidden_output * plasticity[:, None]
             grad_feature_hidden = grad_feature_hidden * plasticity[None, :]
@@ -801,7 +854,7 @@ class CircadianPredictiveCodingHead(PredictiveCodingHead):
         self._traffic_steps += 1
         self._neuron_age = new_age
         self._steps_since_sleep += 1
-        self._wake_examples += int(features.shape[0])
+        self._wake_examples += int(hidden_state.shape[0])
         self._energy_history.append(energy_value)
         max_history = max(self.config.sleep_energy_window * 4, 16)
         if len(self._energy_history) > max_history:

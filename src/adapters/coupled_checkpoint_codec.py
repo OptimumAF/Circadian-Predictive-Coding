@@ -149,7 +149,8 @@ def _size_preflight(header, shapes, limits):
         raise ValueError("complete coupled encoding exceeds codec byte bound")
 
 
-def _native_plan(state: CoupledSnapshot, binding: CodecBinding, limits: CodecLimits):
+def _native_structure(state: CoupledSnapshot, limits: CodecLimits):
+    """Borrow exact native metadata; bound aggregate arrays before any value scan."""
     if type(state) is not CoupledSnapshot:
         raise ValueError("codec requires exact CoupledSnapshot format 1")
     exact_object(vars(state), {"format_version", "parameters", "precisions", "wake_state"})
@@ -187,14 +188,30 @@ def _native_plan(state: CoupledSnapshot, binding: CodecBinding, limits: CodecLim
         for name in _WAKE_ARRAYS:
             shapes[name] = [(hidden_dims[-1],)]
             values[name] = [source[name]]
-    header = _header(binding, input_dim, hidden_dims, precisions, wake)
-    _size_preflight(header, shapes, limits)
+    if (
+        sum(prod(shape) * 8 for group in shapes.values() for shape in group)
+        > limits.max_array_bytes
+    ):
+        raise ValueError("aggregate coupled arrays exceed codec byte bound")
+    return input_dim, hidden_dims, precisions, wake, shapes, values, policy
+
+
+def _native_array_metadata(shapes, values):
     # No finite scan (which creates a temporary) occurs before aggregate sizing.
     for name, group in values.items():
         for value, shape in zip(group, shapes[name]):
             if type(value) is not np.ndarray or value.dtype != np.float64 or value.shape != shape:
                 raise ValueError("native array dtype or shape differs from complete topology")
             native_order(value)
+
+
+def _native_plan(state: CoupledSnapshot, binding: CodecBinding, limits: CodecLimits):
+    input_dim, hidden_dims, precisions, wake, shapes, values, policy = _native_structure(
+        state, limits
+    )
+    header = _header(binding, input_dim, hidden_dims, precisions, wake)
+    _size_preflight(header, shapes, limits)
+    _native_array_metadata(shapes, values)
     return header, shapes, values, policy
 
 

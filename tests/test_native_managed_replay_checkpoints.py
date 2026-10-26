@@ -202,10 +202,13 @@ def setup(
     train_first=True,
     queue_first=True,
     records_created=64,
+    retain_capture_history=False,
+    max_updates=2,
+    metadata_bytes=128 * 1024,
 ):
     clock = LogicalClock()
     budget = ToyBudgetSession(
-        ToyExecutionBudget(max_training_updates=2, max_wall_seconds=1), lambda: 0.0
+        ToyExecutionBudget(max_training_updates=max_updates, max_wall_seconds=1), lambda: 0.0
     )
     model = CircadianPredictiveCodingNetwork(
         3, 2, seed=23, min_hidden_dim=2, circadian_config=CircadianConfig(sleep_mode="disabled")
@@ -247,7 +250,7 @@ def setup(
     ledger = ManagedReplayOrigins(
         owner,
         ports,
-        ReplayOriginLimits(live_records, records_created, invocations, 128 * 1024, 120, 4096),
+        ReplayOriginLimits(live_records, records_created, invocations, metadata_bytes, 120, 4096),
         WINDOW,
         retain_inbox_origins=retain_inbox_origins,
     )
@@ -283,6 +286,7 @@ def setup(
         ledger,
         ReplayGraphPorts(replay_graph_rows, replay_graph_payload_bytes),
         builder_source=replay_builder_source,
+        retain_capture_history=retain_capture_history,
     )
     return owner, life, runtime, ledger, controller, manager
 

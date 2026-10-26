@@ -1,0 +1,1224 @@
+{
+  "complete": true,
+  "observed_work": {
+    "parameter_updates": 56,
+    "training_rows": 116,
+    "fits": 4,
+    "fit_rows": 8,
+    "fit_values": 16,
+    "replay_updates": 12,
+    "replay_rows_charged": 24,
+    "probe_prediction_calls": 256,
+    "probe_prediction_rows": 576,
+    "step_gradient_calls": 32,
+    "step_gradient_rows": 64,
+    "step_gradient_values": 10304,
+    "step_gradient_numeric_bytes": 82432,
+    "step_gradient_dense_mac": 40960,
+    "pc_updates": 42,
+    "pc_training_rows": 87,
+    "pc_candidate_prediction_calls": 42,
+    "pc_candidate_prediction_rows": 87,
+    "pc_energy_entries": 210,
+    "pc_latent_proposals": 168,
+    "cpc_chemistry_attempts": 28,
+    "cpc_gate_attempts": 28,
+    "zero_preparations": 16,
+    "zero_arrays": 64,
+    "zero_values": 5152,
+    "zero_numeric_bytes": 41216
+  },
+  "comparisons": {
+    "bp": {
+      "benchmark": {
+        "warm_acquisition_gain": {
+          "baseline": 0.06774231253090929,
+          "replay": 0.1678501141694359,
+          "replay_minus_baseline": 0.10010780163852662,
+          "higher_is_better": true
+        },
+        "new_acquisition_gain": {
+          "baseline": 0.07859231278873266,
+          "replay": 0.01857555697729131,
+          "replay_minus_baseline": -0.06001675581144135,
+          "higher_is_better": true
+        },
+        "warm_retention_loss": {
+          "baseline": -0.08409775680077225,
+          "replay": -0.13554102742827107,
+          "replay_minus_baseline": -0.051443270627498816,
+          "higher_is_better": false
+        },
+        "warm_return_recovery": {
+          "baseline": 0.08386949050598833,
+          "replay": 0.0533046612492737,
+          "replay_minus_baseline": -0.030564829256714623,
+          "higher_is_better": true
+        },
+        "warm_return_deficit": {
+          "baseline": -0.16796724730676058,
+          "replay": -0.18884568867754475,
+          "replay_minus_baseline": -0.02087844137078418,
+          "higher_is_better": false
+        },
+        "new_retention_loss": {
+          "baseline": -0.02102860107760622,
+          "replay": 0.04441199353796514,
+          "replay_minus_baseline": 0.06544059461557136,
+          "higher_is_better": false
+        }
+      },
+      "probes": [
+        {
+          "wake_updates": 0,
+          "baseline_native_updates": 0,
+          "replay_native_updates": 0,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.002057735979922398,
+                "replay": 0.002057735979922398,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.006393051666588004,
+                "replay": 0.006393051666588004,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.021191969656954635,
+                  "replay": 0.021191969656954635,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.012874002966929171,
+                  "replay": 0.012874002966929171,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.002057735979922398,
+                "replay": 0.002057735979922398,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.006393051666588004,
+                "replay": 0.006393051666588004,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.021191969656954635,
+                  "replay": 0.021191969656954635,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.012874002966929171,
+                  "replay": 0.012874002966929171,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 1,
+          "baseline_native_updates": 1,
+          "replay_native_updates": 2,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.007363933126807332,
+                "replay": -0.025403024281824046,
+                "replay_minus_baseline": -0.018039091155016715,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.013996101603664046,
+                "replay": -0.03595513718548701,
+                "replay_minus_baseline": -0.021959035581822967,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.03371896565366139,
+                  "replay": -0.05174587847665829,
+                  "replay_minus_baseline": -0.0180269128229969,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": -0.021499422638162513,
+                  "replay": -0.0202971486566373,
+                  "replay_minus_baseline": 0.001202273981525212,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.004130105256641776,
+                "replay": 0.008389464634753777,
+                "replay_minus_baseline": 0.004259359378112001,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.008916789272372966,
+                "replay": 0.013437707513628439,
+                "replay_minus_baseline": 0.004520918241255473,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.02277049027479172,
+                  "replay": 0.021318966993458033,
+                  "replay_minus_baseline": -0.0014515232813336887,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.016143608921026925,
+                  "replay": 0.014443998503507222,
+                  "replay_minus_baseline": -0.0016996104175197035,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 2,
+          "baseline_native_updates": 2,
+          "replay_native_updates": 4,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.020399859119351438,
+                "replay": -0.03808282647351088,
+                "replay_minus_baseline": -0.017682967354159446,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.032205416823990196,
+                "replay": -0.039406839730656784,
+                "replay_minus_baseline": -0.007201422906666588,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.039430384728879414,
+                  "replay": -0.026259271713663893,
+                  "replay_minus_baseline": 0.013171113015215521,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": -0.022655095811868253,
+                  "replay": 0.01898980482760483,
+                  "replay_minus_baseline": 0.041644900639473084,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.008482285019605539,
+                "replay": 0.009198632747777047,
+                "replay_minus_baseline": 0.0007163477281715083,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.014122546879297648,
+                "replay": 0.010659497701544396,
+                "replay_minus_baseline": -0.0034630491777532524,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.022638361199237345,
+                  "replay": 0.007250003049593751,
+                  "replay_minus_baseline": -0.015388358149643594,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.011748475540579548,
+                  "replay": -0.004056162455818413,
+                  "replay_minus_baseline": -0.01580463799639796,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 3,
+          "baseline_native_updates": 3,
+          "replay_native_updates": 6,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.03508427044766946,
+                "replay": -0.02883308766284487,
+                "replay_minus_baseline": 0.006251182784824588,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.04495897348354505,
+                "replay": -0.018890362321416387,
+                "replay_minus_baseline": 0.026068611162128663,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.039083678405042566,
+                  "replay": -0.009137100044840888,
+                  "replay_minus_baseline": 0.029946578360201676,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.012735840835498141,
+                  "replay": 0.00980590522508118,
+                  "replay_minus_baseline": -0.0029299356104169616,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.011205187609683448,
+                "replay": 0.0027877576350335276,
+                "replay_minus_baseline": -0.00841742997464992,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.015369809115360261,
+                "replay": 0.0024385563374623165,
+                "replay_minus_baseline": -0.012931252777897945,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.015422939877161729,
+                  "replay": 0.00106941321834738,
+                  "replay_minus_baseline": -0.014353526658814349,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": -0.0010753376276620014,
+                  "replay": -0.0012483114565421671,
+                  "replay_minus_baseline": -0.00017297382888016577,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "pc": {
+      "benchmark": {
+        "warm_acquisition_gain": {
+          "baseline": 0.06347263649833923,
+          "replay": 0.15890346882592382,
+          "replay_minus_baseline": 0.09543083232758459,
+          "higher_is_better": true
+        },
+        "new_acquisition_gain": {
+          "baseline": 0.07700602866491695,
+          "replay": 0.02636621020142399,
+          "replay_minus_baseline": -0.050639818463492955,
+          "higher_is_better": true
+        },
+        "warm_retention_loss": {
+          "baseline": -0.08117492332937293,
+          "replay": -0.1370877315277025,
+          "replay_minus_baseline": -0.05591280819832958,
+          "higher_is_better": false
+        },
+        "warm_return_recovery": {
+          "baseline": 0.08292180472277566,
+          "replay": 0.05766159563166881,
+          "replay_minus_baseline": -0.02526020909110685,
+          "higher_is_better": true
+        },
+        "warm_return_deficit": {
+          "baseline": -0.1640967280521486,
+          "replay": -0.19474932715937132,
+          "replay_minus_baseline": -0.030652599107222733,
+          "higher_is_better": false
+        },
+        "new_retention_loss": {
+          "baseline": -0.025594562578437036,
+          "replay": 0.04480373652433836,
+          "replay_minus_baseline": 0.0703982991027754,
+          "higher_is_better": false
+        }
+      },
+      "probes": [
+        {
+          "wake_updates": 0,
+          "baseline_native_updates": 0,
+          "replay_native_updates": 0,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.001968018020598379,
+                "replay": 0.001968018020598379,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.00602121573376431,
+                "replay": 0.00602121573376431,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.020096057300796333,
+                  "replay": 0.020096057300796333,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.01192644295296566,
+                  "replay": 0.01192644295296566,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.001968018020598379,
+                "replay": 0.001968018020598379,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.00602121573376431,
+                "replay": 0.00602121573376431,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.020096057300796333,
+                  "replay": 0.020096057300796333,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.01192644295296566,
+                  "replay": 0.01192644295296566,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 1,
+          "baseline_native_updates": 1,
+          "replay_native_updates": 2,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.006628425641428758,
+                "replay": -0.022973136332904938,
+                "replay_minus_baseline": -0.01634471069147618,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.012950694294294865,
+                "replay": -0.03329015194621318,
+                "replay_minus_baseline": -0.020339457651918316,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.031789822634531506,
+                  "replay": -0.05028979385176341,
+                  "replay_minus_baseline": -0.018499971217231903,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": -0.020788269539922882,
+                  "replay": -0.021436714107612956,
+                  "replay_minus_baseline": -0.0006484445676900735,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.0037854420916884415,
+                "replay": 0.0075999240666200785,
+                "replay_minus_baseline": 0.003814481974931637,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.008201031964442065,
+                "replay": 0.012303935236747443,
+                "replay_minus_baseline": 0.004102903272305378,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.021450366668053278,
+                  "replay": 0.02063714392370969,
+                  "replay_minus_baseline": -0.0008132227443435891,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.014803598139112806,
+                  "replay": 0.0141015049360729,
+                  "replay_minus_baseline": -0.0007020932030399052,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 2,
+          "baseline_native_updates": 2,
+          "replay_native_updates": 4,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.01885339579960006,
+                "replay": -0.036607006143376086,
+                "replay_minus_baseline": -0.017753610343776025,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.030374732222590406,
+                "replay": -0.03934958458838089,
+                "replay_minus_baseline": -0.008974852365790487,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.038761281023242194,
+                  "replay": -0.027477537055406495,
+                  "replay_minus_baseline": 0.0112837439678357,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": -0.024840841678078998,
+                  "replay": 0.017746675974885787,
+                  "replay_minus_baseline": 0.042587517652964785,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.007762157279631358,
+                "replay": 0.009839969032907764,
+                "replay_minus_baseline": 0.0020778117532764054,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.013057630346841098,
+                "replay": 0.011569401159142234,
+                "replay_minus_baseline": -0.001488229187698864,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.02192679535553166,
+                  "replay": 0.008311598742065343,
+                  "replay_minus_baseline": -0.013615196613466315,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.011822215221783991,
+                  "replay": -0.003883185709281825,
+                  "replay_minus_baseline": -0.015705400931065816,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 3,
+          "baseline_native_updates": 3,
+          "replay_native_updates": 6,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.03277173736972992,
+                "replay": -0.029246934270622305,
+                "replay_minus_baseline": 0.003524803099107618,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.04310501298127267,
+                "replay": -0.020483367881958148,
+                "replay_minus_baseline": 0.022621645099314525,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.03919551591302667,
+                  "replay": -0.010102147080594676,
+                  "replay_minus_baseline": 0.029093368832431993,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.009480529247833547,
+                  "replay": 0.01052949757220778,
+                  "replay_minus_baseline": 0.0010489683243742332,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.01099959947023832,
+                "replay": 0.0033930492488627173,
+                "replay_minus_baseline": -0.007606550221375602,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.015272604920388455,
+                "replay": 0.0028089660596827826,
+                "replay_minus_baseline": -0.012463638860705673,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.016132091078674,
+                  "replay": 0.0013184722515611758,
+                  "replay_minus_baseline": -0.014813618827112823,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 9.562659360703996e-05,
+                  "replay": -0.0015222528638223487,
+                  "replay_minus_baseline": -0.0016178794574293887,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "neutral-cpc": {
+      "benchmark": {
+        "warm_acquisition_gain": {
+          "baseline": 0.06347263649833923,
+          "replay": 0.15890346882592382,
+          "replay_minus_baseline": 0.09543083232758459,
+          "higher_is_better": true
+        },
+        "new_acquisition_gain": {
+          "baseline": 0.07700602866491695,
+          "replay": 0.02636621020142399,
+          "replay_minus_baseline": -0.050639818463492955,
+          "higher_is_better": true
+        },
+        "warm_retention_loss": {
+          "baseline": -0.08117492332937293,
+          "replay": -0.1370877315277025,
+          "replay_minus_baseline": -0.05591280819832958,
+          "higher_is_better": false
+        },
+        "warm_return_recovery": {
+          "baseline": 0.08292180472277566,
+          "replay": 0.05766159563166881,
+          "replay_minus_baseline": -0.02526020909110685,
+          "higher_is_better": true
+        },
+        "warm_return_deficit": {
+          "baseline": -0.1640967280521486,
+          "replay": -0.19474932715937132,
+          "replay_minus_baseline": -0.030652599107222733,
+          "higher_is_better": false
+        },
+        "new_retention_loss": {
+          "baseline": -0.025594562578437036,
+          "replay": 0.04480373652433836,
+          "replay_minus_baseline": 0.0703982991027754,
+          "higher_is_better": false
+        }
+      },
+      "probes": [
+        {
+          "wake_updates": 0,
+          "baseline_native_updates": 0,
+          "replay_native_updates": 0,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.001968018020598379,
+                "replay": 0.001968018020598379,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.00602121573376431,
+                "replay": 0.00602121573376431,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.020096057300796333,
+                  "replay": 0.020096057300796333,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.01192644295296566,
+                  "replay": 0.01192644295296566,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.001968018020598379,
+                "replay": 0.001968018020598379,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.00602121573376431,
+                "replay": 0.00602121573376431,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.020096057300796333,
+                  "replay": 0.020096057300796333,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.01192644295296566,
+                  "replay": 0.01192644295296566,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 1,
+          "baseline_native_updates": 1,
+          "replay_native_updates": 2,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.006628425641428758,
+                "replay": -0.022973136332904938,
+                "replay_minus_baseline": -0.01634471069147618,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.012950694294294865,
+                "replay": -0.03329015194621318,
+                "replay_minus_baseline": -0.020339457651918316,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.031789822634531506,
+                  "replay": -0.05028979385176341,
+                  "replay_minus_baseline": -0.018499971217231903,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": -0.020788269539922882,
+                  "replay": -0.021436714107612956,
+                  "replay_minus_baseline": -0.0006484445676900735,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.0037854420916884415,
+                "replay": 0.0075999240666200785,
+                "replay_minus_baseline": 0.003814481974931637,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.008201031964442065,
+                "replay": 0.012303935236747443,
+                "replay_minus_baseline": 0.004102903272305378,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.021450366668053278,
+                  "replay": 0.02063714392370969,
+                  "replay_minus_baseline": -0.0008132227443435891,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.014803598139112806,
+                  "replay": 0.0141015049360729,
+                  "replay_minus_baseline": -0.0007020932030399052,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 2,
+          "baseline_native_updates": 2,
+          "replay_native_updates": 4,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.01885339579960006,
+                "replay": -0.036607006143376086,
+                "replay_minus_baseline": -0.017753610343776025,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.030374732222590406,
+                "replay": -0.03934958458838089,
+                "replay_minus_baseline": -0.008974852365790487,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.038761281023242194,
+                  "replay": -0.027477537055406495,
+                  "replay_minus_baseline": 0.0112837439678357,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": -0.024840841678078998,
+                  "replay": 0.017746675974885787,
+                  "replay_minus_baseline": 0.042587517652964785,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.007762157279631358,
+                "replay": 0.009839969032907764,
+                "replay_minus_baseline": 0.0020778117532764054,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.013057630346841098,
+                "replay": 0.011569401159142234,
+                "replay_minus_baseline": -0.001488229187698864,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.02192679535553166,
+                  "replay": 0.008311598742065343,
+                  "replay_minus_baseline": -0.013615196613466315,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.011822215221783991,
+                  "replay": -0.003883185709281825,
+                  "replay_minus_baseline": -0.015705400931065816,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 3,
+          "baseline_native_updates": 3,
+          "replay_native_updates": 6,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.03277173736972992,
+                "replay": -0.029246934270622305,
+                "replay_minus_baseline": 0.003524803099107618,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.04310501298127267,
+                "replay": -0.020483367881958148,
+                "replay_minus_baseline": 0.022621645099314525,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.03919551591302667,
+                  "replay": -0.010102147080594676,
+                  "replay_minus_baseline": 0.029093368832431993,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.009480529247833547,
+                  "replay": 0.01052949757220778,
+                  "replay_minus_baseline": 0.0010489683243742332,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.01099959947023832,
+                "replay": 0.0033930492488627173,
+                "replay_minus_baseline": -0.007606550221375602,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.015272604920388455,
+                "replay": 0.0028089660596827826,
+                "replay_minus_baseline": -0.012463638860705673,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.016132091078674,
+                  "replay": 0.0013184722515611758,
+                  "replay_minus_baseline": -0.014813618827112823,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 9.562659360703996e-05,
+                  "replay": -0.0015222528638223487,
+                  "replay_minus_baseline": -0.0016178794574293887,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "active-cpc": {
+      "benchmark": {
+        "warm_acquisition_gain": {
+          "baseline": 0.06287166156723367,
+          "replay": 0.1572322533227211,
+          "replay_minus_baseline": 0.09436059175548742,
+          "higher_is_better": true
+        },
+        "new_acquisition_gain": {
+          "baseline": 0.07637580504013135,
+          "replay": 0.02808851258128718,
+          "replay_minus_baseline": -0.04828729245884417,
+          "higher_is_better": true
+        },
+        "warm_retention_loss": {
+          "baseline": -0.08026855984310471,
+          "replay": -0.13656327542360053,
+          "replay_minus_baseline": -0.05629471558049581,
+          "higher_is_better": false
+        },
+        "warm_return_recovery": {
+          "baseline": 0.08209781990930987,
+          "replay": 0.05845229790539729,
+          "replay_minus_baseline": -0.023645522003912574,
+          "higher_is_better": true
+        },
+        "warm_return_deficit": {
+          "baseline": -0.16236637975241458,
+          "replay": -0.19501557332899783,
+          "replay_minus_baseline": -0.032649193576583246,
+          "higher_is_better": false
+        },
+        "new_retention_loss": {
+          "baseline": -0.02662325398603918,
+          "replay": 0.044485566089364534,
+          "replay_minus_baseline": 0.07110882007540371,
+          "higher_is_better": false
+        }
+      },
+      "probes": [
+        {
+          "wake_updates": 0,
+          "baseline_native_updates": 0,
+          "replay_native_updates": 0,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.001957519526522764,
+                "replay": 0.001957519526522764,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.005985791283293726,
+                "replay": 0.005985791283293726,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.01996927136314547,
+                  "replay": 0.01996927136314547,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.011858039860947883,
+                  "replay": 0.011858039860947883,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.001957519526522764,
+                "replay": 0.001957519526522764,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.005985791283293726,
+                "replay": 0.005985791283293726,
+                "replay_minus_baseline": 0.0,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.01996927136314547,
+                  "replay": 0.01996927136314547,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.011858039860947883,
+                  "replay": 0.011858039860947883,
+                  "replay_minus_baseline": 0.0,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 1,
+          "baseline_native_updates": 1,
+          "replay_native_updates": 2,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.006567753229688701,
+                "replay": -0.022643499477220587,
+                "replay_minus_baseline": -0.016075746247531886,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.012867290093256128,
+                "replay": -0.03295969100090029,
+                "replay_minus_baseline": -0.020092400907644165,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.03166050118972824,
+                  "replay": -0.050148135360455925,
+                  "replay_minus_baseline": -0.018487634170727685,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": -0.020745172945433682,
+                  "replay": -0.021689698515656622,
+                  "replay_minus_baseline": -0.0009445255702229399,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.003713252667725986,
+                "replay": 0.007355500403733457,
+                "replay_minus_baseline": 0.0036422477360074715,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.008059255018356956,
+                "replay": 0.01195033136855933,
+                "replay_minus_baseline": 0.0038910763502023743,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.02110167506527233,
+                  "replay": 0.020161705669432345,
+                  "replay_minus_baseline": -0.0009399693958399846,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.014571197316693651,
+                  "replay": 0.013836988773511999,
+                  "replay_minus_baseline": -0.0007342085431816525,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 2,
+          "baseline_native_updates": 2,
+          "replay_native_updates": 4,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.018603610940399883,
+                "replay": -0.0362974323285456,
+                "replay_minus_baseline": -0.017693821388145715,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.03008925212657329,
+                "replay": -0.03939119253634704,
+                "replay_minus_baseline": -0.009301940409773751,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.038858424338020586,
+                  "replay": -0.027845154517809903,
+                  "replay_minus_baseline": 0.011013269820210683,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": -0.02528592963319791,
+                  "replay": 0.0174257043798009,
+                  "replay_minus_baseline": 0.04271163401299881,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.007470420916729642,
+                "replay": 0.009505690865959981,
+                "replay_minus_baseline": 0.0020352699492303394,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.012607029547734488,
+                "replay": 0.011258832373016614,
+                "replay_minus_baseline": -0.0013481971747178745,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.02130678518444412,
+                  "replay": 0.00818611592860509,
+                  "replay_minus_baseline": -0.013120669255839032,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.011605608064181913,
+                  "replay": -0.0036387479941878825,
+                  "replay_minus_baseline": -0.015244356058369796,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "wake_updates": 3,
+          "baseline_native_updates": 3,
+          "replay_native_updates": 6,
+          "views": {
+            "inherited": {
+              "fresh_acquisition_gain": {
+                "baseline": -0.032298428752551886,
+                "replay": -0.029224661678794034,
+                "replay_minus_baseline": 0.003073767073757852,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": -0.042760990230127444,
+                "replay": -0.020920022683802997,
+                "replay_minus_baseline": 0.021840967546324447,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": -0.039342090007258745,
+                  "replay": -0.010453545653674179,
+                  "replay_minus_baseline": 0.028888544353584567,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.008640641646462027,
+                  "replay": 0.010802538135576106,
+                  "replay_minus_baseline": 0.002161896489114079,
+                  "higher_is_better": false
+                }
+              }
+            },
+            "zero_velocity": {
+              "fresh_acquisition_gain": {
+                "baseline": 0.010559717302883062,
+                "replay": 0.0033526179318627836,
+                "replay_minus_baseline": -0.0072070993710202785,
+                "higher_is_better": true
+              },
+              "fresh_training_gain": {
+                "baseline": 0.014738417506273055,
+                "replay": 0.0028244208382712244,
+                "replay_minus_baseline": -0.01191399666800183,
+                "higher_is_better": true
+              },
+              "old_retention_loss": {
+                "old_0": {
+                  "baseline": 0.015732336044663675,
+                  "replay": 0.0013405030105961176,
+                  "replay_minus_baseline": -0.014391833034067558,
+                  "higher_is_better": false
+                },
+                "old_1": {
+                  "baseline": 0.0003772735149923795,
+                  "replay": -0.001538799380999295,
+                  "replay_minus_baseline": -0.0019160728959916745,
+                  "higher_is_better": false
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "environment": {
+    "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+    "numpy": "2.4.6",
+    "threads": {
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "baseline_source": {
+    "path": "C:\\Users\\Avery\\Documents\\ChatGPT\\Circadian\\artifacts\\runs\\continuous-probe-continuation-20261020\\remaining-arms.log",
+    "original_disposition": "FAILED/SPENT",
+    "parameter_archive": false
+  },
+  "qualification": "same wake information/seed/metrics; extra replay optimization/rows/compute; saved cross-artifact controls, no matched compute or benefit threshold"
+}

@@ -13,6 +13,15 @@ from src.core.coupled_inference import CoupledInferencePolicy
 from src.core.coupled_learner_state import CoupledUpdatePolicy, copy_update_policy
 from src.core.coupled_predictive_coding import CoupledPredictiveCodingNetwork, CoupledSnapshot
 from src.core.learner_ports import TrainingDiagnostic
+from src.core.coupled_unit_renewal import RenewalResult
+from src.core.renewable_coupled_predictive_coding import (
+    RenewableCoupledCircadianPredictiveCodingNetwork,
+    RenewableCoupledPredictiveCodingNetwork,
+)
+from src.core.tracked_coupled_predictive_coding import (
+    TrackedCoupledCircadianPredictiveCodingNetwork,
+    TrackedCoupledPredictiveCodingNetwork,
+)
 
 
 def _rate(value: float, name: str) -> float:
@@ -31,7 +40,43 @@ def _copy_model(model: CoupledPredictiveCodingNetwork) -> CoupledPredictiveCodin
     # Why: reconstruction through the native state boundary validates adaptive
     # state too; copying only the parameter arrays would restart CPC chemistry.
     copied: CoupledPredictiveCodingNetwork
-    if type(model) is CoupledCircadianPredictiveCodingNetwork:
+    if type(model) is RenewableCoupledCircadianPredictiveCodingNetwork:
+        copied = RenewableCoupledCircadianPredictiveCodingNetwork(
+            model.input_dim,
+            model.hidden_dims,
+            seed=0,
+            precisions=model.precisions,
+            config=model.config,
+            history_decay=model.unit_history_decay,
+            renewal_policy=model.renewal_policy,
+        )
+    elif type(model) is RenewableCoupledPredictiveCodingNetwork:
+        copied = RenewableCoupledPredictiveCodingNetwork(
+            model.input_dim,
+            model.hidden_dims,
+            seed=0,
+            precisions=model.precisions,
+            history_decay=model.unit_history_decay,
+            renewal_policy=model.renewal_policy,
+        )
+    elif type(model) is TrackedCoupledCircadianPredictiveCodingNetwork:
+        copied = TrackedCoupledCircadianPredictiveCodingNetwork(
+            model.input_dim,
+            model.hidden_dims,
+            seed=0,
+            precisions=model.precisions,
+            config=model.config,
+            history_decay=model.unit_history_decay,
+        )
+    elif type(model) is TrackedCoupledPredictiveCodingNetwork:
+        copied = TrackedCoupledPredictiveCodingNetwork(
+            model.input_dim,
+            model.hidden_dims,
+            seed=0,
+            precisions=model.precisions,
+            history_decay=model.unit_history_decay,
+        )
+    elif type(model) is CoupledCircadianPredictiveCodingNetwork:
         copied = CoupledCircadianPredictiveCodingNetwork(
             model.input_dim,
             model.hidden_dims,
@@ -47,7 +92,9 @@ def _copy_model(model: CoupledPredictiveCodingNetwork) -> CoupledPredictiveCodin
             precisions=model.precisions,
         )
     else:
-        raise ValueError("coupled learner requires an exact native PC or CPC model")
+        raise ValueError(
+            "coupled learner requires an exact native PC or CPC model (ordinary or tracked)"
+        )
     copied.restore_state(model.snapshot_state())
     return copied
 
@@ -132,3 +179,19 @@ class CoupledLearner:
 
     def restore_state(self, snapshot: CoupledSnapshot) -> None:
         self._model.restore_state(snapshot)
+
+    def renew_units(self, max_units: int) -> RenewalResult:
+        """Reset eligible owned units; an outer session must charge its allowance first."""
+        if type(self._model) not in {
+            RenewableCoupledPredictiveCodingNetwork,
+            RenewableCoupledCircadianPredictiveCodingNetwork,
+        }:
+            raise ValueError("unit renewal requires an exact renewable native model")
+        assert isinstance(
+            self._model,
+            (
+                RenewableCoupledPredictiveCodingNetwork,
+                RenewableCoupledCircadianPredictiveCodingNetwork,
+            ),
+        )
+        return self._model.renew_units(max_units)

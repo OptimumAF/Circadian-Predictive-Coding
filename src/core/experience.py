@@ -2,6 +2,8 @@
 
 Payloads remain opaque. These records do not attest physical source provenance,
 release final-test data, score roles or authorize a scientific experiment.
+Constructors and explicit validate_* helpers share the same metadata rules;
+helpers neither copy payloads nor normalize or mutate their records.
 """
 
 from __future__ import annotations
@@ -14,7 +16,8 @@ from src.core.learner_ports import TrainingDiagnostic
 
 Features = TypeVar("Features")
 Targets = TypeVar("Targets")
-ExperienceRole = Literal["train", "inner_guard", "outer_selection", "final_test"]
+TrainingRole = Literal["train", "probe_train"]
+ExperienceRole = Literal["train", "probe_train", "inner_guard", "outer_selection", "final_test"]
 SampleKey = tuple[str, str]
 
 
@@ -31,13 +34,20 @@ def require_tick(value: int, name: str) -> None:
 def _require_role(role: ExperienceRole) -> None:
     if type(role) is not str or role not in (
         "train",
+        "probe_train",
         "inner_guard",
         "outer_selection",
         "final_test",
     ):
         raise ValueError(
-            "experience role must name train, inner_guard, outer_selection or final_test"
+            "experience role must name train, probe_train, inner_guard, outer_selection or final_test"
         )
+
+
+def require_training_role(role: str) -> TrainingRole:
+    if type(role) is not str or role not in ("train", "probe_train"):
+        raise ValueError("training role must be exactly train or probe_train")
+    return "train" if role == "train" else "probe_train"
 
 
 class EventClock(Protocol):
@@ -68,8 +78,13 @@ class ExperiencePermissions:
     evaluation: bool = False
 
     def __post_init__(self) -> None:
-        if any(type(flag) is not bool for flag in (self.training, self.replay, self.evaluation)):
-            raise ValueError("experience permissions must be exact boolean flags")
+        validate_experience_permissions(self)
+
+
+def validate_experience_permissions(value: ExperiencePermissions) -> None:
+    """Validate declared flags without copying or changing their owner."""
+    if any(type(flag) is not bool for flag in (value.training, value.replay, value.evaluation)):
+        raise ValueError("experience permissions must be exact boolean flags")
 
 
 @dataclass(frozen=True)
@@ -86,32 +101,41 @@ class Experience(Generic[Features]):
     reward: float | None = None
 
     def __post_init__(self) -> None:
-        for name in ("sample_id", "episode_id", "model_version"):
-            require_identifier(getattr(self, name), name)
-        require_tick(self.observed_at, "observed_at")
-        _require_role(self.role)
-        if type(self.permissions) is not ExperiencePermissions:
-            raise ValueError("experience requires typed permissions")
-        if self.role != "train" and (self.permissions.training or self.permissions.replay):
-            raise ValueError("held-out roles cannot grant training or replay permission")
-        if type(self.candidate_ids) is not tuple:
-            raise ValueError("candidate_ids must be an immutable tuple")
-        for candidate in self.candidate_ids:
-            require_identifier(candidate, "candidate_id")
-        if len(self.candidate_ids) != len(set(self.candidate_ids)):
-            raise ValueError("candidate_ids must be unique")
-        if self.action_id is not None:
-            require_identifier(self.action_id, "action_id")
-            if self.action_id not in self.candidate_ids:
-                raise ValueError("action_id must identify a declared candidate")
-        if self.reward is not None and (
-            type(self.reward) not in (int, float) or not isfinite(self.reward)
-        ):
-            raise ValueError("reward must be finite and numeric")
+        validate_experience(self)
 
     @property
     def key(self) -> SampleKey:
         return self.episode_id, self.sample_id
+
+
+def validate_experience(value: Experience[Features]) -> None:
+    """Validate metadata only; do not read opaque features or normalize fields."""
+    for name in ("sample_id", "episode_id", "model_version"):
+        require_identifier(getattr(value, name), name)
+    require_tick(value.observed_at, "observed_at")
+    _require_role(value.role)
+    if type(value.permissions) is not ExperiencePermissions:
+        raise ValueError("experience requires typed permissions")
+    if value.role == "probe_train" and (value.permissions.replay or value.permissions.evaluation):
+        raise ValueError("probe training cannot grant replay or evaluation permission")
+    if value.role not in ("train", "probe_train") and (
+        value.permissions.training or value.permissions.replay
+    ):
+        raise ValueError("held-out roles cannot grant training or replay permission")
+    if type(value.candidate_ids) is not tuple:
+        raise ValueError("candidate_ids must be an immutable tuple")
+    for candidate in value.candidate_ids:
+        require_identifier(candidate, "candidate_id")
+    if len(value.candidate_ids) != len(set(value.candidate_ids)):
+        raise ValueError("candidate_ids must be unique")
+    if value.action_id is not None:
+        require_identifier(value.action_id, "action_id")
+        if value.action_id not in value.candidate_ids:
+            raise ValueError("action_id must identify a declared candidate")
+    if value.reward is not None and (
+        type(value.reward) not in (int, float) or not isfinite(value.reward)
+    ):
+        raise ValueError("reward must be finite and numeric")
 
 
 @dataclass(frozen=True)
@@ -125,14 +149,19 @@ class LabelArrival(Generic[Targets]):
     role: ExperienceRole = "train"
 
     def __post_init__(self) -> None:
-        for name in ("event_id", "sample_id", "episode_id", "model_version"):
-            require_identifier(getattr(self, name), name)
-        require_tick(self.arrived_at, "arrived_at")
-        _require_role(self.role)
+        validate_label_arrival(self)
 
     @property
     def key(self) -> SampleKey:
         return self.episode_id, self.sample_id
+
+
+def validate_label_arrival(value: LabelArrival[Targets]) -> None:
+    """Validate label metadata without copying or inspecting opaque targets."""
+    for name in ("event_id", "sample_id", "episode_id", "model_version"):
+        require_identifier(getattr(value, name), name)
+    require_tick(value.arrived_at, "arrived_at")
+    _require_role(value.role)
 
 
 @dataclass(frozen=True)
@@ -147,3 +176,33 @@ class AppliedExperience:
     applied_at: int
     update_number: int
     diagnostic: TrainingDiagnostic
+
+
+@dataclass(frozen=True)
+class AcknowledgedExperience:
+    """Correct arrived TRAIN consumed without an optimizer update or erasure."""
+
+    sample_id: str
+    episode_id: str
+    event_id: str
+    actor_version: str
+    learner_version: str
+    observed_at: int
+    arrived_at: int
+    acknowledged_at: int
+    wake_updates: int
+    candidate_revision: int
+
+    def __post_init__(self) -> None:
+        for name in ("sample_id", "episode_id", "event_id", "actor_version", "learner_version"):
+            require_identifier(getattr(self, name), name)
+        for name in (
+            "observed_at",
+            "arrived_at",
+            "acknowledged_at",
+            "wake_updates",
+            "candidate_revision",
+        ):
+            require_tick(getattr(self, name), name)
+        if not self.observed_at <= self.arrived_at <= self.acknowledged_at:
+            raise ValueError("acknowledgement requires causal observation and label arrival")

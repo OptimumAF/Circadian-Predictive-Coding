@@ -29,6 +29,7 @@ class ModelCopyLimits:
 class ModelCopy:
     source: object
     target: object | None
+    recipient: object | None = None
 
 
 ModelCopyObserver = Callable[
@@ -70,7 +71,7 @@ class ModelCopyWindow:
             raise ValueError("model copy requires its original context") from error
         self._context_token = self._channel.access.set(self)
 
-    def _notify(self, stage: ModelCopyStage, target=None, memo=None) -> None:
+    def _notify(self, stage: ModelCopyStage, target=None, memo=None, *, recipient=None) -> None:
         self._require_live()
         if self._notifications >= self._limits.max_notifications:
             raise ValueError("model copy notification limit exhausted")
@@ -89,7 +90,7 @@ class ModelCopyWindow:
         def read() -> ModelCopy:
             require_read()
             assert source is not None
-            return ModelCopy(source, target)
+            return ModelCopy(source, target, recipient)
 
         def lookup(original: object) -> object:
             require_read()
@@ -106,7 +107,7 @@ class ModelCopyWindow:
         finally:
             active = self._callback = False
             # Saved readers must neither revive nor keep the copied graph alive.
-            source = target = memo = None
+            source = target = memo = recipient = None
 
     def begin(self, source) -> None:
         self._require_live()
@@ -124,7 +125,7 @@ class ModelCopyWindow:
             self._inflight = False
             raise
 
-    def copied(self, target, memo) -> None:
+    def copied(self, target, memo, *, recipient=None) -> None:
         self._require_live()
         if (
             not self._inflight
@@ -135,7 +136,7 @@ class ModelCopyWindow:
             or memo.get(id(self._source)) is not target
         ):
             raise ValueError("model copy requires actual distinct target and original memo")
-        self._notify("copied", target, memo)
+        self._notify("copied", target, memo, recipient=recipient)
         self._completed = True
 
     def end(self) -> None:

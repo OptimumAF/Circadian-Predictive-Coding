@@ -54,6 +54,14 @@ class ConsolidatedState(Generic[State]):
             raise ValueError("consolidation requires a native TrainingDiagnostic")
 
 
+class ComponentSleepLearner(Protocol[State]):
+    """Optional detached one-event operation; runtime owns admission/commit."""
+
+    def validate_component_sleep(self) -> None: ...
+
+    def prepare_component_sleep(self, state: State) -> ConsolidatedState[State]: ...
+
+
 @dataclass(frozen=True)
 class AppliedConsolidation:
     event_id: str

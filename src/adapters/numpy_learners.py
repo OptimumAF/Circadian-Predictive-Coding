@@ -15,11 +15,13 @@ from numpy.typing import NDArray
 
 from src.core.backprop_mlp import BackpropMLP, NUMPY_BACKPROP_LOSS_ID
 from src.core.circadian_predictive_coding import (
+    CircadianConfig,
     CircadianNetworkSnapshot,
     CircadianPredictiveCodingNetwork,
 )
 from src.core.dimension_validation import require_positive_integer_dimension
 from src.core.learner_ports import TrainingDiagnostic
+from src.core.actor_ports import ConsolidatedState
 from src.core.data_erasure import ReplayPayloadErasure
 from src.core.training_validation import validate_positive_finite_learning_rate
 from src.core.native_model_copy import begin_model_copy
@@ -139,7 +141,7 @@ class BackpropLearner:
         self._model = candidate
 
 
-def _copy_circadian_model(model: CircadianPredictiveCodingNetwork):
+def _copy_circadian_model(model: CircadianPredictiveCodingNetwork, *, recipient=None):
     # Why: observe the real memo at allocation, without adding native state fields.
     window = begin_model_copy(model)
     if window is None:
@@ -147,7 +149,7 @@ def _copy_circadian_model(model: CircadianPredictiveCodingNetwork):
     try:
         memo: dict[int, Any] = {}
         copied = deepcopy(model, memo)
-        window.copied(copied, memo)
+        window.copied(copied, memo, recipient=recipient)
         return copied
     finally:
         window.end()
@@ -169,7 +171,7 @@ class CircadianLearner:
         validate_positive_finite_learning_rate(learning_rate)
         validate_positive_finite_learning_rate(inference_learning_rate)
         require_positive_integer_dimension(inference_steps, "inference_steps")
-        self._model = _copy_circadian_model(model)
+        self._model = _copy_circadian_model(model, recipient=self)
         self._learning_rate = learning_rate
         self._inference_steps = inference_steps
         self._inference_learning_rate = inference_learning_rate
@@ -208,6 +210,48 @@ class CircadianLearner:
 
     def restore_state(self, snapshot: CircadianNetworkSnapshot) -> None:
         self._model.restore_state(snapshot)
+
+    def validate_component_sleep(self) -> None:
+        """Check metadata only, before resource admission or model copies."""
+        model, config = self._model, self._model.config
+        if (
+            type(model) is not CircadianPredictiveCodingNetwork
+            or type(config) is not CircadianConfig
+            or config.sleep_mode != "components"
+            or any(
+                getattr(config, name) is not False
+                for name in ("sleep_enable_split", "sleep_enable_prune", "sleep_enable_replay")
+            )
+            or not (config.sleep_enable_homeostasis or config.sleep_enable_chemical_reset)
+            or not model.hidden_dim == model._min_hidden_dim == model.max_hidden_dim
+        ):
+            raise ValueError("component sleep requires fixed width and no replay/split/prune")
+        model._validate_config(config)
+
+    def prepare_component_sleep(
+        self, state: CircadianNetworkSnapshot
+    ) -> ConsolidatedState[CircadianNetworkSnapshot]:
+        """Run native components on private state; never publish or renew authority."""
+        self.validate_component_sleep()
+        if type(state) is not CircadianNetworkSnapshot:
+            raise ValueError("component sleep requires the complete native snapshot")
+        model = _copy_circadian_model(self._model)
+        model.restore_state(state)
+        width, before = model.hidden_dim, model._sleep_events
+        result = model.sleep_event(max_replay_examples=0, max_hidden_width=width)
+        if (
+            result.performed is not True
+            or result.split_indices
+            or result.pruned_indices
+            or result.old_hidden_dim != width
+            or result.new_hidden_dim != width
+            or model._sleep_events != before + 1
+            or model.config != state.config
+        ):
+            raise ValueError("native component sleep did not complete exactly one fixed event")
+        return ConsolidatedState(
+            model.snapshot_state(), TrainingDiagnostic("numpy_component_sleep_event_v1", 1.0)
+        )
 
 
 def _managed_payload_bytes(value: object) -> int:

@@ -83,6 +83,7 @@ class ManagedReplayOrigins:
         self._original_inbox_origins: ReferenceType[Any] | None = None
         self._inbox_history_birth: ReferenceType[Any] | None = None
         self._expiry_authority_birth: tuple | None = None
+        self._capture_update_binding = self._original_capture_update_binding = None
         self._enrolling_inbox_origins = False
         self._copy_slots = self._minimum_copy_slots = 0
         self._pending: _Row | None = None
@@ -518,7 +519,9 @@ class ManagedReplayOrigins:
         self._pending = None
 
     def train_ready(self) -> TrainingPoll:
-        with self._exclusive():
+        from src.app.replay_publication_updates import lease_publication_update
+
+        with self._exclusive(), lease_publication_update(self) as capture_update:
             owner = self._original_owner()
             with owner._operation():
                 runtime, model = self._require_bindings(owner)
@@ -538,7 +541,9 @@ class ManagedReplayOrigins:
                     self._ports.model_reference,
                     self._writes,
                     self._window_limits,
-                    update_observer=self._update,
+                    update_observer=self._update
+                    if capture_update is None
+                    else capture_update.observe,
                 )
                 self._busy, self._started = True, False
                 try:
@@ -571,6 +576,8 @@ class ManagedReplayOrigins:
                         if history is not None:
                             ManagedInboxOrigins.finish(history, self, owner, runtime, poll.updates)
                         self._prune(retained)
+                        if capture_update is not None:
+                            capture_update.finish(runtime, poll)
                     return poll
                 except BaseException:
                     if self._started:

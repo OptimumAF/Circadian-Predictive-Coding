@@ -1015,13 +1015,18 @@ def _require_collections(op, prepared=None):
 
 
 class ManagedReplayCheckpoints:
+    _retain_capture_history: bool
+
     def __init__(
         self,
         ledger: ManagedReplayOrigins,
         graph_ports: ReplayGraphPorts,
         *,
         builder_source: Callable,
+        retain_capture_history: bool = False,
     ):
+        if type(retain_capture_history) is not bool:
+            raise ValueError("retain_capture_history requires an exact boolean")
         if type(ledger) is not ManagedReplayOrigins or type(graph_ports) is not ReplayGraphPorts:
             raise ValueError(
                 "managed replay checkpoints require original ledger and exact graph ports"
@@ -1036,7 +1041,9 @@ class ManagedReplayCheckpoints:
         )
         self._content_limits = self._original_content_limits = CheckpointContentLimits(
             4096,
-            ledger._admission.limits.max_metadata_bytes,
+            # A lifetime admission may fund multiple bounded witnesses. Its
+            # cumulative allowance does not widen one metadata normalization.
+            min(ledger._admission.limits.max_metadata_bytes, 128 * 1024),
             ledger._admission.limits.max_payload_bytes,
             16,
         )
@@ -1045,6 +1052,14 @@ class ManagedReplayCheckpoints:
         self._active: _Operation | None = None
         self._gate = Lock()
         self._original_gate, self._original_copy_gate = self._gate, self._copies._gate
+        from src.app.replay_restored_capture import initialize_capture_history
+
+        initialize_capture_history(self, ledger, retain_capture_history)
+        self._update_binding = None
+        self._current_success = self._current_success_sealed = None
+        self._current_success_storage = (None, None)
+        self._zero_work_poll = self._zero_work_poll_sealed = None
+        self._zero_work_poll_storage = (None, None)
 
     @contextmanager
     def _exclusive(self):
@@ -1057,6 +1072,9 @@ class ManagedReplayCheckpoints:
             gate.release()
 
     def _original_ledger(self):
+        from src.app.replay_restored_capture import require_publication_storage
+
+        require_publication_storage(self)
         self._require_content_limits()
         if type(self._ledger) is not ReferenceType:
             raise ValueError("original manager ledger requires its exact weak reference")
@@ -1990,6 +2008,29 @@ class ManagedReplayCheckpoints:
                 model=_weak(model),
                 inbox=_weak(prepared._inbox),
             )
+            inbox_state = None
+            erased_inbox_state = None
+            untrained_inbox_state = None
+            if op.history is not None:
+                records = {}
+                for pair in pairs:
+                    record = ManagedInboxOrigins.rebind(
+                        op.history, pair.origin, pair.source(), pair.label(), pair.receipt()
+                    )
+                    records[id(pair.source())] = record
+                inbox_state = records, dict(records)
+                erased_inbox_state = ManagedInboxOrigins.prepare_erased_handoff(op.history, erased)
+                untrained_inbox_state = ManagedInboxOrigins.prepare_untrained_handoff(
+                    op.history, untrained
+                )
+            # Preparing optional history reads original opaque reference ports.
+            # Keep it before the final revalidation/pure publication barrier.
+            retained_publication = self._retained_publication(op, prepared, rows, live)
+            from src.app.replay_publication_updates import prepare_update_binding
+
+            capture_update_binding = prepare_update_binding(
+                self, op, prepared, retained_publication, inbox_state
+            )
             # Finish every opaque observation before pure identities/history checks.
             self._current(op)
             self._original_ledger()
@@ -2039,27 +2080,26 @@ class ManagedReplayCheckpoints:
             self._pure_publication(
                 op, original, prepared, pending, model, cursor, pairs, live, rows
             )
-            inbox_state = None
-            erased_inbox_state = None
-            untrained_inbox_state = None
-            if op.history is not None:
-                records = {}
-                for pair in pairs:
-                    record = ManagedInboxOrigins.rebind(
-                        op.history, pair.origin, pair.source(), pair.label(), pair.receipt()
-                    )
-                    records[id(pair.source())] = record
-                inbox_state = records, dict(records)
-                erased_inbox_state = ManagedInboxOrigins.prepare_erased_handoff(op.history, erased)
-                untrained_inbox_state = ManagedInboxOrigins.prepare_untrained_handoff(
-                    op.history, untrained
-                )
             transition = _ReplayTransition(
-                op.ledger, anchors, rows, inbox_state, erased_inbox_state, untrained_inbox_state
+                op.ledger,
+                anchors,
+                rows,
+                inbox_state,
+                erased_inbox_state,
+                untrained_inbox_state,
+                retained_publication,
+                capture_update_binding,
             )
             op.published = True
             yield transition
             # Trusted controller commits plain assignments; no validation follows.
+
+    def _retained_publication(self, op, prepared, rows, live):
+        if not self._retain_capture_history:
+            return None
+        from src.app.replay_restored_capture import prepare_retained_publication
+
+        return prepare_retained_publication(self, op, prepared, rows, live)
 
     @staticmethod
     def _pure_budget(op, pending):

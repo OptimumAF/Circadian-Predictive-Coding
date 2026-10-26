@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:,">
+<title>Circadian · Recorded MiniGrid inspector</title>
+<style>
+:root{--paper:#f4f3ee;--surface:#fcfcf9;--ink:#202b31;--muted:#657178;--line:#d5dbd9;--accent:#285c87;--pale:#e6edf1;--bad:#964b42}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 system-ui,"Segoe UI",sans-serif}button,select,input{font:inherit}button,select{padding:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:4px;color:var(--ink);max-width:100%}button{cursor:pointer;transition:background .15s,border-color .15s}button:hover,select:hover{border-color:var(--accent)}button:disabled{opacity:.45;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #7aabc9;outline-offset:3px}h1,h2,h3,p{margin:0}h1{font-size:24px;letter-spacing:-.7px;font-weight:650}h2{font-size:19px;font-weight:600;letter-spacing:-.3px}h3{font-size:14px;font-weight:600}.muted,.note,small{color:var(--muted)}.note{font-size:12px;margin-top:10px}header{background:var(--surface);border-bottom:1px solid var(--line)}.header,main{max-width:1440px;margin:auto;padding:22px 32px}.header{display:flex;justify-content:space-between;gap:20px;align-items:center}.brand{font-size:11px;letter-spacing:1.8px;color:var(--accent);text-transform:uppercase;margin-bottom:3px}.origin{font-size:12px;border-left:2px solid var(--accent);padding-left:14px}.origin b{display:block}.fields dd{overflow-wrap:anywhere}.toolbar{display:flex;gap:18px;align-items:end;flex-wrap:wrap;padding-bottom:20px}.toolbar label{display:grid;gap:5px;font-size:12px;color:var(--muted)}.file{margin-left:auto;max-width:440px;text-align:right;overflow-wrap:anywhere}.source{padding:0;border:0;background:transparent;color:var(--accent);font-size:12px;text-decoration:underline;text-underline-offset:3px}.source:hover{background:transparent}.identity{display:flex;gap:22px;flex-wrap:wrap;padding:15px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:12px}.identity b{display:block;font-weight:500}.workspace{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.8fr);gap:32px;padding:24px 0}.views{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.62fr);gap:18px;align-items:start}.view{min-width:0}.view svg{width:100%;height:auto;display:block}.grid-host{background:#e4e9e5;margin-top:12px;border-radius:3px;min-height:170px}.grid-host .empty{padding:28px 16px}.view small{display:block;margin-top:7px}.initial{padding-top:3px}.initial h3{font-size:12px}.initial .grid-host{margin-top:10px}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:12px}.swatch{display:inline-block;width:9px;height:9px;margin-right:4px;background:#27333a}.swatch.key{background:#5982ae}.swatch.goal{background:#7fa483}.playback{display:flex;gap:8px;align-items:center;margin:18px 0 8px}.playback input{flex:1;min-width:30px;accent-color:var(--accent)}#play{background:var(--accent);color:white;border-color:var(--accent);min-width:100px}.frame-label{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted)}.detail{border-left:1px solid var(--line);padding-left:25px;min-width:0}.eyebrow{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}.status{display:inline-block;background:var(--pale);color:var(--accent);padding:3px 7px;font-size:12px;margin:8px 0}.reason{color:var(--bad);font-size:12px;overflow-wrap:anywhere}.fields{display:grid;grid-template-columns:minmax(110px,.85fr) minmax(0,1.15fr);gap:7px 16px;font-size:12px;margin:14px 0}.fields dt{color:var(--muted);overflow-wrap:anywhere}.fields dd{margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.actions{margin-top:15px}.action{display:grid;grid-template-columns:72px minmax(25px,1fr) 50px;gap:8px;align-items:center;padding:5px 0;font-size:12px}.action.chosen{font-weight:650;color:var(--accent)}.track{height:5px;background:#e0e4e1}.bar{height:100%;background:#adbfca}.chosen .bar{background:var(--accent)}.evidence{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}.section{border-top:1px solid var(--line);padding:22px 0}.section-head{display:flex;justify-content:space-between;gap:20px;align-items:baseline;margin-bottom:12px}.section-head p{font-size:12px;color:var(--muted)}.scroll{overflow:auto;max-height:350px}table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{font-size:11px;color:var(--muted);font-weight:600;background:var(--paper);position:sticky;top:0}tr.selected{background:var(--pale)}td button{padding:0;border:0;background:transparent;color:var(--accent);text-decoration:underline}summary{cursor:pointer;margin:14px 0 8px;color:var(--accent)}.cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px}.unknown{display:flex;gap:22px;flex-wrap:wrap;padding:14px 0;font-size:12px;color:var(--muted)}footer{border-top:1px solid var(--line);padding:18px 0 30px;font-size:12px;color:var(--muted)}dialog{border:1px solid var(--line);border-radius:5px;padding:22px;width:min(850px,94vw);max-height:85vh;box-shadow:0 20px 80px #152b3b33}dialog::backdrop{background:#152b3b66}dialog pre{font:12px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:60vh;overflow:auto}dialog code{overflow-wrap:anywhere;font-size:11px}.error{color:var(--bad)}.empty{color:var(--muted);font-size:13px}
+.curves{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px;margin:0 0 20px}.curves[hidden]{display:none}.curve{min-width:0}.curve svg{display:block;width:100%;height:auto;background:var(--surface)}.curve p{font-size:11px;margin:4px 0 8px;color:var(--muted)}.curve-legend{font-size:11px;color:var(--muted);display:flex;gap:14px;margin-bottom:8px}.curve-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}.unrun{color:var(--muted)}
+@media(max-width:850px){.workspace{grid-template-columns:1fr;gap:22px}.detail{padding-left:0;border-left:0;border-top:1px solid var(--line);padding-top:20px}.header,main{padding:18px 20px}.cost-grid{grid-template-columns:1fr;gap:10px}.file{max-width:100%;margin-left:0;text-align:left}.toolbar{align-items:start}.origin{max-width:180px}}@media(max-width:480px){.header{align-items:start}.header h1{font-size:20px}.origin{font-size:10px;max-width:130px}.header,main{padding:16px}.toolbar{gap:12px}.toolbar label{width:100%}.toolbar select{width:100%}.views{gap:10px;grid-template-columns:minmax(0,1fr) minmax(0,.7fr)}.playback{flex-wrap:wrap}.playback input{order:3;flex-basis:100%;margin-top:6px}.section-head{display:block}.section-head p{margin-top:5px}.fields{gap:6px 12px}.identity{gap:12px 20px}.frame-label{font-size:11px}}@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media(prefers-reduced-motion:no-preference){.saved-fifo .curve{animation:curve-appear .15s ease-out}}@keyframes curve-appear{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<header><div class="header"><div><div class="brand">Circadian</div><h1>MiniGrid run inspector</h1></div><div class="origin"><b id="recorded-origin">Recorded TRAIN run</b>Learning is inactive</div></div></header>
+<main id="main">
+<div class="toolbar"><label>Method<select id="condition" aria-label="Method"></select></label><label>Episode<select id="episode" aria-label="Episode"></select></label><label id="cohort-filter-label" hidden>Score cohort<select id="cohort-filter" aria-label="Score cohort"><option value="all">Both checkpoints</option><option value="0">Initial · 0 updates</option><option value="128">Mature · 128 updates</option></select></label><div class="file"><small id="source-name"></small><br><button class="source" id="source-root">Open source report</button></div></div>
+<div class="identity" id="identity"></div>
+<section class="section" id="saved-scope" hidden><div class="section-head"><h2>Probe and original history</h2><p>Recorded costs stay separate</p></div><p id="saved-scope-note" class="note"></p><dl class="fields" id="origin-fields"></dl><div class="scroll" id="private-overview"></div></section>
+<section class="workspace" id="trace-workspace">
+<div><div class="views"><div class="view"><h2>Public observation</h2><div class="grid-host" id="board"></div><small id="view-note">Recorded egocentric view · unseen tiles are shaded</small></div><div class="view initial"><h3 id="initial-title">Initial frame · retained history</h3><div class="grid-host" id="initial"></div><small id="initial-note"></small></div></div>
+<div class="legend"><span><i class="swatch"></i>Unseen</span><span><i class="swatch key"></i>Key / cue uses recorded color</span><span><i class="swatch goal"></i>Goal</span><span>↑ Agent faces up in this view</span></div>
+<div class="playback"><button id="previous" aria-label="Previous frame">←</button><button id="play">Play trace</button><button id="next" aria-label="Next frame">→</button><input id="timeline" type="range" min="0" max="0" value="0" aria-label="Recorded frame"></div><div class="frame-label"><span id="frame-label"></span><span id="direction"></span></div><div class="evidence" id="frame-evidence"></div>
+</div>
+<aside class="detail"><p class="eyebrow">Selected episode</p><h2 id="episode-title"></h2><div class="status" id="status"></div><p class="reason" id="reason"></p><dl class="fields" id="episode-fields"></dl><h3>Seven native actions</h3><p class="note" id="decision-note">First raw argmax · no action mask or repair</p><div class="actions" id="actions"></div><div class="evidence" id="decision-evidence"></div></aside>
+</section>
+<section class="section" id="live-section"><div class="section-head"><h2>Live outcomes</h2><p>All recorded endpoint episodes · failures retained</p></div><div class="scroll" id="episodes"></div></section>
+<section class="section"><div class="section-head"><h2 id="fit-title">Raw fit and acquisition</h2><p>Teacher-forced fit is separate from autonomous goals</p></div><div id="curves" class="curves" hidden></div><div class="scroll" id="raw"></div><h3 id="proof-title" style="margin-top:20px">Frozen both-cue criterion</h3><p id="proof-note" class="note">Both exact teacher sequences and both native goals at128 updates. Unavailable values stay unknown.</p><dl class="fields" id="acquisition"></dl><details id="comparison-section"><summary>Signed comparisons</summary><div class="scroll" id="comparisons"></div></details></section>
+<section class="section" id="affine-receipts" hidden><div class="section-head"><h2>Causal TRAIN updates</h2><p>Original label clocks and paid work</p></div><p class="note">Catalogue rows are the fixed plan. Only a recorded receipt evidences a committed update. Joint replay rows are additional fitting exposure, not a separate optimizer call.</p><h3 style="margin-top:16px">Committed receipts</h3><div class="scroll" id="receipt-table"></div><h3 style="margin-top:20px">Arrived-cue catalogue</h3><div class="scroll" id="catalogue-table"></div></section>
+<section class="section"><div class="section-head"><h2>Memory and computation</h2><p>Recorded work · no learner or environment runs here</p></div><div class="cost-grid"><div><h3>Selected method</h3><dl class="fields" id="costs"></dl></div><div><h3>Whole run</h3><dl class="fields" id="run-costs"></dl></div></div><div class="unknown">Topology: not recorded · Lineage: not recorded · Sleep proposals: not recorded</div></section>
+<footer id="footer"></footer>
+</main>
+<dialog id="source-dialog"><div class="section-head"><div><h2>Source evidence</h2><code id="source-pointer"></code></div><button id="close-source">Close</button></div><pre id="source-json"></pre></dialog>
+<script id="inspector-data" type="application/json">__INSPECTOR_DATA__</script>
+<script>
+"use strict";
+const DATA=JSON.parse(document.getElementById("inspector-data").textContent),$=id=>document.getElementById(id);
+const PRIVATE=DATA.schema_id==="minigrid_private_affine_inspector_v1";
+const AFFINE=DATA.schema_id==="minigrid_affine_inspector_v1"||PRIVATE;
+const RECURRING=AFFINE&&DATA.recipe==="recurring_train";
+const FINAL_FIFO=DATA.schema_id==="minigrid_heldout_fifo_inspector_v1";
+const SAVED_FIFO=DATA.schema_id==="minigrid_saved_fifo_inspector_v1";
+const LEARNABILITY=DATA.schema_id==="minigrid_learnability_inspector_v1"||SAVED_FIFO||AFFINE;
+const ACTIONS=["Left","Right","Forward","Pickup","Drop","Toggle","Done"],COLORS=["#ba6262","#7fa483","#5982ae","#9275a8","#c3a957","#929b9c"],OBJECTS=["Unseen","Empty","Wall","Floor","Door","Key","Cue ball","Box","Goal","Lava","Agent"];
+let condition=PRIVATE?1:0,episode=0,frame=0,timer=null;
+const fmt=v=>v===null||v===undefined?"Not recorded":typeof v==="number"?(Number.isInteger(v)?String(v):v.toFixed(5)):String(v);
+const node=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
+const at=p=>typeof p!=="string"?undefined:p===""?DATA.source:p.split("/").slice(1).reduce((v,k)=>v?.[k.replace(/~1/g,"/").replace(/~0/g,"~")],DATA.source);
+const C=()=>DATA.conditions[condition],E=()=>C()?.episodes[episode],R=()=>at(C().pointer),F=()=>E()?.frames[frame];
+function stop(){if(timer!==null)clearInterval(timer);timer=null;$("play").textContent="Play trace";}
+function openSource(pointer){$("source-pointer").textContent=pointer||"/";$("source-json").textContent=JSON.stringify(at(pointer),null,2)??"Field not recorded";$("source-dialog").showModal();}
+function source(pointer,label="Source"){if(typeof pointer!=="string")return node("span","No source record","unrun");const b=node("button",label,"source");b.addEventListener("click",()=>openSource(pointer));return b;}
+function field(host,label,value,pointer){host.append(node("dt",label));const dd=node("dd",fmt(value));if(typeof pointer==="string"){dd.append(document.createTextNode(" "),source(pointer,"↗"));}host.append(dd);}
+function table(headers,rows){const t=node("table"),head=node("thead"),tr=node("tr"),body=node("tbody");headers.forEach(h=>tr.append(node("th",h)));head.append(tr);t.append(head);rows.forEach(values=>{const row=node("tr");values.forEach(value=>{const cell=node("td");cell.append(value instanceof Node?value:document.createTextNode(fmt(value)));row.append(cell);});body.append(row);});t.append(body);return t;}
+function svg(tag,attrs,text){const element=document.createElementNS("http://www.w3.org/2000/svg",tag);Object.entries(attrs).forEach(([k,v])=>element.setAttribute(k,String(v)));if(text!==undefined)element.textContent=text;return element;}
+function draw(host,image,label){host.replaceChildren();if(!image){host.append(node("p","No recorded public frame.","empty"));return;}const view=svg("svg",{viewBox:"0 0 364 364",role:"img","aria-label":label});
+for(let y=0;y<7;y++)for(let x=0;x<7;x++){const [object,color,state]=image[x][y],left=7+x*50,top=7+y*50,c=COLORS[color]??"#929b9c",g=svg("g",{});g.append(svg("title",{},`${OBJECTS[object]??"Object"} at public (${x}, ${y}); color ${color}; state ${state}`));g.append(svg("rect",{x:left,y:top,width:49,height:49,fill:object===0?"#27333a":object===2?"#9ba5a5":"#fcfcf5",stroke:"#d5dcd8","stroke-width":.4}));
+if(object===4){g.append(svg("rect",{x:left+10,y:top+7,width:29,height:35,rx:2,fill:state===0?"#fcfcf5":c,stroke:c,"stroke-width":3}));g.append(svg("text",{x:left+25,y:top+30,"text-anchor":"middle",fill:state===0?c:"#fff","font-size":15},state===2?"×":state===0?"○":"·"));}
+else if(object===5){g.append(svg("circle",{cx:left+18,cy:top+20,r:7,fill:"none",stroke:c,"stroke-width":4}));g.append(svg("path",{d:`M${left+24} ${top+25}l13 13m-5-5l4-4`,stroke:c,"stroke-width":4,fill:"none"}));}
+else if(object===6)g.append(svg("circle",{cx:left+25,cy:top+25,r:13,fill:c}));
+else if(object===7)g.append(svg("rect",{x:left+12,y:top+12,width:25,height:25,fill:c}));
+else if(object===8){g.append(svg("rect",{x:left+5,y:top+5,width:39,height:39,fill:"#7fa483"}));g.append(svg("text",{x:left+25,y:top+31,"text-anchor":"middle",fill:"#fff","font-size":19},"G"));}
+else if(object===9)g.append(svg("text",{x:left+25,y:top+32,"text-anchor":"middle",fill:"#ba6262","font-size":30},"≈"));
+if(x===3&&y===6){g.append(svg("rect",{x:left+2,y:top+2,width:45,height:45,fill:"none",stroke:"#285c87","stroke-width":2}));g.append(svg("path",{d:`M${left+40} ${top+8}l-6 12h12z`,fill:"#285c87",stroke:"#fff","stroke-width":1}));}view.append(g);}host.append(view);}
+function renderFrame(){const entry=E(),current=F(),slot=entry?.record;$("frame-evidence").replaceChildren();$("decision-evidence").replaceChildren();$("actions").replaceChildren();
+draw($("board"),current?.image,"Recorded public observation");draw($("initial"),entry?.initial_image,"Recorded initial public observation");
+$("initial-note").textContent=!entry?.initial_image?"Initial public frame not recorded.":C().key==="recurrent_bc"?"Reference only · recurrent input stays148; hidden state is not recorded.":"First public frame retained for this episode's296-value input.";
+$("initial-title").textContent=!entry?.initial_image?"Initial public frame":C().key==="recurrent_bc"?"Initial frame · reference":"Initial frame · retained history";
+const count=entry?.frames.length??0;$("timeline").max=String(Math.max(0,count-1));$("timeline").value=String(frame);$("timeline").disabled=count===0;$("previous").disabled=count===0||frame===0;$("next").disabled=count===0||frame>=count-1;$("play").disabled=count<2;
+$("frame-label").textContent=count?`Frame ${frame} / ${count-1} · ${current.decision_pointer?"before decision":"after recorded action · no decision recorded"}`:"No recorded frames";
+$("direction").textContent=current?`Recorded direction: ${["east","south","west","north"][current.direction]}`:"Direction not recorded";
+if(current){$("frame-evidence").append(source(current.pointer,"Public frame source"));if(current.features_pointer)$("frame-evidence").append(source(current.features_pointer,"Actual296 input"));}
+const decision=current?.decision_pointer?at(current.decision_pointer):null;
+$("decision-note").textContent=decision?.probabilities?"First raw argmax · no action mask or repair":"No recorded decision for this frame.";
+if(decision?.probabilities){decision.probabilities.forEach((probability,i)=>{const row=node("div",undefined,"action"+(decision.action===i?" chosen":"")),track=node("div",undefined,"track"),bar=node("div",undefined,"bar");bar.style.width=`${probability*100}%`;track.append(bar);row.append(node("span",`${i} · ${ACTIONS[i]}`),track,node("span",probability.toFixed(4)));$("actions").append(row);});}
+if(current?.decision_pointer)$("decision-evidence").append(source(current.decision_pointer,"Decision source"));if(current?.transition_pointer)$("decision-evidence").append(source(current.transition_pointer,"Physics transition"));
+$("episode-fields").replaceChildren();if(slot){
+const pointer=key=>typeof entry.pointer==="string"&&Object.hasOwn(slot,key)?`${entry.pointer}/${key}`:undefined;
+if(LEARNABILITY||FINAL_FIFO){if(LEARNABILITY){if(!AFFINE)field($("episode-fields"),"Source checkpoint",entry.source_updates);field($("episode-fields"),AFFINE?"Phase":"Disposable phase",entry.phase);}field($("episode-fields"),"Context",entry.context,pointer("context"));field($("episode-fields"),"Role",slot.source_role??slot.role,pointer(Object.hasOwn(slot,"source_role")?"source_role":"role"));}
+field($("episode-fields"),"Native updates",entry.updates,FINAL_FIFO?"/benchmark_updates":undefined);field($("episode-fields"),"Cue",slot.cue,pointer("cue"));field($("episode-fields"),"Goal reached",slot.success,pointer("success"));field($("episode-fields"),"Return",slot.return,pointer("return"));field($("episode-fields"),"Physics steps",slot.environment?.environment_steps,pointer("environment"));field($("episode-fields"),"End flags",slot.environment?`terminated ${fmt(slot.environment.terminated)} · truncated ${fmt(slot.environment.truncated)}`:null,pointer("environment"));}
+$("episode-title").textContent=slot?(PRIVATE?`${entry.phase} · ${entry.context} ${slot.cue} · ${entry.updates} fits`:AFFINE?`Known ${entry.context} ${slot.cue} · ${entry.updates} fits`:LEARNABILITY?`${entry.source_updates} source · ${entry.phase} · ${entry.context} ${slot.cue}`:`${entry.updates} updates · ${FINAL_FIFO?"D":"A"} ${slot.cue}`):"No recorded episode";
+$("status").textContent=slot?episodeStatus(slot):"Not run";$("reason").textContent=entry?.derived?"Planned slot was not run. No source episode, outcome or frame was recorded.":slot?.reason??"";
+}
+function selectEpisode(index){stop();episode=index;frame=0;$("episode").value=String(index);renderFrame();}
+function renderLegacyTables(){const live=C().episodes.map((entry,i)=>{const b=node("button",`${entry.updates} · ${entry.record.cue}`);b.addEventListener("click",()=>selectEpisode(i));const r=entry.record;return[b,r.status,r.success,r.return,r.environment?.environment_steps,r.environment?.truncated,source(entry.pointer)];});$("episodes").replaceChildren(table(["Updates · cue","Status","Goal","Return","Steps","Truncated","Evidence"],live));
+const raw=[];DATA.source.evaluations.forEach((cell,i)=>{if(cell.method!==C().key)return;(cell.scores??[]).forEach((s,j)=>raw.push([cell.updates,s.cue,s.ce,s.accuracy,s.exact_sequence_accuracy,source(`/evaluations/${i}/scores/${j}`)]));});$("raw").replaceChildren(table(["Updates","Cue","CE ↓","Accuracy ↑","Exact sequence ↑","Evidence"],raw));
+const methods=DATA.source.acquisition?.methods??[],index=methods.findIndex(m=>m.method===C().key),acquired=methods[index]??{};$("acquisition").replaceChildren();for(const [label,key] of [["Status","status"],["Both raw sequences exact","raw_both_cues_exact"],["Both native goals","live_both_cues_goals"],["Joint acquisition","joint_acquisition"],["CE gain (initial − final)","ce_gain"],["Goal-count change","live_success_count_change"],["Mean-return gain","mean_return_gain"]])field($("acquisition"),label,acquired[key],index<0?undefined:`/acquisition/methods/${index}/${key}`);
+const comparisons=[];for(const [name,values] of Object.entries(DATA.source.acquisition?.signed_comparisons??{}))for(const [metric,value] of Object.entries(values))comparisons.push([name,metric,value,source(`/acquisition/signed_comparisons/${name}/${metric}`)]);$("comparisons").replaceChildren(table(["Comparison","Gain difference ↑","Value","Evidence"],comparisons));}
+function recordedSum(records,names){if(!records.length)return null;const values=records.map(c=>names.map(n=>c.work?.[n]).find(v=>typeof v==="number"));return values.every(v=>typeof v==="number")?values.reduce((a,b)=>a+b,0):null;}
+function renderLegacyCosts(){
+const row=R(),p=C().pointer;$("costs").replaceChildren();
+for(const [label,key] of [["Charged updates","charged_updates"],["Native training rows","native_training_examples"],["Source unchanged","source_unchanged"],["Actor unchanged","actor_unchanged"]])field($("costs"),label,row[key],`${p}/${key}`);
+const cells=DATA.source.evaluations.filter(c=>c.method===C().key),live=cells.filter(c=>c.updates===0||c.updates===128);
+field($("costs"),"Recorded raw forwards",recordedSum(cells,["raw_score_forwards_completed","score_forward_calls_completed"]),"/evaluations");
+field($("costs"),"Recorded live predictions",recordedSum(live,["live_prediction_calls_returned"]),"/evaluations");
+field($("costs"),"Recorded live steps",recordedSum(live,["environment_steps_returned"]),"/evaluations");
+field($("costs"),"Actor version",null);field($("costs"),"Protocol probe updates",DATA.source.protocol?.probe_updates,"/protocol");
+$("run-costs").replaceChildren();field($("run-costs"),"Run status",DATA.source.status,"/status");field($("run-costs"),"Seconds",DATA.source.seconds,"/seconds");
+field($("run-costs"),"Peak process RSS (bytes)",DATA.source.observed_process_rss?.peak_bytes,"/observed_process_rss");
+const values=Object.values(DATA.source.retained_input_array_bytes??{}),bytes=values.length&&values.every(v=>typeof v==="number")?values.reduce((a,b)=>a+b,0):null;
+field($("run-costs"),"Retained input arrays (bytes)",bytes,"/retained_input_array_bytes");
+const teachers=DATA.source.source_reports??[],steps=teachers.map(s=>s.environment_steps);
+field($("run-costs"),"Recorded teacher steps",steps.length&&steps.every(v=>typeof v==="number")?steps.reduce((a,b)=>a+b,0):null,"/source_reports");
+$("footer").textContent="Recorded artifact · TRAIN only · all outcomes retained. Numeric arrays exclude Python, native state and report copies; time and RSS include broader work. Raw fit and live success differ. This view establishes no retained skill, recovery, generalization or circadian advantage.";
+}
+function episodeStatus(record){
+const outcome=record.success===true?"Goal":record.success===false?(record.environment?.truncated?"Timeout":record.environment?.terminated?"Terminal failure":"No goal"):"Outcome unknown";
+return record.status==="not_run"?"Not run · outcome unknown":`${record.status} · ${outcome}`;
+}
+function renderCondition(){stop();episode=0;frame=0;$("episode").replaceChildren();C().episodes.forEach((entry,i)=>{const r=entry.record,label=AFFINE?`${entry.context} ${r.cue} · ${episodeStatus(r)}`:LEARNABILITY?`${entry.source_updates} source · ${entry.phase} · ${entry.context} ${r.cue} · ${episodeStatus(r)}`:`${entry.updates} updates · ${r.cue} · ${episodeStatus(r)}`,option=node("option",label);option.value=String(i);$("episode").append(option);});$("episode").disabled=C().episodes.length===0;$("identity").replaceChildren();for(const [label,value] of [["Method",C().key],["Seed",FINAL_FIFO||AFFINE?E()?.record.environment?.seed:DATA.source.protocol?.seed],["Role",PRIVATE?C().source_role:FINAL_FIFO?"final_test":AFFINE?"TRAIN":LEARNABILITY?"TRAIN + probe_test":"TRAIN"],["Learning","Inactive"],["Inputs",C().key==="recurrent_bc"?"148 · recurrent":"296 · initial + current"],["State",PRIVATE?`Fit ${C().status} · games ${C().native_status??"Not planned"}`:FINAL_FIFO?C().status:R().status]]){const item=node("div");item.append(node("span",label,"muted"),node("b",fmt(value)));$("identity").append(item);}renderFrame();renderTables();renderCosts();}
+
+// Separate phase panels keep disposable cohorts and source checkpoints distinct.
+// Only observed complete numeric checkpoints become dots; no missing interval is interpolated.
+function visibleCurves(){const selected=SAVED_FIFO?$("cohort-filter").value:"all";return selected==="all"?C().curves:C().curves.filter(row=>String(row.source_updates)===selected);}
+function renderCurves(){
+const host=$("curves");host.replaceChildren();host.hidden=false;const groups=new Map();
+for(const row of visibleCurves()){const key=JSON.stringify([row.source_updates,row.phase,row.context,row.role]);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);}
+for(const rows of groups.values()){
+const first=rows[0],panel=node("div",undefined,"curve"),title=PRIVATE?`${first.context} · ${first.phase}`:AFFINE?`${first.context} · TRAIN`:`Source ${fmt(first.source_updates)} · ${first.phase} · ${first.context}`;
+panel.append(node("h3",title),node("p",PRIVATE?`${first.role} · recorded accuracy ↑ · ${first.phase==="Chronological TRAIN"?"native fits":"private updates"} →`:AFFINE?"Recorded accuracy ↑ · native fit updates →":`${first.role} · recorded accuracy ↑ · phase updates →`));
+const legend=node("div",undefined,"curve-legend");for(const [cue,color] of [["blue","#285c87"],["red","#964b42"]]){const item=node("span"),dot=node("i");dot.style.background=color;item.append(dot,document.createTextNode(cue));legend.append(item);}panel.append(legend);
+const chart=svg("svg",{viewBox:"0 0 360 180",role:"img","aria-label":`${title}. Recorded blue and red cue accuracy checkpoints. Missing or incomplete values are not plotted.`}),maximum=Math.max(1,...rows.map(row=>row.updates).filter(Number.isFinite));
+for(const value of [0,.5,1]){const y=145-value*115;chart.append(svg("line",{x1:38,y1:y,x2:337,y2:y,stroke:"#d5dbd9"}),svg("text",{x:29,y:y+4,"text-anchor":"end","font-size":10,fill:"#657178"},String(value)));}
+const ticks=[...new Set(rows.map(row=>row.updates).filter(Number.isFinite))].sort((a,b)=>a-b);for(const value of ticks){const x=43+value/maximum*280;chart.append(svg("text",{x,y:165,"text-anchor":"middle","font-size":10,fill:"#657178"},String(value)));}
+let observed=0;for(const row of rows){if(row.status!=="complete"||!Number.isFinite(row.accuracy)||!Number.isFinite(row.updates))continue;observed++;const point=svg("circle",{cx:43+row.updates/maximum*280,cy:145-row.accuracy*115,r:row.cue==="blue"?5:3.5,fill:row.cue==="blue"?"#285c87":"#964b42",stroke:"#fcfcf9","stroke-width":.8});point.append(svg("title",{},`${row.cue}: ${row.accuracy} at ${row.updates} updates; ${row.status}`));chart.append(point);}
+panel.append(chart,node("p",observed?"Dots are recorded values. No interpolation; exact evidence is in the table.":"No completed numeric accuracy checkpoint was recorded."));host.append(panel);
+}
+}
+function renderTables(){
+if(AFFINE){renderAffineTables();return;}
+if(FINAL_FIFO){renderFinalTables();return;}
+if(!LEARNABILITY){renderLegacyTables();return;}
+const live=C().episodes.map((entry,i)=>{const b=node("button",`${entry.source_updates} · ${entry.phase} · ${entry.context} ${entry.record.cue}`);b.addEventListener("click",()=>selectEpisode(i));const r=entry.record;return[b,entry.updates,r.source_role??r.role,r.status,r.success,r.return,r.environment?.environment_steps,r.environment?.truncated,source(entry.pointer)];});
+$("episodes").replaceChildren(SAVED_FIFO?node("p","No autonomous games were planned in this probe. Success, return and live decisions are unavailable.","note"):table(["Source · phase · context/cue","Native updates","Role","Status","Goal","Return","Steps","Truncated","Evidence"],live));
+$("raw").replaceChildren(table(["Source checkpoint","Phase","Updates","Context","Cue","Role","Status","CE ↓","Accuracy ↑","Exact sequence ↑","Evidence"],visibleCurves().map(row=>[row.source_updates,row.phase,row.updates,row.context,row.cue,row.role,row.status,row.ce,row.accuracy,row.exact_sequence_accuracy,source(row.pointer)])));
+renderCurves();$("acquisition").replaceChildren();for(const proof of C().proofs)field($("acquisition"),proof.label,proof.value,proof.pointer);
+$("comparisons").replaceChildren();$("comparison-section").hidden=true;
+if(SAVED_FIFO){const rows=(C().signed_metrics??[]).filter(metric=>$("cohort-filter").value==="all"||String(metric.source_updates)===$("cohort-filter").value).map(metric=>[metric.source_updates,metric.label,metric.value,metric.direction,source(metric.pointer)]);$("comparisons").append(table(["Source checkpoint","Metric","Value","Direction","Evidence"],rows));$("comparison-section").hidden=false;}
+}
+function pointerKey(key){return key.replace(/~/g,"~0").replace(/\//g,"~1");}
+function scalarFields(host,value,pointer,label){
+if(value!==null&&typeof value==="object"){
+const entries=Object.entries(value);if(!entries.length)field(host,label,"Empty recorded object",pointer);
+for(const [key,child] of entries)scalarFields(host,child,`${pointer}/${pointerKey(key)}`,`${label} / ${key}`);
+}else field(host,label,value,pointer);
+}
+function renderCosts(){
+if(AFFINE){renderAffineCosts();return;}
+if(FINAL_FIFO){renderFinalCosts();return;}
+if(!LEARNABILITY){renderLegacyCosts();return;}
+$("costs").replaceChildren();for(const cost of C().costs)field($("costs"),cost.label,cost.value,cost.pointer);
+$("run-costs").replaceChildren();for(const [label,key] of [["Run status","status"],["Run reason","reason"],["Total body seconds","total_seconds"],["Scientific advantage verified","scientific_advantage_verified"]])field($("run-costs"),label,DATA.source[key],Object.hasOwn(DATA.source,key)?`/${key}`:undefined);
+scalarFields($("run-costs"),DATA.source.observed_process_rss,"/observed_process_rss","Process RSS");
+scalarFields($("run-costs"),DATA.source.work,"/work","Work");
+if(SAVED_FIFO){
+field($("run-costs"),"Retained input arrays (bytes)",DATA.source.retained_input_array_bytes,Object.hasOwn(DATA.source,"retained_input_array_bytes")?"/retained_input_array_bytes":undefined);
+$("origin-fields").replaceChildren();const original=DATA.source.origin??{};
+for(const [label,key] of [["Original run status","status"],["Original failure reason","reason"],["Original elapsed seconds","elapsed_seconds"],["Original training updates","training_updates"],["Original training rows","training_rows"],["Original budget","budget_status"]])field($("origin-fields"),label,original[key],Object.hasOwn(original,key)?`/origin/${key}`:undefined);
+field($("origin-fields"),"Original censored attempts",Object.hasOwn(original,"censored_games")?JSON.stringify(original.censored_games):null,Object.hasOwn(original,"censored_games")?"/origin/censored_games":undefined);
+}
+$("footer").textContent="Recorded artifact · TRAIN and isolated probe_test · learning is inactive. Disposable F learning and A return are separate from the source learner. Failed and unrun episodes remain visible. Not recorded means unknown; known_returned_work_lower_bounds are partial paid-work lower bounds, never complete totals. Read the recorded scope beside each cost; Python, native state, copies and unobserved failed work may be additional. Implementation correctness establishes no circadian advantage or full retention/recovery claim.";
+}
+if(LEARNABILITY){
+$("recorded-origin").textContent=`Recorded TRAIN + probe_test · ${DATA.source.status}`;$("fit-title").textContent="Fresh-task learning and old-task return";$("proof-title").textContent="Recorded preservation proofs";$("proof-note").textContent="True, false and unknown flags are shown as recorded. A false or unproven flag is not accepted evidence. Fit and native goals are distinct; this view establishes no comparative benefit.";
+}
+
+function renderAffineTables(){
+const live=C().episodes.map((entry,i)=>{const r=entry.record,b=node("button",`${entry.context} ${r.cue}`);b.addEventListener("click",()=>selectEpisode(i));return[b,entry.updates,r.status,r.success,r.return,r.environment?.environment_steps,r.environment?.closed,source(entry.pointer)];});
+$("episodes").replaceChildren(table([PRIVATE?"Private readout context / cue":"Known TRAIN context / cue","Native fits","Status","Goal","Return","Steps","Closed","Evidence"],live));
+if(PRIVATE){$("raw").replaceChildren(table(["Phase","Phase updates","Context","Cue","Role","Status","Recorded CE ↓","Accuracy ↑","Evidence"],C().curves.map(row=>[row.phase,row.updates,row.context,row.cue,row.role,row.status,row.ce,row.accuracy,source(row.pointer)])));}
+else if(RECURRING){const stages={0:"Before learning",2:"After A",4:"After B",6:"After C",8:"After G",10:"Returned A"};$("raw").replaceChildren(table(["Native fits","TRAIN stage","Context","Cue","Role","Status","Recorded CE ↓","Accuracy ↑","Evidence"],C().curves.map(row=>[row.updates,stages[row.updates],row.context,row.cue,row.role,row.status,row.ce,row.accuracy,source(row.pointer)])));}
+else {$("raw").replaceChildren(table(["Native fits","Context","Cue","Role","Status","Recorded CE ↓","Accuracy ↑","Evidence"],C().curves.map(row=>[row.updates,row.context,row.cue,row.role,row.status,row.ce,row.accuracy,source(row.pointer)])));}
+renderCurves();$("acquisition").replaceChildren();for(const proof of C().proofs)field($("acquisition"),proof.label,proof.value,proof.pointer);
+$("comparison-section").hidden=true;
+if(PRIVATE)renderPrivateOverview();
+$("receipt-table").replaceChildren(table(["Update","Observed","Arrived","Applied","Actor version","Learner version","Diagnostic","Evidence"],C().receipts.map((r,i)=>[r.update_number,r.observed_at,r.arrived_at,r.applied_at,r.actor_version,r.learner_version,r.diagnostic?.value,source(`/training/committed_receipts/${i}`)])));
+$("catalogue-table").replaceChildren(table(["Observed","Arrived","Public cue","New rows","Joint replay rows","Bank rows after","Receipt evidenced","Evidence"],C().wakes.map((w,i)=>[w.observed_at,w.arrived_at,w.cue,w.current_rows,w.replay_rows,w.bank_rows_after,i<C().receipts.length?"Yes":"Not evidenced",source(`/training/catalogue/wakes/${i}`)])));
+}
+function renderAffineCosts(){
+$("costs").replaceChildren();for(const cost of C().costs)field($("costs"),cost.label.replaceAll("_"," ").replaceAll("."," / "),cost.value,cost.pointer);
+const host=$("run-costs");host.replaceChildren();field(host,"Workflow status",DATA.source.status,"/status");field(host,"Workflow reason",DATA.source.reason,Object.hasOwn(DATA.source,"reason")?"/reason":undefined);
+if(PRIVATE){
+for(const cost of DATA.global_costs)field(host,cost.label.replaceAll("_"," ").replaceAll("."," / "),cost.value,cost.pointer);
+field(host,"Whole external process time",null);field(host,"Whole external process RSS",null);
+$("footer").textContent="Recorded private comparison · learning inactive · no private model promoted. F uses probe_test readouts; old A/B/C diagnostics reuse TRAIN and are not heldout retention. Old accuracy is recorded correct actions / nine rows. Both controls remain visible. Protocol-plan totals are not paid-work receipts; read each original clock, exposure, memory and RSS scope. Missing/failed/unrun outcomes and false preservation flags remain unknown or failed. This view does not complete the interrupted native run or establish generalization, reliable recovery, matched computation or a circadian advantage.";
+return;
+}
+for(const key of ["training","games"]){if(DATA.source[key]){field(host,`${key} status`,DATA.source[key].status,`/${key}/status`);field(host,`${key} reason`,DATA.source[key].reason,Object.hasOwn(DATA.source[key],"reason")?`/${key}/reason`:undefined);}}
+field(host,"Receipt capture error",DATA.source.training?.receipt_capture_error,Object.hasOwn(DATA.source.training??{},"receipt_capture_error")?"/training/receipt_capture_error":undefined);
+field(host,"Whole process elapsed time",null);field(host,"Whole process peak RSS",null);field(host,"Caller RNG preservation proof",null);
+$("footer").textContent=RECURRING?"Recorded ordinary TRAIN · learning is inactive. A/B/C/G/A curves include reused TRAIN rows; all known G/A games occur after A is trained again. Read CE regressions alongside accuracy. A return does not prove recovery from forgetting. Teacher collection, joint replay, diagnostics, workflow and phase clocks/RSS have separate recorded scopes; external process costs remain unknown. Plan totals are not paid receipts. Failed, missing and unrun outcomes remain explicit. This view does not establish independent acceptance, heldout reliability, matched computation or a circadian advantage.":"Recorded TRAIN only · learning is inactive. Known B/C gameplay and teacher-forced A/B/C fit are separate evidence. Training/readout budget times and RSS have their recorded segment scopes; whole-process costs are unavailable in this source. Catalogue plan storage excludes Python/native states/copies; joint replay adds exposure. Missing/failed observations remain unknown. This view establishes neither independent acceptance, generalization, reliable recovery nor a circadian advantage.";
+}
+if(AFFINE){
+document.querySelector("h1").textContent=RECURRING?"Learn, retain and return":"Affine learning and native games";$("recorded-origin").textContent=`Recorded TRAIN · ${DATA.source.status}`;$("fit-title").textContent=RECURRING?"Learning across A, B, C and G":"Learning across A, B and C";$("proof-title").textContent="Recorded preservation flags";$("proof-note").textContent="These flags are shown as recorded. The viewer checks saved consistency, not source authenticity or scientific benefit. Unrecorded costs and outcomes remain unknown.";$("affine-receipts").hidden=false;
+}
+
+function renderPrivateOverview(){
+const host=$("private-overview");host.replaceChildren(table(["Learner / control","Fit status","Native readout","Recorded new updates","Recorded new fit rows","Evidence"],DATA.conditions.map((c,i)=>{
+const r=at(c.pointer),training=i===0,button=node("button",c.key);button.addEventListener("click",()=>{condition=i;$("condition").value=String(i);renderCondition();});
+return [button,c.status,c.native_status??"Not planned",training?r?.budget?.updates_completed:r?.probe?.completed_updates,training?r?.catalogue?.committed_rows?.native:r?.probe?.completed_training_examples,source(c.pointer)];
+})));
+}
+if(PRIVATE){
+document.querySelector("h1").textContent="Private learning, retention and return";$("recorded-origin").textContent=`Recorded private adaptation · ${DATA.source.status}`;
+$("fit-title").textContent="Fresh F learning and old A/B/C fit";
+$("saved-scope").hidden=false;$("saved-scope").querySelector("h2").textContent="Frozen reference and both private controls";
+$("saved-scope-note").textContent="Two independent private learners start from the same six-fit TRAIN reference. F-only repeats F; joint fitting reuses old TRAIN. Read both fit and native outcomes: the interrupted joint readout has missing games and an unestablished final preservation flag. No model is promoted or selected.";
+$("condition").setAttribute("aria-label","Learner / control");
+}
+
+if(SAVED_FIFO){
+document.body.classList.add("saved-fifo");
+$("trace-workspace").hidden=true;$("saved-scope").hidden=false;$("cohort-filter-label").hidden=false;
+document.querySelector("h1").textContent="Count-memory learning and retention";
+$("live-section").querySelector("h2").textContent="Autonomous evaluation";
+$("cohort-filter").addEventListener("change",renderTables);
+$("episode").closest("label").hidden=true;
+$("fit-title").textContent="F learning and known A fit";
+$("saved-scope-note").textContent="Two owned count-memory cohorts, from checkpoints 0 and 128. F is reserved probe_test fit; A is known TRAIN fit. A return does not imply recovery from loss. The cold cohort starts unacquired; use the recorded curves to assess retention.";
+$("recorded-origin").textContent=`Recorded count probe · ${DATA.source.status}`;
+$("proof-note").textContent="Preservation flags are recorded observations. False or unknown flags do not establish acceptance. Neither teacher-forced fit nor a return phase establishes autonomous success or comparative benefit.";
+}
+
+function renderFinalTables(){
+const rows=C().episodes.map((entry,i)=>{const r=entry.record,b=node("button",`D ${r.cue}`);b.addEventListener("click",()=>selectEpisode(i));return[b,r.status,r.success,r.return,r.environment?.environment_steps,r.environment?.truncated,source(entry.pointer)];});
+$("episodes").replaceChildren(table(["Final cue","Status","Goal","Return","Steps","Truncated","Evidence"],rows));
+const queries=DATA.source.query_matches;
+$("raw").replaceChildren(queries?table(["Cue","Step","Stored key matched","Native action index","Evidence"],queries.map((r,i)=>[r.cue,r.step,r.matched,r.action,source(`/query_matches/${i}`)])):node("p","Query match diagnostics not recorded.","note"));
+$("curves").hidden=true;$("comparison-section").hidden=true;$("acquisition").replaceChildren();
+for(const proof of C().proofs)field($("acquisition"),proof.label,proof.value,proof.pointer);
+for(const entry of C().episodes){const env=entry.record.environment,transitions=env?.transitions;
+field($("acquisition"),`D ${entry.cue} native indices valid`,transitions?.length?transitions.every(t=>Number.isInteger(t.action)&&t.action>=0&&t.action<7):null,env?`${entry.pointer}/environment/transitions`:undefined);
+field($("acquisition"),`D ${entry.cue} actions applied`,transitions?transitions.filter(t=>t.applied===true).length:null,env?`${entry.pointer}/environment/transitions`:undefined);
+}
+field($("acquisition"),"Recorded stored-key matches",DATA.source.matched_queries,Object.hasOwn(DATA.source,"matched_queries")?"/matched_queries":undefined);
+field($("acquisition"),"Recorded queries",DATA.source.total_queries,Object.hasOwn(DATA.source,"total_queries")?"/total_queries":undefined);
+}
+function renderFinalCosts(){
+$("costs").replaceChildren();for(const cost of C().costs)field($("costs"),cost.label,cost.value,cost.pointer);
+$("run-costs").replaceChildren();for(const key of ["complete","error","source_sha256","benchmark_updates","benchmark_rows"])field($("run-costs"),key,DATA.source[key],Object.hasOwn(DATA.source,key)?`/${key}`:undefined);
+$("origin-fields").replaceChildren();if(DATA.source.origin)scalarFields($("origin-fields"),DATA.source.origin,"/origin","Original TRAIN history");else field($("origin-fields"),"Original history details",null);
+field($("origin-fields"),"PROBE updates in this readout",DATA.source.probe_updates,"/probe_updates");
+field($("origin-fields"),"PROBE outcomes in this artifact",null);
+field($("origin-fields"),"TRAIN outcome scores in this artifact",null);
+$("footer").textContent="Recorded final_test only · learning inactive. Original TRAIN history is preserved separately; probe outcomes are absent. Stored-key matches are recorded diagnostics, not independently authenticated lookups. Valid native indices and applied calls do not establish safety or progress. Numeric memory excludes Python/native/copy overhead. Sampled RSS can miss peaks. Negative and partial outcomes remain visible. This view establishes no circadian advantage or generalization claim. Final outcomes must never train, tune, promote or select probes.";
+}
+if(FINAL_FIFO){
+$("recorded-origin").textContent=`Recorded FINAL D · ${C().status}`;
+document.querySelector("h1").textContent="Final D outcome inspector";
+$("saved-scope").hidden=false;$("saved-scope").querySelector("h2").textContent="TRAIN history · PROBE work · FINAL outcomes";
+$("saved-scope-note").textContent="Fixed FIFO36 benchmark128 / 1152 TRAIN rows. The original incomplete run remains spent. This readout performs zero fitting, replay, probe updates or promotion. Final D observations never become fit curves or model-selection input. Missing outcomes remain unknown.";
+$("fit-title").textContent="Final query diagnostics";$("fit-title").parentElement.querySelector("p").textContent="Recorded decisions only · no teacher-forced fitting";
+$("proof-title").textContent="Preservation and native call evidence";
+$("proof-note").textContent="False and unknown flags remain visible; they do not establish acceptance. Derived call counts cite the transition arrays. Native index validity is not geometric progress or safety. Uniform probabilities retain the first raw argmax (Left).";
+}
+
+function advance(delta){frame=Math.max(0,Math.min((E()?.frames.length??1)-1,frame+delta));renderFrame();if(frame>=(E()?.frames.length??0)-1)stop();}
+$("source-name").textContent=DATA.source_label;$("source-root").addEventListener("click",()=>openSource(""));$("close-source").addEventListener("click",()=>$("source-dialog").close());DATA.conditions.forEach((c,i)=>{const o=node("option",SAVED_FIFO||FINAL_FIFO?"FIFO36 count control":c.key);o.value=String(i);$("condition").append(o);});$("condition").value=String(condition);$("condition").addEventListener("change",e=>{condition=Number(e.target.value);renderCondition();});$("episode").addEventListener("change",e=>selectEpisode(Number(e.target.value)));$("previous").addEventListener("click",()=>{stop();advance(-1);});$("next").addEventListener("click",()=>{stop();advance(1);});$("timeline").addEventListener("input",e=>{stop();frame=Number(e.target.value);renderFrame();});$("play").addEventListener("click",()=>{if(timer!==null){stop();return;}if(frame>=(E()?.frames.length??0)-1)frame=0;timer=setInterval(()=>advance(1),450);$("play").textContent="Pause trace";renderFrame();});document.addEventListener("visibilitychange",()=>{if(document.hidden)stop();});
+try{renderCondition();}catch(error){stop();$("main").replaceChildren(node("p","Unable to display this recorded report: "+error.message,"error"));throw error;}
+</script>
+</body>
+</html>

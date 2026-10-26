@@ -31,6 +31,7 @@ class _Copy:
     policy: ReferenceType[Any]
     probe: ReferenceType[Any]
     attempt_limit: int
+    learner: ReferenceType[Any] | None = None
 
 
 class ManagedReplayCopies:
@@ -185,6 +186,7 @@ class ManagedReplayCopies:
                             _weak(policy),
                             _weak(probe),
                             attempt_limit,
+                            _weak(original.recipient) if original.recipient is not None else None,
                         )
                         copying.close()
 

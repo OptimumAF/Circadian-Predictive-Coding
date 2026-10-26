@@ -71,6 +71,8 @@ def capture_managed_composite(
     copy_state: CompositeCopyPort,
     replay_inventory,
     replay_origins=None,
+    replay_copies=None,
+    replay_checkpoints=None,
 ) -> ManagedCompositeCapture:
     """Detach all supported retained sources during one original owner interval."""
     if type(limits) is not CompositeCaptureLimits or not all(
@@ -96,7 +98,15 @@ def capture_managed_composite(
             live, groups = _retained_sources(life, owner, limits)
             _require_payload_consent(owner, groups)
             replay_check = stack.enter_context(
-                lease_replay_capture(owner, groups, limits, replay_inventory, replay_origins)
+                lease_replay_capture(
+                    owner,
+                    groups,
+                    limits,
+                    replay_inventory,
+                    replay_origins,
+                    replay_copies,
+                    replay_checkpoints,
+                )
             )
             reader = SourceReader(project_native, limits)
             holders = tuple(

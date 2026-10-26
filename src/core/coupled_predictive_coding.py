@@ -246,8 +246,14 @@ class CoupledPredictiveCodingNetwork:
             X, y, learning_rate, inference_steps, inference_learning_rate, inference_policy
         )
         candidate = self._prepare_parameters(evaluation.parameter_gradients, rate, X, y, latents)
-        self._parameters = candidate
+        self._publish_training_state(candidate, evaluation.parameter_gradients)
         return CoupledTrainResult(evaluation.energy, inference=diagnostics)
+
+    def _publish_training_state(
+        self, candidate: CoupledParameters, raw_gradients: CoupledParameters
+    ) -> None:
+        """Publish validated parameters; opt-in subclasses may prepare owned history."""
+        self._parameters = candidate
 
     def _training_with_policy(
         self,

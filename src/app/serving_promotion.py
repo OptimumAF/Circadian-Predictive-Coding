@@ -163,6 +163,14 @@ class PromotableActor(StableActor[Features, Targets, Prediction, State]):
             bundle = self._slot.bundle
             return VersionedState(bundle.version, deepcopy(bundle.learner.snapshot_state()))
 
+    def snapshot_state_if_idle(self) -> VersionedState[State]:
+        """Read the current complete bundle without waiting on its owner lease."""
+        with self._payload_exclusive():
+            if self._payload_registry._lifecycle is not None:
+                self._payload_registry._lifecycle._require_access()
+            bundle = self._slot.bundle
+            return VersionedState(bundle.version, deepcopy(bundle.learner.snapshot_state()))
+
     def serving_snapshot(self) -> ServingSnapshot[State, Prediction]:
         with self._read_gate:
             if self._payload_registry._lifecycle is not None:

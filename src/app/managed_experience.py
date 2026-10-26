@@ -47,6 +47,8 @@ class ManagedExperienceOwner(Generic[Features, Targets, Prediction, State]):
             raise ValueError("managed admission requires an exact supported candidate owner")
         with runtime._exclusive():
             runtime._require_open()
+            if runtime._training_role != "train":
+                raise ValueError("managed admission supports only original TRAIN owners")
             inbox = runtime._inbox
             if (
                 inbox._experiences

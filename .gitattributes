@@ -1,2 +1,4 @@
 # Whole-byte Python source protocols require authored bytes, including mixed EOL.
 *.py -text whitespace=cr-at-eol
+# The qualified CPU example is bound to exact project-generated JSON bytes.
+examples/context_head_source/source.json -text

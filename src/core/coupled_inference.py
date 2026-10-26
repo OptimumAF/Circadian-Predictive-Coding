@@ -1,4 +1,4 @@
-"""Opt-in bounded latent inference on the existing coupled binary energy.
+"""Bounded binary latent inference and shared private guarded dynamics.
 
 Inputs are borrowed quiescent parameters, fixed training batches and precisions.
 Outputs own latent arrays and include explicit stopping-work diagnostics. Unsafe
@@ -6,8 +6,10 @@ proposals return the last accepted state without retry. Invalid initial problems
 raise. No parameter updates, learner state, data-role authority or IO lives here.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from math import isfinite
+from typing import Protocol, TypeVar
 
 import numpy as np
 
@@ -75,7 +77,30 @@ class CoupledInferenceResult:
     diagnostics: CoupledInferenceDiagnostics
 
 
-def _gradient_inf_norm(evaluation: CoupledEvaluation) -> float:
+class _LatentEvaluation(Protocol):
+    @property
+    def energy(self) -> float: ...
+
+    @property
+    def latent_gradients(self) -> tuple[Array, ...]: ...
+
+
+_Evaluation = TypeVar("_Evaluation", bound=_LatentEvaluation)
+
+
+@dataclass
+class _InferenceWork:
+    """Private per-call progress; survives exceptions in an owning adapter."""
+
+    attempted_steps: int = 0
+    accepted_steps: int = 0
+    energy_evaluations: int = 0
+    energy_returns: int = 0
+    gradient_norm_evaluations: int = 0
+    energy_comparisons: int = 0
+
+
+def _gradient_inf_norm(evaluation: _LatentEvaluation) -> float:
     norm = max(float(np.max(np.abs(gradient))) for gradient in evaluation.latent_gradients)
     if not isfinite(norm):
         raise FloatingPointError("nonfinite coupled latent gradient norm")
@@ -96,6 +121,77 @@ def _convergence_reason(
     return None
 
 
+def _run_inference(
+    initial_latents: tuple[Array, ...],
+    evaluate: Callable[[tuple[Array, ...]], _Evaluation],
+    max_steps: int,
+    rate: float,
+    policy: CoupledInferencePolicy,
+    *,
+    _work: _InferenceWork | None = None,
+) -> tuple[tuple[Array, ...], _Evaluation, CoupledInferenceDiagnostics]:
+    # Why: binary and continuous tasks require the same guarded dynamics and
+    # accounting. Keep one private loop; wrappers retain likelihood validation.
+    work = _InferenceWork() if _work is None else _work
+    latents = tuple(latent.copy() for latent in initial_latents)
+    work.energy_evaluations += 1
+    evaluation = evaluate(latents)
+    work.energy_returns += 1
+    initial_energy = evaluation.energy
+    if not isfinite(initial_energy):
+        raise FloatingPointError("nonfinite initial coupled inference energy")
+    work.gradient_norm_evaluations += 1
+    norm = _gradient_inf_norm(evaluation)
+    reason, fallback = "max_steps", False
+    for _ in range(max_steps):
+        work.attempted_steps += 1
+        with np.errstate(over="ignore", invalid="ignore"):
+            candidate = tuple(
+                latent - rate * gradient
+                for latent, gradient in zip(latents, evaluation.latent_gradients)
+            )
+        if any(not np.isfinite(latent).all() for latent in candidate):
+            reason, fallback = "nonfinite_candidate", True
+            break
+        work.energy_evaluations += 1
+        try:
+            proposed = evaluate(candidate)
+            work.energy_returns += 1
+            if not isfinite(proposed.energy):
+                raise FloatingPointError("nonfinite candidate coupled inference energy")
+        except FloatingPointError:
+            reason, fallback = "numerical_failure", True
+            break
+        work.energy_comparisons += 1
+        if proposed.energy > evaluation.energy:
+            reason, fallback = "energy_increase", True
+            break
+        old_energy = evaluation.energy
+        latents, evaluation = candidate, proposed
+        work.accepted_steps += 1
+        work.gradient_norm_evaluations += 1
+        norm = _gradient_inf_norm(evaluation)
+        converged = _convergence_reason(
+            policy, work.accepted_steps, norm, old_energy, evaluation.energy
+        )
+        if converged is not None:
+            reason = converged
+            break
+    diagnostics = CoupledInferenceDiagnostics(
+        reason=reason,
+        attempted_steps=work.attempted_steps,
+        accepted_steps=work.accepted_steps,
+        energy_evaluations=work.energy_evaluations,
+        gradient_norm_evaluations=work.gradient_norm_evaluations,
+        energy_comparisons=work.energy_comparisons,
+        initial_energy=initial_energy,
+        final_energy=evaluation.energy,
+        final_gradient_inf_norm=norm,
+        used_fallback=fallback,
+    )
+    return latents, evaluation, diagnostics
+
+
 def _infer_validated(
     parameters: CoupledParameters,
     features: Array,
@@ -105,55 +201,12 @@ def _infer_validated(
     rate: float,
     policy: CoupledInferencePolicy,
 ) -> CoupledInferenceResult:
-    latents = tuple(latent.copy() for latent in feedforward_latents(parameters, features))
-    evaluation = evaluate_coupled(parameters, features, targets, latents, precisions)
-    initial_energy = evaluation.energy
-    if not isfinite(initial_energy):
-        raise FloatingPointError("nonfinite initial coupled inference energy")
-    norm = _gradient_inf_norm(evaluation)
-    attempted, accepted, energy_calls, comparisons = 0, 0, 1, 0
-    reason, fallback = "max_steps", False
-    for _ in range(max_steps):
-        attempted += 1
-        with np.errstate(over="ignore", invalid="ignore"):
-            candidate = tuple(
-                latent - rate * gradient
-                for latent, gradient in zip(latents, evaluation.latent_gradients)
-            )
-        if any(not np.isfinite(latent).all() for latent in candidate):
-            reason, fallback = "nonfinite_candidate", True
-            break
-        energy_calls += 1
-        try:
-            proposed = evaluate_coupled(parameters, features, targets, candidate, precisions)
-            if not isfinite(proposed.energy):
-                raise FloatingPointError("nonfinite candidate coupled inference energy")
-        except FloatingPointError:
-            reason, fallback = "numerical_failure", True
-            break
-        comparisons += 1
-        if proposed.energy > evaluation.energy:
-            reason, fallback = "energy_increase", True
-            break
-        old_energy = evaluation.energy
-        latents, evaluation = candidate, proposed
-        accepted += 1
-        norm = _gradient_inf_norm(evaluation)
-        converged = _convergence_reason(policy, accepted, norm, old_energy, evaluation.energy)
-        if converged is not None:
-            reason = converged
-            break
-    diagnostics = CoupledInferenceDiagnostics(
-        reason=reason,
-        attempted_steps=attempted,
-        accepted_steps=accepted,
-        energy_evaluations=energy_calls,
-        gradient_norm_evaluations=1 + accepted,
-        energy_comparisons=comparisons,
-        initial_energy=initial_energy,
-        final_energy=evaluation.energy,
-        final_gradient_inf_norm=norm,
-        used_fallback=fallback,
+    latents, evaluation, diagnostics = _run_inference(
+        feedforward_latents(parameters, features),
+        lambda current: evaluate_coupled(parameters, features, targets, current, precisions),
+        max_steps,
+        rate,
+        policy,
     )
     return CoupledInferenceResult(latents, evaluation, diagnostics)
 

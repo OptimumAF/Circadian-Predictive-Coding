@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:,">
+<title>Circadian · Sensor run inspector</title>
+<style>
+:root{--paper:#f4f3ee;--surface:#fcfcf9;--ink:#202b31;--muted:#53636b;--line:#d3dad9;--accent:#285c87;--pale:#e6edf1}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 system-ui,"Segoe UI",sans-serif}button,select{font:inherit;color:inherit}button,select{border:1px solid var(--line);background:var(--surface);padding:7px 11px;border-radius:3px}button{cursor:pointer;transition:background .15s,border-color .15s}button:hover{background:var(--pale);border-color:var(--accent)}button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #7aabc9;outline-offset:3px}a{color:var(--accent);text-underline-offset:3px}h1,h2,p{margin:0}h1{font-size:25px;letter-spacing:-.6px}h2{font-size:19px;font-weight:600}header{background:var(--surface);border-bottom:1px solid var(--line)}.head,main{max-width:1320px;margin:auto;padding:24px 32px}.head{display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{text-transform:uppercase;letter-spacing:2px;font-size:11px;color:var(--accent)}.origin{font-size:12px;color:var(--muted)}.origin b{display:block;color:var(--ink)}.toolbar{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}.toolbar label{display:flex;gap:10px;align-items:center}#source-name{overflow-wrap:anywhere;font-size:12px;color:var(--muted)}.identity{display:flex;flex-wrap:wrap;gap:12px 24px;padding:18px 0;border-bottom:1px solid var(--line)}.identity span{font-size:12px}.identity b{font-weight:600;margin-right:6px}.status{color:var(--accent)}#reason{overflow-wrap:anywhere;margin-top:10px}nav{display:flex;flex-wrap:wrap;gap:9px 20px;font-size:12px;padding:16px 0}section{border-top:1px solid var(--line);padding:24px 0}.note{color:var(--muted);font-size:12px;margin:6px 0 14px;max-width:900px}.chart{overflow:auto;margin:10px 0}.chart svg{display:block;width:100%;min-width:0;height:245px}.chart .key{font-size:12px;color:var(--muted);margin:4px 0}.table-scroll{overflow:auto;max-height:350px}table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}td,th{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;max-width:440px;overflow-wrap:anywhere}th{position:sticky;top:0;background:var(--paper);font-size:11px;color:var(--muted);z-index:1}.source{background:transparent;border:0;padding:0;text-align:left;color:var(--accent);text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}.source:hover{background:transparent}.unknown{color:var(--muted);font-style:italic}.empty{padding:16px 0;color:var(--muted)}details>summary{cursor:pointer;color:var(--accent);margin:14px 0 10px;font-size:12px}footer{border-top:1px solid var(--line);padding:20px 0;font-size:12px;color:var(--muted)}dialog{border:1px solid var(--line);border-radius:4px;width:min(860px,94vw);max-height:85vh;padding:22px;background:var(--surface);color:var(--ink)}dialog::backdrop{background:#152b3b88}dialog .dialog-head{display:flex;justify-content:space-between;gap:16px;align-items:center}dialog pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.5 ui-monospace,Consolas,monospace;max-height:58vh;overflow:auto}dialog code{overflow-wrap:anywhere;font-size:12px}.warning{border-left:3px solid var(--accent);padding:8px 14px;background:var(--pale);margin-top:14px;font-size:12px}
+@media(max-width:650px){.head,main{padding:18px 16px}.head{align-items:start;gap:12px}.origin{max-width:125px;font-size:11px}h1{font-size:21px}.toolbar{align-items:start}.toolbar label{width:100%}.identity{gap:10px 18px}td,th{padding:8px}.chart svg{min-width:0}nav{gap:9px 16px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header><div class="head"><div><p class="brand">Circadian</p><h1>Sensor run inspector</h1></div><p class="origin"><b>Recorded evidence</b>Learning and promotion inactive</p></div></header>
+<main>
+<div class="toolbar"><label>Chart metric <select id="metric" aria-label="Chart metric"><option value="bce">BCE · lower is better</option><option value="accuracy">Accuracy · higher is better</option></select></label><span id="source-name"></span><button id="source-root">Open source report</button></div>
+<div class="identity" id="identity"></div><p id="reason"></p>
+<div class="warning" id="limit">Saved observations from one small sensor fixture. Negative values and nulls are retained. These records do not establish recovery, statistical false-positive control or a circadian advantage.</div>
+<nav id="navigation" aria-label="Report sections"></nav><div id="sections"></div>
+<footer>Offline inspection · no learner, native inference or network requests. Click any recorded value to inspect its exact source. Missing evidence is unknown; JSON null remains null. Planned protocol counts are not substituted for measured work.</footer>
+</main>
+<dialog id="source-dialog" aria-labelledby="dialog-title"><div class="dialog-head"><h2 id="dialog-title">Source evidence</h2><button id="close-dialog">Close</button></div><p class="note" id="dialog-file"></p><code id="source-pointer"></code><pre id="source-value"></pre></dialog>
+<script id="inspector-data" type="application/json">__INSPECTOR_DATA__</script>
+<script>
+'use strict';
+const data=JSON.parse(document.getElementById('inspector-data').textContent);
+const byId=id=>document.getElementById(id);
+function element(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
+function format(value){if(value===null)return 'null';if(typeof value==='number'){if(Object.is(value,-0))return '-0';return Number.isInteger(value)?String(value):value.toFixed(6);}return typeof value==='object'?JSON.stringify(value):String(value);}
+function resolve(source,pointer){let value=source==='resources'?data.resources:data.source;if(pointer==='')return value;for(const part of pointer.slice(1).split('/')){const key=part.replace(/~1/g,'/').replace(/~0/g,'~');if(value===null||!Object.prototype.hasOwnProperty.call(value,key))throw Error('Missing source pointer '+pointer);value=value[key];}return value;}
+function openSource(source,pointer){const value=resolve(source,pointer);byId('dialog-file').textContent=source==='resources'?data.resource_label+' · separately supplied; association unverified':data.source_label;byId('source-pointer').textContent=(pointer||'/ (root)');byId('source-value').textContent=JSON.stringify(value,null,2);byId('source-dialog').showModal();}
+function cellView(cell){if(cell.missing)return element('span','unknown','unknown');if(cell.pointer===null)return element('span',format(cell.value));const b=element('button',format(cell.value),'source');b.type='button';b.title=(cell.source==='resources'?'Resources':'Report')+' '+cell.pointer;b.addEventListener('click',()=>openSource(cell.source,cell.pointer));return b;}
+function identity(label,pointer){const s=element('span');s.append(element('b',label),cellView({value:resolve('report',pointer),pointer,source:'report',missing:false}));byId('identity').append(s);}
+identity('Status','/status');identity('Method','/protocol/method');identity('Protocol','/protocol/protocol');
+if(data.protocol_id.startsWith('sensor_stationary_')){identity('Stationary control','/protocol/stationary');identity('Sequence','/protocol/phases');byId('limit').textContent='Stationary A: repeated noise-free frames, no physical shift. At most eight dependent post-calibration opportunities; B and A-return phases are absent. These observations do not establish statistical false-positive control, recovery or a circadian advantage.';}
+byId('source-name').textContent=data.source_label;if(data.source.reason!==undefined&&data.source.reason!==null)byId('reason').append(cellView({value:data.source.reason,pointer:'/reason',source:'report',missing:false}));
+byId('source-root').addEventListener('click',()=>openSource('report',''));
+byId('close-dialog').addEventListener('click',()=>byId('source-dialog').close());
+const chartHosts=[];
+function svg(tag,attrs,text){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v]of Object.entries(attrs))e.setAttribute(k,v);if(text!==undefined)e.textContent=text;return e;}
+function draw(host,section){host.replaceChildren();const metric=byId('metric').value;const index=section.id==='prearrival'?(metric==='bce'?3:4):(metric==='bce'?2:3);const groups=new Map();
+ for(const row of section.rows){const cells=row.cells;const xcell=cells[section.id==='probes'?1:0],ycell=cells[index];const group=section.id==='prearrival'?'Prearrival':format(cells[section.id==='probes'?0:1].value);if(!groups.has(group))groups.set(group,[]);groups.get(group).push({x:xcell.value,y:ycell.missing?null:ycell.value,cell:ycell});}
+ const all=[...groups.values()].flat().filter(p=>typeof p.x==='number'&&typeof p.y==='number');if(!all.length){host.append(element('p','No recorded numeric curve.','empty'));return;}
+ const width=Math.max(300,host.clientWidth),height=245,left=56,right=25,top=22,bottom=42;const xmax=Math.max(1,...all.map(p=>p.x)),ymax=metric==='accuracy'?1:Math.max(.05,...all.map(p=>p.y))*1.08;
+ const sx=x=>left+x/xmax*(width-left-right),sy=y=>height-bottom-y/ymax*(height-top-bottom);const chart=svg('svg',{viewBox:'0 0 '+width+' '+height,role:'img','aria-label':section.title+' · '+metric+' recorded curve'});
+ for(let i=0;i<5;i++){const y=ymax*i/4;chart.append(svg('line',{x1:left,y1:sy(y),x2:width-right,y2:sy(y),stroke:'#d3dad9'}),svg('text',{x:left-10,y:sy(y)+4,'text-anchor':'end',fill:'#53636b','font-size':11},y.toFixed(2)));}
+ for(const x of [...new Set(all.map(p=>p.x))])chart.append(svg('text',{x:sx(x),y:height-bottom+19,'text-anchor':'middle',fill:'#53636b','font-size':11},String(x)));
+ chart.append(svg('text',{x:width/2,y:height-3,'text-anchor':'middle',fill:'#53636b','font-size':11},section.id==='prearrival'?'Feature tick':section.id==='probes'?'Disposable probe updates':'Wake checkpoint'));
+ let number=0;for(const [group,points]of groups){const dash=['','7 4','2 4','10 3 2 3'][number++%4];let segment=[];const flush=()=>{if(segment.length)chart.append(svg('polyline',{points:segment.map(p=>sx(p.x)+','+sy(p.y)).join(' '),fill:'none',stroke:'#285c87','stroke-width':2,'stroke-dasharray':dash}));segment=[];};for(const p of points){if(typeof p.x!=='number'||typeof p.y!=='number'){flush();continue;}segment.push(p);}flush();for(const p of points){if(typeof p.x!=='number'||typeof p.y!=='number')continue;const c=svg('circle',{cx:sx(p.x),cy:sy(p.y),r:3,fill:'#285c87'});c.append(svg('title',{},group+' · '+p.x+' · '+metric+' '+format(p.y)));chart.append(c);}}
+ host.append(chart,element('p',[...groups.keys()].map((g,i)=>g+' ('+['solid','dashed','dotted','dash-dot'][i%4]+')').join(' · '),'key'));
+}
+for(const section of data.sections){const link=element('a',section.title);link.href='#'+section.id;byId('navigation').append(link);const box=element('section');box.id=section.id;box.append(element('h2',section.title),element('p',section.note,'note'));
+ if(['prearrival','heldout','probes'].includes(section.id)){const host=element('div',undefined,'chart');box.append(host);chartHosts.push([host,section]);}
+ if(!section.rows.length)box.append(element('p','No recorded rows. See source for this run’s status.','empty'));
+ else{const scroll=element('div',undefined,'table-scroll');scroll.tabIndex=0;scroll.setAttribute('role','region');scroll.setAttribute('aria-label',section.title+' recorded values');const table=element('table');const head=element('tr');for(const title of section.columns)head.append(element('th',title));const thead=element('thead');thead.append(head);table.append(thead);const body=element('tbody');for(const row of section.rows){const tr=element('tr');for(const cell of row.cells){const td=element('td');td.append(cellView(cell));tr.append(td);}body.append(tr);}table.append(body);scroll.append(table);box.append(scroll);}
+ byId('sections').append(box);
+}
+function refresh(){for(const [host,section]of chartHosts)draw(host,section);}
+byId('metric').addEventListener('change',refresh);window.addEventListener('resize',refresh);refresh();
+</script>
+</body>
+</html>

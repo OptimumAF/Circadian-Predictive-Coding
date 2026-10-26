@@ -24,6 +24,8 @@ from src.app.coupled_attribution_summary import (
 from src.app.toy_execution_budget import ToyBudgetSession, ToyExecutionBudget
 from src.core.actor_ports import ForkableLearner
 from src.core.coupled_energy import Array, CoupledParameters
+from src.core.coupled_inference import CoupledInferencePolicy
+from src.core.coupled_learner_state import CoupledUpdatePolicy, copy_update_policy
 from src.core.coupled_predictive_coding import CoupledPredictiveCodingNetwork
 from src.core.coupled_circadian_predictive_coding import (
     CoupledCircadianConfig,
@@ -31,6 +33,10 @@ from src.core.coupled_circadian_predictive_coding import (
 )
 from src.core.local_pilot_budget import PilotRequest, PilotResources, validate_local_pilot_request
 from src.core.matched_backprop import MatchedBackpropNetwork
+from src.core.tracked_coupled_predictive_coding import (
+    TrackedCoupledPredictiveCodingNetwork,
+    TrackedCoupledCircadianPredictiveCodingNetwork,
+)
 from src.shared.process_memory import ProcessRssSampler
 
 PROTOCOL_ID = "coupled_stationary_recurring_pilot_v1"
@@ -69,34 +75,54 @@ def describe_protocol() -> dict[str, Any]:
     }
 
 
-def build_stream(stream: str) -> tuple[tuple[AttributionBatch, ...], tuple[AttributionBatch, ...]]:
+def build_stream(
+    stream: str, *, training_rng: int = 7301, heldout_rng: int = 9101
+) -> tuple[tuple[AttributionBatch, ...], tuple[AttributionBatch, ...]]:
+    """Build independently seeded training/final partitions with owned arrays.
+
+    Default seed IDs preserve historical rows exactly. Nondefault IDs identify
+    only their own partition's seed, so changing training leaves final data and
+    IDs unchanged. Callers must freeze new seeds before comparative execution.
+    """
     if stream not in STREAMS:
         raise ValueError("stream must be stationary or recurring")
+    for name, seed in (("training_rng", training_rng), ("heldout_rng", heldout_rng)):
+        if type(seed) is not int or not 0 <= seed < 2**32:
+            raise ValueError(f"{name} must be a native integer in 0..2**32-1")
+    if training_rng == heldout_rng:
+        raise ValueError("training_rng and heldout_rng must be distinct")
     phase_contexts = ("A", "A", "A") if stream == "stationary" else ("A", "B", "A")
-    train_rng, heldout_rng = np.random.default_rng(7301), np.random.default_rng(9101)
+    train_generator = np.random.default_rng(training_rng)
+    heldout_generator = np.random.default_rng(heldout_rng)
+    # Why: preserve old evidence IDs while distinguishing prospectively declared
+    # new data; neither partition's naming reveals the other partition's seed.
+    training_prefix = (
+        f"train-{stream}" if training_rng == 7301 else f"train-{stream}-rng{training_rng}"
+    )
+    heldout_prefix = "heldout" if heldout_rng == 9101 else f"heldout-rng{heldout_rng}"
     training = []
     for index in range(18):
         context = phase_contexts[index // 6]
-        features = train_rng.uniform(-1, 1, (8, 2))
+        features = train_generator.uniform(-1, 1, (8, 2))
         targets = (features[:, [CONTEXTS.index(context)]] >= 0).astype(np.float64)
         training.append(
             AttributionBatch(
                 "train",
                 context,
-                tuple(f"train-{stream}-{index}-{i}" for i in range(8)),
+                tuple(f"{training_prefix}-{index}-{i}" for i in range(8)),
                 features,
                 targets,
             )
         )
     heldout = []
     for context in CONTEXTS:
-        features = heldout_rng.uniform(-1, 1, (64, 2))
+        features = heldout_generator.uniform(-1, 1, (64, 2))
         targets = (features[:, [CONTEXTS.index(context)]] >= 0).astype(np.float64)
         heldout.append(
             AttributionBatch(
                 "final_test",
                 context,
-                tuple(f"heldout-{context}-{i}" for i in range(64)),
+                tuple(f"{heldout_prefix}-{context}-{i}" for i in range(64)),
                 features,
                 targets,
             )
@@ -105,24 +131,61 @@ def build_stream(stream: str) -> tuple[tuple[AttributionBatch, ...], tuple[Attri
 
 
 def build_learner(
-    method: str, initial: CoupledParameters
+    method: str,
+    initial: CoupledParameters,
+    *,
+    track_unit_history: bool = False,
+    inference_policy: CoupledInferencePolicy | None = None,
 ) -> ForkableLearner[Array, Array, Array, Any]:
+    if type(track_unit_history) is not bool:
+        raise ValueError("track_unit_history must be an exact boolean")
     if method not in METHODS:
         raise ValueError("method must be one of the four fixed pilot methods")
+    owned_policy = None
+    if inference_policy is not None:
+        if type(inference_policy) is not CoupledInferencePolicy:
+            raise ValueError("inference_policy must be an exact CoupledInferencePolicy")
+        if method == "bp":
+            raise ValueError("inference_policy is unavailable for backpropagation")
+        # Why: reject invalid settings before constructing a model, and keep
+        # caller-owned records separate from the learner's fixed update policy.
+        owned_policy = copy_update_policy(
+            CoupledUpdatePolicy(0.03, 4, 0.2, inference_policy)
+        ).inference_policy
     if method == "bp":
         return MatchedBackpropLearner(MatchedBackpropNetwork(initial), learning_rate=0.03)
     model: CoupledPredictiveCodingNetwork
     if method == "pc":
-        model = CoupledPredictiveCodingNetwork(2, (8, 8), 0)
+        pc_kind = (
+            TrackedCoupledPredictiveCodingNetwork
+            if track_unit_history
+            else CoupledPredictiveCodingNetwork
+        )
+        model = pc_kind(2, (8, 8), 0)
     else:
         config = (
             CoupledCircadianConfig.matched_pc_control()
             if method == "neutral_cpc"
             else CoupledCircadianConfig()
         )
-        model = CoupledCircadianPredictiveCodingNetwork(2, (8, 8), 0, config=config)
+        cpc_kind = (
+            TrackedCoupledCircadianPredictiveCodingNetwork
+            if track_unit_history
+            else CoupledCircadianPredictiveCodingNetwork
+        )
+        model = cpc_kind(2, (8, 8), 0, config=config)
     model.restore_parameters(initial)
-    return CoupledLearner(model, learning_rate=0.03, inference_steps=4, inference_learning_rate=0.2)
+    if owned_policy is None:
+        return CoupledLearner(
+            model, learning_rate=0.03, inference_steps=4, inference_learning_rate=0.2
+        )
+    return CoupledLearner(
+        model,
+        learning_rate=0.03,
+        inference_steps=4,
+        inference_learning_rate=0.2,
+        inference_policy=owned_policy,
+    )
 
 
 def _run_one(

@@ -1,0 +1,114 @@
+{
+  "protocol_id": "arrived_only_shift_observations_v1",
+  "classification": "exploratory_fixed_data_signal_engineering_smoke",
+  "methods": [
+    "bp",
+    "pc",
+    "neutral_cpc",
+    "gated_cpc"
+  ],
+  "streams": [
+    "stationary",
+    "recurring"
+  ],
+  "seeds": [
+    23
+  ],
+  "training_rng": 7301,
+  "final_rng": 9101,
+  "hidden_dims": [
+    8,
+    8
+  ],
+  "learning_rate": 0.03,
+  "inference_steps": 4,
+  "inference_learning_rate": 0.2,
+  "precisions": [
+    1.0,
+    1.0
+  ],
+  "active_cpc_config": {
+    "chemical_decay": 0.995,
+    "chemical_buildup_rate": 0.02,
+    "plasticity_sensitivity": 0.7,
+    "min_plasticity": 0.2
+  },
+  "neutral_cpc_config": {
+    "chemical_decay": 0.995,
+    "chemical_buildup_rate": 0.02,
+    "plasticity_sensitivity": 0.7,
+    "min_plasticity": 1.0
+  },
+  "training_batches": 18,
+  "batch_rows": 8,
+  "final_rows_per_context": 64,
+  "label_delay": 2,
+  "checkpoint_updates": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "policy": {
+    "reference_batches": 3,
+    "window_batches": 2,
+    "persistence_batches": 2,
+    "uncertainty_threshold": 0.05,
+    "feature_threshold": 0.25,
+    "residual_threshold": 0.05
+  },
+  "channels": [
+    "uncertainty",
+    "feature",
+    "residual"
+  ],
+  "uncertainty": "mean binary entropy / log(2); target-free prediction",
+  "feature": "raw input column means; mean absolute window/reference difference",
+  "residual": "mean absolute probability error; labels already arrived",
+  "reference": "first3 batches frozen; window2 post-reference batches; batch-weighted means",
+  "persistence": "strict threshold exceedance for2 consecutive windows; reset on nonexceedance",
+  "prediction_timing": "computed AFTER update k using copied parameters from k-1; not a live before-update trigger",
+  "score_release": "all benchmark final scoring after every observer; no feedback",
+  "comparison": "recurring states0/6/12/18 and receipts must match retained original pilot",
+  "contextual_annotations": "added after stream completion; not detector inputs",
+  "detection_delay": "first alert update minus first changed-phase update (7 or13); None if missed",
+  "limitations": "one seed/fixed data; overlapping windows not independent evidence; unchanged input distribution can hide concept-only shifts; no deployable efficacy/advantage claim",
+  "planned_work": {
+    "benchmark_updates": 144,
+    "training_row_exposures": 1152,
+    "observation_predictions": 144,
+    "final_score_forwards": 304,
+    "predict_coupled_calls": 448,
+    "detector_steps": 144,
+    "probe_updates": 0,
+    "svd_calls": 0,
+    "replay_examples": 0
+  },
+  "resources": {
+    "wall_seconds": 60.0,
+    "training_updates": 144,
+    "environment_steps": 0,
+    "cpu_threads": 1,
+    "process_memory_bytes": 268435456,
+    "replay_bytes": 0,
+    "model_download_bytes": 0,
+    "storage_bytes": 33554432,
+    "gpu_memory_bytes": 0
+  },
+  "stop_policy": "one invocation; preserve all failed/unreached rows; no retry or tuning"
+}

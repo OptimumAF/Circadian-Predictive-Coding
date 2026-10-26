@@ -6,7 +6,7 @@ Validate metadata before copying payloads. IO and native ownership stay outside.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields, replace
 from typing import Generic, TypeVar
 
 from src.core.experience import (
@@ -18,6 +18,7 @@ from src.core.experience import (
     require_tick,
 )
 from src.core.learner_ports import TrainingDiagnostic
+from src.core.categorical_training_diagnostic import CategoricalPCTrainingDiagnostic
 from src.core.data_erasure import ErasedExperience
 
 Features = TypeVar("Features")
@@ -96,8 +97,8 @@ def _validate_events(cursor: InboxCursor[Features, Targets]):
             raise ValueError("cursor source must be an exact Experience")
         replace(source)  # revalidate every declared metadata field without payload copy
         replace(source.permissions)
-        if source.role != "train" or not source.permissions.training:
-            raise ValueError("cursor sources require train-role training permission")
+        if source.role not in ("train", "probe_train") or not source.permissions.training:
+            raise ValueError("cursor sources require an authorized training role")
         if source.key in sources:
             raise ValueError("duplicate cursor source identity")
         sources[source.key] = source
@@ -105,12 +106,15 @@ def _validate_events(cursor: InboxCursor[Features, Targets]):
         if type(label) is not LabelArrival:
             raise ValueError("cursor label must be an exact LabelArrival")
         replace(label)
-        if label.role != "train":
-            raise ValueError("cursor labels require the train role")
+        if label.role not in ("train", "probe_train"):
+            raise ValueError("cursor labels require a training role")
         if label.key in labels or label.event_id in event_ids:
             raise ValueError("duplicate cursor label/event identity")
         labels[label.key] = label
         event_ids.add(label.event_id)
+    roles = {source.role for source in cursor.experiences} | {label.role for label in cursor.labels}
+    if len(roles) > 1:
+        raise ValueError("cursor training roles must be homogeneous")
     return sources, labels
 
 
@@ -171,8 +175,12 @@ def _validate_applied(cursor: InboxCursor[Features, Targets], sources, labels, e
         if receipt.applied_at < last_applied_tick:
             raise ValueError("applied cursor chronology moved backwards")
         last_applied_tick = receipt.applied_at
-        if type(receipt.diagnostic) is not TrainingDiagnostic:
+        if type(receipt.diagnostic) not in (TrainingDiagnostic, CategoricalPCTrainingDiagnostic):
             raise ValueError("applied cursor requires a native TrainingDiagnostic")
+        if type(receipt.diagnostic) is CategoricalPCTrainingDiagnostic and set(
+            vars(receipt.diagnostic)
+        ) != {field.name for field in fields(CategoricalPCTrainingDiagnostic)}:
+            raise ValueError("bounded cursor diagnostic requires its exact complete fields")
         replace(receipt.diagnostic)
     if cursor.completed_updates < len(cursor.applied) or (
         not cursor.stopped and cursor.completed_updates != len(cursor.applied)

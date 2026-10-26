@@ -19,12 +19,22 @@ from src.core.circadian_predictive_coding import (
     replay_sample_id,
 )
 from src.core.replay_retention import ReplayRetentionPolicy
-from src.core.shared_replay_schedule import SharedReplayBuffer, SharedReplaySelection
+from src.core.shared_replay_schedule import (
+    PartitionRetention,
+    ReplayAllocation,
+    ReplayRotationCursor,
+    SharedReplayBuffer,
+    SharedReplaySelection,
+)
 from src.infra.continual_roles import PhaseDecisionRoles
 
 
 MATCHED_REPLAY_SCHEDULE_PROTOCOL = "continual_matched_replay_schedule_v9"
 SHARED_REPLAY_SAMPLER = "newest_retained_v1"
+PARTITIONED_REPLAY_SCHEDULE_PROTOCOL = "continual_partitioned_replay_schedule_v1"
+PARTITIONED_REPLAY_SAMPLER = "recent_reservoir_interleave_v1"
+ROTATING_REPLAY_SCHEDULE_PROTOCOL = "continual_rotating_replay_schedule_v1"
+ROTATING_REPLAY_SAMPLER = "recent_reservoir_rotating_interleave_v1"
 
 
 @dataclass(frozen=True)
@@ -38,6 +48,32 @@ class MatchedReplayScheduleManifest:
     pc_replay_inference_steps: int
     sampling_policy: str = SHARED_REPLAY_SAMPLER
     protocol_id: str = MATCHED_REPLAY_SCHEDULE_PROTOCOL
+
+
+@dataclass(frozen=True)
+class _PartitionedScheduleConfiguration:
+    manifest: MatchedReplayScheduleManifest
+    allocation: ReplayAllocation
+    protocol_id: str = PARTITIONED_REPLAY_SCHEDULE_PROTOCOL
+    sampling_policy: str = PARTITIONED_REPLAY_SAMPLER
+
+
+def _schedule_digest(
+    manifest: MatchedReplayScheduleManifest,
+    allocation: ReplayAllocation | None,
+    rotate_reservoir: bool = False,
+) -> str:
+    # Keep the original v9 digest exact; opt-in memory/selection must bind separately.
+    configuration: MatchedReplayScheduleManifest | _PartitionedScheduleConfiguration = manifest
+    if allocation is not None:
+        configuration = (
+            _PartitionedScheduleConfiguration(
+                manifest, allocation, ROTATING_REPLAY_SCHEDULE_PROTOCOL, ROTATING_REPLAY_SAMPLER
+            )
+            if rotate_reservoir
+            else _PartitionedScheduleConfiguration(manifest, allocation)
+        )
+    return continual_config_digest(configuration, manifest.seeds)
 
 
 @dataclass(frozen=True)
@@ -105,21 +141,37 @@ def _validate_manifest(manifest: MatchedReplayScheduleManifest) -> None:
 class MatchedReplayScheduleSession:
     """Advance A then B only when the caller declares one wake epoch done."""
 
-    def __init__(self, manifest: MatchedReplayScheduleManifest, *, seed: int) -> None:
+    def __init__(
+        self,
+        manifest: MatchedReplayScheduleManifest,
+        *,
+        seed: int,
+        allocation: ReplayAllocation | None = None,
+        rotate_reservoir: bool = False,
+    ) -> None:
         _validate_manifest(manifest)
+        if type(rotate_reservoir) is not bool or (rotate_reservoir and allocation is None):
+            raise ValueError("reservoir rotation requires boolean mode and an allocation")
         if type(seed) is not int or seed not in manifest.seeds:
             raise ValueError("matched replay schedule seed is outside the manifest")
         training = manifest.arrived.training
-        self._digest = continual_config_digest(manifest, manifest.seeds)
+        budget = ReplayRetentionBudget(training.replay_max_examples, training.replay_max_bytes)
+        # Invalid opt-in geometry must refuse before any source data are opened.
+        allocated = (
+            None
+            if allocation is None
+            else SharedReplayBuffer(2, budget, manifest.policy, allocation=allocation)
+        )
+        self._allocation = None if allocated is None else allocated.allocation
+        self._rotate_reservoir = rotate_reservoir
+        self._digest = _schedule_digest(manifest, self._allocation, rotate_reservoir)
         self._seed = seed
         self.phase = "a"
         self.completed_epochs = 0
         self._roles: PhaseDecisionRoles = arrived._build_phase_a_roles(manifest.arrived, seed)
         self._train_digest = _train_content_digest(self._roles)
-        self._buffer = SharedReplayBuffer(
-            2,
-            ReplayRetentionBudget(training.replay_max_examples, training.replay_max_bytes),
-            manifest.policy,
+        self._buffer = (
+            allocated if allocated is not None else SharedReplayBuffer(2, budget, manifest.policy)
         )
 
     @property
@@ -133,6 +185,28 @@ class MatchedReplayScheduleSession:
     @property
     def retention(self) -> ReplayRetentionSnapshot:
         return self._buffer.retention
+
+    @property
+    def allocation(self) -> ReplayAllocation | None:
+        return self._buffer.allocation
+
+    @property
+    def partition_retention(self) -> PartitionRetention | None:
+        return self._buffer.partition_retention
+
+    @property
+    def rotation_cursor(self) -> ReplayRotationCursor:
+        return self._buffer.rotation_cursor
+
+    @property
+    def protocol_id(self) -> str:
+        if self._rotate_reservoir:
+            return ROTATING_REPLAY_SCHEDULE_PROTOCOL
+        return (
+            MATCHED_REPLAY_SCHEDULE_PROTOCOL
+            if self._allocation is None
+            else PARTITIONED_REPLAY_SCHEDULE_PROTOCOL
+        )
 
     def arrive_phase_b(self, manifest: MatchedReplayScheduleManifest) -> None:
         """Expose B training only after all declared A wake epochs complete."""
@@ -169,7 +243,12 @@ class MatchedReplayScheduleSession:
         )
         if self.completed_epochs % interval:
             return None
-        selection = self._buffer.select_recent(manifest.replay_updates_per_sleep)
+        if self._rotate_reservoir:
+            selection = self._buffer.select_partitioned_rotating(manifest.replay_updates_per_sleep)
+        elif self._allocation is None:
+            selection = self._buffer.select_recent(manifest.replay_updates_per_sleep)
+        else:
+            selection = self._buffer.select_partitioned(manifest.replay_updates_per_sleep)
         return MatchedReplayBoundary(
             phase=self.phase,
             epoch=self.completed_epochs,
@@ -182,7 +261,7 @@ class MatchedReplayScheduleSession:
 
     def _check_identity(self, manifest: MatchedReplayScheduleManifest) -> None:
         _validate_manifest(manifest)
-        if continual_config_digest(manifest, manifest.seeds) != self._digest:
+        if _schedule_digest(manifest, self._allocation, self._rotate_reservoir) != self._digest:
             raise ValueError("incompatible matched replay schedule manifest")
 
 

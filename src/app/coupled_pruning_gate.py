@@ -9,7 +9,7 @@ from dataclasses import dataclass, replace
 
 import numpy as np
 
-from src.app.coupled_attribution import _probability_scores
+from src.core.binary_probability_scores import probability_scores as _probability_scores
 from src.app.linear_scaling_measurement import ScalingBatch, _copy_batch, _validate_batch
 from src.app.toy_execution_budget import ToyBudgetSession
 from src.core.coupled_circadian_predictive_coding import CoupledCircadianPredictiveCodingNetwork

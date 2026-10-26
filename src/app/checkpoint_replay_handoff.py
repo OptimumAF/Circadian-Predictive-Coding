@@ -21,6 +21,8 @@ class _ReplayTransition:
     untrained_inbox_state: tuple[dict[tuple[str, str], Any], dict[tuple[str, str], Any]] | None = (
         None
     )
+    retained_publication: tuple[Any, tuple[dict[int, Any], dict[int, Any]]] | None = None
+    capture_update_binding: tuple[Any, Any] | None = None
 
 
 _CURRENT: ContextVar[Any] = ContextVar("original_checkpoint_replay_handoff", default=None)
@@ -146,6 +148,16 @@ class _PublicationLease:
                 )
             ):
                 raise ValueError("checkpoint handoff requires a prepared exact replay transition")
+            if transition.retained_publication is not None:
+                from src.app.replay_restored_capture import require_prepared_publication
+
+                require_prepared_publication(transition.retained_publication, scope.coordinator)
+            if transition.capture_update_binding is not None:
+                from src.app.replay_publication_updates import require_prepared_binding
+
+                require_prepared_binding(
+                    transition.capture_update_binding, scope.coordinator, transition.ledger
+                )
             return transition
         except BaseException as error:
             try:
@@ -196,3 +208,13 @@ def commit_replay_transition(transition: _ReplayTransition) -> None:
         transition.ledger._inbox_origins._untrained_records = transition.untrained_inbox_state[0]
         transition.ledger._inbox_origins._untrained_sealed = transition.untrained_inbox_state[1]
         transition.ledger._inbox_origins._untrained_storage = transition.untrained_inbox_state
+    if transition.retained_publication is not None:
+        manager, storage = transition.retained_publication
+        manager._publications = storage[0]
+        manager._publication_sealed = storage[1]
+        manager._publication_storage = storage
+    if transition.capture_update_binding is not None:
+        manager, binding = transition.capture_update_binding
+        transition.ledger._capture_update_binding = binding
+        transition.ledger._original_capture_update_binding = binding
+        manager._update_binding = binding

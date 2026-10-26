@@ -202,6 +202,16 @@ class CoupledCircadianPredictiveCodingNetwork(CoupledPredictiveCodingNetwork):
         chemicals, gates = self._prospective_chemistry(latents)
         gradients = _gated_gradients(evaluation.parameter_gradients, gates)
         candidate = self._prepare_parameters(gradients, rate, X, y, latents)
+        self._publish_wake_state(candidate, chemicals, gates, evaluation.parameter_gradients)
+        return CoupledTrainResult(evaluation.energy, inference=diagnostics)
+
+    def _publish_wake_state(
+        self,
+        candidate: CoupledParameters,
+        chemicals: Array,
+        gates: Array,
+        raw_gradients: CoupledParameters,
+    ) -> None:
         # No committed field changes before every chemistry/gate/parameter/energy
         # check succeeds. Single-owner callers observe one completed wake state.
         self._parameters, self._chemical_state, self._plasticity_state, self._wake_updates = (
@@ -210,4 +220,3 @@ class CoupledCircadianPredictiveCodingNetwork(CoupledPredictiveCodingNetwork):
             gates,
             self._wake_updates + 1,
         )
-        return CoupledTrainResult(evaluation.energy, inference=diagnostics)

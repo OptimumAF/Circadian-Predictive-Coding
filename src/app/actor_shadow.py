@@ -30,6 +30,7 @@ from src.core.experience import (
     Experience,
     LabelArrival,
     require_identifier,
+    require_training_role,
 )
 from src.core.consolidation_cursor import ConsolidationCursor
 
@@ -92,8 +93,37 @@ class StableActor(Generic[Features, Targets, Prediction, State]):
                 self._payload_registry._lifecycle._require_access()
             return VersionedState(self._version, deepcopy(self._learner.snapshot_state()))
 
+    def snapshot_state_if_idle(self) -> VersionedState[State]:
+        """Refuse contention instead of waiting while another owner is leased."""
+        with self._payload_exclusive():
+            if self._payload_registry._lifecycle is not None:
+                self._payload_registry._lifecycle._require_access()
+            return VersionedState(self._version, deepcopy(self._learner.snapshot_state()))
+
 
 class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
+    # Preserve the ordinary TRAIN owner's exact supported capture schema/bytes;
+    # explicit probe scopes add fields and remain ineligible for managed capture.
+    @property
+    def _training_role(self) -> str:
+        return vars(self).get("_training_role", "train")
+
+    @_training_role.setter
+    def _training_role(self, value: str) -> None:
+        if type(value) is str and value == "train" and "_training_role" not in vars(self):
+            return
+        vars(self)["_training_role"] = value
+
+    @property
+    def _original_training_role(self) -> str:
+        return vars(self).get("_original_training_role", "train")
+
+    @_original_training_role.setter
+    def _original_training_role(self, value: str) -> None:
+        if type(value) is str and value == "train" and "_original_training_role" not in vars(self):
+            return
+        vars(self)["_original_training_role"] = value
+
     def __init__(
         self,
         learner: ForkableLearner[Features, Targets, Prediction, State],
@@ -105,7 +135,19 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
         max_experiences: int = 1024,
         max_consolidations: int = 8,
         actor: StableActor[Features, Targets, Prediction, State] | None = None,
+        training_role: str = "train",
     ) -> None:
+        self._training_role = self._original_training_role = require_training_role(training_role)
+        if self._training_role == "probe_train" and (
+            type(max_experiences) is not int
+            or not 1 <= max_experiences <= 16
+            or type(budget) is not ToyBudgetSession
+            or budget.budget.max_training_updates != max_experiences
+            or budget.updates_completed != 0
+            or budget.replay_examples_completed != 0
+            or actor is not None
+        ):
+            raise ValueError("probe runtime requires a fresh bounded independent owner")
         self._payload_ready = False
         self._payload_lineage = object()
         require_identifier(actor_version, "actor_version")
@@ -131,6 +173,7 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
             budget=budget,
             learner_version=candidate_version,
             max_experiences=max_experiences,
+            training_role=self._training_role,
         )
         self._budget, self._candidate_version = budget, candidate_version
         self._consolidation_limit = max_consolidations
@@ -177,6 +220,18 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
             acquired_gate.release()
 
     def _require_open(self) -> None:
+        if (
+            require_training_role(self._training_role) != self._original_training_role
+            or self._inbox._training_role != self._original_training_role
+            or self._inbox._original_training_role != self._original_training_role
+        ):
+            raise ValueError("candidate requires its original training role")
+        self._inbox._require_training_scope()
+        if (
+            self._training_role == "probe_train"
+            and self._actor._payload_registry._lifecycle is not None
+        ):
+            raise ValueError("probe runtime does not support managed lifecycle owners")
         if self._retired:
             raise ValueError("candidate owner is retired after checkpoint handoff")
         if self._stopped:
@@ -202,6 +257,8 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
         max_updates: int | None = None,
         before_each_update: Callable[[], ContextManager[bool]] | None = None,
         native_observer: NativeUpdateObserver[Features, Targets] | None = None,
+        learning_rate_multiplier: float = 1.0,
+        gate_setting: str = "unchanged",
     ) -> tuple[AppliedExperience, ...]:
         with self._exclusive():
             self._require_open()
@@ -211,6 +268,8 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
                     max_updates=max_updates,
                     before_each_update=before_each_update,
                     native_observer=native_observer,
+                    learning_rate_multiplier=learning_rate_multiplier,
+                    gate_setting=gate_setting,
                 )
             finally:
                 self._stopped = self._inbox.stopped
@@ -219,6 +278,63 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
     def applied_updates(self) -> tuple[AppliedExperience, ...]:
         with self._exclusive():
             return self._inbox.applied_updates
+
+    @property
+    def acknowledged_experiences(self):
+        with self._exclusive():
+            return self._inbox.acknowledged_experiences
+
+    def acknowledge_ready(self, key, *, actor_version, learner_version, wake_updates, verify):
+        """Verify current detached state and arrived TRAIN under one exclusive lease.
+
+        Trusted verifier receives (candidate, source, label); it must be read-only.
+        No prior scalar diagnostic authorizes consumption. Managed/probe/sleep
+        owners are unsupported; their capture and consent contracts stay intact.
+        """
+        require_identifier(actor_version, "actor_version")
+        require_identifier(learner_version, "learner_version")
+        if not callable(verify) or type(wake_updates) is not int:
+            raise ValueError("acknowledgement requires a verifier and exact update count")
+        with self._exclusive():
+            self._require_open()
+            if (
+                self._training_role != "train"
+                or self._actor._payload_registry._lifecycle is not None
+                or self._consolidation_limit != 0
+                or actor_version != self._base_actor_version
+                or actor_version != self._actor.version
+                or learner_version != self._candidate_version
+                or wake_updates != self._budget.updates_completed
+            ):
+                raise ValueError("acknowledgement requires the current unmanaged TRAIN candidate")
+            self._budget.before_final()
+            self._revision += 1
+            revision = self._revision
+
+            def verify_current(source, label):
+                result = verify(self._snapshot_candidate(), source, label)
+                self._require_open()
+                # Why: the candidate lease alone does not pin the serving actor
+                # across a verifier callback or a concurrent actor swap.
+                if (
+                    actor_version != self._base_actor_version
+                    or actor_version != self._actor.version
+                    or learner_version != self._candidate_version
+                    or wake_updates != self._budget.updates_completed
+                    or revision != self._revision
+                    or self._actor._payload_registry._lifecycle is not None
+                ):
+                    raise ValueError(
+                        "acknowledgement candidate or serving source changed during proof"
+                    )
+                return result
+
+            return self._inbox._acknowledge_ready(
+                key,
+                verify_current,
+                actor_version=actor_version,
+                revision=self._revision,
+            )
 
     @property
     def applied_consolidations(self) -> tuple[AppliedConsolidation, ...]:
@@ -308,6 +424,8 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
         Publication and old-owner retirement belong to the checkpoint controller.
         """
         prepared = object.__new__(type(self))
+        prepared._training_role = self._training_role
+        prepared._original_training_role = self._original_training_role
         prepared._actor, prepared._base_actor_version = self._actor, self._base_actor_version
         prepared._candidate, prepared._candidate_version = candidate, self._candidate_version
         prepared._inbox = self._inbox._materialize_cursor(candidate, cursor)

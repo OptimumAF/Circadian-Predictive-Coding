@@ -69,9 +69,28 @@ def _record_arrivals(
         )
 
 
+def _read_native_units(learner: CircadianLearner) -> tuple[dict[str, object], float]:
+    from src.adapters.native_unit_diagnostics import read_legacy_unit_diagnostics
+
+    started = monotonic()
+    observation = asdict(read_legacy_unit_diagnostics(learner._model))
+    return observation, monotonic() - started
+
+
 def _run_stream(
-    method: str, learner: ForkableLearner[Array, Array, Array, State]
+    method: str,
+    learner: ForkableLearner[Array, Array, Array, State],
+    *,
+    diagnose_units: bool = False,
 ) -> dict[str, object]:
+    if type(diagnose_units) is not bool:
+        raise ValueError("diagnose_units must be an exact boolean")
+    if diagnose_units and type(learner) is not CircadianLearner:
+        raise ValueError("native unit diagnostics require the legacy circadian adapter")
+    initial_units = None
+    diagnostic_seconds = 0.0
+    if diagnose_units:
+        initial_units, diagnostic_seconds = _read_native_units(learner)
     features = np.array([[-0.8, -0.2], [-0.2, 0.7], [0.4, -0.5], [0.8, 0.3]])
     targets = np.array([[0.0], [1.0], [1.0], [0.0]])
     clock = LogicalClock()
@@ -124,6 +143,10 @@ def _run_stream(
         "final_candidate_predictions": learner.predict(features).tolist(),
         "diagnostics": [asdict(item.diagnostic) for item in runtime.applied_updates],
     }
+    if diagnose_units:
+        final_units, elapsed = _read_native_units(learner)
+        report["native_unit_diagnostics"] = dict(initial=initial_units, final=final_units)
+        report["native_unit_diagnostic_seconds"] = diagnostic_seconds + elapsed
     if isinstance(candidate.state, CoupledSnapshot):
         wake = candidate.state.wake_state
         report["native_adaptation"] = (
@@ -138,8 +161,10 @@ def _run_stream(
     return report
 
 
-def run_demo(seed: int = 23) -> dict[str, object]:
-    """Run the same six ticks and four native updates for both owned adapters."""
+def run_demo(seed: int = 23, *, include_unit_diagnostics: bool = False) -> dict[str, object]:
+    """Run the same stream, optionally observing existing native unit histories."""
+    if type(include_unit_diagnostics) is not bool:
+        raise ValueError("include_unit_diagnostics must be an exact boolean")
     if type(seed) is not int or not 0 <= seed <= 2**32 - 1:
         raise ValueError("seed must be an integer between 0 and 4294967295")
     return {
@@ -169,6 +194,7 @@ def run_demo(seed: int = 23) -> dict[str, object]:
                     inference_steps=2,
                     inference_learning_rate=0.2,
                 ),
+                diagnose_units=include_unit_diagnostics,
             ),
         ],
     }

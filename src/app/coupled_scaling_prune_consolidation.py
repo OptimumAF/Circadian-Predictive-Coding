@@ -236,7 +236,10 @@ class CoupledScalingPruneConsolidator:
         budget: ToyBudgetSession,
         inference_steps: int,
         inference_learning_rate: float,
+        retain_decision: bool = False,
     ) -> None:
+        if type(retain_decision) is not bool:
+            raise ValueError("retain_decision must be an exact boolean")
         if (
             type(removed_units) is not tuple
             or not 1 <= len(removed_units) <= 16
@@ -258,10 +261,18 @@ class CoupledScalingPruneConsolidator:
             limits.max_inferred_energy_increase,
         )
         self._budget, self._steps = budget, inference_steps
+        self._retain_decision = retain_decision
+        self._last_decision: CoupledScalingPruneDecision | None = None
+
+    @property
+    def last_decision(self) -> CoupledScalingPruneDecision | None:
+        """Owned last gate evidence, which does not attest runtime publication."""
+        return None if self._last_decision is None else _copy_decision(self._last_decision)
 
     def __call__(
         self, state: CoupledScalingTopologyState
     ) -> ConsolidatedState[CoupledScalingTopologyState]:
+        self._last_decision = None
         captured = copy_coupled_scaling_topology(state)
         if len(captured.prune_lineage) >= 64:
             raise ValueError("raw topology prune lineage capacity exhausted")
@@ -285,6 +296,10 @@ class CoupledScalingPruneConsolidator:
         )
         decision = _copy_decision(decision)
         _validate_evidence(decision, self._probes, self._limits, self._steps)
+        if self._retain_decision:
+            # Opt-in evidence is bounded to the last decision. Defaults retain
+            # no extra raw-state copy; an accepted gate is not a publication.
+            self._last_decision = _copy_decision(decision)
         if decision.status != "accepted":
             if decision.status not in ("rejected", "failed") or not _same_raw(
                 decision.state, captured.raw_state

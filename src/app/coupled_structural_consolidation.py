@@ -10,6 +10,7 @@ import numpy as np
 
 from src.app.coupled_pruning_gate import CoupledPruneLimits
 from src.app.coupled_scaling_prune_consolidation import CoupledScalingPruneConsolidator
+from src.app.coupled_scaling_pruning_gate import CoupledScalingPruneDecision
 from src.app.linear_scaling_measurement import ScalingBatch
 from src.app.toy_execution_budget import ToyBudgetSession
 from src.core.actor_ports import ConsolidatedState
@@ -179,7 +180,10 @@ class CoupledScalingStructuralPruneConsolidator:
         budget: ToyBudgetSession,
         inference_steps: int,
         inference_learning_rate: float,
+        retain_decision: bool = False,
     ) -> None:
+        if type(retain_decision) is not bool:
+            raise ValueError("retain_decision must be an exact boolean")
         self._prune = CoupledScalingPruneConsolidator(
             removed_units,
             probes,
@@ -187,10 +191,19 @@ class CoupledScalingStructuralPruneConsolidator:
             budget=budget,
             inference_steps=inference_steps,
             inference_learning_rate=inference_learning_rate,
+            **({"retain_decision": True} if retain_decision else {}),
         )
         self._removed = tuple(i for i in removed_units)
 
+    @property
+    def last_decision(self) -> CoupledScalingPruneDecision | None:
+        """Delegate owned gate evidence; publication remains runtime-owned."""
+        return self._prune.last_decision
+
     def __call__(self, state: CoupledStructuralState) -> ConsolidatedState[CoupledStructuralState]:
+        # Clear before the structural preflight too: stale evidence must never
+        # describe a later call that failed before reaching the inner gate.
+        self._prune._last_decision = None
         captured = _capture(state)
         lineage = CoupledScalingPruneLineage(1, captured.raw_state.config, self._removed)
         expected = CoupledStructuralTransition("prune", lineage)
