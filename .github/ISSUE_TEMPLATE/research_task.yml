@@ -1,0 +1,43 @@
+name: Research or implementation task
+description: Track a bounded Circadian increment and agent progress
+title: "<stable task ID> — <concrete outcome>"
+body:
+  - type: markdown
+    attributes:
+      value: "Link the parent tracker (#18) and update progress in issue comments. Preserve scientific criteria, budgets and negative results."
+  - type: textarea
+    id: scope
+    attributes:
+      label: Requirement and scope
+      description: Include stable task IDs, affected boundaries/files, non-goals and why this increment is useful.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Parent and dependencies
+      description: Link parent/related issues, required evidence and any blocker or unblock condition.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Copy complete original criteria when splitting work; distinguish software, native and scientific claims.
+      value: "- [ ] "
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation and resource limits
+      description: State meaningful checks and any frozen data, seeds, metrics, budgets, failure policy and evaluation isolation before execution.
+    validations:
+      required: true
+  - type: textarea
+    id: handoff
+    attributes:
+      label: Starting status and next action
+      description: Identify owner/chat, current evidence and one precise next action. Add progress, failures and session handoff in comments.
+    validations:
+      required: true

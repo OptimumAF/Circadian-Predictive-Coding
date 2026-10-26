@@ -9,6 +9,9 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
+/build/
+/dist/
+/*.egg-info/
 data/
 /artifacts/runs/
 benchmark_multiseed_*.json
@@ -18,3 +21,7 @@ benchmark_multiseed_*_per_seed.csv
 benchmark_*_smoke.json
 benchmark_*_smoke.csv
 benchmark_*_smoke_*.csv
+
+# Local browser captures are retained outside source control.
+.playwright-cli/
+/output/playwright/

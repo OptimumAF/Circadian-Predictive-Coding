@@ -1,0 +1,33 @@
+include LICENSE
+include THIRD_PARTY_NOTICES.md
+include docs/native-memory-setup.md
+include docs/continuous-comparison-inspector.md
+include docs/portable-continuous-comparison.md
+include docs/portable-ticket-examples.md
+include docs/ticket-workflow-inspector.md
+include docs/clm-probe-inspector.md
+include requirements-memory-demo.txt
+include docs/taskspace-memory-demo.md
+recursive-include src *.py *.html
+recursive-include scripts *.py
+recursive-include examples/taskspace_memory *.py *.json *.md
+recursive-include examples/continuous_comparison *.py *.json *.md
+recursive-include examples/ticket_workflow *.py *.json *.md
+exclude README.md
+prune tests
+prune artifacts
+global-exclude __pycache__ *.py[cod]
+
+recursive-include examples/minigrid_affine_train *.py *.json *.md
+include docs/portable-affine-workflow.md
+include docs/affine-workflow-inspector.md
+include docs/affine-clean-install.md
+include docs/affine-fresh-task-games.md
+include docs/affine-private-rehearsal.md
+include docs/affine-rehearsal-return-games.md
+include docs/portable-affine-adaptation.md
+include docs/private-affine-inspector.md
+include docs/recurring-train-catalogue.md
+include docs/ordinary-fourth-task.md
+include docs/public-cue-neural-baseline.md
+include docs/heldout-affine-games.md

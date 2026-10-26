@@ -1,3 +1,57 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "circadian-predictive-coding"
+version = "0.1.0.dev0"
+description = "Bounded continual-learning experiments and an offline CPU memory demo"
+readme = "docs/taskspace-memory-demo.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+dependencies = ["numpy>=1.26.4,<2.5"]
+
+# Why: installed game users cannot rely on a checkout requirements file.
+# Keep these exact optional pins aligned with requirements-minigrid.txt.
+[project.optional-dependencies]
+minigrid = [
+  "minigrid==3.1.0",
+  "gymnasium==1.2.3",
+  "pygame-ce==2.5.7",
+  "cloudpickle==3.1.2",
+  "Farama-Notifications==0.0.6",
+]
+
+[project.scripts]
+circadian-affine-game = "scripts.run_minigrid_linear_fit_control:main"
+circadian-memory-demo = "scripts.run_taskspace_memory_demo:main"
+
+[tool.setuptools]
+packages = [
+  "src", "src.adapters", "src.app", "src.config", "src.core", "src.infra", "src.shared",
+  "scripts", "src.infra.taskspace_demo_data", "src.infra.continuous_comparison_data",
+  "src.infra.ticket_workflow_data",
+  "src.infra.context_head_data", "src.infra.minigrid_affine_data",
+]
+include-package-data = false
+
+[tool.setuptools.package-dir]
+"src.infra.taskspace_demo_data" = "examples/taskspace_memory"
+"src.infra.continuous_comparison_data" = "examples/continuous_comparison"
+"src.infra.ticket_workflow_data" = "examples/ticket_workflow"
+"src.infra.context_head_data" = "examples/context_head_source"
+
+"src.infra.minigrid_affine_data" = "examples/minigrid_affine_train"
+
+[tool.setuptools.package-data]
+"src.infra.taskspace_demo_data" = ["episodes.json", "README.md"]
+"src.infra.continuous_comparison_data" = ["comparison-summary.json", "controls.json", "README.md"]
+"src.infra.ticket_workflow_data" = ["bp.json", "pc.json", "neutral_cpc.json", "gated_cpc.json", "README.md"]
+"src.infra.context_head_data" = ["source.json", "README.md"]
+"src.infra.minigrid_affine_data" = ["episodes.json", "README.md"]
+"src.infra" = ["*.html"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

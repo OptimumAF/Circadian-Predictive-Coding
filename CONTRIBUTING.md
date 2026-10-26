@@ -37,7 +37,8 @@ clean-install checks separately and avoid upgrades during a benchmark campaign.
 
 ## Branch And PR Workflow
 
-1. Create a focused branch from `main`/`master` (coding-agent branches use `codex/`).
+1. Read or create the owning [GitHub issue](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/18),
+   then create a focused branch from `main`/`master` (coding-agent branches use `codex/`).
 2. Keep scope narrow and architecture-consistent.
 3. Add or update tests for behavior changes.
 4. Update docs for user-facing changes.
@@ -62,7 +63,7 @@ platform targets (`--platform win32` and `--platform linux`) and the appropriate
 platform tests. Unsupported-platform skips must remain visible; they do not count
 as required CPU coverage. Workflow definitions and focused local passes are not
 evidence that the complete baseline or current remote jobs passed. Record exact
-source/environment, commands, outcomes and skips in the development log.
+source/environment, commands, outcomes and skips in the owning GitHub issue.
 
 Keep the checkout and Git identity stable during provenance-sensitive runs: the
 v14 source digest includes tracked diffs and nonignored untracked files, including
@@ -100,12 +101,14 @@ When behavior changes:
 - add/update ADRs for major decisions in `docs/adr/`
 - add an entry in `CHANGELOG.md`
 
-Use [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and
-[docs/development-log.md](docs/development-log.md) for task acceptance and handoff.
-Check a task only after its complete criteria pass and evidence is recorded. Keep
-blocked/deferred work unchecked with an exact next action. Record task IDs,
-commands/outcomes, skipped tests, artifacts, plan amendments, blockers and the
-next action at session end. Preserve original criteria when splitting work.
+Use [GitHub issues](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/18)
+for task acceptance, progress and handoff; follow [the workflow](docs/github-issue-tracking.md).
+Post start, meaningful milestone, failure/blocker and session-end comments.
+Close a task only after its complete criteria pass and evidence is recorded.
+Keep blocked/deferred criteria open with an exact next action. Record task IDs,
+commands/outcomes, skipped tests, artifacts/costs, scope amendments and blockers.
+Preserve original criteria when splitting work. The plans and development log
+retain historical evidence; stop adding duplicate live status to them.
 
 Portable exact boundary checks and recorded-environment reproduction are separate
 claims. See [reproducibility scope](docs/reproducibility-scope.md) and
