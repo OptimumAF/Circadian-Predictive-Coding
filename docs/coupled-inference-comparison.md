@@ -1,5 +1,17 @@
 # Allocated-time coupled inference comparison
 
+## Accepted engineering-preset comparison, 2026-10-17
+
+The [new small report](reports/engineering-preset-comparison-20261017.md) uses
+the existing timed application with the original10ms/11ms allocation and fixed
+baseline; only adaptive policy becomes the pre-existing min2/tol1 engineering
+preset. All six cases qualify,88updates/1408rows, with full original tensors,
+diagnostics/probabilities and measured instrumentation overhead. R1.5/b original
+comparison criteria are accepted. Paired BCE mean−.0148850 has an interval
+crossing0: no conclusive quality, general speed or circadian benefit.
+Both earlier protocols/failures below remain unchanged. This stage is SPENT;
+the saved result does not authorize a retry or another timing variant.
+
 ## Opt-in granularity-aware protocol
 
 ```powershell

@@ -1,5 +1,140 @@
 # Coupled candidate checkpoint handoff
 
+
+## Erasure failure and terminal retry
+
+```powershell
+python -m scripts.run_coupled_candidate_handoff --describe --cleanup-failure
+python -m scripts.run_coupled_candidate_handoff --run --cleanup-failure
+```
+
+This deterministic manual-poll control binds a one-shot trusted erasure fault at
+lifecycle construction. The failed cleanup has already revoked records and
+invalidated checkpoint/rollback tokens; candidates stop while owned inbox/cache/
+metadata payloads remain. Public access stays closed. Retrying existing
+`finish_cleanup()` clears those references without native replay or renewed limits.
+The driver retains its failed state and RuntimeError; candidates remain stopped.
+
+Owned bytes512->368 on pending checkpoint invalidation, then0 on cleanup, while
+656 remains charged. Caller aliases are outside this ledger. Existing guards
+report lifecycle failure, candidate stopped/retired state, or stale tokens in their
+actual order; terminal driver refusal applies after lifecycle failure clears.
+See ADR-0300 and `artifacts/runs/coupled-cleanup-failure-20261015/` for prospective
+controls and evidence. This mode starts no worker and claims no asynchronous
+failure latency, scientific benefit, unlearning or process recovery.
+
+
+Validation:71 focused cases passed without actual native work; scoped lint,
+formatting and Windows/Linux type checks and independent source/actual review
+accepted after a recorded negative-test annotation repair. One controller passed
+four declared six-case native modes; the six intentional boundary-error records
+are retained. Retry preserved failed-driver/stopped-candidate state and all
+learned parameters/receipts while owned bytes512->368->0 and656 stayed charged.
+Three earlier modes preserved full semantics. See stage RESULTS.md for exact
+commands, limits, original static failure and complete retained evidence.
+
+## Busy committed-serving shutdown
+
+```powershell
+python -m scripts.run_coupled_candidate_handoff --describe --busy-serving-cleanup
+python -m scripts.run_coupled_candidate_handoff --run --busy-serving-cleanup
+```
+
+This explicit control holds a candidate lease while stopping the original worker.
+A joined worker may still report unfinished cleanup. Public serving, checkpoint
+restoration and rollback remain closed while retained payloads await cleanup.
+After releasing the holder, existing `finish_cleanup()` clears both generations
+and invalidates the receipt. No replacement worker, native replay or allowance
+renewal is involved; the same 656-byte charge remains spent.
+
+Callers must distinguish worker shutdown from completed cleanup. Manual terminal
+cleanup is reported explicitly; existing automatic-expiry modes remain available.
+See ADR-0299 and `artifacts/runs/coupled-busy-serving-cleanup-20261015/` for the
+prospective limits and validation evidence. Physical timing, caller-owned copies,
+unlearning and process recovery remain outside this fixed local control.
+
+Validation:51 focused cases passed without actual native work; scoped Ruff,
+formatting and Windows/Linux mypy and independent source/actual review accepted.
+One cumulative controller passed all three declared six-case native modes. In each
+busy case the worker joined with512 bytes retained and two busy attempts; one
+manual cleanup purge cleared owned raw references, yielding three attempts and
+generation2 while656 bytes remained charged. Original native state and receipts
+persisted; both earlier modes preserved their complete accepted semantics.
+
+## Committed serving expiry and rollback
+
+```powershell
+python -m scripts.run_coupled_candidate_handoff --describe --committed-serving-expiry
+python -m scripts.run_coupled_candidate_handoff --run --committed-serving-expiry
+```
+
+This mode commits the prepared C promotion, retains A as the previous serving
+bundle and populates C's own cache. Rollback authority is kept live until the
+original elapsed deadline. Expired rollback refuses before publication; cleanup
+clears both generations' cache/metadata and drops previous and the issued receipt.
+The same receipt then refuses as stale and cannot resurrect data.
+
+The committed mode has an explicit 656-byte lifetime raw-copy allowance: the
+additional C cache miss costs16 bytes after the original640 charge. Retained raw
+bytes reach512, then fall to0 without refund. Previous cache TTL ends at20 and
+current cache TTL at28; both remain governed by the original elapsed anchor0 and
+deadline2. Generation1 from commit advances only by actual cleanup passes. Complete
+native A/B/C state, historical receipts and original resources remain intact.
+
+The pending mode retains its interface, schema and640-byte limit. Both modes use
+the same fixed, disjoint inner guards and matched learner controls. Caller copies,
+physical memory overwrite, unlearning, continuous service and full process recovery
+remain outside the guarantee; elapsed time is injected, with no learning-benefit
+or physical-latency claim. See ADR-0298 and
+`artifacts/runs/coupled-committed-serving-20261015/` for declared budgets/evidence.
+Focused tests: `python -m pytest -q tests/test_coupled_committed_serving.py
+ tests/test_coupled_managed_serving.py`. Exact expanded commands are retained in
+that stage; scoped Ruff/format/Windows+Linux mypy cover shared adapter, CLI and tests.
+
+Validation:38 focused tests passed with no actual native work. Scoped Ruff,
+formatting and Windows/Linux mypy passed after recorded nullable-reference fixes;
+independent source/actual review accepted. One budgeted controller ran both six-case
+native modes successfully:72 updates,288 energy evaluations,12 joined workers.
+Pending semantic rows match prior accepted output; committed retained bytes512->0
+with656 still charged. No scientific or physical latency claim.
+
+## Managed cache and pending-promotion expiry
+
+```powershell
+python -m scripts.run_coupled_candidate_handoff --describe --managed-serving-expiry
+python -m scripts.run_coupled_candidate_handoff --run --managed-serving-expiry
+```
+
+This separate fixed coupled control retains a PromotableActor cache and raw
+metadata through handoff, then prepares an accepted promotion without committing
+it. Two disjoint inner-guard batches measure a fixed broad engineering policy;
+final evaluation data never enter training or promotion decisions.
+
+The original two-second elapsed deadline closes cached serving and preparation
+before raw input copying, hashing or native work. A full pending-ticket quota may
+refuse new preparation earlier; output records that actual precedence. The existing
+expiry worker clears actor and pending-bundle metadata, cached predictions, both
+inboxes and pending checkpoint/promotion tokens. It retains full A/B/C learned
+state, CPC chemistry, historical receipts and original resource/copy allowances.
+
+The fixed 640-byte lifetime copy charge remains spent after retained raw bytes
+fall from496 to0. Original metadata/cache age starts at0; preparing at1 never
+renews that deadline. Stop joins the worker and keeps public access closed.
+Caller-owned copies/guard data, physical overwrite, unlearning and process recovery
+are excluded. The elapsed clock is injected; no physical latency or learning
+benefit is claimed. Existing structural cache and other handoff modes are separate.
+
+Focused tests: `python -m pytest -q tests/test_coupled_managed_serving.py`.
+Apply scoped Ruff/check-format and both-platform mypy to the new adapter/test and
+CLI. Frozen resources and exact validation commands/results are in
+`artifacts/runs/coupled-managed-serving-20261015/`; see ADR-0297.
+
+Validation:28 selected tests passed without native work; scoped checks and
+independent review accepted after three recorded test-static repairs. The sole
+six-case native run passed with36 updates/144 energy evaluations and six joined
+workers. Charged640/ingress144 stayed spent; all owned raw references and pending
+tokens cleared while complete learned state and historical receipts persisted.
+
 ## Elapsed-retention control
 
 ```powershell

@@ -28,6 +28,26 @@ the matching episode/sample/actor/role and an independent arrival tick and targe
 label and application ticks, completed budget ordinal and native diagnostic.
 Version names are identifiers, not parameter hashes or promotion certificates.
 
+## Shared validation and malformed local records
+
+`validate_experience`, `validate_experience_permissions` and
+`validate_label_arrival` implement the same rules used by their constructors.
+They return None on valid metadata and raise the original useful error otherwise;
+no payload is copied, normalized or scored. For example:
+
+```python
+from src.core.experience import validate_experience
+
+validate_experience(experience)  # Validate current metadata; does not attest provenance.
+```
+
+The inbox checks current metadata on every call. Complete exact builtin records
+and permission flags use these helpers directly; opaque metadata, subclasses or
+missing fields retain the original reconstruction path and callback/error order.
+Why this: remove allocation solely for validation without changing malformed
+record refusals or allowing user callbacks to observe a different capture order.
+The helper API does not grant inbox consent, role authority or final-label access.
+
 ## Clock and delivery policy
 
 `LogicalClock` advances explicitly through nonnegative integer ticks. Equal ticks

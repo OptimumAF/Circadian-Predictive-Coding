@@ -9,7 +9,9 @@ python -m scripts.run_coupled_inference
 It prints one fixed-step PC update, early-stop PC/neutral-CPC updates and guarded
 fallback PC/neutral-CPC updates from exact shared tensors. This is an engineering
 control with training data only. It does not measure speed or learning benefit.
-R1.5's matched work/time comparison remains unfinished.
+R1.5's declared allocated-time comparison is now accepted in a separate
+[engineering-preset study](reports/engineering-preset-comparison-20261017.md).
+The original failed timing studies remain failed; general benefit is unresolved.
 
 The retained trace has fixed PC energy `.616200` after six latent steps, early
 PC/neutral-CPC energy `.643086` after two, and fallback energy `.660378` after
@@ -17,6 +19,46 @@ zero accepted steps. Early stopping gives a less-relaxed training energy here;
 the lower evaluation count is not evidence of equal-quality efficiency.
 
 ## Policy and native calls
+
+### Recurring stream integration
+
+```powershell
+python -m scripts.run_coupled_inference --stream
+```
+
+This fixed engineering demo uses the existing delayed attribution stream:
+seed23, A6/B6/A6, eight rows per wake, label delay2, checkpoints0/6/12/18.
+PC, neutral CPC and active CPC share original initialization and policy
+`CoupledInferencePolicy(min_steps=2, gradient_tolerance=1.0)`, cap4/rate.2,
+parameter rate.03. The tolerance comes from the original engineering example;
+it was not selected from these final scores. BP's accepted baseline is retained
+without retraining. This is not a matched-compute comparison.
+
+Each original18update session starts before learner work and shares the global
+30second deadline/RSS ceiling. Final64A/64B readouts occur after all18 wakes in
+each case. Failures preserve completed update charges and partial final scoring;
+unknown native attempts/costs remain null. Source learners stay unchanged. The
+CLI prints incomplete results and exits1; the original no-argument trace keeps
+its call shape and output. PC/neutral semantic parity is required for completion.
+
+The report includes signed BCE acquisition/retention/return differences, whose
+formulas are frozen in the [small native protocol](../artifacts/runs/r15-bounded-stream-20261017/PROTOCOL.md).
+New-B gain uses B6−B12, distinct from the older shift report's B0−B12. Positive
+gain is better; positive old-A loss or return gap is worse. Endpoints can show
+further fitting without proving useful skill or recovery.
+
+`build_learner(..., inference_policy=policy)` now accepts an independently owned
+policy for ordinary/tracked PC and CPC. Invalid/corrupted policies, minimum>4,
+and policies supplied to BP fail before native construction. `None` preserves
+the old fixed loop and constructor arguments. Generic training receipts expose
+energy, not inference counters: the demo reports those costs as unavailable.
+The saved native qualification separately instruments returned diagnostics,
+candidate checks, norms/comparisons, predictions and whole observed overhead.
+
+Why this: reuse the existing runner, factory and numerical kernel for a small
+runnable integration. The separate matched-time runner already exists; both
+its10ms and30ms qualifications failed, with adaptive updates reaching cap6.
+This demo neither repairs those failures nor closes R1.5b or establishes savings.
 
 ```python
 from src.core.coupled_inference import CoupledInferencePolicy
@@ -146,7 +188,7 @@ python -m mypy --follow-imports=silent --no-incremental --no-sqlite-cache --cach
 ```
 
 The CLI sets OMP/MKL/OpenBLAS threads to one before NumPy imports. No dependency
-or persisted environment configuration is added. Next compare fixed/adaptive
-inference under a separately declared matched work/time protocol, retaining
-failure/fallback outcomes and all seeds. No large sweep or threshold tuning on
-final scores is authorized by these engineering checks.
+or persisted environment configuration is added. The separate accepted comparison
+retains all seeds, original failures and stopping/instrumentation overhead.
+Its quality interval crosses0; no large sweep or threshold tuning on final
+scores is authorized by these engineering checks or saved comparison.

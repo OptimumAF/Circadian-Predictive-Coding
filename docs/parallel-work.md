@@ -1,4 +1,7226 @@
-# Current parallel work — October 8, 2026
+# Execution policy and historical handoffs — October 22, 2026
+
+## Current execution policy — single agent by default
+
+One agent plans, implements, tests and reviews source/procedure/results itself.
+No standing implementation/reviewer pool, routine second agent, recursive
+delegation or mandatory independent-subagent/orchestration gate. At most two
+agents total only for a concrete useful bounded exception with explicit scope,
+disjoint ownership, shared limits and finite handoff; end it on completion.
+Substantive acceptance criteria, tests, safety/scientific requirements, budgets
+and genuine human/external review remain unchanged. See [AGENTS](../AGENTS.md)
+and the [current continuation prompt](../AGENT_PROMPT.md).
+
+Transition occurred after qualification 12508 terminal 0. Useful child results
+are integrated and accepted. `/root/repeat_typed_tests`,
+`/root/repeat_typed_review` and `/root/train_state_only_native_review` are all
+COMPLETED with write ownership released. Their assignments are retired; no
+child writer, test or pending handoff remains. No interruption or work discard
+was needed. The agent inventory shows only root running.
+
+The tables below preserve completed historical dispatch/evidence records. They
+do not define a prospective worker pool or require another independent agent.
+
+Latest product work: R5.7-CLM.I was implemented, executed and self-reviewed by
+root alone. Windows27/WSL27 and scoped statics pass (66585 terminal0); initial
+24086 pre-fixture typing failure is preserved. No child assignment, numerical
+job or unused correctness allowance remains. D.R.X duplicate native proposal was
+withdrawn after finding accepted D.X. See the [current handoff](../artifacts/runs/clm-train-evidence-memory-20261022/handoff.md).
+
+Subsequent X/F work also used root alone: native memory86435terminal0 and scalar
+fallback32530terminal0, with source/procedure/actual/scientific self-review. No
+independent acceptance is asserted for these new increments. Windows79/WSL79
+fallback checks pass; both native/scalar budgets are closed. No pending model,
+child writer or handoff. [Actual current handoff](../artifacts/runs/evidence-fallback-20261022/handoff.md).
+
+Latest F.I live composition also used root alone,62361terminal0,35checks/platform
+and scoped statics with self-review. No worker or live numeric command remains;
+correctness allowance closed. Current next work is R5.3 paired-head TRAIN replay
+consolidation, not another typed native observation.
+[Latest handoff](../artifacts/runs/clm-live-memory-fallback-20261022/handoff.md).
+
+## Historical dispatch records
+
+## R5.3-F.D.R — repeat TRAIN to typed-request composition
+
+| Dispatch | Exclusive paths | State | Limits |
+|---|---|---|---|
+| D-R-T | new tests/test_clm_repeat_typed_readout.py | Implemented/released; 10 cases, <0.2 MiB/<5 s source work | Source only, 8 MiB/120 s; root executes fixtures |
+| D-R-R | new stage REVIEW.md | SOFTWARE / EXECUTED ACCEPT, released; <2 MiB/<10 s | Source/stdlib only, 8 MiB/120 s |
+| D-R-root | stage helpers/protocol, canonical plans/log/docs | DONE software scope; 12508 terminal 0, 13 checks/platform | Frozen focused correctness allowance closed; no native allowance |
+
+Same dirty 09ff811f dependencies/nonoverlapping ownership; no Git/worktree/index,
+install or persistent environment changes. [Acceptance and aggregate budget](../artifacts/runs/clm-repeat-typed-readout-20261022/PROTOCOL.md).
+
+## R5.3-F.S — state-only TRAIN learner integration
+
+| Dispatch | Exclusive paths | State | Limits |
+|---|---|---|---|
+| F-S-E | new adapters/clm_state_only_catalog_learner.py | Implemented, released; root integrating | Source only, <1 MiB reads/<3 s commands; cap 8 MiB/120 s |
+| F-S-T | new tests/test_clm_train_state_only.py | DONE/released; 41 cases, <1 MiB/~4 s source work | Source only, 8 MiB reads/120 s; no numerical allowance |
+| F-S-R | new stage REVIEW.md | SOFTWARE/EXECUTED ACCEPT; released, <2 MiB/<20 s | Source/stdlib only, 8 MiB reads/120 s; no numerical allowance |
+| F-S-root | temporal script, narrow catalog-probe source admission, helpers/docs/plans | DONE within software scope; 17480 terminal 0, 231 checks/platform | Frozen qualification closed; first 64581 static failure preserved; no native-study allowance |
+
+Shared dirty 09ff811f checkout contains required uncommitted dependencies.
+Nonoverlapping ownership; no Git/index/worktree/install/persistent environment
+writes. [Acceptance and aggregate budget](../artifacts/runs/clm-train-state-only-20261022/PROTOCOL.md).
+All earlier numerical allowances stay closed; accepted probe weights remain disposable.
+
+### R5.3-F.S.X — continuing TRAIN native question
+
+Root owns native_case.py, execute_native.py, NATIVE_PROTOCOL.md and canonical
+documents in the same stage. F-S-X-R owns NATIVE_REVIEW.md only; source/stdlib
+review <=8 MiB reads/120 command seconds, no numerical work. Root source-only
+helper preparation cap 60 command seconds; AST/Ruff/format passed before launch.
+Independent NATIVE PROTOCOL ACCEPT / NATIVE EXECUTOR GO admitted the one case.
+Root execution 15579 is terminal 0, child 0; native-execution.json is complete,
+records preflight/permanent reserve/exact command and unchanged 37 source pins.
+NATIVE ACTUAL / SCIENTIFIC INTERPRETATION ACCEPT: shared accuracy ties, B/return
+NLL and ECE worse, Brier lower, TRAIN-to-suffix gap remains. No probes or control
+retraining. Native allowance closed; final reviewer <4 MiB reads/<20 command seconds.
+[Frozen scope and limits](../artifacts/runs/clm-train-state-only-20261022/NATIVE_PROTOCOL.md).
+
+## CLM-FC / R5.3-F.C software/saved question — DONE; collector FAILED
+
+| Dispatch | Exclusive files | State | Limits |
+|---|---|---|---|
+| F-C-S | app/clm_temporal_sequence.py | DONE/released;122206Breads/1.161s;rootwriter | source8MiB/120s,no backend |
+| F-C-T | newtests/test_clm_catalog_support_learning.py | DONE/released;46+root2cases;<1MiB/<10s | source8MiB/120s,no backend |
+| F-C-R | newstage REVIEW.md | qualifiedACTUAL/NARRATIVEaccepted;released;<6MiB/<15s | source8MiB/120s,no backend |
+| F-C-root | existingtemporal script/narrowoldCLItest/helpers/docs/plans | 59894terminal0;12599collectorFAIL;saved839bb7PASS | frozen correctness+conditional native |
+
+Dirty09ff811f nonoverlappingownership, no Git/index/worktree/install/env changes.
+Correctness BOTH1536pairs768back3072query/candidate12288logits3072fw24576projected
+131072inputs incl65536RNG16384cache source-derived reserves; numeric180seach/
+600stotal2GiBsampledRSS,statics240s. Conditionalnative24updates88q72cand264logits,
+90Heads84fw284projected,1encoder13seq540sinner570outer24GiB onlyaftergates.
+[Protocol](../artifacts/runs/clm-catalog-support-learning-20261022/PROTOCOL.md).
+
+## CLM-CI / R2.1-CLM-C.I/X reserved catalog probes — DONE/released
+
+| Dispatch | Exclusive paths | State | Limits |
+|---|---|---|---|
+| C-I-S | app/clm_reserved_probe.py | DONE/released;68098Breads/.986s;root now writer | source8MiB/120s,no backend |
+| C-I-T | new tests/test_clm_catalog_reserved_probe.py | DONE/released;50cases;~180KiB/<8s | source8MiB/120s,no backend |
+| C-I-R | newstage REVIEW.md | SOURCE/SOFTWARE/ACTUAL/NARRATIVE accepted;released;<3MiB/<20s | source8MiB/120s,no backend |
+| C-I-root | checkpoint adapter/temporal app/script,narrowoldCLItest,helpers/docs | 200PASS/platform;native terminal0 collected;DONE | frozen correctness +oneconditional native |
+
+Shared dirty09ff811f untracked dependencies/nonoverlappingownership; no Git/index/
+worktree/install/env changes. Correctness BOTH1024pairs512back2048query/candidate
+8192logits2048fw16384projected131072inputs incl65536RNG+16384cache reserves.
+200cases/platform passed once. Sole frozen native36updates84query108candidate252
+logits144Heads134fw377projected,1encoder16seq720sinner750outer24GiB, onlyaftergates.
+[Protocol](../artifacts/runs/clm-catalog-reserved-probe-20261022/PROTOCOL.md).
+
+All scoped gates accepted; source/test/review writers released. Sole native case
+terminal0, main1/4->2/4->3/4->3/4; B/return probe old3/4->0/4 preserved as adverse
+results while source remains isolated. No retry or broader benefit/readiness claim.
+NextR5.3-F.C existing catalog+TRAIN recipe composition; no new native allowance.
+
+## CLM-C / R2.1-CLM-C.S/Q catalog-objective disposable probe — DONE/released
+
+| Dispatch | Exclusive files | State | Limits |
+|---|---|---|---|
+| CLM-C-S | new core/clm_catalog_probe.py +adapters/clm_catalog_probe.py; protected catalog learner admission | DONE/released;36228Breads/1.079scommands | source8MiB/120s, no backend |
+| CLM-C-T | new tests/test_clm_catalog_probe.py | DONE/released;56cases;~80KiB/<5s | source8MiB/120s, no backend |
+| CLM-C-R | newstage REVIEW.md | SOURCE/SOFTWARE/NARRATIVE accepted;released;<1MiB/<12s | source8MiB/120s, no backend |
+| CLM-C-root | existing clm_head_probe.py, helpers/docs/plans | DONE;221PASS/platform;both handles collected | original correctness caps; zero pretrained |
+
+Dirty09ff811f shared due untracked prerequisites; nonoverlapping ownership,
+no Git/index/worktree/install/persistent-env changes. New role/owner feature,
+not renewed historical failure allowance. BOTH1024pairs512back2048query/candidate
+8192logits2048fw16384projected131072inputs, <=180sprocess/600sfixtures/240sstatics,
+2GiBsampledRSS; no pretrainedencoders/TF/download/nativeexperiment. Preserve paired
+and catalog TRAIN exactkind defaults. [Protocol](../artifacts/runs/clm-catalog-probe-20261022/PROTOCOL.md).
+
+ActualBOTH420pairs840objects170back176TRAINattempts424query442candidate1100logits
+632fw1684projected62constructorinitials. Fixtures107.547034s;recordedstatics
+42.597741s including initialstaticfailure, no numericalretry. Rawinput27286 and
+originalforecastunderestimate preserved; separately confirmed extraRNGreserve
+16384 yields43670within unchanged131072cap, not fullymeasuredRNG/newallowance.
+No pretrained/native experiment; C.I/X stillopen. [Results](../artifacts/runs/clm-catalog-probe-20261022/RESULTS.md).
+
+## CLM-F / R5.3-F full-catalog supervised learning — DONE/released
+
+| Dispatch | Exclusive files | State | Limits |
+|---|---|---|---|
+| CLM-F-S | new core/clm_catalog.py +adapters/clm_catalog_learner.py | DONE/released;111952Breads/source statics only | source8MiB/120s, no backend |
+| CLM-F-T | new tests/test_clm_catalog_learning.py | DONE/released;60cases+root1;source statics only | source8MiB/120s, no backend |
+| CLM-F-R | newstage REVIEW.md | SOURCE/SOFTWARE/EXECUTOR/ACTUAL/interpretation accepted;released | source8MiB/120s, no backend |
+| CLM-F-root | existing baseengine/app/script, helpers/docs/plans | DONE;222PASS/platform;sole native0;all handles collected | original shared caps held |
+
+Dirty09ff811f/untracked prerequisites require nonoverlapping sharedcheckout;
+no Git/index/worktree/install/env changes. Existing paired objective/defaults,
+all prior negatives and full parents preserved. Explicit TRAIN fullcatalog/indices,
+new directional CE, exactrole admission, shared staged optimizer and distinct
+snapshot type. Same temporal stream/inbox/consent/clocks/receipts; no new runner.
+Correctness BOTH1024pairs512back2048query/candidateTRAINrows2048fw16384projected
+131072inputs; no encoder/TF. Sole native20pair38fw12updates36query+36candidate rows,
+12textencoder540sinner570outer24GiB only after gates and accepted paired reuse.
+[Frozen protocol](../artifacts/runs/clm-full-catalog-20261022/PROTOCOL.md).
+
+Actual BOTH482pairs196back490queries498candidates1290logits724fw1986projected,
+68constructorinitials27082inputs. Sole native40Heads38fw12updates36query+36candidate
+rows108logits,216.028565sinner231.755449swrapper;sampledRSS15785824256B.
+Mixed accuracy1/4→2/4→3/4→3/4; invoice still wrong, no recovery/CPC claim.
+Initial static-only failure retained/charged, no numerical retry. No remaining
+native allowance or live owned model. [Results](../artifacts/runs/clm-full-catalog-20261022/RESULTS.md).
+
+## CLM-RP / R2.1-CLM-P.I/X reserved checkpoint probe — DONE/released
+
+| Dispatch | Exclusive files | State | Limits |
+|---|---|---|---|
+| CLM-RP-S | new core/temporal_clm_probe.py +app/clm_reserved_probe.py | DONE/released;169109B total incl next dependency readback | Source8MiB/120s, no backend |
+| CLM-RP-T | new tests/test_clm_reserved_probe.py | DONE/released; root8cases added,64final | Source8MiB/120s, no backend |
+| CLM-RP-R | newstage REVIEW.md | ACTUAL/narrative accepted/released;<4MiB/<20s | Source8MiB/120s/cache reads |
+| CLM-RP-root | temporal app/script +newadapter, helpers/docs/plans | DONE;93PASS/platform; sole native0 | Shared correctness +one conditional native case |
+
+Shared dirty09ff811f/untracked dependencies, no overlap/Git/index/worktree/install/
+env mutations. Fixed baseline/A/B/return disposable6update two-marker task, three
+before/after readout groups, explicit consent/separate probe inbox+budget/actual
+receipts, source untouched; no label scoring until ALL source/probe TRAIN ends.
+Encoder16bound means probe+support/compare flags refused beforeload; native none.
+Correctness480pairs240back960rows960fw6144proj65536inputs; native one16seqforward/
+36updates84rows expected144Heads134fw,720sinner750outer24GiB aftergates only.
+Measured correctness296pairs126back302rows480fw1290proj25988inputs; native
+144Heads134fw36back84rows280.452s/16.400GBsampledRSS. All source/software/
+actual gates accepted; all46888/63788/23188handles collected, no live ownedjob.
+No final/promotion/replay/tuning, no marker/dose/seed search. Earlier negative
+results remain. [Frozen protocol](../artifacts/runs/clm-reserved-probe-20261022/PROTOCOL.md).
+
+## CLM-P / R2.1-CLM-P owned probe boundary — DONE/released; parent integration open
+
+| Dispatch | Exclusive ownership | State | Limits |
+|---|---|---|---|
+| CLM-P-S | new core/clm_probe.py +adapters/clm_head_probe.py | DONE/released, source accepted | <=81,693B/~1.27s |
+| CLM-P-T | new tests/test_clm_head_probe.py | FAILED model capacity; partial file transferred to root/completed | No model work; final resource handoff unavailable |
+| CLM-P-R | newstage REVIEW.md | SOURCE/SOFTWARE/narrative accepted; released | 389,771B/8MiB/<4s/120s |
+| CLM-P-root | existing clm_head_learner.py helper extraction, helpers/docs/plans | DONE;97PASS/platform/statics;34481/74148terminal | Shared fixed correctness consumed; no native |
+
+Dirtymaster09ff811f/sharedcheckout needed for untracked prerequisites; no overlap/
+Git/index/worktree/install/envmutation. Explicit probe roles, fresh separately
+bounded probe optimizer/schedule/readouts, source state/work preserved. No TRAIN
+role widening, final/probe relabeling, checkpoint/export/install, new runner or
+native case. Executed shared130pairs38back106rows144fw408projection/19300inputs,
+all caps held; one failed testmypy retained/type-only repaired, no numeric rerun. Shared BOTH320pairs160back640rows640fw4096projection32768inputs;
+perprocess90s/2GiB/cumulativefixtures360s/statics180s, threads2. Workers do no
+project/backend imports or numerics. Existing R5.3-S findings and originalreview
+readcapFAIL remain. [Frozen software contract](../artifacts/runs/clm-owned-probe-20261022/PROTOCOL.md).
+
+## CLM-S / R5.3-S explicit catalog support — DONE/released; original review cap FAILED
+
+| Dispatch | Exclusive ownership | State | Limit |
+|---|---|---|---|
+| CLM-S-S | newcore/temporal_catalog_support.py +app/clm_temporal_sequence.py | DONE/released | Source only104,243B/~1.13scommands |
+| CLM-S-T | tests/test_clm_catalog_support.py | DONE/released40cases | Source only<80KiB/<7s |
+| CLM-S-R | newstageREVIEW.md | qualified actual/narrative accepted/released; original readcapFAIL; separate16,247Bfinish | Original2MiB FAILED by36,989B; separate64KiB/10sprospective |
+| CLM-S-root | script/helpers/docs/plans | source/software/native DONE; all83663/47490/62329handles terminal | Fixed correctness+sole native consumed |
+
+Shared dirty09ff811f/untracked prerequisites; no overlapping writes/Git/index/
+worktree/install/envmutation. Two recipes repeatinvoice vs NEWTRAIN original
+workflow→route, A3/v2fourrows12updates44rows each; nativepairedobjective kept.
+One shared13template encoder/two independent heads; all24TRAINupdates before
+scoring. Correctness288pairs160back640rows512forwards2048projected16384elements;
+native1encoder13seq84forwards24updates88rows540sinner570souter24GiBsampledRSS.
+Equalrows differ in class/group/data information, no purecausal/CPCclaim.
+All oldnegatives/failures/parents preserved.94PASS/platform/scopedstatics pass;
+native227.479560s/24updates88rows, repeat1/4→3/4→3/4→3/4 androute1/4→3/4→4/4→
+3/4. Faileddevelopmentreturn/auxiliaryTRAIN preserved; noCPCclaim. Producer caps
+pass, originalreviewcap failed from repeatedreads, narrow separate documentation
+finish used16,247B/cachedcalculations. Allwritersreleased; no furthermodelallowance.
+[Protocol](../artifacts/runs/clm-catalog-support-20261022/PROTOCOL.md).
+
+## CLM-D / R5.3-D TRAIN catalog diagnosis — DONE, writers released
+
+| Dispatch | Exclusive ownership | State | Limit |
+|---|---|---|---|
+| CLM-D-S | app/clm_temporal_sequence.py | DONE/released; opt-in usecase | Source only61,512B/~.94s commands |
+| CLM-D-T | tests/test_clm_train_catalog_diagnostics.py | DONE/released25cases | Source only<70KiB/<5s |
+| CLM-D-R | newstage REVIEW.md | SOURCE/SOFTWARE/EXECUTOR/ACTUAL/interpretation accepted; released | Source only2MiB/60s |
+| CLM-D-root | script/helpers/docs/plans |DONE; handles79208/90060 terminal0 | Shared correctness +sole native protocol |
+
+Dirty09ff811f/current untracked prerequisites require sharedcheckout, no overlapping
+writes or Git/index/worktree/install/env mutation. One3x3 TRAINfullcatalog readout
+at4/8/12 diagnoses bareTRAINfit vs suffixtransfer; no extraTRAIN or changedloss.
+Currentinvoice coverage explanation remains a hypothesis. Defaults/work/receipts
+preserved; no final/probe/replay/CPC claim. Correctness160pairs80updates240rows/
+320forwards1024projected8192elements; native1encoder12seq12updates36rows44forwards,
+540sinner570souter24GiBsampledRSS. All oldfailures/negatives preserved.
+[Protocol](../artifacts/runs/clm-train-catalog-diagnosis-20261022/PROTOCOL.md).
+
+54PASS/platform/scopedstatics firstcohort, sourceforecastactualcosts agree. Native
+207.114953s/23headpairs44forwards/12updates36rows, alloriginalparity exact. Bare
+TRAIN2/3A1/3B2/3return; invoice fails onTRAIN aswellassuffix. OppositeTRAIN/dev
+cases preserved. No coveragecausation/CPCclaim. Next explicit NEWTRAIN v2route
+support packet +frozencontrol, no moremodelworkinthisstage.
+[Results](../artifacts/runs/clm-train-catalog-diagnosis-20261022/RESULTS.md) ·
+[Review](../artifacts/runs/clm-train-catalog-diagnosis-20261022/REVIEW.md).
+
+## CLM-T / R5.3-T fixed temporal native head pilot — DONE, writers released
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| CLM-T-S | app/clm_temporal_sequence.py | source DONE/released | Source only;172,486B reads/~2.32s commands |
+| CLM-T-T | tests/test_clm_temporal_sequence.py | DONE/released29cases; root status/typing fixes | Source only;<100KiB/<8s |
+| CLM-T-R | stage REVIEW.md | SOURCE/SOFTWARE/EXECUTOR/ACTUAL/results accepted; released | Source only;2MiB/60s |
+| CLM-T-root | script/helpers/docs/plans | DONE; handles81056/47316terminal0 | Separate correctness/native allowances |
+
+Fixed existing corpus A4/B4/return4,36paired rows; unchanged/frozen-A controls,
+post-TRAIN development scoring, nofinal/probe/replay. Current source/readout
+prerequisites reused. Native1encoder12seq1152slot/12updates/38headforwards,
+540sinner570souter/24GiBsampledRSS under fresh26GiBfree/nootherPython admission.
+Sole native completed204.319512s; all gates accepted. Prior132FAIL/openparents
+and all negative results preserved. [Protocol](../artifacts/runs/clm-temporal-sequence-20261022/PROTOCOL.md).
+
+Final correctness29cases/platform after1metric-status expected-string failure
+and annotation/format repairs; cumulative79pairs38updates114rows114forwards
+361projected903elements. Sole native learned1/4→3/4→3/4→3/4 with persistent
+invoice obsolete route; no recovery/newknowledge overreleased/CPC advantage.
+1encoder12seq95IDs108slots/20headpairs38forwards12updates36rows;
+sampledRSS15,790,100,480B. All failures/caps preserved. Next TRAIN-only
+full-catalog fit diagnosis; no extra model run now.
+[Results](../artifacts/runs/clm-temporal-sequence-20261022/RESULTS.md) ·
+[Review](../artifacts/runs/clm-temporal-sequence-20261022/REVIEW.md).
+
+## CLM-R / R5.3-R rectangular readout — DONE, writers released
+
+| Dispatch | Exclusive ownership | State | Limit/evidence |
+|---|---|---|---|
+| CLM-R-S | core/clm_head.py + adapter/clm_head_learner.py | DONE/released; integrated | Source only;96,310 B reads/~.91s commands |
+| CLM-R-T | tests/test_clm_choice_readout.py | DONE/released;24 new cases | Source only;<70KiB reads/<6s commands |
+| CLM-R-R | stage REVIEW.md | DONE/released; source/software/tiny integration/results accepted | Source only;<2MiB cap |
+| CLM-R-root | helpers/docs/plans/integration | DONE; handle46089 terminal0 | Sole numerical executor |
+
+25 checks per platform (24 new +1 selected old square regression), scoped statics
+all pass. Shared 96 conservative pair charges/164 module-forward visits;
+20 backwards,56 real TRAIN rows +6 rejected row charges;250 projection/oracle/
+unknown row charges;310 source elements. RSS boundaries333,746,176/354,189,312 B,
+not true peaks. All limits hold; no encoder/Transformers/download work. Existing
+scheduler warnings retained. Tiny temporal4×3 bindings do not qualify semantic
+adaptation. Historical132/128FAIL and full parent requirements remain open.
+Next: existing temporal corpus consumer and separately reviewed native protocol.
+No Git/index/worktree/install/persistent environment changes.
+[Results](../artifacts/runs/clm-rectangular-readout-20261022/RESULTS.md) ·
+[Review](../artifacts/runs/clm-rectangular-readout-20261022/REVIEW.md).
+
+## CLM-A / R5.3-A fixed native head adaptation — DONE, writers released
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| CLM-A-root | script +stage helpers/docs/plans | DONE; handles47588/39577/49358terminal | Sole model executor |
+| CLM-A-T | tests/test_clm_head_adaptation.py | DONE/released24cases; root added1scalar/typeannotations | Source/stdlib only;<80KiB reads/<8s commands |
+| CLM-A-R | stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/EXECUTOR/ACTUAL/results accepted | Source/stdlib only;<2MiB cap |
+
+Dirty09ff811f/shared prerequisites; no Git/index/worktree/install/env mutation.
+25PASS/platform/scopedstatics0; initial2testtype errors repaired withoutmodel
+rerun, originalwarnings retained. Shared52headpairs26back52rows72forwards,
+72literalparams/0random/Identityoracles/encoderwork, allcapsheld. Sole native
+1encoderforward6seq72IDs126paddedslots/19headpairs34headforwards12updates24rows,
+230.4661392swrapper/15,785,938,944BsampledRSS (nottruepeak). Learner1/3→3/3→3/3→
+3/3; control1/3. Passwordacquired/retained, refundalreadycorrect/norecovery.
+Fullparents/prior132/128FAIL remainopen. Nextrectangularfeaturechoice readout
+for existing temporal-rulecorpus; no furthermodelallowance underthisstage.
+[Results](../artifacts/runs/clm-head-adaptation-20261022/RESULTS.md) ·
+[Review](../artifacts/runs/clm-head-adaptation-20261022/REVIEW.md).
+
+## CLM-E / R5.1-E released frozen encoder — DONE, writers released
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| CLM-E-S | adapters/clm_frozen_encoder.py +clm_decision.py | DONE/released; integrated | Source only;116,777B read/~1.73s commands |
+| CLM-E-T | tests/test_clm_frozen_encoder.py | DONE/released30 cases; root added3 pure cases | No worker backend/test/model work |
+| CLM-E-R | stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/EXECUTOR/ACTUAL/interpretation accepted | Source only;<2MiB cap |
+| CLM-E-root | infra loader/script/helpers/docs/plans | DONE; all producer handles terminal | Sole numerical/download executor |
+
+Released Qwen3-8B/CLM CPU HF plain TRAIN recipe, separate from vLLM serving.
+33unique cases/37executions per platform/scoped statics0; original typing/lint
+and installed diagnostic-set JSON repairs retained. Ten payload transfers/two
+verified copies retained16,472,988,603B outside repo. One native forward/4seq/
+30retained IDs/80padded slots/4individual head forwards; wrapper138.313135s,
+sampledRSS14,557,581,312B. Technical checks pass; password→refund p0.803503 is
+wrong and preserved. Prior R5.3-B132/128 FAIL unchanged. Next fixed native head
+learning stream needs separate reviewed protocol, encoder/control remain frozen.
+[Results](../artifacts/runs/clm-frozen-encoder-20261022/RESULTS.md) ·
+[Review](../artifacts/runs/clm-frozen-encoder-20261022/REVIEW.md).
+
+## CLM-B / R5.3-B conventional frozen-feature CLM learner — writers released
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| CLM-S | S: core/clm_head.py + adapters/clm_head_learner.py | DONE/released source; root integrated | Source only;230,669B read/~3.41s commands |
+| CLM-T | T: tests/test_clm_head_learner.py | DONE/released31 cases; root type repair | No worker imports/fixtures/model work |
+| CLM-R | R: stage REVIEW.md | DONE/released; component accepted/resource FAIL | Source only;<1MiB of2MiB |
+| CLM-root | root: script/helpers/docs/plans/integration | numerical handles terminal | Sole executor; no further allowance |
+
+Dirty09ff811f/shared prerequisites; no Git/env/dependency mutation.31PASS per
+platform +2 affected repair checks/platform/scoped statics0; original mypy failure
+and scheduler warnings retained. Sole4learner+4reference updates/24paired exposures,
+28 exact boundary comparisons; wrapper5.692571s/sampledRSS311,816,192B.
+Resource gate FAILED:124 trainable head pairs +8 zero-parameter oracle pairs=132
+versus128 allowed. Root/reviewer omitted oracle cost when admitting repair and
+cleared the case incorrectly; component behavior stands, no all-gates PASS.
+R5.3-B qualification unchecked. Post-case helper accounting corrected source-only;
+no renewal/replacement run. R5.1 released encoder/head is next substantive missing
+dependency, under its own prospective protocol. [Results](../artifacts/runs/clm-head-baseline-20261022/RESULTS.md)
+· [Review](../artifacts/runs/clm-head-baseline-20261022/REVIEW.md).
+
+## OTF / R5.7-A causal online temporal feedback — DONE
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| OTF-S | S: app.decision_evidence helpers | DONE/released; qualified | No worker imports/tests/model work |
+| OTF-T1 | T: tests/test_online_temporal_feedback.py | DONE/released39 cases | One shared integration fixture/platform |
+| OTF-R1..R4 | R: stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/EXECUTOR/ACTUAL accepted | <1.9MiB of2MiB/60s commands |
+| OTF-root | root: receipt property/script/helpers/docs/plans | DONE | Sole fixture/functional executor |
+
+Dirty09ff811f/shared prerequisites; no Git/install/env/subagents.135PASS/platform
+withscopedstatics0; shared18zerobirth56updates168rows336affine458evidenceops.
+Solecase3zerobirth12updates36rows80affine48retrieves36adds0edits22213B/1056scans.
+Wrapper2.359712100s/inner1.664484000s; sampledRSSmax42393600B/402observations.
+Memoryfullaccuracy0→3/4→3/4→4/4 vslinear1/4→4/4→3/4→4/4, no memorygain. Parcel
+newlabelretainedreturn; password memoryeligibility true/false/true is not ordinary
+forgetting; actualweightwrongB/recoveryreturn separate. FrozenA/obsolete/ECE
+negativesretained. Candidate/source field, subset andRSS fixes beforefixtures;
+two guessedpathreads/abandonedASTcounter/reviewerdisplaytruncation recorded, no
+producerfailure/rerun. All jobs terminal/workersreleased. NextR5.3 nativeCLM
+fine-tuningbaseline withqualifiedfrozenencoder/head/cache contract beforemechanisms;
+no inherited modelallowance. [Results](../artifacts/runs/online-temporal-feedback-20261022/RESULTS.md).
+
+## NMC / R5.7-N native four-arm memory comparison — DONE
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| NMC-S | root: native ticket extension/comparison/helpers/docs/plans | DONE; actual+postguard qualified | Sole fixture/native executor |
+| NMC-T1 | T: tests/test_native_memory_comparison.py | DONE/released29 cases; root added2 guard cases | No worker tests/imports/kernels |
+| NMC-R1..R7 | R: stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/EXECUTOR/ACTUAL/postguard accepted | <1.4MiB of2MiB direct reads/60s commands |
+
+Dirty09ff811f/shared prerequisites; disjoint writes/no Git/install/env/subagents.
+121scalarPASS/platform before native +6 targeted postguard/platform/scopedstatics0.
+One shared24rowfit/33readouts/57forward/285seq/23470tokens;249.0324693swrapper/
+peak14015225856B. Frozen context/retrieval/hybrid ordinary+stale successes and
+safe denial; adapter-only stale wrong-workflow preserved. Retrieval pays zero
+nativeforward and matches endpoints. No hybrid/CPC/generalization claim.24 evidence
+adds/0edits/19320B/33retrieves792scans;2snapshots/3restore/2release/final24.
+Post-case missing-cap/boolean guard fixed and independently qualified; original
+case source hashes retained separately, no native rerun. Pre-fixture findings,
+typing/patch and two no-write encoding failures recorded. All jobs terminal and
+workers released. Original bounded R5.7 accepted with prior EDE editability;
+R5.1/R5.3/broaderG5/science/release remainopen. Next R5.7-A causal TRAIN feedback
+through existing temporal stream, frozen A→B→A costs against simpler retrieval.
+[Results](../artifacts/runs/native-memory-comparison-20261022/RESULTS.md) ·
+[Protocol](../artifacts/runs/native-memory-comparison-20261022/PROTOCOL.md).
+
+## EDE / R5.7-E editable temporal evidence — DONE, bounded component
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| EDE-S | root: new core/app/script, stage helpers/docs/plans | DONE; qualified/actual accepted | Sole fixture/functional executor |
+| EDE-T1 | T: tests/test_decision_evidence.py | DONE/released57 scalar cases | Source/stdlib only |
+| EDE-R1..R6 | R: editable-decision-evidence stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/EXECUTOR/ACTUAL accepted | <1.2MiB of2MiB directreads/60s commands |
+
+Dirty09ff811f/currentuntrackedprerequisites; disjointwrites/noGit/install/env/
+subdelegation. Accepted native parcel failure remains unchanged. Missing R5.7
+evidence-only component: bounded consented TRAIN revisions, causal cutoffs,
+retrieval-only vs actual frozen context output. Equal-time/backfill and detached
+candidate/late-completion findings fixed before fixtures.57PASS/platform and
+scopedstatics all0; shared164writes76retrieval44wrapper16fakecallbacks,0models.
+Solecase6readouts/240terms,13writes16retrievals201scans/10287canonicalB,
+1.3339765swrapper/sampleRSS42041344B. Controlled evidence correction fixes
+retrieval recovery; actual frozen scores are unchanged/alreadycorrect, no context
+benefit. Pre-fixture typing/patch and reviewer truncated/nested-query readback
+failures retained; no fixture/model rerun. All jobs terminal/workers released.
+Original R5.7 four-arm/native Context-LM/benefit remain open. Next native-runner
+four-arm composition +separate prospective protocol, no inherited model GO.
+[Frozen protocol](../artifacts/runs/editable-decision-evidence-20261022/PROTOCOL.md).
+
+## NTW / R5.6-N native multi-step workflow — DONE, mixed/negative result
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| NTW-S | root: scripts/run_open_jev_ticket_workflow.py, stage helpers/docs/plans | DONE; qualified/actual accepted | Sole model/fixture executor |
+| NTW-T1/T2 | T: tests/test_native_ticket_workflow.py; read-only next-outcome scout | DONE/released | No worker execution; scout<=40KiB |
+| NTW-R1..R5 | R: native-ticket-workflow stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/EXECUTOR/ACTUAL accepted | <1MiB direct reads; commands<=60s |
+
+Shared dirty09ff811f/untracked prerequisites; no worktree transplant/Git/install/
+dependency/persistent-env mutation or nested agents. Reuse accepted R5.6-L and
+native temporal evidence. Two scalar cohorts plus one bounded literal WSL port
+fixture; one native24-update/24-row/six-episode case only after independent gates.
+Fixed300sequence/60forward upper bound, no Scorer/serving-parity claim; full
+protocol/correctness/native allowances and rationale are recorded before work:
+[NTW protocol](../artifacts/runs/native-ticket-workflow-20261022/PROTOCOL.md).
+35scalarPASS/platform +oneWSLliteral/twoforwards and scopedstatics allPASS. Native
+24TRAIN/24rows,29typed/53topforward/265seq/14505tokens,200.0142488swrapper,
+peak14,258,368,512B. Learnedordinaryinvoice succeeds; staleparcelcommitswrongtool
+(notrecovery); revokedcommitcorrectlydenied. Unchanged0/3/18wrongphase/noevents,
+learned1/3/0successfulrecovery/1denial. Allnegativeendpoints retained. Pre-fixture
+typing/shell/corpus/callbackfindings fixed, reviewerquiet-outputassertioncorrected;
+no fixture/nativefail/rerun. OriginalR5.6accepted; broadnative/science/releaseopen.
+NextR5.7boundededitableTRAINevidence/frozenweightdecision boundary; no futureGO.
+[Results/handoff](../artifacts/runs/native-ticket-workflow-20261022/RESULTS.md).
+
+## TDS / R5.5-L temporal-tool/policy reference — DONE
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| TDS-S | root: temporal core/script, subset compiler flag, stage/docs | DONE;79PASS/platform/scopedstatics/actualaccepted | Sole numerical executor |
+| TDS-T1/T2 | T: tests/test_temporal_decision_reference.py | DONE/released39cases; rootliteral+partialstrengthening | No workerimports/tests |
+| TDS-R1..R6 | R: temporal stage REVIEW.md | DONE/released;SOURCE/SOFTWARE/EXECUTOR/ACTUAL accepted | Source/stdlib444632B<768KiB |
+
+Shared dirty09ff811f/untracked prerequisites; no Git/install/nestedagents.
+[Protocol](../artifacts/runs/temporal-decision-stream-20261022/PROTOCOL.md).
+v2keptwhenolddomainreturns; adddefer/removeretire, stillallowedobsolete route
+choicescountaserrors. Existingstream/perceptron/evaluator, explicitdefaultFalse
+subsetcompiler, fixedunion4slots notoutputgrowth. SharedBOTH96TRAIN288rows/
+1024typedreadouts128zeroctors4096elements; two smallplatformcohorts120s2threads,
+one12TRAIN36row80readoutcase completed aftergates.79PASS/platform/allstatics;
+shared48TRAIN144rows298typedreadouts24zeroctors492elements,0learner scoring.
+Actual.511953400s/240327B;learned1/4→4/4→3/4→4/4 currentv2return, password
+1→0→1 loss/recovery. FrozenA v2twoobsoleteerrors;zero-state alreadyparcel/
+legacycorrect, no freshparcelclaim. AfterBretentionFAIL/worseECE retained.
+Loss/phasecontrast omissionfixed beforefixtures; exceptioncopyfindingwithdrawn
+againstactualsource.0numericalfailure/rerun, Tcapacityresume/preflightrepairs
+preserved. Alljobs terminal/T/Rreleased. ParentexternalR5.5/fullgoal/benefitopen;
+nextnative-temporal delivery/readout bridge preservingdefaults, one-requestnative
+updatesdistinctfrom3rowperceptronpasses; no nativeallowancegrantedthisstage.
+
+## NCAL / R5.4-C saved calibration and rank summary — DONE
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| C-S | root: scripts/summarize_native_consolidation.py, stage helpers/canonical docs | DONE;28PASS/platform/scopedstatics/derivedreport | Sole scalar executor;zero modelwork |
+| C-T1 | T: tests/test_native_calibration_summary.py | DONE/released28cases | No workerimports/testexecution |
+| C-R1..R6 | R: stage REVIEW.md | DONE/released;SOURCE/SOFTWARE/DERIVATION/ACTUAL accepted withscope | Source/stdlib/cache1,968,504B<3MiB |
+
+Shared dirty09ff811f/untracked prerequisites, no Git/install/nestedagents.
+[Protocol](../artifacts/runs/native-calibration-summary-20261022/PROTOCOL.md).
+Four fixed saved reports, same Brier/fivebinECE/NLL and originalcriteria; spectrum
+characterization is not rankadequacy/calibratedquality. Sourcegroup and original
+observedcompute/resource costs preserved beforefixtures. Shared256summaries/
+10000scoredrows4096modules,2threads120s512MiBboundary;one savedderivation<=30s,
+4MiBinput/256KiBoutput.28PASS/platform; shared46summaries940rows34modulevisits.
+One savedderivation.214235000s/boundaryRSS28,704,768B/152358Boutput30rows120spectra,
+0modelwork. AlloriginalcombinedcriteriaFAIL; consvswarmBrier/NLLworse/ECEslightly
+lower, no overallbenefit. Revieweroutputlimitcacheloss andos206preexecution
+failurepreserved; no further attempts. Independentreset/projectionrawparitynew
+readbackunavailable, acceptedpins+reviewedtestedproducer reused; other18rawrows/
+all30derivedmetrics/bins/contrasts/tails checked. OriginalliteralR5.4criterion
+acceptedwithoutaddingstrongerqualityblockers; fullgoal/utility/sciencereleaseopen.
+All jobs terminal/T/Rreleased. NextR5.5 temporalrules/obsoleteerrors viaexisting
+typeddecisionstream, no newcalibration/audit/rankintervention or framework.
+
+## NCS / R5.4-NCS native consolidation stream — DONE, negative task result
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| NCS-S | root: optimizer-control runner/reference opt-in, canonical docs/stage | DONE;121PASS/platform/scopedstatics/native negative | Sole numericalexecutor;onecase allowance spent |
+| NCS-T1 | T: tests/test_native_consolidation_stream.py | DONE/released35scalarcases | No worker imports/tests/numerical work |
+| NCS-R1 | R: consolidation-stream REVIEW.md | DONE/released;SOURCE/SOFTWARE/EXECUTOR/ACTUAL accepted | Stdlib/source/cache1,311,413B≤2MiB |
+
+Shared dirty09ff811f/untracked prerequisites; no Git/install/nestedagents.
+[Protocol](../artifacts/runs/native-consolidation-stream-20261022/PROTOCOL.md).
+CaptureboundA6→warmB6exactbinding→half/half rank8terminalconsolidation/reset→
+sixoriginalreadouts. Primarywarmcontrol; terminalresetisnotafterAreset/B6,
+correlatedoperators/currenthead/extra compute disclosed. Existingowner140/core44
+reusedwhileunchanged.121PASS/platform/allstatics; scalarcombined118runner/
+576fakeTRAIN/42intervention/72predict/6298validations, no nativefixtures/imports.
+Sole native79.3855767s/peak13,895,041,024B; A2/2,B0/2,anchorspass,combinedFAIL.
+12TRAIN/30topforward/18Scorer/6serve/54seq3033tokens; capture/consolidate/project/
+reset each1/60modules. A/B NLLworse vswarm; no overallbenefit. Reviewer capacity
+interruption resumed without producerrepetition. All jobs terminal/T/Rreleased;
+next saved calibration/rank characterization viaexistingmetrics, no newmodelcall
+or rank/weight/dose search. Full R5.4/R2.1/G5/science/release remainopen.
+
+## NAC / R5.4-NC owned two-state consolidation — DONE, native stream open
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| NAC-S | root: native policy/projection/reference/fork helpers, canonical docs | DONE;140PASS/platform/scopedstatics | Sole numerical executor;0released models |
+| NAC-T1 | T: tests/test_open_jev_adapter_consolidation.py | DONE/released31cases; rootadded1precharge regression | No worker imports/tests/numerical work |
+| NAC-R1 | R: consolidation stage REVIEW.md | DONE/released; SOURCE/SOFTWARE ACCEPT | Source/stdlib353,939B/2.2373773s outer |
+
+Shared dirty09ff811f/untracked prerequisites; no Git/install/nestedagents.
+[Protocol](../artifacts/runs/native-adapter-consolidation-20261022/PROTOCOL.md).
+One private factor reference, fixedhalf/half complete-operator interpolation,
+currenthead and existingprojection/reset authority. Pending standaloneproject/
+reset/fork refuse; no historicalreferencechain.140affectedchecks/platform pass,
+source findings fixed beforecohort: impossiblecaptureadmission and sourceproof
+afterreset/beforepublication. Contextorchestration shares existingprojector;
+referencehelper has no sibling imports. Capture11paid10complete/96copyelements,
+consolidation8paid3complete; actualcore14/28QR14SVD vs17/34/17reserved, both
+platformsidenticalledgers. No numerical failure/rerun. Alljobsterminal/T/Rreleased.
+No native task experiment/benefitclaim. NextexistingstreammodecaptureA6/warmB6/
+exactafterBbinding/half-half rank8terminalconsolidation, primarywarmcontrol;
+separate frozenprotocolrequired beforemodelwork. ParentR5.4/R2.1/G5 remainopen.
+
+## NPS / R5.4-NS native projection stream — DONE, negative task result
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| NPS-S | root: existing optimizer-control runner, stage helpers/docs | DONE;77PASS/platform/scopedstatics/native negative | Sole numerical executor; rank4 study allowance spent |
+| NPS-T1 | T: tests/test_native_projection_stream.py | DONE/released28 scalar cases | No worker imports/tests/numerical work |
+| NPS-R1 | R: stream stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/COMPATIBILITY/EXECUTOR/ACTUAL ACCEPT | Source/stdlib834,639B; no model/test work |
+
+Shared dirty09ff811f/untracked prerequisites; no Git/install/nested agents.
+[Protocol](../artifacts/runs/native-projection-stream-20261022/PROTOCOL.md).
+Combined82scalar runnerentries430fakeTRAIN within prospective96/512 sharedcaps.
+Compatibility import and direct-PEFT rank-argument failures retained/spent;
+bothused0initializers/TRAIN,seed1. Final source-directed repair passed, total
+3invocations/2seeds/2initializers8elements/2TRAIN; original initialization/TRAIN
+caps retained. Sole native81.144774s/peak13,895,069,696B,12TRAIN/30forwards/
+18Scorer/6serving,oneprojection/reset across60modules. B2/2,A0/2,anchorspass:
+combinedFAIL, independentlyacceptedvalidnegative. All jobs terminal/T/Rreleased.
+ParentR5.4/R2.1/G5 open; next explicit .5/.5 full-operator two-termconsolidation
+against sameownerafterA snapshot, tiny qualification before any newnativeprotocol.
+
+## NAP / R5.4-NP native adapter projection — DONE, released compatibility open
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| NAP-S | root: native owner/new projection helper/fork signature/docs | DONE; combined108PASS/platform/scopedstatics | Sole numericalexecutor,0released models |
+| NAP-T1 | T: tests/test_open_jev_adapter_projection.py | DONE/released31literal cases | No worker imports/numerical/tests |
+| NAP-R1 | R: projection stage REVIEW.md | DONE/released; SOURCE/SOFTWARE ACCEPT | Stdlib/source182,544B/1.1733184s outer |
+
+Shared dirty09ff811f/untracked prereqs; no Git/install/nestedagents.
+[Protocol](../artifacts/runs/native-adapter-projection-20261022/PROTOCOL.md).
+Defaultoff, paidprojection +existingreset authority, fixedallocatedrank/dormant
+Aoriginal/Bzero, protectedheadbase/RNG/modes. No native scientificjob or benefit
+claim. Combined old77 plus new31 gates changed policy/guard/fork boundaries.
+Each59graphs/29paidTRAIN/32forward,8projection attempts4success,7actualcore/
+14QR/7SVD; paid failures and expected refusals preserved. All jobs terminal.
+Next existing stream option +pinnedPEFTcompatibility before frozen rank4native
+case, primary reset-only reference; no new scientificallowance thisstage.
+
+
+## NFC / R5.4-L bounded factor composition — DONE, native integration open
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| NFC-S | root: new core algebra/docs/stage qualification | DONE; exact products + small-core rank projection | 44PASS/platform/scopedstatics, no native/model work |
+| NFC-T1 | T: tests/test_low_rank_composition.py | DONE/released;44literal cases/45compose entries | Worker no imports/tests/numerical work |
+| NFC-R1 | R: factor-composition stage REVIEW.md | DONE/released; SOURCE/SOFTWARE ACCEPT | Stdlib/source63,245B/1.0163505s outer; no numericwork |
+
+Shared dirty09ff811f/untracked prerequisites, no Git/install/nested agents.
+[Protocol](../artifacts/runs/native-factor-composition-20261022/PROTOCOL.md).
+Perplatform caps128compose/128QR/64SVD,32768literal elements,4m scoped product
+upperbound,2threads/120s/1GiBRSS. No new native study, random draws or final/probe
+labels. All accepted A/B/C outcomes preserved; compression benefit unestablished.
+Final45compose/19QR/12SVD attempts,811literal elements/platform; plannedproducts
+466+oracleupper262144 within4m. InjectedQR/SVD failures are expectedtests; no
+numerical failure/rerun. All jobs terminal. Next default-off native-owner
+integration with admitted scaling/orientation, paid attempts/explicit reset.
+
+
+## NPC / R2.1-N.P.C same-task cold C — DONE as zero-shot control
+
+| Dispatch | Exclusive ownership | State | Shared limit |
+|---|---|---|---|
+| NPC-S | root: existing probe runner/helper/docs/stage executor | DONE; explicit zero-history control/source preserved | 53PASS/platform/statics; sole native62.319583100s, allowance spent |
+| NPC-T1 | T: tests/test_native_cold_c_control.py | DONE/released;27new scalar/tiny tests | No worker runtime; root24nativeTRAIN/48forward/platform |
+| NPC-R1 | R: cold-C stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/EXECUTOR/ACTUAL ACCEPT | Stdlib/source556,668B/1.562551s outer; no models/tests |
+
+Dirty09ff811f/untracked prerequisites require shared checkout; no Git/install/
+nested agents. Prior warm ACTUAL ACCEPT reused; no warm model rerun. Fixed
+observed C task/seed17/dose6/typed endpoints, cold A transfer only; different
+history/total compute. [Protocol](../artifacts/runs/native-cold-c-control-20261022/PROTOCOL.md).
+Cold C2/2→2/2 was already correct (not acquisition); A0/2 transfer, anchors pass.
+Initial mypy duplicate-module discovery rc2 preserved; static-only explicit-
+package repair passed, no numerical rerun. All jobs terminal. Next pure bounded
+native factor composition/rank projection for R5.4; not proven interference remedy.
+
+
+## NPT / R2.1-N.P.T/X reserved text-task probe — DONE as negative study
+
+| Dispatch | Exclusive owner / files | State / contract | Budget / next action |
+|---|---|---|---|
+| NPT-S | root: core fixed probe corpus/new CLI, canonical docs/stage executor | DONE; source preserved, A6/onefork/C6/12child readouts complete | 26PASS/platform/statics; sole2B allowance spent |
+| NPT-T1 | T: tests/test_native_reserved_text_probe.py | DONE/released; scalar role/dose/failure and tiny fullfork/proof | No worker runtime; root18nativeTRAIN/30forward/platform |
+| NPT-R1 | R: reserved-text stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/EXECUTOR/ACTUAL ACCEPT | Stdlib/source350,697B/1.6398143s outer; no model/tests |
+
+Same dirty09ff811f/untracked prerequisites, no Git/install/nested agents.
+[Frozen protocol](../artifacts/runs/native-reserved-text-probe-20261022/PROTOCOL.md).
+Default native math/fork/helpers unchanged; existing77tests/negative controls
+reused. Candidate-batched typed predict differs from serving Scorer, so all12
+probe endpoints are new; only initial/afterA weight/RNG bindings reused.
+Sole native97.436940900s/peak13,906,956,288B; C0/2→0/2, A2/2 retained,
+anchors2/2 but NLLdrift+.261443639 fails+.1 guard. Combined FAIL; no recovery
+or CPC benefit. All jobs terminal. Next: separately frozen same-task cold C6
+control; reuse warm report, no rerun or relabeling C as untouched.
+
+## NOF / R2.1-N.P.S/Q native disposable ownership — DONE
+
+| Dispatch | Exclusive owner / files | State / contract | Budget / next action |
+|---|---|---|---|
+| NOF-S | root: native adapter/new owned-fork helper, docs/stage executor | DONE; explicit default-off copy, inherited spent limits, shared frozen base | 77PASS/platform/scopedstatics,0released models |
+| NOF-T1 | T: tests/test_open_jev_owned_fork.py | DONE/released;16literal cases | No worker runtime; actual47graphs/14forkentries/26paidTRAIN/platform |
+| NOF-R1 | R: native-owned-fork stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/executedtiny-owner ACCEPT | Source/stdlib249,712B/5.4223093s outer, no models/tests |
+
+Shared dirty09ff811f/untracked prerequisites, no Git/install/nested agents.
+[Protocol](../artifacts/runs/native-owned-fork-20261022/PROTOCOL.md).
+Prior NTH7update/zero-inference diagnosis accepted/reused; no new scientific
+allowance. This prerequisite enables a separately budgeted future reserved text
+probe; copying source counters cannot renew a spent update/reset/fork budget.
+
+## NTH / R2.1-N.H.X arrived-TRAIN diagnosis — DONE
+
+| Dispatch | Exclusive owner / files | State / contract | Budget / next action |
+|---|---|---|---|
+| NTH-S | root: train-health CLI, loader optional counter reporter, canonical docs/stage execution | DONE; A6→exact state binding→B1, no readouts | 49PASS/platform, sole7TRAIN complete; no prediction |
+| NTH-T1 | T: tests/test_native_train_health.py | DONE/released;25scalar cases | No worker runtime; root5runner/21fakeTRAIN/platform |
+| NTH-R1 | R: native-train-health stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/ACTUAL ACCEPT | Source/stdlib only378,441B≤512KiB, no model/tests |
+
+Same dirty09ff811f/shared untracked prerequisites; no Git/install/nested agents.
+[Protocol](../artifacts/runs/native-train-health-20261022/PROTOCOL.md) preserves
+all prior negatives and budgets. Source inspection caught missing budget clock/
+incorrect7s wall and missing exact completion checks before any runtime; repaired.
+Accepted health math tests reused unchanged. Final6commands exit0; actual7native/
+app/health successes,1179tokens,0predictions/reset/replay/probe,46.464202000s,
+peak13,894,942,720B. All owned jobs terminal. Next: native disposable fork
+ownership and source-preservation tiny tests before any separately budgeted
+reserved text-task probe. Fullgoal ACTIVE; no acquisition/retention benefit claim.
+
+## NUH / R2.1-N.H native realized-update health — DONE
+
+| Dispatch | Exclusive owner / files | State / contract | Budget / next action |
+|---|---|---|---|
+| NUH-S | root: native adapter/new health helper/control CLI/docs | DONE; optional raw-gradient/actual-step groups and permanent costs | 110PASS/platform/scopedstatics, no2B runs |
+| NUH-T1 | T: tests/test_open_jev_update_health.py | DONE/released;15cases norm/state/cost/failure/receipt tests | No worker runtime; root36graphs20paidTRAIN/platform within caps |
+| NUH-R1 | R: stage REVIEW.md | DONE/released; SOURCE/SOFTWARE/executed tiny functionality ACCEPT | Source/stdlib only, no model/test imports |
+
+Same dirty09ff811f/shared prerequisites, no Git/install/nested agents. Root sole
+numerical executor; cost/fixture limits in
+[protocol](../artifacts/runs/native-update-health-20261022/PROTOCOL.md).
+Prior NTR rehearsal negative accepted; fullgoal ACTIVE. This changes diagnostics,
+not recipes/doses/metrics. First preflight mypy exit was unobserved (lost possible
+tool handle); final logged statics supplied the gate, not that preflight.
+Final6commands exit0. Native20attempt/23forward/19back/18AdamW/16commit;
+health11attempt/70copy/66gradient/50step elements/7reports/platform. All owned
+jobs terminal/ownership released. Next bounded TRAIN-only A6→B1 diagnostic
+entry point with separate frozen/reviewed budget; thisstage0released-model runs.
+
+## NTR / R5.4-N.R bounded native TRAIN rehearsal — DONE as negative study
+
+| Dispatch | Owner / exclusive paths | State / contract | Budget / next action |
+|---|---|---|---|
+| NTR-S | root: sequence/control scripts, canonical docs, sole executor | DONE; default-off rehearsal, prospective consent, full paid receipt/source lineage | 107initial+29final checks/platform; two18update/6readout serial arms complete |
+| NTR-T1 | T: tests/test_native_train_rehearsal.py only | DONE/released; root added2receipt regressions | No worker test/model execution; final29cases accepted |
+| NTR-R1 | R: stage REVIEW.md only | DONE/released; SOURCE/SOFTWARE/EXECUTOR/ACTUAL ACCEPT | Stdlib/source/cached scalar review, no model/test imports |
+
+Shared dirty09ff811f/untracked prerequisites, no nested workers/Git/install or
+new framework. Root integrates/executes all tests, preserves original consent/
+charges and accepted NRO mixed-negative result (source/software/actual DONE).
+Shared correctness caps and TWO finite native jobs defined prospectively in
+[protocol](../artifacts/runs/native-train-rehearsal-20261022/PROTOCOL.md).
+Both arms retain A2/2/pass anchors but B0/2; combined goals FAIL. Pair36updates/
+12readouts/8100tokens/187.448s; no retry/third arm. All jobs terminal/ownership
+released; fullgoalACTIVE. Next native R2.1 per-group realized-update diagnostics
+before another comparative model protocol; no dose/reset/replay extension.
+
+## NCB / R5.4-N.B isolated cold-start B control — DONE
+
+Root new control CLI/docs/sole model executor; T only new scalar tests, R only
+stageREVIEW. Dirty09ff811f/shared untracked prerequisites, no nested workers.
+Same fixed6B updates/6postreadouts, reused accepted baseline after initialstate
+binding; oneCPU graph600s20GiB, no dose/retry/newsource.36PASS/platform/scoped
+statics PASS. SOURCE/SOFTWARE/ACTUAL ACCEPT. Recordingfixtures
+10controls/8predictions/16fakeTRAIN/871validations, noTorch. FullgoalACTIVE.
+[Protocol](../artifacts/runs/native-cold-b-control-20261022/PROTOCOL.md).
+Sole6-update/6readout control52.761s/12.94GiB, B2/2 and anchors pass, A0/2(not
+retention). Prior sequentialB0/2preserved; weights/AdamW mechanism unresolved.
+Allownedjobs terminal/ownershipreleased. Next bounded opt-in optimizer-reset
+intervention/test/protocol; no dose extension/retry of either completed study.
+
+## NCA / R5.4-N.A native A→B→A study — DONE
+
+Root core corpus/existing shared readout extraction/new sequence CLI/docs/sole
+executor; T only tests/test_native_choice_sequence.py, R only stage REVIEW.md.
+Dirty09ff811f shared dependencies, no nested workers/Git/dependency changes.
+One prospective seed17 CPUfloat32 graph/18TRAINupdates/24readouts/90forwards,
+600s20GiB, no replay/probe/final data or retry. Recording-fake qualification caps
+64runners/512predictions/256train entries per platform, no Torch fixture work.
+Source/software GO before actual; preserve original native one-update result.
+[Protocol](../artifacts/runs/native-choice-recurring-20261022/PROTOCOL.md).
+Final30PASS/platform, scoped statics and independentACTUAL ACCEPT. Sole18-update
+study132.413s/13.0GiB: A2/2acquired/retained,anchors2/2, B0/2fails, no forgetting
+recovery. No retries/dose extension; all owned handles terminal/ownership released.
+FullR5.4/G5/goalopen; next separately frozen cold-startB6-update developmentcontrol.
+
+## NUA / R5.4-N.U first native TRAIN update — DONE
+
+Native adapter/inbox path53PASS/platform, source/software/actual ACCEPT; one
+update/four readouts within limits. New remained wrong, old NLL worsened.
+All ownership released and handles terminal; fullR5.4/G5/goal open.
+[Evidence](../artifacts/runs/native-open-jev-update-20261022/RESULTS.md).
+
+## NDM / R5.2-N.M six-case native comparison - DONE
+
+Root comparison CLI/native-loader explicit caps/docs/sole model owner; T new tests
+only, R stage review only. Dirty09ff811f shared dependency checkout, no nested
+workers. Fixed6cases/12native calls/32forwards/8192tokens, oneCPU graph600s20GiB;
+reuse frozen lexical+final linear state,12newlinear readouts,0training.
+Final49PASS/platform/statics/independentACTUAL ACCEPT. Native=linear4/6,lexical3/6; allNLLinfinite. R5.2 smallcriterion complete; fullgoalACTIVE. Ownershipreleased/handles terminal.
+[Results](../artifacts/runs/native-decision-comparison-20261022/RESULTS.md).
+
+## NPE / R5.2-N.E probability evaluation - DONE
+
+Root core/app/adapter/saved-case CLI/docs and sole executor; T only new probability
+tests, R only stage REVIEW. Dirty09ff811f shared checkout, disjoint writes, no nested
+workers or inference. Correctness512fakecallbacks/platform; one saved-native pair
+reprocessing (2observations,0newforwards), source/software GO before execution.
+Final92PASS/platform,150callbacks/platform; scoped statics and independent SOURCE/SOFTWARE/ACTUAL ACCEPT. Saved pair0newforwards, all handles terminal/ownership released.
+[Protocol](../artifacts/runs/native-probability-evaluation-20261022/PROTOCOL.md).
+
+## NDC / R5.1 native contracts + R5.2 Choice codec — scoped DONE
+
+Root OpenJev/codec/docs/soleexecutor; C independentCLM then tests, R Context/causal
+then independentreview. All ownershipreleased/handles terminal/scopedCLOSED,
+fullgoalACTIVE. Final63PASS/platform/four-file statics/independentSOURCE+ACTUAL
+ACCEPT, cumulative20build98decodeWin/99Linux underoriginal128/256. First60failed
+Win1failure2errors/Linux1failure preserved; shortIDs+explicitpreparse64depth fixed.
+Metadata60requests1940344B inclroot524289Bvs524288 perresponseFAIL retained,
+no overallresourcePASS. One reviewerbookkeepingNameError retained. No weights/
+vocab/upstreamPython/install/model/RNG/forward/train/probe/final/compute/physics.
+Next ONEbudgetednativeOpenJev2B smoke aftercache/dependency/headroomcheck, not
+morecodec/sourceinventory. [Evidence](../artifacts/runs/native-decision-contracts-20261022/RESULTS.md).
+
+## TDL / R5.2 learned linear reference — scoped DONE
+
+Root corefeatures/adapter/fixedCLI/docs and soleexecutor; T only newlinear tests,
+R only stageREVIEW, all ownership released. Dirty09ff811f/disjoint writes.
+Final87PASS/platform, six-file statics PASS, independentSOURCE/SOFTWARE/ACTUAL
+ACCEPT. Fixtures perplatform6ctors8traincalls24rows61readoutattempts, including
+paidfailure2updates/refusal. Solepublic3ctors6updates18rows48readouts, all4 dev
+snapshots scored after training. Newaccuracy1/3→1 old1 retained; return0/noforgotten
+task, ECE0→.334759 adverse retained. ScopedCLOSED/fullgoalACTIVE/allhandles terminal.
+Originalcaps respected; no neural/RNG/final/replay/probe/native/device/install work.
+Next R5.1 official native model/input pins before adapters/weights, not similar
+vocabulary or capture increment. [Evidence](../artifacts/runs/typed-linear-reference-20261022/RESULTS.md).
+
+## TDR / R5.2 typed decision reference — scoped DONE
+
+Root core/app/CLI/docs/soleexecutor, T onlynewreference tests, R onlystageREVIEW;
+all ownership released. Dirty09ff811f/sharednonoverlap, final110PASS/platform,
+SOURCE/SOFTWARE/ACTUAL independentlyACCEPT. Initial109PASS1FAIL/platform retained;
+tuple/JSON expectation repaired.44cumulative retrievalentries/platform<512.
+Original public report lost to recorder filenamecollision; failed delivery and
+12calls charged. One prospective unchanged replacement accepted, combinedpublic
+24calls/64comparisons/304tokens;3errors retained. No NN/RNG/train/probe/final/SDK/
+native/install. Referenceonly; fullR5.2/R5.1 remainopen. Stage<8MiB/logs<2MiB,
+allhandles terminal/scopedCLOSED/fullgoalACTIVE. Next bounded TRAIN-only feature
+bridge into existing PerceptronLearner/AttributionStream, protocol before fits.
+[Evidence](../artifacts/runs/typed-decision-reference-20261022/RESULTS.md).
+
+## PCI / R4.8 portable comparison input — scoped DONE
+
+Root CLI/inputresource/config/docs/solefixtureexecutor; T only22newtests, R only
+stageREVIEW. Shared09ff811f/nonoverlap, allreleased. 100scalarchecksPASS/platform,
+originalscientificAST/producerpredicate/defaultprovenance unchanged; real source
+Win/WSL+package-tree preflight PASS,0model/SDK/install/cohortrerun. Exactcontrols
+included in895memberwheel,885unchangedruntime bytes. IndependentSOURCE/ACTUAL
+ACCEPT; no currentfunctional failures/retries. Allhandles terminal/scopeCLOSED.
+OriginalTERMS/SCI failures/rights/browser/native/GPU/installedcomparison/cleanGit/
+fullrelease remainopen, fullgoalACTIVE. NextR5.2typedreferencebaseline, notanother
+packaging audit or oldcohort. [Evidence](../artifacts/runs/portable-comparison-input-20261022/RESULTS.md).
+
+## SCI / R4.8 saved comparison delivery — scoped DONE, browser OPEN
+
+Root projector/dispatch/renderer/CLI/package/docs/solefixtureexecutor; T only33new
+scalar tests, R onlystageREVIEW. Dirty09ff811f/disjointwrites; allreleased.
+Initial146both145PASS1FAIL preserved; originalCLIseamrestored, final146PASS/platform,
+scopedstatics/source/software/export/archive independentACCEPT. 1024sourcecells
+exact;894memberwheel,879unchangedruntime members.0models/SDK/native/install,
+allhandles terminal/finiteSCIscopesCLOSED. No more scientificallowance. Prior
+TERMSreadcapFAIL/rights/browser/GPU/freshcomparison/cleanGit/fullrelease stayopen.
+[Evidence and next action](../artifacts/runs/saved-comparison-inspector-20261022/RESULTS.md).
+
+## TERMS / R4.8 component notices and observed native setup — scoped DONE
+
+Prior scoped notice/archive acceptance retained; individualasset permissions and
+clean native/GPU remainOPEN. Metadataworker2MiB cumulativecapFAIL/oldhelperstatic
+failures preserved; no retrospectivecaprevision or scientificwork. Allreleased.
+[Evidence](../artifacts/runs/memory-native-terms-20261022/RESULTS.md).
+
+## WIN / R4.8 current fresh Windows installation — DONE
+
+Rootbuild/install/docs/soleCPUexecutor; Tonlystagechecker; RonlystageREVIEW.
+Shared dirty09ff811f/nonoverlap, requireduntrackeddeps preserved.1sdist1wheel,
+newexternalprefix2dists/no.pth/strictMSIXalias,70exactselectors/nativecommands and
+325installedinspectorcells,1constructor7appends220rows/4batch70queries. Scoped
+statics/source/software/protocol/actual independentACCEPT. No failures/retries in
+build/install/model work; no new production dependency/sourcechange, no SDK/native.
+Allwritersreleased/handles terminal/scopesCLOSED, no moremodelauthority. Browser/
+cleanGit/GPU/terms/comparison/release and broaderscience remainOPEN.
+[Evidence and exact next action](../artifacts/runs/windows-memory-package-20261022/RESULTS.md).
+
+## MDP / R4.4 unrepresented TRAIN-context transfer — DONE
+
+Root NativeScene/nativecomposition+CLI/docs/solemathSDKexecutor; T onlynew35tests,
+R onlystageREVIEW. Shared dirty09ff811f/disjointownership; allreleased. Windows76
+initial+35finalscalar (41unchanged reused), Linux76finalPASS; scopedstaticsPASS.
+Source/software/actual independentlyACCEPT. OneoriginalsetupfailureSPENT, one
+prospectivelyreviewed softwareVulkanenvironmentqualification; Push19/20success
+19/23controls210knownphysics. No source/data/seed/metric change or final/teacher/
+probeupdate; cumulative2actualctors14appends440rows plus2fixturectors14appends14rows.
+Reviewer2schema-checkfailures preserved then simplifiedliteralchecks; no kernels.
+Allrootprocesses terminal, nativeallowances CLOSED, no moreauthority/carry.
+Broadergoal/release/UI/neural/generalization/CPC remainOPEN.
+[Evidence, commands, limits and next action](../artifacts/runs/memory-development-contexts-20261021/RESULTS.md).
+
+## TMI / R4.7 saved memory inspector — scoped DONE, browser OPEN
+
+Root projector/dispatch/sharedtemplate/CLI/docs/solemetadata executor; T owns only
+new34tests, R onlystageREVIEW. Shared dirty09ff811f, disjoint ownership. Final113
+PASS/platform, WindowsstaticsPASS; Linuxstaticsunavailable preserved. Three cached
+exports/sourcecells independentlyaccepted. UI/narrowviewport/sourceclick gate
+NOT executed: missingCLI then fileURL policyblock; no workaround. Reviewerinitial
+searchbyte accounting unknown preserved. Allwritersreleased/handlesterminal, zero
+model/SDK/physics, allscopesCLOSED. FullgoalACTIVE/parentsopen.
+[Evidence and exact next action](../artifacts/runs/taskspace-memory-inspector-20261021/RESULTS.md).
+
+## PKG / R4.8 ordinary CPU installation — DONE
+
+Root packaging/CLI/resources/helpers/docs/sole numerical executor; T new14case
+test only, root later short-ID repair; R stage REVIEW only. Shared dirty09ff811f,
+disjoint writes, required untracked dependencies/unrelated changes retained.
+Independent source/software/actual ACCEPT: Linux75PASS, Windows61verified old
+cases plus14resourcePASS. Original Windows75attempt remains failed (ID/log cap).
+Two wheels/one sdist, fresh offline Linux env, one installed70query CPU replay.
+All writers/handles/finite allowances CLOSED; no native run or further authority.
+[Commands, costs, failures, artifacts and next action](../artifacts/runs/cpu-memory-package-20261021/RESULTS.md).
+
+## NMD / R4.8 optional CPU-native public path — DONE
+
+Root native composition/CLI/helpers/docs/sole model and SDK executor; T new test
+only (root added tuple regression after release); R stage REVIEW only. Required
+dirty09ff811f shared checkout, disjoint writes; unrelated changes preserved.
+Final61PASS/platform, scoped statics and independent source/software/actual ACCEPT.
+The original native wrapper failure remains failed/SPENT; repaired invocation
+completes four known TRAIN scenes. Cumulative2constructors14appends440rows,
+92controls460knownphysics20240candidates242880features, no new labels or promotion.
+All writers/command handles/finite allowances CLOSED, no background work or carry.
+[Evidence, budgets, failures, review and next action](../artifacts/runs/native-memory-demo-20261021/RESULTS.md).
+R4.8 fresh installation/optional GPU/data terms/comparison/release remain open.
+
+## PMD / R4.8 portable CPU child — DONE
+
+Iadapter/Ttests/rootCLI+data+helpers+docs/solemath/RstageREVIEW released, shared
+required dirty09ff811f/nonoverlapping writes. Final34PASS/platform and3coldCPU
+reproductions independentlyaccepted with stdout-recovery capturequalification;
+initialcontextfailure/extraaffectedcohorts/recordercollision preserved. Allcaps/
+source/resource/evidence in [results](../artifacts/runs/portable-memory-demo-20261021/RESULTS.md).
+All ownership/commands/finiteallowances CLOSED; no carry/backgroundwork. Parent
+R4.8freshnative/setup/licensing and broader fullgoal remain open.
+
+## B22 / stronger R4.4 complete-trajectory repair — DONE
+
+Root integrated fixed-input6 plus T18new/42existing tests;60PASS/platform.
+R independently accepted source/software/actual. ONE220row four-scene case:
+Pick19 repaired22controls, old Pick17/Pick20/Push17retain15/15/18. Shared dirty
+09ff811f required dependencies, disjoint writes. Ttests/RstageREVIEW/rootsource,
+case/helpers/docs/integration/solemath. All ownership/commands/finite allowances
+CLOSED; no carry or background job. Prior failures and stronger claims retained.
+[Protocol, exactcommands/costs/failures/review/next](../artifacts/runs/b22-memory-repair-20261021/RESULTS.md).
+
+## BDC / stronger R4.4 Pick19 diagnosis — DONE
+
+T owned only tests/test_pick19_memory_diagnosis.py; root CLI/helpers/docs and
+sole numerical work; R only stageREVIEW. Shared dirty09ff811f dependencies,
+nonoverlapping writes. Source caps2MiB/45commandseconds, actual review6MiB/30s;
+all source/software/actual gates accepted.24PASS/platform and ONE saved-only
+run accepted; no model/native execution. Original negatives retained. Allwriters
+released and command/fixture/diagnostic/review allowances CLOSED; no carry.
+[Commands, costs, failures, review and precise next action](../artifacts/runs/pick19-memory-diagnosis-20261021/RESULTS.md).
+
+## Previous accepted FRT coordination
+
+FRT-I/T released source and tests; root integrated and executed284PASS per
+platform plus one fixed two-reset case; FRT-R independently accepted source,
+software and actual results. Push19/20 successes19/23,42controls210physics,
+8316candidates99792features. All ownership/commands/finite allowances CLOSED.
+No background job or unused allowance transfer. Original accepted parents
+preserved; BP guard31/37 and Pick19 negatives remain. Full goal ACTIVE.
+[Commands, limits, failures and next action](../artifacts/runs/push-memory-transfer-20261021/RESULTS.md).
+
+## Previous accepted PMC coordination
+
+PMC.S/Q/E completed:304 tests per platform and independently accepted eight-scene
+known-TRAIN memory control, Push acquired, Pick17/20 retained, Pick19 negative.
+All ownership/allowances closed. Source/commands/results in its stage. No rerun.
+
+## Preserved earlier coordination
+
+# Current parallel work — October21,2026
+
+## GSC / R2.1 — DONE, all ownership and allowances CLOSED
+
+Root CLI/docs/integration/solemath; Icore/Ttwo tests/RonlyREVIEW, shared required
+dirty09ff811f/disjointwriters.46PASS0skip perplatform, finalfourpathstatics,
+independent source/software/actual ACCEPT. ONEfull198diagnosis:19503retainedpairs/
+39693actual/20190repeats/21calls/1188rows/4752casts,3samePushresetduplicates/
+0raw-or-native32 conflicts.2.0092766souter/RSS102731776B. No model/SDK/native work.
+Allhandles terminal, no backgroundjob/carry, fullgoalACTIVE. Root next: existing
+Push frozen serving for existing fixed-input nearestD12 learner; not yet assigned.
+[Commands, evidence, failures and scope](../artifacts/runs/aggregated-supervision-consistency-20261021/RESULTS.md).
+
+## Preserved earlier coordination
+
+# Current parallel work — October 21, 2026
+
+## Explicit198-row continuation — SOFTWARE / INPUT READINESS ACCEPTED / CLOSED
+
+E198-I nativefacade only72429B/.84scommand/AST; Tnewtest only<512KiB/~2scommand/
+AST/noexecution; RonlyREVIEW; root continuation/inputloader/docs/stage/integration/
+sole numericalexecutor. Shared dirty09ff811f/disjointwriters/no Git/install/network/
+globalenv/nestedagents. Source4MiB60s; rootprepdocs100/180s/statics10/120s.
+103PASS/0skip perplatform,sevenpathstatics/current18pins and source/software/
+actual ACCEPT. Windows14.9176764s/RSS107524096B; Linux31.703653s/RSS90505216B.
+Globalinit4/128normals,batch1361432/1341426,grad1381440/1371436,fwd1401448,
+GNfitpredictteacherSDK0. New13SGD826rows/37fork/1restore actual; allfourmodule
+ledgers/platformsexact, oldthreeunchanged. No fixturefailure/retry. Initialkwargs
+mypy2errors repaired, prelinttextreplacementfixed anddraftreturnforecastcorrected.
+ONEactual publicinputcase0.7543829s/RSS59998208B/log14100B,100TRAIN rows/
+100unchangedoriginalreceipts/derived120IDonly;0modelteacherSDK.11924316BinputIO.
+Rsource/software693045B/2.2761354souter; actual4225329B/.2638624souter<8MiB45.
+All ownership/finiteallowances CLOSED/no carry/live job; fullgoal/usefullearningOPEN.
+[Commands, evidence, costs/errors/skips and next](../artifacts/runs/expanded-corrective-continuation-20261021/RESULTS.md).
+Next unassigned: existing Pushstudy198mode+six-groupreadout, fixed120→128protocol
+usingboth50s/expert18/old80, originalrawweights+sameprefixnewrule, allmetrics/scenes/
+costs frozen/reviewed before ONE task-level fit. No newcollector/framework/sweep.
+
+## Balanced current-student correction collection — SOFTWARE / EVIDENCE ACCEPTED / CLOSED
+
+BPC-T onlynewtests+oldstudyhelperseams released<2MiB/~3scommand/AST/noexecution;
+BPC-R onlyREVIEW; root existingstudy/docs/stage/integration/sole numericalexecutor.
+Shared dirty09ff811f/disjointwrites/no Git/install/network/globalenv/nestedworkers.
+Source4MiB60s; rootprepdocs conservative110/180s/statics15/120s.268PASS/0skip each
+platform, fivepathstatics, current17pins and source/software/actual ACCEPT.
+Windows66.1918432s/RSS107499520B; Linux69.1013261s/RSS102137856B; actualNN/teacher/
+SDK0. New17source15acq45continuation26readout8collection exact; oldkeysexact +new
+counter5previous112calls, forecastschema discrepancy preserved. Root/reviewer
+absent-zero assumptions and rootCRLFbyte comparison repaired via semanticJSON;
+initialtypefailures preserved. No fixture/scientific retry or weakened budget.
+ONE collection146.4080426souter/RSS600424448B/main2103829B.50newlabels/50controls/
+250knownphysics, unchanged120source/exactfailedtrajectory, onlyreset overlaps112.
+No new-label fit/Pick/probe/final/promotion or physicalsuccess. Fullcosts charged.
+Rsource/software1190637B/1.6911399souter; actual6730286B/.8812462souter<12MiB60s.
+All ownership/finite allowances CLOSED/no carry/live numericaljob. Full goal OPEN.
+[Commands, result, costs, errors/skips and review](../artifacts/runs/balanced-student-corrections-20261021/RESULTS.md).
+Next unassigned: existing input/mixedcontinuation explicit198rows, preserve both
+correction50s+expert18+old80/uniqueprovenance/default148, then frozen fit protocol.
+
+## Private TRAIN velocity fit — SOFTWARE / EXPERIMENT ACCEPTED / CLOSED
+
+PVF-I only existing control helper released69187B/~.82scommand/AST; PVF-T new
+velocity tests/old-study helper seams released<1MiB/~3scommand/AST. PVF-R only
+stage REVIEW; root existing study/integration/docs/stage/sole numerical executor.
+Shared dirty09ff811f/disjoint writers; no Git/install/network/globalenv/nestedwork.
+Source4MiB60s; root prepdocs conservative110/180s command/statics15/120s.
+273PASS/0skip per Windows/Linux, seven-path statics, source/software/actual ACCEPT.
+Windows56.2454682s/RSS113823744B; Linux59.8765632s/RSS104615936B. Fixture one tiny
+init32normals, zeroSGD/GN/forward/grad/predict/SDK; exact ledgers match forecast.
+ONE fixed TRAIN fit39.3969266souter/RSS128344064B/2036836B. Same148rows/eightupdates;
+correction mean slightly improves, first/expert/three old means worsen. No new
+native/teacher/probe/final or physical benefit. Reconstruction72SGD+new8 fully
+charged, selected20699648denseMAC plus GN/solver/sourcepred/copies/other costs.
+Rsource/software1255465B/1.5802924souter; actual4839410B/.5181549souter<8MiB45s.
+Initial type/atomic patch/root inspection errors preserved; no numerical retry.
+All ownership/finite allowances CLOSED/no carry/live job. Full goal/useful learning OPEN.
+[Commands, outcomes, costs, failures/skips and acceptance](../artifacts/runs/push-velocity-fit-20261021/RESULTS.md).
+Next unassigned: existing collection path for inherited balanced120 observed states;
+freeze/review one50-query/50-control TRAIN17 collect-only protocol before execution.
+
+## Saved Push D12 control-gap diagnosis — SOFTWARE / EVIDENCE ACCEPTED / CLOSED
+
+PDG-T only new tests/test_push_control_diagnosis.py; PDG-R only
+artifacts/runs/push-control-gap-20261021/REVIEW.md; root existing saved diagnostic,
+integration/docs/stage/sole executor. Shared dirty09ff811f/disjoint writes; no
+Git/install/network/globalenv/nestedagents. Source4MiB60s; root prepdocs180s/
+statics120s. Fixtures once/platform<=160cases/90sWindows105sLinux/RSS1GiB, ZERO
+model primitives. After independent source/software GO, ONE saved-data diagnosis
+30inner45outer/RSS512MiB/64KiB output; full12 distances and exact matches against
+expert18 and correction50, no model/teacher/SDK work. Full goal/useful learning OPEN.
+[Prospective contract and costs](../artifacts/runs/push-control-gap-20261021/PROTOCOL.md).
+122PASS/0skip each platform; six-path statics and source/software/actual ACCEPT.
+Windows2.1876858s/RSS93032448B; Linux15.2414924s/RSS89657344B; all ledgers match,
+0actualNN. ONE saved diagnosis1.2658335souter/RSS66994176B, output19557B;
+bothreferences exactmatchonlyreset/maxerror.3428077102, full12departstep1.
+Physical/history ranges expert1/1, corrections3/1.40800distance+40800exact coords,
+peak565300B,0model/teacher/SDK work. Initial helpertyping error preserved/repaired;
+no fixture/scientific/reviewer failure. Rsource439955B/1.4867065souter; actual
+4314122B/.2902425souter<5MiB45. Tsource<512KiB/~2s/AST, root prepdocs60/180s,
+statics10/120s. All ownership/finite allowances CLOSED/no carry/live job.
+[Commands, full result, costs/failures/skips](../artifacts/runs/push-control-gap-20261021/RESULTS.md).
+Nextunassigned: private TRAIN-only optimizer-velocity fit control in existing Push
+study, preserving all148 rows/weights/dose and learners; inspect existing paired
+control role contracts and freeze protocol before any new numerical work.
+
+## Fixed balanced correction study — SOFTWARE / EXPERIMENT ACCEPTED / CLOSED
+
+BCS-I recipeonly released22159B/~.54scommand; Tonlynewrecipe/oldrouting tests
+released<2MiB/~3s, noNN/testexecution. Rootstudy/docs/stage/soleexecutor;
+RonlyREVIEW. Shared dirty09ff811f/disjointwriters/no Git/install/network/globalenv/
+nestedagents. Source4MiB60s, prepdocs180/statics120; oncefixturesWindows90/Linux105
+252cases0actualNN, thenONEstudy180outer150inner/CPU1GPU0BLAS1/RSS2GiB/stage16MiB.
+Original16pins, repaired24pins/sixpathstatics/parser pass; independent source,
+software, repair and actual ACCEPT.252 original checks/platform plus23 final
+repair checks/platform pass,0actualNN. Original study entry failed premodel;
+prospective engineering repair retains failure/charges/original scientific caps,
+sole re-entry148inner178outer. Actual PushFAIL50,Pick17SUCCESS22,19/20FAIL50;
+172controls860knownphysics,46.7718499souter/RSS597753856B. All5groups retained,
+correctionmean worsens while initial/expertfit improves. NoCPC/usefulacquisitionclaim.
+Rsource2021141B/2.6012459souter; actual7073836B/16.1555231souter<12MiB60s.
+One preserved reviewer saturation6 assertion corrected cached/no model rerun.
+Root prepdocs conservative120/180s/statics20/120s; all ownership/allowances CLOSED,
+no carry/live numerical job. Failed first entry + successful re-entry combined
+48.4144446souter/GNU44.58s underoriginal180/150. Fixedrecipe/no tuningsweep.
+[Prospective scope, weights, costs and acceptance](../artifacts/runs/balanced-correction-study-20261021/PROTOCOL.md).
+[Executed commands, costs, failures/skips and acceptance](../artifacts/runs/balanced-correction-study-20261021/RESULTS.md).
+Nextunassigned: explicitPushD12 saved-TRAIN admission in existing
+scripts/diagnose_learned_robot_control.py, reusing support/exact-input-error logic
+to diagnose saved control/coverage gap before another dose/weight/label intervention.
+Existing admission covers Pick public21/state42; no new NN/SDK needed. Parents OPEN.
+
+## Weighted mixed continuation — SOFTWARE ACCEPTED / CLOSED
+
+WMC-I onlymixedfacade released73355B/~.43s; WMC-T newtests<320KiB/~1.5s,
+source-only. Root existingcontinuation/integratedtests/docs/stage/soleexecutor;
+RonlyREVIEW. Shared dirty09ff811f/disjointwriters/CPU1GPU0BLAS1, no Git/install/
+network/globalenv/nestedagents. All ownership/finite allowances CLOSED/no carry/job.
+[Protocol/budgets](../artifacts/runs/weighted-mixed-continuation-20261021/PROTOCOL.md).
+57PASS/0skip/platform, fivepathstaticsPASS, source17pins and actualACCEPT. No fixture
+retry/science/SDK/probe/final. Win11.5324865outer/RSS100167680; Linux23.8015277/
+RSS87515136. SourceR569734B/.0737087internal/1.5962978outer; actual206702B/
+.0274265internal/.4806170outer<4MiB45s/noerrors/NNrecompute. Rootconservative
+70/180s prepdocs/15/120sstatics. Initial3type errors and unexecuted23caseGO kept;
+final24 includes two concrete paid/overflow additions, no criteria/cap change.
+[All commands, counts, failures/skips/review](../artifacts/runs/weighted-mixed-continuation-20261021/RESULTS.md).
+Nextunassigned: one frozen prefix/group-balanced148row/eight-update learning study
+through existing study against uniform120. Keepallrows/negatives/no tuning/another
+runner. Parent usefuladaptation/fullgoal remain OPEN.
+
+## Positive row-weighted continuous BC — SOFTWARE/MATH/STATE ACCEPTED / CLOSED
+
+WBC-I only core continuous_bc released20597B/~.4s; WBC-T only newcoretests released
+<.1MiB/~1.127s; source-only/no numerical execution. Root native/newnativetests/
+docs/stage/soleexecutor, WBC-R onlyREVIEW. Shared dirty09ff811f/disjoint writes/
+CPU1GPU0BLAS1/no nestedagents/Git/install/network/globalenv. All ownership released.
+[Prospective protocol and budgets](../artifacts/runs/weighted-continuous-bc-20261021/PROTOCOL.md).
+
+Final144PASS/0skip per Windows/Linux, sixpathstaticsPASS. OriginalWindows142PASS/
+2FAIL+teardown retained: fixture NumPy scalars violated native-number records.
+Helper fixed and genuine heldout construction moved outside raises; production/
+criteria unchanged. Prospective30s fullrepair after measured2.19s; old charges kept.
+Winrepair2.0219492outer/RSS92925952B; Linux17.1886249/RSS83447808B. Exact new module
+and whole-cohort ledgers match acrossplatforms, no science/SDK/probe/final.
+Rsource448093B/2.7437173souter; two reviewer tooling errors retained. ActualR ACCEPT
+142908B/.0259773sinternal/.2622696souter<4MiB45s/no errors/no NN recompute. I/T/R
+allowances CLOSED/no carry/livejob; root conservative90/180s prepdocs,20/120sstatics.
+[Exact commands, failures, counts and acceptance](../artifacts/runs/weighted-continuous-bc-20261021/RESULTS.md).
+
+Nextunassigned: carry owned weights through existing recorded mixed continuation
+with objective/weight provenance/all148realrows/paid failures; qualify before ONE
+frozen prefix/group-balanced study. No anotherrunner/baselinerepeat/physicalbenefit
+claim. R2.1 parent/useful adaptation/fullgoal remain OPEN.
+
+## Corrective learnability readouts — SOFTWARE + DIAGNOSIS ACCEPTED / CLOSED
+
+CLR-I readouthelper released44756B/.64scommand; CLR-T new19genuinetests released
+<.2MiB/.695scommand, readingsnotfullyinstrumented. CLR-R onlystageREVIEW; root
+existingstudy+itsroutingtests/docs/stage/soleexecutor. Shared09ff811f dirtydeps/
+unrelatedchanges preserved; no Git/index/worktree/install/globalenv/subagents.
+[Protocol and disjoint ownership](../artifacts/runs/corrective-learnability-readouts-20261021/PROTOCOL.md).
+
+247PASS/0skip perWindows/Linux, six-pathstaticsPASS. One diagnosis terminal0/
+completeTrue/33.9997286souter/RSS114892800B,112/120fivegroupreadouts, zeroSDK/newdose.
+Correctionmeanimproves butfirstaction andexpertPushworsen; all120nativefailures
+remain. RactualACCEPT8157813B/.0938331internal/.5626026outer <8MiB45s including
+failedcheckerandboundedremainingread. Checkerconfusedopaque callbackcost with
+unreturnedwork; errorpreserved, sourcesemanticscorrected/no scientificretry.
+Rsource2213564B/.0745491s/2.4667264s. Rootprep/docsconservative120/180scommand/
+statics15/120s; all currentallowances/ownershipclosed/no carry/livejob.
+[Full evidence, commands and costs](../artifacts/runs/corrective-learnability-readouts-20261021/RESULTS.md).
+Nextunassigned: optionalpositiverowweights inexistingcontinuousBC/nativepath,
+defaultsexact; qualifygradient/equivalence/isolation beforeonefrozenprefix/group
+repair study. No provenbenefit or newcomparisonauthorizedbythisclosedscope.
+
+## Push on-policy corrections — SOFTWARE + NATIVE RELEASE ACCEPTED / CLOSED
+
+POC-I newcore src/core/push_cube_corrections.py(released); POC-T newtests only;
+POC-R stageREVIEW only; root newcollector/existingstudy+tests/docs/stageexceptREVIEW
+and soleexecution. Shareddirty09ff811f/disjointwrites/CPU1GPU0BLAS1, sourceworkers
+4MiB60s/no NN/SDK/testimports/subagents. Rootprepdocs180scommand/statics120s;
+onceplatformzeroNNfixtures then ONE50query/control correctioncollection onlyafter
+review/current gates. No extra dose/teacheractionexecution/probe/final/promotion.
+[Prospective scope and budgets](../artifacts/runs/push-on-policy-corrections-20261021/PROTOCOL.md).
+
+I/T released before rootgates. I74448B/.65scommand; Tnamed<.3MiB/1.118s+45KiB/
+.425sregression, readtotalsnotfullyinstrumented. Linux234PASS; Windows183unchanged+
+51repairPASS, original232PASS2FAIL preserved. SevenpathstaticsPASS/55pinsheld.
+Sole native99.3743354souter/RSS564776960B,50labels/50studentcontrols250knownphysics,
+exactoriginalfailed112trajectory,0extraSGD/Pick. All50labelsalign; no acquiredbenefit.
+Rsource+software2063992B/.0692749s/2.7741491s; actual6671577B/.0849981/.5194976
+pluswrites, under8MiB45s/no checkererrors. Rootprepdocsconservative120/180scommand/
+statics15/120s; all currentownership/allowances CLOSED/no carry/live job.
+[Exact evidence/costs/failures/skips](../artifacts/runs/push-on-policy-corrections-20261021/RESULTS.md).
+Nextunassigned: all148-row mixed correctivefit using50new+18expert+80oldrefs;
+qualify necessary130→148 mixedrowbound(head130/default8 preserved), composeexisting
+study andfreeze8updates/four-sceneprotocol beforeexecution. No cap-only endstate.
+
+## Fixed candidate112 native endpoint — SOFTWARE + NEGATIVE ACTUAL ACCEPTED / CLOSED
+
+Root existing study driver/stage exceptREVIEW/docs/sole numerical executor;
+N112-T existing study test module only; N112-R stageREVIEW only. Shared dirty
+09ff811f dependencies require disjoint writes, no recursive workers/Git/install.
+CPU1/GPU0/BLAS1; workers source-only4MiB60s, actual review separate8MiB45s;
+root prep/docs150s command/statics120s. Once/platform routing fixtures0actualNN,
+then exactly one fixed four-scene study only after review/current gates. No new
+dose/probe/final/teacher/tuning. Earlier budgets and all negative results remain.
+[Prospective protocol and acceptance](../artifacts/runs/mixed-longer-native-endpoint-20261021/PROTOCOL.md).
+
+T released before root formatting/gates,173PASS/0skip per Windows/Linux, four-path
+statics PASS;49bindings held through independent actual review. Tknown<2MiB(not
+fully instrumented)/2.624scommand/source-only. Rsource+fixtures2018141B/.1603575s
+internal/1.9394422souter; actual6630724B/.1332082s/.3511721s plus concise append,
+under8MiB45s/no checker errors. Root prep/docs conservative100/150scommand/statics
+10/120s; all ownership/current allowances CLOSED/no unused carry/live job.
+Sole native33.0737984souter/RSS568807424B/191controls955knownphysics: Push0/50,
+Pick1/41,0/50,0/50; no useful acquisition, Pick20 loses prior success. Paid48GN+
+72SGD+112readout reconstruction;0newdose/teacher/probe/final. First static5optional
+typing errors and Rreset/WSLpath findings fixed prelaunch; no runtime retry.
+[Exact commands, costs, failures and limitations](../artifacts/runs/mixed-longer-native-endpoint-20261021/RESULTS.md).
+
+Next unassigned/unimplemented: TRAIN-only Push on-policy correction query/collection
+through existing port/teacher with actual physical state/executed studenthistory;
+qualify receipts/isolation/paid failures before separate frozen collection/fit/native
+protocol. Original success-only expert export and every negative remain preserved.
+
+## Longer fixed mixed TRAIN fit — SOFTWARE + ACTUAL ACCEPTED / CLOSED
+
+I adaptercap only; T newlongercontinuationtests; R stageREVIEW; root existingdriver/
+routingtests/docs/stageexceptREVIEW/soleexecution. Shared dirty09ff811f/disjointwrites;
+source-onlyworkers/CPU1/GPU0/BLAS1/no recursiveagents. Explicitmixedmax64 with
+existingdefault/head8 preserved, then onefrozen64TRAINfit aftergates/0newnative.
+[Prospective scope/budgets](../artifacts/runs/mixed-longer-train-fit-20261021/PROTOCOL.md).
+
+I/T released sources before root gates; R actual acceptance/ownership closed.
+I107267Bsource/.66scommand; Tknown<.5MiB/.984s with nonexhaustive read counter
+disclosed, each4MiB60s/source-only. Root prep/docs conservatively100/150s command,
+statics10/120s; all unused carry closed.193PASS/0skip per Windows/Linux;
+seven-path AST/Ruff/format/Linuxmypy pass. All49bindings held through review.
+Sole study20.5906742souter/RSS80891904B plus one pure saved-report comparison;
+64newSGD6272rows plus readout4grad98/12fwd294, paid48GN+8SGD reconstruction.
+Push TRAIN error improves, every old group mean worsens;0newnative/probe/final.
+Rsource+fixtures1879985B/.1673188sinternal/1.4899359souter; actual5558298B/
+.1373210s/.3951989s plus concise writes, under6MiB30s/no failures. One initial
+typing finding fixed prefixtures; no fixture/science runtime failure/retry. All
+current ownership/engineering/fixture/science/review allowances CLOSED, no carry
+or live job. [Exact commands/costs/failures/skips](../artifacts/runs/mixed-longer-train-fit-20261021/RESULTS.md).
+Final pure docs/pin check PASS49bindings/mainSHA/live introductory links; initial
+global-heading assertion failure preserved and scoped to the active section.
+Stage1973805B before final receipt/note, under16MiB; no further model/test work.
+
+Next unassigned/unimplemented: existing-study explicit native candidate112 endpoint,
+one Push17 +Pick17/19/20; qualify then freeze/review new four-scene protocol before
+execution. No additional dose/tuning or authority from the closed current scope.
+
+## Remaining reserved-reset learnability — SOFTWARE + ACTUAL ACCEPTED / CLOSED
+
+Root driver/existingroutingtests/docs/stageexceptREVIEW/soleexecutor; I newinput
+helper(released), T newmixed+inputtests(released), R onlystageREVIEW. Source-only
+workers, shared dirty09ff811f dependencies, disjointwrites/no recursiveworkers.
+I130012Bsource/~1scommand(one0Bmissingguess), Tknown~.3MiBreads/~2scommand with
+nonexhaustive bytecounterexplicit; bothwellbelow4MiB60s, no model/SDK/import/test
+execution. Root scopedstatics/sourceprep within150sengineering/120sstaticlimits;
+allmodelworkonlyrootdeclaredfixtures+soleexperiment. No unspentallowancecarry.
+
+Current47pinsheldthroughactualreview. Linux143PASS; Win134unchanged+9repairPASS,
+original9failretained; repair0NN. Genuinefixture/platform1init8normals3SGD6rows,
+19pred38rows5grad10rows24forwards48rows. Sole study20.256392souter/81735680B,
+2privateSGD36rows+paid48GN/8SGDreconstruction,0newnative. Bothfreshgainspositive,
+Mixed oldfitallworse; no physical/CPC/releaseclaim. Rsource1782888B/.1600701s/
+2.701348s; actual<=5292545B plusappend/.6247998souter, firstinternalunknown.
+Reviewer serializeddictorder checkerfailure preserved/remaindersuccess; no NNretry.
+Allcurrent ownership/rootengineering/fixture/scientific/reviewallowances CLOSED,
+no livejob. [Exact scope, commands/costs/failures/limits](../artifacts/runs/mixed-remaining-learnability-20261021/RESULTS.md).
+Current closeout: root source/read/docs/preparation conservatively charged100/150s commandtime, scopedstatic10/120s; remaining50/110s CLOSED, no carry. Separate fixture/scientific costs are recorded above. Final47pins/rawresultSHA and activeplan/handoff links verified; no further model/test work.
+
+Next unassigned: explicitmixed-only64update TRAINcontinuation qualification,
+then separatelyfrozenlongerconventionalfit; no optimizer/CPCfeature orprobe/final
+selection. Old8dose results/budgets unchanged; thisfuturework isunexecuted.
+
+## Per-group TRAIN fit diagnosis — SOFTWARE + ACTUAL ACCEPTED / CLOSED
+
+Root existing driver/docs/stageexceptREVIEW/soleexecution; I new helper, T new
+helpertests+existingstudytests, R onlyREVIEW. Authors released before root checks;
+all source/test pins held through independent actual acceptance. CPU1/GPU0/BLAS1,
+source-only workers with no model/SDK work. Final118PASS/platform +scopedstatics;
+sole fixed diagnosis12.9796513souter/80973824B,0newnative. Paid reconstruction
+48GN+8SGD plus eight diagnosticgradients/196rows and24forwards/588rows. MeanPush
+improves, firstgripperwrong/alloldgroupsworse; no usefulness/CPC/release claim.
+Rsource+fixture941781B/.0989138sinternal/1.9612185souter; actual3583918B/.1011439s/
+.3155293s, no reviewerrors. I/T source allowances closed/released; authorASTPASS,
+one Tpatchcontextmiss repaired before gates. All current fixture/science/review
+allowances and ownership CLOSED, no livejob/unusedcarry. Exact commands/work/
+limits/failures/skips in [RESULTS](../artifacts/runs/push-train-fit-diagnosis-20261021/RESULTS.md).
+Next unassigned: compose existing reserved23/24 probe atsource40/mixed48 with
+originalthree TRAINreadouts; check mixedcompatibility/isolation before frozen
+probe/reconstructionbudget. Existing data/API reused, no new collector/framework.
+
+## GRC Pick retention — SOFTWARE + ACTUAL ACCEPTED / CLOSED
+
+Root owned existing driver/docs/stageexceptREVIEW/soleexecution; T only existing
+tests, R only REVIEW. All ownership/current engineering/native/review allowances
+closed, no live job. Final93checks/platform/scopedstatics and independent actual
+acceptance. NewPick17/20success16/14,19fails50;0newPush,80controls400knownphysics.
+Both original historical Push copies and full source/mixed continuation match;
+reconstruction48GN+8SGD paid again, earlierfailedrun preserved. Pure98rowstatic
+consistency0exactconflicts; firstpayloadcollision/loss preserved, prospective
+identicalpure repair charges2x4753pairs,0NN. Review had no tooling error.
+Next unassigned: existing per-group TRAIN conditioning/residual readouts; pay any
+necessary deterministicrebuild and diagnostics,0newnative/no newmodeldose.
+[Evidence and limits](../artifacts/runs/mixed-pick-retention-20261021/RESULTS.md).
+
+## GRC physical question — partial negative + repair ACCEPTED / CLOSED allowances
+
+Root owned existing driver/canonical docs/stage except REVIEW/sole execution;
+T existing tests only; R REVIEW only. Original54checks/platform qualified the
+selected profile; one native run failed overall after8mixed updates and negative
+Push50controls. NoPick. Canonical reset repair passes19affected checks/platform
+and independent acceptance; full retention/study/useful acquisition remains open.
+Root/T/R ownership and current engineering/native/review allowances closed; no
+live job. Original failed result and exact producer snapshots preserved. Source
+review, actual GNU parser and repair filename errors remain recorded; no numerical
+retry. Next unassigned: frozen Pick-only retention composition reusing valid Push
+negative; pay source/candidate reconstruction, avoid repeated Push/teacher.
+[Evidence and limits](../artifacts/runs/mixed-push-study-20261021/RESULTS.md).
+
+## GRC — private mixed-gripper continuation SOFTWARE ACCEPTED / CLOSED
+
+R2.1-GRIPPER-CONTINUATION software accepted; physical/useful acquisition remains
+open. Root owned CTC/native SGD integration/docs/sole execution; I new bounded
+mixed helper/facade; T new tests; R source/actual review only. All ownership and
+current allowances closed, no live job. Shared dirty09ff811f dependencies retained.
+44 checks pass per Windows/Linux (17new+27legacy), scoped statics and independent
+actual acceptance. One capacity interruption after positive review was resolved
+by annotation-only resumption, no rereads or numerical retry. All negative PLC
+results and original failures remain. [Evidence](../artifacts/runs/mixed-gripper-continuation-20261021/RESULTS.md).
+Next scope assigned above: explicit mixed-method profile in existing Push driver,
+reuse prior controls, qualify routing/accounting then freeze one physical question.
+
+## PLC — fixed learned Push continuation ACCEPTED / CLOSED (negative acquisition)
+
+R2.1-PUSH-CUBE-LEARNED-CONTINUATION SOFTWARE + LOCAL STUDY accepted;
+useful new-task acquisition/parents OPEN. Root owned driver/integration/docs/sole
+serial execution; T released tests, I reference/cost then onecached diagnosis,
+R source/software/scientific reviewonly. All ownership/current allowances closed;
+no live numerical/native job. Dirty09ff811f dependencies preserved, no isolation
+claim. Final22checks/platform/statics pass; originalWindows20pass2fail remains.
+One native trial:Push0before/after; oldPicksuccess17/37/20 vs17/20/20, soB19+17cost.
+56GN3680rows224solves;174controls870knownphysics. No retry/teacher/final/probe work.
+Two reviewer schema mistakes retained; simplified direct readback completed scoped
+acceptance withinoriginal6MiB, with no thirdchecker/modelreexecution.
+[Evidence and limits](../artifacts/runs/push-cube-learned-continuation-20261021/RESULTS.md).
+Next unassigned R2.1-GRIPPER-CONTINUATION:opt-in private all-layer BP/mixedBCE,
+finite endpoint learning/isolation/cost tests first, commonMSE/headGN default intact.
+
+## PST — PushCube TRAIN supervision ACCEPTED / CLOSED
+
+R4.4-PUSH-CUBE-TRAIN-SUPERVISION SOFTWARE and KNOWN TRAIN-17 LABELS accepted.
+I owned new pure core, T new tests, root collector/integration/docs/sole execution,
+R stage REVIEW only; all ownership and current allowances closed, no live job.
+Final combined 48 checks/platform and scoped statics accepted. Original Windows
+44-pass/4-fail cohort remains charged; repaired within original cumulative caps.
+One frozen native trial: success/18 released rows, 18 controls/90 known physics,
+19 grasp queries/38 source-derived force calls; no learner work or retries.
+[All commands/costs/failures/review](../artifacts/runs/push-cube-supervision-20261021/RESULTS.md).
+Next unassigned R2.1-PUSH-CUBE-LEARNED-CONTINUATION: direct existing live joint
+candidate -> existing continuation with new labels/old references; no repeat old
+native rollouts or new checkpoint framework. Full goal/scientific parents ACTIVE.
+
+## PUS — explicit PushCube TRAIN port ACCEPTED / CLOSED
+
+Root owned pure core/integration/docs and all serial execution. I owned the new
+infra port; T owned fake boundary tests; R owned only stage REVIEW.md with bounded
+source/cached review. All ownership is released; no active numerical/native job.
+Final combined 69 checks pass per platform, scoped statics and independent actual
+reviews pass. Native v2 completes the frozen TRAIN-17 trace: 50 controls, 250 known
+control-physics steps, zero task success. The original qualification and constructor
+diagnosis remain failed and charged. Reviewed scalar-norm representation correction
+adds no angular tolerance. Every prospective allowance and failure is retained.
+[Commands, costs and reviews](../artifacts/runs/push-cube-train-port-20261021/RESULTS.md).
+All current PUS fixture/native/review allowances are closed; full goal stays ACTIVE.
+Its then-next supervision implementation is now accepted above; learned
+continuation with explicit old references remains unfinished.
+
+## CTC — existing-source TRAIN continuation ACCEPTED / CLOSED
+
+R2.1-TRAIN-CONTINUATION SOFTWARE complete; fullgoal/parents OPEN, dirty09ff811f
+preserved. I onlynewadapter191124Bsource/AST; T onlynewtests<=130659Bsource/AST27cases,
+no author numerical execution. Root integration/docs/solefixtures. R onlystage/
+REVIEW.md, SOURCE+REPAIR GO, ACTUAL ACCEPTED, ownership released.
+[Protocol, all commands/results/costs/failures](../artifacts/runs/continuous-train-continuation-20261021/RESULTS.md).
+Rsource300757B<4MiB; two metadata errors/guessedpath/docpatch failure preserved;
+simplified directreads. Ractual100259B+3478Bappend/.4647632souter<6MiB30s, no
+actualerror/rerun. OriginalWindows26pass1fail2.142622s/RSS97021952B; binaryfixture
+units invalid beforeadapter. ProspectiveONLYfixturecorrected; onebinaryrepair1pass
+1.347617s/RSS92393472B, fullLinux27pass5.663570s/RSS88862720B. No fullWinrerun claim.
+Original initcapWin1->2 explicitlyprospective, chargesretained. Allruns23GN344rows/
+46solves826aug/3init24SOURCE-DERIVEDnormals/0predictSGDfitSDK. Fourpathfinalstatics0,
+allstaticsets3.4777711s<120. Currentfixture/reviewauthority CLOSED, no owned joblive.
+
+Future distinct-task readonlyassessment found PushCube but missing Pick grasp/raw42
+semantics; source124879B+unmeasuredmetadata, full128KiBcapconformanceunproven.
+Two sourcepath/tool failures thenCPUfolder simplification preserved; no writes or
+nativeexecution. Assessment released; next UNASSIGNED R4.4-PUSH-CUBE-TRAIN-PORT,
+explicitstate/controller/role/success qualification before newteacher/native study.
+
+## JAN — ordinary native joint acquisition command ACCEPTED / CLOSED
+
+R4.5-JOINT-ACQUISITION-WORKFLOW and actual-command child complete; broad parents
+remain OPEN. Shared dirty09ff811f preserved, production unchanged. Root sole
+producer/integrator/docs. JAN-R curated_review only stage/REVIEW.md, ownership
+released; source GO then actual ACCEPTED. Actual3836888B+3767Bappend/.3320797souter
+within original6MiB30s, ONE cached TAR semantic read,0model/helper/SDK reruns.
+Initial source-inventory checker failure preserved (exact failed metrics unknown).
+JAN-E bp_adaptation_readback read-only critical path3380209B<=4MiB, no writes or
+numerical execution; released. Existing private probes found, existing-source
+TRAIN continuation still artifact-only; PickCube-only native port is not new-task
+support. Root selected substantive R2.1-TRAIN-CONTINUATION next, UNASSIGNED.
+
+[Protocol, exact command, all results/costs/failures](../artifacts/runs/joint-acquisition-native-cli-20261021/RESULTS.md).
+One pinnedLinux native91805terminal0/17.1747456souter/GNU13.41s/RSS539922432B;
+17/19/20 success17/20/20controls,57total285knownCONTROLphysics. Source/acquisition
+exact TAR except declared stream elapsed time; original old-fit regressions stay.
+48GN2896rows192solves24064aug/1source-derived init1024draw/91pred973rows/0SGDfits.
+37sources/6original inputs/argv current, owned reports/receipts/history/flags pass.
+All current work/review allowances CLOSED, no owned job live; no new numerical
+allowance or full-goal readiness implied. Full repository goal ACTIVE.
+
+## JAC — joint acquisition CLI intake ACCEPTED / CLOSED
+
+R4.5-JOINT-ACQUISITION-WORKFLOW / CLI intake complete; actualcommand/fullparentOPEN.
+Shared09ff811f preserved. I onlynewreader618375B/AST; T onlynewtests63cases/AST,
+reported>=378504B+~25KiB/exacttotalunknown<405KiB. Bothreleased0project/model/SDK/
+payloadexecution. Root3existingscripts/integration/format/statics/protocol/freezes/
+solechecks/docs. R onlyREVIEW.md+REVIEW_REPAIR.md, source1160383B, actualACCEPTED
+1185097Bevidence/.5328653souter+notes withinORIGINAL6MiB30s; firstcheckerpadding
+failure964684B/.2782944s preserved, narrowrepair220413B/.2545709s, no rerun.
+[Full evidence and exact next action](../artifacts/runs/joint-acquisition-cli-20261021/RESULTS.md).
+InitialWin1/84pass11fail1teardownerror/RSS106856448/0preflight preserved; synthetic
+requiredNonefields missing, prospectiverepairONLY2fields/noassertion/productionchange.
+RepairedWin0/95PASS5.2777684s/RSS100331520;Linux24773terminal0/95PASS10.9239459s/
+RSS95186944;ledgers7preflights2429rows4858views each,0NN/SDK(sourceguardbased).
+Helpactualmodule0/.7238901s/6743B reused. Final7pathstatics0, total4.4289011s;
+initial2kwargs/4testtypingfailures preserved.30sources/currentargv/logs/resources/
+selection/consumedhelp/originalfailure independentlychecked. Allownership/current
+correctness/reviewallowances CLOSED, no joblive. No scientific/nativeallowance.
+Next UNASSIGNED ONEsmallprospectivefixed nativeCLI validation; fullparentsOPEN.
+
+## JAW — typed joint acquisition profile ACCEPTED / CLOSED
+
+R4.5-JOINT-ACQUISITION-WORKFLOW / typed software child complete; full parent OPEN.
+Shared dirty09ff811f preserved. I onlyhelper510083sourceB/AST; T onlytests408749B/
+AST35cases; both released, no numeric/project/NumPy/SDK execution. Root runner
+re-export/integration/format/statics/protocol/commands/freezes/solefixtures/docs.
+R onlyREVIEW.md+REVIEW_REPAIR.md, sourceGO875783B/finalmeta9578B/.0003986s.
+ActualACCEPTED after one preserved metadata-log parser failure705332B/.2875199s
+outer; narrowrepair22592B/.2367898s, aggregate727924B/.5243097s plusnote/append
+within ORIGINAL6MiB30s. No renewed allowance or numerical rerun.
+[Contract](../artifacts/runs/joint-acquisition-workflow-20261021/PROTOCOL.md) ·
+[Commands, all outcomes, costs, failures and next action](../artifacts/runs/joint-acquisition-workflow-20261021/RESULTS.md).
+Root9451Win/31908Linux terminal0,58PASS0skips each,10.707305/16.763195s,
+RSS106676224/98316288B; ledgers exact48GN2896rows192solves24064aug1init1024draw
+70pred952rows36fakecontrols/conditioning8calls148rows16fw8bw8736vals69888B/0SGDfits.
+28sources/currentargv/statics/frozen58selection/resources/logs independentlychecked.
+Initialtyping2findings/sourcehistory/reservation/draftassertion/unexecutedLinuxargv
+repair and reviewerfailedchecker preserved.0SDK/scientificcohort; fakeIO no physical
+success claim. All ownership/currentcorrectness/review allowances CLOSED, no joblive.
+Next UNASSIGNED CLIreceiptintake then separatelybudgeted actualcommand; fullparent
+and scientific/release gaps OPEN. No artifactimports/newframework/guard37/final.
+
+## TAG — frozen acquisition guard31 ACCEPTED / CLOSED
+
+R2.1-TRAIN20-ACQUISITION-GUARD31 fixed task complete; old two-reset/full parents
+remain open. Shared09ff811f preserved. TAG-I only stage/case.py113144 sourceB/full
+protocol/AST pass,0 own errors/editing time unknown. Root protocol/integration/
+Optional-candidate check/reference-summary seal/format/statics/freezes/preflight/
+sole producer/canonical docs. TAG-R onlyREVIEW.md, sourceGO978577B/finalbinding
+.0212014s and actual ACCEPTED9554010B+2389B append/.180407600s internal/.4287613s
+outer,0 tooling errors/reruns. All43 sources/15 inputs/argv, whole TAR, all lineage/
+receipts/current metadata seal, paid copies/old-new guard chains/history/initials/
+scores/work/literal GNU resources independently checked. All ownership released,
+current study/review allowances closed; no owned job live. No worker numerical,
+project/helper/test/SDK/NumPy execution or recursive agents.
+
+Root61571 terminal0/15.9390517s, self13.943188514s/GNU15.83s/550965248B observed RSS.
+Guard31 succeeds22controls110physics, all3 new40-minus-old32 scores+1. Training
+closed before oldguard read; no extra training/newteacher/probe/final/promotion/
+37/tuning.48GN2896rows192solve24064aug1init1024draw56pred938/0SGD; knownMAC5159936;
+input26349974B/3passes. Initialmypy1Optional finding and reviewer baseline-summary
+seal gap fixed BEFORE numerical work; all final statics0, previous receipts kept.
+Preserve old31negative/renderfailure/37timeout/unknown work/originalclosedbudget.
+[Evidence and exact next action](../artifacts/runs/train20-acquisition-guard31-20261021/RESULTS.md).
+
+Next UNASSIGNED R4.5-JOINT-ACQUISITION-WORKFLOW: explicit existing robot-learning
+runner profile for already-verified fixed joint recipe; typed qualified inputs/
+admission/composition/focused tests first, then ordinary command receipt intake.
+No artifact imports/new orchestration/optimizer, no model/dose change fromguard,
+no automatic guard/final/promotion. Separate prospective actual-CLI budget after
+software/review gate; current goal remains active.
+
+## TAR — acquisition with old-reference rehearsal ACCEPTED / CLOSED
+
+R2.1-TRAIN20-ACQUISITION-REHEARSAL scoped task complete; full parents remain open.
+Shared dirty09ff811f retained. TAR-I owned only stage/case.py, released142981 sourceB/
+AST pass, authoring time unknown,0 failures. Root owned protocol/integration/wrapper/
+format/statics/41-source13-input/argv/preflight/sole producer/canonical docs. TAR-R
+only REVIEW.md: sourceGO975754B/finalbinding0.0104134s; actual review accepted after
+one preserved static-metadata key error (exit1, outer0.2812592s, exact first reads/
+internal time unknown, guard<=10MiB passed). Prospective one10MiB/30s repair,
+aggregate<=20MiB/60s:7590573B+2845B append,0.204960200s internal/0.4407874s outer,
+no repair error or numeric rerun. Own41-source proof/root post-run receipt reused;
+13 inputs/argv rechecked, all scientific outcomes/copies/receipts/lineage/native
+chains/pairs/contrasts/resources verified. All ownership released, study/review
+allowances closed, no owned job live. No recursive agents/model work by workers.
+
+Root9840 terminal0/18.8856788s; self16.920288577s/GNU18.79s/553746432B observed RSS.
+Native17/19/20 succeed17/20/20 controls,57/285physics; all three joint-minus-C20
+scores +1/+1/0, versus NR20 all0. Old-group fit losses all rise slightly.48GN2896
+rows192 solves24064 augmented rows,91pred973rows/1init1024draw/0SGD, net40/2776;
+input32053500B/root-attributed5passes. Fixed source32 then joint130, no preceding
+20-only continuation. Extra920 old-label exposures/compute/history differences
+explicit; no intermediate retention/generalization/CPC/reliability claim.
+[Commands, outcomes, costs and review repair](../artifacts/runs/train20-acquisition-rehearsal-20261021/RESULTS.md).
+
+Next UNASSIGNED R2.1-TRAIN20-ACQUISITION-GUARD31: freeze exact40 candidate fromTRAIN,
+reproduce accepted reports before one existing scoring-only31 scene. Separate
+small prospective budget/source review first; no new37, teacher, updates, probe,
+final, promotion or guard-driven selection. Preserve old32 guard31 negative/
+renderer failure/37 timeout and its unchecked two-reset parent. No allowance yet.
+
+## NROC — matched old-information native control ACCEPTED / CLOSED
+
+R2.1-REHEARSAL-OLD-INFORMATION-CONTROL scopedtask complete; fullparentsOPEN.
+NROC-I onlycase.py released107612sourceB/ASTPASS/authoringtimeUNKNOWN,0failures;
+rootprotocol/integration/phasequalifiedselectors/format/statics/53source13input/
+argv/preflight/soleproducer/docs. NROC-RonlyREVIEW sourceGO1282053B/.0141278s,
+actualcachedACCEPTED8814157B+4162Bappend/.1819674s<10MiB30s,0ownerrors/reruns.
+Workers8MiBnamedsource/stdASTonly; no project/model/SDK imports/execution/recursive
+agents; actual13payloadsONLYafterterminal grant. All ownership RELEASED and study/
+reviewallowances CLOSED/no ownedjoblive. Rootsource53input13argvcurrent afterrun.
+
+Sole12966terminal0/22.1560236s/self20.215317068s/GNU22.07s/553828352Bpeak.17/19
+success17/19controls;20fails50. Allcontrol-minus-retained130 scores17/19=0,20=-1;
+minus-old115all0.86controls430physics,56GN3016rows224solve26624aug120pred1002/
+1init1024draw0SGD; input37553293B6passes,precloseoutstage2572509B. Sameoptimization
+shape didnotretain20; contextweighting differs A640/B400 vsA520/B400/T20120. No
+purelabelcausality/CPCbenefit/generalization. CurrentROC68/TSM169 perplatform reused.
+No numericfailure/timeout/retry; rootadministrative titleequalityassert/missingdoc
+pathfailed, simplifiedtoactualsource/cachedreports and currentsectionscomparison.
+[Commands, outcomes, costs, acceptance and next action](../artifacts/runs/native-old-information-rehearsal-20261021/RESULTS.md).
+
+Next UNASSIGNED R2.1-TRAIN20-ACQUISITION-REHEARSAL: use EXISTING stream/joint
+retained20 API from accepted32 to acquire20 while rehearsingold115,8x130rows,
+fixed17/19/20 versus saved20-only and retainedreturn. Prepare/review smallfrozen
+artifact-local protocol first, no APIduplication/framework or nextnativeallowance.
+## ROC — matched old-information rehearsal SOFTWARE ACCEPTED / CLOSED
+
+R2.1-REHEARSAL-OLD-INFORMATION-CONTROL parentopen. ROC-Ionlytwojointadapters
+released242040B/AST; ROC-Tonlynewtestmodule released172749B/AST/32cases. Root
+protocol/integration/commandvalidation/typefixes/format/checks/solefixtures/docs;
+ROC-RonlyREVIEW.md. Explicitexactboolcontrol adds15orderedoriginalA17repetitions,
+noTRAIN20update labels; realprofile115+15=130, defaults/caps/budgets/isolationunchanged.
+Actualsource40alreadyacquired20. Identity/content selectedmetadata guards, honest
+sourceindices/unknownclocks/authority/commands/projections. No scientificrun.
+OneWin+Linux120outer100inner/CPU1GPU0BLAS1/RSS1GiB; exactforecast1H2init32draw10GN
+1108rows40solves4552aug16pred328.32new+13legacyPUREnodes; no extraNNlegacywork.
+Final3sourceAST/ruff/format/Linuxmypy allpass after4typingfindings; selectednative
+commands prevalidate15advances beforeprojections (Tfinding). Frozen17sources/
+commands; sourceGO/fresh/serial/fullwindow beforefixtures, actualreview3MiB30safter.
+Allworkernamedreads6MiB/stdASTonly/noimports/collection/payloads/recursiveagents.
+Both68PASS/0skip: Windows3.4511022s/RSS95219712B, Linux10.0304612s/RSS88244224B.
+Exactforecast observed both. ROC-R actualACCEPTED279409B+3074Bappend/.0185317s,
+total686259B<6MiB. Allownership RELEASED/fixture-reviewallowances CLOSED/no joblive.
+Parent nativecomparativequestionOPEN; no label/CPCbenefit claim.
+[Evidence](../artifacts/runs/rehearsal-old-information-control-20261021/RESULTS.md).
+
+## MTR — learned fixed-mass transfer/default return ACCEPTED / CLOSED
+
+R4.5-LEARNED-MASS-TRANSFER complete; root sole70441terminal0/17.4054294s. Same48BP
+mass17/defaultreturn each1/true/true17controls; allmetriccontrasts0. No additional
+adaptation needed in this fixedcase.34controls170physics68pred950rows,56GN3016/
+224solves26624aug0SGD;GNU550985728B/input32217034B5passes. MTR-Icase.py released
+635079B/ASTPASS/editingtimeUNKNOWN, initialmissingdirectorywritefailure preserved.
+Rootprotocol/format/statics/freeze/preflight/solejob/docs. MTR-RsourceGO1253992B,
+actualcachedACCEPTED8681583Bread+3482Bappend/.1680835s, no ownerror/rerun; all62
+sources13inputs/currentargv/wholetraining/nativepairs/mass/paidprefix/costs checked.
+All ownership RELEASED/study-reviewallowances CLOSED/no joblive. FullR2.1/R4.5/
+olderWindowsRSS/release stayopen. [Evidence](../artifacts/runs/learned-mass-transfer-20261021/RESULTS.md).
+Next unassigned R2.1-REHEARSAL-OLD-INFORMATION-CONTROL: explicit115old+15originalA17
+repetitions in existing130row joint runtime, originalauthority/commands/unknown
+clocks, noTRAIN20 update labels; tests/review before frozenmatched-optimization
+native control. Current130vs115 changes120exposures/solve size; older115matched
+curationcontrol isdifferentquestion. No newscientificallowance or mass escalation.
+
+## TSM — executedTS12 fixed mass binding ACCEPTED / CLOSED
+
+R4.5-TASKSPACE-MASS-BINDING software complete. TSM-I core/app released71876B/
+ASTPASS; TSM-Tnewtestmodule released610440B/ASTPASS, source-displayUTF8repair;
+root smoke/integration/typefixes/lateinjectionrefinement/solefixtures/docs. TSM-R
+sourceGO1630235B, concretecallbackgap repaired; actualACCEPTED476486Bread+2749B
+append/.0191157s, total2106721B<6MiB, no ownerror/rerun. Rootsession48802terminal0,
+169PASS/platform:52new+117pure; Win3.11075s/RSS105005056B, Linux18.68715s/93179904B.
+Each4H2init128draw19pred16fakeattempt15returns,0fit/train/SDKphysics. Final4source
+AST/scopedstatics/current20bindings/argv PASS. Originaltyping1+10errors preserved;
+no fixturefailure/timeout/retry. All ownership RELEASED/allowances CLOSED/no joblive.
+FullR2.1/R4.5/olderWindowsRSS/release and actualmassskill claims remainOPEN.
+Next unassigned R4.5-LEARNED-MASS-TRANSFER: freeze/review boundedfixedmass17 then
+freshdefault17return of accepted48BP, cacheordinarysuccess/no updates/newteacher/
+reservedprobe or outcome selection. No newscientificallowance opened.
+[API](pick-cube-mass-context.md) · [Evidence](../artifacts/runs/taskspace-mass-binding-20261021/RESULTS.md).
+
+## RPN — native transfer and retention ACCEPTED / CLOSED
+
+R2.1-REHEARSED-PROBE-NATIVE-TRANSFER COMPLETE; root sole native session4977
+terminal0/41.03656s. Test24 fails before/after50; after17/19/20 succeed17/19/16.
+Source/RP48commonprobe exact, all21contrasts preserved; allnative signed changes0.
+152controls760physics/196pred1244rows/56GN3016+SGD18; GNU565940224B<2GiB.
+RPN-I onlycase.py released, reads<=461372B/ASTPASS/authoringtimeUNKNOWN; root
+formatter/kwargsfix/statics/freeze/preflight/soleexecution/docs; RPN-R sourceGO
+1455923B and actualcachedACCEPTED10271567Bread+4103Bappend/.2298547s. All ownership
+RELEASED/study-reviewallowances CLOSED/no owned joblive. Native outcomes not
+physicaltransferimprovement/reliability/CPC benefit; fullR2.1 and olderWindowsRSS
+remainopen. Initialtyping/stalebinding/preflightheading failures preserved.
+[All commands, outcomes, costs and review](../artifacts/runs/rehearsed-probe-native-transfer-20261021/RESULTS.md).
+Next unassigned R4.5-TASKSPACE-MASS-BINDING: existing fixedmassTRAIN17 composition
+with executedTS12 is explicitly refused. Add that narrow training/frozenrollout
+binding + focused synthetic checks before a separately frozen dynamics/return
+case; no newscientificallowance/contextcap/probe relabeling or another audit.
+
+## RP48 — private probe at the rehearsed policy ACCEPTED / CLOSED
+
+R2.1-REHEARSED-POLICY-FRESH-TASK fixed private probe. Same dirty09ff811f required;
+root protocol/wrapper/commands/freezes/statics/soleexecution/canonicaldocs;
+RP48-I only rehearsed-policy-fresh-probe-20261021/case.py, RP48-R only REVIEW.md.
+Worker namedsource<=8MiB/stdAST/no project/NumPy/helper/model/test/SDK/payload
+execution or reads, no recursiveagents. ExactJRS32/C2040/NR20return48 training
+reconstruction precedesONE existingdefaultSGD1x18+diagnosticprobe, original23/24,
+oldqualified17/19/20scorereadouts; source48/2896 unchanged, no learnerescape or SDK.
+All21saved references/descriptivecontrasts retained aftermodelwork; no selection.
+1init1024draw56GN3016rows224solves26624aug+1SGD18/pred44_1092expected, no newfixture.
+ONE120inner150outerLinuxCPU1GPU0BLAS1LP1/RSS1GiB/input64MiB/stage12MiB; sourceGO/
+FinalAST/statics/sourceGO/60source15input/argv/fresh/exclusive/full150window pass.
+Sole42551terminal0/15.64444s; source48held/private49after1SGD18. Freshgains
+TRAIN+.002714882499/test+.003649778364; old17/20losses+5.874794724e-6/+1.523237437e-5,
+old19improves-1.538244966e-5. Bothfreshgains/finalerrorsworsevs32. All21controls/
+contrasts kept, old20noinventedbaseline. Ledger56GN3016/224solves26624aug+1SGD18/
+44pred1092; selfRSS81633280B/rootGNU85073920B, input23305514B4passes. No failure/
+timeout/retry. IndependentactualACCEPTED,7973782Bread+3992Bappend/.1526156s, no
+toolingfailure/numericalrerun; reusedown60sourceGO/rootpostrunreceipt ratherthan
+repeatunchangedsourceI/O. AllI/RownershipRELEASED/study-reviewallowancesCLOSED,
+noownedjoblive. [Evidence](../artifacts/runs/rehearsed-policy-fresh-probe-20261021/RESULTS.md).
+NextunassignedR2.1-REHEARSED-PROBE-NATIVE-TRANSFER: freeze/reviewoneexistingobserver
+case, test24before/after thenold17/19/20after, sameprivateupdate/exactRP48evidence,
+cachedoldphysicalsuccesses; all nativecosts/negatives, no labels/promotion/tuning.
+P3source78/platform andTR20179/platform reused; olderWindowsRSS/noveltask/fullR2.1/
+reliability/release claims remainopen. [Protocol](../artifacts/runs/rehearsed-policy-fresh-probe-20261021/PROTOCOL.md).
+
+## P3 — three TRAIN readouts in the private probe ACCEPTED / CLOSED
+
+R2.1-REHEARSED-POLICY-FRESH-TASK software prerequisite; dirty09ff811f dependencies
+required. Root owns continuous_probe.py finite2→3 cap, protocol/wrappers/commands/
+soleexecution/canonicaldocs; P3-T only NEW tests/test_continuous_probe_three_readouts.py;
+P3-R only continuous-probe-three-readouts-20261021/REVIEW.md. Worker namedsource
+<=8MiB/ASTonly/no numerical/payload execution, no recursiveagents. Four cachedtiny
+family owners; planned4init32draw10SGD20rows78pred158rows plusonepaidgradient.
+Root ONE Windows+ONE Linux
+fixtures including original51case compatibility,90soutereach/Linux80TERMkill5,
+CPU1GPU0BLAS1LP1/measuredRSS1GiB, no scientific/native/final/probe-experiment scope.
+SourceGO/current13pins/finalstatics/whole51+27collection/preflight pass before
+fixtures. Windows78PASS0/4.95953s/RSS94715904B; Linuxsession82202terminal0/14.94515s/
+RSS84787200B/78PASS. BothobservedRSS1GiBcriterionpass; no historicalRSSwaiver.
+Newactualperplatform4init32draw10SGD20rows78pred158rows15energy12latent; selected
+diagnostic2rows12gradientvalues96B. Initialrunnerplatformtypingfailure preserved;
+explicit sys.platform repair/finalstatics pass. Rootidleworker-message mistake
+resolved byfollowup; no lostsource/model attempt. IndependentactualACCEPTED,
+269082Bread+2699Bappend/.0224234s; no reviewtoolingfailure or numericalrerun.
+AllT/T2/RownershipRELEASED/fixture-reviewallowancesCLOSED/noownedjoblive.
+Unfinishedscientificprobe/reliability/R2.1/olderWindowsRSS criteria preserved.
+[Evidence](../artifacts/runs/continuous-probe-three-readouts-20261021/RESULTS.md).
+Nextunassigned: separatelyfreeze/reviewONEoriginalreserved23/24defaultSGD1x18
+privateprobe ataccepted48/2896, originalqualified17/19/20scorereadouts, allcosts
+andnegativeeffects; no native rerun, finalaccess or probe/dose selection.
+
+## NR20 — retained TRAIN20 native comparison ACCEPTED / CLOSED
+
+R2.1-TRAIN20-RETURN-REHEARSAL fixednative child. Same dirty09ff811f deps required;
+root protocol/wrapper/commands/freezes/statics/soleexecution/docs; NR20-I only
+native-train20-rehearsal-20261021/case.py; NR20-R onlyREVIEW.md. Workers namedsource
+<=8MiB/stdAST/no project/helper/NumPy/model/test/SDK/scientificpayload execution or
+read, no recursiveagents. Existing179/platform functional+LinuxRSS evidence reused;
+originalWindowsRSSUNPROVEN/fullsoftwareparent remainsopen. NewLinuxprotocol fixes
+JRS+C20training reconstruction then8×130return withretained20, native17→19→20 vs
+cachedC20R115return; fullsource/evidencegates beforeSDK. CPU1GPU0BLAS1LP1,ONE120inner/
+150outer,56GN3016rows224solves26624aug≤3scenes150controls; no newfixtureallowance.
+SourceGO/current45source12input26softwarebindings/freshoutputs/full150window pass.
+Sole session57735 terminal0/20.255765s:17/19/20success17/19/16controls; all3signed
+scoresvsold1150/0/+1.56GN3016rows224solves26624aug86pred968rows52controls260physics;
+selfRSS549294080B. OriginaloldgroupMSEworsensvsoldonly;20MSEworsensvssource40.
+IndependentactualACCEPTED afterpreservedoptional-keymetadatafailure and ONE
+prospectivecachedrepair2470822Bread+3728Bappend/.0327881s; no modelrerun.
+AllI/RownershipRELEASED/native-reviewallowancesCLOSED/noownedjoblive.
+[Evidence](../artifacts/runs/native-train20-rehearsal-20261021/RESULTS.md).
+NextunassignedR2.1-REHEARSED-POLICY-FRESH-TASK: existingprivateprobe's finiteold
+TRAINreadoutcap2→3, focusedtests/isolation/charges/review, then separatelyfreeze
+oneoriginalreserved23/24defaultSGD1x18probe atsuccessful48/2896. No newnativejob.
+
+## TR20 — optional TRAIN20 rehearsal FUNCTIONAL_SCOPE ACCEPTED / resource parent open
+
+Source R2.1-TRAIN20-RETURN-REHEARSAL. Dirty09ff811f dependencies required; noGit/
+index/stash/install/network/worktree changes. Root owns runtimejointcorr/corestage/
+GNcore/recordedport/protocol/docs/checks/soleexecution. TR20-Donlydataadapter and
+TR20-Tonlynewtestmodule ownership RELEASED; TR20-RonlystageREVIEW.md. Namedworker
+source<=8MiB/stdlibAST/no scientificpayload or project/NumPy/model/test/SDK run.
+Stage artifacts/runs/joint-train20-rehearsal-20261021/. Opt-in retained_reference
+exactobserved20, originalbase128/default unchanged, finitecombined130. RealGN/
+recorded-work capdependency explicitlyextended130 beforefixtures,131refuses;
+31newcases includeoneactual130H2GN. Final6pathstatics26pins/preflight PASS, initial
+unusedimportlintfailurekept. OneWindows+oneLinux fixture≤90s each, aggregateper
+platform3init96draw144GN1126rows576solves6516aug171pred740rows; no scientific/native
+study authority. SourceGO then179PASS/platform Windows0/8.00518s/Linux0/23.06191s;
+measured3init96draw144GN1126rows576solves6232aug149pred376rows/platform.
+IndependentfunctionalACCEPTED,423657Bread+2898Bappend/.0205596s,no reviewtoolerror.
+LinuxRSS83636KiB/rootGNU; WindowsRSSnotcaptured, originalperplatformresource
+criterionUNPROVEN/fullsoftwareprotocolunchecked, no waiver/rerun. AllD/T/R
+ownershipRELEASED/fixture-reviewallowancesCLOSED/no joblive. NextfreezeONEsame40
+Linux130row nativecomparison vsC20Rcached115, preservingWindowsqualification.
+
+## C20R — TRAIN20 context return ACCEPTED / CLOSED
+
+Source R2.1-TRAIN20-CONTEXT-RETURN; same dirty09ff811f deps required. Root owns
+protocol/wrapper/commands/freezes/statics/soleexecution/canonicaldocs; C20R-I
+bp_adaptation_readback only stage/case.py; C20R-R curated_review only REVIEW.md.
+Workers namedsource<=8MiB/stdlibAST/no scientificpayloads or execution; no agents
+spawned by workers. Stage artifacts/runs/train20-context-return-20261021/.
+Protocol fixes exactC20reconstruction then existing8joint115row return updates,
+native17→19→20 vs cached40AFTER controls. No C20native rerun; one120inner/150outer
+CPU1GPU0BLAS1LP1 study, max56GN2896rows3scenes150controls. SourceGO/finalchecks
+required before science, separate actualreview afterward. Existing90joint,
+TCH117/C20final22 evidence reused for unchanged behavior; no newnumericalfixtures.
+FinalsourceGO/finaldriverstatics pass; cleanupfailure-readyflag repaired before
+execution. Solejob83429 terminal0/20.6417958s,86controls430physics.17/19recover
+success17/19controls;20fails50. All3signedreturn-minus40 +1/+1/-1, rawinitials
+paired;56GN2896rows224solves26144aug1init1024draw118pred972rows. I/RownershipRELEASED;
+independentactualACCEPTED. Reviewer groupsschemafailure preserved; narrowcached
+repair2457559Bread+3628Bappend/.0284348s, no scientificrerun. All study/review
+allowances CLOSED/nojoblive. [Evidence](../artifacts/runs/train20-context-return-20261021/RESULTS.md).
+Next unassignedR2.1-TRAIN20-RETURN-REHEARSAL: optional qualified20reference in
+existing joint preparation/runtime, explicit130row bound/defaultcompatibility,
+focused tests/review then frozen comparison vs cached115row return, extra120
+exposures charged. FullR2.1/retention/reliability/PC-CPC/release OPEN.
+
+## C20 — corrected source TRAIN20 continuation ACCEPTED / CLOSED
+
+Root owns stagecase/protocol/execution/canonicaldocs. C20-I onlycontinuation.py,
+C20-T onlytests/test_train20_continuation.py,C20-R onlyREVIEW.md. Shared dirty
+HEAD09ff811f, source-onlyworkers<=8MiB/no scientificexecution. Prospective limits
+in train20-corrected-continuation-20261021/PROTOCOL.md. FixtureoneH2init/oneGN2rows
+perplatform; realstudyoneJRSrebuild+8TRAIN20GN+4nativesmaximum, no controlsrerun.
+Require finalchecks/sourceGO beforestudy; preserveallpaidfailures/noseedsearch.
+Final22Linux/18Windows+4metadata checks and scoped statics PASS; sourceGO precedes
+ONE native terminal0/23.1200358s.20success19 after priorfailure50; old17/19fail50
+each vs cachedsuccess17/18. Source/actor exact;48GN1976rows192solves20384aug,
+1init1024draw,169controls845knownphysics. C20-I/T/R ownership RELEASED; independent
+actual ACCEPTED. Firstreviewclock-checktypo preserved; narrowcachedrepair read
+2093937B+4006Bappend/.0347036s, no scientificrerun. All native/test/review allowances
+CLOSED, nojoblive. [Evidence](../artifacts/runs/train20-corrected-continuation-20261021/RESULTS.md).
+
+Next unassigned R2.1-TRAIN20-CONTEXT-RETURN: existing eight-update joint115row
+old-A/B correction from40/1856, read17/19/20 for recovery/new20 retention. No new
+framework or seed/dose tuning; fullR2.1/release OPEN. Details in C20/RESULTS.md.
+
+## TCH/T20 — learner input and matched diagnostic ACCEPTED / CLOSED
+
+Root coregate/integration/statics/soleexecution/docs complete; TCH-Tnew29tests,
+TCH-Isourceinspection/T20-Iproducer and TCH-R/T20-R ownership RELEASED. Shared
+HEAD09ff811f dirty dependencies unchanged. TCH117PASS/platform, real15row TS12
+conversion0/7.86694s and independentall360coordinatesaccepted. T20fixed4family
+A17/20/A17 terminal0/5.84751s,96updates1440rows; allnewgainspositive/oldAerror
+improvesthroughout, BPbestabsoluteendpoints, PC=neutralexact; no forgetting/
+physical/CPCclaim. Allmetrics/BPdeltas/costs independentlyaccepted, no rerun.
+InitialTCHmypy1/T20mypy25then10errors repaired/retained; no scientificfailure/retry.
+All conversion/study/review allowances CLOSED/nojoblive. [Feature evidence](../artifacts/runs/train20-action-history-20261021/RESULTS.md) ·
+[Matched diagnostic](../artifacts/runs/train20-matched-learnability-20261021/RESULTS.md).
+
+Historical next (C20 now executed above): private8updateTRAIN20 via
+existing actor/shadow/headGN, sourceacceptedcorrectedBP32/1736, separately frozen
+before20/after20+17+19 nativequestion. Preserve originalsource/actor/charges and
+oldcontrols; no newframework or seed/metric tuning. FullR2.1/release OPEN.
+
+## TCD — explicit ordinary TRAIN20 coverage ACCEPTED / CLOSED
+
+Root source/integration/statics/sole serialexecution/docs complete. TCD-T newtests
+and TCD-R review ownership RELEASED. Shared dirty09ff811f dependencies preserved.
+Linux207PASS; Windows206PASS plus repaired signature node, originalfailure retained.
+FinalsixpathstaticsPASS. ONE teacher20 terminal0/7.76784s qualifies/succeeds15controls
+75CONTROLphysics, ordinary typed admission once0/1.18363s wholeepisode/work/flags
+exact. Independent actual acceptance376359Bread+2053append/.0095861s, no scientific
+rerun. No learner/RNG/fit/forward/probe/final; all native/decoder/review allowances
+CLOSED/nojoblive. [Evidence and costs](../artifacts/runs/train-context-diversity-20261021/RESULTS.md).
+
+Next unassigned: extend existing executed-action-history TRAIN gate to declared20,
+verify saved15commands/history/reserved-role refusals, then freeze small learning
+protocol through existing stream runner. Raw coverage/teacher success does not
+establish learned acquisition/generalization/reliability/CPC/release readiness.
+
+## NRT closeout — known old-context retention accepted
+
+Root protocol/integration/statics/sole serialexecution/docs complete; NRT-I only
+stagecase.py and NRT-R onlyREVIEW ownership RELEASED. Shared dirty09ff811f/deps
+preserved. First-pass driverstatics/sourceGO/ONE native terminal0/16.2477394s and
+actualreview ACCEPTED. A17/B19success17/19controls vs cached17/18, all6successscore
+changes0, pairedinitials/fullJRS+NFPexact.1init1024draw40GN1856rows160solves17824aug
++SGD18+gradient18,70pred838rows36controls180physics/resetphysicsunknown. Original
+24negative intact; all currentnative/reviewallowances CLOSED/nojoblive.
+[Results](../artifacts/runs/native-probe-old-retention-20261021/RESULTS.md).
+
+Nextunassigned R2.1-TRAIN-CONTEXT-DIVERSITY: explicit newTRAIN20 through existing
+teacher collection/typedreader, preserve17/19 and allreservedroles/closedstudies.
+Replaceimplicit17/else19 teacher-resultbinding with originalexplicitbinding,
+existingCLIchoice; boundary/defaultchecks/review then ONEprospective TRAIN-only
+collection. No learner/probe/final/newrunner/seedsearch. TwoTRAINcontexts remain
+coverage limitation; broaderlearning/reliability/CPC/release OPEN.
+
+## NPE/NFP closeout — private endpoints accepted, physical gain zero
+
+NPE180PASS Windows/pinnedLinux, finalsixpathstatics/source+actualacceptance.
+NFPONEfrozennativecase terminal0/24.3212s, fullJRS/PCFimitationexact exceptdeclared
+fields, both24initialrawexact. Before/after both0/false/false50controls; gains0,
+imitationgainspositive unchanged.1init1024draw40GN1856rows160solves17824aug+
+1SGD18+gradient18,134pred902rows,100controls500knownphysics/resetphysicsunknown.
+Actualreview5424013Bread+2655append/.0705365s, no model/helper/SDK rerun.
+Rootsoleexecution/integration/docs; I/T/R allownership RELEASED, all fixture/
+native/review allowances CLOSED. Dirty09ff811f/negativeguard/SBC/SBK/oldcosts
+preserved; no newdependencies/Git/index/install/network. [Software](../artifacts/runs/continuous-probe-endpoints-20261021/RESULTS.md) ·
+[Native negative](../artifacts/runs/native-fresh-probe-endpoints-20261021/RESULTS.md).
+
+Nextunassigned R2.1-NATIVE-PROBE-OLD-RETENTION: existing observer scores original
+TRAIN17/19 after SAME privateSGD1/18, reuses accepted unadapted successes and
+requires fullsource/probe equivalence. Separate prospective two-scene protocol/
+review/costs; no fresh24rerun, recipe/seed/dose selection or productionframework.
+Physical retention unmeasured; broader learning/R2.1/reliability/CPC/release OPEN.
+
+## SBC/SBK closeout — stage-balanced control accepted, negative
+
+Root integration/cases/canonicaldocs/sole serialCPU1/GPU0execution complete.
+SBC-Ccoreplanner/SBC-Ttests/SBC-RandSBK-Rreviews ownership RELEASED. Shared dirty
+09ff811f dependencies/unrelatedchanges preserved.90PASS/platform and final5path
+statics accepted; frozenTRAINcomparison all3final losses worse. Separate native
+known-context comparison A17success17/B19failure50, versus unbalanced17/18success.
+Full weighted report exact except elapsed; initial observations both exact.
+Source/actual independentacceptance for both. No numerical failure/retry/tuning;
+initial static failures retained. All fixture/comparison/native/review allowances
+CLOSED. Combined6init2176draw332GN5464rows1328solves45680aug381pred2059rows,
+67controls335knownphysics; original costs remain. Resetphysics unknown.
+[TRAIN result](../artifacts/runs/stage-balanced-corrections-20261021/RESULTS.md) ·
+[Native negative](../artifacts/runs/stage-balanced-known-context-20261021/RESULTS.md).
+
+Next unassigned R2.1-NATIVE-FRESH-PROBE-ENDPOINT: narrow read-only before/after
+observer in existing continuous_probe, explicit reserved probe_test24 serving/
+history admission, preserve private learner/source/benchmark/no final. Reuse
+unchanged unbalanced32/1736 and fixedSGD1/18 reserved23/24 recipe, meaningful
+boundary/default/failure checks/review then prospective ONE paired native case.
+No new orchestration, weighting/seed/dose search or guard retry.
+
+## TFS closeout — TRAIN-only diagnostic and descriptor accepted
+
+Root implementation/case/statics/sole serialexecution/docs complete; TFS-Ttests/
+TFS-Rreview ownership released.34PASS Windows/pinnedLinux; final3pathstaticsPASS.
+20preparedsyntheticrows/36calls/1005conservativevisits each; nolearnerfixture.
+ONE115row TRAIN descriptor terminal0/4.40994s, originalinputs/prepareddata unchanged.
+Prep230projections/diag115reprojections345summaryvisits;0NN/query/native/guard/
+probe/final. Source/actual independentacceptance; reviewterminal0/1394940Bread/
+.020714s. Original1nullabletypingerror fixed; no numericalfailure/retry. All
+current allowances CLOSED. [Results](../artifacts/runs/train-feature-support-20261021/RESULTS.md).
+
+Historical next action (completed above) R2.1-TRAIN-STAGE-BALANCED-CONTROL: specify deterministic recorded-
+stage sampler in existing correctionadapter, preserve defaults/per-batchMSE/
+originalrowlineage/history/clocks. Freeze small65/115eightupdate TRAIN-onlycontrol;
+account changed per-label/context exposure. No newteacher/guard/probe/final/native
+retry. Measured TRAIN stageimbalance motivates hypothesis, no benefit yet.
+
+## CPG closeout — software accepted; native question incomplete
+
+Root integration/protocol/sole serial numerical/statics/docs complete. I script,
+T tests and R stageREVIEW ownership released; shared dirty09ff811f preserved.
+Final48PASS Windows/pinnedLinux; three scoped staticsPASS/independentacceptance.
+Original Windows40/8failed fake sparse reward repaired prospectively; original
+renderer failure retained; same-task environment repair times out124. Complete
+31negative0/False/False/50controls250physics independently verified.37no return,
+interrupted exact work/finalstate unknown; fullnative questionunchecked.
+Both native rebuilds charged, cumulative46.518s/original60; all current fixture/
+native/review allowances CLOSED. No third invocation. Reviewer optional raw
+success-key reader failed after substantive partial checks; prose accepts those
+checks without rerun. GNUrepairedempty. [Evidence](../artifacts/runs/corrected-policy-guard-20261021/RESULTS.md).
+
+Historical next action (completed above): TRAIN-only TS12 support at joint preparation/
+learnability diagnostics; existingconditioning/residuals reused. No guard/probe/
+final reads, newteacher/learner/nativework. Freeze small descriptive protocol.
+
+## JRS closeout — supported recipe and recorded equivalence accepted
+
+Root integration/protocol/case/statics/docs/sole serialnumerical complete;
+Inewstream/Tnewtests/Rreview ownershipreleased.15PASS/platform, all3pathstatics;
+ONEcase fullbase+16native/residual/180rowbindings/16receiptmaps/35commands EXACT.
+Case40GN1856rows/160solves/61pred691rows,0native/teacher/probe/final. Full goalopen.
+Two independent metadata-reader terminal1 failures preserved; already-passed
+substantive comparisons accepted via prose closeout, no third reader. Required
+wall caps verified; GNUfields root-only, originalcommand/aggregateconformance
+notclaimed. All allowances CLOSED; no audit successor.
+[Results](../artifacts/runs/joint-readiness-stream-20261021/RESULTS.md).
+
+Nextunassigned: explicit guard31/37 role in existing frozen rollout path, TRAIN
+defaults retained, probe/final/no-update boundarytests then one frozen small
+unseen-reset control question. No new runner/algorithm/dose/teacher sweep.
+
+## JRB closeout — both modes accepted; full recipe parent OPEN
+
+Rootruntime/docs/protocol/statics/soleWindows+WSLfixtures complete; JRB-Ddata/
+JRB-Texistingtests/JRB-Rreview released. Same curated=None mode now supplies
+precurationA+B; presentC stillgated.59PASS/platform, sourceGO/actualACCEPTED.
+Perplatform1init32draws95GN526rows380solves3244aug105pred210rows; no NNfailure/
+retry/teacher/SDK/probe/final. Tighteroldasserts untouched. Initial2testtyping
+errors and unexecutedLinuxargvseparatorrepair retained. AllallowancesCLOSED.
+[Evidence](../artifacts/runs/joint-readiness-two-source-20261021/RESULTS.md).
+
+Nextunassigned: compose both stages at existing run_continuous_learnability
+checkpoint_observer; freeze one native-free exact numerical/action-equivalence
+case preserving16/296→24/816→32/1736 fullrecipe, source isolation/lineage/costs.
+No newrunner/checkpointaudit/dosesearch; scientific/reliabilityparents remainOPEN.
+
+## JRA closeout — three-source software accepted; recipe parent OPEN
+
+R2.1-JOINT-TRAIN-CORRECTIONS / THREE-SOURCE SOFTWARE DONE. Rootruntime/docs/ADR/
+protocol/statics/canonicalplans/soleWindows+Linuxfixtures; JRA-D datahelper/JRA-T
+tests/JRA-R REVIEW.md released. Shareddirty09ff811f/untrackeddeps preserved;
+noGit/index/install/network. D79623B/T246411Btracked(conservative<1MiB)/R323844B
+sourceonly,0workerNN/test/SDK. Newstage `joint-readiness-adapter-20261021`.
+
+Final3pathstaticsPASS after5testtypingerrors. Reviewfield/seal/paidreturn gaps fixed
+BEFORENN, regressionsincluded.43PASS/platform Windows4.2087486s/Linux9.1935041s;
+exactledger1init32draws/65GN390rows260solves2340aug/79pred158rows EACH, no retries.
+13rootcommands17.0449152s/static3.6426625. Independentactualschema-keyfailure
+.3774304s/exactbytesunknown preserved; prospectivelyauthorizednarrow20s/256KiB
+closeout0/.0014373s/80279B+2322append acceptssoftware,noNN/evidencecohortrerun.
+Allcurrentfixture/reviewauthorityCLOSED. Native/scientific/releaseparentsOPEN.
+[Evidence](../artifacts/runs/joint-readiness-adapter-20261021/RESULTS.md).
+
+Nextunassigned: explicitpre-curationA+Bmode in SAMEadapter. Knownnativefullrecipe
+requiresjoint65preconditioningbeforejoint115; current3-sourceAPIcannot supply
+thatstagewithoutartifacthelper. Preservepresent-curatedarrivalrefusal, lineage/
+clocks/roles/8update/failure semantics, focusedtests undernewprospectivefixture
+budget. Thenboth-stageexistingstreamintegration/numerical-actionequivalence,
+no shortenedrecipe/neworchestration/probe/dosesearch.
+
+## PCF closeout — corrected-state isolated learnability accepted
+
+R2.1-POST-CORRECTION-FRESH-TASK DONE; rootprotocol/argv/statics/canonicaldocs/
+solepinnedWSLCPU1GPU0, PCF-A case.py/PCF-V readback.py/PCF-R REVIEW.md released.
+Shared dirty09ff811f/unrelatedwork preserved,no source/Git/index/install/network
+mutation. Sourceonlyauthor102976B/reader227417Btracked(conservative<1MiB)/reviewer
+293418B, no worker numericalwork. Newstage `post-correction-fresh-probe-20261021`.
+
+ONEterminal0/6.2143575s/nooutput, exactsource+bothrecons; ONEisolatedSGD18 improves
+TRAIN23/test24 with smalloldA/Bfitlosses.41pub1874rows160SVD17824aug3933440MAC;
+all20comparisons retained/no gainselection, gain/endpoint rankings mixed.
+FinalcombinedstaticsPASS after1annotation+1unusedimportfailure, rootaliasASTfalse
+assertion resolvedbyinspection. IndependentONEreaderACCEPTED/.2554624s/6599387B
+actualreviewinclbindings,115model/0native; prose40.095sseparate/no strictcap.
+Allnumerical/readbackallowancesSPENT/CLOSED/no livejobs. Parents/oldincidentsOPEN.
+[Evidence](../artifacts/runs/post-correction-fresh-probe-20261021/RESULTS.md).
+
+Nextunassigned R2.1-JOINT-TRAIN-CORRECTIONS / REUSABLE ADAPTER: successful
+simultaneousmixedTRAINrecipe through existingports, original lineage/clocks/roles/
+paidfailures intact. Production singlebatch_admit excludesCuratedReadinessBatch;
+use a thin separate adapter and small prospectivelybudgeted behavioral fixtures,
+noartifactprivateimports/newframework/newprobe/nativepair/dosesearch.
+
+## OIC closeout — A recovers/B lost; fixed control accepted
+
+R2.1-BP-HEAD-GAUSS-NEWTON / MATCHED OLD-INFORMATION CONTROL DONE. Root protocol/
+argv/statics/canonicaldocs/sole pinnedWSLCPU1GPU0; OIC-A case.py/OIC-V readback.py/
+OIC-R REVIEW.md released, no live numerical authority. Shared dirty09ff811f and
+unrelatedchanges preserved. Namedsourceonlyauthor134375B/readertracked347814B
+conservative<1MiB/reviewer281948B,0workerNN/test/SDK work.
+
+ONE13299terminal0/11.8636462s, A1/15 B0/50,65controls325physics; all3vscuratedA0/B-1,
+vsJSC/noReplayA+1/B-1.40GN1856rows160SVD17824aug3767552MAC; allimitationerrors improve
+whileBfails. FinalscopedstaticsPASS; initialformatfailure/rootread-onlysummary
+KeyError/truncatedoutputs preserved. IndependentONEreaderACCEPTED/.2621205s/
+4030235Bactualreviewinclpins,115model65native. Prose27.113sseparate/noprosecap.
+AllallowancesSPENT/CLOSED. [Evidence](../artifacts/runs/matched-old-information-control-20261021/RESULTS.md).
+
+Nextunassigned: R2.1-POST-CORRECTION-FRESH-TASK, one existing isolated defaultSGD
+probe from accepted curated32/1736state, originalreserved23/24roles, one18rowupdate,
+oldA/Bbefore-after, explicit reproduction/probecostprotocol. No oldnative/oracle
+rerun/newframework/dosesearch. Rootmustfreezeandreviewbefore newnumericalauthority.
+
+## RCA closeout — fixed A recovery/B preservation accepted
+
+All owners released/no live numerical handles. Root protocol/argv/integration/
+statics/canonicaldocs/soleproducer; RCA-A case.py, RCA-V readback.py, RCA-R REVIEW.md.
+Shared dirty09ff811f/untrackeddeps preserved, no Git/index/install/network changes.
+Sourceauthor154755B; readerconservative<.4MiB/exactunknown; reviewer431091B before
+actualreview. Source-only workers, no model/test/SDK execution or broad scans.
+
+ONE8983 SAMEpolledterminal0/13.8718518s; A1/17 B1/18,35controls175physics. Exact
+originalbenchmark+JSCreconstruction,40GN1856rows160SVD17824aug3736832MAC; old A error
+worsens and one tiny labelconflict retained. FinalscopedstaticsPASS after15+1
+mechanical typing errors. IndependentONEreaderACCEPTED/.2513711s/3683411Bactual
+reviewinclpins,35newnative115modelrows, no rerun. Prose separate36.471s/no strictcap.
+All allowancesSPENT/CLOSED; parentsOPEN/priorincidentspreserved.
+[Evidence](../artifacts/runs/returning-a-curated-corrections-20261021/RESULTS.md).
+
+Next ownership unassigned: freeze a matched old-information control,8x115 with
+originalA15cyclic50 replacingnewA50, samecontextcounts/solver work, no curated
+features/targets in training. One fixed pair only after reviewed protocol.
+
+## CRC closeout — software/data accepted; native recurrence still open
+
+Root adapter/integration/docs/sole numerical owner; CRC-C core/CRC-T tests/CRC-R
+review released. Shared dirty09ff811f/untrackeddeps preserved. No Git/index/
+install/network mutations.43 new checks/platform, final5pathstatics and independent
+software acceptance. Testauthor uninstrumented broad search4MiBconformance UNPROVEN
+(conservative4,726,916B), preserved; wholeparent unchecked, no waiver.
+
+ONE saved50row A17 curation terminal0/4.1716796s,0NN/SDK/probe/final; explicitnew
+query100..198/arrival101..199, originalNone clocks/commands/source unchanged.
+50targets retained,4align4descend2grasp40lift0settle,198refused/199TS12released.
+ONE independent cached reader terminal0/.1663559s/231366B inclsummary; no query
+rerun. All fixture/curation/readback allowancesSPENT/CLOSED/no livejobs. Minor
+source-path/type/preflight-wording/append failures preserved. [Evidence](../artifacts/runs/saved-readiness-curation-20261021/RESULTS.md).
+
+Next ownership unassigned: freeze one existing-stream returning-A correction
+question on all115 released rows, eight fixed GN updates/920 new exposures,
+originaljoint continuation/sourceisolation, no priornativecontrol rerun or sweep.
+Only root may assign later workers/budgets; no pending scientificauthority.
+
+## JSC closeout — evidence validated; reviewer wall conformance unproven
+
+All source owners released; no live numerical handles. Root owned canonical
+plans/protocol/argv/statics/sole CPU1GPU0 numerical execution; JSC-A authored only
+case.py, JSC-V only readback.py, JSC-R only REVIEW.md. Shared dirty09ff811f and
+untracked dependencies preserved; no Git/index/install/network mutations.
+
+One native invocation SAME82423 terminal0: A0/50, B1/19,69 controls345 physics;
+32GN936 rows128SVD12064aug2358528knownMAC. Final case/reader statics pass after
+preserved40+1 annotation errors and three repaired source-review findings.
+Independent actual evidence validated within one reader; later unnecessary
+review-summary copying produced conservative60.210s final wall bound against60.
+No strict-cap acceptance/waiver/retry. Full item unchecked, scientific result
+retained, all allowances SPENT/CLOSED. [Evidence](../artifacts/runs/joint-supervised-corrections-20261021/RESULTS.md).
+
+Next source ownership unassigned: bounded TRAIN post-hoc correction adapter for
+saved A17 return with explicit new curation clocks. Freeze50decision protocol
+before queries, no new simulator/NN work. No audit or extra GN dose continuation.
+
+## Historical JTC — accepted TRAIN joint-target consistency
+
+R2.1-READINESS-LABEL-SEPARATION / CROSS-CONTEXT A15+B50. Root owns protocol/argv/
+reader/statics/sole numericalwork/canonicaldocs; JTC-A bp_adaptation_readback owns
+only newstagecase.py; JTC-R independentreviewer owns only REVIEW.md. Shared
+09ff811f dirtycheckout/untrackeddeps preserved; no Git/index/install changes.
+Sourceonlyworkers<=4MiBreads/0NumPy/model/pairdiagnostic/test/SDK execution.
+Onecorecall65rows2080pairs,0NNwork; cachedactualcheck separately declared2080pairs.
+Stage4MiB/producer30s/rootstatic120s; no pairwork until concreteGO/preflight.
+[Protocol](../artifacts/runs/joint-train-consistency-20261021/PROTOCOL.md).
+
+## Historical GNP closeout — accepted isolated learnability, owners released
+
+R2.1-GN-CHECKPOINT-FRESH-TASK DONE at scoped fixedquestion, parentsOPEN. Rootowned
+protocol/reader/argv/statics/sole numericalexecution/canonicaldocs. GNP-A released
+artifactcase, GNP-C releasedCOSTS, GNP-R completed independentconcretesource/actual
+review. AllworkersDONE, no livehandles/numericaljobs. Shared dirty09ff811f and
+untrackeddeps/unrelatedchanges preserved, no Git/index/install/network mutation.
+
+One source24GN416rows +4isolated defaultSGD18rowprobes =28updates488rows,
+1init1024draws/96SVD7904aug/2257920MAC,0SDK/final/replay. Probe-onceDIRECTterminal0
+5.8881921s; fullsourcebenchmark exact exceptONLYobserver/rootelapsed. All4probe
+train/testgainspositive, oldA/Bmixed, versuscachedcontrols lowergains8/24/higher16.
+No uniformbenefit/nativecontrol/newphysicaltask/matchedcomputeclaim. Original
+replaynegative and all otherpriorfailures remain. IndependentactualACCEPTED,
+2378772B/conservative28.7781sfinalappend,0models/0teacherrowsparsed. Finalscoped
+statics pass after2preservedannotationfailures; all numerical/readbackallowances
+SPENT/CLOSED. [Evidence](../artifacts/runs/gn-checkpoint-probes-20261021/RESULTS.md).
+
+Next task unstarted: TRAIN-only A15+savedB50 compatibility using existingpurecore
+pairdiagnostic/TS12, no modelwork or same-contextadapter weakener. Rootnextowner;
+new agent assignments onlywhen concreteindependenttasksready.
+
+## Historical closeout — GN reference question accepted negative, all owners released
+
+Root implemented native-helper composition, froze protocols/argv, alone ran both
+focused cohorts and one nativecase, owns final docs. bp_adaptation_readback
+released adapter/workhelper and later artifactcase; bc_residual_tests released
+newtests/ledger and independently authored stdlibreader. bc_residual_review
+completed independent source/actual acceptance. All workers DONE, no numerical
+job remains. Shared dirty09ff811f/untrackeddeps preserved; no Git/index mutation.
+
+GNRC42checks/platform accepted; native same50Blabels+4A15replays/60rows completes
+negative A0/50,B0/50 vs noReplayA0/B1. All3differencesA0/B-1.36GN876rows144SVD12864aug,
+100controls500physics2180352knownMAC. Sourcefullbenchmark/exactdiagnostics,
+separate originalpaidbudgets/receipts/rawpairs validated; no retry/tuning.
+Independentreader1invocation1553069B/100rows/0teacherrowsparsed; totalreview
+1619770B/18.96862s. All numerical/readback allowances SPENT/CLOSED; authoractive
+work/readbytes not separately metered. [Evidence](../artifacts/runs/gn-reference-rehearsal-20261021/RESULTS.md).
+
+Next task unstarted: freeze original fourGNcheckpoints with existing detached
+observer + isolated reserved23/24 defaultSGD probe, reuse fourfamilycontrols.
+No framework/SDK/provenanceincrement or replay-frequency sweep.
+
+## Historical GNRC — accepted, all software owners released
+
+Root exclusivelyowns scripts/maniskill_continuous_smoke.py, protocols/commands/
+serialnumericalproduction/canonicaldocs. bp_adaptation_readback owns correction
+adapter+continuous_head_corrections.py; bc_residual_tests owns new
+test_continuous_head_correction_replay.py and stageFIXTURE_BUDGET; reviewer owns
+stageREVIEW. Shared dirty09ff811f/untrackeddeps preserved; no Git/index changes.
+Workers source/AST/stdlibonly,0project/NumPyimports/tests/models/SDK/delegation.
+Root sole serialnumericalproducer CPU1GPU0threads1. Onecombinedcohort/platform
+including21affectedregressions, exactledger beforeexecution; originalceilings
+4init/64GN160rows/256SVD4096aug/16SGD32rows.300engineeringseconds/60platform.
+No scientific/nativework until separate frozenretentionprotocol afteracceptance.
+[Protocol](../artifacts/runs/continuous-head-correction-replay-20261021/PROTOCOL.md).
+
+## Historical closeout — same-label SGD comparison accepted; owners released
+
+R2.1-BP-HEAD-GAUSS-NEWTON / SAME-SOURCE SAME-LABEL SGD CORRECTION CONTROL.
+Root owns canonical closeout/nextintegration; root authored case/protocol/argv
+and alone executed numerical work. bp_adaptation_readback released original and
+amended cached readers, bc_residual_review completed source and actual reviews.
+Both workers DONE; no live numerical jobs. Shared dirty09ff811f/untrackeddeps/
+unrelated changes preserved; no Git/index/install/network mutation.
+
+Originalattempt terminal1/5.2500679s/0SDK on invalid1ULP cross-reduction bitguard,
+source16GN296+8SGD400 paid. Original files/allowance immutable/SPENT/FAILED. Explicit
+same-task prospective engineering amendment adds one source50row forward and
+exact per-method reductions; no tolerance/metric/seed/dose change. Source/revised
+budgets independently reviewed before onlyadditional invocation. Original49502
+SAMEpolledterminal0/12.2862527s, A17/B19bothfail50controls,100controls500physics.
+ReusedGN Bsuccess18/Afail50; all3GN-minus-SGD B+1/A0. ActualreviewACCEPTED/
+.0442679s/1505839B/100rows; originalfailure remains. Cumulative2init56publications/
+1512rows160SVD13248augrows4622592knownMAC; allinvocations closed/no thirdattempt.
+[Evidence](../artifacts/runs/same-label-sgd-corrections-20261021/RESULTS.md).
+
+Next rootowned integration: existing GN corrections + existing reference rehearsal,
+separate wake/replay charges/bounded GN evidence, focusedcorrectness before one
+frozen retention question. No newrunner/teacher or repeat of completed control.
+
+## Historical closeout — arrived corrections accepted; owners released
+
+R2.1-BP-HEAD-GAUSS-NEWTON / ARRIVED CORRECTIONS SOFTWARE and FIXED B19 QUESTION
+accepted. Root owns canonical closeout and the next matched correction control.
+bp_adaptation_readback released adapter/helper and studyreadback; bc_residual_tests
+released tests/ledger; bc_residual_review completed source and actual acceptance
+in both stages. Shared dirty09ff811f/untrackeddeps and unrelated changes preserved.
+No worker project/NumPy/model/test/SDK work. Root sole serial numerical producer,
+CPU1GPU0threads1; all workers completed, no live numerical jobs.
+
+Software21checks/platform, Windows2.3819666s/Linux8.8629244s, acceptedactualreview
+276879B/12.5417272s. Nativeoriginal60026 SAMEpolledterminal0, B19success18/A17fail50,
+collection50,118controls590physics. Wholebasebenchmarkexact, actualreviewACCEPTED/
+.0374551s/1249775B/118rows. All fixture/native/readbackinvocations SPENT/CLOSED.
+[Software evidence](../artifacts/runs/continuous-head-corrections-20261021/RESULTS.md) ·
+[Study evidence](../artifacts/runs/gn-arrived-corrections-20261021/RESULTS.md).
+
+Next: freeze one same-source/same50labels/defaultSGD8updates400rows correction
+control before new retention features. No new collection/teacher or baseline
+retuning. No approval question or tooling prerequisite; full goal ACTIVE.
+
+## Historical GNC — arrived head corrections, software accepted
+
+Root exclusively owns scripts/maniskill_continuous_smoke.py, protocols/commands,
+serial numerical production and canonical docs. bp_adaptation_readback exclusively
+owns continuous_correction_demo.py and new continuous_head_corrections.py until
+release. bc_residual_tests owns test_continuous_head_corrections.py and stage
+FIXTURE_BUDGET.md. bc_residual_review will own stage REVIEW.md only. Shared dirty
+09ff811f checkout required untracked dependencies; unrelated changes preserved.
+Workers source/AST/stdlib only, zero models/tests/NumPy/project imports/native/
+delegation. Root sole serial numerical producer CPU1/GPU0/threads1.
+
+300 aggregate recorded engineering seconds, one <=60s cohort/platform after
+concrete independent review. Tiny fixed8 GN successes/default8SGD/failure/timer
+fixtures, exact frozen ledger before execution. No scientific/native authority;
+separate small B19 question only after correctness and acceptance. Original
+ceilings and all old negative results remain.
+
+## Historical PR — phase readouts and native question accepted; owners released
+
+R2.1-BP-HEAD-GAUSS-NEWTON / CONTROLLED NATIVE ADAPTATION / PHASE READOUT SOFTWARE.
+Shared dirty09ff811f required untracked dependencies. Root owns existingrunner,
+helper/tests postrelease, protocols/commands/serialnumericalproduction and all
+canonicaldocs. bp_adaptation_readback authored/released newphasehelper;
+bc_residual_tests authored/released newtests+fixtureledger; bc_residual_review
+owns stageREVIEW. Worker source/AST/stdlibonly,0models/tests/NumPy/projectimports/
+native/delegation. Root sole numericalproducer, CPU1GPU0threads1.
+
+One combined cohort/platform executed:33new+23affectedstream cases,10initializers/
+1280draws/11GNattempt11rows10realSVD660augrows/11SGDrows/3activeCPCupdates/
+68conditioning-residual-actorrows each. Explicit budget/ledger before fixtures;
+no scientific/native work. [Protocol](../artifacts/runs/continuous-phase-readouts-20261021/PROTOCOL.md).
+
+Actual56/platform PASS; Windows2.0250203s/LinuxSAME55779terminal0/12.1171725s;
+independent actualacceptance/.0128543s/112310B. Correctnessallowances CLOSED.
+Separate gn-native-adaptation-20261021 fixedquestion: rootowns case/protocol/argv/
+serialnative/canonicaldocs, bp_adaptation_readback owns/released plainreadback,
+bc_residual_review owns newstageREVIEW. Fourfrozenreturns afterA8/afterB16,
+finalAreturn accepted/reused. Sourceonlyreview/statics before one200-control
+nativebudget; no worker native/modelwork. [Studyprotocol](../artifacts/runs/gn-native-adaptation-20261021/PROTOCOL.md).
+
+Original86499polledterminal0;165controls825physics, A1→0/B0→0/reusedreturnA1.
+Wholebenchmarkexact, intermediatephase fields exact, actualreviewACCEPTED/
+.0404054s/1235924B/165rows. All source/native/review allowances CLOSED; workers
+completed/released, no live numericaljobs. Root canonicalcloseout ownership.
+[Results/costs/next](../artifacts/runs/gn-native-adaptation-20261021/RESULTS.md).
+
+## Historical GNN — accepted native control; owners released
+
+R2.1-BP-HEAD-GAUSS-NEWTON / NATIVE CONTROL QUESTION. Shared dirty09ff811f
+required untracked dependencies, unrelated changes preserved. Root exclusively
+owns newstage bp-head-native-control-20261021 case/protocol/commands, serial
+execution and canonicaldocs. bc_residual_review owns newstage REVIEW.md;
+bp_adaptation_readback owns newstage readback.py only. Workers source/AST/stdlib
+only, no model/test/solver/native/project imports/scientific payload reads or
+delegation. Later cached actual review requires root source review and explicit
+one-invocation authority. Root sole numericalproducer, CPU1GPU0/threads1.
+
+One necessary GN24/416 reconstruction, exact FULL saved GN report excluding
+onlyelapsed before one frozen soft TRAIN17 return<=50controls250knownphysics.
+No production source change, newrunner/decoder/teacher/probe/final/replay/sweep.
+120engineeringseconds separately; native90+kill5/outer120, oneattempt only.
+[Frozen protocol](../artifacts/runs/bp-head-native-control-20261021/PROTOCOL.md).
+
+Original83233polledterminal0;15controls75knownphysics/sparse1/anyfinalTrue,
+wholeGNbenchmarkexact. Independent actualreview ACCEPTED/.0210768s/384918B/
+15newrows/0rawteacherrows. Fourdriverstatics PASS, no production change/retry.
+All source/native/review allowances CLOSED; workers released/no livejobs.
+Root retains canonicalcloseout ownership. [Evidence/costs/next dependency](../artifacts/runs/bp-head-native-control-20261021/RESULTS.md).
+
+
+## Historical GNS — accepted stream and TRAIN study; owners released
+
+R2.1-BP-HEAD-GAUSS-NEWTON EXISTING-STREAM. Shared09ff811f/untracked dependencies
+preserved. GNS-ADAPTER/bp_adaptation_readback owned newcontinuous_head_learnability
+helper, nowreleasedtoroot; GNS-TEST/bc_residual_tests released newhead_stream tests/
+fixtureledger; GNS-REVIEW/bc_residual_review owns stageREVIEW; rootowns
+existingrunner/helperintegration,serialexecution,
+protocols/commands/canonicaldocs. No worker model/test/solver/native/delegation.
+Root sole numericalproducer.23checks/platform and statics independently accepted;
+correctness cohorts closed. Separate bp-head-train-study-20261021 protocol/driver/
+argv reviewed before ONE TRAIN study; terminal0/24GN416rows/96solves, initial
+exact vs acceptedSGD, stronger finalA/worseB. Independent cached actualacceptance
+.015847s/386031B,0rawteacherrows. All scopes CLOSED, workers released, no live
+numerical jobs; root owns canonicalcloseout. No native/probe/final work.
+
+Correctness300engineeringseconds, onecohort/platform underPROTOCOL exactledger.
+DefaultSGD/PC/coreGNmath reuse; newselected delayedstream/nativework/isolation
+checks. [Protocol](../artifacts/runs/bp-head-stream-20261021/PROTOCOL.md).
+
+## Historical GN — core and existing learner accepted; all owners released
+
+R2.1-BP-HEAD-GAUSS-NEWTON, shared dirty09ff811f/untracked dependencies preserved.
+GN-CORE/bp_adaptation_readback owned core; GN-TEST/bc_residual_tests owned new
+tests/fixtureledger; GN-REVIEW/bc_residual_review owned review; root owned existing
+BP integration, finaltestamendments, protocols/commands/serialexecution/docs.
+All DONE/released; workers source/AST/stdlibonly,0models/tests/solves/native/
+delegation. Root sole serial numerical producer; no live numerical jobs.
+
+28PASS/platform, final3pathstatics/independent actualacceptance. Windowsdirect
+terminal0/1.3498439s; LinuxSAME61753terminal0/11.4975685s.13recordedcommands
+16.8812902s/300 beforefinaldiff; no numericalretry. Prefixture27GO unexecuted,
+28amendment adds onlyreturnedNaNstub,0realSVD/models. All correctnessinvocations
+SPENT/CLOSED; no scientific/native authority. ParentGNstream/nativeusefulnessOPEN.
+[Evidence/costs/commands/next](../artifacts/runs/bp-head-gauss-newton-20261020/RESULTS.md).
+
+Next: existing learnability stream BP-only GN opt-in with bounded nativework and
+correct solver/diagnostic costs; focused checks/review then separatelyfrozen study.
+No newrunner/capture audit or defaultSGD change. Full repository goal ACTIVE.
+
+## Historical RF — software and constructive TRAIN fit accepted; owners released
+
+R2.1-FROZEN-HIDDEN-READOUT-FIT, shared dirty09ff811f/untracked dependencies
+preserved. RF-CORE/bp_adaptation_readback owned core, RF-TEST/bc_residual_tests
+owned tests/fixtureledger, RF-REVIEW/bc_residual_review owned review/readback;
+root owned adapter/protocol/commands/serialexecution/canonicaldocs. All DONE/
+released, no live numerical jobs. Workers source/AST/stdlib only except explicit
+ONE cached actual readback;0worker models/tests/solves/native/delegation.
+
+29PASS/platform, final scopedstatics and independent actualacceptance.9engineering
+commands13.3394354s/240 beforefinaldiff. One unchanged BP24/416 reconstruction/
+FULLcommonbenchmarkexact plusONE37row headsolve, physicalMSE.125657→2.91e-13,
+rank37/65/nullity28/condition93960.5/norm9354.94. No head installation or native
+work. Directterminal0/wrapper3.3442565s/GNU1.18s; cachedreviewACCEPTED/.0244627s/
+437004B. All experiment/review allowances SPENT/CLOSED, no further runauthority.
+[Evidence, commands, costs and next action](../artifacts/runs/frozen-hidden-readout-fit-20261020/RESULTS.md).
+Next: pure bounded original-MSE BP head Gauss–Newton proposal and independent
+Jacobian/rejection/work tests, before existing-stream opt-in; no diagnostic-head
+deployment, defaultSGD change or sweep. Fullgoal ACTIVE; useful neural control OPEN.
+
+## Historical GD — software and negative native check accepted; owners released
+
+Root owned smoke/helper integration, protocols/serial execution and canonical docs.
+GD-CORE/bp_adaptation_readback owned the new core/app modules; GD-TEST/
+bc_residual_tests owned two tests/fixture ledger; GD-REVIEW/bc_residual_review
+owned software REVIEW and native REVIEW/readback. Shared dirty09ff811f/untracked
+work preserved. Workers source/AST/stdlib only until the separately authorized
+ONE cached actual readback; no worker model/test/native/delegation. Root sole
+serial numerical producer; all workers now completed/released.
+
+39 software checks/platform accepted;14 commands22.3131782s/300s, initial typing
+failures retained. ONE new decoded BP24/416 condition returns task0/50controls;
+full common benchmark exact, all50 gripper predictions positive/commands open.
+SAME37694 terminal0/wrapper15.6158858s/GNU11.80s. One cached actual review ACCEPTED
+.0295597s/895852B/50rows. All native/review allowances SPENT/CLOSED, no running
+numerical jobs or further run authority. No soft-control or four-family rerun.
+[Software](../artifacts/runs/gripper-action-decoding-20261020/RESULTS.md) ·
+[Native](../artifacts/runs/gripper-decoded-control-check-20261020/RESULTS.md).
+
+Next: R2.1 frozen-hidden readout-fit diagnostic; new correctness budget/protocol
+before any solve study, source isolation and TRAIN-only data. No threshold/dose/
+seed sweep or checkpoint audit continuation.
+
+## Historical TMC-B — paired known-B adaptation accepted; owners released
+
+Root owned protocol/argv/serialproducer/canonicaldocs. TMC-B-SOURCE/
+bp_adaptation_readback owned artifactcase.py; TMC-B-REVIEW/bc_residual_review
+owned REVIEW/readback. Workers source/AST/stdlibonly, no model/test/native or
+otherdelegation. Root sole serialproducer. All shared dirty09ff811f work preserved.
+
+One source2appends37rows/one tick2charge; B19 warmA15 fails50controls, afterB37
+succeeds22controls. Initialraw42exact; alloriginalprimarymetrics/directions and
+negativewarmreturn retained. SAME71421terminal0/wrapper11.5881676s/GNU7.67s;
+ONE cachedactualreview ACCEPTED/.0178163s/599905B/72Brows0Arows. Allallowances
+SPENT/CLOSED; noactive numericaljobs or workerownership. NoA17rerun orCPCclaim.
+[Evidence](../artifacts/runs/taskspace-memory-b-adaptation-20261020/RESULTS.md).
+Next: opt-in explicitactiondecoding correctness, then a new independently frozen
+matchedprotocol if appropriate; no training-dose/seed sweep or audit continuation.
+
+## Historical TMC — software and known-A control accepted
+
+Fourproductionpaths plus2newtestfiles; independenttests/source review separate.
+39checks/platform accepted, scopedstatics, 24.8004687s/240softwareengineering.
+OneA15+B22 source /oneA17return succeeds15controls75physics, allAindices0..14;
+SAME9587terminal0/GNU7.15s/onecachedreview ACCEPTED .0153237s/308065B/15rows.
+No source/native/model/checkerretry, no reliability/safety/CPC claim. Bothstage
+allowances CLOSED; [evidence](../artifacts/runs/taskspace-memory-control-native-20261020/RESULTS.md).
+
+## Historical RLC — complete negative accepted; owners released
+
+R2.1-ROBOT-LEARNABILITY-CONTROL-CHECK, shared dirty09ff811f dependencies preserved.
+Root owned artifact-local case/protocol/command/serial execution and canonicaldocs.
+RLC-SOURCE/bp_adaptation_readback completed source-only helper/cost/controller
+semantics inspection(no writes/imports/numerics). RLC-REVIEW/bc_residual_review
+owned REVIEW/readback.py, independent source/protocol GO and separately authorized
+ONE cached actualpass8MiB30s50rows. No worker models/tests/native or delegation.
+
+1init1024draws24updates416rows/fullcommonbenchmarkexact; one frozenTRAIN17return
+50controls250knownphysics/0success. SAME96460terminal0,independent actual ACCEPTED
+.0290372s/625991B/50rows. No safety/neuralcontrol claim,4sampled violations retained.
+All invocation/review allowances CLOSED; all owners released/jobs terminal.
+[Evidence and precise next action](../artifacts/runs/robot-learnability-control-check-20261020/RESULTS.md).
+Next: implement explicit fixed-input nearest/causalTS12 serving support with scoped
+checks before a new prospective same-information memory-control native protocol.
+
+## Historical RRL — offline question accepted; owners released
+
+R2.1-RESERVED-ROBOT-LEARNABILITY, base09ff811f/shared dirty checkout. Root owned
+artifact-local case/protocol/command/serial execution and canonical docs.
+RRL-SOURCES/bp_adaptation_readback completed source-only compatibility work;
+RRL-REVIEW/bc_residual_review owned REVIEW/readback.py, independent source/protocol
+review and ONE separately authorized plain cached actual pass. No worker project/
+model/native execution, no delegation; no production/math/runtime edits.
+
+ONE112update1952row cohort directlyterminal0/no session; independent actualreview
+ACCEPTED/.0449494s/1439580B/0rawexpertrows. Allfamilies and16probes improve fixed
+imitation errors; no overall activeCPC or autonomous-control claim. All invocation/
+review allowances SPENT/CLOSED, jobs terminal and owners released.
+[Full evidence](../artifacts/runs/reserved-robot-learnability-20261020/RESULTS.md).
+Next: independently freeze one existing-path conventional BP closed-loop TRAIN17
+check with fully charged source reconstruction; no repeated four-family cohort.
+
+## Historical RPI — scoped software/native input accepted; owners released
+
+Root owns production source/execution/canonical docs. RPI-CORE/
+bp_adaptation_readback released core history/binding and native preparation;
+RPI-TEST/bc_residual_tests released focused tests/fixture ledger; RPI-REVIEW/
+bc_residual_review completed independent software and separately authorized ONE
+cached native readback. Separate file ownership/shared dirty checkout preserved.
+Workers source/AST/stdlib-only; root sole serial numerical/native producer.
+
+70unique checks/platform accepted (aggregate Windows47+22+1/fullLinux70), both
+harness failures and selector miss preserved. One native23→24 invocation yielded
+qualified18rows each; original30959terminal0, independent readback ACCEPTED.
+0models/probe updates/scores. All allowances SPENT/CLOSED; no active numerical
+jobs or continuing owners. Next existing-stream matched learner study requires a
+new prospective protocol, not another capture/provenance increment.
+[Software](../artifacts/runs/reserved-robot-probe-input-20261020/RESULTS.md) ·
+[Native collection/costs](../artifacts/runs/reserved-robot-probe-input-native-20261020/RESULTS.md).
+
+## Historical RPA — reserved reset admission accepted
+
+Shared dirty09ff811f checkout; root owns native constructor, execution and docs.
+RPA-TEST/bc_residual_tests owns new reserved-reset test/fixture ledger (released);
+RPA-REVIEW/bc_residual_review owns its REVIEW. RPI-DESIGN/bp_adaptation_readback
+completed read-only inspection of the existing probe/teacher integration. No
+worker project imports/tests/models/native; root sole serial test executor.
+16 sentinel cases, zero environments/models. [Prospective protocol](../artifacts/runs/reserved-robot-reset-admission-20261020/PROTOCOL.md).
+16 PASS/platform, scoped statics and independent actual acceptance. Original
+calls terminal0/no sessions; all allowances CLOSED. No returned environments,
+collection or model work. [Evidence](../artifacts/runs/reserved-robot-reset-admission-20261020/RESULTS.md).
+
+## Historical LSC — software and saved diagnosis accepted; owners released
+
+Root was sole serial numerical producer. Released LSC-CORE/bp_adaptation_readback
+owned only core/continuous_bc_diagnostics.py; released LSC-TEST/bc_residual_tests
+owned the new test and fixture ledger; released LSC-REVIEW/bc_residual_review
+owned REVIEW.md and separately dispatched saved_readback.py. Workers source/
+AST/stdlib only, no project imports/tests/models/native; the one post-producer
+stdlib actual review had explicit separate31-row/930-pair/4MiB/30s authority.
+Root owns new adapter, execution, protocols and canonical docs. Shared dirty
+checkout/unrelated files preserved. [Prospective correctness protocol](../artifacts/runs/readiness-label-separation-20261020/PROTOCOL.md).
+34PASS/platform, identical ordered XML and scoped statics/actual review accepted.
+One saved A15+mixed16 readout accepted: both views1shared-reset duplicate with
+identical targets,0exact conflicts.930pairs/0model/native work. Original calls
+terminal0 directly/no sessions; one independent review.0290668s/937125B. All
+allowances SPENT/CLOSED; no numerical jobs or continuing workers. Prior failures
+and budgets remain closed. [Results/costs/next action](../artifacts/runs/readiness-label-separation-20261020/RESULTS.md).
+
+Read-only next-path inspection confirmed existing probe runner/integration and
+documented probe23/final29 allocation; native role-based gates do not bind them.
+Next: pre-creation final29/probe23 reservation refusals while preserving generic
+probe-role functionality, then freeze an actual probe train/test collection split.
+No future model/collection authority follows from this source inspection.
+
+## Historical SPT — accepted software and fixed native question; owners released
+
+Full goal ACTIVE/current and previous turns PROGRESS. Shared dirty09ff811f and
+unrelated work preserved; no Git/index/network/installs. Root sole serial numeric
+owner, workers source/AST/stdlib only/no project imports/models/tests/native.
+
+| Dispatch | Owner/state | Exclusive writes | Accepted outcome |
+|---|---|---|---|
+| SPT-ROOT | root released | existing robot smoke/canonical docs/recorders/results | integration/serial gates/native case |
+| SPT-CORE | bp_adaptation_readback released | core+app readiness_roll_in | sibling plan/strict bounded paid receipts |
+| SPT-TEST | bc_residual_tests released | new completion test/fixture ledger |41new+59old/100cases per platform |
+| SPT-REVIEW | bc_residual_review released | software REVIEW | combined source/fixture/actual acceptance |
+| SPT-NATIVE-PREP | bp_adaptation_readback released | native case/protocol/budget/command | minimal existing uniform-source composition |
+| SPT-NATIVE-ACTUAL | bc_residual_review released | native REVIEW/readback.py | ONE cached actual review accepted |
+
+Software100PASS/platform; Win4.8047053s/Linux17.6534566s, SAME97125terminal0.
+Four-path lint/trueformat/hostWin+Linux-target typing PASS.17recordedengineering
+commands42.6485891s under240. Bothplatform4init248draws/32predictions864coords/
+1984MAC/24fake scenes36queries26attempts22returns/0SGDactualphysics. Original12
+source+3test typing errors and source findings repaired/preserved before fixtures;
+no numerical failure/retry. [Software](../artifacts/runs/student-prefix-teacher-completion-20261020/RESULTS.md).
+
+One native case admitted21:15:49UTC after actual software acceptance, source/
+protocol/reader GO and input/fresh/time/exclusive checks. Uniform384source full
+training equality exceptelapsed BEFORESDK. Fixed12student+4teacher collection16
+succeeds; labels4ALIGN5DESCEND0GRASP6LIFT1SETTLE. Private8updates128rows then pure50
+fails; both old TRAIN fits worse. Candidate392/5888/source384/5760 frozen. Oneinit
+1024draws/66controls330knownphysics/16queries;14,467,072MAC plus copies/checks/SDK
+unknown work. SAME28321terminal0/wrapper18.8974496s/GNU15.14s/selfRSS513568KiB.
+ONE review.0405178s/2067096B/66newrows ACCEPTED; all allowances SPENT/CLOSED.
+No joint monitoring/new safety, generalization, autonomy or CPC claim.
+[Native outcomes and costs](../artifacts/runs/student-prefix-teacher-completion-native-20261020/RESULTS.md).
+
+Critical-path correction: accepted nearest mass/light/camera/A adaptation already
+works at known TRAIN contexts; original bounded R4.3/R4.4/R4.5/R4.6 are not reopened.
+Current gap is neural state-policy control. Next R2.1-READINESS-LABEL-SEPARATION:
+small all-four-action-axis input/target consistency helper on originalA15+connected16,
+raw42 andtaskspace12 actualhistory; report duplicate conflicts/nearest pairs,
+native32 rounding and opposite-gripper flags, not comparable cross-view scores.
+Tiny zero-model checks/review before saved-input diagnosis; no more seed/dose or
+native retry. Reserved fresh robot-context input remains a probe prerequisite.
+No active numerical handles or continuing worker jobs.
+
+## Historical SBA — software and fixed negative question accepted; owners released
+
+Shared dirty09ff811f/unrelated work preserved. No Git/index/network/installs.
+Root sole serial numerical executor; workers source/AST/stdlib only. No active jobs.
+
+| Dispatch | Owner/state | Exclusive writes | Accepted outcome |
+|---|---|---|---|
+| SBA-ROOT | root done | existing stream/robot CLI/canonical docs/recorders | selected/default behavior + one native case |
+| SBA-CORE | bp_adaptation_readback released | new readiness_training_packets core | deterministic original-row selection |
+| SBA-TEST | bc_residual_tests released | new test/fixture budget | 44 scoped cases; two cached H2 pipelines/platform |
+| SBA-REVIEW | bc_residual_review released | software/native REVIEW | source/protocol/actual software+native accepted |
+| SBA-NATIVE-PREP | bp_adaptation_readback released | native protocol/budget/command | ordinary CLI, zero preparer execution |
+
+Windows44 PASS/2.1533392s; Linux44 PASS/10.4078788s, SAME original98807
+observedterminal0. Four-path lint/format/Win+Linux-target typing PASS. Bothplatforms
+4BP initializers128draws/12SGD180rows/0fits/native;10commands24.1660199s under240.
+Original5source+1test typing errors and worker AST count failure retained/repaired
+before fixtures. Review caught integration/callback gaps before execution; repaired.
+[Software evidence](../artifacts/runs/stage-balanced-acquisition-20261020/RESULTS.md).
+
+Separate ONE native admitted20:50:45UTC after prerequisites. 384SGD5760Arows/B0,
+1init1024draws/0fits; selected3rows/stage/15unique5745repeats/1152stage exposures.
+Pure50controls250knownphysics/task0/truncated/42grasp rows; closestgoal31.880mm/
+final170.674mm. Rare grasp fit improves without native success. SAME28958terminal0,
+wrapper22.7610178s/GNU18.14s/selfRSS506376KiB. Independent ONEcachedreview ACCEPTED
+.0495115s/2279470B/50newrows. Selection/copy overhead extra; no totalcompute match.
+All invocation/readback allowances SPENT/CLOSED; old failures/uncertaincaps intact.
+[Native negative and costs](../artifacts/runs/stage-balanced-acquisition-native-20261020/RESULTS.md).
+
+Root source reassessment: existing roll-in only teacher-prefix→student/canonical42.
+Next R4.4-STUDENT-PREFIX-TEACHER-COMPLETION extends the same selector/ledger/query
+loop for fixed student-prefix→observed-v2 teacher completion and taskspace12 actual
+history support. Goal is new connected TRAIN state coverage, not more weights/dose.
+Preserve mixed-data vs autonomous-success distinction; budget tiny checks/review
+before any new native protocol. Existing R2/probes/game evidence reused. Full goal
+ACTIVE/useful robot control/retention/recurrence/scientific/release parents OPEN.
+
+## Historical RSD/RSI — diagnostics accepted, all owners released
+
+Previous/currentgoalturn PROGRESS/fullgoal ACTIVE. Dirty09ff811f/untrackeddeps/
+unrelatedchanges preserved. No Git/index/network/installs. Root sole serial
+numerical owner; workers source/AST/stdlib only/0models/tests/native. Software
+Linux51296 and scientific56831 SAMEhandles observedterminal0; no active jobs.
+
+| Dispatch | Owner/state | Exclusive writes | Accepted outcome |
+|---|---|---|---|
+| RSD-ROOT | root DONE | correctionadapter/canonicaldocs/recorders/results |20PASS/platform/statics/defaultexact/paidfailure |
+| RSD-LEAF | bp_adaptation_readback DONE/released |newdiagnosticleaf |firststep/allstages/existingphysicalgradient |
+| RSD-TEST | bc_residual_tests DONE/released |newtest/fixtureledger |oneinit/perplatform18SGD36rows+6grad8overlaprows |
+| RSD-REVIEW | bc_residual_review DONE/released |softwareREVIEW |source3/executedordered20/statics ACCEPTED |
+| RSI-PREP | bp_adaptation_readback DONE/released |scientificdriver/protocol/budget/command |fixedsource/savedlabels/0prep execution |
+| RSI-REVIEW | bc_residual_review DONE/released |scientificREVIEW/readback |completefixedquestion ACCEPTED within caps |
+| RSI-CRITICAL | bp_adaptation_readback DONE/released |read-only recommendation |fixed-rowstagebalancedbasepacket next;no new execution |
+
+Software20/platform, Win2.219668s/Linux9.8063441s;14commands35.6611102s within240.
+Source9typing/test1both-target errors andworkerASTquotingerror preserved/repaired
+before numericalfixtures; no numericalfailure/retry. Bothplatforms2init64draws/
+36SGD72rows+12physicalgrad16overlaprows,0fits/predict/scenes/native. Current3source
+identity accepted. [Software evidence](../artifacts/runs/readiness-correction-step-diagnostics-20261020/RESULTS.md).
+
+Scientificquestion admitted20:25:02UTC/GNU90+5outer120/selfRSS2GiBpost/stage8MiB/
+log2/case4/CPU1GPU0/thread1/pinnedWSL; ONE SPENT/CLOSED. Necessary384source repeat
++unchanged8private=392SGD6160rows/1init1024draws,12newgrad74overlaprows/0native.
+Fullsourceexceptelapsed andall8mixedreceipts matcholdacceptedcase. Wrapper11.8079945s/
+GNU7.02s/RSS59080KiB. ONEcachedreview .027675s/1068279B/0newnative rows ACCEPTED.
+Firststep physicaldot GRASPpositiveboth; SETTLEnegativeboth; warm nominalmomentum
+protectivefirstorder. No acquisition/causality/eight-step trajectory claim.
+Originalunusedimport driverlintfailure preserved/repairedprelaunch. Root read
+only derived REVIEWkeys afteracceptance,0rawoutputreread/models. Allallowances
+closed. [Scientific evidence](../artifacts/runs/readiness-step-interference-20261020/RESULTS.md).
+
+Next R4.4-STAGE-BALANCED-ACQUISITION: puredeterministic3indices/stage/fixed15-row
+A-only packet through existingstream, unchanged complete refs/encoded histories/
+loss/ports/updates, report allindex/stage/repeatcosts. Tinycorrectnessbudget/review
+before any separateacquisitionnativecase. No v2warmloader/replayratio/momentumzero/
+all-eight-step diagnostic treadmill. Original negative/incomplete results intact.
+
+## Historical GCR — software accepted; native question accepted negative; owners released
+
+Previous/current turns PROGRESS; full goal ACTIVE. Shared dirty09ff811f/untracked
+requirements and unrelated changes preserved; no Git/index/network/installs. Root
+sole serial model/native executor. Linux71772 SAMEhandleterminal0 observed,
+Windows immediate0; native46755 SAMEhandleterminal0 observed. No active numerical jobs.
+
+| Dispatch | Owner/state | Exclusive files | Outcome |
+|---|---|---|---|
+| GCR-ROOT | root DONE |adapter/smoke/canonical docs/recorder/results |47PASS/platform/7pathstatics |
+| GCR-CORE | bp_adaptation_readback DONE/released |four batch/query/view files |explicitv2family/provenance/teacherpin |
+| GCR-TEST | bc_residual_tests DONE/released |newtest/fixtureledger |26new/oneBPfixture/9updates18rows |
+| GCR-REVIEW | bc_residual_review DONE/released |software REVIEW |actual47/platform/source/statics accepted |
+| GCR-NATIVE-PREP | bp_adaptation_readback DONE/released |nativecase/protocol/budget/command |fixed384source+8privatewake/2scenes,0execution |
+| GCR-NATIVE-REVIEW | bc_residual_review DONE/released |nativeREVIEW/readback |actual complete question independently ACCEPTED; negative |
+
+Software19:42–20:10UTC/CPU1GPU0/thread1/test60/Linux55+5/aggregate240/stage8MiB/log1.
+Perplatform1init32draws/9SGD18rows/0fits/13fwd22rows9back18rows342gradvalues/
+1424selectedMAC/fake4controls2geometryqueries pluspure21oldcases. No scientific
+or native authority under software budget. All numerical/statics firstpass.
+Native proposal launch19:55–20:15/deadline20:20/GNU90+5outer120/selfRSS2GiBpost/
+stage8MiB/raw4/log2/readback8MiB30s100rows. It repeats necessary sourcefactory
+384/5760 only (no storedparameters), fulltrainingequality beforeSDK, no baseline
+scene/replay; v2studentcollection→8privatewake→pure17return→2TRAINrefs37rows.
+Max1init1024draws/392SGD6160rows/15128576MAC/2scenes100controls500CONTROLphysics.
+IndependentGO/rootfullsource/helper/source8+frozen6/freshadmission19:55:57UTC passed.
+Native46755terminal0/wrapper23.6078511s/GNU18.56s/RSS514480KiB; both episodes
+0success/truncated50, both TRAIN fits worse. ONE cached review .0511309s/
+2317964B/100newrows independently ACCEPTED. All execution/readback authority
+SPENT/CLOSED. Last read-only worker recommendation to admit v2 warm data was
+rejected as redundant: accepted native teacher content exactly equals v1.
+Next existing TRAIN step-direction diagnostic composition; no new native dose.
+[Native result](../artifacts/runs/goal-consistent-readiness-recovery-20261020/RESULTS.md).
+[Software evidence](../artifacts/runs/goal-consistent-readiness-corrections-20261020/RESULTS.md).
+
+## Historical OGC — goal-consistent teacher qualified; all owners released
+
+Previous turn PROGRESS; current turn PROGRESS; full goal ACTIVE. Dirty09ff811f/
+untracked dependencies and unrelated changes preserved. No Git/index/network/
+installs. Root sole serial numerical/native executor. All model work remains0.
+
+| Dispatch | Owner/state | Exclusive files | Outcome |
+|---|---|---|---|
+| OGC-ROOT | root DONE | infra collector, teacher CLI, canonical docs/recorders/results |122/platform statics and one qualified teacher case |
+| OGC-CORE | bp_adaptation_readback DONE/released |core readiness teacher |held Euclidean subclass only, v1 preserved |
+| OGC-TEST | bc_residual_tests DONE/released |new test and fixture ledger |32newcases/2fake scenes4controls/0models |
+| OGC-REVIEW | bc_residual_review DONE/released |software REVIEW |source and executed122/platform accepted |
+| OGC-NATIVE-PREP | bp_adaptation_readback DONE/released |native PROTOCOL/MODEL_BUDGET/NATIVE_COMMAND |fixed teacher-only protocol/0execution |
+| OGC-NATIVE-REVIEW | bc_residual_review DONE/released |native REVIEW/readback |prospective GO and actual cached native acceptance |
+
+Software Winimmediate0/3.4407488s/Linux35494 SAMEhandleterminal0/21.4845037s,
+ordered122 identical/0failureerror skip. Ruff final lint/trueformat/hosttypingWin+
+Linux-target pass. Initial unusedimport lint failure/retracted strictSDKboundary
+finding preserved. Production unchanged since checks. No active numerical jobs.
+Software19:28–19:55/CPU1GPU0/thread1/test60/Linux55+5/aggregate240/stage8MiB/log1;
+new+old perplatform18fake scenes100controlattempt98return/103geometryattempt102return/
+358decisionattempt348return+52legacyactions,0models/native. Software acceptance
+alone grants no native qualification or learned-policy claim. The separate native
+case was admitted19:36:22UTC, original73579 SAMEhandleterminal0;15controls75known
+physics/finalsuccess/qualified. Wrapper9.8889418s/GNU5.61s/selfRSS494560KiB,0neural.
+Readback .0088827s/93237B/15newrows ACCEPTED. Spec/transitions/stages exactly equal
+accepted v1 source: no new training coverage. No duplicate-data learning trial;
+v2warm admission deferred, next existing student-arrival corrections with v2.
+Native protocol/one-use readback CLOSED, no active jobs or retained ownership.
+
+[Software results](../artifacts/runs/goal-consistent-observed-teacher-20261020/RESULTS.md).
+[Native result](../artifacts/runs/goal-consistent-observed-teacher-native-20261020/RESULTS.md).
+All earlier fixed384negative/old192incomplete/scalarcap failures remain unchanged.
+
+## Historical OGD — fixed question accepted negative; owners released
+
+Previous turn PROGRESS; this turn PROGRESS; full goal ACTIVE. Root executed the
+one frozen384SGD/5760Arow/B0/native50 question with no production/test edits.
+Accepted189/source34 proof reused. Native30840 SAMEhandle terminal0 observed;
+no active numerical jobs. All scientific/native allowances SPENT/CLOSED.
+
+| Dispatch | Owner/state | Exclusive files | Outcome |
+|---|---|---|---|
+| OGD-ROOT | root DONE | canonical docs, stage admission/recorder/results/diagnosis |sole model/native executor, fixed task0 negative |
+| OGD-PREP | bp_adaptation_readback DONE/released |stage PROTOCOL/MODEL_BUDGET/NATIVE_COMMAND |prospective fixed protocol; SDK source stop mismatch |
+| OGD-REVIEW | bc_residual_review DONE/released |stage REVIEW/readback |training prefix plus separately budgeted native-only ACCEPTED; first KeyError preserved |
+
+Shared dirty09ff811f/untracked dependencies and unrelated work preserved. No Git/
+index/network/installs. CPU1GPU0/thread1/lavapipe/GNU75+5/outer100/RSS2GiBpost/
+stage8MiB/raw4/log2MiB, one invocation. Original checker .0375302s/2984923B/0native
+rows PARTIAL; separately prospective native-only .0043485s/200387B/50rows ACCEPTED,
+no model/native rerun. Old192 incomplete evidence/caps unchanged and closed.
+Root pure teacher counterexample2instances3decisions/0models0sim/.0006586s/1104B:
+SETTLE outside native25mm ball. No demonstrated actual-trajectory causality.
+Separate tiny output review PARTIAL (.0271038s/13898B) on an unnecessary threshold
+assertion in geometry module before output read; no retry/acceptance claim.
+Next explicit versioned teacher goal-consistency repair, preserving v1; B transfer
+deferred until useful base control. Detailed receipts/results and reviewer scopes:
+[OGD evidence](../artifacts/runs/observed-warm-fit-depth-20261020/RESULTS.md).
+
+## Historical — observed teacher qualified; all owners released
+
+OGT / R4.5-OBSERVED-GRASP-TEACHER-QUALIFICATION. Previous turn PROGRESS; this turn
+PROGRESS. Shared dirty09ff811f/untracked dependencies and unrelated changes preserved;
+no Git/index/network/installs. Root sole serial numerical/native owner. All workers
+source/AST/stdlib only, no project/numerical imports/tests/native or delegation.
+
+| Dispatch | Owner/state | Exclusive writes | Result |
+|---|---|---|---|
+| OGT-ROOT | root DONE | teacher CLI/docs/stages except REVIEW/worker files |90/platform and one teacher17 qualified |
+| OGT-INFRA | bp_adaptation_readback DONE/released | existing infra teacher module |explicit current-feedback collection/result and paid-work guards |
+| OGT-TEST | bc_residual_tests DONE/released | new test/FIXTURE_BUDGET |40 cases, zero model work; later root oracle refinement |
+| OGT-REVIEW | bc_residual_review DONE/released | software REVIEW |combined source/budget/actual90 accepted |
+| OGT-NATIVE-REVIEW | bc_residual_review DONE/released | native REVIEW |one cached295408B/15row/.0048018s check accepted |
+
+Source9/tested copies/native FROZEN3 exact. Win2.7255116s immediate terminal0;
+Linux13.4092940s original14320 SAME handle observed terminal0. Static43263 terminal.
+Initial10mypy errors retained and repaired before fixtures; three concrete paid-
+work/log-order findings repaired with same-fixture oracles; no numerical retries.
+Software18:10–18:40/CPU1GPU0/test60/aggregate180s/stage8MiB/log1MiB/modelwork0;
+commands38.6997879s. New40+old50 fakebound16scenes96controlattempts94returns,
+99geometryattempt98returns/334decisionattempt327returns+52legacyactions; no physics.
+
+Single native teacher-only invocation admitted18:25:17UTC returned immediate0,
+9.5030454s/GNU5.64/selfRSS506548224B. Qualified15controls75knownphysics/sparse1/
+finaltrue/terminated; no learner or extra native work. One cached actual checker
+.0048018s firstread→REVIEWwrite/295408B/15rows accepted. One-use45+5/70/RSS2GiBpost/
+stage4MiB/raw1MiB/log1MiB/launchbefore18:32/deadline18:45 allowance SPENT/CLOSED.
+All previous negatives/old20k qualification preserved; no reliability/CPC claim.
+No active handles or worker ownership. Next explicit qualified15-row warm-teacher
+admission/stage version through existing reader/robot CLI plus tiny real-learner
+fixture, then separately freeze one conventional A-only acquisition/pure17 trial;
+original B19 TRAIN reference read-only, seed/loss/dose fixed, new2880Aexposure cost
+explicit. Full acquisition/adaptation/retention/recurrence/release parents open.
+
+## Historical — observed-grasp/reference gate and native negative accepted; all released
+
+OGR / R4.5-OBSERVED-GRASP-REFERENCE-RETENTION, shared dirty09ff811f. Root sole
+serial numerical owner; all workers source/AST/stdlib only, no numerical/native
+execution or recursive delegation. All unrelated changes preserved; no Git/index/
+network/installs. Previous turn PROGRESS; this turn PROGRESS. Full goal ACTIVE.
+
+| Dispatch | Owner/state | Exclusive files | Result |
+|---|---|---|---|
+| OGR-ROOT | root DONE | canonical docs/software stage/native admission/results |6/platform and one204/4320 native negative |
+| OGR-TEST | bc_residual_tests DONE/released | new test and FIXTURE_BUDGET |one32drawinit13updates26rows, six cached cases |
+| OGR-REVIEW | bc_residual_review DONE/released | software REVIEW |actual6/platform independently accepted |
+| OGR-NATIVE-PREP | bp_adaptation_readback DONE/released | native_case.py/PROTOCOL/MODEL_BUDGET |fixed A20/every2/80 preparation, source only |
+| OGR-NATIVE-REVIEW | bc_residual_review DONE/released | native REVIEW |complete negative accepted, strict cached checker |
+
+Software17:52–18:15UTC/CPU1GPU0/test60/aggregate180s/stage8MiB/log1MiB/payload2GiB
+(RSS unmeasured). Windows1.7477937s/Linux8.9220557s both immediate terminal0;
+19.2455563s commands, source21/copies exact, scoped statics/independent acceptance.
+Native74373 SAME handle observed terminal0,12.9950095s/GNU9.45/selfRSS524091392B;
+source21/input4/frozen6 exact. Original8wake400rows plus4A20replays80rows gives
+candidate204/4320, pure return no grasp/0success and A/B fit worse than source AND
+correction-only. Extra compute is not matched. One native18:00–18:25/launch18:00–
+18:12/CPU1GPU0/GNU60+5/wrapper90/RSS2GiBpost/stage8MiB/raw2MiB/log1MiB allowance
+SPENT/CLOSED/no retry. Independent actual saved checker .0276588s firstread→REVIEW
+write/2798501B/100newrows, no actual schema failure. Preparation-only JS template
+parse error preserved; original20k scalar-cap uncertainty unchanged. All owners
+released/no active handles/no more scientific work. Next opt-in existing observed
+teacher in current collector/CLI, strict current feedback, then qualify that policy
+before more learner optimization; v1/thresholds stay. All broader parents open.
+
+## Historical — observed-grasp integration and native negative accepted; all released
+
+Root sole serial numerical executor; shared dirty09ff811f/unrelated changes and
+untracked dependencies preserved. All workers source/AST/stdlib only, zero model/
+test/native execution. No active numerical handles or worker file ownership.
+
+| Dispatch | Owner/state | Exclusive files | Result |
+|---|---|---|---|
+| OGC-ROOT | root DONE | query infra/adapter/runner/canonical docs/stages |146 checks/platform, scoped statics |
+| OGC-CORE | bp_adaptation_readback DONE/released | four core files |separate observed family, source/AST only |
+| OGC-TEST | bc_residual_tests DONE/released | new33 tests/fixture ledger |all four learner families and mixed pipeline |
+| OGC-REVIEW | bc_residual_review DONE/released | software REVIEW |actual146 accepted |
+| OGC-NATIVE-PREP | bp_adaptation_readback DONE/released | glue/protocol/model budget |source/AST only |
+| OGC-NATIVE-ROOT | root DONE | native command/results/canonical docs |one200-update4240row case,0success |
+| OGC-NATIVE-REVIEW | bc_residual_review DONE/released | native REVIEW |negative native/source/receipts/feedback/resources accepted |
+| OGC-NATIVE-READBACK | bp_adaptation_readback DONE/released | READBACK/OBSERVED |initial schema failure retained, cumulative49.443449s/1286041B/100rows |
+
+Windows immediate terminal0; Linux1886/native21883 SAME handles observed terminal0.
+Software engineering17:22–18:05UTC/CPU1GPU0/test60s/aggregate300s/stage8MiB/log1MiB,
+recorded64.8684221s. Prospective142 pair held before any model for four added real
+family cases; source/fake-IO draft amendments retained, actual146 no numeric retry.
+Native one-use17:40–18:10/launch17:40–17:55, actual16.8277088s/522829824BselfRSS,
+SOURCE20/INPUTS3/FROZEN6 exact; SPENT/CLOSED/no retry. Current labels10ALIGN40LIFT
+correctly reflect grasp, but pure updated return never grasps/0success; A fit worse,
+B slightly better. Reviewer schema/actor probes retained; final-validator.0314s
+excludes failures/whole-review wall, which is unmeasured. Older20k scalar-cap
+qualification unchanged. No benefit/safety/generalization/release claim.
+
+Next root action: focused observed-batch plus existing original TRAIN reference
+bank/replay composition fixture, retaining full owner/feedback/receipt/cost gates.
+Only afterward freeze a separate pre-existing A20/every2/80-exposure question;
+no current scientific allowance, new teacher or dose/seed search. Goal ACTIVE.
+
+## Historical — observed-grasp readiness integration in progress
+
+R4.5-OBSERVED-GRASP-CORRECTIONS. Root owns query infra/correction adapter/smoke
+runner/canonical docs/stage, sole numerical executor. Core worker released4 core
+files; test worker released new29 tests/fixture ledger; reviewer owns stage REVIEW.
+All worker work source/AST/stdlib only, no models/tests/native/project imports.
+Shared dirty09ff811f/untracked dependencies required; no Git/index mutations.
+Software engineering17:22–18:05UTC/CPU1GPU0/test60s/aggregate300s/stage8MiB/log1MiB/
+modelpayload2GiB (RSS unmeasured). No scientific/native allowance. Selected current
+raw42 grasp flag chooses closed transport without elapsed/command contact proxy;
+v1 defaults/schema/thresholds preserved. Final focused gates and review pending.
+Previous mixed corrections169 and negative ALLALIGN native result accepted and
+reused; both native allowances closed, original scalar-readback qualifier open.
+
+## Historical — mixed corrections and negative recovery accepted; all released
+
+Root sole numerical executor; shared dirty09ff811f/unrelated changes preserved.
+
+| Dispatch | Owner/state | Exclusive files | Result |
+|---|---|---|---|
+| BGC-ROOT | root DONE | smoke runner/docs/software stage |169 checks/platform/scoped statics |
+| BGC-ADAPTER | bp_adaptation_readback DONE/released | correction adapter |source/AST only |
+| BGC-TEST | bc_residual_tests DONE/released | new23 tests/fixture budget |source/AST only |
+| BGC-REVIEW | bc_residual_review DONE/released | software REVIEW |actual software accepted |
+| BGC-NATIVE-PREP | bp_adaptation_readback DONE/released | glue/protocol/model budget |source/AST only |
+| BGC-NATIVE-ROOT | root DONE | native command/results/docs |one200-update/4240row case,0success |
+| BGC-NATIVE-REVIEW | bc_residual_review DONE/released | native REVIEW |complete negative accepted |
+| BGC-NATIVE-READBACK | bp_adaptation_readback DONE/released | READBACK/OBSERVED |.00809s/718448B/100new rows |
+
+Original93013/71738/1390 SAME handles observed terminal0; no active numerical jobs
+or worker writes. Both software169 and native recovery result independently
+accepted at declared scopes. All50 provisional labels ALIGN despite observed
+source grasp; updated return no grasp/0success, both TRAIN reference fits worse.
+No useful recovery/CPC/safety/release claim. Software engineering16:58–17:35UTC,
+commands72.7426067s/300, CPU1GPU0. Native one-use17:05–17:35/launch17:20/GNU60+5/
+wrapper90/selfRSS2GiB/stage8MiB/raw2MiB/log1MiB, actual13.1105563s/524304384BselfRSS,
+SOURCE15/INPUTS3/FROZEN6 exact. Model allowance SPENT/CLOSED/no retry. Old20k
+scalar-readback conformance stays UNVERIFIED, never waived or redefined.
+
+Next root implementation: explicit observation-bound grasp feedback in versioned
+TRAIN readiness supervision, preserving v1/default thresholds/old records. Test
+actual off-hover held-object behavior and current-port/paid label binding before
+any separate native protocol. Full goal and research/release parents remain open.
+
+## Historical — binary BP robot path delivered; native task negative, all released
+
+Previous goal turn PROGRESS; this turn PROGRESS. Root sole numerical executor,
+shared dirty09ff811f/untracked dependencies preserved/no Git/index/network/install
+changes. Accepted software79/platform and one actual native qualification result;
+full native protocol scalar-budget conformity remains unverified, not waived.
+
+| Dispatch | Owner/state | Exclusive writes | Evidence |
+|---|---|---|---|
+| BGR-ROOT | root DONE | robot script/docs/software stage |79 checks/platform, scoped statics/source2 |
+| BGR-TEST | bc_residual_tests DONE/released | new tests |24 cases; source/AST only, no worker execution |
+| BGR-REVIEW | bc_residual_review DONE/released | software REVIEW |actual79/source/evidence accepted |
+| BGR-NATIVE-ROOT | root DONE | native stage except reviews/docs |one CLI case192/3840+50nativecontrols,0success,partialgrasp/lift |
+| BGR-NATIVE-REVIEW | bc_residual_review DONE/released | native REVIEW |nativebehavior/receipts/model/measuredresources accepted,scalarcap qualification |
+| BGR-NATIVE-READBACK | bp_adaptation_readback DONE/released | native READBACK |≤50distinctrows/no models; aggregate20kopcapUNVERIFIED/possibleoverrun |
+
+OriginalLinux31711 and native35055 SAMEhandles observed terminal0; prior handles
+terminal. No active numerical/native handles or worker write ownership. Stages
+artifacts/runs/bp-binary-gripper-{rollout,acquisition}-20261020/. Oneuse scientific
+allowance SPENT/CLOSED/no retry, CPU1/GPU0/GNU60+5/wrapper90/selfRSS2GiB/stage8MiB/
+raw2MiB/log1MiB/engineering16:44–17:05UTC/launch16:55. Joint monitor was already on:
+51samples459coords0observedviolations, no safetyclaim. Nativebudgetprimarykernels
+recorded, scalarreadback20klimit not proved because recursiveequality undercounted;
+fullstudycheckbox remains open, no moreforensics underclosedcap.
+Next actual implementation: preserve explicit mixed BP objective through existing
+MSE-only correction adapter/runner before new readiness-recovery qualification.
+All negative/incomplete results remain; full acquisition/adaptation/release open.
+
+## Historical — existing BP binary-gripper objective into robot serving
+
+R4.4-BP-BINARY-GRIPPER-ROLLOUT. Previous turn PROGRESS, accepted replay/native
+negative reused. Shared dirty09ff811f/untracked dependencies preserved; no Git/index
+mutation. Root alone executes numerical work. All prior handles including56008
+and30927 terminal, prior scientific budgets closed. No native allowance here.
+
+| Dispatch | Owner/state | Exclusive writes | Limits |
+|---|---|---|---|
+| BGR-ROOT | root RUNNING | run_continuous_robot_learning.py/docs/stage except REVIEW | API/CLI/receipt composition, serial focused tests |
+| BGR-TEST | bc_residual_tests RUNNING | new test_bp_binary_gripper_robot_learning.py | source/AST only, zero models/tests/native |
+| BGR-REVIEW | bc_residual_review RUNNING | software REVIEW.md | combined source/actual evidence, zero numerical work |
+
+Stage artifacts/runs/bp-binary-gripper-rollout-20261020/: PROTOCOL/FIXTURE_BUDGET/
+TEST_COMMANDS. Public binary_gripper_axis=None, exact3only/BP; CLI--binary-gripper.
+Reuse existing mixed objective; soft tanh output/controller unchanged. Selected
+A-only packet IDs bind objective/policy; defaults and PC native objectives retained.
+Nine true initializers24576draws27SGD54rows/8legacyfits16rows672coords/platform;
+new1initializer1024draws3SGD6rows0fits,9fake scenes18controls0physics. CPU1/GPU0/
+each60s/aggregate240s/stage8MiB/log1MiB/engineering16:38–17:10UTC. Freeze final
+combined source/statics and independent review before fixture execution.
+
+## Historical — reference rehearsal software and native case complete; all released
+
+Previous goal turn PROGRESS; this turn PROGRESS. Final196/platform scoped tests /
+statics and independent combined source/actual review accepted. One separately
+budgeted reference-rehearsal native case completed NEGATIVE. Dirty09ff811f and
+unrelated changes preserved; no Git/index mutation. Root sole numerical executor.
+
+| Dispatch | Owner/state | Exclusive writes | Actual evidence |
+|---|---|---|---|
+| CRR-ROOT | root DONE | helper/runner/docs/software stage |196 cases/platform, source4/static/limits exact |
+| CRR-ADAPTER | bp_adaptation_readback DONE/released | correction adapter | optional replay composition; source/AST only |
+| CRR-TEST | bc_residual_tests DONE/released | new tests |28 cases; no worker execution |
+| CRR-REVIEW | bc_residual_review DONE/released | software REVIEW | actual196 pair independently accepted |
+| CRR-NATIVE-ROOT | root DONE | native stage except reviews/docs |1attempt14.5936649s, source192+8wake+4replay,100controls0success |
+| CRR-NATIVE-REVIEW | bc_residual_review DONE/released | native REVIEW | prospective GO and actual complete-negative acceptance |
+| CRR-NATIVE-READBACK | bp_adaptation_readback DONE/released | native READBACK |scientific/scalar only≤28622ops/100rows, author role disclosed |
+
+OriginalLinux30927 and native56008 SAMEhandles observed terminal0; prior native
+handles terminal. No active numerical/native handles or worker write ownership.
+Both stages under artifacts/runs/{correction-reference-rehearsal-20261020,
+taskspace12-reference-rehearsal-acquisition-20261020}/. All scientific allowance
+SPENT/CLOSED/no retry. CPU1/GPU0/GNU90+5/wrapper120/selfRSS2GiB/stage8MiB/raw2MiB/
+log1MiB/engineering16:26–16:50UTC/launch16:40. Extra4updates80reference exposures
+are not matched compute; pure task success remains0 and source A fit worsens.
+Next root implementation is existing BP binary-gripper likelihood through robot
+learning API/CLI and A-only receipt admission, preserving MSE/PC objectives; no
+new model/native authority exists from these closed case budgets.
+
+## Historical — bounded reference rehearsal in correction paths
+
+R4.5-CORRECTION-REFERENCE-REHEARSAL; previous goal turn PROGRESS (accepted negative
+failure-state correction trial). Shared dirty09ff811f/untracked dependencies are
+required; no Git/index changes. Root alone executes numerical tests; all old
+scientific allowances remain closed. No native/comparative allowance this turn.
+
+| Dispatch | Owner/state | Exclusive writes | Scope |
+|---|---|---|---|
+| CRR-ROOT | root RUNNING | smoke runner, canonical docs, stage except REVIEW | integration and serial focused tests |
+| CRR-ADAPTER | bp_adaptation_readback RUNNING | continuous_correction_demo.py | optional existing helper composition; source/AST only |
+| CRR-TEST | bc_residual_tests RUNNING | new test_correction_reference_rehearsal.py | independent behavior tests; source/AST only |
+| CRR-REVIEW | bc_residual_review RUNNING | stage REVIEW.md | combined source + executed evidence; no model work |
+
+Contract: optional replay_plan=None/reference_episodes=(); complete owned TRAIN
+bank in model space, exact source spec; no nearest replay. Eight wake updates
+unchanged, separate original replay budget, extra consolidation/native counters,
+retained failure charges and source/actor/prior-success guards. No final/probe.
+Engineering16:13–16:55 UTC, CPU1/GPU0; each test command ≤60s, aggregate command
+wall time ≤320s. Fixture numerical work must be counted before execution; no
+workers run models/tests/native. Stage8MiB/log1MiB/self RSS2GiB; no process-tree
+hard-cap claim. Final shared tree stabilizes before checks. Detailed scope and
+prospective test costs in stage FIXTURE_BUDGET.md once cases are available.
+
+## Historical — TS12 correction case accepted negative; all owners released
+
+Shared dirty 09ff811f dependencies preserved. Root was the sole numerical/native
+executor; original handle71868 and prior46873/46347 are terminal. Production11
+unchanged, accepted197 checks/platform reused. No live numerical/native handles.
+
+| Dispatch | Owner/state | Exclusive writes | Actual scope |
+|---|---|---|---|
+| TS12-C-ROOT | root DONE | case stage except reviews; canonical docs | source192 +8 private updates,100 native controls,2 reference forwards42 rows |
+| TS12-C-REVIEW | bc_residual_review DONE/released | stage REVIEW.md | prospective GO and actual negative acceptance; no models/tests/native |
+| TS12-C-READBACK | bp_adaptation_readback DONE/released | stage READBACK.md | ≤100 rows/28577 scalar operations; no models/tests/native |
+
+Stage artifacts/runs/taskspace12-failure-state-corrections-20261020/: all50 labels
+ALIGN, collection and corrected return both failed; original A reference fit
+worsened. Complete negative accepted independently. Wrapper13.352883100s/GNU9.49s,
+self RSS523333632B. Frozen limits CPU1/GPU0/GNU90+5/wrapper120/RSS2GiB/stage8MiB/
+raw2MiB/log1MiB, engineering15:58–16:25 UTC/launch16:15. One scientific attempt
+SPENT/CLOSED, no retry, no active worker ownership. Root closes canonical docs.
+Next implementation: optional existing bounded reference rehearsal in correction
+path with explicit extra exposure/update costs; no new native allowance yet.
+
+## Historical — TS12 software accepted197; native negative / all released
+
+Previousgoalturn PROGRESS, thisturn PROGRESS. Base09ff811f/shareddirtyuntracked
+checkout preserved/noGit/index. Rootsole anymodels/tests/nativeexecutor.
+
+| Dispatch | Owner/state | Exclusive writes | Observed scope |
+|---|---|---|---|
+| TS12-ROOT | root DONE | 2scripts/integrationtests/canonicaldocs/bothstagesexceptreviews | final197/platform, scoped11statics andone separatelybudgetednative |
+| TS12-CORE | bp_adaptation_readback DONE/released | newcore+6sharedcore/app/adapters | AST7only/noimports/model |
+| TS12-PURE | bc_residual_tests DONE/released | newpuretest |35casesASTonly/no numericalexecution |
+| TS12-REVIEW | bc_residual_review DONE/released | softwarestageREVIEW | acceptedfinal197actual/source/costs |
+| TS12-NATIVE-REVIEW | bc_residual_review DONE/released | nativestageREVIEW | prospectiveGO andcompleteNEGATIVEactualacceptance |
+| TS12-NATIVE-READBACK | bp_adaptation_readback DONE/released | nativestageREADBACK |50rows<=16764scalarops/20k/no model |
+
+Stages artifacts/runs/official-state-taskspace12-20261020/ and sibling
+*-acquisition-20261020/. Initial37PASS/1admissionerror prefix and repair paid;
+final197pair accepted. Nativepure17 source192→50controls0success/nograsp, complete
+negativeaccepted. Native46873 andLinux46347 SAMEhandles terminal0 observed.
+AllscientificallowanceSPENT/CLOSED, no active numerical/nativehandles. Rootclosing
+plans/log; nextreadyexistingfullystudentcorrectioncase needsits ownprospective
+protocol/coverage/budgetreview, no automaticretry or newrepresentation/dose.
+
+## Historical — AH-C complete negative / all ownership released
+
+Previous goalturn PROGRESS, accepted62/current5source reused. Base09ff811f shared
+dirtycheckout required; noGit/index/branchmutation. Rootsole numerical/native
+executor, allpriorhandles including97105/35812 terminal. All oldnative allowances
+spent/closed, negatives and incompletezero capture preserved. This distinctcase
+adds on-policy history47 supervision/privateupdates, no oldcontrol retry.
+
+| Dispatch | Owner/state | Exclusive writes | Limits |
+|---|---|---|---|
+| AH-C-ROOT | root DONE accepted native question | newnative stage except REVIEW/READBACK; canonicaldocs/plans/log | one sourceinit192SGD +8private/2scenes100controls;15:21–15:50UTC,launch15:40 |
+| AH-C-REVIEW | bc_residual_review DONE/released | newstage REVIEW.md | source/stdlib0model/test/native,nochildren |
+| AH-C-READBACK | bp_adaptation_readback DONE/released | newstage READBACK.md | source/stdlib<=30000scalarops/100nativerows,0model/test/native,nochildren |
+
+Mixed20controls assistedSUCCESS, pure50controlsNEGATIVE. Bothindependentreviews
+accepted allpaid/source/raw/history/receipt/resourceevidence. Root8298 SAMEhandle
+terminal0 observed, no live numerical/nativework. AllscienceallowanceCLOSED.
+Frozenrecipe/costs/exactcommand PROTOCOL.md/NATIVE_COMMAND.json under
+artifacts/runs/action-history-correction-acquisition-20261020/. IndependentGO
+issuedbeforelaunch; all provisional labels and mixed/pure success keptdistinct.
+No newframework/representation/seed/dose/evalaccess. Nativeattempt once regardless
+outcome, no numericalworker allowances; root integrates actualevidence.
+
+## Historical — AH-U originally unlaunched executed arm, accepted negative/released
+
+Previous turn PROGRESS; accepted137source/static/correctness reused. Dirty09ff811f
+currentcheckout required; noGit/index/branch mutation. Rootsole numericalowner;
+allprior7513/87468/49727 handles observedterminal. No othermodeljob. Oldzero
+failure/permanentcharges/cutoffs preserved; no zeroretry/controlreplacement.
+
+| Dispatch | Owner/state | Exclusive writes | Limits |
+|---|---|---|---|
+| AH-U-ROOT | root protocol/admission/results | native stage except REVIEW; canonical docs/plans | ONLY original executed arm1init192SGD/50controls; engineering14:55–15:25/launch15:00 |
+| AH-U-REVIEW | bc_residual_review running | native stage REVIEW only | stdlib/source0model/test, nochildren |
+
+EXECUTED_AMENDMENT.md freezes unchanged scientificrecipe/inputs/metrics/counts,
+corrected137cleanup source, new prospective engineeringdeadline based on measured
+12.49s/504324KiB firstfailure. IndependentGO pending. Result UNPAIRED: oldzero
+capturefailed, original comparison parent remains unchecked. No repeatedfixture
+cohort/newrunner/source-admission framework or future scientificallowance.
+
+### Historical — AH causal history accepted137 / native pair incomplete / released
+
+R4.4-CAUSAL-ACTION-HISTORY; previous turn PROGRESS, accepted SR evidence reused.
+Shared dirty09ff811f required for untracked dependencies; no Git/index mutation.
+Root sole numerical executor; no native/scientific allowance. Engineering
+14:24–14:54UTC/check240 each45/CPU1threads/GPU0/stage8MiB/log1MiB.
+
+| Dispatch | Owner / state | Exclusive writes | Limits |
+|---|---|---|---|
+| AH-ROOT | root closeout | stream/robot/smoke/newapp/newintegration/docs/plans/stage exceptREVIEW | serial numerical, exact fixture count before execution |
+| AH-CORE | bp_adaptation_readback DONE/released | newcore history + BC TRAIN fitter | AST/stdlib only0model |
+| AH-TEST | bc_residual_tests DONE/released | new pure history tests53 cases | AST/stdlib only0model |
+| AH-REVIEW | bc_residual_review initial contract reviewed | stageREVIEW only | source/stdlib0model; actual137 accepted; native incomplete reviewed |
+
+Contract: previous actual native32 action4 + closing proxy/6, raw/canonical42,
+strictly causal/reset each episode. Zero-history control shares47D and fixed0/1
+tail normalization. Native advances only after returned matching execution; no
+teacher targets, future actions, unsent proposals, budget renewal or new runner.
+
+### Historical — SR readiness stage residuals accepted / released
+
+R4.4-READINESS-STAGE-RESIDUALS on dirtymaster09ff811f/shared checkout, untracked
+working dependencies require reuse. Prior turn PROGRESS; old jobs terminal and
+ownership released. No Git/index mutation, native/scientific allowance or old
+baseline retraining. Selected stage partition uses existing forwards only.
+
+| Dispatch | Owner | Exclusive writes | Limits |
+|---|---|---|---|
+| SR-ROOT | root/sole numerical owner | learnabilityrunner/robotCLI/newintegration/docs/plans/stageexceptREVIEW |1800s13:53–14:23UTC/check240 each45 CPU1GPU0|
+| SR-CORE | bp_adaptation_readback DONE/released | newcore readiness_stage_diagnostics |900s sourceASTonly0model|
+| SR-TEST | bc_residual_tests DONE/released | newtest_readiness_stage_diagnostics |900s sourceASTonly0model|
+| SR-REVIEW | bc_residual_review DONE/released | newstageREVIEW |source/stdlibonly0model|
+
+Bindings own fulloriginalTRAIN records; rootbindsrawbeforecanonicalprojection,
+then passes ownedmatchingmodelbindings and validatesreturnedsource/rowpartitions.
+CLI consumes existingqualifiedreader metadata, no time-inferred phases. Default
+outputs/kwargs/all-stage behavior preserved. Exact fixture budgets frozen before serial Windows/pinnedLinux checks. Final106
+per platform/statics/source review accepted; original92 and intermediate97 receipts
+and snapshots retained. Check ledger75.4112499s/240; zero nativephysics. Final
+path-encoded snapshots listed in FINAL_SOURCE_BINDING.json; bare names remain97.
+Parent usefulness/safety/release open. Next: causal executed-action history with
+equal-width zero-history control, no new experiment authority.
+
+### Historical — SF implementation and single negative case ACCEPTED / released
+
+R4.4-STATE42-SCALE-FLOOR implemented,77focusedcases/platform/statics/independent
+acceptance; R4.4-STATE42-SCALE-FLOOR-ACQUISITION complete accepted NEGATIVE.
+Nativefixedunitfloors192updates3840Arows→50controls250physics/0success. Reused
+empiricalcontrol remains0success; A fitworse/Bread-onlyfitlower, no Boptimization.
+
+| Dispatch | Owner / state | Exclusive writes | Evidence / limits |
+|---|---|---|---|
+| SF-ROOT | root /closeout | runner/CLI/stats/savedreader/integration/docs/plans/stagesexceptREVIEW |ninebytesexact/CHECK_LEDGER44.2591029s240; deadline14:01|
+| SF-CORE | bp_adaptation_readback DONE/released | corestandardization/BCadapter |sourceASTonly0model|
+| SF-TEST | bc_residual_tests DONE/released | newcoretest39cases |sourceASTonly0model|
+| SF-REVIEW | bc_residual_review DONE/released | implREVIEW +distinctnativeREVIEW |77orderedIDs/statics/source+oneuseactual+finaldocreadback accepted|
+
+Shared dirtymaster09ff811f/untrackeddependencies preserved/noGitmutation. Root
+sole numericalowner, originalLinux97357 andnative89728 polledSAMEterminal before
+laterwork; all ownedhandles terminal. Originalthreepayloadanchors/ninesourcebytes
+exact PRELAUNCH/POSTCASE. Engineering1800s13:31–14:01/check240each45 CPU1GPU0
+unchanged, no amendment; one native allowanceSPENT/closed/no further modelcase.
+Previous failedCPUconformity/negative scientific results unchanged; no safetyclaim.
+Next R4.4-READINESS-STAGE-RESIDUALS: bind originalqualifiedTRAINphase labels to
+existing stage-aware readouts instead of all; no newrunner/floor/doseretry.
+Fullparentacquisition/retention/recurrence/RGB/generalization/CPC/release OPEN.
+
+### Historical — readiness roll-in and single native question ACCEPTED / released
+
+Root sole numerical/native owner; source bp_adaptation_readback, independent tests
+bc_residual_tests, source/actual reviewer bc_residual_review had disjoint writes.
+All writers released, all owned command handles observed terminal. Final72cases
+per platform/statics accepted; single native complete NEGATIVE, broader phase
+coverage/purestudent0success.1800s allowance prospectively+240 at13:18, deadline
+13:30:06/no modelstart13:23/check240 each45; original failures/caps unchanged.
+No further model/native authority. Root final documentation only. Next learner
+contract R4.4-STATE42-SCALE-FLOOR, no automatic prefix/dose/count increment.
+
+### Historical dispatch — bounded readiness teacher roll-in
+
+| Dispatch | Owner | Exclusive writes | Limits |
+|---|---|---|---|
+| RI-ROOT | root /sole numerical owner | smoke/docs/plans/stageexceptREVIEW |1800s12:56:06–13:26:06/check240 each45 CPU1GPU0|
+| RI-IMPLEMENT | bp_adaptation_readback | newcore roll_in +infraqueries |900s sourceASTonly|
+| RI-TEST | bc_residual_tests | newtest_readiness_roll_in |900s sourceASTonly|
+| RI-REVIEW | bc_residual_review | stageREVIEW |900s source/stdlibonly|
+
+Shareddirty09ff811f; all oldjobs terminal/ownershipreleased. Previousincrement
+PROGRESS/negative50ALIGN labels reused. Explicitteacherprefix thenfrozenstudent
+with per-controlprovenance; no mixedsuccessasstudent-only. Defaults preserved.
+Prospective protocol in readiness-roll-in-20261020; freezeexactfixturemath before
+rootserialexecution. No native scientific allowance here.
+
+### Historical dispatch — canonical readiness corrections accepted / native negative
+
+| Dispatch | Owner | Exclusive write paths | Limits |
+|---|---|---|---|
+| SC-ROOT-20261020 | root closeout / all numerical jobs terminal | smoke/docs/plans/stage except REVIEW |1800s12:26:27–12:56:27/check250 each45 CPU1GPU0|
+| SC-IMPLEMENT-20261020 | bp_adaptation_readback DONE/released | newcore state_corrections +correctionadapter |900s source/ASTonly|
+| SC-TEST-20261020 | bc_residual_tests DONE/released | newtest_state_quaternion_corrections |900s source/ASTonly|
+| SC-REVIEW-20261020 | bc_residual_review source/functional/native ACCEPTED/released | newstage REVIEW only |900s source/stdlibonly|
+
+Shared dirty09ff811f/unrelatedchanges preserved; default19pipeline unchanged.
+Explicit canonical feature view +TRAIN17acquisition through existing runtime;
+no newframework. Separate reviewed native protocol ran ONCE, zero task success.
+130focusedcases/platform/staticfunctional acceptance; all checks/native serialized
+by observed terminal handles. Previous quaternion
+404cases/platform and negative native accepted; fixtureCPUfailure remainswithheld.
+
+### Historical dispatch — explicit state42 quaternion recipe ACCEPTED / native negative
+
+First status authoritative; older Current headings are preserved history.
+
+| Dispatch | Owner/state | Exclusive paths | Limits/disposition |
+|---|---|---|---|
+| SQ-ROOT-20261020 | root closeout / all numerical jobs terminal | learnedrobotCLI/diagguard/docs/stage except REVIEW |1800s11:57:05–12:27:05/check300 each30 CPU1GPU0|
+| SQ-IMPLEMENT-20261020 | bp_adaptation_readback DONE/released | newcore +frozen smoke |900s/sourceASTstdlibonly|
+| SQ-TEST-20261020 | bc_residual_tests DONE/released | two newquaternion testfiles |900s/sourceASTstdlibonly|
+| SQ-REVIEW-20261020 | bc_residual_review ACCEPTED/released | stage REVIEW only |900s source/300s actual, stdlibonly|
+
+Shared dirty09ff811f required for uncommitted dependencies; no Git/index/unrelated
+changes. Previous turn PROGRESS (accepted84state diagnosis/larger-dose negative).
+Pure q/-q canonical42 recipe through existing inputprojection and rawnative/frozen
+serving, explicitCLI optin/defaults preserved. No newframework/kernel/dependency.
+Protocol stage state42-quaternion-recipe-20261020 beforefixtures, sharedmodel/test/
+feature/nativecostlimits; workers no numerical/model/test/native imports/execution.
+OneBP192 completed after final tests/statics/review; native result NEGATIVE. No scientific
+retry. All prior raw42/negative receipts/permanentcharges read-only and spent.
+Final404cases/platform/statics/independent acceptance; fixture sharedCPU1 scheduling
+conformity WITHHELD after observed admission error. All costs/failures retained.
+See state42-quaternion-recipe stage RESULTS/REVIEW; next canonical correction view.
+
+### Historical dispatch — state42 negative accepted; all native jobs terminal
+
+This first status is authoritative; older Current headings are preserved history.
+
+| Dispatch | Owner/state | Exclusive paths | Limits/disposition |
+|---|---|---|---|
+| S42-ROOT-20261020 | root closeout / native terminal | docs and state-readiness stage except REVIEW |1200s11:18:17–11:38:17/check120 CPU1GPU0|
+| S42-REVIEW-20261020 | bc_residual_review accepted / released | stage REVIEW only |600s source / distinct240s saved actual /120s docreadback, stdlib only|
+
+Root sole serial model/native owner, no production/test changes or new correctness
+model work. Five accepted source snapshots unchanged;193focusedcases/platform and
+prior state checks reused. New42state teachers17/19 qualified20/22; BP24/480 then
+50controls0success/truncated independently accepted negative. Three fixed native
+commands ONCE terminal0, total30.6954409s/220; metadata checker failure preserved,
+corrected only source-derived/emitted schema assumption, no model/native retry.
+[Results](../artifacts/runs/state-readiness-acquisition-20261020/RESULTS.md).
+Next separately freeze/review ONE fixed-dose state42A-only phase64 follow-up;
+no concurrent/remaining native work or allowance renewed under this protocol.
+
+### Historical dispatch — A-only learning accepted; all jobs terminal
+
+| Dispatch | Owner/state | Exclusive paths | Limits/disposition |
+|---|---|---|---|
+| RA-ROOT-20261020 | root closeout / jobs terminal | robotCLI/docs/stage except REVIEW |1800s10:57:28–11:27:28/check240 CPU1GPU0|
+| RA-TEST-20261020 | bc_residual_tests DONE/released | new a_only tests |900s source/ASTonly;45+root4cases|
+| RA-REVIEW-20261020 | bc_residual_review ACCEPTED/released | stage REVIEW |900s source/240s actual/120s nativeGO/240s actual savedonly|
+
+Root sole serial numericalowner; disjoint dirty09ff811f/noGitmutation.193cases/
+platform/statics/2testedbytes independentlyaccepted. New BP A-only24/480→native17
+complete negative50controls250physics; saveddiagnosis/errorfit recorded. Wrapper
+prelaunch wordingfailure before subprocess preserved, exact actualcommandONCE.
+No prior budget renewed/retry/cohort/newalgorithm. [Results](../artifacts/runs/readiness-a-only-learning-20261020/RESULTS.md).
+Next existing officialstate42 diagnostic with qualified inputs and frozenbudget;
+leave RGB goals open, no implied matchedinformation/CPC/safety/reliability claim.
+
+### Historical dispatch — readiness input learning accepted; all jobs terminal
+
+| Dispatch | Owner/state | Exclusive paths | Limits/disposition |
+|---|---|---|---|
+| RL-ROOT-20261020 | root closeout/jobs terminal | stream CLI/docs/stage except REVIEW |1800s10:42–11:12/check240 CPU1GPU0|
+| RL-ROBOT-20261020 | bp_adaptation_readback DONE/released | learned-robot CLI |900s source/AST only|
+| RL-TEST-20261020 | bc_residual_tests DONE/released | test_readiness_stream_input.py |900s source/AST only;87cases|
+| RL-REVIEW-20261020 | bc_residual_review ACCEPTED/released | stage REVIEW |900s source/240s actual/120s native+diagnosisGO/240s actual saved only|
+
+Shared dirty09ff811f preserved/no Git mutation; root sole serial model/test/native
+owner.494cases/platform/statics/3testedbytes and independent acceptance. One BP
+full-phase readiness8/8/8→native17 complete negative:24SGD496rows50controls250physics,
+23.3927529s; saveddiagnosis2.6297474s/no modelwork. Jointviolations11/51 retained.
+No new native/modelrun or old cohort restart. [All evidence](../artifacts/runs/readiness-demonstration-learning-20261020/RESULTS.md).
+Next explicit existing A-only control through robot composition/admission, then
+separately frozen isolated acquisition check; B is not proven causal.
+
+### Historical dispatch — readiness corrections accepted; all jobs terminal
+
+| Dispatch | Owner/state | Exclusive paths | Limits/disposition |
+|---|---|---|---|
+| RC-ROOT-20261020 | root closeout / jobs terminal | core/adapter/projection/docs/stage except REVIEW |2100s10:06–10:41/check240 CPU1GPU0|
+| RC-INFRA-20261020 | bp_adaptation_readback DONE/released | query/smoke |900s source/AST/stdlib only|
+| RC-TEST-20261020 | bc_residual_tests DONE/released | new test module |900s source/AST/stdlib only;56 cases|
+| RC-REVIEW-20261020 | bc_residual_review ACCEPTED/released | stage REVIEW |900s source/300s actual/180s GO/180s failure/120s amended GO/180s actual, saved only|
+
+Shared dirty09ff811f/nonoverlap/no Git mutation; root sole serial numerical owner.
+339 cases/platform/statics and combined implementation independently accepted.
+Original BP warm-gate failure/spent costs retained. Explicit same-question
+serialization-only amendment completed with all three rollouts zero-success and
+all50 alignment labels. Cumulative native wrappers45.0167035s/120;56SGD1792rows,
+150controls750known physics. No further retry/model/native authority this increment.
+[Results and exact commands](../artifacts/runs/readiness-corrections-20261020/RESULTS.md).
+Next explicit qualified readiness-demonstration input in the existing stream CLI,
+then a separately frozen conventional learning-to-control check; no new framework.
+
+### Historical dispatch — readiness teacher accepted, all jobs terminal
+
+| Dispatch | Owner/state | Exclusive paths | Limits/disposition |
+|---|---|---|---|
+| RT-ROOT-20261020 | root closeout/jobs terminal | newcore/docs/stageexceptREVIEW |1800s09:47–10:17/check180/native200oneuse|
+| RT-INFRA-20261020 | bp_adaptation_readback DONE/released | collector/CLI |900s sourceASTstdlibonly;42fixreturned|
+| RT-TEST-20261020 | bc_residual_tests DONE/released | newreadinesstest |900s sourceASTstdlibonly;50cases|
+| RT-REVIEW-20261020 | bc_residual_review DONE/accepted/released | readinessREVIEW |900s source;distinct300sactual+GO;300snativeactualsavedonly|
+
+Root soleSERIAL numerical/native owner; workers no imports/models/tests/native.
+138cases/platform/statics and actual source acceptance; separately frozen one-use
+teacher17→19 qualifies bothknownresets20/22controls, native34.7311s/210physics.
+No arbitraryoff-reference/student/safety/CPCclaim. Prior4armfailedgate/negative
+results remain. Shared dirty09ff811f/noGitmutation. [Evidence](../artifacts/runs/readiness-teacher-20261020/RESULTS.md).
+Next distinct readiness correction records/explicitproducer and existingprivate
+runtime integration; qualifyprovisionalstudent-state labels without oldrelabeling.
+
+### Historical dispatch — continuous PC corrections, 2026-10-20 UTC
+
+| Dispatch | Owner/state | Exclusive paths | Limits |
+|---|---|---|---|
+| PCC-ROOT-20261020 | root closing/jobs terminal | continuous_correction_demo.py/canonicaldocs/stageexceptREVIEW |2400s09:07–09:47/check240/CPU1/GPU0|
+| PCC-SCRIPT-20261020 | bp_adaptation_readback DONE/released | scripts/maniskill_continuous_smoke.py |900s/sourceASTstdlibonly|
+| PCC-TEST-20261020 | bc_residual_tests DONE/released | newPCcorrections test +oldPCrolloutrefusalsonly |900s/sourceASTstdlibonly|
+| PCC-REVIEW-20261020 | bc_residual_review DONE/accepted/released | stageREVIEW.md |900s/sourceASTstdlibonly|
+
+Shared dirty09ff811f preserved, root sole SERIAL runner; all workers released.
+131cases/platform+statics and actual source acceptance. Separate native jointGO
+then BP/PC/neutral terminal0/9zero-success episodes. Wholework parity gate failed
+on neutral chemistry overhead; active unexecuted/no retry. Three-arm actual
+review accepted/full4arm incomplete. Review scopes900s source, distinct600s
+actual (capacity interruption/retry),180s nativeGO and180s nativeactual saved-only.
+Root2400s09:07–09:47/check240, newnative400s SPENT126.941s/no renewedcase.
+[Exact evidence](../artifacts/runs/continuous-pc-corrections-20261020/RESULTS.md).
+**Next:** explicit geometry-conditioned teacher readiness, preserving original
+fixed schedule and qualifying new labels before further corrective training.
+
+### Historical dispatch — recorded native state view accepted, all jobs terminal
+
+| Dispatch | Owner/state | Exclusive paths | Limits/disposition |
+|---|---|---|---|
+| PSV-ROOT-20261020 | root closeout/jobs terminal | projection/template/docs/stage exceptREVIEW |1800s08:43–09:13/check150/render20; firstbrowser120+amendedretry60|
+| PSV-TEST-20261020 | bc_residual_tests DONE/released | new state testmodule |600s/sourceASTstdlibonly|
+| PSV-REVIEW-20261020 | bc_residual_review DONE/accepted/released | stageREVIEW.md |600s source then distinct600s08:53–09:03 savedactual+retryprotocol|
+
+187cases/platform+statics/source+actual accepted. Firstlauncher FAILED/incomplete,
+noJS/97.196s, cleanup failures separately resolved; one reviewedfilehandle retry
+passed14.333s/lifetime12.535s<60, PID27296absent/portabsent/serverthreadclosed.
+No further browser or modelwork authorized; original311s budgetfailure unchanged.
+Shared dirty09ff811f/nonoverlap; noGit/index change, root sole serial runner.
+[Exact evidence](../artifacts/runs/paired-state-view-20261020/RESULTS.md).
+
+**Next:** Extend the existing corrective-update path in src/adapters/continuous_correction_demo.py to accept the exact continuous PC/neutral/active learner states already supported by frozen robot rollout. Preserve the existing BP/nearest defaults, the eight arrived-TRAIN exposures, full native wake/momentum/receipt checks and explicit cost accounting; add independent fake-boundary tests before any separately frozen comparative robot case.
+
+### Historical dispatch — paired inspector functional acceptance / resource exception
+
+| Dispatch | Owner/state | Exclusive paths | Limits/disposition |
+|---|---|---|---|
+| PI-ROOT-20261020 | root closeout; jobs terminal | dispatcher/playback/HTML/docs/stage except REVIEW |2400s08:13–08:53/check180s+presentation240s; browser lifetime failed|
+| PI-IMPL-20261020 | bp_adaptation_readback DONE/released | new src/app/paired_quota_inspector.py |900s/sourceASTstdlib only|
+| PI-TEST-20261020 / R1 | bc_residual_tests DONE/released | new tests/test_paired_quota_inspector.py |900s then distinct180s/sourceASTstdlib only|
+| PI-REVIEW-20261020 | bc_residual_review DONE/functional accepted/released | stageREVIEW.md |900s source; distinct600s actual saved-only;120s copy-only|
+
+Root sole SERIAL checks/browser; no workers imported project/models or ran tests.
+150focused/platform+statics pass; actual3pages and browser behavior independently
+accepted. Recorded presentation commands below240s; lifetime proxy~311s exceeds
+240s, resource conformity withheld. No browser retry/retroactive allowance.
+Chrome63044absent/server21282terminal/port8767absent. All negative/scientific data
+unchanged; zero new numerical work. Final HTML has only separately reviewed
+role-note copy delta from tested snapshot. Full goal ACTIVE, R4.7 stillopen.
+[Exact evidence/ledger](../artifacts/runs/paired-inspector-20261020/RESULTS.md).
+
+**Next:** Bind each paired inspector stage to its saved /runs/{arm}/observations/{ordinal} record, validate its native update index against the original quota, and display selected-stage native architecture and tensor-memory components with exact source pointers and scope exclusions. Keep missing observations, lineage and sleep proposals unavailable; use saved metadata only, no new cohort.
+
+### Historical dispatch — bounded R4.3 accepted; all work terminal, 2026-10-20 UTC
+
+| Dispatch | Owner/state | Exclusive paths | Limits/disposition |
+|---|---|---|---|
+| PWA-ROOT-20261020 | root closing, jobs terminal | adapter/CLI/canonicaldocs/stageexceptREVIEW |1800s07:50–08:20/check120 s|
+| PWA-TEST-20261020 | bc_residual_tests DONE/released | new test module |900 s/sourceASTstdlib only|
+| PWA-REVIEW-20261020 | bc_residual_review DONE/engineering accepted/released | stageREVIEW.md |900 s/source/checks only|
+| PWA-AMENDMENT-GO-20261020 | same reviewer DONE/one-use GO/released | stageREVIEW.md |distinct900 s/source/protocol only|
+| PWA-AMENDMENT-ACTUAL-20261020 | same reviewer DONE/actual accepted/released | stageREVIEW.md |distinct600s07:59:15–08:09:15/saved only|
+
+Shared dirty09ff811f dependencies/nonoverlap retained; no Git/index mutation.
+Root sole SERIAL runner. Final105 focused cases/platform+statics pass. Explicit
+SAME-cohort resource retry terminal0/192.3809036 s under400 s, original180 s/pair shared
+birth deadlines. Both pair reports complete/all 160 livezero success; literal
+original bounded R4.3 accepted with negative result, stronger claims open. Prior
+90 s failure remains incomplete/SPENT/cumulatively charged, not independent sample.
+17newSGD/192 rows/79init13272 normals; cumulative failed+amended26 SGD288 rows119init.
+All source/test/executed snapshots match; PID25176 absent, sessions40504/71610
+terminal0. No reviewer/test worker numerical/project imports or delegation.
+Final exact command ledger/costs/failures in stageRESULTS.md. Shared inspector
+compatibility check returns2/nooutput, saved-only R4.7 gap. Full goal ACTIVE.
+Final accounting: 18 recorded commands: 17 engineering /26.422135500s of120s (including retained mypy failure, expected inspector refusal and closing whitespace), one amended native /192.380903600s of400s; combined 218.803039100s. Stage 4184198B before ledger <16MiB; each raw<4MiB/log<4MiB. All final source/test/executed snapshots match, direct new-file whitespace and scoped git diff --check PASS. All jobs terminal/workers released; full goal ACTIVE.
+
+**Next:** Extend the existing shared inspector with a paired-quota projection: selectable frozen/trained arms, physical and actual native stages, all signed cells, costs and overlapping timings with exact source pointers. Preserve null/failure and inactive-control visibility; reuse current renderer and saved reports, with no new cohort or orchestration framework.
+
+### Historical dispatch — paired timing and component accepted, 2026-10-20 UTC
+
+| Dispatch | Owner/state | Exclusive paths | Budget/disposition |
+|---|---|---|---|
+| PQT-ROOT-20261020 | root closing; all jobs terminal | quota_comparison/canonical docs/stage except REVIEW |1800s07:23–07:53/checkaggregate120s|
+| PQT-TEST-20261020 | bc_residual_tests DONE/released | tests/test_paired_quota_timing.py |600s/sourceASTstdlib only|
+| PQT-REVIEW-20261020 | bc_residual_review DONE/accepted/released | stage REVIEW.md |600s source/executed metadata readback|
+| PQT-COMPONENT-GO | same reviewer DONE/one-use GO/released | stage REVIEW.md |distinct600s/source/stdlib only|
+| PQT-COMPONENT-ACTUAL | same reviewer DONE/accepted/released | stage REVIEW.md |distinct300s07:44:45–07:49:45/saved only|
+
+Root sole SERIAL numerical/test runner.54metadata cases/platform and statics pass;
+separate one-use initialized component completed4.7597457s/selfRSS311160832B,
+zero training/predictions/environment/final data.4initializers/672normalvalues,
+34timedcallbacks/34comparisons/15explicit+3internal snapshots, source unchanged.
+No worker ran project/NumPy/Torch/model/RNG/tests/native or delegated work.
+Old paired study stays incomplete/SPENT; no comparative acceptance or rerun.
+Final command totals and exact argv in stage RESULTS.md, all failures retained.
+Dirty09ff811f/unrelated changes preserved; no Git/index mutations.
+Final accounting: 22 recorded commands /38.067043500s of120s, including retained failures and closing whitespace; stage124416B before final ledger, all logs<4MiB. Tested source/test and component executed snapshots match final files.
+
+**Next:** Add an exact validated prospective paired wall allowance in the existing adapter (default90s/max180s), fixed before runtime birth/shared by both arms; test unchanged defaults, invalid inputs and no renewal of existing clocks. Then freeze/review a separate future qualifier before any new study. Do not resume the spent case or alter quotas/seeds/metrics/readout coverage.
+Full goal ACTIVE. Historical handoffs follow.
+
+### Historical dispatch — paired timing implementation, 2026-10-20 UTC
+
+| Dispatch | Owner/state | Exclusive paths | Budget |
+|---|---|---|---|
+| PQT-ROOT-20261020 | root RUNNING | quota_comparison +canonicaldocs/stageexceptREVIEW |1800s07:23→07:53/checkaggregate120s |
+| PQT-TEST-20261020 | bc_residual_tests DONE/released | tests/test_paired_quota_timing.py |600s/sourceASTstdlibonly |
+| PQT-REVIEW-20261020 | bc_residual_review DONE/accepted/released | newstageREVIEW.md |600s/sourceASTstdlibonly |
+
+Shared09ff811f dirtydeps/nonoverlap preserved. RootsoleSERIAL runner; workersno
+project/NumPy/models/RNG/fit/SGD/tests/native/delegation. No new scientific/native
+allowance or oldstudyretry. Sourcebefore preserved; independent tests then scoped
+checks. Newstage artifacts/runs/paired-quota-timing-20261020/. Existingbudget/clock/
+learner/receipt/eval rules unchanged; timingoutsidepaidrows. FullgoalACTIVE.
+All following handoffs historical.
+
+### Previous handoff: paired control source accepted; native incomplete (superseded)
+
+| Dispatch | Owner/state | Exclusive paths | Budget/disposition |
+|---|---|---|---|
+| PQ-ROOT-20261020 | root closing | rewardpilot/quota_comparison/CLI/canonicaldocs/stageexceptREVIEW | 2400s06:51→07:31;180srecordedcommands |
+| PQ-TEST-20261020 | bc_residual_tests DONE/released | tests/test_paired_quota_control.py | 900s/sourceASTonly; no runtime/models |
+| PQ-REVIEW-20261020 | bc_residual_review DONE/SOURCE+GO | stageREVIEW.md | 900s/sourceonlyclosedbeforeactual |
+| PQ-ACTUAL-20261020 | bc_residual_review DONE/released | stageREVIEW.md | separate600s from07:10:35; saved-only; actualacceptanceWITHHELD |
+
+Dirty09ff811f/sharedcheckout deps retained, no Gitchanges. RootsoleSERIAL numerical/
+native.36metadata cases/platform+affected1case rerun PASS, scopedstatics/source
+accepted. One jointnative startsfirstpaironly:192TRAINsteps/9SGD96rows, frozen40live
+complete/trained31complete1failed8unrun; internal90s budget, comparisonNone,
+secondpairunreached. Native SPENT/no retry. PIDs/86738/27493 terminal. OneTRAIN-only
+microprofile no models; scalarresultnotwhole-run cause, productionunchanged.
+29recordedcommands132.8008121s/180 includingclosingchecks. Allworkersreleased.
+Fullgoal/R4.3scientificcriteriaOPEN. **Next implementation:** add per-arm TRAIN/evaluation wall timings and inclusive pair-guard call/time
+counters in the existing paired adapter, with deterministic-clock zero-model tests.
+Keep timing outside sealed paid rows; measure cost before choosing an optimization
+or a separately budgeted future qualifier. Preserve the failed/SPENT study and
+all state/receipt checks; no automatic native retry.
+[Results/costs/commands](../artifacts/runs/paired-quota-control-20261020/RESULTS.md) ·
+[Review/disposition](../artifacts/runs/paired-quota-control-20261020/REVIEW.md) ·
+[Usage/tree](paired-quota-control.md). Following handoffs historical.
+
+### Previous handoff: camera input/native recurrence accepted (superseded)
+
+Root owns production CLI/case/docs/integration and all SERIAL execution. Test
+worker owned tests/test_camera_stream_input.py then released; separate scoped
+assignment owned tests/test_cumulative_camera_case.py then released. Review worker
+owns stage REVIEW.md only: source/stdlib, no worker tests/models/NumPy/native.
+Dirty09ff811f dependencies require nonoverlapping paths; unrelated work preserved.
+Source review closed before a separate600s saved-only actual readback. No worker
+created model/native authority. Root deadline06:53:37/aggregate180s unchanged.
+
+75+13 cases/platform in two groups PASS, scoped statics PASS; offline CLI/native
+source/protocol/actual accepted. One native camera0→1; mass/light/A retained1;
+167controls/835physics/zero172sampledjoint violations. Prior8lightviolations and
+massno-gain unchanged.28recorded commands96.7364400s/180 incl3fixedstatic failures;
+one-use offline/native SPENT, handles terminal. OriginalR4.5 criterion accepted,
+fullgoal/strongerclaims andR4.3 remainOPEN. No further worker execution pending.
+
+**Next implementation — R4.3:** Add a paired trained-versus-frozen recurrent quota scenario to existing
+key_door_reward_pilot/run_coupled_attribution: exact shared initial native state
+and declared instance indices, each policy's own96TRAIN interactions, deferred
+final access after both quotas. Test quotas/state/RNG/isolation before a separately
+frozen small repeated-instance protocol; do not retry the old failed qualifier.
+[Results/commands/costs](../artifacts/runs/camera-stream-input-20261020/RESULTS.md) ·
+[Independent review](../artifacts/runs/camera-stream-input-20261020/REVIEW.md) ·
+[Usage/tree/checks](camera-stream-input.md). Following handoffs historical.
+
+### Previous handoff: cumulative TRAIN context adaptation accepted (superseded)
+
+Root completed **R4.5-CUMULATIVE-TRAIN-SEQUENCE engineering/native subtask**.
+Two workers independently owned tests and review; root owned source/canonical
+integration and all SERIAL execution. Dirty09ff811f dependency tree required
+nonoverlapping paths; all unrelated changes and prior failures preserved.
+Original1200s source/protocol review closed before a separately scoped600s saved
+actual readback; no worker numerical/model/test/native execution or extra budget.
+
+Per platform25+17+1 scoped cases PASS in separate groups; final five-path statics
+and independent source/protocol/actual acceptance. One native case completes:
+mass already successful27controls, afterlearning30(no gain); lighting0→1 and
+A/mass retained. Eight failed-lighting sampled panda_joint6 violations preserved.
+Source/actor1/29; two delayed paid updates yield candidate3/87, nexttick6.
+282controls1410knownphysics; one fit/initializer, three appends87rows.30recorded
+commands159.9333826s/240 incl3repaired type failures. Native SPENT, no retry.
+
+Full goal/R4.5/camera/dynamics/constraints/neural/generalization/science/release
+remain open. **Next:** add the missing saved camera teacher route to the existing
+native stream CLI with existing qualification/sequence API; test role/recipe
+binding before any separately reviewed small camera native protocol. No new
+checkpoint chain or orchestration framework. [Results and commands](../artifacts/runs/continuous-context-sequence-20261020/RESULTS.md),
+[review](../artifacts/runs/continuous-context-sequence-20261020/REVIEW.md),
+[API/tree/checks](continuous-context-sequence.md). All following handoffs historical.
+
+### Previous handoff: fixed RGB-range control negative (superseded)
+
+- [x] **R4.5-NEAREST-RGB-RANGE-CONTROL fixed-recipe subtask:** executed one
+  prospectively reviewed case using existing TRAIN-only RGB-range fitting,
+  nearest learner and corrective pipeline. Production source unchanged.
+- [x] Same24 metadata-only tests passed on Windows/Linux, zero skips/errors/
+  failures; scoped Ruff/format/Linux-target mypy and independent source/actual
+  acceptance. One unused-import lint failure was fixed and preserved. Existing
+  27-case production and normalization/runtime proofs reused without rerun.
+- [x] Native source B19 50controls/return0; candidate A17 29/1; candidate B19 50/0.
+  All six signed metric differences and nine raw endpoint differences versus
+  the accepted empirical pilot are zero. A retained; no corrective improvement.
+- [x] One fit29x21/609coordinates; source-prefix statistics exactly matched before
+  one RNG-free nearest initializer. Two appends79rows,129controls645knowncontrol
+  physics,50provisional labels. Source1/29/candidate2/79. All raw reports and
+  negative results retained; allowance SPENT, no retry or further metric tuning.
+- [ ] **Next implementation:** extend existing continuous_stream_demo.
+  run_continuous_demo with a bounded opt-in released-TRAIN sequence and detached
+  checkpoint observer, preserving two-episode defaults. Use one existing runtime,
+  original clocks/budget/receipts, frozen A statistics, capacity<=256/no eviction.
+  Native callers use already-qualified teachers. Test isolation before a separately frozen native
+  A→mass→lighting→A curve with existing readouts and sampled joint monitoring.
+- [ ] Full R4.5/camera/dynamics/constraint coverage, neural generalization,
+  comparative benefit, committed serving, other lanes, final/UI/release/full goal.
+
+Why this: both provisional-label recipes failed B. A working qualified-label
+nearest baseline already exists; cumulative contexts, learning curves and native
+constraint accounting are the substantive missing original R4.5 outcome. Do not
+start another weight/horizon/seed/correction-dose pilot. R4.6 is already accepted;
+R5/R6 need model/features prerequisites. Original accepted evidence stays accepted.
+[Protocol, files and checks](nearest-rgb-range-control.md) ·
+[Results, commands, costs and next action](../artifacts/runs/nearest-rgb-range-control-20261020/RESULTS.md) ·
+[Independent review](../artifacts/runs/nearest-rgb-range-control-20261020/REVIEW.md).
+Full goal ACTIVE/session PROGRESS. All following handoffs are historical.
+
+### Previous handoff: empirical nearest corrections (superseded)
+
+- [x] **R4.5-NEAREST-CORRECTIONS implementation and fixed-pilot subtask:** the
+  existing updater and native pipeline accept bounded nearest control. One
+  arrived-label append preserves source, frozen statistics, original prototypes,
+  provisional provenance, clocks and permanent charges. MLP still uses eight SGD.
+- [x] Same27 ordered tests PASS on Windows/Linux, zero skips/errors/failures;
+  scoped Ruff/format/mypy and independent source/result acceptance. Three failed
+  type-check invocations are preserved and repaired. No full-suite claim.
+- [x] One separately frozen native pilot completed: source B19 50 controls/return0,
+  candidate A17 29/return1, candidate B19 50/return0. All six signed deltas0.
+  Correction utility is NEGATIVE; old-task retention holds at these fixed resets.
+- [x] Native cost:129 controls/645 known control-physics steps,50 provisional labels,
+  two appends/79 rows including A setup, zero model RNG/fits/SGD/gradients.
+  Source1/29 and candidate2/79; original actions and statistics retained. All raw
+  reports preserved; allowance SPENT. No physical joint-limit/generalization claim.
+- [ ] **Next implementation/validation:** compose ONE nearest correction metric
+  control with the existing fixed RGB-range transform, same A29/TRAIN17/19/
+  capacity/pipeline/order and all six endpoints. Freeze costs and independent
+  review first; execute locally after gates. Reuse this empirical pilot, preserve
+  old MLP range failures, and introduce no tuned weight, sweep or new framework.
+- [ ] Full R4.5 recurrence/constraints/science, neural generalization, comparative
+  benefit, committed serving, other roadmap lanes, final/UI/release/full goal.
+
+Why this: one provisional append did not acquire B and the returned B trajectory
+repeatedly selected its first corrective prototype. Existing untuned sensor-range
+scaling supplies a concrete distance control; this is not a causal finding or a
+newly proposed MLP cure. Original R2.1/R2.3/R4.4/repeated-update/replay/nearest
+visual+mass/game evidence is reused. Replay bridge remains deferred.
+[API, tree and checks](nearest-corrective-adaptation.md) ·
+[All results, commands, costs and failures](../artifacts/runs/nearest-corrective-adaptation-20261020/RESULTS.md) ·
+[Independent engineering and native review](../artifacts/runs/nearest-corrective-adaptation-20261020/REVIEW.md).
+Full goal ACTIVE; session PROGRESS. All following handoffs are historical.
+
+### Previous handoff: saved control diagnosis (superseded)
+
+- [x] **R4.4-NEURAL-GENERALIZATION, saved-control diagnosis subtask:** added a
+  bounded TRAIN-data diagnostic. Only exact full observations admit action errors;
+  later teacher actions are never treated as labels for a diverged learner.
+- [x] The same 44 tests passed on Windows and Linux, with no skips. Scoped Ruff,
+  format and mypy checks and independent source/result review passed. Two initial
+  type errors were fixed; the failed check is preserved.
+- [x] One saved-data analysis completed in 0.497 s, using zero models, training or
+  simulator calls. At the exact reset input, x-command error was -0.418342
+  normalized units (-0.041834 m desired translation error, not achieved motion).
+  The next observation leaves stored support. The sole failure cause is unproven.
+- [x] Reused accepted repeated-update/native-three, original R2.1/R2.3/R4.4,
+  nearest-controller visual/mass acquisition and return, and game evidence.
+  Replay comparison is accepted and closed; its robot bridge remains deferred.
+- [ ] **Next implementation:** extend src/adapters/continuous_correction_demo.py
+  to the bounded nearest learner: one private append of arrived corrective labels,
+  with original source, frozen statistics, provenance, clocks and charges retained.
+  Refuse capacity overflow before work. Reuse ActorShadowRuntime and test arrival,
+  ownership, capacity and preceding receipts before a separate native protocol.
+- [ ] Strong neural/generalizing control, full R4.5, comparative benefit, committed
+  serving, final evaluation, UI, release and the full repository goal remain open.
+
+Why this: conventional control already works, but its existing correction updater
+accepts only the MLP. Learning from encountered states advances adaptation without
+another blind MLP dose or checkpoint variant. No new native allowance is granted.
+Updated objective164ba2be governs. All following handoffs and old next actions are
+historical, including stale claims that accepted parent criteria remain open.
+[Usage and checks](learned-control-diagnosis.md) ·
+[Results, commands, costs and next action](../artifacts/runs/learned-control-diagnosis-20261020/RESULTS.md) ·
+[Independent review](../artifacts/runs/learned-control-diagnosis-20261020/REVIEW.md).
+Full goal ACTIVE; session PROGRESS. Workers released; all numerical handles terminal.
+
+### Accepted preceding comparison (historical next action superseded)
+
+- [x] **R2.1-CONTINUOUS-REPLAY runnablecomparison subtask:** new existing-runner
+  example reuses accepted saved controls; all152 signed/raw comparisons retained,
+  paidreport/fullnativeowner checks afterALLpublicobservers, no oldbaseline rerun.
+- [x] Same45metadata-only cases/platform,0fail/error/skip; final3fileRuff/format/
+  mypyPASS and independent source/actual acceptance before separateONEmodelGO.
+  Units perform0models/arrays/fit/SGD/forward/gradient/RNG/native work.
+- [x] Solefrozen modelrun0/12.2474917s/1732630B:56updates116rows4A-onlyfits8rows/
+  16values4initializers1024normals. All4initialcheckpoints/fullpair0/firstwake exact;
+  PC-neutral currentparams/momentum/commonreports exact beforeactive. No retry.
+- [x] Valid mixed/negative finding: replay improves3warmbenchmark directions but
+  worsens3new/recovery directions ALLfamilies. B stilllearned andAreturn improved
+  inthisfixedcase. Final freshTRAIN/test ERRORS HIGHER all4; finalzeroGAINS lower,
+  inheritedGAINS remainnegative. Gains are not losses. No overallreplay/CPCbenefit.
+- [ ] **Exact next implementation:** opt-in replay_plan/API+boundedCLI through
+  scripts/run_continuous_robot_learning.py; _admit_candidate currentlyrequires
+  native==wake3*phase andwake-onlyrows, rejectingreplaycandidates. Admitdistinct
+  wake/native/replayrows+receipts/fullCPCstate withdefaultNone unchanged. New
+  independent smallprotocol beforeANYnativecall; no currentnativeauthority.
+- [ ] FullR2.1/R2.3/R4.5/usefuladaptation/causalplasticity/generalization/CPCbenefit/
+  native serving/final/UI/release remainOPEN; no capture/audit/provenance variant.
+
+Replay adds12updates24rows vsalready-paid44/92controls: samewakeinfo/seed/metrics,
+NOTmatchedcompute.256probescorecalls576rows/32directiongrads64rows10304values;
+PC42updates87candidateforwardrows210energies168latentsteps28chem/gates. Selected
+work excludesvalidation/copies/elementwise/container/processoverhead. Original
+FAILED/SPENT BPcohort provenance,66vs69oldestimatequalification/allnegatives and
+consent/receipts/budgets/clocks/permanentcharges preserved. One3annotationtyping
+failure fixedbeforeunits, nofunctionaltestfailure. Reuseaccepted76replay/math/
+probe/CLI/nativeproofs; nofullsuite/cleanclone/release/remoteCI/sweep/dependency/native.
+Dirty09ff811f/master/onecheckout/userchanges preserved. NEWroot1800from04:20:24/
+check60/aggregate180/log8MiB/stage12MiB closesby04:42UTC (deadline04:50:24);
+workers900closed/allchildren terminal/currentmodelbudgetSPENT. Fullgoal ACTIVE/
+session PROGRESS. Historical next-actions below superseded; unfinished work kept.
+[API/filetree](docs/continuous-replay.md) ·
+[Allmetrics/costs/exactcommands](artifacts/runs/continuous-replay-comparison-20261020/RESULTS.md) ·
+[Independent acceptance](artifacts/runs/continuous-replay-comparison-20261020/REVIEW.md).
+
+## Current CLOSED — qualified H32 reads, incomplete fullchain, 2026-10-18
+
+Rootowned4source/stage/docs/soleexecution; testsworker only2newtestmodules within
+650, reviewer onlyREVIEW450. Root2000+commands325.6402770000=
+3425.6402770000/3600 CLOSED, allpriorgrantsCLOSED. Allworkersreleased/nojobs/
+sourceASTsavedonly/noimports/models/tests/statics/network/Git. IndependentSOURCEGO
+beforeeachnativecheck; ACTUALaccepts461passing subset/source0complete8games and
+175verifieddecisions, NOTfullchain. Public20s42stepsfail; fresh40s64+64+47steps
+thenfail, source128returnunrun. Explicitwritten prospective40 allH32/count20/
+parent180 criterionreviewed, nofailedbudgetrenewal. Fourtyped/lint/formatgatespass;
+twoinitialtypingfailures/twopublicfailuresretained.320native14400/P3891381/SGD320/
+14reset217steps; no teacher/replay/final. CPU1GPU0threads1interop1/RSS768MiB/stage32MiB.
+FullgoalACTIVE. Nextexisting completed-parent proof composition, no furtherlimit
+increase/newcapture/provenanceframework. Exactscope/costs/review in stageRESULTS.
+
+## Current CLOSED — H32 endpoint-game engineering, fullchain incomplete, 2026-10-18
+
+Rootownedobserver/facade/CLI/docs/stage/soleexecution; evalworker onlyevaluator+
+newtests450, testworker onlynewpublictest550, reviewer onlyREVIEW350. Root1400,
+commands127.7324329000; total2877.7324329000/3000 CLOSED. Allreleased/nojobs;
+workerssourceASTsavedonly/noimports/models/tests/statics/network/Git. SOURCEGO
+beforecombined360PASS1FAIL; ACTUALacceptsonlypassingsubset/failureintegrity,
+NOTGO fullchain. Diagnostic1FAIL despitecProfileprocess0. Bothpaidfailures/native
+work29214148/P135935/SGD289/2reset18steps preserved underoriginalcaps. No20s/180s
+renewal/science. FullgoalACTIVE. Nextmeasuredqualifiedread-group optimization in
+existing evaluator/observer, dedicatedboundarytests, samepubliccase; no newrunner/
+capture/provenanceseries. Scope/commands/profile/failures in stageRESULTS/REVIEW.
+
+## Current DONE — real H32 F16/A16 study, 2026-10-18
+
+Rootownednewstage/readback/docs/soleexecution; revieweronlyREVIEW350source/saved,
+released/nojobs/noimports/models/tests/statics/network/Git. SOURCEGO before4sole
+nativecases, ACTUALGO after1080raw+2304decisionrows/512receipts/256phaseblocks/
+120changes/8contrasts/source/costs.11commands0/noproblem. Science125.7613474000/
+960 andengineeringroot1000+review350+sixchecks5.2252868999=
+1355.2252868999/1600 CLOSED;priorgrantsCLOSED. CPU1GPU0threads1interop1RSS768MiB/
+stage32MiB. Production/testsunchanged354checks/staticsreused. Native76829952/
+P3763384/teacher40resets360steps. Bothcues/negativeoldAredrecovery/PC/gatedevidence
+retained. FullgoalACTIVE. NextexistinginlineH32F/Aendpointgames withmixedrowlaw,
+engineeringtests/reviewbeforeanyscience; no newcapture/auditorcapacityseries.
+
+## Current DONE — H32 isolated F16/A16 composition, 2026-10-18
+
+Rootownedlearnability/CLI/stage/docs/soleexecution; coreworker sharedpilot+counter
+test450, testsworkerwideAPItest550, revieweronlyREVIEW350; allreleased/nojobs.
+SOURCEGO beforecombined354PASS(149new/205old), ACTUALGO after270raw+576decision
+rows/128receipts/64diagnosticblocks/continuity/costs. Originaltype18errors remain,
+finalWinLinuxmypy/Ruff/4CLIpreviews pass. Native43816272/P2822718/SGD423/physics0
+insideoriginalcaps. Root1400+workers1350+commands72.1121156999=2822.1121156999/
+3000engineeringCLOSED; priorgrantsCLOSED. CPU1GPU0threads1interop1RSS768MiB/
+stage32MiB. Workerssource/AST/saved/noimports/models/tests/statics/network/Git.
+FullgoalACTIVE. Nextfreeze/reviewsole4methodrealH32joint128/F16/A16study;
+no newscientificwork in thisengineering allowance. Guide/ADR0438/RESULTS current.
+
+## Current DONE — original H32 fit plus A games, 2026-10-18
+
+R4.2 scientificchild accepted: rootownedstage+canonicaldocs/soleexecution;
+wide_live_study_review onlyREVIEW300source/saved, released. SOURCEGO before
+foursole128cases, ACTUALGO after512receipts/432fixed+112live rows/actions/history/
+returns/costs independentlychecked.11commands0/noproblem; no nativejobs.
+Root900/review300+sixchecks4.4017423000=1204.4017423000/1400engineering,
+science41.4201329000/480 CLOSED; allpriorgrantsCLOSED. CPU1GPU0threads1interop1/
+RSS768MiB/stage32MiB; no worker repo/NumPy/Torchimports/models/tests/statics/network/
+Git. Production/testsunchanged;308acceptedchecks/staticsreused. BPonecuessuccess,
+blue−1/allPCfail preserved; fullgoalACTIVE. Next explicitH32existingF16→A16path,
+not newcapacity/dose/sweep/capturework. Contract/evidence: stagePROTOCOL/RESULTS.
+
+## Current — H32 known-TRAIN games, 2026-10-18
+
+Root owned fit/helper/CLI/stage/docs and sole execution. Evalworker source+newtests
+500, integrationtestworker450, reviewer onlyREVIEW350source/AST/saved; all released.
+No worker imports/models/tests/statics/network/Git. SOURCEGO before native,
+repairGO before four artifact-refused regression cases, ACTUAL accepts exact308
+case union.95PASS +304PASS4FAIL +4PASS; no monolithic green rerun claimed.
+Native279/14886,P248/1368,SGD264,actual4resets64steps within shared caps.
+Root1400+workers1300+12commands85.3473641002 = 2785.3473641002/3000 CLOSED;
+all prior grants CLOSED. CPU1/GPU0/threads1/interop1/RSS768MiB/stage32MiB,no jobs.
+No real-source scientific run; fullgoal ACTIVE. Next frozen4method original
+H32 fit-plus-games study with reproduced saved control rows, not another sweep.
+
+## Current — real H32 quartet study, 2026-10-18
+
+Root owned stage/readback/docs and sole serial execution. Reviewer onlyREVIEW300
+source/saved, no repo/NumPy/Torchimports/models/tests/statics/network/Git; released.
+SOURCE/PROTOCOLGO before four sole128pass cases; ACTUALGO after432rows/512receipts/
+contrasts/costs independently checked. All11commands0, no retry; allfullfitfalse.
+Production unchanged,194acceptedchecks/statics reused. Science28.8684313999/480
+and root700+review300+sixchecks4.3378845999 = 1004.3378845999/1200
+engineering CLOSED; allpriorgrantsCLOSED. CPU1/GPU0/threads1/interop1/RSS768MiB/
+stage32MiB,no owned jobs. Full goal ACTIVE. Next explicit H32 known-TRAIN A live
+rollout through existing evaluator/fit CLI; no width/seed/dose/classifier series.
+
+## Current — fixed H32 TRAIN composition, 2026-10-18
+
+Root owned constructive-fit, stage and docs, sole serial execution. CLIworker
+owned existing CLI/new CLItests350; testworker new native tests350; reviewer only
+REVIEW300. All source/AST/saved only, no imports/models/tests/statics/network/Git,
+all released/CLOSED. Root1200+workers1000+9checks31.3030576000 =
+2231.3030576000/2600 CLOSED; prior grants CLOSED. SOURCE/PROTOCOL GO before
+native, ACTUAL GO after194 distinct/285PASS and scoped statics. Native28/1152,
+P124/1116, SGD10 within shared caps. CPU1/GPU0/threads1/RSS768MiB/stage32MiB;
+no owned jobs. No scientific run. Full goal ACTIVE. Next one frozen four-method
+real H32/128-pass TRAIN study, preserving all old results; no sweep or new runner.
+
+## Current — real kernel TRAIN fit, 2026-10-18
+
+Root owned stage/readback/docs and sole serial execution; reviewer owned only
+REVIEW with 250 source/saved seconds, now CLOSED/released. No worker imports,
+models, tests, statics, network or Git. SOURCE/PROTOCOL GO before one 128-pass fit,
+ACTUAL GO after 108-row/128-receipt arithmetic. Production unchanged; 203 accepted
+engineering cases/statics reused. Full fit negative, 47/54; no retry. Science
+7.4573552000/120 and root500/review250/checks1.8506183000 =
+751.8506183000/1000 engineering CLOSED; all prior grants CLOSED. CPU1/GPU0/
+threads1/RSS768MiB/stage32MiB; no owned jobs. Full goal ACTIVE. Next: explicit
+fixed width-32 neural quartet in existing TRAIN-fit composition, no new kernel
+dose/observer/capture/audit increment. See stage RESULTS/REVIEW.
+
+## Current — bounded polynomial-kernel learner, 2026-10-18
+
+Root owned wrapper/fit/CLI/route tests/stage/docs and sole serialexecution.
+Coreworker2newsource650, testworker2newtests400, revieweronlyREVIEW450sourceAST/
+savedonly, no workerimports/models/tests/statics/network/Git. Allreleased/CLOSED.
+Root1200+workers1500+11commands29.2516361001=2729.2516361001/3000 CLOSED;
+allpreviousgrantsCLOSED. CPU1/GPU0/threadenv1/RSS768MiB/stage32MiB,actual210/
+cleanup220outer225,noownedjobs. SOURCE/PROTOCOLGO before tests, ACTUALGO after
+203distinctscoped/306PASS and finalstatics. Native88returnedpasses918rows/P50-332;
+allattempts retained.0newTorch/science/final/teacher/physics. Synthetic fullfit
+negative; fullgoalACTIVE. Next one reviewed real54-row/128pass kernel TRAIN case;
+no newrunner/baseline rerun/observer/capture/auditincrement. See RESULTS/REVIEW.
+
+## Current — real128-pass perceptron fit, 2026-10-18
+
+Root owned stage/stdlib savedreadback/docs and sole serialexecution. Revieweronly
+REVIEW250source/saved CLOSED/released, no repo/Torchimports/models/tests/statics/
+network/Git. SOURCE/PROTOCOLGO before sole128pass6912rowcase; ACTUALGO after
+independent108row/128receipt arithmetic. Production unchanged,179acceptedchecks/
+statics reused. Fullfitnegative52/54/4exact, no retry. Science5.8162272000/120,
+root500+review250+3checks1.8387361999=751.8387361999/1000engineering CLOSED,
+alloldgrantsCLOSED. CPU1/GPU0/threadenv1/RSS768MiB/stage32MiB,nojobs. FullgoalACTIVE.
+Next bounded separate polynomial-kernel learner, XOR/ownership before science;
+no longerlinearfit/observer/capture/auditincrement. See stageRESULTS/REVIEW.
+
+## Current — separate perceptron TRAIN control, 2026-10-18
+
+Root owned invariantwrapper/existingfit+CLI/routetests/stage/docs and soleexecution.
+Coreworker only2newsource600; testworker only2newtests400; reviewer onlyREVIEW400,
+sourceAST/saved only,no imports/models/tests/statics/network/Git. All CLOSED/
+released; priorgrantsCLOSED. Root1100+workers1400+13commands29.3754324000=
+2529.3754324000/2800 CLOSED. CPU1/GPU0/threadenv1/RSS768MiB/stage32MiB,no jobs left.
+SOURCE/PROTOCOL GO before modelchecks; ACTUAL GO after179distinctscoped PASS,
+9pathstatics/5sourceWinLinuxmypy. Cumulative60returnedpasses826rows/P42-536,
+allattemptcosts retained.0newTorch/teachers/physics/final/science. Negative
+syntheticfit preserved; fullgoalACTIVE. Next one reviewed real54row128pass case,
+no newrunner/seed/dose/observer/captureincrement. See stageRESULTS/REVIEW/ADR0434.
+
+## Current — real checkpoint128 BP TRAIN case, 2026-10-18
+
+Root owned stage/stdlib readback/canonical docs and sole serial execution. Reviewer
+onlyREVIEW300source/saved CLOSED/released, no repo/Torch imports/models/tests/
+statics/network/Git. Source/protocol gap repaired before literal GO; ACTUAL GO
+after sole195call7515row native and saved-only readback, no retry. Original237
+engineering checks/statics reused under unchanged production source. All old
+grants CLOSED; science29.3220662000/300 and engineering1003.1509963999/1300
+CLOSED. CPU1/GPU0/threadenv1/RSS768MiB/stage32MiB, no jobs left. Full goal ACTIVE.
+Next separate fixed multiclass perceptron control in existing TRAIN-fit ports,
+small synthetic acceptance before science; no new diagnostic/audit runner.
+
+## Current — joint128 BP diagnostic integration, 2026-10-18
+
+Root owned pilot/runtime tests/stage/docs and sole serial execution. Helper/CLI
+worker owned four exclusive files500sourceAST; reviewer onlyREVIEW500source/saved.
+Both CLOSED/released, no worker repo/Torch imports/models/tests/statics/network/Git.
+Root1200 +workers1000 +12 commands46.0092889000=2246.0092889000/2600 CLOSED;
+all earlier grants CLOSED. CPU1/GPU0/threadenv1/RSS768MiB/stage32MiB, no jobs left.
+SOURCE/PROTOCOL GO before sole195call7515row native case; ACTUAL GO after237 distinct
+scoped passes/366 executions, scoped statics. Initial unused-import lint failure
+retained/repaired. No comparative science or native retry; full goal ACTIVE.
+Next small reviewed real-source checkpoint128 TRAIN observer case; reuse controls,
+no new diagnostic framework/tuning/sweep. See stage RESULTS/REVIEW and ADR0433.
+
+## Current — BP realized update observer, 2026-10-18
+
+Rootsoleexecution/newadapter/publicCLI/CLItests/docs/stage. Testworkeronlynewnative
+math/isolationtests400sourceclosed/released; revieweronlyREVIEW400source/savedclosed/
+released. No workerrepo/Torchimports/models/tests/statics/network/Git. Root1000+
+workers800+26commands58.6048268=1858.6048268/2100CLOSED; earliergrantsCLOSED. RootCPU1/
+GPU0/threadenv1/RSS768MiB/stage32MiB. Initialsource/publicNO-GOs/3types/9nativefails
+repaired,preserved; SOURCE/repairGO before eachnative.105distinctaccepted/181runs/
+172pass9fail. Native29calls261rows/F1391251/B107963withinoriginalcaps. No scientific
+run/cause/acquisition/retentionclaim, no ownedjobsleft. FullgoalACTIVE; nextexisting
+joint128TRAINobserverintegration/fresh3-18budget/costs, no newrunner/capture/sweep.
+
+## Current — old-A replay comparison and exploratory study, 2026-10-18
+
+Root owned publicsavedCLI/test/stage/canonicaldocs and soleserialexecution.
+Comparisonworker exclusivepureadapter/tests400sourceAST closed/released; reviewer
+onlyREVIEW400source/saved, initial2sourceblockers/storagecheckNO-GO repaired, literal
+SOURCE/PROTOCOL/storageGO before native andACTUALGO afterward. No workerrepo/Torch
+imports/checks/tests/models/network/Git. Root1000reservation (prospective700->1000),
+workers800 +17commands16.2893425 =1816.2893425/2100engineeringCLOSED; priorgrantsCLOSED.
+Science4fixedcases+onesavedpublicCLIreadback189.0714691/900CLOSED;1024updates32256rows/
+P376/3384/40teacher360steps; originalcontrolsreused.111distinctPASS/151executions,
+3typingerrorsrepaired. Storage32->96MiB measured/reviewedbeforefirstnative, individual
+32MiB/RSS768/sciencedosesfixed. RootCPU1GPU0/threadenv1; no ownedjobsleft. Fullgoal
+ACTIVE; mixedBPnegative/PCneutralparity/noacquiredretention/CPCadvantageclaim.
+Next boundedTRAIN-only realizedBPmomentum/update readout usingexistinggradient
+helpers on detachedsnapshot, no newcapture/provenance/dosesweep.
+
+## Current — public MiniGrid old-A rehearsal CLI, 2026-10-18
+
+Root owned mainpilot/native routing tests/canonicaldocs/stage and soleexecution.
+Helperworker onlyminigrid_probe_rehearsal.py/worktests400source; CLIworker only
+run_coupled_attribution.py/CLIfaketests400source; reviewer onlyREVIEW400source/saved.
+Allreleased; no workers imported repo/Torch or ran models/checks/tests/network/Git.
+Root900reserved +workers1200 +10commands148.895248699933=
+2248.895248699933/2400CLOSED; priorgrantsCLOSED. No owned background jobs.
+323distinctPASS/445executions0fail/error/skip; finalcombined321/native2. Native
+320updates8640rows/P126/1134 within384/9216/P160/1440; unusedclosed. RootCPU1/GPU0/
+threadenv1/RSS768MiB/stage32MiB, source/protocolGO precedednative, finalACTUALGO.
+Source/actor/inputs/RNG/budgets preserved. Fullgoal/science OPEN. Next frozenexact
+cohort/matchedextraexposure comparison through existingpilot; no furthercapture.
+
+## Current — isolated F rehearsal/A return, 2026-10-18
+
+Root sole execution/freshprobe/factory/managedgate/nativefake tests/canonicaldocs/
+stage. Source worker onlysix roletransport modules570/600sourceAST; testworker only
+newrole tests400reserved; both released. Reviewer onlyREVIEW threebounded phases
+320+180+100=600closed, initial NO-GOs repaired then SOURCE/PROTOCOL/ACTUAL GO. No
+worker imports/models/checks/tests/network. Root1200source/doc reservation plus
+workers1570+commands106.8302449=2876.8302449/3000CLOSED; priorallowancesclosed.
+1,079distinct accepted/2526executions2515pass8fail3error; all failures repaired and
+preserved. Legacy native pre-review gate error charged, no repeat; prospectivecap
+revision before newnative, total390updates2548rows/P260/2184 within400/3000/P280/2400.
+New fourmethodF16+replay32+A16 alone256/2304/P128/1152; no MiniGrid final/science.
+Next existingpublicCLI replay composition/costs then frozen exactbank/matched
+extra-exposure protocol. Sourceactor/RNG/budgets unchanged; fullgoal ACTIVE.
+
+## Current — fixed old-A TRAIN rehearsal, 2026-10-18
+
+Root sole execution/docs/newpublic factory/native test/stage. App worker only
+stream_rehearsal.py120sourceAST reserved; test worker onlynewfake test estimated360s
+vs90s FAILED/closed. Both released. Reviewer onlyREVIEW300source/saved, SOURCE/
+PROTOCOL/ACTUAL GO; closed before final docs/extra27fake run, root-owned. No worker
+imports/models/checks/tests/network. Prospective900→1800 before execution preserved
+overrun; no native/sciencecap increase. Root600+app120+tests360+review300+commands
+24.7245426=1404.7245426/1800CLOSED.263distinctPASS/289executions,24nativeupdates216rows,
+0scores; fourpathstatics/twosourceWinLinuxmypyPASS. Sourceactor/inputs/RNG/budgets
+unchanged. No sciencegrant; next existingdisposableF/A-return composition, frozen
+exactbank/matchedextraexposure protocol before science. Acquisition/retention/
+recovery/full goal OPEN; no new capture/audit/encoding/dose/seed increment.
+
+## Current — real cue-relative BP adaptation, 2026-10-18
+
+Root sole execution/canonical docs/stage, readback worker onlyreadback.py8/90
+source/AST; reviewer onlyREVIEW120/150source/saved, ownershipreleased afterreview.
+No worker imports/models/tests/checks/network. Newengineeringpreview1.0760297+
+root90+workers128=219.0760297/600CLOSED. Scienceonecase27.4448436+saved.5158033=
+27.9606469/250CLOSED.192updates7488rows94scores846rows10teacher90steps, no final/
+replay/live. Exactsource/cohort/dose and108anchorsmax0 pass. WarmFgain.54110/
+oldAloss.70592/returngain.43018; oldAunacquired, oldinvariantFgain.72393/loss.37883.
+No newencoding advantage; no production change,254acceptedchecks reused. Next
+existingpublic296/K7R2.4rehearsal composition/cost/schema control, notnewdose/sweep.
+
+## Current — cue-relative public pilot/probes, 2026-10-18
+
+Root owns main pilot/CLI/integration/docs/stage; support worker owns new recipe
+helper/shared counters/jointcompose2/90sourceAST, test worker owns2newtests90/90;
+reviewer owns REVIEW150/150source/saved. Ownership released after final review.
+Workers no imports/models/tests/checks/network; root sole serialCPU1GPU0.
+22commands88.4166762+root90+workers242=420.4166762/900CLOSED.254distinct scoped
+PASS/292executions291pass1fixturefailure; initial typing failures preserved.
+Four isolated native F16/A16 and full BP public integration pass. Failedpublic
+128/6912prefix retained; pure novelty correction and prospective cap revision
+preceded only-public rerun. Total448updates15552rows222pred1998 within revised
+500/16000/300/3000. No scientific grant; prior12848/54negative unchanged. Next
+freeze/review one real BP public F/old-A/A-return protocol, no new fit dose/audit.
+
+## Current — cue-relative constructive recipe, 2026-10-18
+
+Root owns fit/CLI/stage/canonical docs; support worker owns catalogue+bounds,
+45/90source/ASTseconds; tests worker owns one new test module4/90; reviewer owns
+stage REVIEW120/150source/saved. Ownership released after review. Workers executed
+no repo/Torch imports/models/tests/checks/network; root sole serialCPU1/GPU0.
+Eleven engineering commands40.0348493+root90+workers169=399.0348493/900CLOSED.
+187distinct scoped PASS/208executions205pass3fixturefailures; five-path statics
+PASS. Native engineering6updates324rows24pred216rows within original caps.
+Sole frozen128science + saved readback7.8867021/120CLOSED:48/54,0exact,fitFalse,
+original control45/54; all six later errors retained.128paid/native/committed
+6912rows12pred108, sourceactorTrue, no probe/replay/teacher/final. Full goal OPEN.
+Next existing history/snapshot/isolated-F probe registration for new family;
+no dose retry, new runner, sweep or capture/audit prerequisite.
+
+## Current — public cue-relative encoder and native binding, 2026-10-18
+
+Coreauthoronlynewcore4/90sourceAST, testauthoronly2newtests3/90sourceAST;
+rootnewadapter+onegenericstreamcase/stage/canonicaldocs; revieweronlyREVIEW20/150.
+Workersno imports/Torch/models/tests/checks/network. Allfilesreleased afterreview.
+110distinctPASS/187executions, final4pathstaticsPASS,10rootchecks29.7877253+root90+
+workers27=146.7877253/900engineeringCLOSED. Native24updates48rows/18pred36rows
+withinoriginalcaps; actualBP2wake delayedtraining_only proves genericstream.
+Sole saved54TRAIN preflightPASS/.9856741parent/RSS45088768/0native, oracle/inverse/
+source/RNGTrue. No newscience; alloriginalnegative/SPENTresults unchanged.
+42tracked/fivecanonicalCRLF preserved. NextexistingTRAINcatalogue/constructiveCLI
+explicitrecipe+projection-aware readers, no newrunner/dose/sweep/auditincrement.
+
+## Current — selected TRAIN cue-turn gradients, 2026-10-18
+
+Root3existingproductionfiles/stage/canonicaldocs; testauthoronlynewtest4/90
+sourceAST, revieweronlyREVIEW20/150source/saved. No workerimports/models/checks/
+network.150distinctPASS/final4pathstatics,10rootchecks47.4256662+root90+workers24
+=161.4256662/900CLOSED. One exact512reconstruction16.4270935+sole saved.4985402
+=16.9256337/120scienceCLOSED. Allfitprobabilitiesidenticalold512, finalcos-.99572,
+fitwitnessFalse/bothAerrors.512/27648rows18pred162rows +6gradientfwd/backrows each,
+0optimizer/teacher/replay/final. Engineering2/108rows12pred108rows/18gradientfwd26
+rows17backcalls; oldevidenceunchanged.42tracked/5canonicalCRLF retained. Ownership
+released afterreview; nextpurepubliccue-relativeencoderobservability/noalias
+prerequisite, not newdose/seed/audit or favorableoldcontext substitution.
+
+## Current — constructive H8 TRAIN fit accepted, 2026-10-18
+
+Root newadapter/existingCLI/stage/canonicaldocs; testauthor onlynewtests7/90
+sourceAST, reviewer onlystageREVIEW25/150source/saved, no worker imports/models/
+checks/network.197distinct accepted196finalscalar+reusednative1, staticsPASS;
+13rootchecks50.0110094+root90+workers32=172.0110094/900engineeringCLOSED.
+One frozen512native16.7481354 +sole saved.5460929 =17.2942283/120scienceCLOSED;
+no retry.52/54/4exact, both Astep2errorsremain, fit_witnessFalse;128prefixexact0.
+Native512/27648rows18pred162rows, engineering2/108rows12pred108rows. Original
+42tracked/5canonicalCRLF and all negative/SPENT evidence preserved. Ownership
+released afterreview. Next existing TRAIN representation/activation/priorgradient
+cuecontrast reconciliation; no new runner/dose or favorableoldcontext substitution.
+
+## Current — TRAIN bounds and fit-gap reporting, 2026-10-18
+
+Root owns existing support/pilot/2CLIs/canonicaldocs/stage. Coreauthor only
+newcore+coretests4/90source/AST, adaptertestauthor onlynewtests4/90source/AST;
+reviewer onlystageREVIEW20/150source/saved, no worker imports/models/checks/network.
+335finalscoped PASS/statics/review; twofixture-failed runs retained. Sole <=10s
+saved-source diagnosis0/.9596581parent confirms known54unique/0conflicts;
+weightedPC128gap23/54, CEgap1.345738544779821; no native/model/fit/teacher work.
+14checks59.3970014+root90+workers28=177.3970014/900CLOSED;722.6029986unusedclosed.
+Original42tracked/fivecanonicalCRLF preserved. All childownership released after
+review; next existing jointBP H8 TRAIN-only disposable capped CE-fit mode,
+reconciling existing45/54 result first. Original controls/fullgoal remain open.
+
+## Current — public weighted probe route and paired case evidence, 2026-10-18
+
+Rootowns newrecipeadapter/existingpilot+CLI/stage/canonicaldocs. Testauthoronly
+newpublictest10/90source/AST; experimentauthoronlypaired_case.py+protocol6/90;
+revieweronlystageREVIEW25/150source/saved, noimports/models/checks/network.
+22rootserialchecks168.4456923+root90+workers41=299.4456923/900CLOSED; scoped444
+uniquePASS(575executions), staticsPASS. Science500separate: PCcomplete146.8270093,
+neutralINCOMPLETE181.5084297/body180lastF16+A4/returnbudgetbindingFalse, savedonly
+readback.1471845;328.4826235CLOSED171.5173765unusedclosed. No retry/sourcechange
+postGO/tuning.500nativeupdates16020rows1025280configuredlatentrows,304predictions/
+2736rows20teacher180steps. PCno stopping reduction, allcurvesidentical, acquisition
+False; no mature-retention/recovery/CPCbenefit. Whole two-method studyINCOMPLETE.
+Original42tracked preserved. Exactnext existing TRAIN-onlysupport diagnostic
+frequency-aware rowaccuracy/CE bounds; no automaticnewcase/checkpoint/audit work.
+
+## Current — bounded isolated probe accepted, 2026-10-18
+
+Root owns3adapter paths+core role-specificweights/stage/canonical integration;
+appworker onlyfresh_task_probe.py+scalarfake tests6/120source/ASTsec; testauthor
+onlynativeprobe test3/90; reviewer onlystageREVIEW15/150includingfinalsaved.
+No worker imports/models/checks/network; rootserialCPU1GPU0/thread1.
+11commands81.6339868+root60+workers24=165.6339868/900CLOSED734.3660132unusedclosed.
+628finalPASS+46draft, seven-path staticsPASS, independentactual/sourceGO.
+Failed controller invocation and draft11typing errors preserved/repaired.
+No scientific comparison/final data; original42tracked changes preserved.
+Exact next: existing R2.1 protocol boundedPC/neutral option plus frozen small
+acquisition/retention/return-cost comparison; no new runner/audit lane.
+
+## Current — bounded ordinary stream accepted, 2026-10-18
+
+Root owned3production/newstage/canonical. Author onlynewboundedstreamtestfile,
+5/90source/ASTseconds, released; onepatchcontextmiss nomutation resolvedexacttail.
+Reviewer onlystageREVIEW.md,15/150incldocs, source/saved-only noimports/models/
+checks/network. Rootserial303finalcases+draft44/statics;14commands79.9247884+
+root60+author5+review15=159.9247884/900CLOSED740.0752116unusedclosed. Peak339361792B,
+CPU1GPU0/thread1, noresourcefault/cancel/sciencerun. Three failedstatics retained.
+Independent ordinaryrouteGO; existingmanagedcapture/prune/probes separateunqualified.
+Next explicitownedboundedreservedtasklearning inexistingR2.1 probe, keepnative+
+outercosts andsource/actor/checkpointisolation. HEAD/master/41tracked preserved,
+allnegatives/openfullgoal retained;current42=original41+inboxcursor; noautomaticaudit/fourthupdate work selected.
+
+## Current — bounded atomic episode accepted, 2026-10-18
+
+Root owned production2/stage/canonical; author exclusivelynew
+ test_torch_pc_inference.py,2/90active source/ASTseconds, released. Reviewer ONLY
+categorical-bounded-adapter-20261018/REVIEW.md,10/150conservative incldocs, no
+imports/models/checks/network. Rootserial40new+56fixedregressions/statics;9checks
+31.5788060+root60+author2+review10=103.5788060/900CLOSED796.4211940unusedclosed.
+Peak331431936B/CPU1GPU0/thread1; no scientific run/resourcefailure/cancel. Actual
+source+96accepted; kernel87reused. Two reviewfindings repaired beforechecks.
+Parentboundedstreamworkpolicy/integration/science/release/fullgoalOPEN. Next
+existing scheduled episode streamroute with owned diagnostics/workreceipts and
+fork/restore/failuregates. HEAD/master/41trackedchanges andallnegativespreserved.
+
+## Current — bounded categorical core accepted, 2026-10-18
+
+Root owns production2/stage/canonical integration. Author exclusively new
+ test_categorical_pc_inference.py,2/90active shell seconds, ownership released.
+Reviewer exclusively categorical-bounded-inference-20261018/REVIEW.md,8/150
+conservative; source/AST/saved-only, no imports/models/checks/network. Root alone
+serial87math/regression cases+statics, CPU1/GPU0/thread1/RSS287784960B. No science.
+10command21.6607005+root60+author2+review8=91.6607005/900 CLOSED808.3392995unused.
+Initial failedWin3arityerrors retained. Independent source+actual coreGO; parent
+R1.5-T adapter/stream/science/release/fullgoalOPEN. Existing41tracked dirty/HEAD
+preserved. Next explicit bounded completeTRAIN atomic PC/neutral route using
+existing weighted publication boundary, ownedwork DTO and fullstate/failuretests.
+
+## Current — paid proof accepted; new categorical learner outcome selected, 2026-10-18
+
+Root owns source/stages/canonical except new paid-guard testfile (author) and
+engineeringstage/REVIEW.md (reviewer). Author source/AST-only5/90 includes2test
++3read-only nextlearnerreconciliation; no further writes. Reviewer source/saved-
+only8/150 engineering,4/60 separate native source/actual. All workers no repo/
+Torch imports/models/checks/network; rootalone serial execution. Ownership released
+at final review. Existing unrelated tracked41 paths/HEAD/master preserved.
+
+Engineering16commands204.9058022s+root60conservative+author5+review8 =277.9058022/
+900 CLOSED622.0941978unused;346finalPASS/statics/31.2177%guard criterion/source+
+actual accepted. Two failed Win type checks and intermediate timings retained.
+Science93.1475881/250 CLOSED156.8524119unused, actualnative2/supervision0/checker1/
+summary0;RSS121966592B/CPU1GPU0/thread1. Separate engineering64/180 CLOSED116unused.
+Two preflight failures happenedbefore SPENT/child; CIMabsence andgates repair,
+chargedroot60, first actualnativecasewas solecase. All32checkIDs absentbeforecase.
+Native49632/30616absence verified at closure; no host cleanup or further dispatch.
+
+Park guardlane afternegative. NextR1.5-T: detachedTRAINcategorical boundedproposal
+thenoneexplicitPC/neutralownedadapterroute+actualwork DTO; binaryboundedR1.5
+alreadyexists. Newfeatures requiremath/state/cost/sourcegates before comparative
+protocol; fixedcontrols/negativeevidence/finalisolation preserved. FullgoalACTIVE.
+
+## Current — qualified deferred runtime and negative native case, 2026-10-18
+
+Explicit shared checkout ownership: root production2/existing fixture/stages/
+canonical; author ONLY new qualified-boundary tests (22cases),3/90 CLOSED87unused;
+reviewer ONLY engineeringstage/REVIEW.md,15/150 CLOSED135unused for engineering,
+separate5/60 CLOSED55unused native source/actual review. Workers source/AST/saved-
+only; root alone serial checks/native. No imports/models/network by workers.
+
+Engineering15commands350.4694529s/peak335523840B; root60+author3+reviewer15 gives
+428.4694529/900 CLOSED471.5305471unused. Final224/statics/independent actual accepted,
+whole-case25% FAILED, narrower phase49.5238% accepted. All failures retained.
+Separate one-case science94.1724308/250 CLOSED155.8275692unused, native actual2,
+supervision0, complete-check1/summary0; RSS130613248B/CPU1GPU0/thread1. New separate
+engineering65/180 CLOSED115unused (root60 conservative +review5). No retry.
+All30 check IDs absent before native. Native owned IDs41660/47072 checked at final
+closure; exact results/commands in both current stages. No further native dispatch.
+
+Next candidate runtime dependency: existing full value+owner-path paid guard on
+retained50-step receipt, measure before one-traversal repair. No new capture/
+provenance framework, algorithm sweep or duplicate baseline. Full goal ACTIVE.
+
+## Current — weighted S64 study accepted, 2026-10-18
+
+Root owns stage except readback.py/REVIEW.md plus canonical docs; root90 engineering.
+Author onlyreadback4/90 CLOSED86unused, later handoff memory-only; reviewer only
+REVIEW6/90 CLOSED84unused, sourceGO/allactual/finaldocs accepted and ownership released. Workers source/AST/saved
+only, no imports/models/checks/network. Scientific137.1309185/500s CLOSED,
+362.8690815 unused closed; serialCPU1GPU0/thread1/RSS355016704B/stage32MiB.
+Two cases +soleanalysis0,384native14976rows188pred1692/958464nominal,0SGD/final.
+Both31/54,0/6, negative preserved. Next functional deferred count-game guard
+composition repair, not more weight/horizon experiments. FullgoalACTIVE.
+
+Final closure: scientific137.1309185/500s CLOSED362.8690815unused. Separate
+engineering55/270 CLOSED215unused: root45/90 conservative preparation/closure,
+author4/90 and reviewer6/90, all worker ownership released. All six owned actual/
+launcher IDs absent; HEAD/master/41 tracked paths/five canonical CRLF preserved.
+Stage6485337B before closure (<32MiB), scopedgitdiffcheck0 with original two EOF
+exclusions/three unrelated LF notices. No source/test/model work after accepted
+gates. Exact next action above; full repository goal remains ACTIVE.
+
+## Current — weighted fixed64 route accepted, 2026-10-18
+
+Rootownsroute/CLI/newnative/existingstalefixture/stage/canonical; nolearnability
+edit needed. Testauthoronlynewscripted2/90CLOSED88released; revieweronlyREVIEW6/180CLOSED174released,
+finalsource/actual280/docsaccepted andownershipreleased. Workerssource/AST/saved-only,
+noimports/models/checks/network.900engineeringinclworker270/root45, serialCPU1/
+GPU0/thread1/RSS768stage32.11commands205.6912098s/RSS346935296B,576native22464rows/
+282pred2538/384core20736included/973440nominal/0SGD/physics/final. No failures/retries.
+Next frozen2caseweightedS64 viaexistingdriver, no moreframework. FullgoalACTIVE.
+
+Final258.6912098/900CLOSED(root45+author2+reviewer6+checks205.6912098),
+641.3087902unused closed.22ownedIDsabsent/HEADmaster41tracked/fiveCRLF/scopeddiff0,
+stage140897Bbeforeclosure. No more source/test/model work; fullgoalACTIVE.
+
+## Current — weighted-PC mechanistic run accepted, 2026-10-18
+
+Root owns newstage except readback.py/REVIEW.md and canonical docs; root90s
+engineering. Authoronlyreadback2.007/90CLOSED87.993released; revieweronlyREVIEW6/90CLOSED84released,
+finalsource/actual/docsaccepted andownershipreleased. Workerssource/AST/saved-only,
+no imports/models/checks/network. Separate scientific240grant solecase+soleanalysis
+66.5091124sCLOSED173.4908876unused; CPU1GPU0/thread1/RSS352002048B/stage32MiB.
+Bothcommands0, exactoldcausal equality and scalarwork accepted;192native7488rows/
+94pred846/15192nominal/130core7020 includes2detached, no doublecount/SGD/final.
+Old16/54failure preserved. Next existing namedS64+weighted composition, no another
+capture/audit/diagnostic-only increment. Finalengineering38.007/270CLOSED(root30+author2.007+reviewer6),231.993unusedclosed.
+All4ownedIDsabsent/HEADmaster41tracked/fiveCRLF/scopeddiff0; stage2523732Bbeforeclosure.
+Fullgoal ACTIVE, numerical93/public284 reused unchanged.
+
+## Current — public weighted PC readouts, 2026-10-18
+
+Root owns learnability/weightedguard/CLI/native/integration/canonical. Readoutworker
+onlyexistinghelper2/60CLOSED58released; testauthoronlynewscripted3/60CLOSED57released;
+revieweronlyREVIEW12/60CLOSED48released, finalsource/actual/docsaccepted and released. No workerimports/
+models/checks/network. RootserialCPU1GPU0/thread1/600incl180worker30prep/210supervisor
+225outer/RSS768stage32. Composite284currentcases qualify (initial275PASS1FAIL,
+family10PASSrepair,new2full+original6PASS), scopedstatics/actualCLI accepted.
+13commands205.6419455s,768native29952rows376pred3384/260weightedproposals14040rows,
+60336observednominal+432manualdiagnosticderived=60768. NextfrozenONEweightedPC
+mechanisticreconstruction withqualifiedoldevidence, no furtherframework or sweep.
+Finalrounded253/600CLOSED; all26ownedIDs absent/41tracked/fiveCRLF preserved.
+Full repository goal ACTIVE.
+
+## Current — exact weighted PC diagnostics, 2026-10-18
+
+Root sole production/nativeoracles/integration/canonical; author onlynewbehavior
+file3/60CLOSED57released, reviewer onlystageREVIEW10/60CLOSED50released, final
+source/actual/docs accepted and ownershipreleased. Workers source/AST/saved-only, no imports/models/checks/network.
+RootserialCPU1GPU0/thread1/420inclhelpers30prep/165supervisor180outer/RSS768stage32.
+93allPASS/threepathstatics,7commands17.8755858s;29weightedproposals163rows1326nominal,
+separately6native24rows6pred24rows0SGD, no physics/final/science.
+Finalrounded61/420CLOSED; all14ownedIDs absent/41tracked/fiveCRLF preserved.
+Next existing
+weighted public readout/work/CLI composition, not another runner/capture/audit.
+
+## Current — weighted joint study, 2026-10-18
+
+Root owns all newstage except readback.py/REVIEW.md and canonical docs. Author
+readback.py4/90CLOSED86released before firstnative; reviewer only REVIEW.md
+20/120CLOSED100released, finalsource/actual/docs accepted and ownershipreleased. Workers source/AST/saved-only, no
+imports/models/checks/network. RootserialCPU1GPU0/thread1. Separate scientific
+700grant:3once cases+sole10sanalysis,200.0983063s total; allcomplete/no retries.
+576native22464rows282pred2538/192SGD29952nominal30teacher270steps.
+Finalscientific200.0983063/700CLOSED; engineering54/330CLOSED (30root4author20review).
+All8ownedIDs absent/41tracked/fiveCRLF preserved; fullgoalACTIVE. Rootengineering
+120cap, author90/reviewer120 caps do not expand scientificgrant. Current RESULTS
+records negative outcomes and post-run CE-direction/legacy-MSE interpretation
+correction; original frozen artifacts preserved. Next weighted-PC native proposal
+diagnostic, not another capture/audit/runner or redundant uniform-CE baseline.
+
+## Current — public weighted catalogue composition, 2026-10-18
+
+Root API/CLI/native/integration/canonical; sourceauthor onlynewroute2/60CLOSED58
+released, testauthor onlynewscriptedfile2/60CLOSED58released, reviewer onlyREVIEW
+12/60CLOSED48released (finalsource/evidence/docs accepted, ownershipreleased). No worker
+models/imports/checks/network.247scopedPASS/5pathstatics/actualCLI; no failures.
+11commands251.8999494s,768native29952rows29952nominal384SGD376pred3384. Rootserial
+CPU1GPU0/thread1/600aggregateinclhelpers/prep/210supervisor225outer/RSS768stage32.
+Closedauthorreservations releasedprospectively beforefirstnative; no budgetrenewal.
+Next smallfrozenweightedjointrealstudy/reusequalifiedoriginalcontrols; no new
+algorithm/captureaudit/sweep. StageRESULTS/observations/REVIEW retain evidence.
+Finalrounded298/600CLOSED, all22ownedIDs absent/41tracked/fiveCRLF preserved.
+
+## Current — weighted catalogue stream, 2026-10-18
+
+Root owns existing weighted learner/integration/canonical docs; testauthor only
+newtest3/60CLOSED57released, reviewer onlystageREVIEW15/60CLOSED45released (source/actual/docs
+acceptance complete). No worker imports/models/tests/statics/
+network. RootserialCPU1GPU0/thread1/420inclhelpers+prep/180check/RSS768MiB/stage32.
+Initial218(213PASS5FAIL) +targeted10PASS qualifies218distinct composite; scoped
+statics0, three3x54 delayed streams/paid receipts/sourceactor stable.135native/
+3637rows33814nominal40SGD6pred171rows, no science/physics.13commands62.9662151s.
+Next existing public joint catalogue weighting/ordinary probe composition, not
+another runner/checkpoint/audit increment. Stage RESULTS/observations/REVIEW/closure. Rounded111/420CLOSED; all26ownedIDs
+absent, stage202408B beforeclosure/41tracked/fivecanonicalCRLF preserved.
+
+## Current — typed weighted catalogue adapter, 2026-10-18
+
+Root owns newproduction adapter/integration/canonical docs. Testauthor exclusively
+newtest5/60CLOSED55released; reviewer exclusivelystageREVIEW20/60CLOSED40released,
+source/actual/docs acceptance complete. No worker imports/models/tests/
+statics/network.70 distinct composite cases accepted after preserved13+1fixture
+failures; two-path finalstatics0. Root serialCPU1GPU0/thread1/420engineeringincl
+helpers/prep/180check/RSS768MiB/stage32MiB; actual14commands42.4341107s,82native/
+4428rows+2oracle108rows54756nominal11SGD0pred/physics. No science. FullgoalACTIVE;
+next existing weighted schedule catalogue metadata/array binding/callback, not
+another checkpoint/audit increment. See stage RESULTS/observations/REVIEW/closure. Finalcharge rounded98/420CLOSED;
+all27uniqueownedIDs absent/stage253865B beforeclosure/41tracked/fiveCRLF preserved.
+
+## Current — weighted recurring local evidence, 2026-10-18
+
+Root owns stage protocol/drivers/science/integration/canonical docs; readback
+worker exclusively readback.py5/90CLOSED85released, reviewer exclusivelyREVIEW
+source/savedonly30/120CLOSED90released. No worker models/repoTorch imports/tests/statics/network.
+Three serial frozen cases and sole saved analysis COMPLETE/SPENT; no retries.
+Science206.1909229/700s, CPU1GPU0/thread1/RSS768MiB/stage32MiB; all owned PID/RSS
+supervision/cleanup guards pass. New576updates5184rows/282pred2538/192SGD6912nominal/
+30teacher270steps. Historical ordinary evidence reused/partialweighted preserved.
+Independent source GO and actual arithmetic/matchedness accepted; final docs/
+closure accepted; both worker ownerships released. Rootprep/closure30/90CLOSED;
+science unused493.8090771s CLOSED. All8ownedIDs absent, stage7430585B beforeclosure,
+41tracked/fivecanonicalCRLF/scoped diff0 preserved. closure.json records charges.
+Goal ACTIVE, no production change or broad claim.
+
+## Current — explicit online weighted PC/neutral public route, 2026-10-18
+
+RootownsAPI/CLI/jointguard/newnative tests/integration/canonicaldocs. Routeauthor
+onlyminigrid_weighted_feature_route5/90CLOSED/released; testauthor onlynewpuretest
+2/60CLOSED/released; review onlyREVIEW16/20amendedCLOSED/released. No worker Torch/
+repoimports/models/tests/statics/network.183compositecases/sourceactualreview/
+sixpathstatics/CLI accepted. InitialfixtureFAIL andnativeTIMEOUT retained; unused
+helperreservation repair prospectively permits final141.357s native3PASS under
+same420aggregate/210check/RSS768MiB/stage32MiB/CPU1GPU0. Finalknown528updates4752rows
+6912nominal144SGD196pred1764 +separateUNKNOWNfailedgrantfullceiling charged; see
+stage weighted-pc-public-20261018/closure.json andENGINEERING_AMENDMENT.md.
+Next smallfrozenreviewed scientificprotocol, reusequalifiedcontrol/preservepartial.
+
+## Current — weighted PC/neutral schedule, 2026-10-18
+
+Root owns existing schedule/oldBPtest expectation/integration/canonicaldocs.
+weighted_pc_schedule_tests owns onlynewtest source/read/AST~1.04s charged2/60CLOSED
+58unused/released. weighted_pc_schedule_review onlyREVIEW source/read/savedoutputs
+charged5/90CLOSED85unused/released. No worker model/repoTorchimport/test/statics.
+RootserialCPU1GPU0/threadenv1,360aggregateinclhelpers210check/RSS768MiB/stage32MiB.
+136cases/sourceactualreview/statics PASS.49PCcommits163rows2062nominal23SGD/73BProws
+3pred9rows; paid discarded candidates retained. No science/coremath changes.
+Stage artifacts/runs/weighted-pc-schedule-20261018/closure.json. Next explicit
+online publicPCneutralweighted composition andordinary unweighted probe templates.
+
+## Current — atomic weighted PC episodes, 2026-10-18
+
+Root owns native commit extraction/newweightedPCadapter/integration/canonicaldocs.
+weighted_pc_episode_tests owns only tests/test_torch_pc_weighted.py; source/read/
+AST2.2543925s rounded3/60CLOSED57unused/released. One casecount-tool failure fixed.
+weighted_pc_episode_review owns only stageREVIEW; source/read/AST2.9912332s rounded
+4/90CLOSED86unused/released. No worker repository/Torch imports/tests/modelwork.
+RootserialCPU1GPU0/threadenv1/360aggregateinclhelpers210check/RSS768MiB/stage32MiB.
+60finalcases/scopedstatics/sourceactualreview PASS;41proposals36nativeattempts/
+74commitattempts/256commitrows262relaxrows4014nominal0SGD/probe/physics. Failed
+finite refusals/discarded candidates charged. No production/test editsaftergates.
+Stage artifacts/runs/weighted-pc-episode-20261018/closure.json. Next existing
+weighted schedule PC/neutral dispatch, not new runner/capture/science yet.
+
+## Current — weighted PC primitive, 2026-10-18
+
+Root owns core/categorical_pc_weighted.py, integration and canonical docs;
+weighted_pc_math_tests owns only tests/test_categorical_pc_weighted.py,
+source/read/AST60s ceiling, released after authoring39 cases; root executes all.
+weighted_pc_review owns only stageREVIEW.md, source/read/AST90s ceiling, independent
+source/actual review. No worker Torch/test/model/network/Git/settings work.
+Root serialCPU1GPU0/threadenv1,360aggregate inclhelperceilings/210check/RSS768MiB/
+stage32MiB.16numericalproposals15complete/6native,66attemptrows912nominal,
+0SGD/probe/replay/physics.39PASS/finaltwo-pathstatics; five test-only mypy errors
+fixed with behavior-preserving annotation/mapping repair; native evidence reused.
+Stage artifacts/runs/weighted-pc-primitive-20261018; closure.json holds final
+resource/process/release evidence. No scientific run. Next atomic complete TRAIN
+PC/neutral adapter, full native-state/counter parity and rollback before schedule.
+
+## Current — single PC64 real A-game study, 2026-10-18
+
+Root sole stage/integration/canonicaldocs writer; no production/test changes.
+joint64_live_readback ownsreadback.py only,4/60s source/read/AST CLOSED56unused/
+released. joint64_live_review ownsREVIEW.md only,80/90s source/saved-arithmetic
+CLOSED10unused/released. No workers repoimports/tests/models/physics/network/Git/
+settings/subdelegation. RootserialCPU1GPU0/threadenv1; preparation90s separate.
+
+Sole reconstruction+2games andsoleanalysis COMPLETE/SPENT/no retries.270TRAIN
+probrowsmatcholdS64exactly; all32liveargmaxeschecked. Bothgames16forward/0return/
+successfalse/truncatedtrue.128train6912rows442368nominal latent-rowiterations,
+62pred302rows/2reset32steps/0optimizer,11.1612544parentsec under100;RSS322785280peak.
+No newF/Areturns/baselinecomparison/scientificadvantage. Closure/stage
+artifacts/runs/joint64-a-live-study-20261018. Next explicitTRAIN-weighted PC energy
+primitive/allonesidentity/derivative+neutralparity before runtime/experiments,
+usingpreexistingTRAINweightdefinition; game/finaloutcomes do not selectparameters.
+
+## Previous accepted handoff — joint TRAIN A frozen readout, 2026-10-18
+
+Root owns5production paths/one existingtest/native test/stage/canonicaldocs;
+joint_a_live_tests ownsnew42case file only,about3s read/AST conservative4/90s CLOSED
+86unused/released. joint_a_live_review ownsstageREVIEW.md only,60/90s CLOSED
+30unused/released. No workers runtime/repoimports/models/physics/network/Git/settings.
+
+221distinct finalcases:220authoritativeserial scripted/default +1fullnativeS64
+stream/F/A/fakegame integration. Eight-pathstatics/actualnewCLI0, independent
+source/actual acceptance.192updates7488rows479232nominal latent-row iterations,
+98pred850/0SGD/realphysics. Source0fixbefore native, staticfailures/initialoverlap
+and pre-nativepluginliteral correction retained; finalgate serial/inbudget.
+No newscientificexperiment; existingTRAINconflict0evidence reused (alreadyexists).
+Next one frozenTRAIN-only S64reconstruction +2targetfreeknownA realgames, notF/A
+rerun or anotherdiagnostic/capture chain. Stagejoint-train-a-live-20261018 closure.json.
+
+## Previous accepted handoff — frozen fixed64 real-data study, 2026-10-18
+
+Root sole protocol/drivers/integration/canonicaldocs writer; no production/test
+changes. relax64_saved_analysis owns only new studyreadback.py,60s source/read/AST
+allowance,~3s/conservative4charged/released. relax64_study_review owns only REVIEW.md,
+90s source/saved-arithmetic allowance, finalcharge/release there. No workers model/
+repoimports/tests/physics/network/Git/settings/subdelegation. Root serialCPU1GPU0.
+
+Both scientificcases +sole stdlibreadback COMPLETE/SPENT, no retries/failures,
+literalGO beforedispatch.56.776412parentsec under450grant, RSS354242560peak<768MiB,
+384updates14976rows188scores1692/20teacher180steps958464nominal latent-rowiterations.
+540probrows1152decisionlossrows188scorecalls validated; reportedPCneutralexact,
+35/54actions0/6exactTRAIN, oldAunacquired. Originalnegatives/SPENT/gap preserved.
+Stage artifacts/runs/relax64-acquisition-study-20261018, closure.json terminalcosts.
+Next bounded TRAIN label-conflict readout usingexisting catalogue/canonicalizer;
+no seed/dose sweep or another checkpoint infrastructure increment.
+
+## Previous accepted handoff — fixed64 acquisition controls, 2026-10-18
+
+Root exclusively owns5production paths/newnative test/stage/canonicaldocs.
+relax64_tests exclusively tests/test_minigrid_relax64_control.py,49scripted cases,
+4/60s source/read/AST CLOSED56unused/released. relax64_review exclusively stage
+REVIEW.md,60s source/saved-result allowance, finalcharge/release there. Workers
+no imports/tests/models/physics/network/Git/settings/subdelegation. Root serial
+CPU1GPU0/threadenv1; original360saggregate210percheck/RSS768MiB/stage32MiB.
+
+163finalpure+1nativeparity+2fullsyntheticPASS,7pathstatics/actualdescribe0;
+independent source/actual acceptance. Initial raw148fixture refusal and one
+adversarial mypy annotation failure preserved/repaired; no production/resource
+failure or amended allowance. Shared386/15084native188/1692predictions,
+965376nominal latent-row iterations,0SGD/physics; within400/16000/1024000 ceilings.
+No scientific run. Closure/totals in artifacts/runs/fixed-relax64-control-20261018.
+Next concrete outcome two frozen real S64 PC/neutral acquisition/adaptation cases,
+using existing runner and historical references, no new orchestration/audit chain.
+
+## Previous accepted handoff — joint PC diagnostic route and frozen TRAIN replay, 2026-10-18
+
+Root owns three production files/new native+late-guard tests/stages/canonicaldocs.
+pc_update_route_tests exclusively new scripted routefile52cases,source/read/AST
+4/60s CLOSED56unused/released. pc_update_route_review exclusively REVIEW.md,
+original60s source/saved-arithmetic allowance, finalcharge/release there. No workers
+runtime/imports/models/tests/physics/network/Git/subdelegation. RootserialCPU1GPU0.
+
+167pure+2fullnative final-treePASS, fivepathstatics0/actualdescribe0. Engineering
+384native14976rows188predict1692/0SGD,4diag216proj. Two source-owner fixes before
+firstgate; no failed test/static gate or limitamendment. Distinct360s aggregate/
+210percheck/RSS768MiB/stage32MiB, actualcosts/terminalclosure in closure.json
+at artifacts/runs/pc-update-checkpoint-route-20261018/closure.json.
+
+One distinct frozen TRAIN-only PC replay afterliteralGO COMPLETE/SPENT,128/6912
+updates30/270scores2/108diag, noFreturn/physics. All270referenceprobabilities match
+exactly; localdescent/nonzeroresidual/noexactacquisition. Old SPENT/negative/gaps
+unchanged. Protocol/actualresults in artifacts/runs/pc-realized-train-replay-20261018.
+Next separatelynamed fixed64step PCneutral learningcontrol, originalS2baseline
+and strongpolicy/budget/state guards retained; no report-onlyaudit increment.
+
+
+
+Session closure: independent source/actual/statics/prospective-GO/replay/saved-
+arithmetic/docs acceptance recorded; reviewer30/60s CLOSED30unused and ownership
+RELEASED; author4/60s CLOSED56unused/released. Root8commands76.4801612s+60helper
+seconds rounded137/360s CLOSED223unused. Replay newgrant COMPLETE/SPENT,
+preparation+parent7.381385s under75s; no extra model work. All18unique recorded
+Python/launcher IDs absent, no owned jobs/workers. Stage bytes before closure
+additions87630/728736, each<32MiB; peaks443187200/301334528B<768MiB. HEAD09ff811/
+40tracked dirty paths/five canonicalCRLF/scopeddiff0 preserved with same three
+LF warnings/two EOF exclusions. No production/test edits after finalgates. Full
+goal ACTIVE; next fixed64-step separately named PC/neutral control as above.
+
+## Current — realized PC diagnostic API, 2026-10-18
+
+Root exclusively new production/native-oracle test/stage/canonicaldocs. Author
+pc_update_tests exclusively tests/test_torch_pc_update_diagnostics.py,41cases,
+source/read/AST4/60s CLOSED56unused/released. pc_update_review exclusively stage
+REVIEW.md, original60s source/read, finalcharge/release there. No worker runtime/
+repoimports/tests/models/physics/network/Git/subdelegation. Root serialCPU1GPU0/
+threadenv1, distinct240s aggregate/90s percheck/RSS768MiB/stage32MiB.
+
+First43 and final43PASS; initial3mypyerrors retained, final three-pathstatics0.
+Reviewer's finite linear/objective guards fixed before tests. Actual native
+oracle4updates16rows/4predict16/0SGD;88diagattempts28complete/272projections/
+784latent-row forwards/512priorforwards256backwards. No scientific invocation;
+all prior negative/SPENT results and probability-evidence gap unchanged. Closure
+and exact commands in artifacts/runs/pc-update-diagnostics-20261018/RESULTS.md.
+
+Next optional existing joint checkpoint composition, with original budget/state/
+row/source guards; no new runner or law. Full goal/scientific/release parents open.
+
+
+
+Session closure: independent source/math/state/actual43-case/finalstatics/docs
+acceptance recorded; reviewer15/60s CLOSED45unused, ownership RELEASED. Author
+4/60s CLOSED56unused/released. Root11commands22.8913872s+40 conservative helpers
+rounded63/240s CLOSED177unused. All22 recorded Python/launcher IDs absent; no
+owned jobs/workers remain. Stage86918B before closure additions<32MiB, peak
+actualPythonRSS252899328B<768MiB. HEAD09ff811/40 tracked dirty paths/five canonical
+CRLF preserved; scoped diff0 retains same three LF warnings/two EOF exclusions.
+No source/test changes or native operations after finalgate. Full goal ACTIVE;
+exact next action is optional existing-joint checkpoint composition above.
+
+## Current — public catalogue route and four frozen cases, 2026-10-18
+
+Root exclusively production/API/CLI/newnative+supporttests/stage/canonicaldocs.
+joint_route_tests exclusively tests/test_minigrid_joint_catalogue_route.py,
+62cases, source/read/AST2/60CLOSED58unused/released. joint_route_review exclusively
+routeREVIEW.md, source/math/actual/prospectiveGO/negativeinterpretation/docsreview,
+finalcharge/release there. Original60ssourceallowance, no workers runtime/imports/
+models/tests/physics/network/Git/subdelegation; root serialCPU1GPU0/threadenv1.
+
+Implementation85distinct compositepasses, initialpaid128supportfailure/7mypyerrors
+retained, final73pure/eightpathstatics/actualdescribe0. Native320updates14400rows/
+142predict1278/320SGD afterprospectivecapamendment; no thirdengineeringnative.
+Rootclosure commands/helpers/PID/storage in artifacts/runs/joint-catalogue-route-20261018/closure.json. Four distinct
+scientificcases afterliteralGO eachCOMPLETE/SPENT, total768updates29952rows/
+376scores3384/40teacher360steps,114.1139911sparent+sole savedarithmetic.5140653s.
+All0/6exactacquisition, noactivebenefit;2304probeprobvector evidence missing is
+protocoldeviation, not relaxedpass. Criterion/scientificparents remainopen.
+
+[Implementation evidence](../artifacts/runs/joint-catalogue-route-20261018/RESULTS.md)
+and [all saved outcomes/qualification](../artifacts/runs/joint-catalogue-study-20261018/RESULTS.md).
+Next detached TRAIN-only realizedPCupdate/residual diagnostic, nolearninglawchange,
+newrunner or scientificrerun. Existing ADR0021/localderivative evidence reused.
+
+
+
+Session closure: independent source/composite/statics/actual-results/docs review
+accepted with the explicit probability-evidence deviation; reviewer25/60 seconds
+CLOSED35 unused and ownership RELEASED. Testauthor2/60 seconds CLOSED58 unused.
+Root18 engineering commands89.6713254s +60 conservative helperseconds =>150/360s
+CLOSED210 unused; native/SGD allowance fully used, no further native work. Science
+fourcases+sole saved readback114.6280564s totalparent, all grantsSPENT. All45unique
+recorded Python/launcher IDs absent; no owned jobs or workers running. Stage bytes
+before closure additions: engineering144174, study9561324, each<32MiB. Checkout
+HEAD09ff811/40 tracked changes/five canonical CRLF preserved; scoped diffcheck0
+with same three historical LF warnings/two EOF exclusions. No source/test edits
+or model calls after finalgates; full goal ACTIVE and next action remains the
+TRAIN-only realized-PC relaxation/update diagnostic above. Closure.json contains
+exact costs and terminal evidence.
+
+## Current — joint checkpoint/probe row binding, 2026-10-18
+
+Root exclusively existingpilot+learnability source, two new native integrationtest
+files, stage/canonicaldocs. catalogue_counter_tests exclusively new countertestfile,
+original+extended source/read/AST4/60s CLOSED56unused/RELEASED, no runtime/models.
+catalogue_rows_review exclusively REVIEW.md; finalsource/compositeactual/statics
+acceptance, finalcharge/release there. Workers no repoimports/tests/models/physics/
+network/Git/subdelegation. Root sole serialCPU1GPU0/threadenv1:42nativeupdates828rows,
+130predict1170rows,36BPsteps/6PCfamilycalls. Nativejoint+F16+oldA+return16 executes;
+finalmetadatafaultrepair addszero native work. Composite163distinct passingcases,
+two failed fixture cases retained. Five-pathstatics0. Prospective agentSGDcap16->48,
+other original240s/64updates/4096rows/192predict/8192rows/RSS/storage bounds unchanged.
+No science/probe experiment (only engineering probe execution) or priorSPENTretry.
+Exact root check/helper/process closure in closure.json.
+
+[Evidence, failures, costs and public API/CLI next action](../artifacts/runs/catalogue-checkpoint-rows-20261018/RESULTS.md).
+
+
+Final closure: independent source/actual/composite/statics/docs acceptance and
+ownership RELEASED; author4/60s CLOSED56unused, reviewer10/60s CLOSED50unused.
+Root11checks127.3599616s+30conservativehelpers rounded158/240s CLOSED82unused.
+All22unique recorded trainer/launcher IDs absent; no owned jobs remain. Stage243969B
+before closure additions<32MiB, peak per-childRSS512208896B<768MiB. HEAD09ff811/
+40tracked changes/fivecanonicalCRLF/scopeddiff0 kept with same3historicalLFwarnings/
+twoEOFexclusions. No further native operations/source/test changes after final
+checks; metadata fixture failures/nativebeforetinyfix qualification retained.
+Prior scientificSPENT/negatives unchanged, publicjointAPI/CLI and fullgoal ACTIVE.
+
+
+## Current — joint TRAIN-catalogue composition, 2026-10-18
+
+Root exclusively new adapter/catalogue integrationtest, stage and canonicaldocs.
+catalogue_tests exclusively authored tests/test_minigrid_train_catalogue.py,
+35cases, source/read/AST6/60s CLOSED54unused/RELEASED, no runtime/repoimports/models.
+Author identified missing causal-first-frame check before gates; root added it.
+catalogue_review exclusively stageREVIEW.md, source/actualstatics acceptance;
+final charge/release there. All workers no tests/physics/network/Git/subdelegation.
+Root sole serialCPU1GPU0/thread1 runtime: initialhook importfailure beforecollection,
+repaired79PASS, finalscopedstatics0;8nativeupdates432rows/4predict216rows/2SGD,
+no physics/science/probes. Separate newengineering180s originallimit; no priorSPENT
+grant renewed. Exact root command/helper costs/jobs/stage closure in closure.json.
+
+[Evidence, failure and explicit row-binding next action](../artifacts/runs/train-catalogue-composition-20261018/RESULTS.md).
+
+
+Final closure: independent source/actual79/statics/docs acceptance and ownership
+RELEASED; author6/60s CLOSED54unused, reviewer6/60s CLOSED54unused. Root7checks
+22.1775702s+30conservativehelperseconds rounded53/180s CLOSED127unused. All
+14unique recorded Python/launcher IDs absent; no owned jobs remain. Stage69601B
+before closure additions<32MiB, peak per-childRSS331583488B<768MiB. HEAD09ff811/
+40tracked changes/fivecanonicalCRLF/scopeddiff0 retained withsame3historical
+LFwarnings/twoEOFexclusions. No further native work/source/test edits after gates,
+no science/probe/physics, no prior SPENTgrant renewal; full goal remains ACTIVE.
+
+
+## Current — isolated linear TRAIN fit, 2026-10-18
+
+Root exclusively owns core/adapter/CLI, CLI/integration tests, stage/canonicaldocs.
+linear_fit_tests exclusively authored two new core/API test files, source/AST
+conservative3/60s CLOSED57unused/RELEASED; root incorporated slots/type fixture
+corrections. linear_fit_review exclusively owns stageREVIEW.md; independent source/
+math/prospectiveGO/actual saved-data acceptance, final charge/release there.
+Workers no repository imports/models/tests/physics/network/Git/subdelegation;
+review arithmetic uses saved data only. Root serial CPU1GPU0/thread1, two145-case
+gates and finalstatics pass; sole54row linearfit negative result retained/SPENT.
+No Torch/SGD/physics or prior scientific retry. Budgets/jobs/stage closure recorded
+in closure.json. No other live assignment or overlapping ownership is requested.
+
+[Commands, failures, exact costs, negative result and next action](../artifacts/runs/linear-train-fit-20261018/RESULTS.md).
+
+
+Final closure: independent source/math/actual/docs acceptance and ownership
+RELEASED; reviewer5/60s CLOSED55unused, testworker3/60CLOSED57unused. Root13checks
+23.1678533s+30conservativehelperseconds rounded54/180s CLOSED126unused. Science
+sole.7131358/10s COMPLETE/SPENT, negative all-label fit; no retry. All27unique
+recorded Python/launcher IDs absent; no owned jobs remain. Stage377672B before
+closure additions<32MiB, peak engineering per-childRSS208510976B<768MiB. HEAD09ff811/
+40tracked changes, five canonicalCRLF, scoped diff0 with same3LFwarnings/two
+historicEOFexclusions. A PowerShell ordered-dictionary display returned null
+summary fields; saved closure JSON was valid and ordinary stdlib readback confirmed
+all values. No model/source/test change followed final gates; full goal ACTIVE.
+
+
+## Current — paid TRAIN margins, 2026-10-18
+
+Root owns core reducer/adapterhelper/existingreadout+CLI, integrationtest/stage/
+canonicaldocs. action_margin_tests exclusively owns2newpure/API/CLItestfiles,
+62cases/sourceAST1.538s conservative2/60CLOSED58unused/RELEASED. Root owns separate
+native/fake integration module. action_margin_review exclusively stageREVIEW.md,
+independent source/math/actual acceptance,5/60s CLOSED55unused/RELEASED. Workers zero
+repoimports/tests/models/physics/network/Git/settings/subdelegation. Root alone
+native48predict432rows0SGD/physics, source/optimizer/RNG/budget exact. One.554s
+Ruff/pure-test overlap retained as schedulingdeviation, no native/model overlap.
+Composite208distinct, final scopedstatics0; all scientific grants staySPENT.
+Root14checks88.1900133s+30helpercharge round119/180s CLOSED61unused. All28known
+Python/launcher IDs absent; closure.json records processes/stage/perchildRSS limits.
+
+[Commands, all-row analysis, failures and next implementation](../artifacts/runs/train-action-margins-20261018/RESULTS.md).
+
+## Current — weighted schedule witness, 2026-10-18
+
+Root exclusively owns production/core+BP adapter, integration/stage/canonicaldocs.
+schedule_witness_tests exclusively authored new testmodule, source/AST2/60s,
+RELEASED; root added review regressions. schedule_witness_review exclusively owns
+stageREVIEW.md, independent source+actual acceptance;16/60s CLOSED44unused/RELEASED.
+Workers zero repo imports/tests/models/physics/Git/network/subdelegation. Root
+alone serialCPU1GPU0/thread1; final205PASS/scopedstatics0,96attempt304rows96SGD
+within256/4096/256. No scientific/probe/physics/final work or SPENTpair retry.
+Root check subprocesses original180s, helpers separately conservatively charged
+inside that same allowance:23checks86.1116805s+30helpercharge round117/180s CLOSED,
+63unused. All owned jobs terminal;46IDs checked, unrelated reused node_repl/adb
+preserved. closure.json records totals/jobs/stage size. Testworker2/60s CLOSED.
+
+[Evidence, failures and precise next implementation](../artifacts/runs/weighted-schedule-witness-20261018/RESULTS.md).
+
+## Current — one weighted BP scientific pair, 2026-10-18
+
+Root owns stage protocol/nativechild/supervisor adaptation/profile/integration and
+canonicaldocs/plans; production/tests unchanged. weighted_pair_check exclusively
+readback.py, stdlib only/readAST~5.6s/conservative6/60CLOSED54unused/RELEASED; once
+rootchecker code2/.188331s qualifies partial observations, not fullcomparison.
+weighted_pair_review exclusively REVIEW.md, literalprospectiveGO after watchdog
+fix, ACTUAL accepts incomplete/negative evidence, finaldocs there. Workers zero
+repoimports/models/tests/physics/Git/network/subdelegation. Root alone serialCPU1/
+GPU0,338SGD updates3042rows/180teachersteps, no live/final/replay. Both sciencegrants
+SPENT/no retry. Model-free profile direct metadata cost~32ms, not nativecausality.
+Rootengineering40/90conservativeCLOSED50unused; failures retained, no source changes.
+
+[Protocol, evidence, profile and exact next implementation](../artifacts/runs/matched-weighted-bp-20261018/RESULTS.md).
+
+
+Final closure: prospective GO and ACTUAL partial/negative/profile/handoff acceptance
+in independent REVIEW.md, RELEASED. Rootengineering40/90s conservative CLOSED,
+50unused; checker author6/60CLOSED54unused; reviewer8/60CLOSED52unused; saved
+readbackonce .188331/10s SPENT/unqualified. Both scientific arms remain SPENT/no
+retry. Allfour recorded Python/launcher IDs absent; stage4445646B before final
+small closure additions<32MiB. HEAD09ff811/40tracked paths/five canonicalCRLF/
+scopeddiff0 preserved with same3historicalLFwarnings/twoEOFexclusions. No production/
+test edits or further native work; full goal ACTIVE. Exact closure.json records
+all costs, remaining parents and preserved negative status.
+
+## Current — weighted learnability route, 2026-10-18
+
+Root owns new minigrid_weighted_feature_route.py, existing learnability/CLI changes,
+integration/stage/canonicaldocs/plans. weighted_route_tests exclusively authored
+49cases in new testmodule; source/read/AST~3s/60, RELEASED, no repo imports/runtime.
+Root corrected preemptive doubleencoding fixture edit back to author's call after
+initial152PASS/1FAIL; retained152+fixed1nativepass qualify153distinct. Reviewer
+weighted_route_review exclusively owns stageREVIEW, source accepted; final actual/
+static/handoff acceptance recorded there. Root alone serialCPU1GPU0 actualRSS-
+supervised;272attempt2448rows272SGD/512/8192/512.11checks287.2774714s+12helpercharge
+round300/300CLOSED. OriginalHEAD09ff811/40dirtypaths preserved. No games/science.
+
+[Commands, costs, acceptance and next matched protocol](../artifacts/runs/weighted-learnability-route-20261018/RESULTS.md).
+
+
+Final closure: independent source/execution/statics/handoff ACCEPTED/RELEASED;
+reviewer4.862154s, charge5/60CLOSED55unused; test author conservative4/60CLOSED56unused. Root
+287.2774714checkseconds+12conservativehelpercharge, round300/300CLOSED0unused.
+All11 owned Python trainer/launcher pairs terminal; no matching owned Python job
+remains. PID30572 has been reused by unrelated conhost and was preserved, not
+killed. Stage104832B before closure additions<32MiB; HEAD09ff811/40tracked changes,
+five canonical CRLF files/scoped diff0 preserved with same3LFwarnings/two historical
+EOF exclusions. Exact observation in closure.json. No further source/test/runtime
+work after corrected one-case pass. Full goal ACTIVE; no scientific comparison GO.
+
+## Current — weighted BP stream composition, 2026-10-18
+
+Root owns existing torch_train_weighted_learner.py, integration/stage/docs/plans.
+weighted_stream_tests owned ONLY tests/test_weighted_feature_stream_adapter.py,
+released independent39initialcases; root added13guard cases for52. Source/read
+~1.4s/60s, no imports/runtime. weighted_stream_review owns ONLY currentstageREVIEW;
+five source findings repaired; final source/runtime/statics/handoff accepted and RELEASED.
+Root alone serial CPU1GPU0 actualRSS-supervised runtime; combined129PASS and scoped
+statics0. Native220attempts877rows148SGD/256/4096/256; failures retained. No game,
+probe/final/comparative work. Shared dirtyHEAD09ff811/unrelatedchanges preserved.
+
+[Commands, resources, review and next route](../artifacts/runs/weighted-feature-stream-20261018/RESULTS.md).
+
+
+Final closure: independent source/runtime/statics/handoff ACCEPTED/RELEASED in
+REVIEW.md. Root63/180 s (42.2873641 metered+20 helper charge rounded up),117 unused
+CLOSED; test worker2/60 s,58 unused CLOSED/RELEASED; reviewer4/60 s,56 unused
+CLOSED/RELEASED (actual source/artifact reads~3.32 s). All14 owned actual Python
+and launcher PID pairs absent. Stage207971 B before final closure/review additions,
+well under32MiB. HEAD/40 tracked changes/five canonical CRLF retained; scoped
+`git diff --check -- . ':(exclude)ARCHITECTURE.md' ':(exclude)CHANGELOG.md'` exits0
+with same three historical LF warnings/two historical EOF exclusions. No further
+source/test/runtime work after final combined129. Full goal ACTIVE; no science GO.
+
+## Current — weighted feature BP native port, 2026-10-18
+
+Root owns new torch_feature_weighted.py, stage/integration/canonicaldocs/plans.
+weighted_feature_tests ownedONLY new testmodule, authoredindependent33cases
+(rootadded4 for37total), source/readAST1.51s/conservative2/60CLOSED58unused/RELEASED.
+weighted_feature_review ownsONLY stageREVIEW; identifiedNumPyRNGblocker, accepted
+localrepair/math/state/composite119evidence. Finalstatics/docs/closure/total there.
+Workers zero repoimports/runtime/Torch/models/physics/Git/network/subdelegation.
+Root serialCPU1GPU0 actualRSSsupervised;166attempt568rows68SGDsteps, no science.
+FailedformatPIDpath/initialmypy/expandedfixturefailure preserved, no fullgate
+PASSclaim. Rootmeteredchecks39.9351368/180s beforehelperclosure, hard192/3072/192
+neverrenewed; no broadrepeat. OriginaldirtyHEAD09ff811/unrelatedchanges preserved.
+
+[Evidence and next integration action](../artifacts/runs/weighted-feature-bp-20261017/RESULTS.md).
+
+Finalclosure: root60/180s (39.9351368metered+20helpers), 120unused CLOSED; worker2/60 and reviewer3/60 CLOSED/RELEASED. Matching owned Python jobs/initial63364+18864 absent; stage142720B<32MiB, HEAD/40tracked changes/fivecanonicalCRLF/scopeddiff0 historicalexclusions/warnings preserved. FullgoalACTIVE; no scienceGO.
+
+## Current — one trained PC diagnostic, 2026-10-17
+
+Root owns stage protocol/native observer/supervisor adaptation, canonical docs/
+plans and saved stdlib analysis; production unchanged. pc_saved_check exclusively
+wrote stage readback.py, source/AST~3.4/60s, conservative4charged/56unused CLOSED,
+RELEASED. pc_protocol_review owns onlystageREVIEW; prospective literalGO and
+ACTUAL negativecase accepted, finaldocs/release/total there. Workers zero repo
+imports/tests/models/physics/Git/network/subdelegation. Root nativeCPU1GPU0 serial,
+exactlyone160update/1440row case completes19.482333s/RSS295960576B, once saved
+check .120131s. ScienceSPENT/no retry. Rootengineering30/90conservative CLOSED,
+60unused; root alone did realnativework. Prior failedgrants/unverifiedRSS remain.
+
+[Protocol/evidence/handoff](../artifacts/runs/minigrid-pc-prior-diagnostic-20261017/RESULTS.md).
+
+Finalclosure: independent finaldocs ACCEPTED/RELEASED; reviewer8/60s charge52unused CLOSED. Actual57740/60592absent; stage2080648B<32MiB; HEAD/40trackedpaths/five canonicalCRLF/scoped diff0 (historicalexclusions/warnings) preserved. Source/tests unchanged, no extra nativework, fullgoalACTIVE.
+
+## Current — bound prior-gradient implementation, 2026-10-17
+
+Shared dirtymaster09ff811/40 tracked changes preserved. Root owns integration,
+CLI, route tests, stage and canonical docs. prior_reader authored new reader and
+native tests, source/AST only~2.6/60s, RELEASED; prior_composition owns existing
+composition/new scripted tests, source/AST<4/60s, RELEASED. No worker native work.
+Root executed serial CPU1/GPU0 checks, threadenv1, zero native training/physics.
+Independent prior_review owns only stage REVIEW.md, source/math accepted; final
+evidence/docs acceptance recorded there. No new science allowance or delegation
+budget multiplication. All previous spent grants and unrelated changes preserved.
+
+[Commands, ownership, evidence and limitations](../artifacts/runs/minigrid-prior-gradients-20261017/RESULTS.md).
+
+Closure: root 137.6091032s metered +20s helper charge => 158/600s, 442unused CLOSED; workers each4/60s conservative CLOSED. Matching owned Python jobs absent; HEAD/40tracked changes/five canonical CRLF/scoped diff0 preserved. RSS ceiling remains unverified; no source/test edits after final123. Reviewer release in stage REVIEW.md. Independent final review accepted/released, actual3.5078853s, conservative5/60charged,55unused CLOSED.
+
+## Current — FIFO36 composition / partial native adaptation, 2026-10-17
+
+Root owns4 productionpaths/stage/integration/docs/plans. bounded_factory evaluator+
+new test RELEASED.4946861/120 readASTs (charge1/119 unused); shift_feedback_tests two
+new test files RELEASED1.7988227/120(charge2/118 unused). Reviewer solecurrentstage
+REVIEW, scoped SOURCE117/separateGO/partialACTUAL accepted, <=60 readseconds;
+final RELEASED3.0339953/60readseconds, charge4/56unused CLOSED; closure recorded. Worker repoimports/tests/models/native/physics/Git/network/
+settings/deps/subdelegation0. Root serialCPU1 GPU0; no source/test edits after117 gate.
+
+Initial315 gateINCOMPLETE300 s, ownedactualorphanstopped afteridentitycheck; conservative
+360 s/full4096 reservation SPENTactualunknown. No broadrepeat. Root engineering
+600→720 prospective; successor117 PASS267.0785908 s648 train5832 rows252 predict924 rows
+withinseparate1024 caps. Initialstatics/sampler fixture failures preserved; finalseven
+pathstatics0/old actual previews exact. Root631.3463913/720 charge632/88 unused CLOSED,
+read/static/docs100/120 CLOSED. No scientificcapextension or baseline rerun.
+
+NativeINCOMPLETE/SPENT180.9136734 supervisor/181.2120603 outer seconds, actual61624/
+launcher24828 both2, external123396096 B,6740821 BJSONretained.128/1152 paidcomplete/
+five captures;14 certifiedgames4 success, B64 bluecensored8,96/128 notrun. Completechecker
+FAIL/fulloracleUNEXECUTED; separatepartialcheckerPASSandindependentstdlibprojection/
+FIFO arithmetic exact. CountstateAretired96/relearned 128 isnot later live validation.
+No retry/futureGO; earlier64/A-F/neuralnegatives unchanged. SharedHEAD09 ff811/
+40 trackedchangespreserved; finalreceipt coversCRLF/scopeddiff/ownedprocessclosure.
+Nextlearnerdiagnostic: existing boundfeedforward prior-CE gradientgeometry gap,
+notanother capture/audit increment. [Handoff](../artifacts/runs/minigrid-recurring-fifo-20261017/RESULTS.md).
+
+## Current — recurring invariant route / failed native / future-only reporting repair, 2026-10-17
+
+Root owns3productionpaths/integration/docs/plans; source worker bounded_factory
+owned evaluator+test, RELEASED .8158248/120readASTs; test worker
+shift_feedback_tests owned pilot/CLI tests, RELEASED1.7295856/120readASTs.
+Reviewer shift_feedback_review RELEASED at2.5276595/60read seconds (charge3/57unused CLOSED); owned ONLY stageREVIEW. SOURCE242/separateGO/
+narrow failed ACTUAL/future-repair accepted within60readseconds, zero runtime.
+No worker models/physics/Git/network/settings/deps/subdelegation. Root CPU1/GPU0,
+heavy jobs serial; production/tests frozen after242PASS118.4206225s. Sixpath
+statics0; rawdefault actualpreview exact. Realcountengineering3754/33786train+
+1248/4752predict within original4096caps; nativeFIFO/neural/RNN/physics prohibited.
+Initial15fail/redfixturefail kept; sixFIFO/eightraw scope reuse documented.
+
+Rootengineering196.8060474/600s charge197/403unused CLOSED; read/static/docs
+100/120CLOSED. Sole scientific caseFAILED/SPENT180.6625117supervisor seconds,
+181.0505844outer,113348608Bexternalpeak; owned49348/27768both1/exited. EmptyJSON
+because latewrapperdeadline precedes publication: actual doses/outcomesUNKNOWN.
+CompletecheckerFAIL. No retry/extension/futureGO; previous twoA/F failures remain.
+Future-only artifact repair12model-freechecks passes, no native replay/portwork;
+as-run artifacts untouched, future child not wired or executed. Final reviewer
+closure recorded in stageREVIEW/closure.json. SharedHEAD09ff811/40trackedchanges
+preserved. No fullsuite/release/goal completion or scientific benefit claim.
+
+Next learner outcome: existing finite-capacity FIFO control on recurring stream,
+before any new experiment; no further capture/audit chain. [Handoff](../artifacts/runs/minigrid-recurring-invariant-20261017/RESULTS.md).
+
+## Current — deferred games / repaired entry / partial native, 2026-10-17
+
+Shared dirtymaster09ff811/40trackedchanges preserved. Root owns3productionpaths,
+3newtestmodules after workerrelease, stage/integration/docs/plans. Sourceworker
+bounded_factory RELEASED1.4671659/120readASTs charge2/118unused CLOSED;
+testworker shift_feedback_tests RELEASED2.7526805/60charge3/57unused CLOSED.
+Reviewer shift_feedback_review owned ONLY originalstageREVIEW; SOURCE/final459/
+bothseparateGO/partialACTUAL/FINALDOCS accepted and RELEASED3.2240347/60s,
+charge4/56unused CLOSED. Workers noimports/tests/
+models/native/physics/Git/network/deps/settings/subdelegation.
+
+Root heavytest/native jobs serialCPU1GPU0. Initial448260.9805223s, pre-native450
+261.6801831s, final459270.0320634s; include red/failed/partial reads conservative
+795.5776228/900engineering, charge796/104unused CLOSED. Engineering600→900
+prospective after measuredclock/RSSnativebug. Final6pathstatics0; static/read/
+docs conservative100/120CLOSED,20unused. No1357uniquetest/releaseclaim.
+
+Attempt1 INCOMPLETE/SPENT54.8575325s119132160B beforegames; originalbudget
+clockobservation ordering repaired againstPREentrycontrols. Attempt2 separately
+frozen/reviewed, INCOMPLETE/SPENT74.373039s124354560B at20s after50livepreds/
+steps; entryexitTrue. Threeacceptedepisodes(twoAfail/Fblue+.49375); Fredfailed/
+censored despitephysical+.49375. Unknownlivetotals/lowerbounds preserved. Both
+complete-onlycheckersFAIL unchanged. Originalspentcase/chargesneverresumed.
+Bothstagescombined32MiBcap, twoattempt384updates3456rows/188scores1692rows/
+180teachersteps plus50live. Allownedchildrenexited; NOthird/futureGO.
+
+Next substantial task is invariant option in existing rawcountrecurringA/B/C/A
+no-finalrunner, preserving defaults; no anothercapture/provenanceincrement.
+[Evidence/review/precise action](../artifacts/runs/minigrid-deferred-probe-games-repaired-20261017/RESULTS.md).
+
+## Current — fresh typed count read-cost increment, 2026-10-17
+
+Shared dirtymaster09ff811/40trackedchanges preserved, noGit/index/dependencies/
+network/settings work. Root owns ONLYproduction minigrid_probe_rollout.py plus
+stage/docs/plans. shift_feedback_tests exclusive new14case snapshotcomparison
+module RELEASED0.4675254/60readASTseconds, charge1/59unused CLOSED. Reviewer
+shift_feedback_review exclusive stageREVIEW, SOURCE/direct/profileACTUAL accepted;
+FINALDOCS accepted0.8277003/60, charge1/59unused CLOSED. No worker imports/tests/native/physics/subdelegation.
+
+RootCPU1GPU0 serial: first380204.4857545s, final380205.3666972s, directcost
+6.0993806s, oncefakeprofile27.4308656s;443.3826979/600focused, charge444/156unused
+CLOSED. Firstbothmypy1 preserved; exactnative fixtureassert, final2pathstatics0.
+No760uniquetestclaim. Rootstatic/read/docs conservative90/120s,30unused CLOSED.
+Actualnative/physics forbidden; realcounttest deliberatelydeselected/reused.
+Source/testunchangedafterfinalgate. No nativeallowance/GO/retry/renewal.
+
+Directread medians25.895%/28.308% lower at18/36keys, allfixed5×25blocks/full
+freshcopies retained. Samefake4one-step profile retains1297/23089 parent/cohort
+checks; old20%calltargetFAIL and wrongcohortadmissionFAIL/nativeSPENT unchanged.
+Next substantial task is OPTIONAL post-training readonly games withbounded4
+paidtypedstates, originaldeadline+proofs andstrictdefaultpreserved; newexplicit
+phasecontract needs ownimplementation/tests/freeze/review, notnativeGO here.
+[Commands/evidence](../artifacts/runs/minigrid-count-snapshot-cost-20261017/RESULTS.md).
+
+## Current — endpoint safety and signature cost accepted, 2026-10-17
+
+Shared dirtymaster09ff811 preserved; noGit/index/dependency/network/settings
+changes. Root owns4source paths/integration/stage/docs, testworker exclusively
+owned two newtestmodules before release; root added2next-port regressions after
+review. shift_feedback_tests total1.6701316/60s readAST, charge2/58unused CLOSED;
+reviewer shift_feedback_review owns ONLY stageREVIEW, finalSOURCE+ACTUAL366/
+correctedA-onlymicrobenchmark and FINALDOCS accepted,2.2745738/60s;
+charge3/57unused CLOSED.
+No worker imports/runtime/native/physics/tests/subdelegation. RootCPU1GPU0 serial:
+350checks212.577405s +oncefakeprofile31.5468296s +wrongcohortmicro1.5261014s
++final366checks188.0101996s +correctedA-onlymicro1.539795s=435.2003306/600s,
+charge436/164unused CLOSED. Native/physics forbidden; realcounttestdeselected.
+Sixpath finalruff/format/mypyboth0; scopedgitdiff0 with3historicalLF warnings and
+preservedARCHITECTURE/CHANGELOG exclusions. Rootstatic/read/docs conservative90/
+120s includingclosure,30unused CLOSED. No source/test edits afterfinalgate.
+
+Original20%BOTHcalltargetFAIL (1297/23089 unchanged); wrongcohortfirstmicro
+admissionFAIL/raw retained. Corrected frozen128A-only per-check10%criterionPASS:
+24.2293% lower median, all5blocks saved. No second endpointprofile, nativeGO,
+retry/renewal,20s/game/learningclaim. PriornativeINCOMPLETE/SPENT and original
+acceptedR2.1/repeated-update unchanged. [Evidence](../artifacts/runs/minigrid-probe-boundary-20261017/RESULTS.md).
+
+## Current — probe live endpoint route, native incomplete, 2026-10-17
+
+Shared dirty master09ff811 with explicit ownership, no Git/index/dependency/
+network/settings changes. Root owns integration/CLI/helper/new root tests/stage/
+canonical docs/plans. Source bounded_factory owned evaluator+new evaluator tests,
+RELEASED1.3938491/60s, charge2/58unused CLOSED. App shift_feedback_tests owned
+fresh_task_probe/new app endpoint helper+tests, RELEASED1.2626938/60s, charge2/
+58unused CLOSED. Reviewer shift_feedback_review owned ONLY stage REVIEW.md;
+SOURCE, diagnostic-source repair, partial ACTUAL, profile and FINALDOCS accepted;
+RELEASED2.9777154/60s, charge3/57unused CLOSED, detailed stage closure retained. Worker caps fresh60s read/stdlibAST, no repoimports/native/physics/
+models/Git/network/deps/settings/subdelegation; no added scientific allowance.
+
+Root first325 checks220.6376855s; final326 checks210.3210558s/0fail/error/skip,
+plus once scripted cProfile31.4488113s, total462.4075526/600s, charge463/137unused
+CLOSED. No651unique claim. Real count/neural/RNN/FIFO operations and actual
+physics forbidden during tests/profile; simulated prefix/one-step games/unit
+clocks do not establish a native20s pass. Root static/read/docs conservative90/
+120s including closure,30unused CLOSED. Ten-path final statics all0; six old
+actual CLI descriptors exact. No further source edits after final gate.
+
+ONE scientific case INCOMPLETE/SPENT48.3301726s/113225728B actualRSS:144count
+updates1296rows/46teacher scores414rows+4livepredictions4rows,90teacher+4live
+steps. First20s readout expires before any complete game; no A-return/later
+origin. Original180/210/220/768MiB/whole32MiB bounds held, no retry/futureGO.
+Once complete-only checker FAILED1/.1692555s atstatusassert, charge1/9unused
+CLOSED, no replay. Raw false flags preserved; future-only deadline/binding
+qualification fix tested, not another native success.
+
+[Evidence, measured callback duplication and exact next implementation](../artifacts/runs/minigrid-probe-live-20261017/RESULTS.md).
+
+## Current — invariant exact-memory control, 2026-10-17
+
+Root owns integration/CLI/new CLI tests/stage/docs/plans on dirty master09ff811;
+no Git/index/dependency/settings/network changes. Source bounded_factory owned
+learnability + memory helper, RELEASED: 2.8408835/60 s, charge3 /57 unused CLOSED.
+Tests shift_feedback_tests owned two test modules, RELEASED: 1.240440/60 s,
+charge2 /58 unused CLOSED. Review shift_feedback_review owned only stage REVIEW:
+SOURCE/GO/ACTUAL/FINALDOCS accepted, RELEASED: 2.4547672/60 s, charge3 /57 unused CLOSED. Workers have no model/test/
+physics work and do not expand root budgets. Root final110 tests pass; total
+276.5873411/400 focused seconds, charge277 /123 unused CLOSED. Real engineering
+count work64/576 updates/rows +94/846 predictions/rows; no additional allowance.
+Root static/read/docs conservative90/120 s including closure,30 unused CLOSED.
+One frozen scientific case COMPLETE/SPENT:192/1728 updates/rows +94/846 scores/
+rows,90 teacher steps,52.5573043 s /119005184 B actual RSS, CPU1/GPU0; original
+180/210/220 s and768 MiB/whole32 MiB caps held. No retry/future GO. Once saved
+checker0.2105439/10 s, charge1 /9 unused CLOSED; no models/physics replay.
+[Commands, outcomes and precise next action](../artifacts/runs/minigrid-memory-control-20261017/RESULTS.md).
+
+## Current — known TRAIN A128 live readout, 2026-10-17
+
+Shared dirtymaster09ff811 explicitownership: rootlearnability/newtrainrollouthelper/
+CLI/newCLIhelpertests/stage/docs/plans/integration. Sourcebounded_factoryONLY
+evaluator thenread-onlycriticalpath RELEASED2.3443193/60s/3charged57unusedCLOSED;
+testsshift_feedback_testsONLY2newtests RELEASED2.771098/60s/3charged57unusedCLOSED.
+Reviewshift_feedback_reviewONLYstageREVIEW, SOURCE/GO/ACTUAL/FINALDOCS; finalcharge/
+release in closure. Workersread/stdlibAST/no repoimports/tests/native/physics/Git/
+network/deps/settings/subdelegation. Root158finalchecks/initial155+1fixturefailure,
+278.6846862/300focused279charged21unusedCLOSED; read/static/docs75/90conservative
+inclclosure15unusedCLOSED. One nativeBPcase COMPLETE/SPENT192updates1728rows/
+110predictions862rows/106physicssteps,34.4765334s382570496B, CPU1interop1GPU0/
+180body210parent220cleanup768MiBwhole32MiB/live0update20s. No retry/futureGO.
+Oncechecker.1237531/10s/1charged9unusedCLOSED, no replay. [All evidence and next
+existing count-control integration](../artifacts/runs/minigrid-train-a-rollout-20261017/RESULTS.md).
+
+
+## Current — matched native control execution, 2026-10-17
+
+Root owns freshstage/minigrid-matched-a-only-execution-20261017+canonicaldocs/plans;
+source unchanged, accepted116/static/math/infra/app/BP evidence reused. Only useful
+worker shift_feedback_review owns stageREVIEW.md, fresh60sread/stdlibAST cap;
+independent protocol/copy/source/GO/ACTUAL/FINALDOCS, no imports/tests/models/
+physics/network/Git/deps/settings/subdelegation. Final charge/release in closure.
+Root static/read/docs75/90conservative inclclosure15unusedCLOSED; one serial native
+protocol COMPLETE/SPENT83.9727565s/346718208B,576updates5184rows/282scores2538rows/
+270teachersteps, CPU1interop1GPU0/shared180/210/220/768MiBwhole32MiB. Once saved
+checker.1668122/10s/1charged9unusedCLOSED, no native replay. OldfailedgrantSPENT
+untouched; no retry/futureGO. Sourcegate/BP not rerun. [All evidence and next
+existing-evaluator integration](../artifacts/runs/minigrid-matched-a-only-execution-20261017/RESULTS.md).
+
+
+## Current — matched A-only control recipes, 2026-10-17
+
+Shared dirty09ff811 checkout; explicit disjoint ownership/no Git/index/network/
+deps/settings changes. Root CLI/newCLItests/stage/docs/plans/integration;
+bounded_factory ONLYlearnability source RELEASED. shift_feedback_tests ONLY
+newmatchedAPItests+oldAonlyAPItests RELEASED. shift_feedback_review ONLYstage
+REVIEW, independent SOURCE/gates/GO/failure+repair/FINALDOCS. Worker read/stdlibAST
+caps60s each, no imports/tests/models/physics/native/subdelegation. Resource
+closure records final measured/rounded worker charges and release.
+Root focused timeout125.0186934s preserved; prospective agent allowance180→300s,
+final116PASS68.5652770s, aggregate193.5839704s/194charged106unusedCLOSED. Root
+static/read/docs75/90 conservative including closure,15unusedCLOSED. CPU1/GPU0.
+Native one reviewed family FAILED/SPENT PID publication lock before ready/import;
+no admitted model/score/physics, actualtrainerRSS/exitunknown. No retry. Future-only
+repair exact3s loop test.5780677/5s/1charged4unusedCLOSED,18retries/dummywriterexit0;
+full repaired supervisor unexecuted. Saved checker NOTRUN/10unusedCLOSED. All
+scientific caps/old failures/negative results preserved. [Evidence and exact next
+fresh frozen matched comparison](../artifacts/runs/minigrid-matched-a-only-20261017/RESULTS.md).
+
+
+## Current — distinct public F probe, 2026-10-17
+
+Shared dirty09ff811 checkout with explicitexclusive ownership; no Git/index/network/
+deps/settings edits. RootONLYcore/infraMiniGridlayout+CLI/newlayoutCLItests/stage/
+docs/plans/integration; sourcebounded_factoryONLYlearnability+newprobe_support,
+released1.574003/60sreadAST (2charged58unusedCLOSED). Testsshift_feedback_testsONLY
+newdistinctprobetest41cases,1.9854302/60sreadAST (2charged58unusedCLOSED/released).
+Reviewshift_feedback_reviewONLYstageREVIEW,2.0590974s+rounded.3s/60readAST,
+3charged57unusedCLOSED/released; FINALDOCSaccepted. Workers
+0imports/tests/models/physics/native/network/Git/subdelegation. Root304finalchecks
+train/physicsforbidden,169.3820281/180saggregate (170charged10unusedCLOSED),static/
+read/docs85/90conservativecharged5unusedCLOSED. CPU1/GPU0. SeparateSOURCEGO/source
+port6teachers54steps3/10scharged7unusedCLOSED/SPENT. SeparateNATIVEGO/onecase
+160updates1440rows/46scores414rows/10teachers90steps,18.7062617s379060224B,
+original180body210parent/shared220cleanup768MiBwhole32MiB COMPLETE/SPENT/no retry.
+Physics54+90=144,16resets. Oncechecker1/10charged9unusedCLOSED; allsource/evidence
+preserved. IndependentSOURCE/GO/narrowACTUAL accepted,FINALDOCS inREVIEW. NextoldA
+fitreadoutsondisposableFclone,notmorecapture/audit/dose; fullgoalopen.
+
+
+## Current — canonical BP A-only acquisition, 2026-10-17
+
+Stage: artifacts/runs/minigrid-bp-a-only-20261017. Shared dirty checkout;
+non-overlapping ownership, no Git/index/network/dependency/settings changes.
+Root: CLI/newCLItests/stageharness/docs/plans/integration; final166PASS54.8300566s,
+focused55/180charged125unusedCLOSED; static/read/docs/posthoc75/90charged15unused
+CLOSED. Source bounded_factory: ONLYlearnability/sharedlearningpacket source,
+thenreleasedsource and ONLYstage/readback.py,2.4588126/60sreadAST,3charged57unused
+CLOSED/released. Tests shift_feedback_tests: ONLYnewAonlytest/tinyPCfixturehelper,
+.8772164/60sreadAST,1charged59unusedCLOSED/released. Reviewer shift_feedback_review:
+ONLYstageREVIEW.md,original60sread/stdlibAST cap;1.7168460s,2charged58unusedCLOSED/released.
+Workers no imports/tests/models/forwards/updates/physics/subdelegation; root tests
+forbid nativeTorchtrain. CPU1/GPU0 shared; root alone executed one reviewed native
+160updates1440rows/90teachersteps case COMPLETE/SPENT18.1951811s/378277888B,
+original180body210parent/shared220cleanup768MiBwhole32MiB. No retry/futureGO.
+Once savedchecker.1436/10s,1charged9unusedCLOSED; once savedraw/canonicalprobe
+support overlap.3860058/10s fromrootread90,0models/forwards/updates/physics.
+Independent SOURCE/GO/narrowACTUAL/overlap accepted; FINALDOCS closure inREVIEW.
+Allolderownership/evidence preserved. Fullgoal/release open; nextdistinctoptin
+TRAIN-role probe inexistingport,notanotherA-dose/capture/audit increment.
+
+
+## Current — existing-bound-method selector and BP case, 2026-10-17
+
+Dirtymaster09ff811 preserved. SourceworkerONLYlearnability released .4870202s then
+separateONLYstage/readback.py1.0477022s; aggregate1.5347224/60readASTs,2charged58CLOSED,
+no failures/prohibitedruntime. TestworkerONLYnewsource tests+tinydefaultPCfixture
+parameterization RELEASED1.159422/60readASTs,2charged58CLOSED, execution0. RootONLY
+CLI/newCLItests/stage/docs/plans/releasedintegration; fixedmixedkwargsannotations.
+ReviewerONLYstageREVIEW SOURCE/finalgates/GO/narrowACTUAL/FINALDOCS accepted, RELEASED
+2.0868894/60sreadstdlib,3charged57unusedCLOSED; prohibited native runtime0. Failed overbroadreceipt/codec assumptions andprinting
+syntaxerror preserved; subsequent narrowed source-correct checks pass, no models.
+
+RootserialCPU1/interop1/GPU0: initial/final109PASSoverlap, focused92.9114972/180s,
+93charged87CLOSED; engineeringupdates/physics0. Statics/read/posthoc/docs75/90charged
+15unusedCLOSED; first10mypy errors/target preserved, final5pathstatics/preview/syntax0.
+NativeBP160updates1440rows/46scores414rows/ten teachers90steps COMPLETE/SPENT; no
+health/final/live/replay. Oncechecker .13568s/10s1charged9CLOSED. Pureposthoc saved54
+TRAINalias check .3709644s withinreadbudget, no updates/forwards/physics. PriorSPENT
+negativecases preserved. [Evidence/precise next recipe](../artifacts/runs/minigrid-bp-qualification-20261017/RESULTS.md).
+
+## Current — trained canonical-PC health measurement, 2026-10-17
+
+Dirty master09ff811 preserved; no production changes. RootONLYnewmeasurementstage/
+adapted accepted supervisor+child/docs/plans/releasedchecker. bounded_factoryONLY
+stage/readback.py RELEASED1.4602182/60sreadAST,2charged58CLOSED; firstchildreadbefore
+creation corrected once afteractualready, no imports/NumPy/models/tests/physics.
+ReviewerONLYstageREVIEW protocol/SOURCE/GO/narrowACTUAL/FINALDOCS accepted, RELEASED
+.9979365/60sreadstdlib,1charged59unusedCLOSED/prohibitedruntime0; one truncated
+output narrowed, no commandfailure. Allownership disjoint.
+
+Root serialCPU1/interop1/GPU0; original154gates reused/sourceunchanged. Preview/AST/
+read/docs/closure60/90charged30unusedCLOSED; engineeringupdates/physics0. Sole native
+160updates1440rows+30healthcells COMPLETE/SPENT20.3756786s/295735296B peak,ten teachers
+90steps. Saved checker once .2677999/10s,1charged9CLOSED, NumPy onlysavedarraySVD,
+no native models/forwards/physics. All30dead/sat0 but acquisitionallfalse; no benefit.
+[Exact evidence and next fixed BP-control prerequisite](../artifacts/runs/minigrid-pc-health-measurement-20261017/RESULTS.md).
+
+## Current — bound TRAIN activation health, 2026-10-17
+
+Dirty master09ff811 preserved. bounded_factory ONLYexisting native activation reader,
+RELEASED .9196002/60readASTs,1charged59unusedCLOSED. shift_feedback_tests ONLYnew
+invariant activation tests, RELEASED .5901282/60readASTs,1charged59unusedCLOSED.
+Each had one absent early protocol search, no runtime/imports/models/physics.
+Root ONLYexisting learnability+CLI/four superseded unsupported-health test params,
+new bound-health route tests/stage/docs/plans/releasedintegration. Reviewer ONLY
+stageREVIEW: SOURCE/scoped executed/FINALDOCS accepted, RELEASED .8843689/60s,
+1charged59unusedCLOSED; failures/prohibitedexecution0.
+
+Root serialCPU1/interop1/GPU0, engineering nativeupdates/physics0. Initial204PASS
+92.9201131s then final154PASS16.2395592s after cost repair; overlapping scopes,
+not358distinct. Focused109.1596723/180s,110charged70unusedCLOSED. Static/read/preview/
+docs/closure60/90charged30unusedCLOSED. Nine-path statics and actual preview0.
+No new native experiment/GO/allowance; previous complete-PC and incomplete-game
+SPENT receipts preserved. [Exact evidence](../artifacts/runs/minigrid-invariant-health-20261017/RESULTS.md).
+
+## Current — canonical-PC qualification, 2026-10-17
+
+Dirty master09ff811 retained, no index/history/Git/network/dependency mutation.
+Explicit nonoverlap: bounded_factory ONLYexisting minigrid_learnability source,
+then separately ONLYstage readback.py; RELEASED4.4777264/60readASTs,5charged55CLOSED.
+Optional missing-test search1/initial checker metadata KeyError corrected; no imports/
+models/tests/physics. shift_feedback_tests ONLYnew source test file RELEASED
+1.0844757/60readASTs,2charged58unusedCLOSED, prohibitedexecution0. Root ONLYexisting
+CLI/newCLItests/stage/docs/plans/released integration. Reviewer ONLYstage REVIEW.md,
+SOURCE/gates/GO/narrow ACTUAL/FINALDOCS accepted, RELEASED1.2098390/60s,
+2charged58unusedCLOSED; prohibitedexecution0. One guessed-path search failure corrected.
+
+Root serialCPU1/interop1/GPU0;98combinedPASS46.0369698/120focused,47charged73unused
+CLOSED. Engineering native updates/physics0. Static/read/preview/docs/closure60/90
+charged30unusedCLOSED. Separate sole scientific160updates1440rows/46scores414rows/
+ten teacher episodes90steps COMPLETE/SPENT; no retry or budget renewal. Independent
+stdlib readback once .1168191s/0. Scoped statics pass; all acquisition premises fail.
+[Exact evidence and next learner diagnostic](../artifacts/runs/minigrid-pc-qualification-20261017/RESULTS.md).
+
+## Current — bound learnability routing, 2026-10-17
+
+Dirty master09ff811 preserved. bounded_factory ONLYminigrid_learnability RELEASED
+2.5509081/60readASTs,3charged57unusedCLOSED; no workerexecution. Testauthor ONLYnew
+test_minigrid_invariant_learnability RELEASED2.0935131/60,3charged57CLOSED; no failures/
+imports/tests/models/physics. Root ONLYCLI/newCLItest/stage/docs/plans and released
+integration, added paidowneridentity and flatcompletedguard fixes. Reviewer ONLY
+stageREVIEW SOURCE/scopedexecuted/statics/FINALDOCS accepted, RELEASED1.8368594/60,
+2charged58unusedCLOSED, prohibitedruntime0. Allwriteownership explicit, no overlap/Git/network/deps.
+
+Root serialCPU1+interop1/GPU0 focused278.5588369/300s,279charged21unusedCLOSED, retains
+125/85/13timeout attempts/180->240->300prospective corrections.32zero+4nativePASS,
+30closingoverlapPASS,44oldpairedPASS; no80combinedclaim.64nativeupdates576rows once,
+80forwards720rowsinclreferences. Nativeunused32/448CLOSED. Static/docs60/90charged
+30unusedCLOSED. No scientificnative allowance/physics; old300sSPENT neverrenewed.
+Fakefull route stubsacceptedTRAIN, actualnewfit/probe/flatpublication/refusal tested;
+simulated800totals notnativecalls. [Exact evidence](../artifacts/runs/minigrid-invariant-learnability-20261017/RESULTS.md).
+
+
+## Current — matched neural comparison, 2026-10-17
+
+Dirty master09ff811 retained. bounded_factory ONLYexisting history-smoke script
+RELEASED1.9920279/60readASTs,2charged58unusedCLOSED. shift_feedback_tests ONLYnew
+comparison tests RELEASED2.554546/60,3charged57CLOSED; separately ONLYstage stdlib
+readback RELEASED2.7648322/60,3charged57CLOSED. Readbackauthor corrected two guessed
+source paths using actual tree; no tests/imports/models/physics. Root ONLYexisting
+raw-neural evaluator/newrawtests/docs/plans/stage/released integration and tiny
+shared TRAIN missing-method preflight after demonstrated legacy regression.
+Reviewer ONLYstageREVIEW: SOURCE/finalgates/GO/narrow incompleteACTUAL/FINALDOCS
+accepted, RELEASED1.8925345/60readstdlib,2charged58unusedCLOSED, execution0.
+
+Root CPU1/GPU0 serial engineering0nativeupdates/0rows/physics0; focused62.8066389/
+180s63charged117unusedCLOSED; original32updates512rowsunusedCLOSED. Statics/preview/
+read/docs/closure conservative60/90charged30CLOSED. Final115combinedPASS plus14
+closingraw aftertypeonlyfixtureedit; earlierfivefailures/staticerrors preserved.
+Sole nativeSPENT256updates2304rows,300sbodytimeout; parent301.6419593s/406487040B
+peak.8rawcomplete+1boundpartial,7not_run; no comparative/scientificacceptance.
+Saved checkeronce .1954767s/exit2 explicitincomplete, no fulltrajectory acceptance.
+[Exact commands, work, failures and next implementation](../artifacts/runs/minigrid-neural-representation-comparison-20261017/RESULTS.md).
+
+
+## Current — encoding-bound neural ports, 2026-10-17
+
+Dirty master09ff811 retained. bounded_factory ONLYnewwrapper RELEASED.8855478/60s
+read/AST,1charged59CLOSED; shift_feedback_tests ONLYnewunitfile RELEASED1.7224357/
+60s,2charged58CLOSED. Both prohibitedruntime0. Root ONLYexistingTRAIN/evaluator/
+newintegrationtests/docs/plans/stage+releasedintegration. Reviewer ONLYstageREVIEW,
+SOURCE/executed/FINALDOCS accepted, RELEASED1.2007445/60s read/stdlib,
+2charged58unusedCLOSED/prohibitedexecution0.
+Root serial1CPU0GPU:151combinedpass/onepreservedfixturefail,15closingPASS, scoped
+statics0;164nativecalls1224rows,39SGD+125manual, cap256/4096 unusedCLOSED. Four32-update
+native streams and generic disposableprobe work, fakegames only; no science/GO.
+Focused34.7903243/180s (35charged145CLOSED); static/docs45/90charged45CLOSED.
+[Evidence and exact next CLI wiring](../artifacts/runs/minigrid-invariant-neural-20261017/RESULTS.md).
+
+
+## Current — saved A32 invariant recipe, 2026-10-17
+
+Shared dirty09ff811. Root ONLY existingTRAIN admission/newrecipe+integrationtests/
+docs/plans/stage and releasedfile integration. bounded_factory ONLY evaluator,
+then separate CLI+CLItests, then stage stdlibreadback: RELEASED1.18934/.702996/
+1.4706213s read/AST respectively; no model/test/physics execution. Testauthor ONLY
+new evaluatortests then separateTRAINtests: RELEASED.7129241s and<1.6s read/AST,
+no execution. Reviewer ONLY stage REVIEW: SOURCE/GO/narrowACTUAL/FINALDOCSaccepted,
+RELEASED1.8614650/60s read/std,2charged58unusedCLOSED/prohibitedexecution0.
+Root serialCPU1GPU0 focused232.2958612/240s,233charged7unusedCLOSED;180→240
+prospective revision after measured96.8s suite preserved. Final74PASS; unchanged
+broader220passes reused, two fixture failures retained/resolved, no222passclaim.
+Root statics/docs conservative60/90charged30unusedCLOSED.
+Eightpathstatics0, realpreview0; sole native51.0626623s/92,540,928B RSS/SPENT,
+32updates288Arows/16games214steps. All214 arithmetic independently accepted,
+rawA/E2/0 vsinvariant2/2; only inspected nuisance transfer, no neural/CPC claim.
+Final closure/resources/next action in
+[RESULTS](../artifacts/runs/minigrid-invariant-pilot-20261017/RESULTS.md).
+
+
+## Current — explicit public invariant encoding, 2026-10-17
+
+Shared dirty09ff811. bounded_factoryONLYnewcore RELEASED.4294191/60readstdlibASTs,
+1charged59CLOSED; shift_feedback_testsONLYcoretest RELEASED.9074471/60,
+1charged59CLOSED; bothruntime0. RootONLYnewnativeadapter/native tests/docs/plans/
+stage+releasedintegration. ReviewerONLYstageREVIEW SOURCE/scopedexecutedaccepted,
+FINALDOCSaccepted/RELEASED1.0504553/60readstdlibASTs,2charged58unusedCLOSED/runtime0.
+Rootserial1CPU0GPU focused12.1808168/180s(13charged167CLOSED),
+statics/docs/closure45/90charged45CLOSED.226finalPASS/scopedstatics0;8initialtype
+errors/target preserved/fixed. Bothcounts through existingprobe+delayedTRAINarray
+fixtures; no realgame/newexperiment/GO. Earlier nativequalificationFAILED/SPENT
+preserved. [Evidence/nextactualrecipe](../artifacts/runs/minigrid-invariant-encoding-20261017/RESULTS.md).
+
+## Current — frozen MiniGrid return games, 2026-10-17
+
+Shared dirty09ff811. RootONLYnewCLI/roottests/docs/plans/stage+integratedreleased
+files. bounded_factoryONLYevaluator RELEASED1.7121179/60readstdlibASTs,
+2charged58CLOSED; shift_feedback_testsONLYnewboundarytest RELEASED.976219/60,
+1charged59CLOSED; bothruntime0. ReviewerONLYstageREVIEW SOURCE/GO/narrowACTUAL
+and FINALDOCS accepted, RELEASED2.2660797/60readstdlibASTs,3charged57unusedCLOSED/
+runtime0. Rootserial1CPU0GPU focused158.9771879/180s,
+159charged21CLOSED; static/preview/stdlibstub/readback/docs/closure80/90charged10CLOSED.
+128combinedPASS+1closing/scopedstatics; 6expectedmetadataassertfailures and
+three-case missingterminal wrapper INCOMPLETE preserved. Sole native SPENT:
+actual46332/launcher16132both0, supervisor1 due239B runpy warning; no retry.
+32actualgames379decisions/steps0training, narrow saved arithmetic independently
+accepted/maxerror0; clean native gateFAILED, parentsopen. Original executed child
+preserved; separate future-onlymaincallfix stdlibstubPASS/no actual rerun.
+[Evidence and next learner encoding task](../artifacts/runs/minigrid-memory-return-live-20261017/RESULTS.md).
+
+## Current — MiniGrid E8/A8 return comparison, 2026-10-17
+
+Root ONLYexistingadapter/docs/plans/stage/integratedreleasedtests in dirty09ff811.
+AuthorONLYCLI RELEASED.9508817/60readASTs,1charged59CLOSED; testauthorONLYtwo newfiles
+RELEASED<1.4/60readASTs,2charged58CLOSED; bothimports/tests/models/physics0. Reviewer
+ONLYstageREVIEW, SOURCE/GO/savedACTUAL/FINALDOCS accepted and RELEASED
+1.7579664/60readstdlibASTs,2charged58unusedCLOSED/runtime0. RootCPU1GPU0serial
+originalfocused169/180charged11closed (90+65stimeouts preserved); successor
+167.4599185/180s,168charged12closed; static/readback/docs/closure60/90charged30closed.
+193PASS+12type-onlyclosing/scopedstatics0. Solecase SPENT37.0181365s,actual9812/
+launcher23816both2; topincomplete/matureexactfailed preserved, FIFOcompletes.
+49commits441rows/64scores576rows/36newphysics; SOURCE/GO thenACTUAL accepted. Frozen
+90body110work120cleanup768MiB32MiB, no retry/futureGO. [Evidence/next live boundary](../artifacts/runs/minigrid-memory-return-20261017/RESULTS.md).
+
+## Current — FIFO action-memory component, 2026-10-17
+
+Shared dirty09ff811. Root ONLYnewintegrationtest/docs/plans/stage, integrating
+releasedsources. bounded_factory ONLYnewcore/fifo_action_memory.py+newnativeadapter
+RELEASED.4376931/60readASTs (1charged59CLOSED); shift_feedback_tests ONLYnewcoretest
+RELEASED.6192257/60 (1charged59CLOSED). Both runtime/model/physics0. Reviewer ONLY
+stageREVIEW, SOURCE/scoped ACTUAL/FINALDOCS accepted and RELEASED.6109451/60
+readstdlibASTs,1charged59unusedCLOSED/runtime0. Root serial
+CPU1GPU0 focused+example3.6500024/180s (4charged176CLOSED), staticcommands8.4512519s
+plus docs/closure conservative30/90charged60CLOSED. Final254focused and scopedstatics
+pass; tiny actual count/native/helper/stream array fixtures,0MiniGridphysics/new
+scientificcase/GO. Old refusal learner/results unchanged. [Evidence/next integration](../artifacts/runs/fifo-action-memory-20261017/RESULTS.md).
+
+## Current — MiniGrid saved-memory E16 capacity, 2026-10-17
+
+Root ONLYadapter/integratedreleasedscript+tests/docs/plans/stage in dirty09ff811
+shared checkout. bounded_factory ONLYscripts/run_minigrid_memory_probe.py RELEASED
+1.8514951/60readASTs (2charged58CLOSED); shift_feedback_tests ONLYtwo newtestfiles
+RELEASED2.5586795/60 (3charged57CLOSED), both runtime/model/physics0. Reviewer ONLY
+stageREVIEW, independent SOURCE/GO/ACTUAL/FINALDOCS accepted and RELEASED
+2.2169648/60readstdlibASTs,3charged57unusedCLOSED; runtime/model/physics0.
+Root CPU1/GPU0 serialfocused44.9564283/180s (45charged135unusedCLOSED), static/
+preview/readback/docs/closure conservative60/90charged30unusedCLOSED.
+One native SPENT3.053176s, actual18100/launcher35948both2; reportincomplete/mature
+failedcapacitynegative preserved;17countcommits153rows/10scores90rows/36physics.
+No benchmark rerun or oldbudgetrenewal, no retry/futureGO. Frozen90body/110work/
+120cleanup768MiB32MiB unchanged. [Evidence/next capability](../artifacts/runs/minigrid-action-memory-probes-20261017/RESULTS.md).
+
+## Current — MiniGrid count-memory live control, 2026-10-17
+
+Root ONLYnewrecipe/sharedtrainarm/CLI/roottests/docs/stage/plans, dirty09ff811shared
+checkout. Evaluatorauthor bounded_factory ONLYminigrid_policy_evaluation.py RELEASED
+1.1805244/60readASTs,2charged58CLOSED; testauthor ONLYnewmemory-evaluationtest RELEASED
+2.0193629/60readASTs,3charged57CLOSED; both runtime/model/physics0. Reviewer ONLYstage
+REVIEW, SOURCE/literalGO accepted after148finalPASS/scopedstatics/preview/PSparse.
+Originalfocused240slice227charged13CLOSED (195stimeout retained); separate180slice
+137.4198192s/138charged42CLOSED. Static/preview/readback/closure85/90charged5CLOSED.
+Native exactlyonecase COMPLETE/SPENT124.4663s,actual17200/40408both0;
+SOURCE/literalGO/narrowACTUAL/FINALDOCS accepted, reviewer RELEASED3.0365032/60readASTs,
+4charged56unusedCLOSED/runtime0.128storage updates,
+408physics steps,54keys; knownTRAINacquired/retained, noCPC/generalization claim.
+Frozen180body/200work/210sharedcleanup,768MiB/32MiB/CPU1GPU0; no retry/futureGO. Prior negatives/
+failed budgets retained. [Evidence/current status](../artifacts/runs/minigrid-action-memory-live-20261017/RESULTS.md).
+
+## Current — MiniGrid count-memory geometry, 2026-10-17
+
+Root ONLYcore/action_memory.py/shared docs/plans/stage. Testauthor
+shift_feedback_tests ONLYnewtest_minigrid_action_memory.py: RELEASED2.2966989/
+60readASTs,3charged57unusedCLOSED; repositoryimports/tests/models/physics0.
+Reviewer shift_feedback_review ONLYstageREVIEW; SOURCE/scopedACTUAL accepted,
+RELEASED0.5345935/60readASTs,1charged59unusedCLOSED/runtime0.
+Root serialCPU1GPU0 focused48.8488175/180s,49charged131CLOSED;
+static/readback/closure40/60conservativecharged20CLOSED.69new/225combinedPASS,
+scopedstatics0; noactualMiniGridexperiment/newGO. Oldphysics in legacytests is
+engineeringwork, not newgameplay evidence. [Scope/evidence/next dependency](../artifacts/runs/minigrid-action-memory-shape-20261017/RESULTS.md).
+
+## Current — public-history inspector, 2026-10-17
+
+Root owns shared dispatch/rawTRAINselector/infra/template/stage/docs. Projection
+worker only new app module, RELEASED1.6809911/60readASTs,2charged58CLOSED;
+test author only new test file, under3/60readASTs,3charged57CLOSED. Runtime/model/
+physics/browser0 for workers. Reviewer only stageREVIEW, SOURCE+savedACTUAL
+and FINALDOCS accepted; RELEASED1.6140460/60readseconds,2charged58unusedCLOSED.
+Root serialfocused54.7653024/
+180s (55charged125CLOSED), static/build/closure50/60conservative10CLOSED, browser
+under3/90s (3charged87CLOSED). Actual browserfilepolicy denied before navigation;
+0interactive checks/no reroute. Three savedpages+explicitpartialfixture published,
+no learning/physics/new experiment. [Evidence/blocker/next implementation](../artifacts/runs/r47-public-history-inspector-20261017/RESULTS.md).
+
+## Current — isolated memory E16 capacity, 2026-10-17
+
+Root owns memory recipe/CLI/stage/docs in dirty09ff811 shared checkout. Test author
+owns only tests/test_action_memory_probes.py, RELEASED0.6606938/60readASTseconds,
+1charged/59unusedCLOSED, imports/tests/models/physics/network/Git/settings0.
+Reviewer owns only action-memory-probes-20261017/REVIEW.md: SOURCE/GOaccepted,
+SOURCE/GO/narrowACTUAL/FINALDOCSaccepted; RELEASED1.1294424/60readseconds,
+2charged58unusedCLOSED/runtime0. Root CPU1/GPU0
+jobs serial; focused78.0018387/180s,79charged101CLOSED; static/readback/closure
+35/60conservativecharged25CLOSED; previews2/15charged13CLOSED. Native onecase
+COMPLETE/SPENT3.6380211supervisorseconds/49,098,752Bpeak,40storageupdates320rows
+NOTSGD/46scores368rows/26teacher208physics, no live/Torch/final/replay. No new
+failed gates, all old failures retained. [Evidence/next action](../artifacts/runs/action-memory-probes-20261017/RESULTS.md).
+
+## Current — bounded action-memory control, 2026-10-17
+
+Dirty09ff811 shared checkout, explicit nonoverlap. Root owns new recipe/shared
+comparison+identity seams/CLI/protocol/harness/docs. bounded_factory owns only
+core/action_memory.py, adapters/action_memory_learner.py, test_action_memory.py:
+RELEASED0.6883164/60readASTs,1charged59unusedCLOSED. shift_feedback_tests owns
+only test_key_door_memory_pilot.py:RELEASED1.7828814/60readASTs,2charged58unused
+CLOSED. Both imports/tests/models/physics/network/Git/settings/subagents0.
+Reviewer owns only current stage REVIEW.md; SOURCE/GO/narrowACTUAL/FINALDOCSaccepted, RELEASED1.7314061/60readseconds,
+2charged/58unusedCLOSED/runtime0.
+Root serialCPU1GPU0 focused98.3779693/180s inclusivefailures,99charged81closed;
+static/readback/closure45/60conservativelycharged15closed; previews3/15charged12closed.
+Single nativeSPENT/COMPLETE21.2174supervisorseconds/47,267,840Bpeak, noTorch,
+8countstorageupdates64rows (notSGD),30scores240rows,30liveepisodes162calls150steps.
+Prior negatives preserved; newknownTRAINsuccess is unequalcapacity/compute,
+not generalization/CPCbenefit. [Commands/next action](../artifacts/runs/bounded-action-memory-20261017/RESULTS.md).
+
+## Current — matched history live closure, 2026-10-17
+
+Dirty09ff811 sharednonoverlap. Rootownedshared_live/historypilot/CLI/docs/stage;
+bounded_factory ONLYnewsession+unittests RELEASED1.1807728/60readASTs,2charged/
+58unused CLOSED. shift_feedback_tests ONLYnewliveintegrationfile RELEASED
+1.4630749/60readASTs,2charged/58unused CLOSED. Workersimports/tests/models/
+physics/network/Git/settings/subagents0. Reviewer ownsONLYstageREVIEW, SOURCE/
+GO/narrowACTUAL/FINALDOCS accepted, RELEASED1.6483727/60readseconds,
+2charged/58unused CLOSED, runtime0.
+Rootfocused199.2983722s inclusive80failedtimeout, prospective120→240→300
+amendments preserved;200charged/100unused CLOSED. Static/readback/closing
+conservatively45/60charged,15unused CLOSED; previews2/15charged,13CLOSED.
+Workerallowances do notexpand sharedcaps. Alltest/nativehandles terminal.
+
+One separatelyreviewed native case COMPLETE/SPENT68.7098s, actual19496/launcher
+33568both0,peak317452288B;32parameterupdates256rows BP8SGD/PC24manual48latent,
+120TRAINscores960rows+156livecalls36applied;100knownphysics/128episodes,
+120sessions/240liveforkinterfacecalls. All120illegal/no usefulskill. No retry,
+oldfailedbudgetrenewal/seed-dose-selection/futureGO. Rootownsallreleasedfiles;
+all reviewwriters RELEASED. Nextbounded supervisedmemorycontrol viaexisting
+nativeports/stream/live, prospectivelyfreeze ownentry/byte/unseen/conflictlaws.
+
+
+## Current — matched history capacity closure, 2026-10-17
+
+Dirty09ff811 sharednonoverlap. Root owns existinghistoryadapter/CLI/canonicaldocs/
+stage. Testsworker shift_feedback_tests owned onlytest_public_history_probes.py,
+RELEASED~3.04/60read+ASTseconds,4charged/56unused CLOSED, runtime0. Reviewer
+shift_feedback_review RELEASED stageREVIEW; SOURCE/GO/narrowACTUAL/FINALDOCS
+accepted,1.3214907/60readseconds,2charged/58unused CLOSED,
+runtime/import/tests/models/physics0.
+Root focused37.9300075/120seconds,38charged/82unused CLOSED; static/readback/
+closing conservatively45/60charged,15unused CLOSED; previews2/15charged,13CLOSED.
+No worker expands sharedcaps; all root test/model sessions terminal.
+
+One native case COMPLETE/SPENT24.1387internal/25.5267supervisor,
+actual25280/launcher18544both0/terminal,319873024Bexternalpeak.160parameterupdates
+1280rows BP40SGD/PC120manual,240batchlatent,184scores1472rows/26teacher208physics.
+No retry/renewedoldfailedqualifier/unusednativeallowance/futureGO. Originalall
+failed/negative charges preserved. Root owns all releasedfiles; no remaining review/modelGO. Next existingliveepisodeTRAINpath
+withownedcausalhistory sessions, separateprospectiveprotocol, no furtherEprobe.
+
+
+## Current — matched public history closure, 2026-10-17
+
+Dirty09ff811 shared/nonoverlap. Root owns collector/CLI/newhistoryadapter and
+integrationtests/canonicaldocs/stage. bounded_factory owned only coreencoder+
+coretests, RELEASED.9266977/60read+ASTseconds, noexecution. Reviewer owns only
+stageREVIEW; SOURCE/GO/narrowACTUAL accepted; FINALDOCS accepted, reviewer RELEASED1.5949671/60readseconds,
+2charged/58unused CLOSED; runtime0. No worker imports/tests/models/physics/network/Git/subagents.
+Root focused39.685075/120seconds (40charged/80unused CLOSED), static gates
+34.937697s plus savedreadback/closure conservatively50/60charged,10unused CLOSED;
+previews2/15charged (13unused CLOSED). No remaining model/test allowance.
+
+One native qualification COMPLETE/SPENT10.3686internal/11.4369supervisor,
+actual52476/launcher47892both0/terminal;317607936Bpeak.32parameterupdates256rows
+(BP8SGD/PC24manual),48PCbatchlatentiterations,120scores960rows,8teacher64physics.
+No retries/future GO; old failed qualifiers/charges preserved. All native work
+charged, no worker allowance expands sharedcaps. Root owns released files and
+canonical docs. Next: existing-helper matched E16 capacity comparison, separate
+prospective protocol, no final/dose/seedselection or new orchestration.
+
+
+## Current — quota fresh-task probe integration, 2026-10-17
+
+Dirty09ff811 shared/nonoverlap. Root owns existing reward runner/CLI/new fixed
+diagnostic adapter+integration tests/canonical docs/stage. bounded_factory owned
+only new recurrent_probe_source.py and its unit tests, RELEASED1.5501331/60read
+seconds/runtime0. Reviewer shift_feedback_review owns only stageREVIEW.md,
+60read/stdlibseconds/runtime0; SOURCE/GO/narrowACTUAL/FINALDOCS accepted.
+Reviewer RELEASED4.1791114/60read+closure seconds,5charged/55unused CLOSED.
+No additional agent/model jobs. Root tests50.9496965/240s (51charged/189unused
+CLOSED), static/saved-readback/closing conservatively59/60charged (1CLOSED),
+previews3/15charged (12CLOSED). Unit9SGD72rows within20/160allowance, remaining
+11SGD88rows CLOSED. Worker allowances never expand shared caps.
+
+One separately reviewed native diagnostic COMPLETE/SPENT:180s internal cap,
+actual46524/launcher28576both0,23.1046native/24.2873supervisor seconds,
+319852544Bpeak; both processes terminal. Actual238SGD1888TRAINrows/112predict/
+2112unroll1776physics224episodes; no final/live/replay. No retry, unused allowance
+or futureGO. All previous240s qualifier failures and permanent charges preserved.
+Next work is matched four-method public observation history, not another probe,
+checkpoint, guard or audit increment. Root retains integration/canonical docs.
+
+## Current — R4.3 exact comparison performance repair, 2026-10-17
+
+Dirty09ff811/shared/nonoverlap. Root owns existingtorch_feature_rehearsal_pilot
+comparator/stage/nativeharness/canonicaldocs; bounded_factory RELEASED only new
+tests/test_exact_native_state_comparison.py (1.4040566read/ASTseconds, noexecution).
+Reviewer shift_feedback_review owns only newstageREVIEW,60read/stdlibseconds,
+zero repoimports/tests/models/native/network/subagents. Root240focused/60static/
+15previews/15saved-record microprofile, serialCPU1/GPU0; smallCPU/meta tensors only
+in rootunits. One fixed integrationdirection, no independentmodeljobs. Prepared
+future NEWsource qualifier uses SAMEscientificprotocol/global240s/external300+10/
+768MiBRSS/8MiBstdout32MiBstage onlyafterfinalgates+freshSOURCE/literalGO. Original
+prefixqualifier remainsFAILED/SPENT and all398charges/partialfalse status preserved.
+
+Current closure: 107 equality and354 combined PASS; scoped4path statics and
+descriptor/actualCLI parity accepted. One reviewed new-source native attempt is
+FAILED/SPENT at original240s, frozen40complete/reward12complete+1failed+27unrun.
+SOURCE/GO, narrow saved-data ACTUAL and FINALDOCS accepted. No further
+modelwork or inherited GO. Test author RELEASED1.4040566/60readseconds/runtime0;
+reviewer has used2.9328283/60readseconds/runtime0 before final docs. Root focused
+141.4710836/240s (142charged/98unused CLOSED); static/saved-readback/closing work
+conservatively40/60charged (20unused CLOSED); previews4/15charged (11CLOSED),
+microprofile3/15charged (12CLOSED). All native work permanently charged; both
+owned49636/35104processes terminal. Reviewer-only remaining final read allowance
+cannot authorize another native run. Next deliverable is an existing E16 probe
+integration for the quota learner, not another qualifier or audit chain.
+Reviewer ownership RELEASED3.3112832/60readseconds,4charged/56unused CLOSED;
+worker runtime0. All current writers released, root owns the final tree.
+
+## Current — R4.3 acquired TRAIN prefix / quota integration, 2026-10-17
+
+Dirty09ff811/shared/nonoverlap. Root owns new acquiredquotaadapter, originalreward
+recipe/CLI/canonicaldocs/stage; helperauthor bounded_factory RELEASED owns only
+physicalevaluator+oldtests (≈1.801readseconds); testsauthor shift_feedback_tests
+RELEASED owns only newprefixintegrationtest (≈4.23readseconds). Root now owns
+released files. Reviewer shift_feedback_review owns only stageREVIEW,60aggregate
+read/stdlib/runtime0. Root initially180focused/60static/15preview, focused raised
+PROSPECTIVELY420s after measured long full192-prefixfake execution, before180
+exhaustion. Exact rationale/attempts inRESULTS; no scientific budget expansion.
+One fixed integration direction, no independent model jobs byworkers. Native
+allowance0 until separate frozenprotocol/preparedharness/finalgates/literalGO;
+futureproposal300+10s actualPID/RSS768MiB/stdout8MiB/stage32MiB. Oldscratchnegative
+and failedsupervisor0/23 preserved; newprefix condition not their retry.
+
+Acquired-prefix closure: source/test writers released,217combined+217closing
+PASS/sevenpathstatics/descriptorparity/PSparse/scopeddiff accepted. SOURCE/literalGO
+and narrowACTUAL/FINALDOCS accepted; reviewer RELEASED6.6677760s/7charged53unusedCLOSED. Native FAILED/SPENT at original240s
+readout deadline,398nativeupdates/192collectionsteps; frozen39finalcomplete+1failed,
+reward40unrun/comparisonnull. Originalfullprefixstate match and paidwork retained;
+no retry. Root native handle68518 terminal; actual42536/launcher47572 exited2.
+Engineering411.217/420focused,46/60static,3/15previewscharged; allunusedCLOSED; ≤8sadditional
+saved-record comparator profile3.6169792s/no models/SGD/predictions/environment.
+Next comparatorfastpath implementation preserves all exacttype/mutation guards;
+no nativeGO carries forward. Full repository goalACTIVE.
+
+## Current — R4.3 repeated-instance reward control, 2026-10-17
+
+Dirty09ff811 shared/nonoverlap/no subdelegation. Root newcomparisonadapter/
+existingCLI/stage/canonicaldocs; R43-REPEATED-PROJECTION-20261017 bounded_factory
+RELEASED only newapp/key_door_reward_comparison.py+its test (6.0readseconds);
+R43-REPEATED-DISPATCH-TESTS-20261017 shift_feedback_tests RELEASED only newadaptertest (2.10readseconds);
+R43-REPEATED-REVIEW-20261017 shift_feedback_review only stageREVIEW. Eachworker
+60read/stdlibseconds/runtime0. Root90focused/60statics/15previews; one400+10s
+fourcellcomparison onlyaftergates+literalGO/768MiB/8MiBstdout32MiBstage. Fixed
+9/14,18/5reward/frozenmatrix, own96stepseach; failed0/23descriptiveexcluded/not
+loaded/notretried. [Protocol](../artifacts/runs/r43-repeated-reward-control-20261017/PROTOCOL.md).
+
+Current closure: source/test writers released; root final129PASS and sixpath
+statics/parity/CLI/PSparse/scopeddiff pass. Focused12.0585697/90s, statics48/60s,
+previews6/15s conservatively charged; unused allowances close at session end.
+Reviewer SOURCE/literalGO/ACTUAL/FINALDOCS accepted and RELEASED;5.3328880s read,6charged/54unusedCLOSED. Sole fourcellnative
+complete/SPENT/17SGD192TRAINrows384steps160freshlive; all160timeout/0success/
+0return, allcapsheld and actual/launcherexit0. Historicalfailed0/23unchanged.
+Rootnative job terminal; no inherited furthermodelGO. FullgoalACTIVE.
+
+## Current — R4.3 frozen recurrent nonlearning control, 2026-10-17
+
+Dirty09ff811 shared/nonoverlap/no subdelegation. Root rewardadapter/CLI/new
+frozenintegrationtests/canonicaldocs/nativequalifier; R43-FROZEN-EVAL-20261017
+bounded_factory RELEASED owns only new key_door_physical_evaluation.py/test.
+Worker60read/stdlibseconds/runtime0; root120focused/60statics/15previews;
+one prospective0SGD/96collectionstep catalogue0/23 qualifier onlyaftergates+GO,
+actualPIDsupervisor120+10s/768MiB/8MiBstdout/32MiBstage. No comparison or trained
+baseline claim. [Contract/evidence](../artifacts/runs/r43-frozen-recurrent-control-20261017/RESULTS.md).
+
+Closure: helperauthor RELEASED7.1readseconds+separate repaired-source1.3readseconds,
+testauthor R43-FROZEN-INTEGRATION-20261017 RELEASED~4.76readseconds; reviewer
+R43-FROZEN-REVIEW-20261017 owns only stageREVIEW, SOURCE/literalGO/narrowACTUAL/
+futurehandlecandidate and FINALDOCS accepted; reviewer RELEASED10.1150178/60readseconds,
+11charged/49unusedCLOSED, runtime0. Firstfocused120capFAILED,
+actual128.1531592s/incomplete/8.153s manualoverrun; preserved. Newprospective180s
+finalgate428PASS plus61closingPASS, aggregate133.924458s. Sevenpathstatics/
+PSparse/4protocolparities/2CLIpreviews pass. Rootstatic33/60s,previews3/15s.
+Sole nativeSPENT/qualificationFAILEDunknownlauncherexit; savedmodelcomplete0SGD/
+96physics10collections/40score40live0success. Allcapsheld; no retry. Separate
+futureearlylauncherhandle repair reviewed/stdlibexit0and2checked, harmless≤5/10s.
+Originalas-runartifactspreserved. Rootalljobs terminal; next existingCLI bounded
+repeated-instance comparison dispatch, protocol/admission frozenbeforejobs.
+
+## Current — R4.3 explicit environment instances, 2026-10-17
+
+Dirty09ff811 shared checkout, explicit nonoverlap, no subdelegation. Root owns
+existing reward adapter/CLI/new seeded integration tests and canonical docs;
+R43-SEEDS-CORE-20261017 bounded_factory RELEASED owns only new core
+key_door_instances.py/test_key_door_instances.py, 60s read/stdlib, no runtime.
+Contract finite24 deterministic instances, exact distinct seed pair, A/B/C same
+physical instance/B controls remapped, D final-only separate instance. Root limits
+120s focused/60s statics/15s previews; native zero, prior quota native spent.
+[Acceptance and evidence](../artifacts/runs/r43-environment-instances-20261017/RESULTS.md).
+
+Closure: coreauthor RELEASED1.4/60readseconds, testauthor
+R43-SEEDS-INTEGRATION-20261017 RELEASED3.90/60readseconds owns only new
+test_seeded_quota_pilot.py. Root owns released files for formatting/typing/fixture
+corrections. Final363PASS, scoped5pathstatics/threehistoricalprotocolequalities/
+twoCLIpreviews accepted; all testjobs terminal. Reviewer
+R43-SEEDS-REVIEW-20261017 owns only stageREVIEW, SOURCE/scopedACTUAL accepted,
+FINALDOCS accepted/RELEASED4.3577344/60readseconds,5charged/55unusedCLOSED.
+Root focused77.92143/120s, statics32/60s chargedconservatively,
+previews5/15s, native0. No carriedforward GO; fullR4.3/fullgoalOPEN. Next existing
+quota recipe frozen recurrent own-policy control before a frozen small study.
+
+## Current — R2.8 independent-data family accepted, 2026-10-17
+
+Dirty09ff811 sharedcheckout/nonoverlap/no subdelegation. Root existingadapter/
+newstream_removal_confirmation/CLI/stage/integration/canonicaldocs; bounded_factory
+ONLYbuild_stream+test_stream_data_rngs (RELEASED,.6/60readseconds,runtime0);
+shift_feedback_tests ONLYtest_removal_confirmation (RELEASED,.75/60readseconds,
+runtime0); reviewer ONLYstageREVIEW (SOURCE/literalGO/ACTUAL/FINALDOCS accepted; RELEASED,11reads/3.0401723of60s,charged4/unused56CLOSED). Rootaddsactualprofile-refusal regression afterreview; no nativebefore
+safety/storage repairs.276PASS/scopedstatics/14previews13legacyexact, sole192SGD/
+1200rowcaseSPENT; oldevidence/negativeoutcomes preserved. Fullcommands/costs/
+failures/ownershiplimits in [RESULTS](../artifacts/runs/r28-removal-confirmation-20261017/RESULTS.md),
+[review](../artifacts/runs/r28-removal-confirmation-20261017/REVIEW.md).
+OriginalR2.8acceptance complete/unresolvedbundle; broaderfullgoalACTIVE. NextR4.7
+existingsharedinspector coherentstreamcomparison, ZEROtraining/newstudy.
+
+## Current — R2.8 replay removal, 2026-10-17
+
+Shared dirty master09ff811, disjoint ownership/no subdelegation. Root owns
+adapter/CLI/stage integration and canonical docs. shift_feedback_tests owns only
+new tests/test_no_replay_pilot.py (RELEASED, ~.95/60 read seconds, runtime0);
+bounded_factory owns only stage REUSE.md (RELEASED, ~4/60 read seconds, runtime0).
+shift_feedback_review owns only stage REVIEW.md (independent SOURCE/scoped ACTUAL
+and FINALDOCS accepted; RELEASED,10reads/2.7055727of60s, charged3/unused57CLOSED). All workers have 60 aggregate read/stdlib seconds,
+no tests/model/browser work. Root90focused/60statics/15CLIpreview seconds plus
+prospective5s read-only stdlib comparison; native0. Current totals/failed attempts
+and exact outcomes in [RESULTS](../artifacts/runs/r28-no-replay-control-20261017/RESULTS.md),
+[review disposition](../artifacts/runs/r28-no-replay-control-20261017/REVIEW.md).
+No Git/index/network/dependency or global environment mutations. Compatible
+native evidence reused; readback is retrospective, no confirmation or CPC win.
+
+## Current — saved inversion C assay accepted, 2026-10-17
+
+Root owns stage helper/preparation/nativeharness/protocol/integration/docs/plans;
+no production change. Testworker ONLYtests/test_saved_sensor_states.py RELEASED,
+~.65of60readseconds, no runtime/constructor/model/tests/browser. Reviewer ONLY
+stageREVIEW; SOURCE+literalGO+ACTUAL+FINALDOCS accepted and reviewer RELEASED,
+13read/stdlibcommands3.2076991/60s, charge4/unused56CLOSED, runtime0. Dirty09ff811
+sharedcheckout, nonoverlap/no subdelegation. New55guardedchecks use onlynative
+constructor/snapshot/fork/restore; forbidsolver/train/predict/health/SVD calls.
+Rootfocused+offline3.7682255/90s, statics18.2587621/60beforeclosingdiff,
+inputprep.5091665/10inclfirstimportfailure. Solefrozen64Cupdates512rows SPENT,
+parent1.0301801/global30s, benchmarkneverretrained, originalsource+inputsunchanged.
+[Commands/costs/failures](../artifacts/runs/r21-saved-inversion-probes-20261017/RESULTS.md),
+[independent review](../artifacts/runs/r21-saved-inversion-probes-20261017/REVIEW.md).
+Next existingrehearsalrecipe explicitno-replaycontrol forR2.8; reusecompatible
+2inputacceptedbaselines, do notmatch16inputsensorassay acrossdifferentrecipes.
+
+## Current — fixed contrast-inversion demo accepted, 2026-10-17
+
+R4.6 original bounded criteria now met; broader scientific claims remain open.
+Dirtymaster09ff811 sharedcheckout with explicit nonoverlap, no subdelegation.
+Root owns adapter/CLI/stage/native/integration/docs/canonicalplans. bounded_factory
+owns only sensor_stream.py/sensor_retention.py/newfixturetest, RELEASED/~.9of60
+readseconds/runtime0. shift_feedback_tests only newtest_contrast_sensor_demo.py,
+RELEASED/~.70of60readseconds/runtime0. Reviewer only stageREVIEW; SOURCE/literalGO/
+ACTUAL+FINALDOCS accepted; reviewer RELEASED15read/stdlibcommands4.1936671/60s,
+charged5/unused55CLOSED, runtime0. All source/tests completed, nativeSPENT once.
+Root focused+offline8.6470304of90s, statics26.2413749of60beforeclosingdiff,
+previews15.3080676of20; global30snative.9706334wholecommand, actual89SGD350rows.
+No workers ran native/test/browser. Full commands/failures/costs/nextaction:
+[RESULTS](../artifacts/runs/r46-contrast-inversion-20261017/RESULTS.md), independent
+[REVIEW](../artifacts/runs/r46-contrast-inversion-20261017/REVIEW.md).
+Next isolatedC assay using existing native restore/SensorLearnability;
+qualify observed4/8/12 fullsnapshots plus reconstructedzero-update control from
+capturedinitialparameters (fullstate0 was not saved). Freeze64probeupdates512rows, no benchmark
+retraining/checkpoint framework or favorable-case selection.
+
+## Current — stationary inspector compatibility, 2026-10-17
+
+Root owns existing router/projection/template, integration/browser/canonical docs.
+shift_feedback_tests owned only new tests/test_stationary_sensor_inspector.py,
+released after authoring, ~0.93/60 read seconds, zero model/test/browser work.
+shift_feedback_review owns only stage REVIEW.md, SOURCE+ACTUAL accepted after
+repairing its two findings; FINALDOCS accepted and reviewer RELEASED.
+Reviewer10read/stdlib commands3.1165661/60s, charged4/unused56CLOSED, runtime0. No subdelegation or
+write overlap. Root329final passes, scoped statics and7actualCLI builds;4viewed
+browser screenshots, no learner work. Browser closed; unused root budgets close
+at handoff. Independent review totals/disposition in
+[REVIEW](../artifacts/runs/r47-stationary-inspector-20261017/REVIEW.md), exact commands
+and failures in [RESULTS](../artifacts/runs/r47-stationary-inspector-20261017/RESULTS.md).
+Next explicit harder sensor condition in existing runner, not more checkpoint
+infrastructure; full research/release goal remains active.
+
+## Current — stationary sensor monitoring accepted, 2026-10-17
+
+Rootownsadapter/CLI/integration/native/canonicalplans/docs. bounded_factoryONLY
+sensor_stream.py/sensor_monitoring.py/newunitmodule RELEASED/~1of60readseconds,
+runtime0. shift_feedback_testsONLYnewintegrationmodule55cases RELEASED/.68of60
+readseconds/runtime0. ReviewerONLYstageREVIEW SOURCE+literalGO+ACTUAL accepted,
+FINALDOCS accepted and reviewer RELEASED13read/stdlibcommands5.2645766/60s,
+charge6/unused54CLOSED/no model/test/browser. RootunusedCLOSED/nativeSPENT/ownjobs0;
+closingreceipt2,868,967Bbeforeitself<32MiB. No subdelegation/overlappingwrites.
+[Evidence/commands/failures/nextaction](../artifacts/runs/r46-stationary-sensor-20261017/RESULTS.md).
+
+274PASS/noSGDintests,4.581164of90focusedseconds; final9pathstaticsallzero,
+16.4360821of60s beforefinaldiff inclfailures.35previews/all28oldbyteexact,
+11.2843667of15s. ONE7casenativeSPENT81SGD342rows/84prearrivalF336/exit0; all0/8
+alarms/absentphaserecoverynotapplicable, no scientificbenefit claim. Fullparents/
+release/goalOPEN. NextEXISTINGinspectorstationaryadmission/phases, ZEROnewtraining.
+
+## Current — R1.5/b comparison accepted, 2026-10-17
+
+Root owns stagecomparison/native/integration/canonicalplans/docs, no production
+defaults changed. shift_feedback_tests ONLYnewtest_engineering_preset_comparison
+RELEASED8authoredcases+1rootregression/~.65of60readseconds/runtime0. Reviewer
+ONLYstageREVIEW, SOURCE+literalGO+ACTUAL accepted; originalR1.5/b criteria met,
+no adaptivewinrequired. FINALDOCS accepted/reviewer RELEASED13read/metriccommands
+3.4432898of60seconds, charge4/unused56CLOSED/no model/test/browser. Closingreceipt
+1,169,113Bbeforeitself<32MiB; rootunusedengineeringCLOSED/ownjobs0.
+No subdelegation/overlappingwrites.
+[Exact evidence and next action](../artifacts/runs/r15-engineering-preset-comparison-20261017/RESULTS.md).
+
+89fakechecks+1exactnativefixture deselected, focused4.0829993/90seconds;
+Ruff/format/bothtypes0/static24.6539018of60includingfinaldiff0, previews0of10.
+ONE native6casesSPENT/88SGD1408rows/12F1536/exit0/allwithinoriginal10ms/11ms;
+pairedBCEintervalcrosses0, no quality/speed/CPCclaim. Nativeallowanceclosed,
+fullgoal ACTIVE and other scientific/release parents OPEN. Nextstationarysensor
+mode through existingfixture/monitor/CLI, not more timing/audit/probehorizon.
+
+## Current — R1.5b bounded recurring stream accepted, 2026-10-17
+
+Root integration owner: new coupled_inference_stream adapter, existing bounded
+CLI, combined checks, ONE native qualification, canonical plans/docs. Factory
+worker bounded_factory ONLY shared factory+new59factory tests RELEASED, about2/
+60readseconds/runtime0. Worker shift_feedback_tests ONLYnew13stream tests
+RELEASED (11authored+2root reviewregressions), about.6/60readseconds/runtime0.
+Independent shift_feedback_review ONLYstageREVIEW, SOURCE+literalGO+ACTUAL
+accepted; FINALDOCS accepted and reviewer RELEASED.16read/metric commands
+4.0099624/60seconds, charge5/unused55CLOSED, no model/test/browser execution.
+No subdelegation or overlapping production writes.
+[Evidence/commands/failures/next action](../artifacts/runs/r15-bounded-stream-20261017/RESULTS.md).
+
+Final125PASS; scoped statics/both typeplatforms pass. Focused6.1115906/90seconds,
+statics28.4596261/60including failures/finaldiff, preview.4888347/10. New native
+SPENT54updates432rows/24finalF1536rows/exit0, independentlyaccepted parameter/
+diagnostic/probability PC-neutral parity. No speed/matchedcompute/CPCbenefit.
+FullR1.5b/scientific/release/full goal OPEN; unusedengineering CLOSED/ownjobs0.
+
+Plan correction: timed comparison app/CLI alreadyexists; factorybinding was not
+its missingprerequisite. Bothold10ms/30ms failedqualifications preserved. Next
+implementation uses existing run_timed_inference_case for a distinct separately
+frozen engineeringpreset qualification, fakeclock/learner checks first, review
+before nativework; no newpublicroute, runner, toleranceextension orfinaltuning.
+
+## Current — R2.1 learnability after replay accepted, 2026-10-17
+
+- [x] Scoped existing shift/fresh-probe integration: recurring-only C probes at
+  0/6/12/18, four original setup sessions, separate template, partial paid costs
+  and explicit PC840B/neutral968B storage validation.229focused checks, scoped
+  statics, oldfive CLI descriptions exact; corrected SOURCE/offline ACTUAL accepted.
+  [Evidence and all16 curves](../artifacts/runs/r21-incident-learnability-20261017/RESULTS.md).
+- [ ] Original frozen new native qualification INCOMPLETE/SPENT/exit1 due incorrect
+  full-snapshot equality gate. All432updates3232rows and full new tensors saved;
+  corrected-source offline30checks pass without retraining. Raw failure unchanged.
+  Earlier missing-tensor qualification remains incomplete too; no capture rerun.
+- [ ] Full R2.1/R2.7/R2.8/R4.2/R4.6/R4.7/release/full goal stay OPEN.
+
+All benchmark/arrived records exact retained replay baseline; full PC-neutral
+22stationary/86recurring parameter+diagnostic traces exact. BP C gains positive;
+PC/neutral/activeCPC warmthree endpoints negative. Active1/dead0/saturated0 does
+not explain negative learning. No CPC/equalcompute/causal plasticity-loss claim.
+Separate accidental legacy8updates64rows violated zero-native engineering scope,
+never relabeled pass; this increment totals440updates3296rows including it.
+
+Next R1.5b: existing bounded-inference kernel/adapter is implemented, but shared
+coupled_attribution_pilot.build_learner binds fixed4steps only. Add an optional
+owned CoupledInferencePolicy binding (None preserves old controls), same policy
+for PC/neutral/active, with focused ownership/runner tests. Why: matched-time/work
+cost remains a concrete prerequisite to R2.8 bundle selection; more seeds/probe
+horizons or renewal tuning do not resolve it. Whole stopping/validation/guard/
+orchestration overhead must count before any separately frozen comparison.
+
+Root production/CLI/integration/native/docs ownership released at closing.
+Prepared-budget worker released learnability_pilot.py +new17tests (~1.32/60readsec,
+runtime0); test worker released integration tests (~1.4/60readsec/runtime0).
+Reviewer ONLYstageREVIEW RELEASED aftercorrectedSOURCE/offlineACTUAL/FINALDOCS;
+27read/stdlibcommands6.3534542/60seconds,charged7/unused53CLOSED/runtime0.
+Root pytest21.5372885+offline.5205902=22.0578787/120focusedseconds,
+statics36.9472589/60, previews2.9225463/10. NativeONE SPENT432/3232 +unplanned8/64
+legacy test. Original qualificationexit1 staysfailed, offlinecriteria acceptance
+separate. No running jobs, no retries/futureGO; unused engineering CLOSED.
+
+## R2.7 shift incident feedback — October17, scoped implementation DONE
+
+Root owns/released two production files, combined integration and docs. Worker
+shift_feedback_tests ONLY new tests/test_shift_incident_replay.py RELEASED;
+41 new cases, read commands about2.2/60seconds, runtime/native0. Reviewer ONLY
+stage REVIEW.md, source/literalGO/saved-scalar ACTUAL accepted; full tensor
+qualification NOT accepted; FINALDOCS accepted and reviewer RELEASED.
+Reviewer read/stdlib4.5511555/60seconds, charged5/unused55CLOSED; runtime0.
+No active model jobs.
+[Exact commands, budgets, failure and next action](../artifacts/runs/r27-shift-incident-feedback-20261017/RESULTS.md).
+386 unique checks pass; engineering focused10.1383596/90, statics27.9978652/60,
+previews2.3550583/8, dummy supervisor.2500279/10seconds. All unused root/worker
+engineering CLOSED. ONE native invocation SPENT176updates1184rows/all8cases
+finished, post-run tensor export failed exit1. No retry/further GO. Stronger
+native trace criterion preserved unchecked. Full goal ACTIVE, scientific/release
+parents OPEN. Next existing isolated R2.1 probe composition on recurring replay
+snapshots, no new framework or repeated capture experiment.
+
+## R2.7/R4.6 incident replay — October17, DONE (scoped runtime)
+
+Frozen stage r27-incident-replay-20261017/SCOPE.md; shared dirty09ff811/deps kept.
+Root helper/stream/sensor/CLI/integrationtests/native/docs. incident_gate ONLYnewcore+
+newtest RELEASED.4628543of60readsec/runtime0/rootowns. Reviewer ONLYstageREVIEW
+SOURCE+literalGO+ACTUAL+FINALDOCS accepted, RELEASED3.6839174read/stdlibsec/
+charge4of60/unused56CLOSED/native0. AllunusedengineeringCLOSED/noactiveownedwriters
+orjobs.437uniquePASS final8.7678205s,
+initial436PASS8.8656638 =>17.6334843of90; statics16.2664862of60 incl2mypyerrors
+perplatform; final5PASS8paths.28previews0/9.8393594of15/26oldexact. ONE SPENT native
+16SGD52rows/32gradient104/38prediction880/allattemptreturn, child0/no furtherGO.
+Parent.5727295s measureslauncher44748 RSS5,447,680 only; actualtrainer38676 wrapper
+49,950,720B/195samples/pilot49,926,144B/216. Actualnative capsguards pass; external
+descendantpreemption/process-treeRSS untested, RESOURCE_NOTE preserves limitation.
+Skip4/admit8fromonset6obs7/skip12,4permanentcharges,retention544numericB,sourceactor
+unchanged. Full scientificparentsOPEN; nextexisting stationary/recurring shiftpilot
+composition withfakelearner tests beforeseparatefixedprotocol/actualPIDsupervision.
+
+## R4.7 saved sensor inspector — October17, DONE (scoped slice)
+
+Stage r47-sensor-inspector-20261017/SCOPE.md; dirtyshared09ff811/deps preserved.
+Root dispatcher/file/CLI/template/filetests/docs; sensor_inspector_projection
+ONLYnewapp+newtest RELEASED~1.2of60readsec/runtime0/rootowns. Reviewer ONLYstageREVIEW
+SOURCE+ACTUAL+FINALDOCS accepted, RELEASED measured4.5839684read/stdlibsec,
+charge5of60/unused55CLOSED/modeltestbrowsernative0. AllunusedengineeringCLOSED;
+noactiveownedwriters/jobs. Root277uniquePASS final18.0337505s,
+initial273PASS4FAIL18.4241476 =>36.4578981of90. Statics21.0789310of60 incl initial
+12mypyerrors/platform; finalall5PASS. Six CLIbuilds twiceall0/sourcebytesunchanged+
+default/syntheticpartial adapter builds3.7186481of30, all8MiB/16MiBcaps. Browser
+108.248of300seconds/11of12screenshots/oneEdge/contextclosed; originalnarrowclip
+kept, final390all12ticks/nooverflow. Import/defaultbrowserpath failures preserved;
+no install/nativework. Sensor334/1860+oldfailedwork/MiniGrid1426/16230 unchanged.
+Full parentsOPEN; nextboundedarrivedincident input to existing periodicrehearsal,
+explicitnext-boundarydelay/defaultpreserved; separatelyfreeze comparativeprotocol.
+
+## R4.6 sensor heldout — October17, DONE (scoped readout)
+
+Frozen r46-sensor-heldout-20261017/SCOPE.md; shared dirty09ff811/uncommitted deps.
+Root owns integrated source/tests/native/docs. sensor_retention core/test RELEASED
+.6546658/60 read seconds, runtime0; root now owns. sensor_heldout_review owns only
+stage REVIEW.md RELEASED; SOURCE/literalGO/ACTUAL/finaldocs accepted. Reviewer
+measured5.774read/purestdlibsec, charge6of60/unused54CLOSED; model/test/native0.
+All unused engineering CLOSED; no active owned writers/jobs.
+375 unique focused passes; two runs18.4148447/90 seconds. Ten statics commands all
+PASS16.2147162/60; 26 previews all0/8.9828948/15, 20 old descriptors exact.
+SOURCE GO then six fixed single-case qualifications, all0/SPENT/no retry/furtherGO;
+137 updates810rows/292predictionF7328rows, original30body45parent/256MiB/128KiB
+perfile/CPU1GPU0 pass. Full scientific parents OPEN. No further model work.
+Next shared inspector sensor projection/template using saved evidence.
+
+## R2.1/R4.6 sensor learnability — October17, DONE (scoped observer)
+
+Frozen stage r21-sensor-learnability-20261017/SCOPE.md; dirtyshared09ff811 and
+required uncommitted dependencies. Root adapter/CLI/newintegrationtest/native/docs;
+sensor_probe ONLYnew sensor_learnability.py+test_sensor_learnability.py RELEASED
+~2.1of60readsec/runtime0. sensor_probe_review ONLYstageREVIEW SOURCE+literalGO/
+ACTUAL/finaldocs accepted, RELEASED6of60readsec/runtime0/unused54CLOSED. All unused
+engineering CLOSED/no active owned writers/jobs. Root193PASS3.7417151of90; statics
+15.8250499of60 incl initial11mypyerrors/platform in tests/harness;20previews0/
+6.5139663of15/all12old descriptors exact. SOURCEGO thenONE integrated case per
+BP/PC/neutral/gated child0/SPENT/no furtherGO, each28updates176rows/30body45parent/
+256MiB/128KiB perfile/CPU1GPU0 pass. All benchmark rows/receipts/monitor unchanged;
+16positiveBCEgains but ALLcoldaccuracydeclines/noCPCbenefit. No baseline-only rerun/
+final/sweep/tuning. Next existing finish-heldout readout; full scientific parents OPEN.
+
+## R4.6 existing sensor methods — October17, DONE (scoped functionality)
+
+Source R4.6; stage r46-sensor-methods-20261017/SCOPE.md. Shared dirty09ff811
+requires uncommitted dependencies; no Git/env/dependency mutations. Root owns
+adapter/CLI/newintegrationtest/native/docs. sensor_methods ONLYnew
+sensor_learners.py+test_sensor_learners.py RELEASED~1.52of60readsec/runtime0;
+rootnowowns. sensor_methods_review ONLYstageREVIEW SOURCE+literalGO/ACTUAL/finaldocs
+accepted RELEASED6of60readsec/runtime0/unused54CLOSED. AllunusedengineeringCLOSED/
+noactiveownedwriters/jobs. Root final150PASS2.7887524 +initial147PASS3FAIL2.9374609
+=5.7262133of90; statics10commandPASS15.9221616of60;12previewsPASS3.3457323of15,
+sixoldBPdescriptors exactprior. Corrected authoredfailureoracle5completedwake/
+6observedattempts, originalfailureartifact kept;8paidforecasts/5scores/3pending.
+SOURCEGO thenONE pc/neutral/gated case eachSPENT/child0/no furtherGO. Each12SGD48/
+72energy288/12initializer48/12diag48,CPU1GPU0/30body45parent/256MiB/128KiB pass.
+Neutralfull12parameter+energytrajectoryexactPC;allaccuracy1/no_deficit,activeBCE
+slightlyhigher/noCPCclaim. Full scientific parents OPEN. Nextexistingisolatedprobe/
+healthdiagnostics on sensor fullsnapshots; no newnative/probeallowance yet.
+
+## R4.6 arrived-only sensor replay — October17
+
+Scope artifacts/runs/r46-sensor-replay-20261017/SCOPE.md; shared dirty09ff811,
+requireduncommitteddependencies/noGit-env-dependency mutations. Root owns existing
+adapter/CLI/native/docs; sensor_replay_tests onlynewtest RELEASED~2.4of60readsec/
+runtime0, nowrootowns. sensor_replay_review ONLYstageREVIEW SOURCE+literalGO/ACTUAL/
+finaldocsaccepted RELEASED6of60readsec/runtime0/unused54CLOSED; rootcanonicalplans/
+integration. AllunusedengineeringCLOSED/noactiveownedwriters/jobs.85uniquePASS
+2.2360131s +initial84PASS1FAIL3.0592871=5.2953002of90; statics24.0241874of60 incl
+initialtypingfailures; previews6PASS1.5095387of15. Testwrongfield anddynamickwargs
+typing fixed without acceptance/dose changes. NativeONE SPENT22SGD58rows/
+56F164/44B116/.5224799parent/RSS43,610,112B/JSON50,106B; no furtherGO.
+Event2/4/4 individual-row arrived content selections/charges/attempts/returns/
+commits; retention544numericB. Allaccuracy1/no_deficit/lowerlastforecastBCE with
+extra exposure, no matchedbenefit/CPCclaim. FullR4.6/openparents preserved.
+Next existingPC/neutral/activeCPC ordinarysensor composition; no new framework.
+
+## R4.6 scheduled BP — October17
+
+Scope artifacts/runs/r46-scheduled-bp-20261017/SCOPE.md; shared dirty09ff811 with
+uncommitteddependencies. Rootownsadaptercomposition/CLI/pausefake/native/docs;
+scheduled_bp ONLYnewnativeadapter+test RELEASED1.1271264of60readsec/runtime0;
+scheduled_sensor_tests ONLYnewintegrationtest RELEASED~1.46of60/runtime0. Reviewer
+ONLYstageREVIEW SOURCE+GO/failedACTUAL/correctedSOURCE+GO/ACTUAL/finaldocsaccepted,
+RELEASED12of60readsec/runtime0/unused48CLOSED;allunusedengineeringCLOSED/noactive
+ownedwriters/jobs. Root96uniquePASS/fullfinal5.2770552s plus95prefix1.9256952
+anddiagnosis1FAIL1.1631356=8.365886of90;statics24.8391055of60 inclinitialtypingerrors;
+previews4PASS.7990202of15. OriginalnativeFAILED/SPENT0SGD/4F16rows/2chargedarrivals
+fromwrappernative-vs-versionedstateportmistake/primaryerroroverwritten. Corrected
+prospective successorSCOPE, samecaps/data/seed/dose; bufferstate/runtimeportfix only,
+actual3SGD48/18F144/6B96/12receipts9buffered3native/two-bufferresumeequal,
+.6852172parent/RSS42,852,352B/JSON36,650B. BothSPENT/noadditionalGO.
+Allaccuracy1.0/no_deficit/lastprearrival2stepsBCEhigher thanretainedonlineBP.
+Next existingStreamRehearsal/RecentStreamReplayPolicy ordinaryBP; fullR4.6/openparents
+preserved. No Git/env/dependency mutations or unrelated edits.
+
+## R4.6 prefix sensor monitoring — October17
+
+Scope artifacts/runs/r46-sensor-monitoring-20261017/SCOPE.md; dirtyshared09ff811
+requireduncommitteddependencies/noGit-env-dependency mutations. Rootownshelperapp/
+adapter/CLI/integrationtests/native/docs; sensor_recovery onlycore+test RELEASED
+.6468715of60readsec/runtime0; sensor_monitor_tests onlynewtest RELEASED~1.76of60/
+runtime0. Reviewer ONLYstageREVIEW SOURCE+literalGO/ACTUAL/finaldocsaccepted,
+RELEASED6of60readsec/runtime0/unused54CLOSED/twoharmlessguessedADRpathreadfailures.
+AllunusedengineeringCLOSED/noactiveownedwriters/jobs. Root105PASS2.115903of90/statics5PASS9.0063891of60/
+previews2PASS.4078138of15, firstattempts. Paidforecast-before-monitor fix reviewed
+beforeexecution/regressionkeeps3paidrows/3wakes/5fakeforecasts/2monitorrows.
+OneSPENT12SGD48/24gradient96+12diag48=36F144/24B96/parent.4994921s/RSS43,352,064B/
+JSON35,893B; allpriorforecast+fullstreamexactparity/priorfileunchanged. Featurealarms
+5..8/return1of4=.25/no newonsets;bothphase no_deficit/nullrecoverylabels. No further
+nativeGO. Sensor24SGD96rows total/MiniGrid1426/16230 unchanged. FullR4.6 control/
+comparison/actualrecovery remainopen; nextarrived-only4batchscheduledfinetuning.
+
+## R4.6 sensor prearrival/BP vertical slice — October17
+
+Scope artifacts/runs/r46-sensor-prearrival-20261017/SCOPE.md. Shared dirty09ff811;
+required uncommitted dependencies, explicit nonoverlapping ownership: root
+adapter/CLI/native/docs; sensor_fixture ONLYcore/sensor_stream.py+test; prearrival_hook
+ONLYapp/coupled_attribution.py+test; reviewer ONLYstageREVIEW. BothwritersRELEASED
+~1.5/1.6459825of60readsec/runtime0/no subdelegation; rootintegrated/formatted.
+Reviewer SOURCE+literalGO/ACTUAL/finaldocsaccepted/RELEASED12of60readsec/runtime0;
+unused48closed/allunusedengineeringCLOSED/noactiveownedjobs/writers.
+Rootfocused90/statics60/previews15 TOTAL: final142uniquePASS4.0000674s
+acrosstwo invocations; statics23.3316684s inclmethodassignerrors thenfix/allPASS;
+preview.1460490s. Misreadreviewwindowfindingwithdrawn/add5authorityregressionspass.
+OneSPENT/no retry native12SGD48rowexposures/24gradient96rows+12diag48=36F144/24B96,
+parent.6850371s/RSS42,614,784B/JSON16,943B. Correctedmandatorycandidategradientcost
+beforeGO, no scientificdosechange. InitialA1.0/allobserved1.0/coldBunmeasured/
+no recoveryclaim.
+MiniGrid1426/16230unchanged/sensor12/48separate. No newnativeGO; fullR4.6/matched
+comparisons/recovery remainopen. Next calibratedprearrivalmetrics/stationaryprefix.
+
+## R2.1 history acquisition condition — negative measurement accepted, October17
+
+Stage r21-history-acquisition-20261017/SCOPE.md freezes one new condition and
+64SGD1152rows/max200F1288rows/64physics/75body45arm20diagnostic90parent/768MiB/
+CPU1GPU0/output8MiB. Root pilot/CLI/native/docs; author ONLY shared train arm,
+RELEASED.2191/60readsec/runtime0; tester ONLY two new history acquisition/train
+arm test modules; reviewer ONLY stage REVIEW. Workers runtime0/read60each.
+Root focused90/statics60TOTAL including failures, serial execution. New0/64
+condition preserves original failedfull5 and compares accepted rawpaired0/64;
+initial-law checks4F36rows precede anySGD. No newbaseline/trainer/final/probe work.
+Tester28+18cases RELEASED~1.714readsec/runtime0; root13loadercases. Combined181
+PASS21.7198248of90/scopedstatics28.8684079of60 inclinitial2typingerrors, previews
+1.1889025of15/0. SOURCE/ACTUAL/GO thenONE64SGD1152rows184F1272/64B1152/48physics/
+4env/20.1184683parent/RSS414232576B/output2436267B/terminal98420. NativeACTUAL
+acceptednegative:17/18actions/onegoal/jointfalse, CEgainlower.0467869thansimpler
+rawpaired/goal+returngainstied.17copies9832245B exact/SPENT/no furtherGO. Permanent
+training1426updates16230rows, syntheticseparate. All source/testwritersreleased/
+handles terminal; finaldocs accepted/reviewer RELEASED12/60readsec/runtime0/
+unused48closed/correctedharmlessschema-previewerror/no numerical failure;
+allunusedengineeringclosed. Next R4.6 feature-only SHADOW prearrival
+hook+label-preserving sensor fixture inexistingstream; BPqualificationfirst,
+scheduled-finetune/replay/fullscientificrequirements remainopen.
+
+## R2.1 paired public-history readout — native accepted, October17
+
+Stage r21-paired-history-readout-20261017/SCOPE.md; shared dirty09ff811 checkout.
+Root owns evaluator/native case/outputs/docs, tester ONLY new
+test_paired_history_evaluation.py, reviewer ONLY stage REVIEW.md. Worker60readsec/
+runtime0/no subdelegation; root focused60/statics60 total. One prospective native
+cold readout0SGD/twoTRAIN-A cues/max32physics after independent gates,60parent/
+45body/768MiB/CPU1GPU0/output2MiB. No comparative study/old baseline reconstruction.
+Retain raw148/defaultprotocol/TRAIN-A roles and originalbudget/state proofs.
+Tester37cases RELEASED~.7609/60readsec/runtime0. Statics5PASS8.4170823s; initial
+sixfilefakegate timedout60s/terminal51107/noXML/lostprefix preserved. Prospective
+engineering successor90s: new37+direct122PASS6.1503438s/0f/e/s; original broadgate
+still incomplete. SOURCE/qualificationACTUAL/GO then ONE native0SGD32physics/
+34F50rows/2freshsessions/5.2093981parent/RSS334188544B/670326Boutput. Bothcold
+timeouts/no goals preserved; native ACTUAL accepted component/costs only.
+12newcopies140769B+reusedreference7047945B exact/SPENT/no retry/furtherGO;
+MiniGrid training1362/15078unchanged. All source/testwriters released/handles
+terminal; finaldocs accepted/reviewer RELEASED10/60readsec/runtime0/unused50closed,
+one harmless missingfocused-direct.json read/no arithmetic failure; allunused
+engineeringclosed. Next explicit history condition at existing paired
+pilot/genericstream, small protocol frozen/reviewed before study execution.
+
+## R2.1 public-history control — native accepted, October17
+
+Contract: artifacts/runs/r21-public-history-control-20261017/SCOPE.md. Shared
+dirty09ff811 checkout, no Git/env/dependency mutations. Root owns recurrent
+policy/new history initializer/canonical docs; tester owns ONLY two new
+test_recurrent_public_history modules; reviewer owns ONLY stage REVIEW.md.
+Workers read60s each/runtime0/no subdelegation; tester32pure+1native RELEASED
+~1.2193readsec. Root focused223PASS3.5066435of60; statics final5PASS/sixpaths,
+aggregate14.7577009of60 incltyping/argv failures. Tenplaincopies129330B exact.
+SOURCE/qualificationACTUAL/GO beforeONE native1PASS3SGD54syntheticrows,
+6.1818929parent5.4708887body/RSS333733888B/CPU1GPU0/1854Boutputs; actual XML
+properties parsed/xunit2 warning retained. Native ACTUAL accepted/source-law-
+roles-delayedstream-restore/fork only. SPENT/no retry/furtherGO; MiniGrid1362/15078
+unchanged. Extra1184params/costs/no comparativeclaim. All source/testwriters
+released/owned handles terminal; final docs accepted/reviewer RELEASED10/60readsec/
+runtime0/unused50closed/no failed reads, allunusedengineeringclosed. Next existing evaluator's
+explicit paired public-history raw/live route; preserve raw protocol and roles.
+
+## R2.1 actual paired reserved-E experiment — ACTUAL accepted, October17
+
+Stage r21-paired-fresh-task-20261017/SCOPE. RootONLYstagecase/controllers/outputs/
+canonicaldocs; testerONLYtest_case.py23authored RELEASED1.0532/30readsec/runtime0;
+root3reviewregressions, reviewerONLYREVIEW40readsec/runtime0. No productionsource
+change/Git/install/network/subdelegation. Initialstatic12typeerrors and focused
+fixturecollectionerror retained; ordinaryfixes/finalstatics5PASS43.3251423of60/
+focused26PASS7.1170127of60 inclfailedattempts.34copies7617612B exactpre/post/no
+source-test-protocolwritersduringnative. LiteralGO beforeONEactual80SGD1440row
+case/4Eteachers36physics/handle63740terminal0/12.866985parent/laterRSS370802688.
+NativeACTUALindependent144decisions16scores8points/64receipts/costs/sourceflags
+accepted. WarmminusColdCEgainnegativebutwarmabsolutefitbetter; no plasticityloss/
+CPCclaim/jointskill. Permanent1362updates15078rows/syntheticseparate/SPENT/no retry/
+nextGO. Finaldocs accepted/reviewer RELEASED12/40readsec/runtime0/unused28closed;
+two harmless missing-path reads retained, allunusedengineeringclosed. Allwriters
+released/handles terminal. Next explicit
+296nativeadmission+coldzerohistoryinputcontrol forjointacquisition prerequisite,
+using existingencoder/pairedadapter/stream, notmoreprobe/capture/auditwork.
+
+## R2.1 MiniGrid paired probe observer — native accepted, October17
+
+Stage r21-minigrid-paired-probe-20261017/SCOPE.md, dirty09ff811/exclusivepaths.
+RootONLYminigrid_learnability.py/integration/controllers/docs/plans; testerONLY
+new44casepure+1nativefiles RELEASED~1.63/30readsec/runtime0; reviewerONLYREVIEW
+40readsec/runtime0. No worker execution/Git/install/network/subdelegation.
+Statics first4annotationerrors retained/fixed; final5PASS/16.879699of90aggregate.
+Focused92PASS30.1366301of90 incloriginal5streamfake/defaultcontrols;25copies
+397383Bexact/no source-test-protocolwritersduringnative. SOURCE/ACTUAL/GO before
+ONEcase9SGD162rows/5.2875552parent4.7109122body/RSS331640832/1PASS/CPU1GPU0.
+NativeACTUALaccepted ONLYscope/isolation/costs; MiniGrid1282/13638unchanged,
+synthetic9/162separate/SPENT/no retry/nextGO. All ownedhandles terminal/writers
+released; finaldocsaccepted/reviewerRELEASED~10/40readsec/runtime0/unused30closed,
+allunusedengineeringclosed. Next actual fixed0/64reserved-E study, not another
+capture/audit horizon. Freeze/review before any experiment.
+
+## R2.1 warm paired probe adapter — native accepted, October17
+
+Stage r21-paired-probe-adapter-20261017/SCOPE.md. Shared dirty09ff811 checkout,
+exclusive paths. AuthorONLY core/learner_ports +nativepaired +app/fresh_task_probe
+RELEASED1.7204/30readsec/runtime0; testerONLYnewvalidation/nativefiles30readsec/
+runtime0 RELEASED~2.6534/30read; reviewerONLYstageREVIEW40readsec/runtime0.
+RootONLYnewwarmadapter,
+typedfailuretests/integration/driver/docs/plans, statics90/focused90totalparent.
+Review finalparentforkproof gap fixed/regressionpasses. No worker executions,
+Git/index/install/network/dependency mutations. Final196focusedPASS2.767832of90/
+statics5PASS9.227032of90,22copies305011Bexactpre/post, SOURCE/ACTUAL/GO beforeunit:
+one45body60parent768MiBCPU1GPU0max12/200, declaredactual8/34 inclwarm/control/
+unpublishedfailure; actual4PASS4.9859265parent4.3971057body/RSS325767168/CPU1.
+NativeACTUALaccepted scopedbehavior/costs,7published31rows+1failed3rows,
+MiniGrid1282/13638 unchanged/synthetic8/34 separate/SPENT/no retry/nextGO.
+All source/testwritersreleased, ownedhandles terminal; finaldocsaccepted/reviewer
+RELEASED~10/40readsec/runtime0/unused30closed/allunusedengineeringclosed.
+No environment/MiniGrid/newscientificcase; next existingobserver pairedprobe
+integration with original reserved packets, not another capture/audit horizon.
+
+## R2.1 endpoint-first — negative native endpoints accepted, October17
+
+Stage r21-paired-endpoint-first-20261017/SCOPE.md. Root ONLYpilot/CLI/integration/
+docs/plans/driver; tester ONLYnew35casefile RELEASED/read~2.25of30/runtime0;
+reviewer ONLYREVIEW/read40/runtime0.55focusedPASS/96.4629of120incl earlier47pass,
+statics5PASS/18.2135of90/2CLIpreviews0; SOURCE/ACTUAL/literalGO beforeONEnewmodecase.
+23copies7440077Bexact/allsource-test-protocolwriters0 duringnative.
+Handle49352terminal1/64SGD1152rows/endpointvalidatedjointfalse+sameoriginalnative
+goals/returns+smallerCEgain; full5incomplete20s later32/48absent/outcomesnull.
+1539F1152B/99pred98physics/cumulative1282updates13638rows. NativeACTUAL accepted
+negativeendpoint+paidpartial ONLY, finaldocs accepted/reviewer RELEASED~14/40read/
+runtime0/unused26CLOSED/allwritersreleased. No furthernativeGO/retry;
+next explicitwarmprobe-role adapter for existingprobe runner, notcapture/audit.
+
+## R2.1 optimized native verification — executed INCOMPLETE, October17
+
+Scope artifacts/runs/r21-paired-acquisition-optimized-20261017/SCOPE.md. Rootowns
+driver/output/docs/plans; reviewer ONLYREVIEW.md/fresh25readseconds/runtime0.
+Reused accepted125tests/statics/descriptor; newindependentGO beforeONEcase.
+15unchanged+5newcopies20files7409111B exact, source/test/protocolwriters0.
+Handle51102terminal1/64SGD1152rows/initialparitytrue, raw0/16/32/live0/16 retained;
+20s cap duringlive32,25predictions24physics there. Total1457F1152B/89pred88physics,
+29.2641parent26.2295body/RSS376688640B. Originalprefixesexact/fulloutcomesnull.
+BothnativecasesFAILED/SPENT/no thirdGO; permanent1218updates12486rows. Freshnative
+ACTUAL accepts paidpartial ONLY; finaldocs accepted/reviewer RELEASED~7/25readsec/
+runtime0/unused18CLOSED. All writersreleased/unusedengineeringCLOSED.
+Next existingpilot endpoint-first order, not moreblind
+reconstructions/audit. No runtime workers/all owned handles terminal.
+
+## R2.1 paired readout cost — SOURCE/ACTUAL accepted, October17
+
+Scope artifacts/runs/r21-paired-readout-cost-20261017/SCOPE.md. Root wrapper+
+commands/docs/plans; author ONLYsharedsignature RELEASED.2055/20readsec/runtime0;
+tester ONLYnew67identitycasefile RELEASED.2567/30readsec/runtime0; reviewer ONLY
+stageREVIEW/40readsec/runtime0.125focusedPASS43.5092parent42.522JUnit, statics5PASS/
+17.6509of60incl2annotationfailure;2profiles41.0120of90seconds bothPASS. Preserved
+2099/3209/983/831checkcounts, fakeprofile27.3941→13.1098s; no native-fit claim.
+No model/SGD/environment/scientific work or newnativeGO; original20s caseSPENT,
+MiniGrid1154/11334unchanged. Finaldocs accepted/reviewer RELEASED~8/40readsec/
+runtime0; all owned handles terminal/writers released/unused engineering CLOSED.
+
+## R2.1 paired TRAIN integration — qualified; native full case failed, October17
+
+Scope/evidence artifacts/runs/r21-paired-acquisition-20261017/{SCOPE,RESULTS,REVIEW}.md.
+Shared dirtymaster09ff811/nonoverlapping paths. Author owned new schedule adapter
+and existing training/raw scorer, RELEASED23.8555/45statics2.0573/40read/runtime0.
+Tester owned test_paired_episode_stream.py, RELEASED33cases~2.65/35read/runtime0;
+root added one transition-bound case plus20route/CLI cases and owns live route,
+new pilot/CLI/docs/plans/integration. Final67focused PASS incl13legacy boundaries;
+statics all5PASS/aggregate33.4971of90s. Original120s broad timeout and2fixture
+diagnosis failures retained; separate narrowed90s allowance48.1119s used.
+Reviewer owns only REVIEW.md/45readsec/runtime0; SOURCE/qualificationACTUAL/GO
+and native failed-case ACTUAL accepted.17plaincopies7396015B exact pre/post.
+
+ONE native handle17011 terminal1:64SGD/128episodes/1152rows, initialparitytrue,
+raw0/16/32 and live0/16 retained. Original20sreadout cap stopped before live32;
+outcomesnull,48/64 absent.29.9783parent26.8422body/RSS377016320B,1414F1152B.
+All4completed live episodes timeout; acquisition inconclusive. Permanent MiniGrid
+1154updates11334rows; synthetic units separate. Case SPENT/no retry/newGO. Source/
+test/protocol writers0/all owned command handles terminal; finaldocs accepted,
+reviewer RELEASED~13/45readseconds/runtime0, unused engineering CLOSED.
+Next bounded noSGD/noenvironment readout profiling then measured
+redundancy removal with corruption controls. Full scientific/release goal OPEN.
+
+## R2.1 paired-episode learner — component native accepted, October17
+
+Scope artifacts/runs/r21-episode-batch-20261017/SCOPE.md; dirtymaster09ff811.
+Author newadapter only RELEASED5.35394/40statics/.92896read/runtime0; tester
+newnativefile9cases RELEASED~1.19/30read/runtime0. Root owns44pure/3extra native
+faultcases/docs/plans/driver. Statics15.4945/60incl2annotationfindings/finalall5
+pass; pure44pass.586JUnit1.19293parent. Sole native13262terminal0/12pass8.302JUnit/
+15.3424body16.895parent/RSS330211328B/CPU1;13physicalSGD75rows synthetic only,
+three0step faults add15F15B. Nativeunit SPENT/permanentMiniGrid1090/10182 unchanged.
+14plaincopies196178Bexact/writers0. Independent SOURCE/ACTUAL/GO/nativeACTUAL
+accepted/reviewer~6/40read/runtime0 beforefinaldocs. No extra model/nativeGO.
+Next explicit paired-type/count support in existing fixed-A TRAIN stream/scorer;
+preserve legacy9*update contracts. Fullscientific/releasegoal ACTIVE/incomplete.
+Finaldocs accepted/reviewer RELEASED~7/40readseconds/runtime0. All owned handles
+terminal/all ownership released/unusedengineering CLOSED. Scoped tracked
+diff-check passed excluding preserved historical EOF debt; no next native GO.
+
+## R2.1 isolated cue updates — native accepted, October16→17
+
+Previous goal turn PROGRESS. Stage artifacts/runs/r21-cue-updates-20261016/SCOPE.md;
+dirtymaster09ff811. Author owns new minigrid_cue_updates.py only40read40statics/
+runtime0, tester new componenttests30read/runtime0, reviewer stageREVIEW.md
+40read/runtime0. Root pilot/CLI/newroute tests/docs/plans;60statics/60focusedbody
+90parent/10describe. Pre-execution limits were one gated case75body90parent/45originalwarm/
+20originaldiag/nestedmax2updates20sec/768MiBCPU1GPU0. No newteacher/final/probe/
+objective/baseline. Original960/9012SPENT preserved; fullcase130/1170additional.
+Source/test authors RELEASED22.86998/40statics/2.18095read and~1.4/30read/runtime0.
+Rootfinal68PASS4.969JUnit/5.6164parent; initial40pass28fixtureerrors retained.
+Finalall5statics PASS/rootaggregate42.5926/60 incl2annotationfindings.
+Solecase67704terminal0/16.6003pilot19.8710parent/RSS359354368B; allwarmparities,
+basegradients and both129armreadouts complete. New130/1170→1090/10182permanent,
+synthetic separate. Case SPENT;19frozenfiles7347964Bexact/writers0. Independent
+SOURCE/ACTUAL/GO/nativeACTUALaccepted/reviewer~7/40read/runtime0 beforefinaldocs.
+Preserve defaultgradientroute/all negatives/all6scores/bothcuearms. AowncueCE
+down/othercueup, jointfitfalse; no129live/adaptation/CPCclaim. No nextGO.
+Next separateoptinpaired-episodeCE primitive withindependentzeroactivation/
+meanloss/atomicstep andhonestepisode-row-stepaccounting, preservelegacycontracts.
+Finaldocs accepted/reviewer RELEASED~8/40readseconds/runtime0. All owned handles
+terminal/all ownership released/unused engineering CLOSED. Scoped tracked
+diff-check passed excluding preserved historical EOF debt. Full goal ACTIVE.
+
+## R2.1-CUE-GRADIENT warm128 measurement — native accepted
+
+Previous goal turn PROGRESS. Scope artifacts/runs/r21-warm-gradient-20261016/
+SCOPE.md; dirtymaster09ff811. Source author owns new warm-gradient adapter/CLI
+only (40read40statics/runtime0); independent tester owns new recipe tests only
+(30read/runtime0); reviewer stage REVIEW.md only (40read/runtime0). Root owns
+stage/drivers/docs/plans (60statics60focusedbody90parent/10describe).
+Source/test authors RELEASED; source7.6223/40statics, tester31cases/runtime0.
+Root31pass4.3158parent/3.185JUnit; all5statics11.6565/60, describe.7648/10.
+ONE native128update1152row reconstruction/readout PASS10.6773body13.6108parent,
+45warm/20diagnostic/768MiBCPU1GPU0; original5parities true. Independent SOURCE/
+ACTUAL/GO/nativeACTUAL accepted, reviewer~9/40read/runtime0 before finaldocs.
+All16frozen copies7303768Bexact. Case SPENT; permanent MiniGrid960/9012,
+synthetic units separate. No newteacher/reward/control/probe/final work.
+Agradientjoint−.9921/allfivecomponentsnegative, B+.5732/C_train+.3207;
+no causal/acquisition/retention/CPC claim. All owned execution handles terminal.
+Next isolated blue/red one-update arms preserving full A128momentum, all six
+TRAIN scores/costs; protocol/review required before another case. Full goal ACTIVE.
+Finaldocs accepted; reviewer RELEASED~10/40readseconds/runtime0. All ownership
+released/unused engineering CLOSED; scoped tracked diff-check passed excluding
+preserved historical EOF debt. No next experiment GO.
+
+## R2.1-CUE-GRADIENT checkpoint composition — scoped accepted
+
+Previous/current goal turns PROGRESS. Evidence artifacts/runs/r21-cue-gradient-
+compose-20261016/RESULTS.md; dirtymaster09ff811. Source/test authors RELEASED:
+author14.6486/40statics/runtime0, independent25testcases/runtime0. Root final6path
+statics14.7495/90inclfailedreceipts. Broadfocused120sTIMEOUT/nocompleteJUnit/body
+capunverified; simplifiedprospectivenew60body90parenttarget39pass54.663/55.3415s.
+Sole native fixture PASS8.567body9.513parent,4SGD36rows/6teachers54physics,
+54raw+54gradientforward54backwardrows/RSS347037696B/CPU1. Unit SPENT; permanent
+MiniGrid832/7860, older synthetic costs separate. Independent SOURCE/scopedACTUAL/
+GO/nativeACTUAL/finaldocs accepted; reviewer RELEASED/read~6/40/runtime0.
+Current15plaincopies214410Bexact; no source/
+test/protocol writers. No full800native/probe/baseline reconstruction or newGO.
+Next separately frozen RNN-only128state diagnostic using existing warm source/
+guard/packets and current scorer; preserve warm parity/newly charge reconstruction.
+All owned handles terminal, source/test/review ownership released; unused
+engineering CLOSED. Native unit SPENT; full goal ACTIVE/no next experiment GO.
+
+## R2.1-CUE-GRADIENT — scoped component accepted
+
+Evidence artifacts/runs/r21-cue-gradient-20261016/RESULTS.md. Source author and
+independent63case test author RELEASED; root owns integration/native tests/docs.
+Author16.2224/40statics; root51.2615/60statics (two failed annotation receipts kept),
+63focused pass3.3264/90aggregate parent. Sole8case native UNIT pass, body5.7332/
+30parent6.4779/40,4SGD8rows/6sources2forks, RSS325005312B/CPU1. Allowance SPENT.
+Independent SOURCE/focusedACTUAL/GO/nativeACTUAL accepted, reviewer owns REVIEW.md
+RELEASED/read~7/40/runtime0; final documentation accepted. Eleven
+current source/test/protocol/driver copies113009Bexact; no source/test writers.
+No MiniGrid reconstruction/comparative case; accepted828/7824negatives unchanged.
+Next existing-runner TRAIN checkpoint composition; scientific/release parents OPEN.
+All owned handles terminal and source/test/review ownership released; unused
+engineering allowances CLOSED. Native unit SPENT; no next experiment GO.
+
+## MINIGRID-MOMENTUM-CONTROL V2 — full scoped native accepted
+
+Scope artifacts/runs/r21-minigrid-momentum-v2-20261016/RESULTS.md. Same dirtymaster.
+Root3sourcefiles/testernew21casefileRELEASED(~1.1/20read/runtime0); root206distinct
+qualified205+correctednode/26.0657of45static43.7913of90focused. Alloldsource185
+assumptions kept, oldfailedtest/native artifacts preserved. Solev2native48247
+terminal0/236.8587parent231.0462pilot/all8+8updates/all3readoutscomplete.
+New144/1396→828/7824permanent/allcasesSPENT;15postwindowcopies7227039Bexact.
+Reviewer SOURCE/ACTUAL/GO/nativeACTUALaccepted~7/40read/runtime0; finaldocs accepted/RELEASED.
+No source/test/protocolwriters; unusedrootengineering CLOSED. Next R2.1 percue
+TRAINgradientgeometryport, notmorebudget/audit/capturehorizons. Read-onlyadvisor
+.6069/10read/no writes/runtime/RELEASED. No newexperimentGO or learnerupdates.
+
+## MINIGRID-MOMENTUM-CONTROL runtime composition — component accepted/CASE failed
+
+Stage artifacts/runs/r21-minigrid-momentum-compose-20261016/RESULTS.md.
+Same dirtymaster09ff811; source/testauthorsRELEASED. Author40read40static,
+13.8949static/.9609read; tester~1.1/30read/runtime0. Root8scope185checks/scoped
+staticsPASS/31.1470of90static/51.3566of180focused. Native76041terminal1,
+141.6768parent: reward8+control8nativeaccepted; readout90cap/fullCASEincomplete.
+New144/1396 cumulative684/6428allcasesSPENT.17nativewindowexact before3later
+repairchanges; current17repairmappingexact. Latecallbackrefusal preserved,
+fakeprofile988→920fullproofs structuralonly. No native on repaired tree.
+Reviewer newREVIEW SOURCE/ACTUAL/GO/failedCASEACTUAL/repairaccepted~9/40read,
+no runtime; finaldocs accepted/RELEASED, unusedengineering CLOSED. Rootownsdocs/plans/stage only; no sourcewriters.
+Next separateversioned engineeringallowance frommeasuredreadoutcost; no newGO.
+
+## MINIGRID-MOMENTUM-CONTROL native port — accepted component
+
+Current stage r21-minigrid-momentum-control-20261016/RESULTS.md; runtime pair OPEN.
+Same dirtymaster09ff811; originalepisodeevidence unchanged/densezero nativeSGD.
+
+| Owner | Exclusive writes | State / allowance |
+|---|---|---|
+| training_only_stream | zero-lossmodule +additiveRNN/typeddispatch | RELEASED;6.2133/30static/.3264/30read |
+| weighted_bc_tests | new zero-lossfake tests | RELEASED;~1.13/25read/runtime0 |
+| root | nativeunit/stage/docs/plans |134fake+3nativePASS;21.7697/60statics4.7319/90focused |
+| weighted_bc_review | newstage REVIEW.md | SOURCE/ACTUAL/GO/nativeACTUAL accepted;~5/30read;finaldocs accepted/RELEASED |
+
+Nativeunit terminal0/PID58748/5.1721parent4.5471runtime;8physical7commits14rows
++2failedstagedrows/3raw6rows, peak324915200B/CPU1GPU0. Syntheticonly costs,
+no MiniGridpair/adaptationclaim.8sourcewindowequal67719B/0writers/caseSPENT.
+Future existing-runtime composition/sharedwarmfork/distinctreadout/ledger and
+reviewed frozenpairedcase OPEN. Earlier native540/5032 unchanged/allcasesSPENT.
+
+## MINIGRID-WARM-READOUT proof consolidation — accepted native completion
+
+Scope r21-minigrid-warm-readout-compose-20261016/guard-repair/SCOPE.md.
+Previous134/1242failureSPENT, cumulative404/3758; no native currently.
+
+| Owner | Exclusive writes | New budget |
+|---|---|---|
+| training_only_stream | reward_pilot.py only |RELEASED; source8.5956/30static/.6559/35read|
+| weighted_bc_tests | new test_minigrid_warm_guard.py only |RELEASED;9newcases/.74read/runtime0|
+| weighted_bc_review | guard-repair/REVIEW.md only |SOURCE/ACTUAL/GO/finalnativeACTUAL accepted;~12/40read|
+| root | stage/docs/plans/integration |staticsPASS151testsPASS/profile548full;native44577terminal0|
+
+Full pre-work/post-callback authority retained; no default/budget/metric change.
+Qualifiedrepair completes all8reward+bothTRAINreadouts/94.5497parent/91.5008pilot;
+136newupdates1274rows/cumulative5405032. NegativeCE/success preserved, no benefit
+claim. Postterminal12source window exact; finaldocs accepted/reviewer RELEASED. No newnativeGO.
+
+## MINIGRID-WARM-READOUT-COMPOSE — code accepted, native case incomplete
+
+Same dirtymaster09ff811, previous port/native evidence reused. New scope and
+results: artifacts/runs/r21-minigrid-warm-readout-compose-20261016/.
+
+| Owner | Exclusive writes | State / separate allowance |
+|---|---|---|
+| training_only_stream | rewardpilot/warmhelper/newreadouthelper | RELEASED;14.4248/35static,1.2893/35read |
+| weighted_bc_tests | newtest | RELEASED;34cases/runtime0 |
+| weighted_bc_review | compose-stage REVIEW.md | SOURCE/GO/failedACTUAL accepted;~14/40read/runtime0;finaldocsaccepted/RELEASED |
+| root | CLI/stage/docs/plans/integration | statics40.4092/90;focused44.4851/180;native72793terminal1 |
+
+Current10copies124864B exact after terminal; no production/test writers during
+native. CaseSPENT60.5517parent57.0771pilot, sixcommits/134total1242rows, seventh
+4draw/physics paid/eighthnotrun, original45.020s phase cap; diagnosticsnot_run.
+Cumulative404updates3758rows with older cases; all negatives/failure artifacts kept.
+One bounded fake cProfile PASS3.4512/20s adds0nativework; structural evidence
+1361full comparisons/150guards. No native wallestimate/benefit inferred.
+No retry/newnativeauthority. NativeCOMPOSE/CASE remains OPEN; measured source
+repair is next; reviewer finaldocs accepted/ownership RELEASED. All owned handles
+terminal, unused engineering CLOSED/all native case allowances SPENT.
+
+## MINIGRID-WARM-READOUT — existing TRAIN evaluator port, accepted component
+
+After native48291terminal0 and independent18-byte postterminal window. Current
+source changes are not claimed as executed by that earlier native case.
+Scope r21-minigrid-warm-readout-20261016/SCOPE.md, no native allowed.
+
+| Dispatch | Owner | Exclusive paths | State |
+|---|---|---|---|
+| MINIGRID-WARM-READOUT | training_only_stream | existing evaluator | RELEASED;source statics7.0416/30s |
+| MINIGRID-WARM-READOUT-TEST | weighted_bc_tests | newevaluationtest | RELEASED;37authored/runtime0 |
+| MINIGRID-WARM-READOUT-INTEGRATE | root | stage/docs/plans | staticsPASS;focused187PASS/28532 terminal0 |
+| MINIGRID-WARM-READOUT-REVIEW | weighted_bc_review | readout-stage/REVIEW.md | SOURCE/ACTUAL/finaldocs accepted; RELEASED |
+
+Root statics60/focused120body150parent; author20read30static/tester20read0runtime;
+newnarrowrowmetadata distinctmethodTRAINexact3layouts6sources/128or136/nohistory.
+Old methods/default/final gates preserved; fake-qualified component notscientific
+evidence. Native/fullrecipe composition remains separate unchecked requirement.
+187/0skip,105.383JUnit106.1656parent within120body150parent; rootstatics
+22.9565/60s including retained initial typingfailure. All owned handles terminal.
+Reviewer~5/30readseconds/runtime0; source/test/review ownership RELEASED;
+unused engineering CLOSED. Saved-only closure.2929943s/10 PASS. No nativeportuse.
+
+## MINIGRID-WARM-REWARD repaired native validation — eight commits accepted
+
+Same dirtymaster09ff811; production/tests exactly equal accepted18 current
+mapping (16original+2postrepair),191 final tests/statics reused without rerun.
+New prospective case only: r42-minigrid-warm-reward-20261016/repaired-case/SCOPE.md.
+Original6/8failure134updates1242rows SPENT, preserved. Same180whole/210parent/
+45phase/1GiB/768warm/CPU1/GPU0 limits and original8dose/cues/seed/raw metrics.
+
+| Dispatch | Owner | Exclusive write paths | State |
+|---|---|---|---|
+| MINIGRID-WARM-REWARD-INTEGRATE/CASE | root | repaired-case driver/artifacts/canonical docs | native0/8commits/136total1274rows |
+| MINIGRID-WARM-REWARD-REVIEW | weighted_bc_review | repaired-case/REVIEW.md | SOURCE/GO/ACTUAL/finaldocs accepted;RELEASED |
+| MINIGRID-WARM-READOUT | training_only_stream | none/read-only | gap confirmed/released; .2852readseconds |
+
+No production writers/nativejobs before literalGO. Newmax136updates1280rows,
+cumulativepredecessor+new<=270updates2522rows, oldpaidworknevererased. No final/
+probe/teacher/replay/promotion/newloss/selection or scientificclaim. Noautomatic
+retry/increase if incomplete. Native source/testbyte assumptions unchanged.
+CaseSPENT/terminal0 handle48291/PID42888/55.1099parent52.2274pilotseconds,
+RSSpeak365293568B. All8complete/128warm+8reward136updates1274rows/170physics/
+1534positions; one−1terminal/seven0timeouts. Cumulativeold+new270updates2516rows.
+Independent current18window afterterminal0 BEFOREevaluatorwrite recorded and
+ACTUAL accepted, no scientific/speedup inference. Review~6/30readseconds/runtime0; finaldocs accepted/ownership RELEASED/unused engineering CLOSED. Both native case allowances SPENT.
+
+## Historical MINIGRID-WARM-REWARD-20261016 — original failed native case
+
+Previous turn PROGRESS; dirtymaster09ff811. NewstageSCOPE
+artifacts/runs/r42-minigrid-warm-reward-20261016/SCOPE.md. Fixed simpler accepted
+unweightedA128 warm reconstruction then existing8delayedreward route; preserve
+cold defaults/native math/full optimizer/gradient state. No cue/arm/seed search.
+
+| Dispatch | Owner | Exclusive paths | State |
+|---|---|---|---|
+| MINIGRID-WARM-REWARD | training_only_stream | newwarmhelper/currentrewardrecipe | SOURCE released/statics16.2000/30s |
+| MINIGRID-WARM-REWARD-TEST | weighted_bc_tests | newwarmrewardtest | RELEASED;27new cases, runtime0 |
+| MINIGRID-WARM-REWARD-REVIEW | weighted_bc_review | stage REVIEW | SOURCE/GO/failureACTUAL/SOURCEPOSTREPAIR/finaldocs accepted;released |
+| MINIGRID-WARM-REWARD-INTEGRATE | root | existingrewardCLI/newpureparitytest/docs/plans/stage | 191final scoped passes; native8case OPEN |
+
+Newengineering author30read/30static/tester30read/runtime0/reviewer45read/runtime0;
+root90static/focused150body180parent. No native untilfinalgates/freeze/literalGO.
+Provisional sole180body210parent/1GiB/768warm/reward<=45ANDwhole remainder;
+newwarm128/1152+reward<=8/128,raw10/90,warm4live<=64+8collect<=128,0newteacher.
+Every reconstruction/parity/collection/guard/copy cost new; oldbudgetsSPENT.
+No reward-effect/acquisition benefit claim; futurematchedcontrol required.
+Sole nativeSPENT/terminal1 handle88959/PID46600: exactwarm128/1152/parityPASS,
+sixrewardcommits90rows then45.026s localphasefailure in7thcollection;8thnotrun.
+Total134updates1242rows/153pred152physics/1485positions; no newteacher/final/probe.
+Allknown105rewarddraws retained, failed7th15draws14physics; secondaryouterRNG
+refusalpreserved. Newsourcepostrepair onlyremovesduplicateparentwarmbytesinside
+helper-owned callback, preservesfullproofs;191tests0skip andfivepathstaticsPASS.
+Rootstatics28.8027/90s/focused40.9120parentwithin150body180parent. 190pre-repair
+receipts+18oldcopies+nativefailure retained;2newcopies+16unchanged qualifyfinal.
+Reviewer~15/45reads/runtime0; finaldocs/closure accepted, allownershipreleased/
+ownedhandles terminal/unusedengineeringCLOSED/originalnativeSPENT.
+NativeNOT rerun/fit45unproven. Nextseparatefrozen
+prospective validation ofrepairedsame8route, no spentcase renewal or newtrainer.
+
+## MINIGRID-WEIGHTED-A-20261016 — R2.1/R4.2 reference control, DONE scoped
+
+Dirtymaster09ff811; stageSCOPE r21-minigrid-weighted-a-20261016. Fixed accepted
+unweighted A128 andsixTRAINsources reused; onlynewweighted128train/readout,
+distinctobjective/native148/K7. Originalfreshpairdraft/failed138gate preserved.
+
+| Dispatch | Owner | Exclusive paths | State |
+|---|---|---|---|
+| MINIGRID-WEIGHTED-A | training_only_stream | newrecipe+narrowevaluator | DONE/released;statics21.5445/30s |
+| MINIGRID-WEIGHTED-A-TEST | weighted_bc_tests | newweightedBCtest | DONE/released;35newcases |
+| MINIGRID-WEIGHTED-A-REVIEW | weighted_bc_review | stage REVIEW | SOURCE/GO/ACTUAL/finaldocs accepted;released |
+| MINIGRID-WEIGHTED-A-INTEGRATE | root | wrapperguard/CLI/docs/plans/stage | DONE;144passes/native79.3266parent |
+
+Readonlymetadata calibration construct1.7041/snapshot.1410/fork.4916s,0SGD.
+Measuredbyte-guardrepair preserves bothrecords/seal/exactfields. Postfix
+calibrationGO thenFIRSTPASS snapshot.018863s(7.475xfaster),0SGDpredenv. Both
+20body25parent budgets separate/SPENT. FullnativeGO admitted final frozen15files.
+Sourceauthorno jobs, testauthor0runtime; reviewer45readsecs/runtime0; root
+statics22.968856/90s;focusedaggregate33.0810s within120body150parent. One initialfixturetypeFAIL kept; original
+focused138 had2badterminalcheckpointfixtures corrected0,2,128. Referencecase
+final144/0failure-error-skip. Sole native code0/stderr0/79.3266parent76.1832pilot,
+handle96316 terminal0/PID34964/RSSpeak389103616B;180body210parent allowance SPENT.
+Newcost128/1152/raw10/90/live4/48steps/0teacher, oldpaidcostseparate. Bothjointfalse,
+17of18/oppositefailedcues/livegaindifferences0. No final/probe/
+replay/promotion/newloss/seed/dose/metric selection; all scientificparentsopen.
+IndependentACTUAL reconstructsraw/native/receipts/reference exact; reviewer~23/45
+readseconds/runtime0, preserved read-only schema mistakes. Finaldocs+savedclosure
+accepted; all ownersreleased/unusedengineeringCLOSED/allownedhandles terminal.
+Next substantive
+implementation: existing typed BC-to-reward MiniGrid warm prefix, full optimizer
+continuation/cold defaults/fixed simpler unweighted schedule and all cues; native
+prefix parity and separate frozen future protocol, no newcaseGO inthisstage.
+
+## MINIGRID-REWARD-ROUTE-20261016 — R4.2 delayed runtime route, DONE scoped
+
+Dirtymaster09ff811, accepted nativecollector/DTO/objective reused. Root scope:
+artifacts/runs/r42-minigrid-reward-route-20261016/SCOPE.md. Fixed8 TRAIN episodes
+Ablue/Ared/Bblue/Bred/Cblue/Cred/Ablue/Ared,existinggenericruntime,source/actor
+unchanged. No final/teacher/probe/evaluation/replay/promotion or learning claim.
+
+| Dispatch | Owner | Exclusive paths | State |
+|---|---|---|---|
+| MINIGRID-REWARD-ROUTE | training_only_stream | newadapter minigrid_reward_pilot | DONE/released;statics23.6942/30s |
+| MINIGRID-REWARD-ROUTE-TEST | weighted_bc_tests | newtest minigrid_reward_pilot | DONE/released;25newcases |
+| MINIGRID-REWARD-ROUTE-REVIEW | weighted_bc_review | stage REVIEW only | SOURCE/GO/ACTUAL/finaldocs accepted;released |
+| MINIGRID-REWARD-ROUTE-INTEGRATE | root | newCLI/docs/plans/stage | DONE;110passes/native18.72parent |
+
+Original engineering limits: author30static/testauthor0runtime/review45readsec;
+root60static/focused60body90parent; sole native45body60parent1GiB onlyafter
+checks/independentSOURCE+GO. CPU1/intra1interop1/BLAS1/GPU0. Sole native terminal0,
+SPENT:8SGD128rows/8emptyearlypolls/all8timeoutsreturn0; source+actor unchanged.
+Existing bounded8inbox payloads count as retained memory; no new erasure API.
+Rootstatics15.9982/60s,110focusedFIRSTPASS/0skip; allfailuresretained. No scientific
+benefit/readinessclaim. Nextlearner: existingweightedBCport asdistinctmatched
+MiniGridfixedA composition; read-onlyreassessment.8504039s/no native permission.
+Reviewerreads~12/45s/runtime0; allownershipreleased/unusedengineeringclosed.
+
+## MINIGRID-REWARD-COLLECT-20261016 — R4.2 recurrent RL boundary, DONE scoped
+
+Dirtymaster09ff811, existing native148/K7 objective/DTO/runtime reused. SCOPE:
+artifacts/runs/r42-minigrid-reward-collection-20261016/SCOPE.md. CPU1/GPU0;
+author30staticseconds/testauthor0runtime/root60static+90focusedbody seconds;
+review45readseconds/runtime0. Sole native engineering case45body/60parent only
+after focused/statics/independentSOURCE. No comparative experiment or final data.
+
+| Dispatch | Owner | Exclusive write paths | State |
+|---|---|---|---|
+| MINIGRID-REWARD-COLLECT | training_only_stream | new adapter only | DONE/released;15.0403/30s statics |
+| MINIGRID-REWARD-TEST | weighted_bc_tests | new collection test only | DONE/released;48new final cases |
+| MINIGRID-REWARD-REVIEW | weighted_bc_review | stage REVIEW only | SOURCE/GO/ACTUAL/finaldocs accepted;released |
+| MINIGRID-REWARD-INTEGRATE | root | docs/plans/stage smoke/controller | DONE;170passes/native5.02parent |
+
+Source/test edits by root only after owner release. Sole native terminal0/SPENT,
+oneSGD16rows/zero return/stale refusal; no scientific advantage claim. Final
+scopedstatics38.4912/60s, allfailedtyping attempts preserved. Reviewerreads~16/45s,
+runtime0/allownersreleased/unusedengineeringclosed. Broaderparentsopen.
+
+## MINIGRID-INSPECTOR-20261016 — R4.7 recorded playback, DONE scoped
+
+Dirtymaster09ff811/source fixedA artifact unchanged. Contract and exact evidence:
+artifacts/runs/r47-minigrid-inspector-20261016/SCOPE.md, RESULTS/REVIEW. No native
+SGD/physics/newexperiment/Git/index/install/network/GPU. Existing8/16MiB caps.
+
+| Dispatch | Owner | State | Exclusive paths | Evidence |
+|---|---|---|---|---|
+| MINIGRID-PROJECTOR | training_only_stream | DONE, released | newpureprojection+appdispatch | ownedstatics26.6057/30s, initialtypefailureskept |
+| MINIGRID-TEST | weighted_bc_tests | DONE, released | two new tests |24author+6root;205combinedFIRSTPASS/native0 |
+| MINIGRID-REVIEW | weighted_bc_review | DONE, released | stage REVIEW only | SOURCE/ACTUAL/finaldocs; reads~21/45s/runtime0 |
+| MINIGRID-INTEGRATE | root | DONE scoped | newHTML/IObranch/docs/checks/browser | published3518758B, exactsource308frames288actions |
+
+Browserall5/cue/history/negative+goal/playpause/partialempty/mobile passed;
+bodyshortcutfailureresolved, console0. Server210.12295/600s terminal0/tabclosed/
+viewportreset; emittedscreenshots, no standalonefiles.11frozenfiles unchanged.
+Alloldnegativelearning/fullR4.7+releaseparentsopen; unusedengineeringCLOSED.
+Next substantive learnerport: TRAIN-only MiniGrid recurrentrewardcollector,
+existingnative148K7objective/DTO/runtime ready; no newtrainer/dose/experiment.
+Sourceauthorreadonly.9024635/10s/native0, allwriteownershipreleased; unusedallowancesclosed.
+
+
+## FIXED-A-20261016 — MiniGrid R2.1/R4.2 acquisition control, DONE scoped
+
+Shared dirtymaster09ff811; accepteduntrackeddependencies retained. Contract:
+artifacts/runs/r21-fixed-a-acquisition-20261016/SCOPE.md; RESULTS/REVIEW own evidence.
+
+| Dispatch | Owner | State | Exclusive paths | Evidence |
+|---|---|---|---|---|
+| FIXED-A-SOURCE | training_only_stream | DONE, released | evaluator only | exactAonly2sources; statics6.9897/20sPASS |
+| FIXED-A-TEST | weighted_bc_tests | DONE, released | two new testmodules |42newcases +92affected,134FIRSTPASS0skip/native0 |
+| FIXED-A-REVIEW | weighted_bc_review | DONE, released | stage REVIEW only | SOURCE/GO/ACTUAL/finaldocs;16/45s reads, runtime0 |
+| FIXED-A-INTEGRATE | root | DONE scoped | existingCLI/docs/plans/controller/analyzer | original128stream; sole640SGDcase111.30parent |
+
+Alljointcriteriafalse. BP/RNNredgoal+bluenegativeterminal/meanreturngain−.253125;
+PCvariants0goals;16timeouts2failures2successesallkept. No CPCadvantage/retention/
+recovery/interferenceclaim. Sourceauthor nextinspector gapread1.8666456/10s0runtime.
+Next concrete R4.7 pureMiniGridprojection in existinginspector; no doseextension,
+newtrainer/checkpoint/auditframework. GoalACTIVE, scientific/releaseparentsopen;
+nativeSPENT/unusedengineeringCLOSED/all23frozenequal. No otherwriters/jobs.
+
+
+## HISTORY-LIVE-20261016 — new MiniGrid R2.1/R4.2 boundary, DONE scoped
+
+Shared dirty master09ff811; accepted untracked dependencies retained. Contract:
+artifacts/runs/r21-history-live-20261016/SCOPE.md; RESULTS/REVIEW hold commands,
+failed attempts and native outcomes. No Git/install/network/GPU.
+
+| Dispatch | Owner | State | Owned paths | Evidence |
+|---|---|---|---|---|
+| HISTORY-LIVE-SOURCE | training_only_stream | DONE, released | evaluator only | owned statics15.7072/30sPASS; independent SOURCE/ACTUAL |
+| HISTORY-LIVE-TEST | weighted_bc_tests | DONE, released | two new test modules |35authorcases+9root;92unique combined passing bodies across88+4corrected |
+| HISTORY-LIVE-REVIEW | weighted_bc_review | DONE, released | stage REVIEW only | SOURCE/GO/ACTUAL/finaldocs;19/45s reads, no native |
+| HISTORY-LIVE-INTEGRATE | root | DONE scoped | newCLI, shared32helper, docs/plans/controller | sole native68.18parent,160SGD/480live,all30timeouts |
+
+Full goal ACTIVE; scientific/live/release parents remain open. All failed
+fixtures/typechecks/old budgets preserved. Sole native SPENT; unused engineering
+CLOSED. Author read-only nextdependency inspection.9222713/15s/0runtime supports
+A-only evaluator admission before separately frozen fixed-A128 acquisition, not
+another infrastructure increment. All21source/test/protocol frozen files equal.
+
+
+## NATIVE-HEALTH-20261016 — new MiniGrid R2.1 extension, DONE scoped
+
+Dirty shared master09ff811; same checkout required for accepted untracked changes.
+Contract/caps in artifacts/runs/r21-native-activation-20261016/SCOPE.md.
+
+| Dispatch | Owner | State | Exclusive write scope | Next action |
+|---|---|---|---|---|
+| NATIVE-HEALTH-SOURCE | training_only_stream | DONE, released | new torch_activation_diagnostics; only recurrent._forward finite keyword | owned statics6.363551/30sPASS; final117unique scoped passing bodies/statics/SOURCE accepted |
+| NATIVE-HEALTH-TEST | weighted_bc_tests | DONE, released | two new nativeactivation/route test modules | native math/ownership9SGD81rows plus fake route; author runtime0 |
+| NATIVE-HEALTH-REVIEW | weighted_bc_review | DONE, released | stage REVIEW only | SOURCE/correction/GO/ACTUAL/final docs accepted; read23/45s/runtime0; unused CLOSED |
+| NATIVE-HEALTH-INTEGRATE | root | DONE scoped | minigrid_learnability, existing CLI, docs/plans/controller | health readout/work records via existing score loop |
+
+No other writers/jobs authorized. No Git/install/network/GPU. Extra checked native
+recurrent finite branch justified by tanh masking overflow; default math preserved.
+Prior accepted results and all scientific/live/release open requirements retained.
+Rootfirststatics4typingfindings5.1361s preserved; allfinalsixpathchecks PASS,
+aggregate23.5952/90s. Firstfocused116PASS64.3595parent, publicationcorrectionfinite
+admission then21narrowPASS1.8295s/no moreSGD;117unique bodies acrossruns. Descriptor
+PASS.6124s,21frozen418299B/currentequal; SOURCE/GO before sole nativeFIRSTPASS
+99.9997parent98.8423body439726080Bpeak. All800SGD/7200rows/230scores2070rows90physics
+plus150extrahealth/1350rows/86400B/150SVD120FFaffines270RNNsteps+discardedoutputs;
+ACTUAL accepted allpriorreceipts/raw/probe outcomes exact. Native SPENT/no retry.
+Rootanalyzer150SVD separately; reviewer noSVD/runtime0. No causal/CPCbenefit claim.
+Next existing target-free evaluator296/history support (actual148-only dependency).
+Source/test ownership RELEASED; reviewer finaldocs accepted/released; all unused engineering
+allowances CLOSED. All root runtime commands terminal.
+
+
+## HISTORY-20261016 — R2.1/R4.2 shared public history, DONE scoped
+
+Shared dirty master09ff811; current tree needed for accepted untracked dependencies.
+Contract/caps: artifacts/runs/r21-minigrid-history-20261016/SCOPE.md.
+
+| Dispatch | Owner | State | Owned paths | Dependency / next action |
+|---|---|---|---|---|
+| HISTORY-SOURCE | training_only_stream | DONE, released | core/minigrid_public_history, demonstration_episode, torch_feature_learner, fresh_task_probe | additive296; owned statics PASS7.5223/45s; final combined441PASS/scopedstatics accepted |
+| HISTORY-TEST | weighted_bc_tests | DONE, released | tests/test_minigrid_public_history.py, test_minigrid_history_route.py | encoder/reset/role/cap, mixed296/148 route; runtime0 |
+| HISTORY-REVIEW | weighted_bc_review | DONE, released | stage REVIEW.md only | SOURCE/GO/ACTUAL/final docs accepted; read24/60s, runtime0; unused allowance CLOSED |
+| HISTORY-INTEGRATE | root | DONE scoped | minigrid_learning_pilot, minigrid_learnability, existing CLI, all canonical docs/stage controllers | combined gates90statics/360focused; native only after independentGO |
+
+Reviewer caught hardcoded193104 after296probe paid work: fixed expected byte scalar
+from admitted data before budget/update; full-route regression requested. Reviewer
+also caught unintended legacy native test selection; before execution reduced to
+four pre-native policy admission nodes, reusing accepted unchanged objective math.
+No extra native engineering cost silently admitted. Final441PASS/0skip (326.425pytest/327.7114parent), nine-path statics PASS14.6802/90s total incl preserved first2typingfindings. Independent SOURCE accepted. Descriptor PASS.8962s;21relativefrozen texts348335B/currentequal; SOURCE/GO/ACTUAL accepted; sole nativePASS87.5853parent86.4404body/439619584Bpeak/800SGD7200rows/230forwards2070rows/90physics. BudgetSPENT/no retry. TRAINaliasremoved butall acquisitionpremisesfalse; noCPCbenefit. Nextnative activationreadout via existinghealthreducer, scientific/releaseparentsopen. Testauthor48cases/runtime0/released. All historical ownership below
+released; no prior native budget reused. Source/testaccepted and released; reviewer finaldocumentation accepted/released. All unused engineering allowances CLOSED; all commands terminal.
+
+
+## R2.1 MiniGrid checkpoint learnability — scoped accepted, 2026-10-16
+
+Shared dirty master09ff811; preserve accepted/unrelated uncommitted sources.
+Root owns existing CLI +docs/plans/controllers. training_only_stream owns only
+new adapter minigrid_learnability; weighted_bc_tests owns only new matching test;
+weighted_bc_review owns stage REVIEW. Original stream/learner/boundary sources
+unchanged. Exact contract/prospective limits in r21-minigrid-learnability-20261016/
+SCOPE.md: same A32/B32/C_train32/A32, owned0/32/64/96/128, alltraining before
+any readout,150knownTRAINrawforwards+10disposable16update probes at0/128. No D,
+livepolicy/replay/selection. Rootstatics90s/fakefocused240body270parent, worker
+statics60s/reviewer60sread/runtime0; sole180body210parent768MiB32MiB nativecase
+onlyafterSOURCE/gates/plainrelativefreeze/GO. Total800SGD7200rows/230forwards
+2070rows/10teacher90expectedphysics(max160)/RNN1854unroll. Prior failed native
+budgets/full160live/scientific/release parents preserved. No installs/Git/network/GPU.
+
+Source/test ownership RELEASED; author33.5467411/60s statics after4typefindings/
+platform, no runtime; testauthor18manual/root3extra cases. RootstaticsfinalPASS,
+cumulative43.6768513/90s initial1annotationfailure preserved. Focused245cases
+244PASS1mockfixtureFAIL kept; exactrealguard correction1PASS43.1862s under
+prospective90body120parent based on50.078s measuredhappy;245uniquecoverage,not
+oneclean245casepass. Fourteenrelativecopies253129B+SOURCE/GO precede sole native
+PASS78.0358parent76.9069body,800SGD7200rows230scores2070rows90physics/RNN1854;
+RSS395112448B21224samples. ACTUAL independently accepted raw/probe/signedmetrics/
+640receipts/teacherencodings/aliasbound. AllA32/B64/C96fitpremisesfalse; no useful
+learning/plasticity-loss/CPCbenefit/full160claim. Native SPENT/no retry. Final
+docs/closure accepted;14frozen/ninewhitespacepaths/scopedgitdiff0. Reviewer13/60s
+read commands/runtime0, allownership RELEASED/unusedengineering CLOSED and all
+rootcommands terminal. Nextsharedpublicinitial+current
+296control across4FFmethods,old148/RNNretained,roles/causality/costs+newprotocol.
+
+## R2.1 MiniGrid probe boundary — scoped accepted, 2026-10-16
+
+Same dirty master09ff811 with accepted dependencies. Root owns existing app
+fresh_task_probe width admission/controllers/docs/plans. training_only_stream
+owned core+infra MiniGrid E contexts, RELEASED: Ruff and corrective Windows/Linux
+mypy PASS17.4730717/60s total; initial cache INTERNAL ERROR preserved. Test author
+owned only new test_minigrid_probe_admission and test_minigrid_probe_boundary,
+43manualcases/runtime/statics0, RELEASED. Reviewer owns stage REVIEW only,
+60s reads/runtime0; SOURCE/GO, ACTUAL and final docs/closure accepted. Reviewer
+approximately12s/60read commands, ownership RELEASED/unused allowance CLOSED.
+Contract and prospective budgets in r21-minigrid-probe-boundary-20261016/SCOPE.md:
+exact148 plus original widths,65536cap, reserved cue-bound E-blue/E-red geometry
+separate from unchanged four benchmark layouts. Rootstatics90s/fakefocused180body
+210parent/physics0/nativeSGD0 gate268PASS2.9922941parent, statics16.9752376PASS.
+Firstbasenamefreeze collisionFAILED/preserved, corrected8relativecopies equal.
+Sole90body120parent768MiB16MiB five-method native smoke afterGO PASS5.1797360parent/
+4.2370623body,45physics15SGD135rows30forwards270rows,alloriginalbindingsunchanged;
+RSS335966208B594samples. Zero complete sequence fits; no benefit/ranking claim.
+All root commands terminal; all worker ownership released/unused engineering
+allowances CLOSED. Corrected8frozen/ninewhitespacepaths/scopedgitdiff0.
+Native allowance SPENT/no retry. Next existing stream/CLI learnability scenario
+using owned0/128states and isolated probes, separate charges and knownTRAIN metrics.
+No comparative experiment/additional R4.2 cost case; oldbudgetsSPENT/fullparentsOPEN.
+No installs/Git/network/GPU.
+
+## R4.2 native readout cost — scoped qualified, native failed, 2026-10-16
+
+Dirty master09ff811 and accepted dependencies retained. Root owns existing
+torch_feature_rehearsal_pilot comparator, minigrid_learning_pilot storage and
+all controllers/docs/plans. Test worker released both new test paths without
+runtime. Reviewer owned stage REVIEW only, read60s/runtime0; SOURCE/GO, ACTUAL
+failure-accounting and final docs/closure accepted. Ownership RELEASED.
+Two bounded synthetic native measurements PASS5.8874/5.3968parent seconds,
+zeroSGD/predict/env; full report fields preserved, no native-state check removed.
+Root four-path statics PASS22.5427593/90s; focused476 PASS120.6673091parent;
+storage delta FAILED30.0240447s timeout preserved, exact new publication cases
+PASS2/25.0062331parent:478 unique cases. CPU1/nativeSGDfixtures0/legacyphysics≤205.
+Frozen11 texts/unchanged descriptor preceded GO. Fresh native case also FAILED:
+180.0531293body/181.9425851parent,640SGD5760rows,47live starts/732live steps,
+54teacher steps, nofinalD/comparisons. Both180s cases SPENT; no native speed benefit
+established. Saved analyzer IndexError preserved; separate overlap correction
+matches observed receipts/scores/actions, with historical coverage incomplete.
+All root commands terminal; all worker ownership released. Reviewer conservatively
+approximately18s reads/60/runtime0; unused engineering allowances CLOSED.
+Closure11frozen equal/nine whitespace paths/scoped gitdiff0. No further native case.
+Next R2.1 exact148 probe admission and E-blue/E-red probe-only MiniGrid boundary;
+full160readout/performance/scientific/release parents stay OPEN.
+Artifacts r42-minigrid-readout-cost-20261016; no Git/install/network/GPU/service.
+
+## R4.2 actual MiniGrid learner integration — scoped verified, native incomplete, 2026-10-16
+
+Shared dirty master09ff811; accepted uncommitted dependencies and unrelated work
+preserved. Root owns new frozen evaluation helper, existing coupled-attribution
+CLI scenario, docs/controllers/plans. training_only_stream owns new learner-pilot
+module; weighted_bc_tests owns new fake-boundary/pilot tests; weighted_bc_review
+owns stageREVIEW only. No file overlap. Prospective protocol/resources in
+artifacts/runs/r42-minigrid-learning-20261016/SCOPE.md: seed17, five existing
+methods,128updates each/640SGD5760rows; all training before any final D. No replay/
+RL/probes/tuning. Owned0/32/64/96/128 states,150TRAINraw scores and150knownlive+
+10finalD episodes, all7nativeactions; no teacher in learner live decisions.
+Workers60s owned statics/runtime0, reviewer60s reads/runtime0; root90s statics/
+120s focused fakes+legacy≤512physics; sole180body210parent768MiB64MiB actual case
+only after SOURCE/gates/frozen descriptor/GO. Original budgets preserved below.
+
+Source/test ownership RELEASED; root integrated. Source author25.0086567/60s
+statics after3typefindings; no worker runtime. Test author48manualcases/root
+authority418JUnitPASS. Rootfinal4pathstatics10.8131693s/cumulative36.2773621/90;
+initial7errors and subsequent passes preserved. Focused120.01755/120.02191s
+timeouts kept; ordinary15s fakeprofile expecteddeadlinefailure, measuredsource
+simplification then prospective240body270parent gatePASS418/89.6009083s/0skips.
+Legacyphysics≤205 conservativebound, nativeSGDfixtures0. Eight reviewed frozen
+texts byte-identical; SOURCE/GO then sole native FAILED180.03102body/181.72285
+parent, child2/stderr0/13,380,969B/peak398,602,240B47600samples. All640SGD5760rows
+committed/originalsourceactorcharges intact;54teacher+840livephysics,841predict,
+54raw486rows/54live slots53complete1partial; nofinalD. Comparisons/derivedclaims
+null. ACTUALfailed-accounting accepted; normalnativecompletion/scientificparents
+OPEN. Final documentation accepted; reviewer~20sreads/60/runtime0, ownership
+RELEASED and unused allowance CLOSED. All worker ownership released and root
+commands terminal. Native allowance SPENT/no automatic retry. Eight frozen texts/
+eight manual whitespace paths/scoped git diff --check PASS; existing EOF debt
+excluded/preserved. Unused engineering allowances CLOSED. Exact next: native guard cost diagnosis
+withzeroSGD/env, measuredsimplification/preservedrefusalchecks beforefreshprotocol.
+
+## R4.2 actual MiniGrid cue/key/door — scoped accepted, 2026-10-16
+
+Shared dirty master09ff811; preserve accepted uncommitted dependencies and unrelated
+work. Root owns new core teacher/layout, existing Memory lifecycle extraction,
+CLI/docs/controllers/plans. training_only_stream owns new infra game, released
+after statics31.6322088s/60 (five dynamic-base errors per platform simplified to
+ordinary lazy imports, then two annotation errors corrected, final allPASS).
+weighted_bc_tests owns56 new cases, released without statics/runtime; root covers.
+weighted_bc_review owns stageREVIEW only,60s reads/runtime0. SOURCE/GO accepted.
+Root five-path statics FIRSTPASS15.2752251s/session14543terminal0; focused370/0skip
+FIRSTPASS3.7028606s, conservative≤205 native-call bound including old twins, noSGD.
+Sole fixed CLI FIRSTPASS1.2937805s/1,164,256B, ten nine-step closed episodes/90
+native actions, roles/train-codec/final-refusal intact; model updates0. ACTUAL
+and final documentation accepted; reviewer4.5s reads/60s/runtime0, allownership
+released/unusedengineeringCLOSED. Sole demo SPENT. Closure seven whitespace paths/scoped
+gitdiff0, known EOF debt excluded; all root jobs terminal. Scope/receipts in r42-minigrid-cue-key-door-
+20261016; no learner experiment or new runner. Next existing stream/CLI native
+game route with owned checkpoint live readouts, reviewed small protocol first.
+
+## R4.2 actual MiniGrid boundary — scoped accepted, 2026-10-16
+
+Shared dirty master09ff811, accepted dependencies require this checkout. Root owns
+infra adapter/newCLI/optionalrequirements/docs/controllers/plans; training_only_stream
+owns core episode dimension admission/Torch feature+recurrent policies/newdimension
+tests, released; weighted_bc_tests owns newadaptertests, released without runtime/
+statics; weighted_bc_review owns stageREVIEW only. Explicit contract/budgets in
+artifacts/runs/r42-minigrid-boundary-20261016/SCOPE.md. Authorstatics22.1907199s/60,
+initial one annotation error each platform preserved/fixed; rootfirststaticwin
+one kwargs annotation error preserved statics-first.json, rootfixed only type.
+Final eight-path staticsPASS;314focusedFIRSTPASS3.861413s incl46nativeenvironment
+steps/noSGD, CPU1. Rootbinaryinstall19.3773473s no baseupgrade. Reviewcaught unknown
+applied work on nativeexception; fixedbeforechecks with regression. SOURCE/GO then
+CLI30stepsPASS/.8526527s; nativefirst0SGD failedunsupportedwakebudget4.6460545s,
+original7stepclosedtrace/source/receipts preserved. CorrectiveSOURCE/GO then sole
+supported-budgetsuccessor reused paidtrace0newenvsteps:5SGD35rows/5score35rows,
+allownedstate/chargesPASS4.2728714s/peak311955456B150samples. Actualsource-native
+integration, nolearningcomparison. ACTUAL/finaldocs/closure accepted. Reviewer
+5.3s reads/60s/runtime0; all ownership released/unusedengineeringCLOSED. Bothnative
+allowancesSPENT/CLOSED/allrootcommandsterminal; total83nativeenvironmentcalls.
+
+## R4.7 acquired-task recorded inspector — scoped accepted, 2026-10-16
+
+Stage r47-acquired-task-inspector-20261016/SCOPE.md, shareddirtyHEAD09ff811.
+RootHTML/infraCLI/controllers/docs; training_only_stream existingappprojection+
+smallpurehelper+newcomponenttests; weighted_bc_tests newfiletests only;
+weighted_bc_review stageREVIEW. SameexistingfileCLI supports singleexplicitTRAIN
+acquired_return_diagnostics withoriginalpointers/records/playback; oldfinalpaired
+schema preserved. Recordedwake/nativeclocks/role/raw-live25metrics/conditions/
+costs, missingnativecounts unknown. No learner/env/nativeexperiment. Workers60s
+ownedstatics/reviewer60sreads/no runtime; rootfocused120body150parentCPU1GPU0,
+saved3build/payload90s/16MiBeach, browser240ACTIVEcommandseconds<=2viewports/
+<=2sessionslocalonly/noinstalls. CachedofflineCLI0.1.22present; no browser started
+during prerequisite setup.
+Originaloldbrowserbudgetunverified preserved; newallowance distinct/newfunction.
+Sourceauthor49cases/statics17.9379567safter8mypyerrorsperplatformfixed;
+fileauthor16cases/statics8.8958627sFIRSTPASS, allauthorsreleased. SOURCEaccepted,
+root6pathstatics9.5602268s/finalJSsyntaxPASS,187focusedFIRSTPASS14.5656901parent/
+0skips. ThreeactualsavedCLIbuilds+payloadsPASS2.04245s,7testedtextscurrent.
+Browser26commands60.5206879ACTIVEseconds<240, oneclosedsession/twoviewports,
+roles/clocks/failures/success/Pause/sourcepopup/costs/nooverflow verified. FileURL/
+staleref/unsupportednetwork errors kept; server69560closedCtrlCexpectedexit1.
+IndependentSOURCE/ACTUAL/finaldocsaccepted; closure .2722706s,7testedtextscurrent,
+10whitespacepaths/scopedgitdiff0; knownARCH/CHANGELOGEOFdebt preserved/excluded.
+Allownershipreleased/unusedengineeringCLOSED. No newlearning/nativework.
+NextoptionalactualMiniGridadapter/smallenvsmoke at existingports; bothpackages
+absentlookup, observation/action/termination contract first, notanotherpresenter.
+
+
+## R2.1/R4.2 acquired-task matched replay — scoped accepted, 2026-10-16
+
+Stage r21-acquired-replay-20261016/SCOPE.md, dirtyHEAD09ff811 sharedcheckout.
+Root owns caller/CLI/controllers/docs/plans/log; training_only_stream owns
+acquiredhelper/accounting/newcomponenttests; weighted_bc_tests newcallertests;
+weighted_bc_review stageREVIEW. Existing recent48/coverage policies, same
+48transition/12096arrayB cap, every2wake one8rowepisode.320wake+160replay=
+480native/3840rows each, ownedwake192/256/320 nativestates288/384/480 and12TRAIN
+legalreadouts afterfinish,21rawpoints. Eacharm verifies A192 and C256 acquisition
+independently; replay changesprefix/no identicalstartingweights. No final/probe/
+prior/tuning/newrunner. Workers60sstatics/reviewer60sreads/no runtime; rootfocused
+150body180parent. Solecase PERarm sequential onlyafterSOURCE/gates/freeze/GO:
+480SGD3840rows4992unroll270predict18env192steps90body120parent768MiB8MiB,
+CPU1GPU0/no retry/sweep. Component63authoredcases/finalstaticsPASS18.4885678s,
+initialbothmypy2Optionalclock errors fixed; authorreleased/runtime0.
+Caller41cases/statics22.8070585s afterinitialbothmypy1unionattributeerror,
+finalPASS; allauthorsreleased. Root6pathstatics10.8520818sPASS/SOURCEaccepted.
+Combined23module focused150.0137153s timeout/noJUnit preserved/session50697
+terminal1. ProspectiveONE360body390parentengineering successor recordedSCOPE,
+suffixrequalified/session39442 terminal0,735PASS/0skip187.4153057s;
+cumulative337.429021s. ActualbothdescribesPASS/25textsfrozen/8accepteddepsunchanged.
+IndependentGO thenSOLEPERarm native480SGD3840rows4968unroll246predict18env168steps,
+57.5436666/55.149244parentseconds/allcapsPASS/no retry. BothinitialA/Cacquired,
+identicallivefailurepattern/primarydifference0 despitecoverageCrawfitbetter.
+Analysis/compare/independentACTUAL accepted. NativebothSPENT/allcommandsterminal;
+finaldocs/closure accepted25frozencurrent/9whitespacepaths/scopedgitdiff0.
+Allownershipreleased/unusedengineeringCLOSED; reviewer~11sreads<60s/runtime0.
+NextR4.7existinginspectorexplicitTRAINreportprojection,
+originalpointers/wake-nativeclocks/costs; no furtherexperiment ornewrunner. Parent
+Path/stdouthandleshadow bug fixed beforeexecution; partialstdoutcapture added
+for futuretimeouts. No originaltimeout qualified aspass; no moreblindescalation.
+
+
+## R2.1/R4.2 acquired-task return — scoped accepted, 2026-10-16
+
+Stage r21-acquired-task-return-20261016/SCOPE.md/dirtyHEAD09ff811/sharedcheckout.
+Root existingcaller/CLI/controllers/docs+newpublicationtests; training_only_stream
+newacquired_task_return/additivecoremetrics/newcomponenttests; weighted_bc_tests
+newcallertests; weighted_bc_review stageREVIEW. Workers60sstatics/reviewer60sreads
+runtime0; rootfocused150body180parent. Sole320SGD2560rows3712unroll270predict/
+18env192steps90body120parent768MiB8MiB CPU1GPU0 afterSOURCE/gates/freeze/GO.
+FixedA64/B64/A64/C_train64/A64, samelegalowned192/256/320A/Creadouts onlyafter
+finish, no prior/final/probe/selection/gating. Existing192prefix/source/rawA/B
+reusednecessarycontinuation; oldtensorsnotinJSON. Raw/liveinitialfitcondition
+affectsinterpretationonly. Componentstatics19.8669787s/caller12.3165647sPASS/no runtime. Publicationfinding
+fixed beforequalification;41+34+2newcases, root7pathstatics10.5418984sPASS.
+509combined FIRSTPASS55.087pytest55.7016475parent/0skips; realdescriptorPASS,
+21texts frozen,7unchanged executiondeps; independent SOURCE/GO/ACTUAL accepted.
+Sole native320SGD2560rows3688unroll246predict18env168steps39.472504parentseconds,
+allcapsPASS/no retry. InitialAacquired, Cacquires/Alost, Arecovers/Clost;
+retentionfails/no generalization/savings/CPCclaim. AnalysisPASS. NativeSPENT,
+allownershipreleased/commands terminal; closure/finaldocs accepted,unused
+engineering CLOSED. Reviewer~8sreads<60s/runtime0. Next existing
+recent48/coverage matched replay composition, each arm initialcondition separately
+verified because replay changes prefix;320wake+160replay480native, no new runner.
+
+
+## R2.1/R4.2 fixed-A equal-exposure control — scoped accepted, 2026-10-16
+
+Stage r21-fixed-a-exposure-20261016/SCOPE.md/dirtyHEAD09ff811/sharedcheckout.
+Root existing acquisitioncaller/CLI/controllers/docs; training_only_stream owns
+existingtrain_policy_diagnostics endpoint64defaultOR128 +NEWendpointtests;
+weighted_bc_tests NEWfixedexposurecallertests; weighted_bc_review stageREVIEW.
+Workerstatics60seach/reviewerreads60s/no runtime; rootfocused150body180parent.
+Sole128SGD1024rows1216unroll66predict8env88steps24priorcallbacks/90body120parent/
+768MiB8MiB CPU1GPU0 onlyafterSOURCE/gates/freeze/GO. OriginalmeanCE/seed17,
+same128A exposure asacceptedreturn128A+64B; rawcomparison total128vs192work
+explicit, standalonelegal0/128live not oldunmaskedreturncomparison. No newmath/
+runner/final/probe/tuning. Helperreleased38authoredcases/statics17.2293771sPASS.
+Rootdescriptor inheritedten-scorewording corrected to18 beforequalification.
+Authorsreleased, caller28newcases/finalstaticsPASS27.1790331s afteronepreserved
+mypyannotationfailure. Root5pathstaticsALLPASS9.2732266s, independentSOURCE
+accepted. Combined329FIRSTPASS25.156pytest25.904222parent/0skips; actualdescriptor
+code0/.6153325s,19texts/actualprotocolfrozen,4controllerscompilePASS.6unchanged
+baselineexecutiondeps/8meanfields+returngeometry-defaultsmatch. NextGO/solecase;
+sole nativeafterGO code0/12.4170836parentseconds/allcapsPASS; rawA128 .9375acc/
+.5seq, bluelegalSuccess/redwrongkey, priorcomparisonnull. Analysis/independent
+ACTUAL/finaldocsaccepted19textscurrent. NativeSPENT/allcommands terminal/
+allownershipreleased/unusedengineeringCLOSED.
+Nextsubstantial192prefix+C_train64/A64continuation, matching A/Clegalreadouts;
+A192equal-totalcausalcontroldeferredexplicitly, notanotherobjective/capture.
+
+## R2.1/R4.2 weighted train-only acquisition — scoped accepted, 2026-10-16
+
+Stage r21-weighted-train-live-20261016/SCOPE.md; dirtyHEAD09ff811/sharedcheckout.
+Root existing acquisitioncaller/CLI/controllers/docs; training_only_stream NEW
+torch_train_weighted_learner+componenttests; weighted_bc_tests NEWcaller tests;
+weighted_bc_review stageREVIEW only. Existing complete currenttrain-episode
+weights/native objective, same64dose/seed/readout, no final/probe/selection.
+Workers60sstatics/no runtime, reviewer60sreads; root150body180parentfake.
+Sole native64SGD512rows640unroll58predict8env88steps24priorcallbacks,
+90body120parent768MiB8MiB CPU1GPU0 only after SOURCE/gates/freeze/GO.
+No descendantworkers/Git/index/network/installs/CI or baseline rerun. Preserve
+weightedBC8/mean64negatives; no causality/improvement promise. Authorsreleased;
+componentstatics23.3559854sallPASS; testauthor24.464522safterinitial2mypyannotation
+failures. RootfivepathstaticsPASS9.2247264s; SOURCE accepted/localownerrollback
+fix+2regressions. Combined263firstPASS18.393pytest19.1757444parent/0skips;
+actualdescribePASS/.5985868s,22textsfrozen,7unchangedmeandependencies/15matched
+protocolfields. IndependentGO/sole nativePASS19.1850599parentseconds/allcaps,
+savedanalysisPASS. EndpointworseCE/tiedaccuracy/zeroalllive; priorcomparisonnull.
+NativeSPENT/allcommands terminal; ACTUAL/finaldocsaccepted/allownershipreleased/
+unusedengineeringCLOSED. NextmissingA128
+equal-A-exposuremeancontrol, no moreweightedobjective/captureincrement.
+
+## R2.1/R4.2 train-only closed-loop acquisition — scoped accepted, 2026-10-16
+
+Shared dirty HEAD09ff811/stage r21-train-live-20261016/SCOPE.md. Root existing
+train_acquisition_pilot/CLI/docs/controllers; training_only_stream NEW bounded
+train_policy_diagnostics+helpertests; weighted_bc_tests NEWcaller tests; reviewer
+stageREVIEW. Workers60sstatics each/reviewer60sreads, no runtime; rootfake180parent/
+150body. Sole64SGD512rows<=640unroll58nativepredict/24priorcallbacks8env88steps,
+90body120parent768MiB8MiB CPU1GPU0. Priorzero supportrefusal explicit/no smoothing/
+completedmetricimputation; all4learner episodes remain. No final/probe/selection.
+Authors released;197latestPASS after preserved191PASS6FAIL test-expectation gate;
+fivepathstaticsPASS/SOURCE+GO accepted/18textsfrozen. Sole native64SGD8.6589473
+parentseconds/allcapsPASS; allfourlearnerlivefail, bothpriorzero-massrefuse,
+comparisonnull. SavedanalysisPASS; ACTUAL/finaldocs accepted. All commandhandles
+terminal/nativeSPENT/all ownership released/unusedengineeringCLOSED. Next objective existingweightedCE
+composition in same64trainstream, not newcapture/audit or final-driven tuning.
+
+## R4.2 legal warm-start pair — scoped accepted, 2026-10-16
+
+HEAD09ff811/shared dirty checkout; stage r42-legal-warm-pair-20261016/SCOPE.md.
+training_only_stream owns existing rewardpilot; weighted_bc_tests owns only new
+legal-pair tests; weighted_bc_review owns stageREVIEW; root CLI/docs/controllers.
+Worker statics60s each/reviewer60s reads/no worker runtime/native; root focused
+180parent150body, sole nativepair90body120parent768MiB8MiB24SGD224rows1600unroll/
+928predict96env1056steps/CPU1GPU0. Finalshared8afterboth24commits, samelegal live
+information/fullwarmstate match; default/negative results preserved. No sweep.
+Authorsreleased; rootfinalseal2regressions afterconcretereviewfinding. Final107PASS
+(first106/1messagefailurepreserved),3pathstaticsPASS/SOURCE+GO+ACTUAL accepted
+solepair24SGD72.4083152sparent, allnativecaps. All8reward0/liveendpointsidentical
+1/8success0meanreturn, CEmarginallybetter/accuracylower; nomomentumrewardclaim.
+Finaldocsaccepted/allownershipreleased/allcommandsstopped/nativeSPENT/unusedengineeringCLOSED.
+
+## R4.2 legal-conditioned game integration — scoped accepted, 2026-10-16
+
+Shared dirty HEAD09ff811; artifacts/runs/r42-legal-game-20261016/SCOPE.md.
+Root owns reward pilot/CLI/controllers/docs. training_only_stream owns existing
+app evaluator/shared live + new evaluator tests; weighted_bc_tests owns new legal
+recipe fake tests; weighted_bc_review owns stage REVIEW. Source/native core reused.
+Workers run only scoped statics (45/60seconds cumulative), reviewer60seconds reads;
+root focused180parent/150body768MiB, sole native8SGD90body120parent768MiB8MiB.
+All CPU/BLAS/Torch/interop1/GPU0. No index/Git/network/dependency/CI operations.
+Final packets deferred until8validated commits; actual conditional collection/PG/
+live law, raw teacher CE separate. No new runner, comparison, seed tuning or sweep.
+Authors released before combined215PASS/sixpathstaticsPASS. SOURCE/GO/ACTUAL
+accepted soleCLI8SGD19.9546531parent seconds, allnative ceilingsmet; train8/8zero
+reward and all40livefailures preserved. FakeRSS unknown. Finaldocsaccepted/allownershipreleased;
+allprocessesterminal/nativeSPENT/unusedengineeringCLOSED.
+
+## R4.2 matched four-phase replay — scoped accepted, 2026-10-16
+
+HEAD09ff811/shared dirty checkout; stage r42-matched-four-phase-replay-20261016/
+SCOPE.md. Root adapter/new fixed-policy-protocol module/CLI/controllers/docs;
+accounting author return_replay_accounting+newtests; independent author newpilot
+tests; reviewer stageREVIEW. Existingrecent/partitioned policies, equal384native/
+16transitionretention; two serialisolatedCLIchildren after SOURCE/gates/freeze/GO.
+No-replayreference reused, no newalgorithm orfinaltuning. Worker runtime/native0.
+Authors released before combined200selected198PASS2descriptorFAIL; correctedtwo
+PASS/latest200qualified202exec, staticsPASS/final13inputs+protocolsfrozen.
+SOURCE/GO/ACTUAL accepts soleisolatedpair768SGD/51.1928012parentseconds/allcaps.
+PrimaryfinalB/Csuccess0tie; allnegatives/exposureconfound/failures preserved.
+Both native allowances SPENT/no retry/commands terminal; finaldocsaccepted,
+reviewer ownership released and unused engineering allowances CLOSED.
+
+## R4.2 four-phase policy evaluation — scoped accepted, 2026-10-16
+
+HEAD09ff811/shared dirty checkout, stage r42-four-phase-policy-20261016/SCOPE.md.
+Root trainadapter/CLI/controllers/docs; evaluation author return_policy_evaluation
+and key_door_pilot plus newboundarytests; independent test author newpolicytests;
+reviewer stageREVIEW. Existing runner/state guards;256train thenfivecheckpoints/
+40liveepisodes/final-only packets. Worker runtime/native0; one bounded native
+case only after finalgates/freeze/GO. Original defaults/allnegative results kept.
+All authors released ownership. Final153focused/six-pathstaticsPASS,12inputs/
+protocol frozen; independent SOURCE/GO/ACTUAL accepts sole256SGDcase13.2840836
+parentseconds/allcaps pass. Four successes C_train192/A256,36illegal; Cforgotten,
+B/Dallfail. Native allowance SPENT/no retry; ownedcommands terminal. Finaldocs
+accepted/reviewer ownership released; unused engineering allowances CLOSED.
+Fullparent/goalopen. Author2typingfailures corrected/preserved.
+
+## R4.2 four-phase train-only sequence — scoped accepted, 2026-10-16
+
+HEAD09ff811/shared dirty checkout; stage r42-four-phase-train-20261016/SCOPE.md
+defines exact interfaces/caps. Root train_acquisition adapter/attribution CLI and
+controllers/docs; core author context_return_metrics.py/newfourphasemetricstests;
+independent tests author newfourphasepilot tests; reviewer stageREVIEW only.
+Six train-only packets, A64/B64/C_train64/A64 on existing runner. No final/probe/
+replay/live work. Worker runtime/native0; root combined checks and ONE256native
+case only after SOURCE/GO/freeze. Original protocols/negative results preserved.
+Authors released ownership before root181 focusedPASS/five-pathstaticsPASS.
+SOURCE/GO/ACTUAL accept sole256SGDcase/5.2616786parent seconds, allcaps pass,
+816decision arithmetic/sharedA-Bprefix128 exact. Native allowance SPENT/no retry;
+all commands terminal. C fits then is forgotten; fullparent stays open. Final
+docs accepted; reviewer ownership released, unused engineering allowances CLOSED.
+Reviewer saved-only arithmetic failure corrected/preserved.
+
+## R4.7 recorded key/door inspector — scoped DONE, 2026-10-16
+
+HEAD09ff811/shared dirty checkout; stage r47-key-door-inspector-20261016/SCOPE.md
+fixes schema, ownership and shared resource limits. Root file boundary/template/
+CLI/docs; projection author app/key_door_inspector.py+ownunit tests; independent
+file/CLI test author separatetest; reviewer stageREVIEW only. Existing v14 path
+unchanged. Saved-report work only; no native or environment work authorized here.
+Authors released ownership. Combined122 focusedPASS, final22 file/CLI recheck,
+five-path statics/both types, JS syntax, three final saved builds/source equality
+and independent SOURCE/ACTUAL accepted. Browser evidence includes preserved
+failures/mobile correction; Pause-click unobserved. Final docs accepted; reviewer
+ownership released, unused engineering allowances CLOSED. Original five-minute
+active browser timing ceiling remains unverified, not passed or renewed.
+Full R4.7 remains open. All owned browser/server commands terminal.
+
+## R2.1 return fresh-task probes — DONE, 2026-10-16
+
+HEAD09ff811/current shared checkout; acceptance/resources in
+r21-return-fresh-task-probes-20261016/SCOPE.md. Root owns train adapter/CLI/
+controllers/docs/plans/log. Common author owns fresh_task_probe.py,
+key_door_learnability.py and new test_fresh_task_probe_boundaries.py; integration
+test author owns new test_return_fresh_task_probe_pilot.py; reviewer owns stage
+REVIEW.md. All other paths read-only. All author ownership released; combined239 latestcases PASS (two initial CLI
+failures preserved, four-case recheck passes),7path statics PASS;18inputs and
+actual off/on descriptions frozen. Independent SOURCE/GO/ACTUAL accepts sole544SGDpairedcase/26.8574727parent seconds,
+exactoldbenchmarkprojections andallfourEcurves; allcaps pass/no retry. All native
+execution terminal; finaldocs accepted, all author/reviewer ownership released,
+unused engineering allowances CLOSED. Accepted prior
+artifacts reused, both prefixes needed only for disposable post192 probe states.
+
+## R2.1 / R4.2 context-return episode replay — DONE, 2026-10-16
+
+HEAD09ff811/current shared checkout; stage r21-return-episode-replay-20261016/SCOPE.md
+owns acceptance/budgets and preserves accepted off evidence. All execution terminal; sole native allowance spent.
+Root owns train adapter/new accounting helper/CLI/controllers/docs/plans/log;
+independent test author owns new test_return_episode_replay_pilot.py; reviewer owns
+stage REVIEW.md. No overlapping writers or native work by authors. Root statics/focused143/native pass; independent SOURCE/GO/ACTUAL/finaldocs accepted.
+All author/reviewer ownership released; unused engineering allowances CLOSED.
+Test author26.8071334s statics/runtime0; root17.7112357s statics/19.7141726s fake
+parent/28.4392079s native parent. All original caps pass. Shared fake and
+native budgets are fixed in SCOPE. See current development log for prior evidence.
+
+## R4.2 weighted demonstration objective — DONE, 2026-10-16
+
+HEAD09ff811/shared dirty dependencies preserved. Stage
+r42-weighted-demonstration-20261016/SCOPE.md fixes API/math/ownership and amendedcaps.
+
+| Owner | Exclusive paths | State | Limits |
+|---|---|---|---|
+| line_rollout_app | new core weights helper+unit tests | DONE/released | statics60s/runtime0 |
+| line_rollout_tests | new test_torch_recurrent_weighted.py | DONE/released | statics60s/runtime0 |
+| root | native lazy method/weighted module/typed port/fake tests/docs | DONE/released | shared caps |
+| line_rollout_review | stage REVIEW.md | DONE/released | source/saved only |
+
+Independent SOURCE/GO/RECOVERY GO/ACTUAL accepts147fake+24native171cases513PASS.
+Original launch UNKNOWN/fullallowance reserved; observed smaller recoverypasses,
+combined conservative69SGD596rows2140unroll130predict within amendedcaps. No science
+or usefullearningclaim. All execution terminal; unused allowances CLOSED after
+finaldocsreview. FullgoalACTIVE; next matched weighted/mean BC-only recipe.
+
+## R2.1 key/door decision route and measurement — DONE, 2026-10-16
+
+HEAD09ff811/shared dirty dependencies preserved. Stage
+r21-key-door-decision-route-20261016/SCOPE.md fixes ownership and shared caps.
+
+| Owner | Exclusive paths | State | Limits |
+|---|---|---|---|
+| line_rollout_app | key_door_learnability.py + new direct-helper test | DONE/released | statics60s/runtime0 |
+| line_rollout_tests | new test_key_door_decision_route.py | DONE/released | statics60s/runtime0 |
+| root | key_door_pilot.py/CLI/controllers/docs/plans/log | DONE/released | shared caps |
+| line_rollout_review | stage REVIEW.md | DONE/released | source/saved only |
+
+Independent SOURCE/GO/ACTUAL accepts88focused264PASS/current5pathstatics/sole
+84SGD672rows1738unroll diagnostic case and exact old projection. All4endpoints
+chooseleft/all80livefail; no useful adaptation/CPC claim. Execution terminal,
+unused allowances CLOSED after docs review. Full goal ACTIVE; next explicit
+train-only experimental weighted demonstration objective, unchanged mean-CE baseline.
+
+## R2.1 reserved-probe decision diagnostics — DONE, 2026-10-16
+
+HEAD09ff811/shared dirty dependencies preserved. Stage
+r21-probe-decision-diagnostics-20261016/SCOPE.md fixes ownership and shared caps.
+
+| Owner | Exclusive paths | State | Limits |
+|---|---|---|---|
+| line_rollout_app | new core diagnostic helper+unit test | DONE/released | statics60s/runtime0 |
+| line_rollout_tests | new test_fresh_task_probe_diagnostics.py | DONE/released | statics60s/runtime0 |
+| root | existing probe app/native test/controllers/docs/plans/log | DONE/released | shared caps |
+| line_rollout_review | stage REVIEW.md | DONE/released | source/saved only |
+
+Independent SOURCE/GO/ACTUAL accepts155fake+1native/468passing phases/final5path
+statics. Sole native2SGD16rows80unroll8predict24physics within original limits;
+full-state/report/call equivalence and isolation pass. No new scientific quality
+comparison. All runtime handles terminal; unused allowances CLOSED. Full goal
+ACTIVE; next adapter/CLI opt-in forwarding, not checkpoint/audit infrastructure.
+
+## R4.2 matched warm-start control — DONE, 2026-10-16
+
+HEAD09ff811/shared dirty dependencies. Stage r42-warm-start-control-20261016/SCOPE.md
+fixes one comparison, ownership and shared resource caps; old allowances CLOSED.
+
+| Owner | Exclusive paths | State | Limits |
+|---|---|---|---|
+| root | existing reward recipe/CLI/root tests/controllers/docs/plans/log | DONE/released | shared caps only |
+| line_rollout_tests | new test_warm_start_control_pilot.py | DONE/released | statics60s/runtime0 |
+| line_rollout_review | stage REVIEW.md | DONE/released | source/saved evidence only |
+
+Independent SOURCE/GO/ACTUAL accepts187qualified561latestPASS/final5pathstatics/
+sole24SGD139rows798unroll pair. Mixed/negative outcomes retained; usefulgoalopen.
+Finaldocsaccepted/released; allruntimehandles terminal, unused allowances CLOSED.
+No further native case in this scope; full repository goal ACTIVE.
+
+## R4.2 demonstration-to-reward phase — DONE, 2026-10-16
+
+HEAD09ff811/shared dirty checkout. Stage r42-demonstration-reward-phase-20261016/
+SCOPE.md fixes interfaces, ownership and shared engineering limits. Prior work
+owners/allowances remain released/CLOSED; no new scientific comparison authorized.
+
+| Owner | Exclusive files | State | Limits |
+|---|---|---|---|
+| line_rollout_app | new torch_demonstration_reward_learner.py + unit test | DONE/released | statics60s/runtime0 |
+| line_rollout_tests | new test_demonstration_reward_pilot.py | DONE/released | statics60s/runtime0 |
+| line_rollout_review | stage REVIEW.md only | DONE/released | source/saved evidence only |
+| root | recipe/CLI/shared opt-in budget/native test/docs/plans/log | DONE/released | central shared caps |
+
+
+Independent SOURCE/GO/ACTUAL accepts172qualified516latestPASS and train-only
+11SGD69rows74unroll nativecontinuation. Bothfailedguards preserved; ordinarypytest
+passes same original caps. Full16update scientificrecipe unexecuted. Final docs
+review accepted/released; runtime processes terminal, unused allowances CLOSED;
+no further native work in this scope.
+
+## R4.2 separate recurrent RL route — DONE, 2026-10-16
+
+HEAD09ff811/master/shared accepted dirty dependencies, root sole integration/
+runtime owner. Contract/limits artifacts/runs/r42-recurrent-rl-pilot-20261016/SCOPE.md.
+
+| Dispatch | Parent | Owner | Exclusive paths | State | Limits |
+|---|---|---|---|---|---|
+| rl-port-1 | R4.2 | line_rollout_app | new torch_reward_update_learner.py +test | DONE/released | ownedstatics60s/runtime0 |
+| rl-tests-1 | R4.2 | line_rollout_tests | test_key_door_reward_pilot.py | DONE/released | ownedstatics60s/runtime0 |
+| rl-review-1 | R4.2 | line_rollout_review | stageREVIEW.md | DONE/released | source/evidenceonly |
+| rl-recipe-1 | R4.2 | root | newrecipe/existinglive/scorer/CLI/rootstest/docs/controllers/plans/log | DONE/released | sharedcaps only |
+
+No overlapping writes/Git/install/recursive delegation. Prior ownership and
+allowances remain released/CLOSED; full repository goal ACTIVE.
+
+Independent SOURCE/GO/ACTUAL accepted the route and preserved negative case.
+125 distinct cases qualify; final ten-path statics pass. Sole native case terminal,
+8SGD/11rows/382unroll; unused allowances CLOSED. Final docs review accepted/released; no more
+runtime work. Full R4.2 and repository goal remain open.
+
+## R4.2 recurrent reward component — DONE, 2026-10-16
+
+HEAD09ff811/master/shared dirty checkout; accepted dependencies preclude a clean
+worktree transplant. Root runtime/integration owner, no Git/index mutations.
+Source contract/shared limits: artifacts/runs/r42-recurrent-reward-20261016/SCOPE.md.
+
+| Dispatch | Parent | Owner | Exclusive paths | State | Limit |
+|---|---|---|---|---|---|
+| reward-core-1 | R4.2 | line_rollout_app | core/policy_gradient_episode.py; test_policy_gradient_episode.py | DONE/released | statics60s; runtime0 |
+| reward-tests-1 | R4.2 | line_rollout_tests | test_torch_recurrent_reward.py; test_key_door_training.py | DONE/released | statics60s; runtime0 |
+| reward-review-1 | R4.2 | line_rollout_review | stage REVIEW.md | DONE/released | source/evidence only |
+| reward-integration-1 | R4.2 | root | native reward helper/method; app collector; native integration test; docs/controllers/plans/log | DONE/released | central shared caps only |
+
+No author overlaps or further delegation. All previous increments' ownership and
+experiment allowances remain released/CLOSED; full repository goal ACTIVE.
+
+Independent SOURCE/GO/ACTUAL accepts175cases525PASS/17frozen texts/51SGD442
+combinedtimesteps; all command handles terminal, native allowance CLOSED. No
+scientific experiment or fullR4.2claim. Next existing-runner reward route.
+
+## R2.1 tracked observer — accepted, ownership released 2026-10-16 UTC
+
+Original R2.1 implementation accepted after SOURCE/GO/ACTUAL. Full goal active.
+Core owned only learnability_pilot.py; test author only test_tracked_learnability.py;
+root owned builder/rehearsal adapter/CLI/root tests/docs; reviewer only stageREVIEW.
+All DONE/released.116focused/scopedstatics/sole376call new-path verification pass;
+all retained curves/reports exact. Allowances closed/no live jobs/pending approval.
+Stage r21-tracked-observer-20261016/SCOPE.md and RESULTS.md record ownership,
+shared limits, commands and acceptance. Next substantial R2.2 bounded native renewal.
+
+## R2.1 native unit history — accepted, ownership released 2026-10-16 UTC
+
+Native history accepted:218focused/static/sole24-call smoke and independent review.
+All allowances closed; next existing learnability observer composition.
+Previous paired-initialization increment accepted; full goal active. Shared
+checkout HEAD09ff811 with required dirty dependencies, no Git/index mutations.
+Stage artifacts/runs/r21-coupled-unit-history-20261016/SCOPE.md is the narrow
+contract and shared budget. Root is sole runtime owner; authors source/statics
+only; no further delegation. Preserve default models/snapshots and all old results.
+
+| Dispatch | Owner | State | Exclusive paths | Budget / next action |
+|---|---|---|---|---|
+| R21-history-core | linear_reference_core | DONE | two new core history/tracked modules; existing PC/CPC core | serial statics90s, no runtime; release after implementation |
+| R21-history-tests | linear_reference_tests | DONE | tests/test_coupled_unit_history.py | serial statics90s, no runtime; forecast native calls |
+| R21-history-root | coordinator | DONE | coupled_learners.py, native_unit_diagnostics.py, new ports test, docs/artifacts | focused512native updates/8192eval; sole24-update stream smoke after review |
+| R21-history-review | reference_source_review | DONE | stage REVIEW.md only | source/stdlib only; no runtime; review combined tree/gates |
+
+
+**R2.3 rotation ACCEPTED / ownership released:** stage
+r23-rotating-replay-20261016,HEAD09ff811/shared dirty dependencies. Source/test
+released, root existing app/CLI integrated.127currentnodes qualified126+1 after
+initialunsupportedwhole-schedule-copy failure; statics/formatrepair/soleCLI
+independently accepted. Exposurenowseed17B0then1/seed19distinct2, retentionexactv1,
+0executedupdates. Allunused executionCLOSED/no source/test/runtime jobs.
+Closing docs review accepted/released, no unresolved findings. Next coherentnative rehearsal,
+not anothercursor/auditincrement. FullR2.3/nativeintegration remainopen.
+
+**R2.3 partitioned replay ACCEPTED / ownership released:** stage
+r23-partitioned-replay-20261016,HEAD09ff811/shared dirty dependencies preserved.
+Core/test authors released; root existing schedule/CLI/docs integrated.
+82focused/scopedstatics/soletrain-onlyCLI accepted; independentSOURCE/focused/
+ACTUAL passed. Seed17retention-without-exposure negative retained; fullR2.3/native
+integration open. All execution allowances CLOSED; no source/test/runtime jobs.
+Closing docs review accepted/released; no unresolved findings. Next opt-in
+bounded reservoir rotation, separately scoped from this retained trace.
+
+**R2.7 prefix calibration ACCEPTED / ownership released:** stage
+r27-prefix-calibration-20261016,HEAD09ff811/shared dirty deps. Core/testauthors
+released; root existing app/adapter/CLI/docs integrated.187focused/final11path
+statics/sole144update pilot pass; initialtypingfailure preserved. Independent
+SOURCE+GO/ACTUAL accepted; residualBsignal limited/returncarry/featurefalsealerts
+preserved. FullR2.7 open; nextR2.3 existing sharedbuffer hybrid allocation.
+No source/test/runtime ownership or jobs; unused execution allowances CLOSED.
+Closing docs review accepted/released in REVIEW.md; no unresolved findings.
+
+**R2.7 arrived-shift ACCEPTED / ownership released:** stage
+r27-arrived-shift-20261016, HEAD09ff811/shared dirty dependencies preserved.
+Core/test authors released; root adapter/CLI/docs integrated; independent
+SOURCE+ACTUAL accepted.119 focused/scopedstatics/sole144-update pilot complete.
+Initial collection failure preserved (zero phases); full119 repair validation
+passed. All3 channels miss every recurring change; unreachable uncertainty
+threshold documented. FullR2.7 open; next bounded training-prefix calibration
+and reachable-score checks, not retuning v1. All unused allowances CLOSED;
+no session-owned runtime jobs or ownership. Closing docs review accepted;
+checkpoint-score/state wording corrected and finding resolved in REVIEW.md.
+
+**R2.1 sixteen-probe ACCEPTED / ownership released:** stage
+r21-sixteen-probe-20261016, HEAD09ff811, shared dirty dependencies preserved.
+Source/test authors released; root CLI/integration/docs complete; independent
+SOURCE+ACTUAL accepted. 58 distinct focused qualified, initial cap failure and
+one-case validation retained; scoped statics/sole328-update pilot accepted.
+All old prefixes/benchmark exact,9/16negative new endpoints preserved. No live
+runtime jobs/ownership; unused allowances CLOSED. FullR2.1 open; next R2.7
+bounded arrival-only shift observations through the existing runner.
+
+**R2.1 native units ACCEPTED / ownership released:**
+`r21-native-units-20261016`, HEAD09ff811, shared dirty dependencies preserved.
+Source/test authors released their paths; independent source and actual review
+accepted. Root delivered existing stream CLI integration/docs. 107 focused,
+three changed-oracle validations, final scoped statics and sole eight-update CLI
+pass. Failures, oracle-version history, separate allowances and counter limits
+are preserved in RESULTS.md. All unused allowances CLOSED; no live runtime jobs
+or worker ownership. Full R2.1 remains open. Next fixed16-update probe scenario
+through the existing pilot, with a separately frozen/reviewed small protocol.
+
+**R2.1 PROGRESS ACCEPTED/released:** r21-learnability-20261016, HEAD09ff811/
+shareddirtydeps. Source linear_reference_core DONE/released2new; tests
+linear_reference_tests DONE/released81new; reviewer reference_source_review
+SOURCE+ACTUAL accepted; rootpilot/CLI/10integrationtests/docs/canonicalDONE.
+101focused/fourstatics/sole136updatepilot accepted;15/16negativefixedendpoints
+retained withallintermediatecurves. Initialtypingfailure/reviewrepairs retained;
+no scientificretry. AllunusedCLOSED/nojobs/ownership. FullR2.1 importance/age/
+generalization open; nextread-onlynativelegacyimportance/ageadapter.
+
+**SuccessiveCLI ACCEPTED/released:** numpy-successive-demo-20261016,113focused/
+scopedstatics/independentSOURCE+ACTUAL/correctednativePASS, firstconstructororder
+sourcefailurepreserved. AllunusedCLOSED/nojobs/ownership. RESULTS commands and
+limits. FullR3parentsopen; usersteering nextR2.1, no newcaptureincrement.
+
+**Repeated current updates PROGRESS:** original d2/d2b, restored-repeated-
+updates-20261015; HEAD09ff811/shared dirty dependencies preserved. Source
+linear_reference_core DONE/released two paths; tests linear_reference_tests
+DONE/released new27cases and narrow birth helper; reviewer reference_source_review
+DONE/released stageREVIEW, SOURCE/focused/native ACTUAL accepted. Root native/controller/docs/canonical
+integrated.140distinct qualified focused passes/150executions; initial3failures
+retained and exact10repair passed. Four scoped statics PASS. First native
+FAILED/SPENT3updates/capture0, corrected fixture deque lifetime/content-hash
+victim without changing seed/data/policy. Separate native-validation PASS1 with
+three updates/actualrestore/6capture3copy/37fields×3/view/19IDs unchanged,
+retired1/current3/tworows/weakexpiry/raw256/800->1056->1312/exact27773metadata.
+Allunused CLOSED; no continuing runtime jobs or worker ownership. Fullparents
+open; next expose bounded successive-update option in existing NumPy CLI.
+
+**Current update PROGRESS ACCEPTED:** original d2/d2b,
+restored-current-update-20261015, HEAD09ff811/shared dirty dependencies preserved.
+Source linear_reference_core DONE/released new replay_publication_updates and
+four narrow seams; tests linear_reference_tests DONE/released49new; reviewer
+reference_source_review SOURCE/ACTUAL accepted/released stageREVIEW. Root native/
+docs/ADR0306/controllers/canonical integrated. Authors no runtime.370distinct
+focused passes/scoped statics/sole1native two-update PASS; initial36fixture
+failures preserved, live32birthpositive/16negative and separate49repair declared.
+418exec/cumulative162.8237959sparent, no initial150 overclaim. Native37fields×3/
+19IDs/view/retired1-current2/eviction/raw224/736->960->1184/exact27153metadata.
+Allunused CLOSED/no continuingjobs/ownership. Original parents open. Next another
+successive current update using latest success with original retired baseline.
+
+**Restored demo PROGRESS ACCEPTED:** original d2/d2b, numpy-restored-demo-20261015.
+HEAD09ff811 shared dirty checkout/accepted dependencies; preserve unrelated edits.
+Source linear_reference_core DONE/released new restored example, narrow setup
+keyword/CLI; tests linear_reference_tests DONE/released34pure; reviewer
+reference_source_review SOURCE/ACTUAL accepted stageREVIEW. Root integration/
+controllers/docs DONE. Authors no runtime.69focused+scopedstatics+sole1native
+CLI PASS;23IDs/fullnativeview unchanged/raw128/608->736/exact25233metadata.
+Allunused CLOSED/no jobs/ownership. Parents open; next later-current update
+capture using existing ledger plus original retired proof. See stageRESULTS.
+
+**Restored replay capture PROGRESS ACCEPTED:** original d2/d2b,
+restored-replay-capture-20261015. Source linear_reference_core DONE/released NEW
+reader+narrow manager/handoff/checkpoint-reader; tests linear_reference_tests
+DONE/released64scalar cases; reviewer reference_source_review SOURCE/ACTUAL
+accepted stageREVIEW. Root native/setup keyword/controllers/docs integrated.
+Authors no runtime/imports/fixtures/native/tests/threads/subworkers.321distinct
+focusedPASS/scopedstaticsPASS/sole1nativePASS. Initial57failures from inherited
+fixture8 allowance preserved; separate32 birthpositive/8negative and cumulative
+118newgraphs/384exec/7joined/75.7182412sparent declared/recorded. Actual restore,
+128raw/608->736->864charges/exact25233metadata,19originalIDs/fullstate unchanged.
+Allunused CLOSED/no activejobs/ownership. Parents open. Next explicit restored
+demo/CLI mode, existing default/issued modes preserved. Evidence:stageRESULTS.
+
+**Issued snapshot demo PROGRESS ACCEPTED:** original d2/d2b, numpy-snapshot-demo-20261015.
+Same HEAD09ff811 and necessary dirty dependencies; unrelated changes preserved.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| snapshot-demo-source | linear_reference_core | DONE | new numpy_snapshot_capture_example.py, author receipt | released/staticPASS |
+| snapshot-demo-tests | linear_reference_tests | DONE | new test_numpy_snapshot_demo.py, author receipt | released/34purePASS |
+| snapshot-demo-review | reference_source_review | DONE | stage REVIEW.md only | SOURCE/ACTUAL accepted/released |
+
+Root CLI/newnative/controllers/docs/canonical integrated. Workers performed no
+native/fixture/test/thread execution.35focusedPASS/scopedstatics/independentreview
+and sole fixed nativeCLI1casePASS; previous API/constructor evidence reused.
+17originalIDs/tokenpending/fullnativeview unchanged,128raw/224->352charge. All
+unusedCLOSED/no activejobs/handles/samplerworkers/ownership. Broader parents stay
+unchecked. Next actual restored current/retired graph capture qualification.
+
+**Issued snapshot branch PROGRESS ACCEPTED:** original d2/d2b, checkpoint-snapshot-capture-20261015.
+Source linear_reference_core DONE/released five paths/staticPASS; tests
+linear_reference_tests DONE/released57fake cases/staticPASS; independent
+reference_source_review DONE/released stage REVIEW.md SOURCE/ACTUAL acceptance.
+Root new native integration/controllers/docs/ADR0304/canonical DONE. No author
+runtime; root232focused +sole1nativePASS. One borrowed original cursor/stamp
+fixes repeated bookkeeping under unchanged capacity2; separate graph-channel
+counters/counts prospectively clarified.17originalhandles/tokenpending/fullstate
+unchanged, original4096/raw128/224->352->480->608charges. AllunusedCLOSED/no
+activejobs/handles/samplerworker/ownership. Whole parents remain unchecked.
+Next opt-in one-case nonempty issued-snapshot demo mode, default cases preserved.
+
+**Original R3.5b2e5b3d2/d2b PROGRESS ACCEPTED:** retained constructor-copy branch.
+Scope retained-replay-capture-20261015, sameHEAD09ff811/necessarydirtydeps.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| replay-bridge-source | linear_reference_core | DONE | NumPy/app/replay forwarding, new replay_copy_capture; existing model-copy/NumPy constructor/copy-witness recipient seams | released/accepted |
+| replay-bridge-tests | linear_reference_tests | DONE | new retained-replay fake tests/test static receipt | released/175combinedPASS |
+| replay-bridge-review | reference_source_review | DONE | stage REVIEW.md only | SOURCE/ACTUAL progress accepted/released |
+
+Root canonical/docs/ADR0303, new native integration and3pure recipient tests,
+controllers. No worker runtime/fixture/native/test/thread execution. Existing
+borrowed copy observation is extended only because original wrapper identity is
+missing; never infer it later from mutable list/content. Old public witnesses stay
+compatible, new capture refuses unbound recipient. All parents remain unchecked.
+
+Initial observer incorrectly blocked a stubbed adapter-forwarding test and then
+disabled itself:175runFAILED/partial observations preserved. Prospective fresh
+same175 with wrapper/coordinator distinction PASS; no product/test changes.
+Sole native1casePASS/fulloriginalfields/handles/raw96/256->352->448charges; no
+nativeincapture/threads. AllunusedallowancesCLOSED, no active jobs/handles/sampler
+workers/ownership. Next existing captured-snapshot witnesses, same open d2/d2b.
+
+**R3.5b2e5b4 DONE:** actual legacy populated/retired capture example.
+Same HEAD09ff811/necessary dirtydeps; scope numpy-retained-capture-20261015.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| legacy-source | linear_reference_core | DONE | new NumPy capture example/source statics | released/accepted |
+| legacy-tests | linear_reference_tests | DONE | new retained-capture tests/test statics | released/58distinctPASS |
+| legacy-review | reference_source_review | DONE | stage REVIEW.md | SOURCE/ACTUAL accepted/released |
+
+Root CLI/canonical/docs/controllers; no author native/fixture execution. Naturally
+empty replay at zero updates; nonempty copied lineage remains unqualified. Only
+the explicit new bounded scopes run, no renewal of historical budgets.
+
+Initial focused3fails then repair2fails preserved; root final two-test correction
+compares actual deliberately distinct ticket/pending reports. All58distinctcases
+PASS over63executions; sole2case nativePASS, no training/nativeincapture/threads.
+Exact original raw184->336/152retained each, allhandles/nativestates preserved.
+All unused allowancesCLOSED; no active jobs/handles/sampler workers/ownership.
+Next originalb3d2 lease-aware retained checkpoint witness capture integration;
+nonempty copied replay continues to refuse until that path is qualified.
+
+**R3.7ah DONE:** live complete B/C checkpoint files with original continuation.
+Same HEAD09ff811/necessary dirty deps; scope coupled-live-checkpoints-20261015.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| ah-source | linear_reference_core | DONE | new live adapter/narrow serving seam/source static receipts | released/accepted |
+| ah-tests | linear_reference_tests | DONE | new live checkpoint tests | released/108combinedPASS |
+| ah-review | reference_source_review | DONE | stage REVIEW.md | SOURCE/ACTUAL accepted/released |
+
+Root CLI/canonical/docs/controllers. No worker fixture/native execution. Newmode
+copy cap1496 at birth, no reset/refund; zero authority reconstructed. Old modes
+stay unchanged; broader parents remain open.
+Initial failednative beforecopy/file preserved, separate constructor repair and
+same-six-case run accepted.12files629888B,originalcontinuation/cleanup/native0
+during saver. All unusedbudgets CLOSED, no active jobs/handles/retentionworkers.
+Next original R3.5b2e5b legacy populated/retired all-native capture qualification.
+
+**R3.7ag DONE:** existing file-store + complete coupled codec CLI composition.
+Scope: artifacts/runs/coupled-composite-files-20261015/SCOPE.md. Same checkout/
+HEAD09ff811 and accepted dirty dependencies; unrelated changes preserved.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| ag-source-20261015 | linear_reference_core | DONE | new file CLI / source-static receipt | released; accepted |
+| ag-tests-20261015 | linear_reference_tests | DONE | new file tests / test-static receipt | released;35new/121combinedPASS |
+| ag-review-20261015 | reference_source_review | DONE | stage REVIEW.md | released; SOURCE/ACTUAL accepted |
+
+Root owns canonical docs/controllers/six saved-graph integration. No worker fixture
+execution or new native allowance. Delivered with no store/codec edits.
+Focused121/6, four static gates and sole6 saved-graph transfers accepted. All unused
+budgets CLOSED, no active child/handle/thread or worker ownership. Next: opt-in
+capture/file mode in existing live demo; authority/recovery restrictions intact.
+
+**R3.7af DONE, 2026-10-15:** bounded complete coupled composite data bytes.
+Scope: artifacts/runs/coupled-composite-codec-20261015/SCOPE.md. Same HEAD09ff811
+plus necessary accepted dirty dependencies, no Git/index mutation.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| af-source-20261015 | linear_reference_core | DONE | new codec/2helpers/author statics | released; accepted |
+| af-tests-20261015 | linear_reference_tests | DONE | new codec tests/stage controller | released;299PASS/11deselected |
+| af-review-20261015 | reference_source_review | DONE | stage REVIEW.md | released; SOURCE/ACTUAL accepted |
+
+Root canonical/docs/native integration; live authority excluded from byte API.
+All unused finite allowances CLOSED. Initial incompletefocusedgate preserved;
+separate reviewed observer correction completed299. Sole6native codecroundtrips
+accepted; no active jobs/handles/threads/ownership. Broader parents remainopen.
+Next: existing bounded file-store composition, data-only load and atomic failures.
+
+
+**R3.7ae DONE, 2026-10-15:** reusable complete coupled managed-state capture.
+Scope: artifacts/runs/coupled-composite-capture-20261015/SCOPE.md.
+HEAD09ff811 plus necessary accepted dirty sources preserved; no Git/index mutation.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| ae-source-20261015 | linear_reference_core | DONE | new coupled capture/native helpers + narrow NumPy walker/codec hooks | released; accepted |
+| ae-tests-20261015 | linear_reference_tests | DONE | new composite tests/stage evidence | released;200+1 passes, no suite replay |
+| ae-review-20261015 | reference_source_review | DONE | stage REVIEW.md | released; SOURCE/ACTUAL accepted |
+
+Root sole canonical/docs/nativecontroller; existing app coordinator and restore
+restrictions unchanged. All unused finite allowances CLOSED. Initial native schema
+refusal and explicit bounded repair remain recorded; six final native casesPASS.
+No active jobs/handles/workerthreads/ownership. Full original goal staysopen.
+Next: bounded complete coupled composite bytes under original authority boundary.
+
+
+**R3.7ad DONE, 2026-10-15:** fixed coupled erasure failure/terminal retry.
+Scope: artifacts/runs/coupled-cleanup-failure-20261015/SCOPE.md.
+HEAD09ff811 + necessary accepted dirty dependencies; no Git/index mutation.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| ad-source-20261015 | linear_reference_core | DONE | shared managed adapter/elapsed factory/new fault module | released; SOURCE/ACTUAL accepted |
+| ad-tests-20261015 | linear_reference_tests | DONE | new cleanup failure tests/stage evidence | released;71PASS/0skips/replays |
+| ad-review-20261015 | reference_source_review | DONE | stage REVIEW.md | released; source/controller/actual accepted |
+| ad-next-read-20261015 | linear_reference_core | DONE | read-only original scope/source | released; coupled composite capture is next gap |
+
+Root sole canonical/CLI/docs/controllers. Fresh finite resources/no carryover;
+all scientific controls preserved.71focusedPASS/scopedstatics/independentreview
+accepted; ONE4mode24case nativePASS7.6032937s/sixexpectedERRORrecords retained.
+AllunusedCLOSED; no active handles/jobs/ownership. Next: reusable complete coupled
+managed-composite capture under original copy admission, no process-restore grant.
+Parent R3.7/G3/fullgoal remainopen.
+
+
+**R3.7ac DONE, 2026-10-15:** committed serving busy stop/finish_cleanup.
+Scope: artifacts/runs/coupled-busy-serving-cleanup-20261015/SCOPE.md.
+HEAD09ff811 + necessary accepted dirty dependencies preserved. No Git mutations.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| ac-source-20261015 | linear_reference_core | DONE | shared coupled_managed_serving.py | released; SOURCE/ACTUAL accepted |
+| ac-tests-20261015 | linear_reference_tests | DONE | new busy tests/stage evidence | released;51PASS/0skips/replays |
+| ac-review-20261015 | reference_source_review | DONE | stage REVIEW.md | released; source/controller/actual accepted |
+
+Root owns CLI/docs/canonical/controllers. Fresh finite resources only; no old
+allowance carryover.51focusedPASS/staticsPASS; ONE3mode18case nativePASS5.2347476s,
+all18workersjoined. AllunusedCLOSED; no active handles/jobs/ownership. Exactnext:
+trusted erasure-fault/terminal retry control with candidates remaining stopped.
+No scientific claim; parents/fullgoal remain open.
+
+**R3.7ab DONE, 2026-10-15:** committed coupled serving expiry/rollback.
+Current09ff811 plus necessary dirty accepted source/CLI/docs preserved, noGit/index/
+deps/network operations. Scope and finite paired-native resources:
+`artifacts/runs/coupled-committed-serving-20261015/SCOPE.md`.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| ab-source-20261015 | linear_reference_core | DONE | shared coupled_managed_serving.py | released; SOURCE/ACTUAL accepted |
+| ab-tests-20261015 | linear_reference_tests | DONE | new committed tests/stage evidence | released;38PASS/0skips/replays |
+| ab-review-20261015 | reference_source_review | DONE | stage REVIEW.md | released; source/controller/actual accepted |
+
+RootownsCLI/docs/canonical/controllers. PreviousR3.7aa accepted evidence reused;
+newpaired tiny native controls cover changed shared adapter.38focusedPASS; scoped
+statics/independentreview accepted; ONEpaired12case nativePASS3.9295684s, all12workers
+joined. All unused allowances CLOSED/no carryover. No active handles/jobs/ownership.
+Exactnext: busy-holder committed stop/finish_cleanup under fresh finite resources.
+Parentgoal remainsopen.
+
+**R3.7aa DONE, 2026-10-15:** managed fixed coupled cached-serving/promotion
+expiry. Base HEADf6a4adb1dc99073bae012e371ace560ea8152555 now includes prior accepted
+source; relevant source clean. Preserve staged docs and all dirty documentation.
+Why: existing structural cache demo is unmanaged. Scope/budgets/interfaces:
+`artifacts/runs/coupled-managed-serving-20261015/SCOPE.md`.
+
+| Dispatch | Owner | State | Exclusive writes | Next action |
+| --- | --- | --- | --- | --- |
+| aa-source-20261015 | linear_reference_core | DONE/released | new coupled_managed_serving.py | freeze runnable composition |
+| aa-tests-20261015 | linear_reference_tests | DONE/released | new test_coupled_managed_serving.py/stage worker evidence | freeze independent boundary tests |
+| aa-review-20261015 | reference_source_review | DONE/released | stage REVIEW.md | source before native and actual before acceptance |
+
+R3.7aa accepted:28 focusedPASS/actualML0; recorded initial3staticerrors/narrowrepair;
+ONE6native2.6355374s/156234B/72ctor36SGD144E54pred42serve/6workers joined,
+independent actual review PASS. Originalcopy640 retained496->0/no refund; all
+owners released/unused CLOSED. Next: committed current+previous serving bundle
+expiry and rollback invalidation under fresh limits. Broader parents remain open.
+
+Root owns CLI/docs/canonical/controller integration. No new algorithm/audit/deps/
+network/Git mutation. Earlier source/evidence reused unchanged; broader goal open.
 
 **R3.7z DONE, 2026-10-15:** elapsed lifecycle/real-worker vertical slice.
 Shared necessary dirty checkout `81f1695e`; root owns CLI/docs/two actor prediction
@@ -4325,3 +11547,130 @@ counters/actor predictions independently accepted in ACTUAL_REVIEW. Joint48train
 192E92pred12children; unused80train320E36pred20children CLOSED/no carry. Source/
 reviewer0models/processes; all handles terminal/authors released. Original recovery
 parents/actor promotion/managedcomponents/coordinatorloss and timingremainopen.
+
+## 2026-10-16 — R2.1/R4.2 declared-context coverage
+
+Shared dirty HEAD09ff811 with disjoint ownership: root app/adapter/CLI/docs and
+integration; training_only_stream new core/coverage_replay + unit tests;
+weighted_bc_tests two new coverage integration test modules; weighted_bc_review
+stage REVIEW only. All authors released before combined gates, reviewer idle
+during sole serial native recent48/partitioned48/coverage cases. CPU/BLAS/Torch/
+interop1/GPU0, original90body120parent768MiB8MiB per arm, cumulative270/360s;
+no parallel experiment, retry, sweep, Git/index/network/dependency changes.
+211 focused cases/statics/SOURCE/GO/ACTUAL accepted; mixed1/4vs0/4 primary success,
+return0all/no broad advantage. All jobs terminal; native SPENT/unused engineering
+CLOSED. [Commands, costs, failures and next action](../artifacts/runs/r42-coverage-replay-20261016/RESULTS.md).
+
+## 2026-10-16 — R2.1/R4.2 four-phase fresh-task probes
+
+Shared dirty HEAD09ff811: root caller/CLI/shared predicate extraction/docs/
+controllers; training_only_stream new protocol descriptor+tests;
+weighted_bc_tests new behavioral tests; weighted_bc_review stageREVIEW only.
+Both authors released before123case combined gate; reviewer idle during one
+coverage-only native diagnosis. Original CPU/BLAS/Torch/interop1/GPU0,
+90body120parent768MiB8MiB;416SGD3328rows/5072maxunroll638maxpredict72env736steps.
+No comparative arm rerun/retry/sweep or network/dependency/Git work. Existing
+helpers already256-capable; only unchanged per-slot completion predicate was
+factored to validate initial success before wake1, with bounded caller seal.
+[Exact commands, observed work, outcomes and handoff](../artifacts/runs/r21-four-phase-probes-20261016/RESULTS.md).
+
+Four-phase probe closure: SOURCE/GO/ACTUAL/final docs accepted, all ownership
+released and commands terminal; sole native allowance SPENT/unused engineering
+CLOSED. Reviewer three harmless path lookup failures retained in REVIEW.
+
+## 2026-10-16 — R4.2 legal-conditioned reward component
+
+Shared dirty HEAD09ff811, explicit disjoint ownership: root collector/native loss/
+method/typed ports/controllers/docs; training_only_stream new core wrapper+tests;
+weighted_bc_tests two new independent native/collection test modules;
+weighted_bc_review stage REVIEW. Authors released before final221-case gate;
+reviewer idle during native checks. CPU/BLAS/Torch/interop1/GPU0; shared focused
+128SGD512predict4096unroll128env2048step cap, actual44/51/323/51/282. Sole smoke
+original2SGD24rows144unroll26predict2env24step/90body120parent768MiB8MiB, actual
+2/24/48/24/2/24 and both truncated zero return. SOURCE/GO/ACTUAL accepted.
+No Git/index/network/dependency work or learning comparison. Core tolerance and
+native actual-underflow findings closed before runtime; failed worker statics and
+one freeze-heading refusal preserved. No new orchestration framework.
+[Detailed evidence and next caller/evaluator action](../artifacts/runs/r42-legal-reward-20261016/RESULTS.md).
+## 2026-10-17 — R4.7 coherent stream inspector
+
+Shared dirty09ff811 with explicit disjoint writes: bounded_factory only new
+app/coherent_stream_inspector_projection.py; shift_feedback_tests only new
+tests/test_coherent_stream_inspector.py; shift_feedback_review only stageREVIEW;
+root routing/fileadapter/CLIhelp/template/stage/integration/canonicaldocs.
+Authors RELEASED before root focused gates; root postrelease validation fixes
+owned by root. Reviewer read/stdlib60s, no tests/models/browser/native. No agent
+subdelegation, parallel scientific work or resource enlargement.
+386combinedPASS/final57presentationPASS/scopedstatics/browser accepted; newnative0.
+Root focused63.9266081/90, statics28charged/60, publication5.2536838/15,
+browser100charged/240; stage+screens<32MiB. Owned browser/server closed. Final
+reviewer exact accounting/release in stageREVIEW; no budgets carried forward.
+[Evidence/remaining claims/next R4.3 action](../artifacts/runs/r47-coherent-stream-inspector-20261017/RESULTS.md).
+
+## 2026-10-17 — R4.3 movement-action mapping
+
+Shared dirty09ff811 actual dependencies; disjoint file ownership. bounded_factory
+only core/key_door_navigation.py; shift_feedback_tests only new mapping and
+collection tests; shift_feedback_review only stageREVIEW; root appcollector/
+evaluator/game+reward+trainadapters/CLI/newpipetests/boundarytest/docs/stage.
+Authors released before root gates, no subdelegation or worker runtime/modelwork.
+Eachworker60read/stdlibs (core1.0s,test.82s), reviewer60/readonly. Root521distinct
+focusedPASS33.3695048/90s, statics34.7397431/60preclosing, previews4charged/15s.
+One reviewed native8SGD94row/541predict915unroll565physics case, actualPIDmonitor
+CPU1/GPU0,90body120parent+10cleanup768MiB8MiBstdout32MiBstage. Actual12.3174669s,
+316059648Bpeak, allfailed/negative evidence preserved. Native SPENT/no retry,
+allownedhandles terminal; finalreviewer accounting/release in REVIEW. Missing
+psutil prelaunch failed beforemarker/child; standardWindows supervisor used
+after newreview, no dependencyinstall. Root solecanonical writer.
+[Exactcommands/outcomes/budgets/nextquota action](../artifacts/runs/r43-action-remapping-20261017/RESULTS.md).
+
+## 2026-10-17 — R4.3 shared physical-interaction quota
+
+Shared dirty09ff811, disjoint ownership. bounded_factory only newcore quota and
+existingappcollector; shift_feedback_tests only two newquota/collection tests;
+shift_feedback_review only stageREVIEW. Root existingrewardrunner/CLI/newrunner
+tests/integration/stage/canonicaldocs. Authors released before root gates, no
+subdelegation or worker runtime. Core1.6/60,test1.21/60read-stdlib seconds; reviewer
+same60readonly, final accounting in REVIEW. Root193focusedPASS35.9360389/90,
+statics42.0682363/60beforeclosing, previews conservatively3/15seconds. CPU1/GPU0;
+sole native9SGD96row/547predict923unroll571physics57episode case after SOURCE/GO,
+90body120parent+10cleanup768MiB8MiBstdout32MiBstage. Actual25.762595s/316358656B.
+Allownhandles terminal, nativeSPENT/no retry/futureGO; failures/negative outcomes
+preserved. No new framework/dependency/network/Git/index/globalsettings changes.
+[Commands, evidence, limitations and next environment-instance action](../artifacts/runs/r43-interaction-quota-20261017/RESULTS.md).
+
+
+## 2026-10-17 - Old A fit on the F-adapting disposable learner
+
+Shared dirty09ff811, explicit disjoint ownership. bounded_factory owned only
+app/fresh_task_probe.py +newapp/probe_training_readouts.py; tests worker only
+newtest_probe_training_readouts.py +newtest_minigrid_old_task_readouts.py;
+reviewer only stageREVIEW.md. Root adapter/CLI/newCLItest/stage/docs/plans and
+released integration. All author files released before root checks. CPU1/GPU0;
+worker command read/stdlibAST only, no repository imports/runtime/native/physics/
+Git/network/deps/settings/subdelegation. Source1.2368847/60s, charge2/58unused;
+tests3.6825244/60s, charge4/56unused. Reviewer final command totals in REVIEW.
+Root focused150.2345593/180s, charge151/29unused; root static/read/docs charge75/90
+conservatively including closure,15unused. No worker allowance expands native
+160update/1440row/62score558row budget. Sole native20.3926202s/377454592B, SPENT;
+once checker .1177828/10s, charge1/9unused. All unused allowances close at handoff,
+no futureGO. SOURCE/GO/ACTUAL accepted; FINALDOCS/release recorded in REVIEW.
+[Commands, all curves, costs, failures, skipped gates and next action](../artifacts/runs/minigrid-probe-old-fit-20261017/RESULTS.md).
+
+
+## 2026-10-17 - Fixed A return on the disposable F learner
+
+Dirty09ff811sharedcheckout, disjointwrites. bounded_factory ONLYappfresh_task_probe
++newapp/probe_return_phase; testworkerONLYnewtest_probe_return_phase+
+newtest_minigrid_a_return; reviewerONLYstageREVIEW.md. Rootadapter/CLI/newadapter
+helper/newCLItest/stage/docs/plans/releasedintegration. Authorsreleasedbeforegates;
+no worker runtime/imports/tests/native/physics/Git/network/settings/deps/subagents.
+CPU1/GPU0shared. Source1.3052538/60scharge2/58unusedCLOSED; tests1.7294285/60s
+charge2/58unusedCLOSED; reviewerfinalchargeinREVIEW. Rootfocused167.3901446/180,
+charge168/12unusedCLOSED; rootstatic/read/docsconservative75/90inclclosure,
+15unusedCLOSED. Sole native192updates1728rows/94scores846rows/90physics10resets,
+26.3838008s/379990016B, SPENT/no retry/futureGO; prior sourcegate reused. Once
+savedchecker .1397353/10scharge1/9unusedCLOSED, no models/physics replay. SOURCE/
+GO/narrowACTUAL accepted; FINALDOCS/ownershiprelease inREVIEW/closure. Failed
+static/patch/read attempts preserved, no extra infrastructure or allowance renewal.
+[All commands/curves/costs/skips/failures/nextmatchedcontrol task](../artifacts/runs/minigrid-a-return-20261017/RESULTS.md).

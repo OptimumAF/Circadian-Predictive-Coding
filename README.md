@@ -1,5 +1,4184 @@
 # Circadian Predictive Coding
 
+[Detached CLM probe reviews can now be inspected offline](docs/clm-probe-inspector.md)
+through the existing export command. Recorded marker learning, old TRAIN errors,
+costs and missing native outcomes remain visible without loading models or
+computing new scores. Final pure checks pass on both platforms; interactive
+browser verification remains open because local file navigation was blocked.
+
+[An isolated installed-package check](docs/reports/clm-inspector-package-20261025.md)
+also exports literal CLM reviews using the packaged module/template outside the
+checkout, with model-library imports blocked. The source archive includes the
+usage guide; interactive UI and scientific gates remain separate and open.
+
+[The existing isolated-probe runner now accepts the workflow32 source](docs/clm-reserved-probes.md#workflow32-source-and-original-train-readout)
+and reads its twelve original TRAIN rows without updating the source. The final
+software checks pass on both platforms. Its [one native source32→probe6 case](docs/reports/clm-workflow-fresh-native-20261025.md)
+learned one of two reserved markers while old TRAIN accuracy fell12/12→10/12
+inside the disposable probe. The source stayed unchanged; reliable acquisition,
+joint retention and context return remain open.
+
+The same workflow probe now accepts an explicit `parameter_scope="state_only"`
+to keep its action head and scale fixed. [59 final checks per platform](docs/reports/clm-workflow-probe-state-only-20261025.md)
+qualify that option and unchanged default behavior; its native learning effect
+remains unmeasured.
+
+The [native state-only control attempt](docs/reports/clm-workflow-state-only-native-20261025.md)
+stopped at its frozen memory preflight before model loading. It supplies no new
+learning result; the failed attempt and original limits are preserved.
+
+[The separate 32-pass TRAIN-only CLM case](docs/reports/clm-train32-native-20261025.md)
+fit all 12 fixed known TRAIN rows, including legacy/password, in about 305 seconds
+with 15 GiB sampled peak RSS. Its 384 query exposures and 32-step schedule are distinct
+from the earlier eight-pass case. No new workflow rollouts, retention, fresh-task
+generalization or circadian benefit were established; the CLI still defaults to 8.
+
+[The public-observation CLM native case](docs/reports/clm-public-native-20261025.md)
+completed ordinary and stale ticket workflows; the external dispatcher blocked a
+revoked commit. Its eight-pass TRAIN fit improved from4/12 to10/12, with legacy/password choices
+still wrong. Original costs and negative results remain; this fixed known-task
+case establishes neither a circadian advantage nor generalization.
+
+[CLM TRAIN observations can now match live public requests](docs/clm-ticket-workflow.md#public-observation-train-option)
+through an explicit option, preserving the original recipe. A learned-only mode
+also avoids repeating an already-observed unchanged control. Focused Windows/Linux
+checks qualify both paths; the native report records their measured scope and limits.
+
+[CLM workflow TRAIN diagnostics](docs/clm-ticket-workflow.md#optional-train-fit-diagnostic)
+now offer an explicit `--record-train-fit` option for phase-specific accuracy and
+probability margins before and after training. Tiny Windows/Linux checks verify
+that the reads preserve training and episode behavior. The public-observation
+study records their first native diagnosis separately from task outcomes.
+
+[The earlier original-recipe CLM observation](docs/reports/native-clm-ticket-workflow-20261025.md):
+training enabled one stale-parcel recovery in three episodes, versus zero for the
+unchanged heads. Invoice remained unsuccessful; reliable adaptation and a
+circadian advantage remain unproved. The fixed run's costs and failures are kept.
+
+[Failed-run budget evidence](docs/train-budget-evidence.md) can now retain the
+original training clock and charges even when model readback fails. Sixteen
+scripted cases qualify per platform; no model training was needed for the repair.
+
+[Public-cue learner health](docs/public-cue-activation-health.md) now reads
+existing activity, saturation and rank diagnostics under the original guards
+and budgets. Scoped software and zero-update Torch qualification pass; cold
+metrics establish neither task learning nor recovery.
+
+[Public-head schedule validation](docs/weighted-prefix-validation.md) now reuses
+bounded immutable prefix counts while retaining source and full-state checks.
+96 focused checks pass per platform; scripted component timings improve. The
+earlier native experiment remains incomplete and is not rerun.
+
+[The class-balanced recurring TRAIN pilot](docs/weighted-recurrent-context.md)
+now uses the existing stream and readonly evaluator, with fixed middle-task
+observations and an explicit CLI mode. Existing protocol defaults are preserved.
+
+[Public-cue weighted learning](docs/public-cue-weighted-stream.md) now runs through
+the existing delayed-label stream with exact episode binding and permanent paid
+failure handling. Software and native parity checks pass; a useful adaptation
+experiment remains a separate gate.
+
+[Class-balanced public-cue training](docs/public-cue-weighted-training.md) now
+offers an explicit TRAIN-episode update using the existing native weighted loss.
+Software and native parity checks pass; task success remains unproved.
+
+[Recurrent snapshot validation](docs/recurrent-snapshot-validation.md) now avoids
+temporary optimizer setup on readonly copies while retaining exact full-state
+checks. Focused native parity and corruption checks pass on Windows and Linux;
+the earlier incomplete game run remains an open limitation.
+
+[Public-cue probe games](docs/public-cue-probe-games.md) now connect the existing
+isolated learner to the readonly game evaluator. Software checks pass; the sole
+native case stopped at its original readout deadline after majority-only fitting
+and one failed F game. Its partial result and original charges are preserved.
+
+[Isolated fresh-task probes](docs/public-cue-fresh-task-probe.md) already accept
+the public-cue recurrent learner through the existing generic interface. Focused
+checks qualify source/actor isolation, both head clocks and the same-fork return
+path. Actual fresh-task game success remains a separate, unfinished gate.
+
+[Bounded recurrent episode replay](docs/recurrent-episode-replay.md) adds explicit
+recent/coverage controls to the existing stream pilot, with equal extra fitting
+and both learners trained before readouts. Software checks and native outcomes
+remain separate; original no-replay results and defaults are preserved.
+The first paired run lost its detailed report at the original output-size cap;
+no comparative learning result is established. [Results and limits](docs/reports/balanced-recurrent-replay-20261025.md)
+record that failure and the separately tested compact export repair.
+
+The existing command now exposes [ordinary recurring adaptation](docs/ordinary-fourth-task.md)
+as `circadian-affine-game --example-affine-recurring`. Add `--describe` to inspect
+the fixed recipe before work, or a new `--output` path to retain its result. It
+uses bundled TRAIN data and the existing G collector/learner; no research archive
+or saved model is required. Normal/private modes and final-evaluation separation
+remain unchanged.
+
+Replay that saved result in the [shared offline inspector](docs/affine-workflow-inspector.md#ordinary-recurring-reports):
+`python -m scripts.build_key_door_inspector --source-artifact new-recurring-run.json --output recurring-learning.html`.
+It shows acquisition/return curves, complete recorded G/A games and original
+costs, including worse confidence and missing/failed evidence. Playback performs
+no training or simulation.
+
+[Frozen affine held-out games](docs/heldout-affine-games.md) evaluate the saved
+ordinary endpoint on original D without refitting. The fixed result is mixed:
+red succeeds in13steps; blue truncates at16. Full trajectories, costs, model/RNG
+preservation and the failed cue remain recorded. This is one held-out-from-TRAIN
+layout observation, not reliable generalization or a circadian advantage.
+
+[Public-cue native neural baseline](docs/public-cue-neural-baseline.md) binds two
+original BP/PC/neutral/active heads to existing public history and provides a fixed
+conventional BP known-A route through the existing stream and native evaluator.
+Complete optimizer/adaptive/RNG state, failed work and original budgets remain
+owned; the scoped software checks pass. Native learning outcomes and comparative
+scientific claims are separate. Actual qualification encountered budget-admission
+and post-training finalization failures; both boundaries are repaired. The paid
+128-update run produced no scored or native-game outcome, so qualification is open.
+
+[Ordinary fourth-task adaptation](docs/ordinary-fourth-task.md) adds an API mode
+to the existing workflow: collect original TRAIN G, learn A/B/C/G/A with bounded
+joint reuse, then play known G and returning A from the actual endpoint. Original
+probe/final separation, receipts, failure charges and old workflow defaults remain.
+The fixed local observation learned G at18/18 while retaining ABC at18/18; all
+four known G/returned-A games succeeded in nine steps each. Extra replay and
+confidence costs remain explicit; generalization and CPC benefit are unproved.
+
+[Bounded recurring TRAIN planning](docs/recurring-train-catalogue.md) adds an
+explicit ten-arrival option to the existing catalogue, retaining three earlier
+packets per public cue with causal spans and separate replay/memory costs.
+Original defaults remain. The existing TRAIN runner also supports this explicit
+ten-update mode, with all scores deferred until learning finishes. Software
+integration is checked; the separate original G workflow above now provides its
+native fourth-task source and fixed known-task adaptation observation.
+
+[Inspect private learning and retention](docs/private-affine-inspector.md) shows
+the frozen reference, both controls, recorded costs and partial game traces in
+the existing offline viewer. Failed and unrun outcomes stay visible; no training
+or gameplay runs during export or inspection.
+
+[From-birth private adaptation](docs/portable-affine-adaptation.md) adds
+`circadian-affine-game --example-affine-adaptation --output private-adaptation.json`:
+learn bundled ABC, collect F, fit both private controls, then play F and returning A.
+No saved research models are required. The TRAIN reference stays frozen.
+The first installed qualification stops at its work deadline after five of eight
+games; full completion remains unqualified and the partial result is preserved.
+
+[Native return after private rehearsal](docs/affine-rehearsal-return-games.md)
+now tests actual F games followed by old A. Both models solve F; rehearsal also
+solves returning A, while the equal-row F-only control times out on A. This is
+one fixed known-task observation; broader reliability and generalization remain open.
+
+[Private rehearsal with an equal-row control](docs/affine-private-rehearsal.md)
+learns the fixed F probe while retaining A/B/C correct actions in the observed
+diagnostic. The current-only control forgets some old actions. Cross-entropy
+tradeoffs and all costs are recorded; native retention is still unmeasured.
+
+[Saved fresh-task policy games](docs/affine-fresh-task-games.md) execute the
+isolated F probe before and after its two private fits, using the existing native
+game loop and no new training. Fixed-task execution and all costs are recorded;
+old-task recovery, generalization and circadian benefit remain separate questions.
+
+[Clean affine setup](docs/affine-clean-install.md) now checks optional game
+dependencies before spending TRAIN work. A fresh Linux NumPy-only installation
+supports descriptions, bundled data and saved-result inspection; native play
+refuses missing dependencies before creating a learner. Native extras and full
+release readiness remain separate requirements.
+
+[Inspect affine learning and native games](docs/affine-workflow-inspector.md)
+shows saved A/B/C learning curves, causal receipts, replay costs and real B/C
+playback in the existing offline viewer. Source dialogs retain exact evidence;
+missing outcomes and costs stay unknown. No new training runs to view a result.
+
+[Fresh affine train and play](docs/portable-affine-workflow.md) runs from a
+checkout or installed wheel without the research archive: six causal TRAIN fits,
+then four complete known B/C games. The installed smoke passed all four games;
+known-task execution does not establish generalization or a circadian advantage.
+
+[Isolated affine fresh-task diagnostics](docs/affine-fresh-task-probe.md) use
+the existing reserved-task helper: F15/18→18/18 after two private fits, with
+old-task interference. The benchmark model remains unchanged; this is fit,
+not heldout generalization or CPC benefit.
+
+[Native B/C readout after third-task learning](docs/after-c-linear-games.md)
+solves all four known games in nine steps each from the saved after-C model,
+with zero new fits. This is known-task usefulness, not generalization or CPC benefit.
+
+[Finite replay capacity for a third task](docs/catalogue-capacity.md) now uses
+the existing delayed stream to fit C_train from a saved after-B model, comparing
+one versus two retained packets per public cue. Both learn C_train at18/18;
+two retain A/B at18/18, using18extra replay rows and a larger bank. This is
+TRAIN evidence; the separate native follow-up above now qualifies known B/C games.
+
+[Known old/new native games](docs/retained-context-linear-games.md) now succeed
+from the retained after-B model: four fixed A/B games, nine steps each, zero
+new fits. This is known-TRAIN usefulness; generalization, reliable return and
+circadian advantage remain unproved.
+
+[Bounded arrived-TRAIN reuse](docs/arrived-cue-catalogue.md) keeps both known
+tasks at **18/18** through the fixed A/B/A training observation, using **90** row
+exposures versus **54**; its extra replay and confidence costs remain explicit.
+
+[Chronological affine TRAIN learning](docs/context-linear-stream.md) now runs
+through the existing delayed stream. Its replacement baseline learns and
+recovers the current task while forgetting part of the other. The
+[causal native-game command](docs/context-linear-causal-games.md) is available;
+its first six-game attempt hit the time limit before saving complete outcomes.
+
+[Inspect guarded contextual learning](docs/context-serving-inspector.md) using
+the existing offline inspector. Every saved task phase, guard rejection, actor
+version and rollback remains source-linked; no additional model work runs.
+
+[Run the guarded contextual CPU learner from an installed package](docs/context-example.md)
+with --example-context-source. The bundled qualified source preserves its full
+training history; the existing actor/guards learn a new known task and retain
+old tasks. No research archive or simulator is needed.
+
+[Complementary context-order validation](docs/withheld-context-orders.md) uses
+the existing comparison with two separate balanced recipes and seven frozen
+controllers. Receipt clocks, cumulative native work and acknowledgements are
+checked before all14 results can be scored. Original comparison defaults remain.
+The sole cohort stopped after publication in its fifth case; no comparison
+scores exist. A subsequent owner-retirement repair passes scalar checks while
+the repaired native tail remains unverified. Failed evidence and costs remain.
+
+[Fixed drift can consume private task returns](docs/task-return-feedback.md)
+through the existing live schedule. One bounded case published after two updates;
+task failures and diagnostic costs remain visible. Scoped checks pass; this is
+not evidence of a better controller or scientific benefit.
+
+[Closed-loop controller-development trials](docs/controller-task-trials.md) now
+score private task outcomes through the existing runner. Scoped checks pass.
+The first fit invocation failed report serialization; its work is recorded,
+but task outcomes and fitted policy are unverified. The output limit is fixed
+without repeating the scientific run. Future oversized task-trial reports retain
+a bounded failed-work summary; outcomes and fit remain explicitly unavailable.
+
+[Correct TRAIN acknowledgement](docs/correct-training-acknowledgement.md) now
+advances past already-correct queued packets without optimizer updates. One clean
+case used two updates/four acknowledgements and passed unchanged publication
+guards; later legacy tasks succeeded. The outer metering-limit defect is recorded;
+measured work stayed within the declared limits, with no scientific benefit claim.
+
+The [contextual stream comparison](docs/context-stream-comparison.md) adds a
+shared scenario preview and completes ten missing controller applications.
+All ten retained old tasks but improved no served new-task outcome. Candidate
+feedback stalled behind an already-correct pending packet; noisy drained
+candidates failed retention guards. Costs and negative results are preserved.
+
+The [contextual TRAIN recipes](docs/context-training-recipes.md) now support
+delayed recurrence and named synthetic label noise. Clean learning was published;
+the noisy candidate was rejected for old-task regression. An incomplete pre-run
+scenario description limits the engineering evidence; comparative validation remains open.
+
+The [candidate-feedback variant](docs/candidate-training-feedback.md) now exposes
+shadow TRAIN errors causally. One development case repaired and published the
+conventional learner, passing6/6 common tasks; three extra reads over15rows were
+charged. Existing drift and fitted-controller negatives remain unchanged.
+
+The [contextual controller fit](docs/context-controller-learning.md) now runs four
+disposable TRAIN trials and one frozen live application. It reproduced drift's
+5/6 task outcome with repair pending; no task benefit from fitting was demonstrated.
+Fit and application costs are recorded separately.
+
+The [fixed contextual references](docs/context-reference-comparison.md) now compare
+the same six tasks without rerunning accepted periodic evidence. Periodic serves
+6/6; no-learning, drift and the unchanged budget-aware rule serve5/6. Drift leaves
+repair pending; budget-aware's reserve exceeds its credits. Costs are unpaired
+proxies, with no efficiency or CPC advantage claim.
+
+The [contextual live-worker mode](docs/context-head-live.md) now serves declared
+public contexts through the existing learning schedule, priority gate, guarded
+publication and rollback. The single case completed; typed inference did not
+overlap the short model calls, and that negative timing result is preserved.
+
+The [guarded contextual serving mode](docs/context-head-serving.md) now rejects
+an old-task regression, then publishes a repaired conventional learner solving
+6/6 known workflows after two updates and nine rows. A frozen control stays5/6; rollback restores
+that original behavior. This is a synchronous TRAIN-template demonstration.
+
+The [isolated head probe](docs/context-head-probe.md) now tests further learning:
+the warm control learns v1legacy, loses password temporarily, then recovers it
+while retaining both legacy tasks. The fresh control loses v1legacy on return.
+Probe weights remain separate from benchmark/deployed models; all costs are recorded.
+
+The [separate-head conventional control](docs/context-head-control.md) now learns
+both known public contexts and retains all four workflows through A→B→A. It uses
+96coefficients versus60for the shared control; known-context and capacity
+assumptions are explicit. This establishes scoped task usefulness, not CPC benefit.
+
+The [contextual queue rehearsal](docs/context-queue-rehearsal.md) extension runs
+recent and context-coverage TRAIN replay. Both fixed cases finish at the original
+3/4 task success despite50%more training exposure; coverage changes the old/new
+invoice tradeoff at the B checkpoint. The negative result and costs are preserved.
+
+The [context-return example](docs/context-return-stream.md) now demonstrates fresh
+A→B→A learning: an old invoice skill is lost and recovered, while the returning
+task displaces the newer invoice skill. Retention remains incomplete.
+
+The existing [joint-context perceptron control](docs/joint-context-perceptron.md)
+learns all four known workflows with eight passes and preserves effect permissions.
+It provides a simpler working control; its joint fit is separate from the
+chronological result above.
+
+Run the existing [BP qualifier with public context](docs/context-bp-qualification.md).
+The fixed joint case learned password/v2invoice workflows but failed v1invoice/
+v2parcel; lower loss and distinct inputs did not establish complete joint ability.
+
+Opt into [observable policy context](docs/ticket-policy-context.md) in ticket
+requests, TRAIN teachers and episodes. Original D7 defaults remain; explicit D9
+inputs distinguish conflicting rules. Verified plumbing does not establish learning.
+
+Run an [isolated warm/fresh policy-learning probe](docs/ticket-policy-learning-probe.md)
+with separate old-task readouts and return updates. The fixed native case retained
+old warm tasks but failed revised invoice acquisition; fresh solved no endpoint tasks.
+
+Diagnose the frozen policy study's [saved v1 TRAIN fit](docs/ticket-train-diagnosis.md#saved-policy-comparison-mode)
+without retraining. All six states fit5/6 rows; the revised invoice action remains
+wrong after four updates. Lower loss alone does not demonstrate task adaptation.
+
+Compare frozen controllers with [same-phase no-learning controls](docs/phase-matched-controllers.md).
+The fixed policy study found identical task outcomes across all five controllers;
+extra training and the fitted chooser established no task benefit.
+
+Run [native policy-change reference trials](docs/native-policy-trials.md) with
+finite original authority and phase-bound development readouts. The first fixed
+case preserves v2 tasks but does not demonstrate v1 invoice acquisition or recovery.
+
+Exercise genuine v1→v2 task rules and old-domain return with the existing runner:
+[versioned policy stream](docs/versioned-policy-stream.md). The fixed conventional
+case learns parcel and retains password, then loses parcel while adapting invoice.
+
+Continue private learning from fresh feedback after one guarded publication:
+[two-window native serving mode](docs/post-publication-learning.md). One lifetime
+budget and versioned receipts span both windows; the published actor stays frozen.
+Optional `--followup-training-recipe clean|noisy` declares matched twelve-row
+new+old feedback and delay2 only in the second window, with explicit noise metadata.
+
+Execute one bounded native [component-sleep action](docs/component-sleep-actions.md)
+through the existing NumPy TRAIN/consolidation path. Original quotas, source,
+actor and no-sleep Torch rules remain; no task or circadian benefit is claimed.
+
+Select bounded per-update plasticity effects through the original TRAIN runtime:
+[native gate actions](docs/gate-actions.md). Defaults, chemistry, immutable policy
+and budgets are preserved; the tiny engineering case establishes no task benefit.
+
+Read the fixed FIFO36 benchmark on held-out D games without training:
+[final-only memory readout](docs/fifo-heldout-games.md).
+The same guide shows how to build an offline player for the saved final traces,
+with exact source links and separate TRAIN, probe and FINAL evidence.
+Both cues fail on unmatched keys despite earlier successful known-context recall;
+final outcomes remain separate from fitting, promotion and probe selection.
+
+Inspect an explicit TRAIN-standardized MiniGrid BP control:
+[standardization contract and negative result](docs/standardized-minigrid-bp.md).
+
+Run the conventional public-cue contextual game control through the existing CLI:
+[two-head CPU control and fixed recurrence](docs/contextual-minigrid-control.md).
+
+Use the existing FIFO36 game control from a local wheel:
+[optional MiniGrid setup and installed protocol command](docs/minigrid-cpu-install.md).
+It improves row fit but fails both cue games; original defaults and successful
+FIFO memory evidence remain preserved.
+
+Exercise explicitly marked bad TRAIN labels during live adaptation:
+[live TRAIN recipes](docs/live-training-recipes.md). In the fixed case the candidate
+learned legacy but lost password; the unchanged guard rejected it and kept the
+deployed actor unchanged. This is a scoped negative result, not general robustness.
+
+Publish a guarded candidate at the causal TRAIN drain and continue live serving:
+[drained publication mode](docs/drained-ticket-publication.md). Later legacy
+requests now use the learned actor; earlier failures, original budgets, stale
+feedback history and complete rollback remain visible.
+
+Serve real local typed workflows during native shadow updates:
+[live serving mode](docs/live-ticket-serving.md). The bounded trace records
+serving-priority deferrals, actor versions and instrumented latency, including
+six live legacy failures before the learned candidate is later published.
+
+Choose a bounded learning-rate effect for one native wake update while retaining
+the original policy and optimizer history: [per-update rate actions](docs/learning-rate-actions.md).
+The four-family correctness checks and two-update example establish mechanics;
+they do not establish a tuned-controller or CPC advantage.
+
+Execute fixed complete TRAIN replay between native wake updates through the
+original serving gate: [categorical replay actions](docs/categorical-replay-actions.md).
+The bounded example preserves source/actor/RNG and separate exposure charges;
+it establishes execution correctness, not a replay or CPC benefit.
+
+Evaluate frozen controllers under recurring, diluted and noisy TRAIN receipts,
+with all candidates finished before readonly task evaluation:
+[withheld controller streams](docs/withheld-controller-streams.md).
+No controller is refitted; fitting costs and unknown all-in utility remain explicit.
+
+Fit a small wait/wake chooser from disposable native trials, then apply its
+frozen choices through the existing stream: [trained contextual controller](docs/contextual-controller.md).
+The observed chooser learns useful actions but pays sixteen discarded fit
+updates and establishes no advantage over the existing simple control.
+
+Run a fixed controller study with a prospective cost-aware utility and separate
+development, validation and readonly sealed stages:
+[outer objective and chronology](docs/controller-outer-objective.md).
+This engineering path does not fit a controller or establish generalization.
+
+The native serving demo now offers causal no-learning, periodic, drift-triggered
+and budget-aware references: [usage and observed tradeoffs](docs/reference-controllers.md).
+The frozen case preserves four-update failures and matches the saved fixed
+schedule at eight updates; it establishes no drift-detection or CPC advantage.
+
+Choose explicit no-update or bounded wake work under existing runtime limits:
+[finite adaptation actions](docs/adaptation-actions.md). This opt-in API preserves
+serving priority and paid failures; advanced action executors and controller
+benefit remain open research/development work.
+
+Learn into the serving actor with measured publication guards and complete
+rollback: [native BP typed serving](docs/native-ticket-serving.md). This reuses
+the qualified old-task checkpoint and trains eight new batches through the
+existing stream; it does not establish generalization or a CPC advantage.
+
+Run a fresh learned BP candidate without historical artifacts:
+`python -m scripts.run_native_ticket_controls --fresh-bp --output fresh.json`.
+This explicitly trains112bounded CPU updates and records acquisition/retention/
+return task traces. [Run requirements and limits](docs/fresh-bp-ticket-demo.md).
+
+Saved ticket examples now work from an installed wheel without local research
+artifacts: `python -m scripts.build_key_door_inspector --example-ticket bp --output bp.html`.
+Select BP, PC, neutral or active CPC; original failures, costs and source links
+are preserved. [Portable usage and limits](docs/portable-ticket-examples.md).
+This reads saved evidence and runs no learner or native inference.
+
+The [saved ticket inspector](docs/ticket-workflow-inspector.md) now shows BP and
+native-control task endpoints, complete action/effect traces, original charges
+and source links through the existing offline viewer. Failed outcomes and
+unknown mechanisms remain visible. It runs no learner or native inference.
+
+The [native task controls](docs/native-ticket-controls.md) now run the same
+96old +8new +8return TRAIN sequence as saved BP. PC, neutral CPC and gated CPC
+fail all full-task endpoints at this fixed dose; PC-neutral evidence matches
+exactly. All336updates returned, scoped checks pass, failures preserved.
+BP remains the working demonstration here; no general ranking or CPC benefit.
+
+The [qualified BP new-context case](docs/bp-new-contexts.md) now acquires `legacy`,
+transfers `password` initially, retains both old tasks and keeps all four after
+return.16new updates/96rows reuse the prior qualified state without refitting;
+stale recovery and permission refusal pass.20checks/platform/scoped statics pass.
+This is one fixed synthetic stream, not broad generalization or CPC advantage.
+
+The [isolated BP fit qualification](docs/ticket-bp-fit-qualification.md) now fits
+all six teacher states under a fixed96-update joint TRAIN budget. Both ordinary
+tasks and stale recovery succeed; both revoked commits are refused.7focused
+checks/platform and scoped statics pass. This is known-template task ability,
+not chronological retention, generalization or CPC benefit.
+
+The [saved BP TRAIN diagnosis](docs/ticket-train-diagnosis.md) checks phase fit
+without refitting: teacher/runtime features align, but commit and ready-action
+margins remain wrong despite falling CE.19checks/platform/scoped statics pass;
+all prior task failures remain unchanged.
+
+The [chronological task recipe](docs/recurring-ticket-workflow.md#native-family-option)
+now accepts existing native BP/PC/neutral+gated CPC.39checks/platform and scoped
+statics pass. One fixed12-update case per family failed both tasks at every
+checkpoint; traces/costs and all prior negatives are retained. No CPC advantage.
+
+The [native typed readout](docs/torch-typed-decisions.md) connects existing
+categorical BP, PC and CPC checkpoints to the typed decision/task port. It keeps
+full frozen state and masks permitted logits before normalization. Literal
+integration checks are separate from learned adaptation evidence.
+
+Track current work and agent progress in the
+[GitHub project tracker](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/18).
+See [the issue workflow](docs/github-issue-tracking.md); the plans and development
+log preserve historical evidence rather than live task status.
+
+The [CLM temporal runner](docs/clm-catalog-learning.md#live-typed-memory-with-a-frozen-clm-fallback)
+now combines TRAIN memory with typed serving: four known requests use memory,
+then a fixed unlabeled unknown request calls the frozen trained head. Separate
+copied-view costs keep the original memory record/counters sealed.35focused
+checks pass per Windows/WSL, with scoped lint/format/type checks and self-review.
+This executes literal heads/fake encoder; native joint-serving quality and broad
+adaptation or CPC benefit remain unproven.
+
+
+The [typed memory wrapper](docs/decision-evidence.md) now has an explicit fallback
+mode: use eligible TRAIN evidence, otherwise call the existing frozen predictor
+once with its unchanged input.79checks/platform and scoped statics pass; existing
+retrieval/context behavior remains covered. A separate native CLM observation
+completed12head updates with memory: head outputs/losses exactly unchanged,
+memory answered0/3/3/4 fixed requests across phases, correct wherever answered.
+This does not demonstrate native fallback quality, generalization or CPC benefit.
+[Native outcomes/costs](artifacts/runs/clm-train-evidence-memory-20261022/NATIVE_RESULTS.md).
+
+
+The optional [CLM TRAIN evidence memory](docs/clm-catalog-learning.md#phase-delayed-train-evidence-memory)
+now composes the existing causal memory store with the catalog stream. It admits
+only reuse-consented TRAIN after actual receipts validate, preserves head updates,
+and reports unavailable queries, phase coverage, choices and retrieval/storage
+costs. 27 focused checks pass on Windows and WSL, with scoped lint/format/type
+checks. Literal memory choices answer0/3/3/4 of four requests at baseline/A/B/return,
+correct wherever answered; this is fixed-template software behavior, not a native
+comparison, generalization or circadian benefit.
+
+
+[Catalog TRAIN support composition](docs/clm-catalog-learning.md#explicit-train-support-recipes)
+now connects the existing explicit repeat/route recipes to catalog learning and
+its TRAIN/development diagnostics through the same CLI and stream. Both owners
+finish before scoring; objective/receipt/index/counter and shared-prefix checks
+admit the comparison. 224focused checks per platform, scoped statics and independent software review
+pass. In one fixed native study, repeat reached4/4 at return while route stayed3/4;
+the simpler control was preferable. The collector failed after training; saved
+results received qualified acceptance, with timing/provenance limits retained.
+[All outcomes and failures](artifacts/runs/clm-catalog-support-learning-20261022/RESULTS.md).
+No reliable retention, recovery or circadian benefit is established.
+
+[Catalog-objective reserved-task probes](docs/clm-reserved-probes.md#optional-full-catalog-objective)
+now run through the existing temporal CLI with explicit phase labels, separate
+consent and budgets, preserved benchmark state, and scoring after all training.
+200 focused checks per platform and scoped lint, format and type checks pass.
+One frozen native case shows partial new-task learning and severe old-task damage
+inside B/return probes (3/4 to0/4); the benchmark learner remains isolated. No
+retention, recovery or circadian advantage is established.
+[Full outcomes/costs](artifacts/runs/clm-catalog-reserved-probe-20261022/RESULTS.md).
+
+[Explicit full-catalog CLM training](docs/clm-catalog-learning.md) is now available
+as a default-off supervised recipe through the existing temporal stream. It uses
+ordered candidate IDs/indexed TRAIN targets, a separately named directional loss
+and permanent candidate/logit costs.222focused checks/platform and scoped statics
+pass. One fixed native case gives accuracy1/4→2/4→3/4→3/4; it underperforms paired
+CLM afterA and ties later accuracy with better probability/calibration metrics.
+The revised invoice rule still fails. Paired defaults, historical controls and
+all earlier negative results are preserved; no circadian or recovery claim.
+
+[Reserved CLM checkpoint probes](docs/clm-reserved-probes.md) now run a fixed
+new-task diagnostic through the existing stream with separate consent/budgets,
+preserved benchmark state and scoring after all training.93checks/platform,
+scoped statics and independent review pass. The native pilot shows partial TRAIN
+learning and incomplete suffix transfer; old choices stay unchanged, while some
+probability/calibration metrics worsen. All outcomes and costs are retained.
+No circadian advantage, recovery or repository-wide readiness is established.
+[Disposable ownership boundary](docs/clm-owned-probe.md).
+
+[Optional CLM TRAIN support recipes](docs/clm-temporal-sequence.md#optional-catalog-support-recipes)
+now compare explicit new route supervision with an equal-row invoice-repeat
+control through the existing stream.94checks/platform and scoped statics pass.
+The fixed native comparison improves development accuracy from3/4 to4/4 afterB,
+then returns to3/4: invoice revision and auxiliary TRAIN fit remain incomplete.
+All phase metrics, negative results, extra data and costs are preserved; no
+circadian advantage or generalization claim follows.
+
+The optional [TRAIN catalog diagnosis](docs/clm-temporal-sequence.md#optional-train-catalog-diagnosis)
+shows that the CLM invoice error also occurs on the exact TRAIN query, beyond the
+development suffix. It preserves the original trajectory and reports all TRAIN
+choices/margins and diagnostic costs. Current-rule learning remains incomplete;
+the support comparison above supplies a limited recipe observation, with coverage
+causation and reliable transfer still unresolved.
+
+[CLM temporal-rule learning](docs/clm-temporal-sequence.md) connects the existing
+changing-tool corpus to frozen released features and native paired head updates.
+Its sole development pilot completed: accuracy1/4→3/4→3/4→3/4, with persistent
+failure to replace the still-allowed invoice rule. Learned v2 ties the unchanged
+control's accuracy with worse probability metrics. No recovery or circadian
+advantage is demonstrated; full outcomes and costs remain recorded.
+
+[Rectangular CLM choice readout](docs/clm-choice-readout.md) ranks independent
+query and candidate sets through the existing owned learner. It supports the
+existing temporal corpus's four queries and three active tools while keeping
+paired training strict. Scoped software checks pass; the separately budgeted temporal-rule
+pilot above uses this interface.
+
+[Conventional CLM head adaptation](docs/clm-head-adaptation.md) connects frozen
+released features to the existing delayed TRAIN learner for a fixed
+password/parcel → refund/parcel → password/parcel diagnostic. It reports
+per-task acquisition, retention, actual loss/recovery and cost against frozen
+released heads. These known TRAIN examples do not establish generalization.
+
+[Released CLM frozen features and typed choice](docs/clm-frozen-encoder.md)
+connect pinned local Qwen3-8B/CLM weights to the existing TRAIN feature and decision
+ports. Scoped checks and one CPU reference case pass; that case incorrectly
+routes a password request to **refund** (p0.804). This separate HF plain-text
+recipe is not vLLM serving parity or evidence of useful adaptation. The usage
+guide lists optional dependencies, local asset arguments and focused commands.
+
+[Frozen-feature CLM head training](docs/clm-head-baseline.md) supplies the
+conventional paired contrastive update through the existing learner/inbox ports.
+Its tiny source-parity example is separate from released encoder/head runtime
+qualification and useful adaptation. Its recorded numerical checks pass; the
+engineering pair allowance failed and remains documented.
+
+[Causal online temporal feedback](docs/online-temporal-feedback.md) connects
+explicitly consented TRAIN feedback to bounded memory beside the existing delayed
+learner. It records live-prefix readouts and scores them after TRAIN, reporting
+unavailable evidence separately from wrong or uncertain model outputs.
+
+[Editable temporal decision evidence](docs/decision-evidence.md) adds bounded
+TRAIN-label revisions and causal retrieval beside frozen weights. Retrieval-only
+and actual context-model outputs are reported separately. The optional
+[four-arm native comparison](docs/native-memory-comparison.md) uses one shared
+fit to compare frozen context, retrieval-only, adapter-only and hybrid memory;
+scientific benefit requires measured outcomes, not software correctness.
+
+The [learned local ticket workflow](docs/local-ticket-workflow.md) executes
+bounded open/workflow/commit episodes with independent permission checks and
+recorded stale-state recovery, beyond one-step ranking.
+An [optional native driver](docs/local-ticket-workflow.md#optional-cached-native-model)
+uses the existing cached Open-Jev owner with this same sandbox and typed effects.
+Its frozen small protocol keeps TRAIN, evaluation and permanent work separate.
+
+The [native temporal workflow](docs/native-temporal-workflow.md) connects the
+fixed changing-tool/rule task to the existing native learner. It trains before
+scoring fixed learned/unchanged/frozen-A states and records every declared cost.
+
+## Test native task acquisition, retention and return
+
+The [fixed A→B→A native stream](docs/native-choice-sequence.md) uses the existing
+Open-Jev TRAIN adapter and delayed-label inbox. It records all old/new/return
+development outcomes and costs against reused unchanged-baseline readouts.
+Use its frozen local protocol; it does not tune or assume adaptation success.
+The [cold-start B control](docs/native-choice-sequence.md#isolated-cold-start-b-control)
+tests the same B recipe without prior A and reuses its accepted baseline.
+The [declared optimizer reset control](docs/native-choice-sequence.md#declared-optimizer-history-control)
+tests one empty AdamW replacement between A6 and B6 while preserving learned
+weights and permanent work allowances; the continuous-AdamW default is retained.
+The [bounded TRAIN rehearsal option](docs/native-choice-sequence.md#bounded-train-only-rehearsal)
+revisits two prospectively authorized old cases after B updates and reports its
+six added training exposures. Development and probe cases are excluded.
+Optional [`--update-health`](docs/native-choice-sequence.md#train-only-realized-update-health)
+records head/LoRA group gradient and actual AdamW-step norms, with separate
+diagnostic costs. It adds no model call and does not select training work.
+The [seven-update TRAIN diagnosis](docs/native-choice-sequence.md#seven-update-train-diagnosis)
+binds accepted A6 weights before observing one B update, with zero readouts.
+Opt-in [disposable native ownership](docs/native-choice-sequence.md#disposable-native-ownership)
+copies mutable state for a future isolated probe while sharing frozen weights
+and inheriting spent limits. A fork alone is not a learnability result.
+The [fixed reserved-text probe](docs/native-choice-sequence.md#reserved-text-task-probe)
+uses that fork for a new marker task, with old-task/anchor readouts and source
+preservation checks. Probe targets stay outside the source learner.
+The [same-task cold C control](docs/native-choice-sequence.md#same-task-cold-c-control)
+reuses the accepted warm result and fixed observed task from an original source;
+its A endpoint measures transfer, and total history/compute differ.
+The [bounded factor-composition module](docs/low-rank-composition.md) supplies
+exact low-rank sums and optional rank projection for future native consolidation;
+it does not change the learner or establish a task benefit.
+Opt-in [native adapter projection](docs/native-choice-sequence.md#explicit-native-adapter-projection)
+installs those factors using existing owners and explicit reset authority;
+the [fixed projection stream](docs/native-choice-sequence.md#fixed-projection-stream)
+compares one declared rank against the accepted reset-only history. Allocated
+rank stays fixed and later training can regrow dormant coordinates.
+Opt-in [two-state consolidation](docs/native-choice-sequence.md#fixed-two-state-adapter-consolidation)
+retains one owned factor reference and interpolates its operator with the current
+one at fixed half/half weights. The current head is preserved. The
+[terminal consolidation stream](docs/native-choice-sequence.md#terminal-consolidation-stream)
+captures A6, continues warm B6, then consolidates before the original readouts;
+task benefit is evaluated separately from operator correctness.
+The [saved calibration/rank summary](docs/native-consolidation-calibration.md)
+compares fixed native outputs using existing Brier/five-bin ECE and recorded
+spectra, with zero model calls or temperature fitting.
+
+## Run one native Choice TRAIN update
+
+The optional [native training adapter](docs/native-choice-bridge.md#native-train-update)
+uses the pinned Open-Jev head/LoRA recipe and existing delayed-label inbox.
+The bounded CLI records old/new development readouts and saves a fresh inference
+package with inherited, unrecalibrated temperature. This slice does not establish
+task acquisition, retention, return recovery or circadian advantage.
+
+## Prepare native Open-Jev Choice requests
+
+The [pure wire bridge](docs/native-choice-bridge.md) preserves native candidate
+order, probabilities and confidence without loading a model or inventing logits.
+[Pinned, distinct upstream contracts](docs/upstream/README.md) document the
+remaining model-execution and licensing gates.
+
+## Run the learned linear routing reference
+
+The [temporal tool/policy reference](docs/temporal-decision-reference.md) uses
+the existing stream for A→B→old-domain return while the revised policy remains
+active. It distinguishes retired-tool masking from learning changed rules and
+counts still-allowed obsolete choices as errors, with unchanged/frozen-A controls.
+
+`python -m scripts.run_temporal_decision_reference --output temporal-routing.json`
+
+`python -m scripts.run_linear_decision_reference --output linear-routing.json`
+
+Six TRAIN-only passes learn old and new vocabulary through the existing stream;
+all checkpoint scoring follows training. The fixed sequence retains errors and
+signed acquisition/retention/return results. [Usage and limits](docs/linear-decision-reference.md).
+
+## Run the typed routing reference
+
+`python -m scripts.run_decision_reference --output routing.json`
+
+A small lexical control selects immutable allowed candidates and reports routing
+errors, candidate recall and descriptive calibration. No training or tool actions.
+[Schema, limitations and checks](docs/typed-decision-reference.md).
+
+## Inspect the saved four-family comparison
+
+`python -m scripts.build_key_door_inspector --example-comparison --output comparison.html`
+
+Displays accepted learning/retention/return contrasts and costs without training.
+All four controls and adverse outcomes remain visible; no circadian advantage is
+established. [Usage and limitations](docs/continuous-comparison-inspector.md).
+Validate the accepted bundled controls without training using
+`python -m scripts.continuous_replay_example --example-baseline --validate-baseline-only`.
+[Portable control input and execution limits](docs/portable-continuous-comparison.md).
+
+## Install the CPU memory demo
+
+Standard wheel/source packaging now includes the original numeric data. A fresh
+isolated Linux installation reproduced all 70 recorded commands without checkout
+imports or SDKs. Source-archive rebuilding and independent review passed. The
+initial Windows fixture-ID failure is preserved; this is a scoped alpha package.
+[Build, install, run and check](docs/cpu-memory-package.md) ·
+[Executed evidence and limits](artifacts/runs/cpu-memory-package-20261021/RESULTS.md).
+
+## Run the portable CPU memory example
+
+```powershell
+python -m scripts.run_taskspace_memory_demo --output replay.json
+```
+
+Rebuilds220 released TRAIN rows and checks70 recorded commands without SDKs or
+research archives.34 tests pass per Windows/Linux; both platforms and an isolated
+source/data copy reproduce all commands with independent acceptance. The recorded
+success scores are historical; this command runs no simulator. Initial admission
+and recorder/stdout-recovery failures remain documented.
+[Setup, files and checks](docs/taskspace-memory-demo.md) ·
+[Evidence and limitations](artifacts/runs/portable-memory-demo-20261021/RESULTS.md).
+
+For fresh physics in the prepared Linux/WSL simulator environment:
+
+```bash
+python -m scripts.run_taskspace_memory_demo --native --output fresh-native.json
+```
+
+The optional path passed 61 focused checks on Windows and Linux and independent
+review. A fresh CPU simulation completed Pick19/17/20 and Push17 in 22/15/15/18
+controls. The initial serialization failure and its costs are preserved. These
+known TRAIN resets establish this path's operation; clean installation, optional
+GPU mode, generalization and CPC benefit remain unproved.
+[Native setup, costs and failure](docs/taskspace-memory-demo.md#optional-native-fresh-run) ·
+[Executed evidence](artifacts/runs/native-memory-demo-20261021/RESULTS.md).
+
+## Known-TRAIN Pick19 repaired with complete trajectory coverage
+
+Appending complete B22 after all198 prior rows yields Pick19 success in22
+controls; Pick17/Pick20/Push17 retain success15/15/18.60 focused tests pass on
+Windows/Linux; scoped statics and independent source/software/actual review pass.
+Extra storage/data/appends are recorded. This does not establish neural,
+held-out, population reliability or circadian benefit. Prior failures remain.
+[Usage and checks](docs/taskspace-memory-control.md) ·
+[Commands, costs and evidence](artifacts/runs/b22-memory-repair-20261021/RESULTS.md).
+
+## Pick19 saved-data diagnosis
+
+All24 focused checks pass per Windows/Linux with independent source and result
+acceptance. The failed trajectory reproduces exactly; B22/B50 have no exact
+native-command conflict. Earlier coverage differs, while late stored actions
+agree. No repaired-control or circadian benefit is established.
+[Usage and safe extension](docs/pick19-memory-diagnosis.md) ·
+[Evidence, costs and next action](artifacts/runs/pick19-memory-diagnosis-20261021/RESULTS.md).
+
+## All198 supervision checked: no exact target conflicts
+
+A bounded grouped diagnostic now retains all19,503 input pairs and charges repeated work. **46 focused checks pass per Windows/Linux**, scoped statics and independent actual review pass. Three shared Push-reset pairs have identical targets; zero raw/native32 conflicts. This does not explain the earlier control failures or establish useful adaptation.
+[Usage, boundaries and commands](docs/aggregated-supervision-consistency.md) · [Evidence and next action](artifacts/runs/aggregated-supervision-consistency-20261021/RESULTS.md).
+
+## All198-row corrective learning: negative native result
+
+The existing study now fits both correction batches with all old data retained. **337 focused checks pass per Windows/Linux** and independent review accepts the one fixed experiment. Every native TRAIN scene failed50; the previously successful Pick17 endpoint was lost. Better current-correction fit did not yield useful adaptation. Full goal remains active.
+[Evidence, commands, costs and next action](artifacts/runs/aggregated-correction-study-20261021/RESULTS.md).
+
+## Retain all correction data in explicit198-row learning (2026-10-21)
+
+The existing mixed continuation now supports explicit198-row updates while
+preserving its148-row default. Both accepted50-row correction packets load with
+distinct IDs and unchanged original labels/history/receipts. **103 checks pass per
+Windows/Linux**, including real198-row learning; scoped statics and independent
+actual100-row input acceptance pass. Task-level fitting and useful adaptation
+remain open; no physical/CPC benefit is claimed.
+[API, files and commands](docs/push-cube-learned-continuation.md) ·
+[Evidence, costs and next action](artifacts/runs/expanded-corrective-continuation-20261021/RESULTS.md).
+
+## Current student supervision:50 new labels (2026-10-21)
+
+The existing collector now labels the unchanged balanced120 student's observed
+states after exact reconstruction/readout checks. Its failed50-control trajectory
+reproduces;49 inputs lie outside the original correction packet's exact inputs.
+**268 focused checks pass per Windows/Linux**, scoped statics and independent
+actual review pass. No fitting of new labels or physical improvement yet.
+[Usage, modules and safe extension](docs/push-cube-corrections.md) ·
+[Commands, results, full costs and review](artifacts/runs/balanced-student-corrections-20261021/RESULTS.md).
+
+## Private velocity fit control: mixed negative result (2026-10-21)
+
+The existing Push study can compare a private zero-velocity learner with the
+fixed inherited control, keeping source/data/weights/eight updates unchanged.
+**273 focused checks pass per Windows/Linux**, scoped statics and independent
+actual review pass. Correction mean improves slightly, while first-action,
+expert Push and all three old-task means worsen. No new physical outcome or
+CPC advantage; useful adaptation and the full goal remain open.
+[Usage, files and extension](docs/push-cube-learned-continuation.md) ·
+[Commands, all results/costs and review](artifacts/runs/push-velocity-fit-20261021/RESULTS.md).
+
+## Saved Push control gap (2026-10-21)
+
+The existing diagnostic now accepts Push D12 traces.122 checks/platform, scoped
+statics and independent actual review pass. Both expert and correction records
+match only the reset input, where action error remains0.343; later coverage is
+descriptive, with no invented action labels. No new model or simulator work.
+[Usage and commands](docs/learned-control-diagnosis.md) ·
+[Evidence and limits](artifacts/runs/push-control-gap-20261021/RESULTS.md).
+
+## Fixed balanced corrective learning: Push still fails (2026-10-21)
+
+One frozen all148-row/eight-update study now runs through the existing learner,
+readouts and native endpoints. **252 focused checks pass per Windows/Linux**,
+plus23 per platform for the final narrow cache-reader repair; scoped statics and
+independent actual review pass. Pick17 recovers in22 controls; Push17 and
+Pick19/20 still fail50. First-action/expert fit improves while mean correction
+fit worsens. All groups, negative results and costs remain recorded. Useful
+adaptation and the full goal stay open; no CPC advantage is established.
+[Usage, modules and extension](docs/push-cube-learned-continuation.md) ·
+[Commands, results, entry failure and review](artifacts/runs/balanced-correction-study-20261021/RESULTS.md).
+
+## Weighted learning through the existing continuation (2026-10-21)
+
+The recorded mixed continuation now carries fixed positive row weights, their
+exact provenance and real exposure costs through the existing actor/shadow runtime.
+**57 focused checks pass on Windows and Linux**, including all148 rows, real
+weighted updates, default equivalence and paid failures. Scoped statics and
+independent executed review pass. The fixed prefix/group-balanced study is
+reported above; useful overall adaptation and the full goal remain open.
+[API, files and safe extension](docs/push-cube-learned-continuation.md) ·
+[Commands, costs, outcomes and review](artifacts/runs/weighted-mixed-continuation-20261021/RESULTS.md).
+
+## Positive row weights in continuous BC (2026-10-21)
+
+The existing loss and native learner now accept optional positive row weights.
+Uniform weights preserve exact unweighted results; explicit weights carry named
+objectives and real row counts. **144 focused checks pass per Windows/Linux**,
+including every parameter derivative, real momentum updates and failure isolation.
+Scoped statics pass. The first Windows fixture failure is preserved. Recorded
+continuation integration and the fixed weighted study are reported above. This
+capability establishes no physical or CPC benefit.
+[API, modules and safe extension](docs/continuous-bc.md) ·
+[Commands, costs, failures and independent review](artifacts/runs/weighted-continuous-bc-20261021/RESULTS.md).
+
+## Corrective fit diagnosis: means hide a worse first action (2026-10-21)
+
+Five-group detached TRAIN readouts now compare112/120 using the existing study.
+**247 focused checks pass per Windows/Linux**; scoped statics and independent
+actual review pass. The fixed
+diagnosis shows correctionhalfMSE .04476→.00644, originalPush expert .03600→.07240,
+and first-action error .03275→.07349. This supplies learning evidence, not physical
+success; all four accepted120 native failures remain. No new dose or simulator
+scene. [Usage/tree/commands](docs/push-cube-learned-continuation.md) ·
+[Results, accounting and review](artifacts/runs/corrective-learnability-readouts-20261021/RESULTS.md).
+
+## Corrective fit: all four fixed TRAIN scenes fail (2026-10-21)
+
+The existing study now fits all148 released correction/expert/old-task rows in
+eight mixed updates, then evaluates frozen checkpoint120. **279 focused checks
+pass per Windows/Linux**, scoped statics and independent actual review pass.
+Push17 and Pick17/19/20 all fail50 controls; Pick17 loses its prior112 success.
+200controls/1000known CONTROLphysics, plus fully charged training/reconstruction.
+Useful adaptation remains open; all negative results are retained.
+[Usage, tree and extension notes](docs/push-cube-learned-continuation.md) ·
+[Exact commands, results, costs and next action](artifacts/runs/mixed-correction-fit-20261021/RESULTS.md).
+
+## Push labels on student-visited states (2026-10-21)
+
+The new TRAIN-only correction path keeps the learner frozen, queries the existing
+teacher and executes only student commands. One accepted native run releases50
+provisional labels on the exact earlier failed112 trajectory. That collection
+includes no fitting; the later corrective fit is reported above. Linux234focused
+cases pass; Windows183unchanged+51repaired module passes,
+with original2failures retained. Scoped statics and independent actual review pass.
+Useful Push acquisition and reliable retention remain open.
+[API/tree/commands](docs/push-cube-corrections.md) ·
+[Results, costs, failures and next action](artifacts/runs/push-on-policy-corrections-20261021/RESULTS.md).
+
+## Fixed112 physical endpoint: acquisition still fails (2026-10-21)
+
+The existing study's `--native-endpoint` mode verifies the accepted112 reconstruction
+before one Push17 and Pick17/19/20 evaluation. **173 focused cases pass per platform**;
+scoped statics and independent actual review pass. Push still fails50controls;
+Pick17 succeeds41,19fails50,20fails50. Better TRAIN fit did not yield useful Push
+acquisition and further weakened retention.191new controls/955known CONTROLphysics,
+no extra training dose or tuning. [Usage](docs/push-cube-learned-continuation.md) ·
+[Exact results, costs, failures and next action](artifacts/runs/mixed-longer-native-endpoint-20261021/RESULTS.md).
+
+## Longer conventional TRAIN fit: a tradeoff (2026-10-21)
+
+Explicit mixed continuation now permits up to64 updates per finite scope;
+default8 and head-GN maximum8 remain. The existing study's `--longer-fit` mode
+performs one fixed TRAIN-only fit. **193 focused checks pass on each Windows/Linux**,
+scoped statics and independent actual review pass. Push TRAIN half-MSE improves
+0.3482→0.0360, while all three old-task group errors grow. No new physical scene
+was run; useful acquisition and retention at the new endpoint remain open.
+[API and commands](docs/continuous-train-continuation.md) ·
+[Exact results, costs, failures and next action](artifacts/runs/mixed-longer-train-fit-20261021/RESULTS.md).
+
+## Isolated reserved-reset probes after mixed adaptation (2026-10-21)
+
+The existing study supports explicit `--reserved-probes` with the retention profile
+and `--diagnostics-only`. One private update improves reserved test imitation at
+both source40 and mixed48; mixed has smaller gains and greater old-task fit loss.
+Source/deployed learners remain unchanged, with zero new physical scenes.
+Scoped software and independent actual review pass: Linux143checks; Windows134
+unchanged passes plus9repaired passes, with the original9failures preserved.
+[Usage/tree/checks](docs/push-cube-learned-continuation.md) ·
+[Full endpoints, costs, failures, review and next action](artifacts/runs/mixed-remaining-learnability-20261021/RESULTS.md).
+
+## Per-group TRAIN fit diagnosis (2026-10-21)
+
+The fixed study now supports detached conditioning and physical residual readouts
+with `--training-diagnostics`; add `--diagnostics-only` to the retention profile
+for zero new native scenes. All118focused checks pass on each Windows/Linux,
+scoped lint/format/types pass, and independent actual review accepts the one
+budgeted diagnosis. Mean Push fit improves, but its first gripper remains wrong
+and all three old-task TRAIN group errors grow. Useful adaptation is still open.
+[Usage/tree/commands](docs/push-cube-learned-continuation.md) ·
+[Results, costs, limitations and next action](artifacts/runs/push-train-fit-diagnosis-20261021/RESULTS.md).
+
+## Mixed retention: negative adaptation result (2026-10-21)
+
+The Pick-only profile `--profile bp_mixed_retention` reuses the verified Push
+negative and exactly reproduces the paid source/mixed continuation before three
+new native scenes. Pick17/20 succeed in16/14controls; Pick19 fails50, versus source
+successes17/20/20. Push still fails. Final93checks/platform, scoped statics and
+independent actual review pass; this does not establish useful adaptation.
+[Commands, costs, failures and next fit diagnosis](artifacts/runs/mixed-pick-retention-20261021/RESULTS.md).
+
+## Previous mixed Push study: negative endpoint, original retention unfinished (2026-10-21)
+
+The existing study now selects `--profile bp_mixed` and reuses accepted source
+controls. Eight mixed updates completed, but Push17 still failed within50controls.
+The enclosing trial stopped before Pick because saved-list/live-tuple comparison
+rejected equal reset values. That defect is fixed without numeric tolerance;
+original terminal failure and costs remain. Initial54checks/platform passed;
+final19affected regression checks/platform and scoped statics passed, independently
+reviewed. Pick retention was unobserved in that run; the successor above observes
+its reproduced candidate.
+[Protocol, commands, failures, costs and exact acceptance](artifacts/runs/mixed-push-study-20261021/RESULTS.md).
+
+## Private mixed-gripper continuation (2026-10-21)
+
+`run_continuous_train_continuation(..., update_rule="bp_mixed")` now uses the
+existing XYZ-MSE/gripper-BCE learner on a private fork, preserving the original
+source, stable actor, momentum, counters and normalization. The head-GN default
+remains. All **44 focused checks pass per platform**, with scoped statics and
+independent review. Controlled endpoint learning is verified; physical Push benefit
+remains unproven and the previous negative trial is preserved.
+[API, tree and commands](docs/continuous-train-continuation.md) ·
+[Results, costs and limits](artifacts/runs/mixed-gripper-continuation-20261021/RESULTS.md).
+
+## Learned Push continuation: negative local result (2026-10-21)
+
+The fixed in-process study now passes22focused checks per Windows/Linux, scoped
+statics and independent review. Eight updates on18Push+80old TRAIN reference rows
+preserve all three known Pick successes (17/37/20controls); Push still fails before
+and after50controls. Pick19 uses17more controls than the accepted source. All
+original failures and costs remain; this is no circadian or generalization claim.
+Next learning repair targets the observed gripper-label mismatch using existing
+mixed BP math, with the current head-GN default preserved.
+[Usage/tree/checks](docs/push-cube-learned-continuation.md) ·
+[Protocol, exact results/costs/failures/review](artifacts/runs/push-cube-learned-continuation-20261021/RESULTS.md).
+
+## PushCube TRAIN supervision (2026-10-21)
+
+The fixed geometric teacher and TRAIN-only collector now pass 48 checks on each
+Windows/Linux runtime, scoped lint/format/type checks and independent review.
+One frozen TRAIN-17 native trial succeeds after 18 controls and exports 18
+qualified labels, with 90 known control-physics steps and 19 grasp queries.
+The original failed checks and their prospective repairs remain recorded.
+This proves hand-written supervision on one known reset; learned Push adaptation
+and retention remain next. [API, tree and commands](docs/push-cube-supervision.md) ·
+[Results, costs and limitations](artifacts/runs/push-cube-supervision-20261021/RESULTS.md).
+
+## Explicit PushCube TRAIN boundary (2026-10-21)
+
+`ManiSkillPushCubeEpisode` reads structured physical positions and an explicit
+Panda grasp sensor. It preserves actual commands, native sparse reward/end flags
+and paid failures. Its D12 encoder and fake SDK boundary pass 69 checks on each
+Windows/Linux runtime, with independent review and scoped lint/format/type checks.
+One native TRAIN-17 episode also completes: 50 controls, 250 known control-physics
+steps, zero task success. Both earlier numerical-admission failures are preserved;
+the reviewed correction permits bounded scalar quaternion roundoff with exactly
+zero rotation. Supervision is now accepted above; learned adaptation remains next. Pick defaults stay
+unchanged. [API](docs/push-cube-train-port.md) ·
+[Commands, costs and limitations](artifacts/runs/push-cube-train-port-20261021/RESULTS.md).
+
+## Continue an existing learned BP source (2026-10-21)
+
+`run_continuous_train_continuation` accepts newly released TRAIN data and explicit
+old references through the existing private runtime, preserving source/actor,
+frozen normalization, counters, delayed labels and paid failures. Tiny real
+continuation and focused isolation checks are independently accepted: Windows26
+original passes plus one repaired case, Linux27PASS. The original fixture failure
+and all23GN/344row charges remain. This is software evidence, not new physical
+learning or circadian benefit. [API/tree/commands](docs/continuous-train-continuation.md) ·
+[Results and review](artifacts/runs/continuous-train-continuation-20261021/RESULTS.md).
+
+## Ordinary fixed joint acquisition CLI (2026-10-21)
+
+`python -m scripts.run_continuous_robot_learning --joint-acquisition` now accepts
+six bounded qualified receipts, preserves original clocks/work and source
+bindings, and routes the fixed existing recipe. Mixed legacy flags refuse before
+reads; owned receipt metadata stays guarded.95focused checks pass per repaired
+Windows/Linux, actual module --help and scoped statics/independent review accepted.
+The initial invalid synthetic fixture and review-format failure are preserved.
+Tests spend no learner/SDK work. The separately budgeted actual native command
+now also passes independent review: known TRAIN17/19/20 succeed in17/20/20
+controls,57total/285known control physics. Full training reports reproduce the
+accepted acquisition experiment; all three old-group fit regressions remain.
+[Actual command, costs and limits](artifacts/runs/joint-acquisition-native-cli-20261021/RESULTS.md).
+[Usage and boundaries](docs/learned-continuous-robot.md) ·
+[Commands, costs, failures and acceptance](artifacts/runs/joint-acquisition-cli-20261021/RESULTS.md).
+
+
+## Typed joint acquisition workflow (2026-10-21)
+
+The existing robot-learning runner now exports `run_joint_acquisition_rollouts`:
+qualified typed inputs → source32 → eight joint updates →40/2776 → frozen known
+TRAIN17/19/20. It preserves paid failures, input/model/report ownership and output
+exclusivity; complete negative scenes continue.58focused checks pass per platform,
+scoped statics and independent review accepted. These tests use fake native IO;
+CLI receipt intake and the separately budgeted actual command are now accepted. No new scientific
+benefit or repository-wide readiness claim.
+[API and example](docs/learned-continuous-robot.md) ·
+[Commands, costs, failures and review](artifacts/runs/joint-acquisition-workflow-20261021/RESULTS.md).
+
+## Frozen rehearsal learner passes one development guard (2026-10-21)
+
+The accepted acquisition learner succeeds on the fixed scoring-only guard31 in22
+controls; the saved source32 learner failed at50. Training reports reproduce
+exactly before guard data is loaded, and training stays closed during scoring.
+Independent review accepted provenance, costs and all three +1 score differences.
+This is one reused development reset, not general reliability or a CPC advantage.
+The earlier renderer failure, negative31 and37 timeout remain preserved.
+[Exact commands, result, costs and review](artifacts/runs/train20-acquisition-guard31-20261021/RESULTS.md).
+
+## Acquisition with old-reference rehearsal (2026-10-21)
+
+The existing joint API acquired TRAIN20 while retaining native success on known
+TRAIN17/19 after eight updates:17/20/20 controls. The saved TRAIN20-only strategy
+lost17/19. All three old imitation losses rose slightly; added rehearsal exposure
+and costs are explicit. This fixed result is independently accepted, with no
+claim of unseen-reset reliability or circadian advantage. Production APIs and
+defaults are unchanged.
+[Results, exact commands, costs and review](artifacts/runs/train20-acquisition-rehearsal-20261021/RESULTS.md).
+
+## Explicit old-information rehearsal control (2026-10-21)
+
+The existing joint correction API now supports `old_information_control=True`:
+original115 old-context rows plus15 ordered A17 reference repetitions, with no
+TRAIN20 labels in the eight new return updates. Original provenance, clocks,
+commands, source/actor isolation and paid failures remain guarded; defaults stay
+unchanged.68 focused checks pass on each platform, independently accepted.
+The frozen native old-information control succeeds17/19 but fails20 at50controls;
+saved retained20 succeedsall3. Same130rows/eightupdates/solve shapes, different
+context weighting/data/costs; independently accepted, no CPC/generalization claim.
+[Native outcomes, exact commands, costs and review](artifacts/runs/native-old-information-rehearsal-20261021/RESULTS.md).
+[API](docs/joint-readiness-corrections.md) · [Checks, commands, costs and review](artifacts/runs/rehearsal-old-information-control-20261021/RESULTS.md).
+
+## Learned fixed-mass transfer and default return
+
+The unchanged rehearsed BP policy succeeds under doubled cube mass and after a
+fresh default reset, in17controls each. Independent review accepts both outcomes,
+original mass/history evidence and costs. This fixed condition needed no new
+learning; it does not establish general robustness or circadian benefit.
+[Physical results and commands](artifacts/runs/learned-mass-transfer-20261021/RESULTS.md).
+The explicit mass/history API passes169focused checks per Windows/Linux.
+[API examples](docs/pick-cube-mass-context.md) · [Software checks](artifacts/runs/taskspace-mass-binding-20261021/RESULTS.md).
+
+## Latest fixed private-update result (2026-10-21)
+
+The rehearsed BP policy still solves known TRAIN17/19/20 resets after one private
+fresh-data update, in17/19/16controls. Reserved test24 fails before and after
+50controls, despite better imitation error. Independent review accepts all five
+outcomes, isolation and costs; this shows fixed-reset retention, not new-task
+success, generalization or circadian advantage. Production behavior is unchanged.
+[Results, exact commands and limits](artifacts/runs/rehearsed-probe-native-transfer-20261021/RESULTS.md).
+
+## Known A recovers while B remains successful (2026-10-21)
+
+Eight fixed updates on all115 released TRAIN rows recover A17 in17 controls;
+B19 remains successful in18. Independent checks accept the native results,
+source isolation and costs. Old A imitation error worsened and remains recorded.
+This is one known-context result, not reliability, generalization or CPC benefit.
+[Results, commands and costs](artifacts/runs/returning-a-curated-corrections-20261021/RESULTS.md).
+
+The fixed old-data control now recovers A in15 controls but loses B after50,
+despite improved imitation errors. The curated recipe preserves both at the
+same update/context-row dose; data, stage distribution and historical query
+costs differ. Independent checks accept both outcomes; no generalization or
+CPC advantage follows. [Control evidence](artifacts/runs/matched-old-information-control-20261021/RESULTS.md).
+One disposable SGD update from the corrected state improves reserved-reset
+training/test imitation error while old A/B fit worsens slightly. Independent
+checks accept isolation and all cached comparisons; the larger gain still leaves
+worse final error than several earlier checkpoints.
+[Probe evidence and limits](artifacts/runs/post-correction-fresh-probe-20261021/RESULTS.md).
+The supported Python stream API now composes both correction stages at its
+existing detached B checkpoint and returns the adapted candidate.15 focused
+integration tests pass on Windows and Linux. A frozen run matches the original
+benchmark, all16 correction updates and all35 saved commands exactly; independent
+review accepts that scope. This adds no new physics or general reliability claim.
+[API and example](docs/joint-readiness-corrections.md) ·
+[Results and preserved review-tool failures](artifacts/runs/joint-readiness-stream-20261021/RESULTS.md).
+The existing rollout API now supports scoring-only reserved guard resets with
+48 focused checks passing per platform and independent acceptance. The native
+study is incomplete: reset31 failed after50 controls; reset37 has no returned
+result after timeout. Known-reset success therefore does not show transfer.
+[Guard API, observations, failures and costs](artifacts/runs/corrected-policy-guard-20261021/RESULTS.md).
+An explicit TRAIN-only diagnostic now describes all115 released rows with
+34 focused checks passing per platform and independent acceptance. It reports
+marginal feature/history support without learner, query or native work. The
+curated A return has40 lift rows and no settle rows; this does not explain the
+guard failure causally. [API](docs/joint-readiness-corrections.md#train-only-feature-support) ·
+[Description and costs](artifacts/runs/train-feature-support-20261021/RESULTS.md).
+The optional recorded-stage sampler is now implemented and checked:90 focused
+cases pass per Windows/Linux, with independent acceptance. Its frozen comparison
+worsens all three final TRAIN losses. Native A17 still succeeds17controls; B19
+fails50, while the saved unbalanced recipe succeeded on both. The unbalanced
+default remains. [Sampling API](docs/joint-readiness-corrections.md#optional-recorded-stage-sampling-control) ·
+[TRAIN evidence](artifacts/runs/stage-balanced-corrections-20261021/RESULTS.md) ·
+[Physical negative result and costs](artifacts/runs/stage-balanced-known-context-20261021/RESULTS.md).
+The existing isolated probe now exposes synchronous read-only before/after
+endpoints, with explicit reserved-test24 frozen serving.180 focused checks pass
+on each platform, scoped statics and independent acceptance. Original defaults
+and private probe updates remain; no learner is returned.
+[API and commands](docs/continuous-probe-endpoints.md) ·
+[Software evidence](artifacts/runs/continuous-probe-endpoints-20261021/RESULTS.md).
+The frozen native before/after24 question completed: both endpoints fail after50
+controls, with zero physical gain despite exactly reproduced imitation gains.
+Independent review accepts the negative result, isolation and costs.
+[Native evidence](artifacts/runs/native-fresh-probe-endpoints-20261021/RESULTS.md).
+The fixed old-context retention case also completed: A17 still succeeds in17
+controls; B19 in19 versus the cached source's18. Independent review accepts
+source/probe equivalence, physical outcomes and costs. This preserves both old
+successes in one case; reserved24 acquisition remains unsuccessful.
+[Retention evidence](artifacts/runs/native-probe-old-retention-20261021/RESULTS.md).
+The ordinary teacher and typed readiness reader now admit explicit TRAIN20,
+preserving17/19 and reserved-role gates. For a separately budgeted collection
+inside the existing optional native environment:
+
+```powershell
+python -m scripts.maniskill_task_teacher_smoke --output fresh-teacher-20.json --train-seed 20 --geometry-readiness --observed-grasp
+```
+
+The single budgeted TRAIN20 collection qualified and succeeded in15controls;
+the typed reader preserved its original episode, feedback and75knownphysics steps.
+Independent review accepts this demonstration coverage; no learner was run.
+[Collection and admission evidence](artifacts/runs/train-context-diversity-20261021/RESULTS.md).
+Outputs are exclusive; an existing receipt is preserved. A mismatched returned
+TRAIN allocation remains recorded with its paid work and fails qualification.
+The existing action-history learner path now also admits declared20, with117
+focused checks passing per platform. Independent review verified all360 TS12
+coordinates and the original commands, clocks and costs from that demonstration.
+[Feature-admission evidence](artifacts/runs/train20-action-history-20261021/RESULTS.md).
+One fixed four-family A17→20→A17 run now completes through the existing stream.
+All families improve new-context imitation; old-context error also improves during
+the new phase and on return, so this does not demonstrate forgetting and recovery.
+BP has the lowest final errors; PC and neutral CPC match, active CPC is higher.
+Independent review accepts all endpoints, comparisons and costs. There are no
+learned native rollouts or new-task/generalization/circadian-benefit claims.
+That matched diagnostic is separate from the corrected BP continuation: eight
+private TRAIN20 head updates now change native20 failure to success in19controls,
+while previously successful17/19 both fail50. Source and actor remain unchanged.
+This fixed case demonstrates acquisition with forgetting; retained old skills,
+recurrence, generalization and circadian benefit remain unestablished.
+[Continuation results and costs](artifacts/runs/train20-corrected-continuation-20261021/RESULTS.md).
+The fixed return case then applies eight existing joint old-context updates:
+TRAIN17/19 recover success in17/19controls, while TRAIN20 fails50. This records
+recovery after forgetting and a retention gap across the three known contexts.
+[Return evidence and costs](artifacts/runs/train20-context-return-20261021/RESULTS.md).
+The joint API now supports an optional separately qualified TRAIN20 reference
+during return training. Independent functional acceptance covers179checks on each
+platform, including actual130-row native GN work and unchanged defaults. One
+frozen native comparison now solves all three known TRAIN17/19/20 contexts in
+17/19/16 controls, preserving acquired20 while recovering17/19. Against the
+cached old-only return, native success is unchanged for17/19 and improves for20;
+all three old imitation-error endpoints worsen. This adds120 training exposures
+and more compute. Earlier20-only forgetting remains, and these known resets do
+not establish unseen-task learning, reliability or circadian benefit. Windows
+software memory-resource conformance remains unproven because RSS was not measured.
+[Optional rehearsal API](docs/joint-readiness-corrections.md) ·
+[Software checks and acceptance scope](artifacts/runs/joint-train20-rehearsal-20261021/RESULTS.md) ·
+[Accepted native results and costs](artifacts/runs/native-train20-rehearsal-20261021/RESULTS.md).
+[Matched diagnostic](artifacts/runs/train20-matched-learnability-20261021/RESULTS.md).
+The private probe recipe and all closed studies remain unchanged.
+All earlier failures and negative results remain.
+
+The existing private probe now supports up to three old TRAIN readouts, allowing
+17/19/20 to remain visible during one fresh-task probe. Source/actor isolation,
+role refusal, diagnostics and paid failures pass78 focused checks on each platform
+with independent acceptance. This is software support; the probe on the rehearsed
+48/2896 policy has now also run once and passed independent review. Its private
+update improves fresh TRAIN23/test24 imitation, slightly worsens old17/20 fit and
+improves old19 fit. Both fresh gains and final errors are worse than the saved
+32-update probe. All21 comparisons and costs remain; no new native success or
+circadian benefit is established.
+[API, costs and checks](docs/continuous-fresh-task-probes.md).
+[Rehearsed-policy probe results](artifacts/runs/rehearsed-policy-fresh-probe-20261021/RESULTS.md).
+
+
+## Saved A-return corrections with explicit new clocks (2026-10-21)
+
+A bounded adapter can annotate an already recorded TRAIN return without
+backdating its labels or replacing executed actions.43 focused checks pass on
+Windows and pinned Linux, with scoped statics and independent acceptance.
+One saved A17 trace now has50 provisional labels and arrival-gated TS12 pairs;
+no training or simulation in that curation step. The subsequent known-context
+recovery result is above. A worker source-read
+engineering limit is unproven and preserved.
+[API and example](docs/saved-readiness-curation.md) ·
+[Executed evidence and costs](artifacts/runs/saved-readiness-curation-20261021/RESULTS.md).
+
+
+## Joint supervision preserves B but does not recover A (2026-10-21)
+
+Eight joint A15+B50 TRAIN updates preserve B19 success in19 controls; A17 still
+fails at50, with40 grasp-positive observations. Recorded-label error decreases
+on both tasks. Independent checks validate the outcomes, isolation and costs;
+69 controls345 known physics. Earlier negatives and matched controls remain.
+[Results, exact commands and limitations](artifacts/runs/joint-supervised-corrections-20261021/RESULTS.md).
+
+The reviewer closeout's final conservative bound was60.21s against60s. Strict
+conformance is unproven and the full plan item stays unchecked; no experiment
+retry or retrospective waiver. Reliability, returning-A recovery, unseen tasks
+and CPC benefit remain open. Next: explicitly clocked provisional corrections
+on the already-paid A return, using the existing teacher and runtime.
+
+
+## GN checkpoints retain measured imitation learnability (2026-10-21)
+
+Four isolated one-update SGD probes improve reserved training and test error at
+all four GN checkpoints, with small mixed effects on old-task error. The original
+GN benchmark remains exact. Independent review accepted all results and saved
+control comparisons; no simulator or baseline rerun. Probe gains are lower than
+the controls at8/24 and higher at16, without a uniform advantage.
+[Results, absolute errors, costs and commands](artifacts/runs/gn-checkpoint-probes-20261021/RESULTS.md).
+
+This is held-out-reset imitation learnability, not native control or a new physical
+task. Earlier failed rehearsal results remain. The TRAIN compatibility check and
+joint-supervision question subsequently executed above; no exact label conflicts
+were found, which does not establish global identifiability or control.
+
+## Reference rehearsal fails the fixed recovery question (2026-10-21)
+
+GN corrections now compose with existing reference rehearsal;42 focused checks
+pass per platform with scoped statics and independent acceptance. The fixed
+native experiment adds four replays of the original A bank to eight B updates.
+Both tasks fail at50controls. A remains lost and B loses its no-replay success;
+all three score changes are A0/B-1. No retry or tuning;100controls500knownphysics.
+[Software evidence](artifacts/runs/continuous-head-correction-replay-20261021/RESULTS.md) ·
+[Negative experiment, costs and limits](artifacts/runs/gn-reference-rehearsal-20261021/RESULTS.md).
+
+The isolated learnability question completed above using the existing probe
+API and reserved data. Retention, reliability, unseen tasks and CPC benefit remain
+open; this fixed negative result establishes none of those broader claims.
+
+## Fixed SGD correction control remains negative (2026-10-21)
+
+Using the same source,50 saved labels and8updates, default SGD fails A17 and B19
+at50controls each. The reused GN method succeeds on B19 in18controls; both fail
+A17. All three B score differences favor GN locally, with no generalization or
+circadian advantage claim. GN freezes hidden layers while SGD updates them;
+total computation differs.
+
+The first control attempt stopped before simulation on an invalid bit-equality
+check between two equivalent MSE reductions. Its failure and charges remain.
+An explicitly reviewed amendment verified each reduction exactly, then completed
+the comparison. [Evidence, costs and limits](artifacts/runs/same-label-sgd-corrections-20261021/RESULTS.md).
+
+GN now supports the existing reference rehearsal path.42 focused checks pass
+on each platform, with scoped statics and independent acceptance. Original wake
+and replay budgets and actual costs remain separate. The fixed old-A recovery question
+completed negatively above. [Software evidence](artifacts/runs/continuous-head-correction-replay-20261021/RESULTS.md).
+
+## Arrived corrections acquire known B; retention remains open (2026-10-21)
+
+The existing correction runtime and native composition now support explicit
+BP head GN updates.21focused checks pass on each platform with scoped static
+checks and independent acceptance. Default SGD remains unchanged.
+[API and commands](docs/bp-head-gauss-newton.md).
+
+One fixed experiment used50arrived labels and8private updates. Known B19 changed
+from failure to success in18controls; A17 remained unsuccessful. All original
+negative results are retained.118controls/590knownphysics in total; no unseen-task,
+reliability, safety or circadian advantage claim. [Results, costs and limitations](artifacts/runs/gn-arrived-corrections-20261021/RESULTS.md).
+
+The same-label SGD comparison is now accepted above. Equal update/row exposure
+does not imply equal compute.
+
+## Neural phase readouts and a negative adaptation result (2026-10-21)
+
+The existing neural runner now exposes optional detached phase readouts for
+frozen control comparisons.56focused checks passed on Windows and pinned Linux,
+with scoped statics and independent acceptance. Default schema/SGD stay unchanged.
+[Contract, file tree and commands](docs/continuous-phase-readouts.md).
+
+A fixed GN study found A success1→0 after B training, B success0→0, and A recovery1
+from the accepted return-A run. Four newreturns used165controls825knownphysics.
+B acquired grasp/transport behavior but failed taskcompletion; no general
+adaptation or circadian advantage follows. All negative results, metrics and
+sampledjointviolations remain. [Study, costs and limitations](artifacts/runs/gn-native-adaptation-20261021/RESULTS.md).
+
+Arrived correction work is now accepted above. Reliability, unseen tasks, safety
+and repository readiness remain open.
+
+## GN-trained neural policy completes known PickCube reset (2026-10-21)
+
+One frozen GN-trained BP policy completed known TRAIN17 PickCube in15controls
+with sparse return1 and final success true. The full24-update/416-row benchmark
+reproduced exactly before serving. Existing soft native32 actions, causal TS12
+history and frozen ownership checks were used; no production source changed.
+Scoped driver statics and independent actual review passed.
+
+This is one known-reset neural success, not reliability or generalization.
+Earlier failed controls and the offline acquisition/forgetting tradeoff remain:
+GN final A error .001915 vs SGD .060225, but B .086033 vs .064604. Solver and
+storage costs differ; no matched-compute or circadian advantage claim.
+[Native evidence, costs and limitations](artifacts/runs/bp-head-native-control-20261021/RESULTS.md).
+
+Detached phase readouts now support the controlled native question above. [API/commands](docs/bp-head-gauss-newton.md) ·
+[Stream software](artifacts/runs/bp-head-stream-20261021/RESULTS.md) ·
+[All TRAIN metrics](artifacts/runs/bp-head-train-study-20261021/RESULTS.md).
+
+## Fixed hidden features fit TRAIN references (2026-10-20)
+
+The new TRAIN-only readout diagnostic fits one disposable output head while
+leaving the existing BP/PC-family source unchanged.29 focused tests passed on
+Windows and pinned Linux; scoped statics and independent review accepted it.
+
+One frozen study reduced physical TRAIN MSE from0.125657 to2.91e-13 using fixed
+hidden features. Large condition number93960.5 and coefficient norm9354.94 limit
+interpretation: this is recorded-row fitting, with no head deployment or native
+success claim. All prior control negatives remain. Next is a bounded original-MSE
+BP head proposal, not a seed/dose sweep or circadian-advantage claim.
+[API and checks](docs/frozen-hidden-readout-fit.md) ·
+[Results, costs and limits](artifacts/runs/frozen-hidden-readout-fit-20261020/RESULTS.md).
+
+## Explicit gripper execution; native check remains negative (2026-10-20)
+
+Frozen common-MSE BP/PC/neutral/active serving now has an optional fixed binary
+rule for the gripper, with separate prediction, selected-command and actual-native
+receipts. XYZ and old soft defaults are preserved.39 focused checks passed on
+both platforms with independent acceptance.
+
+One unchanged24-update BP source still failed its decoded TRAIN17 return after
+50 controls. All gripper predictions were positive, so all commands stayed open.
+The complete negative, prior soft result and working memory controls are retained;
+this establishes no CPC or general control benefit. Next is a bounded TRAIN-only
+readout-fit diagnostic before further native experiments.
+[API and commands](docs/gripper-action-decoding.md) ·
+[Native result and costs](artifacts/runs/gripper-decoded-control-check-20261020/RESULTS.md).
+
+## Fixed-input memory retains robot control (2026-10-20)
+
+The existing nearest learner now supports explicit identity-scaled inputs, and
+its existing delayed-release stream can skip fitting. Scoped checks passed on
+Windows and pinned Linux:39 per platform, independently accepted. Legacy fitted
+behavior and default stream schemas are preserved.
+
+Using the same taskspace12 information, A15+B22 memory completed one frozen
+TRAIN17 return in15 controls, selecting the original A prototypes in order.
+This is a useful known-context control result with different memory and compute
+from BP. It establishes no circadian advantage, unseen-task reliability or safety.
+A paired B19 check also passed independent review: A-only memory failed after
+50 controls; adding the delayed22 B rows produced success in22 controls from
+the same initial observation.
+[Usage and checks](docs/taskspace-memory-control.md) ·
+[Retained-A evidence](artifacts/runs/taskspace-memory-control-native-20261020/RESULTS.md) ·
+[B adaptation, costs and limits](artifacts/runs/taskspace-memory-b-adaptation-20261020/RESULTS.md).
+
+## Offline learning still falls short of BP robot control (2026-10-20)
+
+The24-update BP source reproduced the accepted offline benchmark exactly, then
+failed one frozen TRAIN17 return:50controls,zero success,no observed grasp.
+Independent review accepted this complete negative and preserved4sampled joint6
+limit violations. No learner/controller defaults changed. Positive imitation/probe
+gains do not establish autonomous control. Next is a same-taskspace memory control
+through existing nearest and frozen-serving components, after scoped checks.
+[Full results, costs and limitations](artifacts/runs/robot-learnability-control-check-20261020/RESULTS.md).
+
+## Learnability on recorded robot trajectories (2026-10-20)
+
+One fixed offline A/B/A study used the existing BP, PC, neutral CPC and active
+CPC learners plus disposable reserved-reset probes. All four improved fixed A/B
+imitation fit and all16one-step probes improved TRAIN/test error. BP had the
+smallest final A/B errors; PC and neutral matched; active CPC had mixed differences
+and no overall advantage.112updates/1952row exposures, extra diagnostics charged,
+independent actual review accepted. No new native rollout or learned-control claim.
+[Full metrics, protocol, costs, failures and next action](artifacts/runs/reserved-robot-learnability-20261020/RESULTS.md).
+
+## Reserved robot probe inputs (2026-10-20)
+
+The existing teacher/CLI now collects prospectively fixed probe-train reset23
+and score-only probe-test24 with original role, commands, flags and paid work.
+70 scoped cases/platform and independent review passed (Windows coverage is
+aggregate after two preserved harness failures). One frozen native collection
+qualified18rows at each reset; raw and causal TS12 exports passed independent
+review. The existing probe plan is constructed but unexecuted: no learner,
+probe update or score was run. Held-out-reset expert inputs are not learned
+adaptation, a new physical task or circadian benefit.
+[Usage](docs/reserved-robot-probes.md) ·
+[Checks and failures](artifacts/runs/reserved-robot-probe-input-20261020/RESULTS.md) ·
+[Native evidence and next action](artifacts/runs/reserved-robot-probe-input-native-20261020/RESULTS.md).
+
+## TRAIN input/target consistency (2026-10-20)
+
+A bounded diagnostic compares raw42 and existing taskspace12 actual-history
+inputs while keeping queried targets, executed commands and original provenance
+separate.34 focused checks passed on Windows and pinned Linux, with scoped
+statics and independent acceptance. One saved31-row diagnosis found one shared
+reset in each view with identical targets and no exact target conflicts.
+This does not explain the neural control failure or establish representation
+adequacy. No training or simulator work was added.
+[Usage](docs/readiness-label-separation.md) ·
+[Evidence, costs and next action](artifacts/runs/readiness-label-separation-20261020/RESULTS.md).
+
+## Student-prefix teacher completion (2026-10-20)
+
+The existing robot collector can execute a fixed student prefix then the
+observed-v2 teacher, preserving actual command history and paid failures.
+100 focused checks/platform, scoped statics and independent acceptance passed.
+In one fixed native case,12 student +4 teacher controls solved the task; eight
+private updates still left the pure student unsuccessful and worsened both
+reference fits. Mixed success is not autonomous learning. Existing nearest-exemplar
+context adaptation remains accepted; this result concerns the neural state policy.
+[Usage](docs/readiness-roll-in.md) ·
+[Results and costs](artifacts/runs/student-prefix-teacher-completion-native-20261020/RESULTS.md).
+
+## Stage-balanced TRAIN acquisition packets (2026-10-20)
+
+The existing stream and robot CLI can explicitly use three original rows per
+recorded stage in each 15-row A-only packet. Targets and causal histories stay
+intact; empirical weighting changes and extra selection/copy costs are reported.
+44 focused checks passed on each platform, with scoped statics and independent
+acceptance. Default uniform behavior is preserved. A separately frozen native
+trial was independently accepted as negative: grasp fit improved, but the student
+never entered the goal region and had zero task success. Useful control remains
+open. [Native evidence and costs](artifacts/runs/stage-balanced-acquisition-native-20261020/RESULTS.md).
+[Usage](docs/observed-grasp-corrections.md) ·
+[Checks, commands and costs](artifacts/runs/stage-balanced-acquisition-20261020/RESULTS.md).
+
+## First-step readiness diagnostics (2026-10-20)
+
+The existing private correction API can opt into read-only TRAIN reference/stage
+step-direction diagnostics.20 focused tests passed on Windows and pinned Linux;
+scoped lint/format/typing and independent review accepted. Enabling the readout
+left the tiny fixture's default candidate, receipts and charges identical. Failed
+diagnostics retain the paid first update and stop further work. These checks do
+not establish robot usefulness; PC/CPC execution remains unqualified here.
+[Usage](docs/observed-grasp-corrections.md) · [Evidence and costs](artifacts/runs/readiness-correction-step-diagnostics-20261020/RESULTS.md).
+A separate no-simulator diagnosis found a first-step direction against old grasp
+fit on both references; inherited momentum points toward better warm grasp fit.
+These are local derivatives, not task success.
+[All stages and scientific limits](artifacts/runs/readiness-step-interference-20261020/RESULTS.md).
+
+## Goal-consistent student-state corrections (2026-10-20)
+
+The existing collection/private-update/pure-return path can explicitly select v2
+supervision while preserving v1, source isolation, clocks and paid work.47 focused
+checks/platform, scoped statics and independent acceptance passed. A separate
+frozen native trial was accepted as negative: both episodes failed the task and
+both original TRAIN reference fits worsened. Useful learned recovery remains open.
+[Native outcome and costs](artifacts/runs/goal-consistent-readiness-recovery-20261020/RESULTS.md).
+[Usage](docs/observed-grasp-corrections.md) · [Commands and costs](artifacts/runs/goal-consistent-readiness-corrections-20261020/RESULTS.md).
+
+## Goal-consistent observed teacher (2026-10-20)
+
+Explicit observed-grasp v2 uses Euclidean20mm entry/25mm retention through the
+existing teacher collector/CLI. Legacy behavior and evidence are preserved.
+122 focused checks/platform and independent acceptance passed. The teacher
+qualified at TRAIN17 in15controls, but its demonstration exactly matches v1.
+There is no new training coverage; useful learned control remains open.
+[Usage](docs/observed-grasp-teacher.md) · [Evidence](artifacts/runs/goal-consistent-observed-teacher-20261020/RESULTS.md).
+
+## Fixed conventional fit-depth result (2026-10-20)
+
+One frozen384-update BP trial is independently accepted as negative: it grasped
+but did not solve TRAIN17 in50controls, despite improved imitation fit. No reliable
+learned control or CPC advantage is established. A pure diagnosis also reproduces
+a teacher stopping region outside the native goal radius. Explicit v2 semantics
+are now implemented; teacher qualification did not establish learned control.
+Earlier failures remain.
+[Results, costs, failures and next action](artifacts/runs/observed-warm-fit-depth-20261020/RESULTS.md).
+
+## Explicit observed warm-source learning (2026-10-20)
+
+The existing robot learning CLI now has an explicit observed-grasp warm-source
+route, requiring readiness+A-only+nonvisual inputs. It preserves original B19
+as read-only TRAIN diagnostics and each source teacher definition. 189 focused checks per platform, scoped statics and independent software
+acceptance passed. One native question executed with producer-reported zero success; saved-evidence
+acceptance remains incomplete after two checker failures. No learned success claim. [Usage and costs](docs/observed-grasp-teacher.md).
+
+## Observed-grasp teacher collection (2026-10-20)
+
+The existing teacher collector/CLI supports explicit --geometry-readiness
+--observed-grasp with strict current feedback and a distinct result.90 focused
+checks/platform and independent review passed. One frozen TRAIN17 teacher-only
+case qualified in15controls/75knownphysics, sparse1/finaltrue. Learner acquisition
+remains unproven; old failures and default v1 behavior are preserved.
+[Usage, commands and scoped evidence](docs/observed-grasp-teacher.md).
+
+## Observed-grasp TRAIN readiness corrections (2026-10-20)
+
+Opt-in current official grasp feedback selects closed transport/settle supervision
+through the existing query, arrived-update and frozen-return path. A separate
+teacher and record version retain feedback across raw/history views; geometry-only
+v1 defaults, thresholds, actual student commands and all prior negatives remain.
+Software146 checks/platform independently accepted. One native question corrected
+held-state labels to10ALIGN40LIFT, but return still failed/no grasp; A reference
+fit worsened, B slightly improved. All auxiliary readback failures are preserved.
+Reference composition also passes6 focused checks/platform. Its frozen A20 replay
+trial still had zero success/no updated grasp and worsened A/B fit versus
+correction-only despite4 extra updates80rows. Useful retention stays open.
+[API, rationale, costs and scoped evidence](docs/observed-grasp-corrections.md).
+
+## Explicit mixed BP private corrections (2026-10-20)
+
+Existing correction adapter and robot runner accept explicit binary_gripper_axis=3
+for exact mixed BP. Arrived endpoint labels and optional complete TRAIN replay
+retain original clocks, budgets, permanent charges and mixed receipts; soft student
+commands/history and frozen source remain unchanged. No new math or native recovery
+claim. Software169 checks/platform and one separately budgeted native recovery
+question are independently accepted. Native recovery was negative: all50 labels
+were ALIGN despite source grasp, updated student never grasped, and both TRAIN
+reference fits worsened. [Usage, costs and next dependency](docs/bp-binary-gripper-robot.md).
+
+## Explicit BP binary-gripper robot objective (2026-10-20)
+
+The robot learning API/CLI can select the existing BP mixed binary-gripper loss,
+with explicit candidate/receipt binding and unchanged soft tanh serving. MSE
+remains the default; PC/CPC objectives are unchanged.79 focused checks per platform
+and independent review passed. A native run grasped/lifted the cube but missed the
+goal; task success remains zero, and readback-budget conformance is unverified.
+[Usage and qualified evidence](docs/bp-binary-gripper-robot.md).
+
+## Optional reference rehearsal during corrections (2026-10-20)
+
+The existing private correction and robot return APIs can compose bounded TRAIN
+reference replay for all four neural families. Eight wake updates remain; replay
+adds separately charged consolidations and exposure. Defaults are unchanged.
+[API, costs and boundaries](docs/correction-reference-rehearsal.md). Final196
+focused checks per platform and independent review passed. A subsequent native
+trial remained negative: extra replay modestly reduced reference-fit damage but
+delivered no autonomous success. [Evidence](artifacts/runs/taskspace12-reference-rehearsal-acquisition-20261020/RESULTS.md).
+
+## Optional fixed physical taskspace12 (2026-10-20)
+
+The existing fourfamily learner and robot/correction runner accepts a separate
+12-input official-state recipe with fixed0.1m displacement scaling and causal
+actual-command history. No empiricalfit; raw42 and default47 paths retained.
+197focusedchecks/platform and independentreview pass, including a preserved
+admissionfailure and repair. This establishes scoped softwarecorrectness. One subsequent pure native12 trial
+completed with zero success; useful autonomouscontrol remains open.
+[Usage and boundaries](docs/official-state-taskspace12.md) ·
+[Evidence](artifacts/runs/official-state-taskspace12-20261020/RESULTS.md).
+
+## History-consistent readiness corrections (2026-10-20)
+
+The existing correction runner now supports47D history BP/PC/neutralCPC/activeCPC:
+raw arrived labels, optional bounded teacher roll-in,8privateupdates and pure
+studentreturn. History follows actual commands; source/statistics stay frozen.
+62focusedchecks/platform and independent review pass. One subsequent native trial completed: assisted collection succeeded, but the
+updated pure student failed. Autonomous acquisition remains open. [Usage](docs/causal-action-history.md#readiness-corrections) ·
+[Scoped evidence](artifacts/runs/action-history-corrections-20261020/RESULTS.md).
+
+## Causal executed-action history (2026-10-20)
+
+The existing learner/robot path supports47D causal executed-action inputs and an
+equal-width zero control, with fixed history scaling and original raw traces.
+137 focused checks per platform, scoped statics and independent review pass.
+The first native zero arm failed during final capture after50zero-reward controls;
+the originally unlaunched executed arm subsequently completed with zero success.
+The comparison remains incomplete; no comparative benefit is established.
+[Usage](docs/causal-action-history.md) · [Evidence](artifacts/runs/causal-action-history-20261020/RESULTS.md).
+
+## Readiness phase residual diagnostics
+
+The existing learner now partitions residuals by original qualified TRAIN phases,
+with owned row/source bindings and the same diagnostic prediction count. [Usage
+and commands](docs/readiness-stage-residuals.md). The final 106 focused checks pass
+on both platforms, with scoped static checks and independent review. Prior native results remain zero-success; phase
+fit for those old reports remains unavailable. [Evidence/limits](artifacts/runs/readiness-stage-residuals-20261020/RESULTS.md).
+
+## Explicit frozen observation scale floors
+
+The existing four-family learner/robot paths can apply declared positive scale
+floors while retaining empirical statistics and default behavior. [Usage and
+commands](docs/observation-scale-floors.md).77focusedcases/platform/statics and
+independent acceptance. One fixed native unit-floor case still scored zero;
+A imitation fit was worse than the reused empirical-scale control.
+[Negative evidence/costs](artifacts/runs/state42-scale-floor-acquisition-20261020/RESULTS.md).
+
+## Bounded readiness teacher roll-in
+
+The existing collector can execute an explicit teacher prefix then hand back to
+its frozen student. Every command records its behavior source and exact native
+float32 action. [Usage and commands](docs/readiness-roll-in.md).72focused cases
+per platform/statics and independent review pass. One native case broadened
+teaching coverage to grasp/lift, but pure updated student task success stayed0.
+[Negative evidence and costs](artifacts/runs/readiness-roll-in-acquisition-20261020/RESULTS.md).
+
+## Canonical readiness corrections
+
+[Existing private corrections](docs/state42-canonical-corrections.md) now support
+canonical state42 and an explicit TRAIN17 acquisition route.130focusedcases per
+platform and independent functional review pass. One native correction case
+reduced training loss but still had zero task success; all50query labels were
+ALIGN. Useful learned control remains open. [Evidence](artifacts/runs/state42-canonical-acquisition-20261020/RESULTS.md).
+
+## Explicit state42 quaternion features
+
+The [opt-in feature recipe](docs/state42-quaternion-features.md) canonicalizes
+TCP/object quaternion signs before training and frozen serving, preserving raw
+native traces.404focusedcases/platform and independent functional review pass.
+The single fixed-dose native control remains negative(zero task success); four
+sampled joint violations remain. Fixture shared-CPU scheduling conformity is
+withheld following a recorded overlap. [Evidence and limitations](artifacts/runs/state42-quaternion-recipe-20261020/RESULTS.md).
+
+## Geometry-readiness teaching
+
+The [explicit readiness teacher](docs/pick-cube-readiness-teacher.md) uses current
+TCP/cube/goal geometry to wait for approach, attempt closing and recover approach
+after lost proximity. It reuses the existing bounded robot collector and CLI,
+with distinct TRAIN provenance. The original fixed teacher remains available.
+Geometry alone does not establish grasp or off-reference expert quality.
+The [official state42 acquisition diagnostic](artifacts/runs/state-readiness-acquisition-20261020/RESULTS.md)
+qualified two full-phase teachers but the fixed BP A-only learner still had zero
+native success. This accepted negative leaves useful learned control unresolved.
+A separately frozen larger dose improved fit but still failed control and recorded
+34sampledjoint-limit violations. The [explicit state42 saved diagnostic](docs/learned-control-diagnosis.md#official-state42-mode)
+now describes all42 coordinates with zero new model/native work;84focusedcases
+pass per platform. Recorded support departure is descriptive, not a causal claim.
+The [existing private correction pipeline](docs/readiness-corrections.md) now
+accepts distinct readiness labels and bases query closing progress on executed
+student commands.339focused cases/platform and independent implementation review
+pass; student usefulness remains a separate native question.
+
+
+## Private PC/CPC robot corrections
+
+The [existing corrective recipe](docs/continuous-corrective-adaptation.md) now
+accepts exact PC, neutral CPC and active CPC alongside BP and nearest memory.
+Eight arrived TRAIN updates continue native momentum/chemistry in a private
+candidate, with frozen source/actor, bounded paid evidence and native work costs.
+131 focused cases pass per platform and independent implementation review
+accepted. Correctness alone does not establish useful adaptation or CPC benefit.
+
+
+## Paired recurrent interaction control
+
+The [existing game CLI](docs/paired-quota-control.md) pairs frozen and trained
+recurrent policies at equal96-step physical TRAIN allowances, with their own
+trajectories and fixed phase/guard timing. A validated `--paired-wall-seconds`
+option sets one prospective cap for the whole pair (default90/max180); existing
+birth budgets cannot be renewed.105focused cases/platform, scoped statics and
+independent source/actual review pass.
+
+One declared resource amendment completed both original catalogue pairs. All160
+live evaluations had zero success. First-pair accuracy worsened; avoiding two
+negative terminals cost10moresteps. The second pair was unchanged. The original
+bounded R4.3 criterion is met, with no demonstrated useful learning or circadian
+advantage. The earlier90s failure and all cumulative costs remain preserved;
+this retry is not independent replication. [Results and original criterion map](artifacts/runs/paired-wall-allowance-20261020/RESULTS.md).
+
+The [shared recorded inspector](docs/paired-inspector.md) now displays both paired
+arms, physical/native stages, all signed cells, costs and exact sources, including
+the original failure. 150 focused cases pass per platform and independent
+functional review accepted; browser lifetime exceeded its allowance, so resource
+conformity remains withheld. Full shared-inspector requirements remain open.
+The selected native checkpoint now also shows recorded architecture, actual array
+shapes and tensor-memory scope with exact pointers. The187-case combined scope
+and independent presentation checks pass; full lineage/sleep coverage stays open.
+
+## Camera input and recurring robot contexts
+
+The [existing stream CLI](docs/camera-stream-input.md) now accepts the fixed saved
+TRAIN17 camera teacher with separate warm/new recipes and strict qualification.
+75input/compatibility checks and13case checks pass per platform in separate groups;
+scoped statics and independent source/actual review pass. One native camera trial
+changes return0→1 after its arrived labels; mass, lighting and A remain successful.
+Original R4.5 is accepted for the declared known-TRAIN sequence. Prior mass no-gain
+and eight failed-lighting sampled joint violations remain; no neural, heldout,
+safety or circadian benefit is established. [Results and costs](artifacts/runs/camera-stream-input-20261020/RESULTS.md).
+
+## Cumulative TRAIN context sequence
+
+The existing [continuous stream](docs/continuous-context-sequence.md) accepts up to
+three delayed TRAIN releases with a fresh detached observer before and after each.
+One runtime and birth budget preserve earlier prototypes, frozen statistics, source
+and serving actor. The default two-episode behavior is preserved. Scoped checks
+and independent source/result review pass. A fixed TRAIN native case acquired
+lighting success and retained A/mass success; mass already worked before learning.
+The failed lighting readout's eight sampled joint violations remain recorded.
+[Results and costs](artifacts/runs/continuous-context-sequence-20261020/RESULTS.md).
+
+## Fixed RGB-range nearest control
+
+A [single frozen range-transform control](docs/nearest-rgb-range-control.md)
+retained A success and left B unsuccessful, matching the empirical pilot on all
+15 reported differences. It added one TRAIN statistics fit; no corrective or
+circadian benefit is established. 24 metadata tests pass on both platforms and
+independent review accepted the scoped execution. Production code is unchanged.
+
+
+## Arrived corrective labels for nearest control
+
+The existing [corrective pipeline](docs/nearest-corrective-adaptation.md) now
+supports one private nearest-prototype append. 27 focused cases pass on both
+platforms with independent review. Its fixed native pilot preserved A success
+but did not improve B; all costs and negative results remain. No circadian or
+generalization benefit is established.
+
+
+## Saved robot-control diagnosis
+
+A new [saved-TRAIN diagnostic](docs/learned-control-diagnosis.md) found a known-input
+command error before rollout drift. It uses exact observation matches and never
+transfers off-trajectory teacher labels. Both platforms passed 44 focused cases;
+independent review accepted the single analysis. No training or simulator ran,
+and no neural task success or circadian benefit is established. Existing useful
+nearest-control adaptation evidence remains accepted.
+
+
+## Fixed replay comparison example
+
+The existing stream now has a small [runnable comparison](docs/continuous-replay.md)
+that reuses saved controls. Its fixed pilot improved warm-task retention but
+reduced new-task acquisition and worsened final fresh-task errors. All costs and
+negative results are retained; no overall replay/circadian benefit is established.
+[Exact results](artifacts/runs/continuous-replay-comparison-20261020/RESULTS.md).
+
+
+## Continuous TRAIN replay
+
+The existing continuous A/B/A Python runner accepts an opt-in fixed warm-TRAIN
+replay plan with separate exposure accounting. The default path is preserved;
+scoped76-case checks passed on Windows/Linux with independent acceptance.
+This establishes correctness, not scientific benefit.
+See [API, structure, costs and validation status](docs/continuous-replay.md).
+
+
+## Latest evidence: matched disposable fresh-task learning
+
+A bounded continuation ran only the three missing PC/CPC arms and reused accepted
+BP evidence. Fresh-task gains improved after zeroing velocity, with worse old A
+retention; active CPC fresh gains remained below PC. No uniform reset benefit,
+native/generalization or circadian advantage.38focused cases/platform and scoped
+statics/independent review pass. Original failed invocation is unchanged; a
+66-versus69 forward-row estimate correction qualifies cost conformance.
+[Usage, file tree and checks](docs/continuous-fresh-task-probes.md) ·
+[All outcomes/costs/commands and next implementation](artifacts/runs/continuous-probe-continuation-20261020/RESULTS.md).
+
+## Latest functionality: reserved fresh-task inputs in the stream CLI
+
+The existing continuous-mlp-learnability command accepts reserved probe_train/
+probe_test JSON files, fixed probe updates, diagnostics and optional disposable
+velocity control. Inputs are strict/bounded and validated before fit; no role
+conversion or final/guard access.124focused cases pass/platform, scoped statics
+and independent engineering review accepted. No new scientific/native claim;
+original failed matched example remains open/spent. [Schema, command, file tree
+and checks](docs/continuous-fresh-task-probes.md) ·
+[Exact evidence/limitations/next action](artifacts/runs/continuous-probe-cli-20261020/RESULTS.md).
+
+## Latest functionality: paired disposable fresh-task control
+
+ContinuousProbePlan now accepts zero_velocity_control=True, composing two existing
+isolated probe scopes with independent budgets and unchanged benchmark/fullwake.
+Same120focused cases/platform plus1metadata repair case/platform and scoped statics
+pass; independent engineering acceptance. Sole example failed after BP on a JSON
+comparison defect, repaired with saved data only; other families unexecuted.
+Partial BP improved fresh gain while worsening old A retention; no CPC advantage.
+[API, file tree and checks](docs/continuous-fresh-task-probes.md) ·
+[Evidence and precise next action](artifacts/runs/continuous-probe-control-20261020/RESULTS.md).
+
+## Latest functionality: learned continuous candidate to robot
+
+Run `python -m scripts.run_continuous_robot_learning --help` for the explicit
+A/B/A learning -> frozen TRAIN17 robot command. It supports BP/PC/neutral/active
+CPC, preserves paid reports and full state/wake ownership, refuses bad handoffs
+and records sampled joint constraints.57focused cases pass on each platform,
+scoped statics and independent implementation review pass.
+
+A separate four-arm native cohort completed200controls/1000control-physics steps:
+allfour returned0/no task success, with0sampledjoint violations. PC/neutral raw
+episodes match exactly. This verifies runnable inference, not useful robot skill,
+generalization, continuous safety or circadian advantage. All budgets are spent.
+[API, file tree, run/test/check commands](docs/learned-continuous-robot.md) ·
+[Executed evidence and remaining work](artifacts/runs/continuous-learned-robot-20261020/RESULTS.md).
+
+## Latest evidence: matched continuous appearance adaptation
+
+The existing stream command completed a frozen four-family lighting TRAIN cohort:
+96updates/2784rows, with each arm validated before the next. PC and neutral CPC
+match exactly in common report fields; active CPC has higher final error on both
+contexts. No circadian benefit, new physical task, generalization or robot skill
+is established. Learner/probe/runtime functionality is unchanged.
+[Usage and boundaries](docs/continuous-mlp-learnability.md) ·
+[All results, commands, costs and preserved failures](artifacts/runs/matched-continuous-lighting-20261020/RESULTS.md).
+
+## Latest functionality: frozen PC/CPC robot inference
+
+The existing frozen robot Python entrypoint now accepts exact continuous PC,
+neutral CPC and active CPC learners with complete source/private adaptive-state
+checks. Existing zero/BC/nearest/serving routes stay compatible.156focused tests
+pass on Windows/Linux, scoped statics and independent review pass. One untrained
+activeCPC native smoke completed50controls with0updates/0sampledjointviolations,
+but0return/no task success. This establishes the path, not learned robot skill.
+[API, structure and commands](docs/frozen-bc-robot-rollout.md) ·
+[All evidence and remaining work](artifacts/runs/continuous-pc-rollout-20261020/RESULTS.md).
+
+## Latest functionality: opt-in probe fit and step direction
+
+Set `ContinuousProbePlan(..., diagnostics=True)` for physical fresh-training
+fit and read-only common task-gradient comparisons with each actual native step.
+Default reports/updates stay unchanged. Same83focused tests pass on Windows/Linux,
+scoped statics and independent review pass. The sole budgeted synthetic example
+is saved: later TRAIN and held-out gains are negative for all four families;
+local uphill directions do not prove a cause or circadian advantage.
+[API, structure and commands](docs/continuous-fresh-task-probes.md) ·
+[Executed evidence and next action](artifacts/runs/continuous-probe-direction-20261020/RESULTS.md).
+
+## Latest functionality: isolated continuous fresh-task probes
+
+The existing A/B/A runner now accepts an optional continuous probe plan: four
+independent disposable learners score fresh and old tasks without changing the
+benchmark or deployed actor. Run `python -m scripts.continuous_probe_example`
+for the fixed synthetic integration (28updates total). Windows306+51 and Linux357
+checks, scoped statics and independent review pass. Later fresh gains are negative
+for every family; the cause and scientific benefit remain open.
+[API, file tree and commands](docs/continuous-fresh-task-probes.md) ·
+[All results and preserved failures](artifacts/runs/continuous-isolated-probe-20261020/RESULTS.md).
+
+## Latest functionality: continuous BP/PC/CPC through the existing stream
+
+The A/B/A learnability runner now selects BP, PC, neutral CPC or active CPC and
+reports common physical diagnostics with separate native costs. Run
+`python -m scripts.continuous_learnability_example` for the fixed synthetic
+four-family sequence (12updates total).306focused checks pass on each platform,
+scoped statics and independent acceptance. PC/neutral match exactly; active results
+are mixed, with no advantage claim. Reserved continuous probes remain open.
+[API, file tree and commands](docs/continuous-mlp-learnability.md) ·
+[Executed evidence](artifacts/runs/continuous-learnability-modes-20261020/RESULTS.md).
+
+## Latest functionality: matched continuous CPC modes
+
+The continuous PC learner now supports neutral and active CPC with owned adaptive
+state, atomic updates and detached fork/restore. Run
+`python -m scripts.continuous_cpc_example` for the fixed PC/neutral continuation.
+81focused cases pass on each platform, with scoped static checks and independent
+acceptance. Exact neutral equivalence and active arithmetic are verified; useful
+adaptation/retention/recovery and scientific advantage remain open.
+[API, file tree and commands](docs/continuous-cpc.md) ·
+[Evidence and next integration](artifacts/runs/continuous-cpc-bridge-20261020/RESULTS.md).
+
+## Latest functionality: owned continuous PC learner
+
+The continuous PC adapter now updates parameters with momentum through the
+existing native/actor-shadow interfaces, preserves failed work and supports
+isolated snapshot/restore/fork. Run `python -m scripts.continuous_pc_learner_example`
+for one fixed two-row/four-action update.177focused checks/platform plus50final
+repair checks/platform and independent acceptance pass. Task benefit and matched
+continuous CPC remain open. [API and commands](docs/continuous-pc-learner.md) ·
+[Executed evidence](artifacts/runs/continuous-pc-learner-20261020/RESULTS.md).
+
+## Latest functionality: bounded continuous PC latent inference
+
+Run `python -m scripts.continuous_pc_inference_example` for fixed four-action
+latent inference with exact stopping-work counters. Unsafe proposals retain the
+last accepted state; parameters and target-free deployment remain unchanged.
+127focused cases/platform and independent review pass. An owned parameter-learning
+adapter and scientific comparison are still open. [API and check commands](docs/continuous-pc-inference.md) ·
+[Executed evidence/costs](artifacts/runs/continuous-pc-inference-20261020/RESULTS.md).
+
+## Latest functionality: continuous PC task energy
+
+A separate pure continuous energy now accepts bounded multi-axis robot labels,
+returns exact free-state derivatives, and matches the existing BC task head.
+Run `python -m scripts.continuous_pc_example` for the fixed two-row/four-action
+math example.65focused cases pass on Windows/Linux with no skips, plus scoped
+statics and independent review. Continuous inference/learning and scientific
+benefit remain open. [API, equations and check commands](docs/continuous-pc-energy.md) ·
+[Executed evidence and costs](artifacts/runs/continuous-pc-energy-20261020/RESULTS.md).
+
+## Latest functionality: joint telemetry in ordinary frozen rollouts
+
+Use monitor_joint_positions=True in run_frozen_rollout, or --monitor-joint-positions
+in the existing smoke CLI. Reports retain signed position deviations and paid work,
+validate raw qpos after cleanup, and withhold failed corrections. Defaults unchanged.
+363focused checks on both platforms and independent review pass; no new native or
+scientific benefit claim. [Usage](docs/joint-position-telemetry.md) ·
+[Checks, failures and next action](artifacts/runs/joint-rollout-integration-20261019/RESULTS.md).
+
+## Latest functionality: optional physical joint-position telemetry
+
+The existing CPU episode port can report signed per-joint limit exceedances and
+costs without changing learner features or control actions. Zero tolerance,
+owned reset-time limits, bounded storage; default behavior preserved.
+365 matching focused Windows/Linux checks and independent review pass. One native
+TRAIN17 teacher recorded30samples/0observed violations; this is not a broader
+safety or learner-performance claim. Full R4.5/release remain open.
+[Usage and limits](docs/joint-position-telemetry.md) ·
+[Evidence, failures and next action](artifacts/runs/joint-position-telemetry-20261019/RESULTS.md).
+
+## Latest evidence: matched lighting updates trade B fit for A retention
+
+A jointly frozen MLP comparison used the existing runner: treatment final A/B
+half-MSE .04109/.31199 versus A-only .02748/.44287. Both full curves, six metrics,
+receipts and costs are retained; no overall or circadian advantage is established.
+
+**The one-thread gate was not verified inside WSL, so full protocol acceptance is
+withheld.** Both runs remain spent; explicit Linux environment forwarding was
+verified without models for future commands. No native success claim follows.
+[Results, limitations and next implementation](artifacts/runs/lighting-mlp-joint-20261019/RESULTS.md).
+
+## Latest integration: saved lighting data in the learning stream
+
+The existing stream CLI accepts --lighting-drift with visual TRAIN17 teachers,
+preserving original acquisition costs and default/mass workflows. Strict input
+validation precedes fitting; existing MLP diagnostics and A-only options compose.
+375 matching Windows/Linux checks and independent actual-input review pass.
+
+No learner or simulator ran in this increment. Next freeze the lighting treatment
+and equal-exposure A-only control jointly before fitting; no neural/CPC claim.
+[Usage, structure and tests](docs/pick-cube-lighting-context.md#saved-lighting-teachers-in-the-existing-stream) ·
+[results and limits](artifacts/runs/lighting-stream-input-20261019/RESULTS.md).
+
+## Latest integration: native lighting acquisition and A return
+
+A fixed case restores the saved RGB nearest baseline, privately appends29 lighting
+examples through the existing delayed-update runtime, then succeeds under lighting
+and on fresh default A. Warm lighting return0 -> private return1; A return1.
+110 tests pass on Windows/Linux with scoped statics and independent review.
+
+This is same-task/same-seed memory evidence, with doubled prototype storage; no
+neural generalization or circadian advantage. Full R4.5 remains open.
+[Structure, tests and extension](docs/pick-cube-lighting-context.md#fixed-lighting-acquisition-and-a-return) ·
+[six outcomes, commands and costs](artifacts/runs/lighting-context-return-20261019/RESULTS.md).
+
+## Latest integration: lighting-aware teacher and frozen rollout
+
+The existing teacher and frozen-rollout APIs/CLIs now carry typed lighting context,
+original readback and paid work. Default CLI fields remain compatible.411 focused
+checks pass on Windows and Linux, with scoped statics and independent review.
+
+Actual frozen MLP and nearest-actor inference is verified on fake IO; no new native
+simulation or training ran. Lighting adaptation and broader R4.5 remain open.
+[API, flags and commands](docs/pick-cube-lighting-context.md#teacher-and-frozen-rollout-integration) ·
+[checks and limitations](artifacts/runs/lighting-context-interfaces-20261019/RESULTS.md).
+
+## Latest integration: verified native lighting context
+
+The existing visual episode port supports one fixed TRAIN17 half-ambient context,
+with owned readback, explicit refresh costs and unchanged defaults.323 focused
+checks pass on Windows and Linux, plus scoped statics and independent review.
+
+One zero-control native check observed the exact ambient change and changed pixels;
+a fresh default scene restored the original frame and features exactly. This
+verifies an input boundary; adaptation, task success and CPC benefit remain open.
+[API, file tree and check commands](docs/pick-cube-lighting-context.md) ·
+[actual frames, results and costs](artifacts/runs/pick-cube-lighting-context-20261019/RESULTS.md).
+
+## Latest integration: matched A-only update control
+
+The existing MLP stream runner supports `--a-only-control`: it updates A in every
+phase while diagnosing actual TRAIN A/B, with source-specific exposure costs and
+unchanged default behavior.80tests pass on Windows and pinned Linux, plus scoped
+lint/format/types and independent review.
+
+One frozen equal-exposure comparison found no aggregate benefit from mass-B
+labels: warm acquisition tied, five other original metrics favored A-only.
+Treatment had slightly better gripper residuals; large errors remain in both.
+This is saved-trajectory evidence, with no new native/generalization/CPC claim.
+[Usage and check commands](docs/pick-cube-mass-context.md#matched-a-only-control) ·
+[complete results and limits](artifacts/runs/mass-a-only-control-20261019/RESULTS.md).
+
+## Latest integration: qualified mass input and MLP learning diagnostics
+
+The existing stream CLI accepts fixed mass-TRAIN17 receipts with `--mass-drift`,
+retaining original measurements/acquisition costs and refusing inconsistent or
+heldout inputs before training. Default TRAIN17/19 routes stay compatible.
+
+One frozen ordinary MLP A/B/A run completed24updates/696row exposures. Training
+half-MSE fell on both contexts; A improved during B, with no observed forgetting.
+This is saved-trajectory learning, not native skill/generalization/CPC advantage;
+large gripper errors remain. A matched A-only continuation is the next control.
+[Usage, tests, lint and type commands](docs/pick-cube-mass-context.md) ·
+[all checkpoints, six metrics and costs](artifacts/runs/mass-mlp-learnability-20261019/RESULTS.md).
+
+## Latest integration: mass acquisition and original-task return
+
+A fixed native TRAIN17 memory control now runs through existing teacher, frozen
+rollout and actor/shadow APIs. The unchanged serving baseline fails at doubled
+mass; one private 29-pair append succeeds there and retains success on the
+original task. Teacher cost is included: 137 controls/685 known physics steps,
+10,672 B prototype growth. Serving stays unchanged; no final/probe data is used.
+
+This demonstrates stored-trajectory memory on one training seed, not neural
+learning, generalization or circadian advantage. The original prephysics launch
+failure is retained alongside the reviewed corrected run. Full R4.5 and release
+remain open. [Files, checks and safe next extension](docs/pick-cube-mass-context.md) ·
+[outcomes, exact commands and limitations](artifacts/runs/mass-context-return-legacy-20261019/RESULTS.md).
+
+## Latest integration: mass-aware teacher and frozen rollout
+
+The existing teacher and frozen-rollout APIs/CLIs now carry the explicit TRAIN17
+mass context, original readback and measured work. Strict qualification/source
+and final metadata checks retain paid failures and preserve default CLI fields.
+210cases pass perplatform plus scoped statics/independent review; initial failures
+are preserved. No new native learning result is claimed. Next: one frozen small
+mass acquisition/return case through the existing runtime; full R4.5 remains open.
+[API/files/examples/check commands](docs/pick-cube-mass-context.md).
+
+## Latest functionality: bounded robot mass context
+
+The existing PickCube episode port now supports one explicit TRAIN17 mass-only
+intervention, with exact readback, identity guards and unchanged defaults.
+216tests pass perplatform plus scoped statics/independent review. A small native
+check observes0.064kg→0.128kg and fresh-default restoration; it demonstrates the
+API, with no learner or adaptation claim. Earlier negative neural results stand.
+[Files/API/example/check commands/limits](docs/pick-cube-mass-context.md).
+Next: existing teacher/frozen-rollout propagation, then a small drift/return
+study. Full R4.5, neural generalization, committed serving and release stay open.
+
+## Latest native result and next milestone
+
+The saved mixed-objective model still fails both fixed TRAIN contexts:50steps,
+return0, no success; all six differences from MSE are0.41tests perplatform,
+scoped statics and independent review pass. Offline mean gains have not produced
+native success; no circadian advantage is established.
+
+Original R4.4 small-baseline acceptance is complete using accepted state then
+frozen-visual nearest-policy results. Neural generalization remains open.
+Next: R4.5 bounded object-mass context and drift/return through existing ports;
+full research, committed serving and release gates remain open.
+[Implementation/tree/commands/limits](docs/public-vector-mixed-native.md) ·
+[results and scientific limits](artifacts/runs/public-vector-mixed-native-20261019/RESULTS.md).
+
+## Latest learner result: slight mean gains with mixed-gripper tradeoffs
+
+One fixed public21 mixed-objective arm improves final TRAIN A/B physical errors
+slightly versus the saved MSE arm, with the same96updates/2816rows. Acquisition,
+retention and translation harms remain; added CE work prevents equal-compute
+claims.58tests perplatform/scoped statics/independent review pass. Saved fullstate;
+no native task benefit established. [Results and commands](docs/public-vector-mixed-control.md).
+
+## Latest native result: public21 corrections still yield no success
+
+One fixed source collection plus eight private updates improves the sequence of
+recorded training losses, but both corrected TRAIN17/19 episodes still return0
+with no success. All six differences from the uncorrected model are0; original
+source state remains exact.50focused checks perplatform/scoped statics/independent
+review pass. New cost8SGD/400rows/50queries; all negative evidence remains.
+[Composition, commands, outcomes and limits](docs/public-vector-corrective-native.md).
+
+## Public21 corrective adaptation through the existing runtime
+
+A frozen public21 MLP now collects raw789 paired TRAIN corrections and continues
+a private candidate through eight updates, with unchanged source state and
+original label clocks. Default raw789 behavior remains.276focused checks pass on
+each platform; scoped statics and independent review pass. No native experiment
+or learning-benefit claim in this increment; earlier failures remain.
+[API, tree, commands and limits](docs/public-vector-corrections.md).
+
+## Latest native result: longer-trained public21 MLP still fails both contexts
+
+The saved96-update model reproduces42source diagnostic values exactly without
+retraining, but both fixed TRAIN17/19 episodes return0/no success after50steps.
+All6differences from p8 are0; full state unchanged.55tests perplatform, scoped
+statics and independent review pass. Offline mean improvement did not transfer
+to native success here. [Composition and evidence](docs/public-vector-mlp-depth-native.md).
+
+## Latest depth study: better mean TRAIN fit, mixed retention and axis errors
+
+One fixed96-update public21 MLP study reduces final A/B imitation error to
+.02713/.04567 from .04825/.19450, using4xtrainingexposure and~2.67xtotal dense
+computation. Three retention/acquisition metric differences and largest gripper
+errors worsen.72tests perplatform/scoped statics/independent review pass.
+No native task benefit or CPC/generalization claim; earlier negatives remain.
+[Study, tree, commands and limits](docs/public-vector-mlp-depth.md).
+
+## Bounded update counts in the existing learnability runner
+
+The MLP stream CLI accepts `--phase-updates 1..128`; the default remains8 per
+A/B/A phase. Budgets and reported costs derive from the admitted count, with
+unchanged source/actor isolation and failed-work receipts.103focused tests pass
+on each platform, including86new; scoped statics and independent review pass.
+No new comparative/native experiment was run. Earlier neural failures remain.
+
+[API, examples, structure, test commands and costs](docs/continuous-phase-updates.md).
+
+## Latest native result: saved public21 MLP still fails both TRAIN contexts
+
+The saved24-update MLP restores without retraining and exactly reproduces42
+source residual values. One fixed native TRAIN17/19 case reaches50steps with
+zero return/no success each, matching the RGB MLP.76focused tests pass on both
+platforms; scoped statics and independent review pass. Full learner state stays
+unchanged. No neural/CPC/generalization benefit established; all negatives kept.
+
+[Composition, tree, developer commands and limits](docs/public-vector-mlp-native.md) ·
+[exact outcomes/costs/review](artifacts/runs/public-vector-mlp-native-20261019/RESULTS.md).
+
+## Latest learner result: public21 input reduces cost, final errors worsen
+
+The stream CLI now exposes the fixed public21 view for the existing MLP
+learnability recipe.61focused tests pass on each platform, including52new cases;
+statics and independent review pass. One24-update arm has slightly worse final
+A/B errors than unchanged RGB-MSE despite lower model computation; all tradeoffs
+and earlier negatives remain. Final parameters/momentum are saved for a later
+native check without retraining. No native/generalization/CPC benefit claimed.
+[API/tree/run/test commands](docs/public-vector-mlp-learnability.md) ·
+[all outcomes/costs/failure/review](artifacts/runs/public-vector-mlp-learnability-20261019/RESULTS.md).
+
+## Latest native control: A-only public21 memory suffices locally
+
+The same frozen A29 nearest actor succeeds under the known camera shift and
+fresh original return,29controls each, without new fit/labels/training updates.
+Both raw789 traces exactly reconstruct teachers. Model payload/distance work
+shrinks; rendering and full-source validation remain charged.45new tests pass
+on each platform, statics/repaired lint and independent review accept scope.
+This limits the earlier RGB-adaptation interpretation; no neural/CPC/generalization
+benefit follows. Prior failures remain. Next: existing MLP learnability runner
+with fixed public21 TRAIN inputs, separately frozen before any comparison.
+[Tree/API/commands/costs/limits](docs/public-vector-camera-control.md) ·
+[exact evidence/review](artifacts/runs/public-vector-native-20261019/RESULTS.md).
+
+## Latest implementation: explicit public21 model input
+
+The existing frozen rollout can give a matching21D learner/actor the fixed public
+qpos9/qvel9/goal3 view while preserving validated rawRGB789 traces and rendering
+costs. Default behavior remains unchanged. Final564 Windows/563 Linux scoped
+checks pass (one unchanged mathematical reference executed once on Windows),
+including59 new cases per platform; statics and independent review pass.
+No native comparison or neural/CPC benefit is established. Next is a separately
+frozen A29-only nearest camera control; all prior negative results remain valid.
+[API/tree/commands/limits](docs/pick-cube-public-vectors.md) ·
+[exact evidence/review](artifacts/runs/public-vector-projection-20261019/RESULTS.md).
+
+## Latest native result: camera memory acquisition and original-context return
+
+One fixed5cm camera shift at physical seed17 makes the warm actor fail. After
+one private29-pair append, the candidate succeeds in the shifted camera and the
+fresh original-camera return; both reconstruct their teacher trajectories.
+Source/deployed actor remain unchanged.54 new cases pass on each platform,
+scoped statics and independent source/gate/actual review pass. Extra labels,
+memory, interactions and computation are charged; prior negatives retained.
+This known-task memory result does not establish generalization or CPC benefit.
+[Tree/API/commands/costs/next control](docs/camera-context-acquisition.md) ·
+[exact artifacts/review](artifacts/runs/camera-context-return-20261019/RESULTS.md).
+
+## Latest implementation: one explicit TRAIN camera context
+
+Existing RGB port, TRAIN teacher and frozen rollout APIs/CLIs now support one
+named5cm camera displacement at physical seed17. Defaults remain unchanged.
+Strict owned metadata, role/recipe/qualification/cleanup checks preserve context
+binding and paid failures. Final690 scoped tests pass on each platform, including
+90 new zero-SGD cases; statics and independent review pass. Actual camera frames,
+native drift adaptation and recurrence remain unexecuted; prior failures retained.
+[API/tree/run/test commands](docs/pick-cube-camera-context.md) ·
+[results/limits/next native protocol](artifacts/runs/camera-drift-context-20261019/RESULTS.md).
+
+## Latest validation: RGB-range learner has no native success
+
+The fixed range24 learner now reproduces its accepted offline report and runs
+TRAIN17 then19 through the existing frozen native rollout. Both reach50 controls
+with0 return/no success; all action-bound and full-state checks pass.100 new
+cases pass on each platform, scoped statics and independent review accept the
+negative result. No neural/generalization/circadian benefit claim. Production
+source is unchanged; original failures and offline tradeoffs remain preserved.
+[Commands, artifacts, costs and next implementation](artifacts/runs/rgb-range-native-20261019/RESULTS.md).
+Next: explicit bounded camera-drift context using existing native paths and the
+working simple nearest-memory control; full research/release requirements open.
+
+## Latest implementation: explicit RGB-range normalization
+
+The existing visual MLP recipe can fit TRAIN vector features while using fixed
+sensor-range RGB scaling; empirical normalization remains the default. 74new/
+437 perplatform focused checks, scoped statics and independent review pass.
+One fixed offline arm lowers final mean action errors in both contexts, but
+Bforgetting and several axis errors worsen; wrong-sign grip errors remain.
+No native task/generalization/CPC benefit established. All previous negatives kept.
+[API/tree/run/test commands](docs/pick-cube-rgb-standardization.md) ·
+[all results/tradeoffs/costs/next action](artifacts/runs/rgb-range-normalization-20261019/RESULTS.md).
+
+## Latest implementation: private corrective learning; native result negative
+
+The existing robot rollout now returns owned paired corrections and composes
+source19 collection, eight private updates and frozen17/19 rollouts. Source
+weights/stats/momentum remain unchanged; original arrivals and paid receipts are
+preserved. 39new/exact346 perplatform checks, scoped statics and independent review
+pass. One fixed native case completes, but source and both updated task rollouts
+all return0 with no success. Changed controls/lower pre-update losses did not
+produce native benefit. No circadian/generalization/query-necessity claim.
+[API/tree/run/test commands](docs/continuous-corrective-adaptation.md) ·
+[negative result/costs/next action](artifacts/runs/corrective-adaptation-20261019/RESULTS.md).
+
+## Latest implementation: provisional labels on student-visited TRAIN states
+
+The existing frozen robot rollout can optionally query its nominal teacher while
+executing the student's unchanged commands. Labels remain separate from actual
+actions/rewards, with arrival gates, TRAIN seed/owner binding and full learner
+state checks. 80 new/exact351 Windows+351 Linux focused cases and scoped statics
+pass; independent review accepted the implementation. No new native episode or
+learning benefit was tested; off-reference labels are provisional.
+[API/tree/run/test commands](docs/pick-cube-corrections.md) ·
+[checks/failures/costs/next action](artifacts/runs/train-corrective-queries-20261019/RESULTS.md).
+
+## Latest implementation: explicit existing objective; matched visual tradeoff
+
+The fixed MLP recipe/result API and CLI accept an optional binary-gripper axis;
+default MSE behavior stays unchanged. 48 new cases, exact300 Windows/300 Linux
+checks, scoped statics and independent review pass. One fixed mixed arm reused
+the accepted MSE control: final old-task error slightly improves, new-task error
+worsens and both forgetting costs increase. Wrong-sign gripper errors remain.
+No native/held-out run, overall repair or circadian benefit is established.
+[API/tree/run/test commands](docs/continuous-learnability-objective.md) ·
+[complete evidence/costs/next action](artifacts/runs/visual-mlp-binary-control-20261019/RESULTS.md).
+
+## Latest implementation: owned MLP result; native task failures preserved
+
+Python callers can retain the existing detached final learner; the stream CLI
+report remains unchanged. 52 new/exact253 checks per Windows/Linux and scoped
+statics pass. One independently reviewed native case reproduced the fixed recipe,
+then both TRAIN17/19 failed at50 controls with zero return and unchanged state.
+Action bounds pass; other physical constraints remain unmeasured. No native skill,
+generalization or CPC benefit claim; all earlier negatives retained.
+[API/tree/commands](docs/continuous-learnability-result.md) ·
+[full evidence/costs/next action](artifacts/runs/visual-mlp-native-20261019/RESULTS.md).
+
+## Latest implementation: fixed MLP learning and return
+
+The existing stream CLI now runs a fixed TRAIN A8/B8/Areturn8 MLP sequence with
+arrival/budget isolation, all losses, endpoint diagnostics and costs. 160 Windows/
+159 Linux checks and scoped statics pass; independent review accepted one real
+saved-visual-data run. Both contexts fit; learning B worsens A, and returning A
+recovers A while worsening B. No simulator, guard/probe/final access or circadian/
+generalization claim. Previous negative guards remain preserved.
+[API/tree/run/test commands](docs/continuous-mlp-learnability.md) ·
+[full endpoints, costs and handoff](artifacts/runs/visual-mlp-learnability-20261019/RESULTS.md).
+
+## Latest implementation: TRAIN-only learner conditioning
+
+Continuous BC can now report bounded activation saturation and actual objective
+gradients without changing the learner. 48 new cases; 323 Windows pass/five platform
+skips and 367 Linux pass, scoped statics and independent review accepted. One fixed
+read-only visual A/B initialization reports hidden saturation 0.43%/76.93% under
+frozen A-only statistics. This flags conditioning, not trained learning failure
+or benefit. No updates/guard/probe/final reads; prior native rejection preserved.
+[API/tree/commands](docs/continuous-bc-conditioning.md) ·
+[exact checks, costs, failures and next action](artifacts/runs/continuous-bc-conditioning-20261019/RESULTS.md).
+
+## Latest native result: guard rejects larger nearest candidate
+
+Two fixed fresh-reset guards qualify, but the unchanged59-row candidate ties
+warm29 on seed37 and worsens imitation on seed31. Existing controller rejects
+all three frozen performance gates. Serving remains unchanged; zero new
+training/publication/serving rollout.294cases perplatform/scoped statics and
+independent actual readback accepted. This is a preserved negative, not a
+circadian/generalization benefit. [API/tree/commands](docs/native-guard-promotion.md) ·
+[full evidence/costs/next action](artifacts/runs/native-guard-promotion-20261019/RESULTS.md).
+
+## Latest implementation: isolated guard-only teacher data
+
+Existing PickCube teacher/CLI now collects explicitly allocated inner_guard31/37
+with arrival-gated owned extraction. Training pairs, fitting, learners and stream
+refuse guard data; TRAIN17/19 defaults and probe/final reservations remain.
+96new/676Windows/exact676Linux cases and scoped statics independently accepted.
+Native guard collection/publication remain unverified; no scientific benefit.
+[API/tree/commands](docs/guard-only-teacher.md) ·
+[evidence, preserved failures and next action](artifacts/runs/guard-only-teacher-20261019/RESULTS.md).
+
+## Latest implementation: actual promotable actor controls
+
+The existing PickCube smoke accepts the actual nearest PromotableActor. A private
+update leaves serving unchanged; an existing-controller commit changes later
+controls. Mid-rollout bundle changes refuse and retain completed work.66new/
+435Windows/exact435Linux tests, scoped statics and independent review pass.
+
+Fake robot IO only: native publication still needs legitimately allocated,
+arrived/disjoint inner_guard data. No new native or scientific benefit claim;
+all earlier negative results remain. [API/tree/commands](docs/promotable-actor-robot-boundary.md) ·
+[evidence/limits/next action](artifacts/runs/promotable-actor-robot-boundary-20261019/RESULTS.md).
+
+## Latest native result: visual candidate acquisition and A return
+
+One fixed PickCube visual case through the existing runtime: A-only serving
+fails B in50steps; one delayed30pair append makes the private candidate succeed
+on B in30 and fresh A in29. Exact teacher trajectories, frozen A stats and one
+permanent charge verified. Serving remains unchanged; no promotion occurred.
+
+55new/459Windows and55+404Linux checks, scoped statics and independent actual
+readback pass. This demonstrates stored-memory candidate acquisition/retention,
+not neural generalization, domain drift or circadian benefit. Baseline failures
+and all prior negative results remain. [Tree/commands](docs/visual-context-acquisition.md) ·
+[evidence, costs and open requirements](artifacts/runs/visual-context-return-20261019/RESULTS.md).
+
+## Latest runtime input: released visual TRAIN labels
+
+The existing continuous-nearest stream CLI now accepts --visual-observation:
+two qualified789D RGB recipe receipts, each<=4MiB. Default42D/1MiB state inputs
+remain. Strict recipe/type/range/mode/context checks precede fitting/runtime.
+No new runner or learner.72new/333Windows+333Linux checks and scoped statics pass;
+one synthetic CLI replay verifies delayed private update and frozen serving.
+This does not establish real visual adaptation or circadian benefit.
+[API/tree/run/test/lint/types](docs/continuous-delayed-stream.md) ·
+[evidence, costs and open requirements](artifacts/runs/visual-delayed-stream-20261019/RESULTS.md).
+
+## Latest robot input: frozen public RGB features
+
+The existing PickCube port, TRAIN teacher and frozen smoke offer opt-in
+`visual_observation=True` / `--visual-observation`: fixed789D RGB block means,
+public proprioception and goal. Default42D state/rendernone is preserved.
+Current owned frame only, explicit frame/feature costs, fixed recipe checks;
+no pretrained model, fitting or privileged object input.
+
+Final641 tests on each Windows/Linux and scoped statics pass. One independently
+reviewed software-rendered TRAIN17 teacher and frozen nearest reconstruction
+both succeed in29controls with identical transitions. This establishes one
+trajectory reconstruction, not visual generalization or circadian benefit.
+[API/tree/run/test/lint/types](docs/pick-cube-rgb-features.md) ·
+[evidence, costs, failures and open requirements](artifacts/runs/pick-cube-rgb-features-20261019/RESULTS.md).
+Full visual adaptation/domain recurrence and repository/release goals remain open.
+
+## Latest robot boundary: actual stable serving actor
+
+The existing smoke accepts main(actor=runtime.actor) for an exact warm TRAIN
+nearest-BC StableActor. Controls call that actual actor; versions/backend/full
+native state are guarded around predictions/commands/cleanup. Candidate updates
+remain isolated. Existing learner/default/clock routes remain available.
+
+[API/tree/run/test/lint/type commands](docs/stable-actor-robot-boundary.md) ·
+[432Windows/432Linux checks and independent review](artifacts/runs/stable-actor-robot-boundary-20261019/RESULTS.md).
+Verified with fake native IO; this new actor route has no real simulator run.
+Promotion/visual/generalization/research/release and full goal remain open.
+
+## Latest runtime example: delayed continuous TRAIN pairs
+
+The existing stream CLI now has an opt-in continuous-nearest recipe: warmA
+serving stays fixed while a private candidate appends the B episode only after
+its tick2 label, under a one-update budget. Qualified saved TRAIN17/19 inputs;
+no simulator, promotion or optimizer in this example. All30 savedB actor actions
+still differ from labels; candidate reconstruction does not imply native success.
+
+[API/tree/run/test/lint/type commands](docs/continuous-delayed-stream.md) ·
+[236 Windows +236 Linux checks and independently reviewed replay](artifacts/runs/continuous-delayed-stream-20261019/RESULTS.md).
+Full repository/scientific/release requirements remain open.
+
+## Latest local robot behavior: fixed TRAIN acquisition and return
+
+Explicit TRAIN seeds17(default)/19 now bind reset identity and context through the
+existing teacher and frozen actor commands. Reserved probe/final seeds refuse
+before creation. In one fixed lookup case, Bbefore failed; adding30 B pairs made
+B succeed and retained A success on a fresh reset. This is same-task stored-memory
+acquisition/retention, not generalization or CPC benefit. Full goal remains active.
+
+See [API, file tree and run/test/lint/type commands](docs/pick-cube-train-contexts.md)
+and [822 WSL/139 Windows checks, fixed protocol, costs and independent review](artifacts/runs/continuous-context-return-20261019/RESULTS.md).
+No new experiment is authorized by replaying these documentation examples.
+
+## Nearest BC reconstructs one TRAIN robot trajectory
+
+A bounded nearest-observation control now runs through the existing frozen robot
+path with full state and work guards.683 scoped WSL/79 Windows cases/statics and
+one native case pass independent review:29steps/reward1, with all29transitions
+exactly matching the teacher. This is same-initial-state reconstruction with
+stored data; strongBC/generalization/adaptation remain open. All negative MLP
+results stay preserved. [API, module tree and costs](docs/nearest-continuous-bc.md)
+· [exact commands and independent evidence](artifacts/runs/continuous-nearest-bc-20261019/RESULTS.md).
+
+## Optional binary-gripper BC loss
+
+The continuous BC learner supports an explicit endpoint-label classification loss
+for the normalized gripper, with full configuration state and default all-axis
+MSE preserved.604 scoped tests/statics and a fixed matched TRAIN study pass
+independent review. Common final MSE improves .019050→.018535, but grasp/align
+and all translation-axis errors worsen; wrong-sign grasp grip remains. No new
+native case or robot skill is established. [API/math/compatibility](docs/binary-gripper-bc.md)
+· [commands, negatives and next control](artifacts/runs/continuous-bc-binary-gripper-20261019/RESULTS.md).
+
+## Clocked BC native execution: both task outcomes negative
+
+Saved zero/elapsed-clock policies now run with explicit recipes and frozen full
+state through the existing robot smoke.109 focused WSL cases, platform collection
+checks, scoped statics and independent source/actual review pass. Both fixed
+TRAINseed17 cases reach50steps with zero reward and no success; the small offline
+fit improvement did not deliver task success. StrongBC/adaptation remain open.
+[Exact commands, bounded costs, failures and next learner action](artifacts/runs/continuous-bc-clock-20261019/NATIVE_RESULTS.md).
+
+## Optional public episode-step input
+
+Continuous TRAIN demonstrations and the frozen robot entry point now support an
+explicit public step/horizon feature with a matched zero-clock control.475 focused
+tests, scoped statics and independent review pass. In one fixed matched TRAIN
+study, final half-MSE is .018974zero versus .018162elapsed; initial and some
+stage/axis errors worsen. No clocked native rollout or useful robot skill is
+established. All prior negatives remain. [API, ownership and limits](docs/continuous-episode-clock.md)
+· [commands and complete evidence](artifacts/runs/continuous-bc-clock-20261019/RESULTS.md).
+
+## Fixed1024 TRAIN optimization evidence
+
+Both BC policies completed the matched continuation with full state/history
+preserved and independent acceptance. Final TRAIN half-MSE .025183raw versus
+.016886standardized; standardizeddescend-stage error worsened. No new robot
+rollout was performed and earlier task negatives remain. Useful robot BC and
+adaptation are still open. [Exact curves, costs and next phase-input question](artifacts/runs/continuous-bc-1024-20261019/RESULTS.md).
+
+## Optional frozen TRAIN input standardization
+
+The continuous BC policy now owns optional TRAIN-fitted observation statistics;
+raw input remains the default.425focused tests/statics and a matched study pass
+independent review: final TRAIN loss .032012raw vs .019050standardized. The
+standardized start was worse, and both fixed policies fail the actual TRAIN robot
+task. All negatives stay preserved. [Usage, exact evidence and costs](docs/continuous-bc-standardization.md).
+
+## Frozen robot BC execution; task success remains negative
+
+The existing smoke entry point accepts a frozen TRAIN BC learner while keeping
+its zero-action CLI default.358focused checks/statics and one real seed17 rollout
+pass independent integration review. The fixed256-update policy completes50
+steps but earns zero reward even in TRAIN context; no useful robot skill or CPC
+benefit is established. [API, runnable usage, costs and next work](docs/frozen-bc-robot-rollout.md).
+
+## Fixed TRAIN BC continuation
+
+The existing learner completed one frozen continuation at64/128/256 updates:
+TRAIN half-MSE .062273→.042838→.032012, with all losses and action diagnostics
+retained and independently accepted. No new simulator/probe work or production
+learner change. Better fit on one demonstration does not establish robot skill;
+prior failed probes remain. [Commands, costs and limitations](artifacts/runs/continuous-bc-train-continuation-20261019/RESULTS.md).
+
+## TRAIN BC action diagnostics
+
+The existing continuous BC learner now reports bounded per-axis/stage TRAIN
+errors with one forward and no model update. 226 focused tests, scoped statics,
+and the saved-state diagnosis pass independent review. Gripper error accounts
+for 75.10% of TRAIN squared action error; prior failed probes remain unchanged.
+Robot skill, retention/recovery, and circadian benefit remain unproven.
+[API, costs, commands, and next learning question](docs/continuous-bc-diagnostics.md).
+
+## Real robot demonstration; learned BC quality remains open
+
+A fixed TRAIN-only task-space teacher completed PickCube in29steps.288focused
+checks and independent native review pass. The existing BC learner then improved
+TRAIN action loss after64updates, but both untrained and trained frozen probe
+policies returned zero. No learned robot skill or CPC advantage is established.
+[API, runnable commands and exact evidence](docs/pick-cube-task-teacher.md).
+
+## Robot expert runtime repaired; teacher qualification negative
+
+An isolated compatible runtime now constructs the official planner. Unsupported
+MPlib0.1.1/NumPy2 combinations fail before scene creation.305focused checks pass.
+The fixed50-step official expert earned no sparse success; no BC data qualified.
+All earlier failures remain preserved. [Configuration, evidence and next teacher work](docs/maniskill-expert.md).
+
+## Bounded official robot expert bridge
+
+The TRAIN collector now routes official joint-space expert conversion through
+the existing continuous port, with separate success/cost gates and refusal of
+unqualified BC data.238focused tests pass. The one real expert attempt crashed;
+no robot expert dataset or BC skill is established. Earlier CPU-port compatibility
+remains accepted. [API and remaining dependency](docs/maniskill-expert.md).
+
+## Real CPU robot integration accepted
+
+The existing ManiSkill PickCube port now exports an actual50-step episode in
+WSL Ubuntu using CPU physics and a software Vulkan device. Real Panda FK/IK,
+224focused checks and independent trajectory review pass. All rewards were zero;
+BC skill, adaptation and full-lifetime process-tree memory remain unverified.
+Windows/OpenMP and initial Linux failures are preserved.
+[Runnable configuration and limits](docs/maniskill-continuous.md) ·
+[Commands and evidence](artifacts/runs/maniskill-wsl-cpu-20261019/RESULTS.md).
+
+## Earlier Windows runtime finding: OpenMP conflict isolated
+
+The isolated dependency setup and207boundary/guard tests pass, but Panda CPU IK
+aborts on conflicting OpenMP runtimes. No new robot rollout or BC skill is claimed.
+Windows failures remain preserved; the next supported route is WSL CPU simulation.
+[Evidence and next action](artifacts/runs/maniskill-cpu-ik-20261019/RESULTS.md).
+
+## Earlier ManiSkill port milestone: boundary verified, Windows startup blocked
+
+An optional real PickCube/Panda CPU port and fixed smoke CLI now bind normalized
+continuous controls to owned episode records. 200focused tests and scoped statics
+pass. The first native attempt failed on missing Windows Pinocchio CPU IK; no
+complete rollout, BC skill or adaptation is claimed. [API, failure and next step](docs/maniskill-continuous.md).
+
+## Continuous-action CPU BC learner
+
+An owned NumPy tanh MLP now implements the existing native learner port with
+explicit normalized loss, physical action bounds and full momentum continuation.
+229focused checks and a hand-authored example pass; simulator/task quality is
+unmeasured. [Usage, objective and limitations](docs/continuous-bc.md).
+
+## Continuous-action demonstrations for the planned robot baseline
+
+New pure records validate declared units/bounds, complete trajectories, separate
+termination/truncation and matching training roles. 165focused tests and scoped
+checks pass. No robot learner or simulation is implemented by this boundary.
+[API and example](docs/continuous-demonstrations.md).
+
+## H32 fixed versus bounded weighted probes: no stopping benefit observed
+
+Both frozen full F16/A16 cases complete with identical saved learning curves and
+work counts. Bounded uses its full two-step cap; weighted adaptation trades ordinary
+CE for balanced CE and does not recover an acquired skill. Existing benchmark and
+all negative results are preserved. [Results](docs/reports/h32-bounded-probe-study-20261019.md).
+
+## Existing weighted PC probes now run at H32
+
+Use `--wide-neural --probe-inference fixed-weighted` or `bounded-weighted` with
+the existing PC/neutral joint F16/A16 recipe. Benchmark training remains unchanged;
+the isolated probe/return objective is explicitly class-weighted. 359 scripted
+checks and four single-update native fixtures pass. Full native comparative study
+is pending; no benefit claim. [Usage and evidence](docs/reports/h32-bounded-probe-integration-20261019.md).
+
+## H32 runtime diagnostic works; frozen comparison remains incomplete
+
+Fixed executable H32 prior-gradient admission;117 focused tests pass. The frozen
+PC case reproduces original fit and measures15positive joint prior-gradient dots.
+BP failed before training; its SPENT attempt is retained. No comparative or
+circadian benefit claim. [Evidence](docs/reports/h32-prior-gradient-study-20261019.md).
+
+## Inspect TRAIN gradients in the existing H32 joint route
+
+`--wide-neural --joint-catalogue --prior-gradient-geometry` now composes the existing
+TRAIN prior-CE diagnostic with original BP/PC/neutral/active recipes. Checkpoints,
+objectives and baselines stay fixed. Corrected259scripted checks and four native
+fixtures pass; an initial test-selection budget violation remains recorded/unmet.
+[Usage, limits and evidence](docs/reports/h32-prior-gradient-integration-20261019.md).
+
+## Saved count control succeeds autonomously after task return
+
+The existing evaluator now admits the two genuine FIFO36 after-return states.
+Both succeed on fixed A/F games for both cues:8/8 games,72 predictions/steps,
+zero new training. 174 scoped tests and independent review pass. This demonstrates
+known-task count recall, without neural/circadian or heldout benefit.
+[Outcomes, API and costs](docs/reports/saved-fifo-probe-games-20261019.md).
+
+## Inspect saved count-memory learning and retention
+
+The existing offline builder now opens the accepted FIFO36 F16/A16 report. Compare
+the initial and mature cohorts, phase curves, signed changes and costs; inspect
+the original incomplete run separately. No learner runs and no games are invented.
+146 scoped checks pass. Interactive browser QA remains open due to URL policy.
+[Usage and limitations](docs/key-door-inspector.md#saved-fifo36-fresh-task-probe) ·
+[Saved page](artifacts/runs/saved-fifo-inspector-20261019/inspector.html).
+
+## Isolated saved FIFO36 fresh-task and return probe
+
+The existingmemoryprobe CLI now supports genuineFIFO36 savedstates. Bothcohorts
+learnF; matureA stays exact. This establishes isolatedcountrecall/retention,
+not mature recovery or a neural/circadian advantage. 202scopedcases and independent
+review support the implementation; originalfailedbudgets remain recorded.
+[Usage, outcomes andcosts](docs/reports/saved-fifo-fresh-return-20261019.md).
+
+## Known-task memory: acquisition, eviction and return
+
+The finite FIFO36 control now has all30 TRAIN readouts: it learns each task,
+loses A after retirement, and recovers A when it returns. New readouts used zero
+training; the original wall-time failure and censored attempt stay recorded.
+209focused checks and independent review pass. This is count recall, with no
+neural or circadian advantage established.
+[Outcomes and costs](docs/reports/saved-fifo-readouts-20261019.md) ·
+[Saved-state CLI](docs/saved-fifo-readouts.md).
+
+## Matched S64 controls: partial fit, stronger BP control
+
+The full H32 PC/neutral S64 pair now matches exactly. At the fixed TRAIN endpoint,
+BP fits51/54 actions, S64PC/neutral42/54, and S2PC/neutral30/54. Both PC recipes
+remain non-exact; no CPC benefit is established. All1,526 comparisons and costs
+are independently checked; the original learner defaults remain unchanged.
+[Comparison and limitations](docs/reports/h32-relax64-matched-controls-20261019.md) ·
+[Commands and evidence](artifacts/runs/h32-relax64-matched-controls-20261018/RESULTS.md).
+
+## Explicit H32 fixed64 learner control
+
+The existing PC/neutral S64 methods now support `--wide-neural` on the original
+joint/F16/A16 route.605focused checks and native two-update parity pass; one full
+PC case reaches42/54 TRAIN actions versus original S2's30/54, with zero exact
+sequences. F fit partly regresses when A returns; no CPC or gameplay advantage.
+[Preview and costs](docs/fixed-relaxation-controls.md#explicit-h32-composition) ·
+[Observed curves and limits](docs/reports/h32-relax64-control-20261018.md).
+
+## Inspect realized PC updates on H32 TRAIN checkpoints
+
+The existing `--wide-neural --pc-update-diagnostics` combination now supports
+original PC/neutral joint F16/A16.525 focused checks and one native PC case pass;
+benchmark/probe outputs match accepted evidence. Both detached proposals descend
+locally, while the learning plateau remains unexplained. No CPC benefit claim.
+[Preview, scope and costs](docs/pc-update-diagnostics.md#explicit-h32-composition) ·
+[Observed results and independent review](artifacts/runs/h32-pc-train-diagnostics-20261018/RESULTS.md).
+
+## Matched native exposure: eight fixed observations
+
+The existing F48 and old-A replay paths now have complete BP, PC, neutral CPC and
+active CPC observations. PC and neutral match exactly; source128 PC-family fits
+stay5/9 percue, and active endpoint CE is higher. BP fits more actions but old-A
+red stillfailsfullrecovery. All curves/costs/signs are retained; no CPC advantage.
+[Human tables and limits](docs/reports/matched-exposure-controls-20261018.md) ·
+[Commands,24savedchecks and independent review](artifacts/runs/matched-exposure-controls-20261018/RESULTS.md).
+
+## F48 exposure control and BP tradeoff
+
+The existing CLI now supports `--wide-neural --extra-f-exposure` on the explicit
+joint/F48/A16 route. It matches old-A replay's native calls/rows while preserving
+original input bounds and isolation.785focused checks/scopedstatics/independent
+review pass. One BP pair shows better F fit with F-only exposure but higher A CE;
+neither route fully recovers old A-red. No gameplay/CPC benefit is established.
+[Run/preview and costs](docs/f48-exposure-control.md) ·
+[Comparison/evidence/remaining work](artifacts/runs/f48-exposure-control-20261018/RESULTS.md).
+
+## H32 old-A rehearsal on isolated learners
+
+The existing CLI now accepts `--wide-neural --old-a-rehearsal` on the explicit
+joint/F16/A16 route for the four original methods. One BP native case verifies
+256updates/8064rows, separate replay charges and unchanged source/actor/budgets;
+472 focused checks and independent review pass. A-red fit still fails full
+retention/recovery; this is extra training exposure, not a comparative win.
+[Run/preview and limits](docs/minigrid-probe-rehearsal.md#explicit-h32-composition) ·
+[Evidence and next control](artifacts/runs/wide-old-a-rehearsal-20261018/RESULTS.md).
+
+## Matched H32 adaptation observations
+
+The deferred path now completes all64 fixed game observations for BP, PC,
+neutral CPC and active CPC. PC and neutral match exactly; each PC-family method
+has zero goal successes. BP's single F-red success disappears after A-return.
+All costs, cues and signed comparisons are retained; no circadian benefit or
+full retention/recovery is established. Existing code and BP evidence were reused.
+[Results and cost tables](docs/reports/deferred-h32-controls-20261018.md) ·
+[Commands,22saved-data checks and independent review](artifacts/runs/deferred-h32-controls-20261018/RESULTS.md).
+
+## Deferred games on actual learned H32 endpoints
+
+The existing learnability CLI now accepts explicit
+`--wide-neural --deferred-probe-rollouts`: four full endpoint snapshots, all
+training completed, then sixteen frozen A/F games. 401 focused checks, scoped
+statics and independent review pass. One actual BP case completes under original
+40s/endpoint and180s/body limits. Only one game succeeds; that F-red success is
+lost after A-return. No retention/recovery or circadian advantage is established.
+[Run/preview and guard scope](docs/wide-neural-probe-games.md#games-after-all-isolated-training) ·
+[Exact evidence, costs and remaining work](artifacts/runs/deferred-h32-games-20261018/RESULTS.md).
+
+## Exact large packet checks
+
+Known-task packet guards now compare large native arrays bit for bit through
+views, avoiding a full feature byte temporary. All metadata, owner, mutation and
+callback checks remain;166 scoped tests and independent review pass. Timing is
+inconclusive and the native game study remains incomplete.
+[Commands, evidence and limits](artifacts/runs/h32-preservation-components-20261018/OUTER_RESULTS.md).
+
+## Native endpoint cost diagnosis
+
+A single frozen neutral-CPC run measured preservation spans at53.79/58.77seconds,
+versus about0.25seconds of prediction at each source0 endpoint. The final observer
+deadline still failed; all eight recorded games had no goal/reward. This identifies
+a runtime target, not a learning advantage or completed study.
+[Observed costs and limits](docs/reports/neutral-endpoint-profile-20261018.md) ·
+[Saved inspector](artifacts/runs/neutral-endpoint-profile-20261018/profile-inspector.html)
+(interactive QA remains open).
+
+
+## H32 endpoint cost breakdown
+
+Existing inline H32 game reports now retain bounded elapsed preservation, input,
+prediction and physics spans, including failures and unknown intervals. All
+original budgets remain.214 scoped scripted checks and independent review pass;
+no new native run or performance benefit is claimed.
+[Timing scope and usage](docs/wide-neural-probe-games.md#recorded-endpoint-phase-costs).
+
+
+## Saved fresh-task learning and old-task return
+
+The [offline inspector](docs/key-door-inspector.md#h32-fresh-task-learning-and-old-task-return)
+now opens the four saved H32 F16/A16 reports, including failed/unrun games,
+both cue curves, exact public-frame playback and unknown/lower-bound costs.
+[BP page](artifacts/runs/learnability-inspector-20261018/bp-final.html).
+474 inspector checks and independent source/publication review pass. Browser
+interactive QA is still open after a security denial. The scientific study
+remains incomplete; this view establishes no comparative or circadian benefit.
+
+
+## Latest original-source adaptation games
+
+The frozen four-method study is incomplete under its declared limits. BP has one
+completed new-task F-red success, plus an F-blue wrong-key failure; full retention/
+recovery and comparative ranking remain unqualified. All failures and costs are
+preserved. [Observed outcomes, limits and cost table](docs/reports/original-wide-probe-games-20261018.md).
+
+## H32 games after isolated learning and return
+
+The existing learnability CLI now offers explicit `--extended-wide-probe-budget`
+with `--wide-neural --probe-rollouts`:60s readonly endpoints/240s whole case.
+The bounded public integration completes192 updates and16 games with source,
+input, RNG and native state isolation. 284 focused checks and scoped statics pass;
+independent review accepted runtime and a later cleanup-preview correction.
+
+All16 synthetic games failed with zero return. Useful adaptation and circadian
+benefit remain unproven. Default40/180 limits and their failed qualification remain.
+[Usage and costs](docs/wide-neural-probe-games.md),
+[exact checks, failures, metadata correction and review](artifacts/runs/extended-wide-probe-budget-20261018/RESULTS.md).
+
+## Earlier implementation milestones
+
+## H32 post-adaptation games — implementation in qualification
+
+Explicit `--wide-neural --probe-rollouts` now connects fixed A/F games to the
+existing isolated F16/A16 path.360 scoped checks pass, but the public synthetic
+chain times out its unchanged20s endpoint budget; full execution remains open.
+[Usage, costs, preserved failures and next repair](docs/wide-neural-probe-games.md).
+Original-source row-fit evidence below is unchanged; no new benefit claim.
+
+## Latest original-data H32 probe/return evidence
+
+The fixed quartet completed isolated F16→A16 diagnostics. BP improved new-F fit,
+lost its previously exact A-red fit and did not fully recover it. PC/neutral
+matched; active CPC showed no advantage. [All cues, costs and limits](docs/reports/wide-neural-probe-return-20261018.md).
+These are teacher-forced fit results; post-adaptation game success remains open.
+
+## H32 isolated fresh-task and return diagnostic
+
+The existing MiniGrid learnability CLI now accepts explicit `--wide-neural` on
+the fixed joint TRAIN/F16/old-A/A16 route. Probe updates stay on disposable
+learners; both A cues and original source/actor/RNG/budgets remain guarded.
+[Usage, costs, structure and checks](docs/wide-neural-learnability.md).
+354scoped checks pass; synthetic execution is not useful adaptation evidence.
+
+## Latest known-TRAIN game evidence — 2026-10-18
+
+The fixed H32 quartet's actual known-A games are qualified: BP succeeds on red
+but fails blue with−1return; all PC-family games fail. No circadian advantage or
+heldout/retention claim. [Results and costs](docs/reports/wide-neural-known-a-games-20261018.md).
+Use existing `--wide-neural METHOD --train-a-rollout --fit-updates 128` CLI;
+all native recipes/defaults unchanged.
+
+## Width-32 known-TRAIN games
+
+The existing fit CLI now supports `--wide-neural METHOD --fit-updates 128
+--train-a-rollout`: both fixed A games use frozen owned readers with zero live
+updates.308scoped cases qualify after four preserved artifact-save failures and
+a targeted harness repair. The public synthetic BP check completes both games
+with0success/return; no acquisition or CPC benefit is established.
+[Usage, structure and commands](docs/wide-neural-train-rollout.md).
+
+## Real width-32 TRAIN study
+
+All four fixed 128-pass cases completed. Full fits remain negative: BP51/54;
+PC/neutral/active30/54. PC and neutral match exactly; active CE is higher at the
+same accuracy. Independent review checked432probability rows and512receipts.
+No acquired retention/recovery or CPC advantage follows.
+[Results, costs and next live-game implementation](docs/reports/wide-neural-original-train-fit-20261018.md).
+
+## Fixed width-32 neural TRAIN recipes
+
+The saved-source CLI now offers `--wide-neural bp|pc|neutral_cpc|gated_cpc` through
+the existing isolated TRAIN stream. Complete state ownership and explicit native
+versus derived costs are verified. 194 scoped tests and independent review pass;
+all original width-8 recipes stay frozen. Real acquisition/retention/recovery and
+CPC benefit remain unproven. [Usage and commands](docs/wide-neural-train-fit.md).
+
+## Learned affine policy completes known game tasks
+
+The existing CLI now exposes `--context-linear-game`. One frozen known-A pair
+succeeded for both cues in nine steps each, using the saved model with no refit.
+This is known-task gameplay, not chronological adaptation or generalization.
+[Command, evidence and costs](docs/context-linear-games.md).
+
+## Complete public-cue affine TRAIN fit
+
+The existing diagnostic fitter now offers `--context-linear-fit`. One fixed
+original-source case classified 54/54 TRAIN actions and all six traces correctly.
+No games or chronological adaptation ran. [Usage and limits](docs/context-linear-train-fit.md).
+
+## Contextual TRAIN alignment diagnosis
+
+The existing diagnostic CLI now supports `--context-bounds` without a learner
+or game. The original54TRAIN rows align correctly and have no exact-input
+conflicts in either routed head. This does not prove linear fit or live success.
+[Usage, executed result and costs](docs/context-game-train-diagnosis.md).
+
+## Real polynomial-kernel TRAIN result
+
+The single fixed 128-pass case completed: 47/54 correct actions, 3/6 exact traces,
+CE 0.88949. Full fit remains negative. All 108 saved probability rows and 128
+receipts were independently verified. No neural acquisition, retention/recovery
+or CPC advantage follows. [Results and costs](docs/reports/kernel-perceptron-original-train-fit-20261018.md).
+
+## Bounded nonlinear TRAIN learner
+
+The existing saved-source CLI now offers `--kernel-perceptron`: a fixed degree2
+kernel classifier with a128-prototype cap, owned snapshots and atomic refusal.
+203scoped checks and independent review pass; fixed16-pass XOR learns. The
+synthetic public fit completes but stays negative. No real-source acquisition,
+retention/recovery or CPC advantage is established.
+[Usage, structure, commands and costs](docs/kernel-perceptron-train-fit.md).
+
+## Real perceptron TRAIN result
+
+The single frozen128-pass fit completed:52/54correct rows,4/6exact traces,
+CE0.565923. Full fit remains negative; A-blue CE worsened. All108saved probability
+rows and128update receipts were independently checked. No retention/recovery,
+linear impossibility or CPC advantage follows.
+[Results and costs](docs/reports/perceptron-original-train-fit-20261018.md).
+
+## Simple multiclass TRAIN learner
+
+The saved-source fit CLI now offers `--perceptron`: a separate deterministic
+mistake-based classifier using the existing bounded TRAIN-only stream.179scoped
+checks/statics and independent review pass; a fixed separable example learns.
+The synthetic public route completes but its full-fit result is negative.
+[Usage, structure, commands and limits](docs/perceptron-train-fit.md).
+
+## Real checkpoint128 TRAIN observation
+
+One frozen BP run reproduces all270 historical benchmark probability rows exactly.
+Its isolated three-update TRAIN cycle lowers old-A CE0.393744→0.390614, with local
+descent signs for aggregate carried momentum. This provides no causal explanation
+of historical F interference and no retained acquired skill or CPC benefit.
+[Results, costs and limitations](docs/reports/bp-checkpoint128-train-cycle-20261018.md).
+
+## Checkpoint128 BP TRAIN readout
+
+The existing MiniGrid history pilot now offers `--bp-update-diagnostics` on its
+original BP joint route. It observes actual momentum at128 on an isolated
+three-update TRAIN copy before F collection and reports the additional costs.
+237 distinct scoped checks and independent review pass. This engineering result
+does not establish real-source retention, recovery or circadian benefit.
+[Usage and commands](docs/bp-realized-update.md),
+[results and costs](artifacts/runs/minigrid-bp-update-route-20261018/RESULTS.md).
+
+## Realized BP TRAIN updates
+
+A bounded diagnostic now reports actual SGD/momentum directions and old-A fit
+changes on a detached B/A/A TRAIN cycle. The public saved-TRAIN example runs;
+105scoped checks and independent review qualify its correctness. It does not
+explain the historical warm BP result or establish acquired retention.
+[Usage, structure and commands](docs/bp-realized-update.md),
+[results, costs and preserved failures](artifacts/runs/bp-realized-update-20261018/RESULTS.md).
+
+## Old-A rehearsal: working comparison, mixed learning results
+
+The saved-data CLI now compares qualified original replay/no-replay MiniGrid
+reports. All four frozen replay cases completed against reused controls. Warm BP
+rehearsal worsened both F learning and old-A fit; PC/neutral improved those fit
+measures and matched each other. Old A remained unacquired, so acquired retention,
+recovery and circadian benefit remain unproven.111scoped checks and independent
+review pass. [Usage/results/costs](docs/minigrid-rehearsal-comparison.md),
+[all curves, exact commands and preserved failures](artifacts/runs/old-a-rehearsal-comparison-20261018/RESULTS.md).
+
+## Public MiniGrid old-A rehearsal
+
+The existing history pilot/CLI now offers `--old-a-rehearsal` for fixed old-A TRAIN
+replay during isolated F learning, then A return on the same candidate. Separate
+budgets and public exposure/storage/compute costs are preserved.323scoped checks,
+a complete native BP CLI run and independent review pass. No comparative benefit
+or acquired retention/recovery is established; existing negative results remain.
+[Usage, structure and commands](docs/minigrid-probe-rehearsal.md),
+[observed checks and costs](artifacts/runs/minigrid-rehearsal-cli-20261018/RESULTS.md).
+
+## Isolated fresh-task replay and old-task return
+
+The existing fresh-task probe can now rehearse a fixed old-A TRAIN bank through
+its disposable stream, preserving probe roles and separate charges, then continue
+A return on the same candidate. All four native methods pass;1,079scoped cases
+and static/independent checks qualify. No comparative learning benefit is claimed.
+The callable API is also exposed by the subsequent public pilot/CLI increment.
+[Usage, structure, costs and commands](docs/isolated-probe-rehearsal.md),
+[executed evidence and preserved failures](artifacts/runs/isolated-probe-rehearsal-20261018/RESULTS.md).
+
+## Fixed public old-A TRAIN rehearsal
+
+The existing stream now supports a fixed complete TRAIN episode bank. A small
+MiniGrid factory composes raw296/K7 old-A episodes with the original four native
+learners, separate replay charges and ordinary continuation.263scoped cases pass,
+including24native updates216rows with source/actor isolation. This verifies replay
+functionality; comparative learning benefit remains untested.
+[Usage, costs and checks](docs/minigrid-fixed-rehearsal.md),
+[executed evidence](artifacts/runs/minigrid-fixed-train-rehearsal-20261018/RESULTS.md).
+
+## Real cue-relative BP adaptation result
+
+One frozen real joint-training/F/A-return case completed with qualified source,
+work and saved arithmetic. Warm F loss improves, while old-A fit worsens and is
+only partly restored on return. The preserved invariant control has larger F
+gain and smaller old-A loss. Neither encoding establishes acquired old-A
+retention; the original default remains. No production code changed this session.
+[Results, costs and limits](docs/cue-relative-bp-adaptation.md),
+[exact commands/evidence](artifacts/runs/cue-relative-bp-adaptation-20261018/RESULTS.md).
+
+## Cue-relative public fresh-task probes
+
+The existing joint MiniGrid pilot now offers `--cue-relative-history` for all
+four native methods, with isolated F learning, old-A readouts and A-return.
+254scoped cases and static/independent checks pass; native coverage includes
+four disposable F/A-return cases and a complete BP public integration. These
+synthetic checks establish functionality, not scientific adaptation benefit.
+Prior fit failures and unproven retention/recovery/CPC advantage remain.
+[Usage and check commands](docs/cue-relative-probe.md),
+[executed evidence](artifacts/runs/cue-relative-probe-20261018/RESULTS.md).
+
+## Cue-relative constructive TRAIN recipe
+
+The existing CLI now accepts `--constructive-bp --cue-relative`, preserving the
+original BP recipe and default behavior.187scoped cases, static checks and
+independent review pass. One frozen128-update TRAIN run reaches48/54rows versus
+the preserved control45/54, but neither fits any complete trace. Full fit remains
+unmet; this establishes no retention, recovery or circadian advantage.
+[Usage, boundaries and checks](docs/constructive-train-fit.md),
+[executed evidence](artifacts/runs/cue-relative-fit-20261018/RESULTS.md).
+
+## Optional public cue-relative key encoding
+
+A pure public-observation codec and separate learner binding now encode key
+colors relative to the preserved initial cue for all four native methods.
+110scoped cases, static checks and independent review pass, including a small
+existing delayed training-only stream run. Apply once to raw histories; the
+mapping is not idempotent. Saved54TRAIN mapping checks pass without a model.
+Pilot/CLI registration and learning/retention/recovery evidence remain open;
+the earlier52/54fit failure and absence of a circadian advantage are unchanged.
+[API, boundaries and checks](docs/cue-relative-encoding.md),
+[executed evidence](artifacts/runs/cue-relative-encoding-20261018/RESULTS.md).
+
+## Selected TRAIN cue-turn gradients
+
+The existing prior-gradient API can select rows of complete TRAIN episodes.
+The constructive CLI's optional `--cue-turn-gradients` reads original Astep2
+only after all fit scores, under the same budget.150scoped cases/statics/review
+pass. One qualified reconstruction preserves all fit probabilities and finds
+near-opposed final cue-turn gradients; fit remains52/54 with both A errors.
+This diagnostic does not establish their cause or an adaptation advantage.
+[Usage and scope](docs/cue-turn-gradients.md),
+[executed evidence](artifacts/runs/cue-turn-gradients-20261018/RESULTS.md).
+
+## Disposable TRAIN fit with a fixed work cap
+
+The existing saved-source CLI now offers `--constructive-bp`: the original H8
+BP learner through the training-only stream, with up to512updates and detached
+TRAIN scoring under one budget.197scoped cases/statics/independent review pass.
+The frozen512case reaches52/54rows and4/6exact traces; both A cues still miss
+step2. Full acquisition and useful old-A adaptation remain unestablished.
+[Usage and costs](docs/constructive-train-fit.md),
+[executed negative result](artifacts/runs/constructive-train-fit-20261018/RESULTS.md).
+
+## TRAIN input bounds and fit gaps
+
+The existing joint MiniGrid pilot offers optional `--train-fit-bounds`; the
+saved-source linear-control CLI offers `--bounds-only` without a fit or model.
+The reports preserve original metrics and expose signed row-accuracy/CE gaps.
+335scoped cases/statics/review pass. Current54distinct inputs have no label
+conflicts, but the saved weighted-PC checkpoint fits only31/54rows. This reports
+underfit; finite-network capacity and useful adaptation remain unestablished.
+[Usage, mathematics and costs](docs/train-fit-bounds.md),
+[executed evidence](artifacts/runs/train-fit-bounds-20261018/RESULTS.md).
+
+## Matched weighted MiniGrid probe recipes
+
+The existing MiniGrid pilot now offers explicit `fixed-weighted` and
+`bounded-weighted` F16/old-task/A16 probes. They share the weighted objective,
+warm checkpoint and native cap; original benchmark/control defaults remain.
+439integration/regression cases plus5driver cases and scoped statics pass.
+The paired PC case found no stopping reduction; neutral-CPC timed out, leaving
+the two-method comparison incomplete. No learning or circadian advantage is established.
+[CLI usage](docs/categorical-bounded-inference.md#minigrid-f16-and-a16-probe-recipes),
+[correctness and paired study evidence](artifacts/runs/minigrid-bounded-probe-route-20261018/RESULTS.md).
+
+## Isolated bounded fresh-task probes
+
+An explicit warm PC/neutral probe learner now works with the existing fresh-task
+runner, including old-task readouts and sixteen TRAIN return updates. Original
+reserved roles, native clocks, source isolation and separate native/publication
+costs are preserved.628scoped checks and independent review pass; scientific
+learning/retention/recovery benefit remains unestablished.
+[Usage and checks](docs/categorical-bounded-inference.md#isolated-reserved-task-probe),
+[evidence and limitations](artifacts/runs/categorical-bounded-probe-20261018/RESULTS.md).
+
+## Bounded scheduled TRAIN streams
+
+The existing scheduled learner now supports optional bounded PC/neutral inference
+with owned stopping diagnostics and separate native/publication work receipts.
+303scoped tests/statics/independent review pass, including delayed updates and
+ordinary pause/resume. Fixed formats remain intact. Managed capture and isolated
+probe composition still need separate qualification; no learning benefit claimed.
+[Usage and checks](docs/categorical-bounded-inference.md#scheduled-train-stream),
+[all evidence](artifacts/runs/categorical-bounded-stream-20261018/RESULTS.md).
+
+## Atomic bounded TRAIN updates
+
+An explicit PC/neutral episode API now publishes complete native updates with
+bounded inference and owned stopping/work diagnostics.96scoped tests/statics/
+independent review pass. Scheduled bounded stream binding is still unfinished;
+fixed controls and prior negative results are preserved.
+[Usage and checks](docs/categorical-bounded-inference.md#atomic-train-episode-api),
+[executed evidence](artifacts/runs/categorical-bounded-adapter-20261018/RESULTS.md).
+
+## Bounded categorical PC core
+
+A detached TRAIN proposal now supports declared stopping and safe fallback to
+its last accepted latent state, with rejected work and finalization counted.
+87 scoped math/regression tests, statics and independent review pass. The atomic
+bounded learner adapter remains unfinished; fixed controls are unchanged.
+[API example and checks](docs/categorical-bounded-inference.md),
+[executed evidence and limits](artifacts/runs/categorical-bounded-inference-20261018/RESULTS.md).
+
+## Paid-report runtime improvement
+
+The scalar report guard preserves its original corruption checks and is 31.2%
+faster on a fixed saved receipt;346 focused tests and scoped statics pass.
+Native validation still times out: five games complete, one censored, ten unrun.
+The next learner increment is optional bounded categorical PC inference, with
+fixed controls preserved. [Checks](artifacts/runs/paid-report-guard-20261018/RESULTS.md),
+[all outcomes and costs](artifacts/runs/minigrid-paid-guard-games-20261018/RESULTS.md).
+
+## Deferred count-game runtime result
+
+Qualified boundary composition passes224 focused tests and scoped statics while
+preserving original clock, state and paid-history checks. A frozen native case
+completed its first four games, then timed out during the return readout: five
+complete games, one censored, ten unrun. Full completion remains open; this is
+no circadian advantage claim. [Code and checks](artifacts/runs/deferred-qualified-boundary-20261018/RESULTS.md),
+[all native outcomes and costs](artifacts/runs/minigrid-qualified-deferred-games-20261018/RESULTS.md).
+
+## Weighted S64 comparison result
+
+The two frozen PC/neutral cases each fit31/54 TRAIN rows and0/6 exact traces,
+versus35/54 for the existing ordinary S64 controls and48/54 for weighted BP.
+All results and costs are retained; useful adaptation or circadian benefit is
+not established. [Full results](artifacts/runs/weighted-relax64-study-20261018/RESULTS.md).
+
+## Existing fixed64 weighted catalogue controls
+
+The joint weighted route supports `pc_relax64` and `neutral_cpc_relax64` using
+existing S64 policies, native PC/neutral methods and ordinary isolated probes.
+Original S2/default recipes stay unchanged.280 scoped cases pass, including both
+full S64 routes and an S2 regression; this establishes implementation correctness.
+[Preview command and costs](docs/weighted-categorical-pc.md#existing-fixed64-weighted-catalogue-controls),
+[executed evidence](artifacts/runs/weighted-catalogue-relax64-20261018/RESULTS.md).
+
+## Weighted PC mechanistic result
+
+One frozen original-recipe reconstruction matches the earlier negative run
+exactly. Both0/128 detached updates reduce ordinary/weighted CE and fixed-latent
+energy, while the learner still fits only16/54 rows and0/6 complete traces.
+This local-descent observation establishes no useful adaptation or circadian
+advantage. [Results and costs](artifacts/runs/weighted-pc-mechanistic-20261018/RESULTS.md).
+
+## Weighted PC checkpoint readouts
+
+Combine --joint-catalogue --weighted-catalogue --pc-update-diagnostics with
+explicit PC/neutral and the original distinct-probe/old-A/return recipe. After
+six TRAIN scores at0/128, the existing runner derives TRAIN-only aggregate weights
+and measures the exact detached proposal with separate costs and original guards.
+284 current scoped cases qualify via retained failure/repair and native gates;
+this is engineering correctness, not learned benefit.
+[Command and limits](docs/weighted-categorical-pc.md#public-weighted-checkpoint-diagnostics),
+[evidence](artifacts/runs/weighted-pc-public-diagnostics-20261018/RESULTS.md).
+
+## Exact weighted PC update diagnostics
+
+`diagnose_pc_update(snapshot, train_sources, class_weights=weights)` measures one
+exact detached weighted proposal, ordinary/weighted CE, gradient/delta geometry
+and fixed-final-latent energy. It does not train the source. None keeps the original
+unweighted API.93 numerical cases/statics/independent review pass; public weighted
+checkpoint composition is now accepted above. [Usage](docs/weighted-categorical-pc.md#exact-weighted-update-diagnostics),
+[executed checks and costs](artifacts/runs/weighted-pc-update-diagnostics-20261018/RESULTS.md).
+
+## Explicit weighted joint catalogue API/CLI
+
+Use --joint-catalogue --weighted-catalogue with explicit BP/PC/neutral and the
+existing distinct-probe/old-A/return recipe. Fixed aggregate TRAIN weighting is
+separate from online episode flags; probes stay ordinary unweighted and isolated.
+247 scoped cases/statics/CLI/review pass. The fixed real-data comparison now
+executes, with mixed/negative outcomes and no complete acquisition or benefit claim.
+[Command and limits](docs/weighted-categorical-pc.md#public-joint-catalogue-apicli),
+[engineering evidence](artifacts/runs/weighted-catalogue-public-20261018/RESULTS.md),
+[real-data outcomes and interpretation correction](artifacts/runs/weighted-joint-study-20261018/RESULTS.md).
+
+## Weighted catalogue streams
+
+`TorchTrainWeightedLearner.from_catalogue(bound_policy, catalogue, updates)` binds
+one owned TRAIN catalogue to the existing delayed stream for BP/PC/neutral. Exact
+arrays/labels, aggregate weights, fixed prefix limits and native publication guards
+are verified alongside original episode/recurrent behavior. Public joint weighting uses the separate option above; scientific comparisons
+have scoped evidence above; broader benefit remains open. [Usage](docs/weighted-categorical-pc.md#catalogue-binding-to-the-existing-sequential-stream),
+[executed checks and failures](artifacts/runs/weighted-catalogue-stream-20261018/RESULTS.md).
+
+## Weighted TRAIN catalogue update API
+
+`src/adapters/torch_catalogue_weighted.py` owns up to six complete TRAIN sources
+and54 independent rows with their original spans. It derives distinct fixed
+catalogue weights and stages one atomic BP/PC/neutral update; all-one native
+state/continuation parity and atomic refusals are verified. Public weighted joint
+streams use the separate option above. [Usage and limits](docs/weighted-categorical-pc.md#typed-weighted-train-catalogues),
+[checks and retained failures](artifacts/runs/weighted-catalogue-adapter-20261018/RESULTS.md).
+
+The [explicit weighted PC/neutral API/CLI](docs/weighted-categorical-pc.md#explicit-online-apicli-composition)
+now runs the existing online TRAIN stream with isolated ordinary unweighted
+fresh-task/old-task/return checks.183 distinct cases qualify through composite
+gates; statics, actual CLI description and independent review pass. Initial test
+failure/engineering timeout remain recorded. Scientific benefit remains open.
+
+The [existing weighted TRAIN schedule](docs/weighted-categorical-pc.md#existing-weighted-train-schedule)
+now supports PC/neutral with full continuation, isolated delayed updates and
+separate objective receipts.136 focused cases, scoped statics and independent
+review pass, including original BP/recurrent regressions. Public composition
+above now uses it; scientific benefit remains open.
+
+[Weighted categorical PC/neutral updates](docs/weighted-categorical-pc.md#atomic-complete-episode-pcneutral-update)
+now atomically train complete TRAIN episodes and preserve full native continuation.
+60 focused cases, scoped statics and independent review pass, including exact
+all-one S2/S64 full-state parity. The existing schedule above now composes this
+update; correctness establishes no acquisition or circadian benefit.
+
+The explicit [weighted categorical PC primitive](docs/weighted-categorical-pc.md)
+now returns owned parameter proposals from a normalized TRAIN-role objective.
+39 focused tests verify independent derivatives and exact all-one native PC/
+neutral parameter identity; scoped statics pass. The complete episode adapter
+above now uses this primitive; scientific evidence remains unfinished.
+
+The existing joint runner now supports
+[two target-free known TRAIN A games](docs/joint-train-a-live.md) from its genuine
+frozen128/6912 checkpoint, including fixed64 controls.221 distinct scoped cases
+and static checks qualify wiring/accounting. One frozen real PC64 readout matches
+all270 reference probabilities exactly, then fails both known A games:16forward
+inputs each,0return, truncation. [Results and costs](artifacts/runs/joint64-a-live-study-20261018/RESULTS.md).
+Independent review accepts the negative result; useful neural adaptation remains open.
+
+The existing runner now supports separately named
+[fixed64-step PC/neutral controls](docs/fixed-relaxation-controls.md), including
+isolated fresh-task/old-task/return updates and explicit inference costs.
+166 distinct scoped cases, static checks and independent review qualify runtime
+behavior. Two frozen real-data cases improve some fit measures but reach35/54
+TRAIN actions and0/6 exact traces; useful acquired-skill retention/recovery remains
+open. [Results, costs and qualifications](artifacts/runs/relax64-acquisition-study-20261018/RESULTS.md).
+Original S2 defaults and all negative results are preserved; no circadian advantage.
+
+The existing joint MiniGrid route now supports optional
+[PC update diagnostics at checkpoints0/128](docs/pc-update-diagnostics.md#opt-in-joint-checkpoint-integration).
+169 scoped cases, static checks and independent review pass. One frozen TRAIN-only
+replay reproduces all270 old probability rows exactly and measures local descent
+with nonzero latent residual; exact acquisition remains0/6. It does not establish
+the failure's cause or benefit. [Results and costs](artifacts/runs/pc-realized-train-replay-20261018/RESULTS.md).
+
+The [TRAIN-only realized PC readout](docs/pc-update-diagnostics.md) now reports
+latent residuals, native update alignment and counterfactual CE from owned PC or
+neutral-CPC snapshots. It changes no learner. All43 focused tests, scoped static
+checks and independent review pass. This verifies the diagnostic; useful task
+acquisition and its failure's cause remain open.
+
+The existing [MiniGrid learnability API/CLI](docs/joint-train-catalogue.md#public-acquisition-and-isolated-adaptation-route)
+now runs explicit joint54-row TRAIN updates and isolated fresh-task/old-task/return
+checks. Defaults and final-data isolation are preserved.85 distinct scoped cases
+qualify through composite gates; final lint/format/type checks and independent
+review pass. [Commands, retained failures and costs](artifacts/runs/joint-catalogue-route-20261018/RESULTS.md).
+
+Four fixed local cases completed: BP45/54 TRAIN actions, PC/neutral/active30/54,
+all0/6 exact traces. Fresh-task fit improves, but acquired-skill retention and
+circadian benefit remain unestablished. The frozen probability-recomputation
+criterion is partial because probe DTOs omit probabilities; all spent cases and
+negative results are preserved. [Results and qualification](artifacts/runs/joint-catalogue-study-20261018/RESULTS.md).
+
+The [isolated linear TRAIN-fit CLI](docs/linear-train-fit.md) now fits one fixed
+disposable least-squares head without changing the online learners.145 focused
+tests, scoped lint/format/type checks and independent review pass. The sole frozen
+case gets52/54 actions and4/6 traces exact: a negative all-label fit result, not
+proof of inseparability or adaptation. All original failed/incomplete comparisons
+and spent budgets remain preserved. [Commands and evidence](artifacts/runs/linear-train-fit-20261018/RESULTS.md).
+
+
+Optional [TRAIN action margins](docs/minigrid-learnability.md#train-action-probability-margins)
+now report target-versus-competitor probability gaps from existing paid predictions,
+with all rows/classes and separate costs.208 distinct scoped cases qualify through
+retained/repaired evidence; four native methods preserve state and scores with
+zero extra forwards. Saved BP results expose an action tradeoff, while all exact
+traces remain0. [Commands, failures and evidence](artifacts/runs/train-action-margins-20261018/RESULTS.md).
+
+The [weighted BP schedule checker](artifacts/runs/weighted-schedule-witness-20261018/RESULTS.md)
+now avoids repeated observation serialization while retaining complete mutation
+and copy checks.205 scoped tests, lint/format/type checks and independent review
+pass. Fixed model-free timing shows89%lower metadata-check cost, with added bounded
+witness memory/setup cost. Full learner runtime and scientific benefit remain
+unestablished; the earlier incomplete comparison and all negatives are preserved.
+
+The [first fixed weighted/unweighted BP recurring-task attempt](artifacts/runs/matched-weighted-bp-20261018/RESULTS.md)
+is incomplete: ordinary BP completes, weighted BP reaches its body cap after the
+first F probe and two A-return updates. Both retain zero exact TRAIN traces.
+Saved arithmetic/matchedness checks preserve the partial; no full comparison or
+scientific benefit follows. A model-free profile identifies repeated full-schedule
+serialization as a concrete cost to reduce while retaining mutation refusal.
+
+The [opt-in weighted BP learnability route](docs/weighted-feature-bp.md#opt-in-minigrid-learnability-route)
+now runs the original TRAIN stream with distinct weighted receipts and ordinary
+isolated probes.153 scoped cases qualify through152 retained passes plus one
+corrected native case; lint/format/type checks pass.128 weighted updates and16
+unweighted probe updates execute on synthetic frames. Scientific benefit remains
+open. [Commands and failure](artifacts/runs/weighted-learnability-route-20261018/RESULTS.md).
+
+The [weighted BP episode and stream adapter](docs/weighted-feature-bp.md) now
+runs through the existing delayed-label runtime with a sealed TRAIN schedule,
+owned fork/restore and distinct objective receipts.129 focused tests, scoped
+lint/format/type checks and independent review qualify this integration. A small
+three-update native sequence passes; learning benefit remains unproven.
+[Evidence and failures](artifacts/runs/weighted-feature-stream-20261018/RESULTS.md).
+
+One [frozen trained-PC diagnostic](artifacts/runs/minigrid-pc-prior-diagnostic-20261017/RESULTS.md)
+now completes with measured RSS and isolated fresh-task probes. CE improves, but
+TRAIN argmax selects action2 everywhere after32 updates:5/9 accuracy and no exact
+traces. Both probes also fail exact acquisition. This validates the diagnostic;
+useful task skill and circadian benefit remain unproven.
+
+The optional [bound prior-gradient diagnostic](docs/minigrid-learnability.md#bound-feedforward-prior-ce-gradients)
+now reads TRAIN-only prediction gradients for the existing BP/PC/neutral/active
+heads without updating them.123 focused checks and scoped lint/type checks pass;
+full state, costs and isolation are guarded. This does not establish learning
+benefit or circadian advantage. [Evidence](artifacts/runs/minigrid-prior-gradients-20261017/RESULTS.md).
+
+The [finite-capacity FIFO control](docs/minigrid-action-memory.md#optional-finite-capacity-fifo-control)
+now runs on the existing recurring stream.117 focused checks/scoped statics and
+independent source review pass. The single native case preserves all 128 updates
+and five count states, but is incomplete at180 s. A succeeds at32 and64; saved-state
+arithmetic verifies its counts are lost at96 and relearned 128. Later live return
+and full B/C acquisition remain unverified. No retry or circadian-benefit claim.
+[Commands, partial evidence and costs](artifacts/runs/minigrid-recurring-fifo-20261017/RESULTS.md).
+
+The existing [MiniGrid count runner](docs/minigrid-action-memory.md#optional-invariant-recurring-task-control)
+now supports `--invariant-memory` on its A/B/C_train/A stream.242 focused tests,
+scoped lint/type checks and independent source review pass; raw defaults remain.
+The single native case exhausted180s and lost its report at a late wrapper check:
+it is failed/spent, with unknown learner outcomes. A future-only reporting repair
+passes12model-free checks; no retry or scientific benefit is claimed.
+[Evidence and next action](artifacts/runs/minigrid-recurring-invariant-20261017/RESULTS.md).
+
+Optional [post-training A/F games](docs/minigrid-learnability.md#optional-post-training-af-endpoint-games)
+now capture four paid states during fixed training and use frozen count readers.
+459 focused checks and scoped lint/type checks pass. Two local attempts remain
+incomplete: the first exposed a repaired entry-clock ordering bug; the second
+completed three games before its20s deadline. Cold A blue/red failed; Fblue
+succeeded. Fred's closing refusal keeps its outcome censored. Full16-game,
+generalization and circadian-benefit claims remain open. Both failures are kept.
+[Results, costs and next action](artifacts/runs/minigrid-deferred-probe-games-repaired-20261017/RESULTS.md).
+
+The [bounded invariant exact-memory control](docs/minigrid-learnability.md#bounded-invariant-exact-memory-adaptation-control)
+now runs the fixed A128/F16/A16 assay through the existing CLI.110 focused tests,
+scoped lint/type checks and independent review pass. One local case fits both A
+and distinct F teacher traces exactly, preserves A during F, and keeps both fits
+on return, using at most36keys/87264logical table bytes. This is finite trace fit;
+live F/return validation was unfinished at that stage; the partial game results
+above retain that limitation. All neural failures
+remain preserved. [Results and costs](artifacts/runs/minigrid-memory-control-20261017/RESULTS.md).
+
+The [known TRAIN A128 live readout](docs/minigrid-learnability.md#known-train-a128-live-games)
+now runs through the existing learnability CLI and frozen neural evaluator.
+158focused checks/scopedstatics/independent review pass. In the fixed BP case,
+red succeeds and blue fails:1/2knownTRAINgames, meanreturn−.253125. All preceding
+TRAIN/probe numerical evidence is unchanged. [Results, costs and next simpler
+control](artifacts/runs/minigrid-train-a-rollout-20261017/RESULTS.md).
+
+The [matched A128/F16/A16 native assay](artifacts/runs/minigrid-matched-a-only-execution-20261017/RESULTS.md)
+now completes for PC, neutral CPC and active CPC, with exact PC-neutral numerical
+parity and an accepted BP reference. All acquisition gates still fail; active CPC
+shows no benefit in this fixed case. Useful live task skill remains unproven.
+The known TRAIN A readout above completes that integration with separate costs.
+
+The [matched A-only learnability recipe](docs/minigrid-learnability.md#matched-a-only-native-method-recipes)
+now supports the existing BP, PC, neutral CPC and active CPC heads with identical
+A128/F16/A16 inputs and unchanged native settings.116focused checks and scoped
+lint/format/type checks pass. The original comparative native grant failed before
+model work at a PID-file lock and produced no comparison. Its SPENT failure and
+bounded dummy-process repair check remain preserved. The separately frozen fresh
+execution is completed in the current result above.
+[Original failure evidence](artifacts/runs/minigrid-matched-a-only-20261017/RESULTS.md).
+
+The [learnability CLI](docs/minigrid-learnability.md#explicit-existing-method-qualifications)
+now selects any existing bound neural head while preserving the PC alias/defaults.
+The fixed BP control reached77.8% TRAIN accuracy versus PC55.6%, but neither met
+exact-sequence acquisition gates. [Evidence and costs](artifacts/runs/minigrid-bp-qualification-20261017/RESULTS.md).
+Useful retention/recovery and circadian benefit remain unproven.
+
+The existing [TRAIN activation diagnostics](docs/native-activation-health.md#encoding-bound-train-health)
+now support encoding-bound neural checkpoints, including the canonical-PC route.
+Zero-update native math/isolation and guarded readout behavior pass focused checks.
+A [frozen trained-PC measurement](artifacts/runs/minigrid-pc-health-measurement-20261017/RESULTS.md)
+found zero dead/saturated prior activations under fixed cutoffs, while acquisition
+still failed. Useful adaptation remains unproven; previous spent evidence is preserved.
+
+The [single canonical-PC qualification](docs/minigrid-learnability.md#single-canonical-pc-qualification)
+now runs the existing TRAIN stream and isolated fresh-task probes. Its frozen local
+case completed, but no task reached exact-sequence acquisition (trained accuracy
+55.6%, all forward predictions). Retention, recovery and circadian benefit remain
+unproven. [Results and costs](artifacts/runs/minigrid-pc-qualification-20261017/RESULTS.md).
+
+The existing [learnability route](docs/minigrid-learnability.md#encoding-bound-public-history-route)
+now supports bound neural TRAIN-fit diagnostics and separately budgeted disposable
+probes. Native synthetic tests verify source/benchmark/RNG isolation and paid-work
+refusal; real acquisition, retention and recovery remain unproven. Preview with
+`python -m scripts.run_coupled_attribution --scenario torch-minigrid-history-learnability --invariant-history --describe`.
+
+The [encoding-bound neural path](docs/minigrid-invariant-encoding.md#encoding-bound-neural-heads)
+now composes all four existing Torch heads with canonical public inputs, the TRAIN
+stream and fixed frozen evaluator. Native equivalence, full continuation, PC-neutral
+parity and source/probe isolation are verified, including four32-update integrations.
+Original objectives/raw defaults are preserved. The existing history-smoke CLI now
+has an [opt-in matched neural comparison](docs/minigrid-invariant-encoding.md#matched-neural-a32-comparison)
+using the original saved TRAIN inputs, paired initial states and fixed A/E games.
+This mode targets exploratory acquisition/nuisance transfer; the incomplete run
+establishes no matched effect, retention, recovery, independent generalization
+or circadian benefit. The sole
+comparison exhausted its300s limit after all8arms trained; canonical evaluation
+is incomplete/SPENT, with no matched result or retry.
+[Observed costs and failure](artifacts/runs/minigrid-neural-representation-comparison-20261017/RESULTS.md).
+
+
+The [explicit public encoding control](docs/minigrid-invariant-encoding.md) now has
+an executable saved-A32 recipe through the existing TRAIN runner and evaluator.
+After32updates/288original TRAIN rows, both raw/invariant controls succeed on both
+A cues; only the invariant control succeeds on both previously inspected E cues.
+The single16game/214decision run completed within budget; independent arithmetic
+has zero probability error. This is narrow public nuisance transfer, not neural
+learning, independent generalization or a circadian advantage. Raw defaults and
+all previous failed/negative results remain preserved.
+
+The [saved-memory game readout](docs/minigrid-action-memory.md#frozen-saved-return-game-readout)
+now executes actual target-free A/E games with zero retraining. The mature FIFO
+endpoint succeeds on both known A and both inspected E cues; the failed exact
+prefix succeeds on both A and one E cue. All379 decisions were independently
+reconstructed. Native qualification remains **failed/SPENT** because the launcher
+emitted a runpy warning; original sources/results are preserved, no retry ran.
+These are exploratory known-game outcomes, not generalization or circadian benefit.
+
+The [matched MiniGrid memory-return assay](docs/minigrid-action-memory.md#opt-in-matched-new-task-and-return-comparison)
+now measures new-task fitting, forgetting and relearning on isolated copies.
+Mature FIFO learns E, partially forgets A, then relearns A while retaining E;
+26evictions/704retired exposures leave eightoriginal keys absent. The exact-memory
+capacity failure stays incomplete. These are exploratory teacher-forced results;
+qualified saved known-game readouts appear above; circadian benefit remains unproved.
+
+The [FIFO count control](docs/fifo-action-memory.md) can keep acquiring within a
+fixed retained-table cap by retiring its oldest entries. Native/helper/stream
+fixtures verify learning, forgetting, relearning and exposure accounting; live
+MiniGrid A/E game readouts are recorded above with their failed packaging gate.
+The original refusal control and its
+negative capacity result remain intact.
+
+The [MiniGrid saved-state capacity assay](docs/minigrid-action-memory.md#isolated-saved-state-e16-capacity-assay)
+now runs isolated E16 probes without repeating benchmark training. The empty copy
+fits the reserved task; the mature copy reaches63/64 keys and refuses its next
+batch. The incomplete result and costs are preserved; no circadian advantage
+is established.
+
+The [MiniGrid count control](docs/minigrid-action-memory.md) now runs through the
+existing game/stream/evaluator ports. One reviewed case acquires A/B/C, retains A
+and succeeds when A returns:54keys/130896 logical bytes,128count updates,
+124.47supervisor seconds. This is known TRAIN memorization with different capacity
+and computation from neural controls; no generalization or circadian benefit.
+
+The [bounded count learner](docs/key-door-action-memory.md#explicit-minigrid-geometry)
+now accepts MiniGrid's explicit296-feature/seven-action public-history packets.
+It retains old defaults and requires an explicit larger byte allowance for64
+MiniGrid keys. Known TRAIN live evidence is available above; unseen-layout
+generalization remains unproved.
+
+The [recorded inspector](docs/key-door-inspector.md#public-history-and-bounded-memory-reports)
+now accepts memory live/E16 and matched-history reports through the existing
+builder, preserving negative results, costs and source links. Source/file checks
+pass; interactive browser QA remains open after local-file navigation was blocked.
+[Generated memory page](artifacts/runs/r47-public-history-inspector-20261017/memory-live.html).
+
+The [memory capacity mode](docs/key-door-action-memory.md#isolated-e16-capacity-assay)
+uses existing isolated probe helpers after benchmark training. Both initial and
+mature copies fit reserved E16 packets without changing the benchmark; the fixed
+64-key cap stays intact. This is deterministic reserved fit, not generalization.
+[Executed checks and costs](artifacts/runs/action-memory-probes-20261017/RESULTS.md).
+
+The [bounded supervised memory control](docs/key-door-action-memory.md) uses the
+existing stream and live runner with exact public observation/action counts.
+Its fixed local case learns known TRAIN rooms, retains A through B/C and succeeds
+when A returns. Eight count-storage updates are not SGD; capacity and computation
+differ from neural controls. [Checks, costs and limits](artifacts/runs/bounded-action-memory-20261017/RESULTS.md).
+
+The [closed-loop history scenario](docs/key-door-public-history.md#closed-loop-train-layout-history)
+uses fresh public history and frozen native state per episode for the same four
+learners. It reports actual actions, returns, timeouts and partial costs through
+the existing episode runner. The native case completes but all120readouts stop
+on illegal actions with zero successes; useful acquisition remains unproved.
+[Commands, checks and outcomes](artifacts/runs/matched-history-live-20261017/RESULTS.md).
+
+The [matched history capacity scenario](docs/key-door-public-history.md#matched-fresh-task-capacity)
+adds isolated reserved E16 probes at genuine initial/end checkpoints of the same
+four BP/PC/neutral CPC/active CPC learners. It reuses the existing stream/probe
+helpers, keeps separate charges and constructs no final data.
+All252focused checks and the one native case pass. Probe endpoints reach50%
+by predicting only the majority action; useful skill and CPC benefit remain unproved.
+[Protocol, executed checks and limitations](artifacts/runs/matched-history-probes-20261017/RESULTS.md).
+
+The [matched public-history route](docs/key-door-public-history.md) gives existing
+BP/PC/neutral CPC/active CPC learners identical causal initial+current inputs
+through the existing TRAIN stream. All159focused checks and the one fixed native
+qualification pass; PC-neutral parity is exact. Eight updates produce no complete
+TRAIN sequence, so useful adaptation and circadian benefit remain unproved.
+[Executed checks, raw curves and costs](artifacts/runs/matched-public-history-20261017/RESULTS.md).
+
+The [quota learning-capacity route](docs/key-door-quota-probes.md) runs disposable
+E16 probes at genuine initial/end checkpoints, with separate charges and no final
+evaluation. The fixed native case completes: end-checkpoint E teacher-forced
+accuracy improves25%→62.5% while the original benchmark history stays unchanged.
+This is incomplete supervised fit; retention/recovery and circadian benefit remain
+unproved. [Checks, raw curves, failures and costs](artifacts/runs/quota-fresh-task-probes-20261017/RESULTS.md).
+
+The existing exact state comparator now avoids repeated Tensor/dataclass
+inspection for builtin records while still checking every value. All 354 combined
+checks pass. The local saved-record median falls from 18.7 ms to 10.4 ms; the full
+native qualifier still hits its original 240-second limit. Frozen readout finishes,
+reward readout remains partial, and useful joint adaptation is unproved.
+[Executed checks, costs and preserved failures](artifacts/runs/r43-exact-comparison-20261017/RESULTS.md).
+
+The [fixed TRAIN-prefix quota route](docs/acquired-quota-prefix.md) connects
+native recurrent demonstration training to mapped reward continuation. It checks
+full prefix-state equality against a frozen-prefix control, preserves original
+budgets and clocks, and defers all finals until both arms finish. A prescribed
+prefix does not guarantee acquisition; raw results and all failures remain visible.
+
+The [existing game CLI now supports a fixed repeated-instance reward/control comparison](docs/key-door-reward-comparison.md).
+It pairs each trained recurrent policy with a frozen recurrent nonlearning policy,
+each collecting its own96physical steps. Reports retain physical-stage curves,
+all failures and actual unequal computation costs. This does not supply trained
+BP/PC/CPC baselines or establish useful adaptation or circadian benefit.
+[Checks and experimental evidence](artifacts/runs/r43-repeated-reward-control-20261017/RESULTS.md).
+
+The [game quota runner has an explicit frozen recurrent control](docs/key-door-action-remapping.md#frozen-recurrent-nonlearning-control).
+It collects its own96physical steps with no optimizer updates, then evaluates
+five distinct physical stages while native update indices remain zero. This is
+a nonlearning reference with explicit costs; trained matched baselines and
+useful adaptation remain open requirements.
+428combined checks and61closing checks pass. The saved native report completes
+96steps with zero updates, but its parent launcher-exit check failed; that
+qualification remains failed/spent. All40live evaluations fail to reach the goal.
+[Evidence, failures and costs](artifacts/runs/r43-frozen-recurrent-control-20261017/RESULTS.md).
+
+The [existing game quota runner accepts explicit environment instances](docs/key-door-action-remapping.md#explicit-environment-instances):
+declare separate training and final-only catalogue indices while retaining learner
+and sampling seeds. A/B/C share geometry; B alone changes controls. Omitted inputs
+preserve the original recipe. This enables a future repeated-instance protocol;
+it does not establish useful learning, generalization or circadian benefit.
+
+The [game runner can now fill shared physical-interaction quotas](docs/key-door-action-remapping.md#fill-a-shared-interaction-quota)
+across fresh episodes.193focused checks and one reviewed native case pass:
+exactly96training steps, nine optimizer updates. All10B evaluations still time
+out; learned mapping and circadian benefit remain unproved.
+[Commands, trajectories and costs](artifacts/runs/r43-interaction-quota-20261017/RESULTS.md).
+
+The [existing game/reward runner now supports explicit action remapping](docs/key-door-action-remapping.md).
+Only B's controls change; spatial observations keep their meaning.521focused
+checks and one reviewed eight-update engineering case pass. All greedy B readouts
+time out; the A/C outcomes include successes and wrong-key failures. These results
+do not establish learned remapping or a circadian advantage.
+[Full trajectories, costs and failures](artifacts/runs/r43-action-remapping-20261017/RESULTS.md).
+
+The [shared offline inspector now compares saved coherent streams](docs/key-door-inspector.md#coherent-stream-comparison):
+all eight BP/PC/neutral-CPC/active-CPC arms, A/B curves, signed old/new/return
+outcomes and unequal costs. Filters preserve failure and summary rows; every
+reported cell links to its source. 386 focused checks and browser QA pass, with
+independent review. [Open the saved comparison](artifacts/runs/r47-coherent-stream-inspector-20261017/learning-comparison.html).
+No new training ran; the unresolved and negative scientific findings stand.
+
+The [existing rehearsal CLI now runs a fixed independent-data replay-removal family](docs/stream-rehearsal.md#independent-data-removal-family):
+all four methods, replay present/absent, original initialization and fixed fresh
+data.276focused checks and one reviewed192-update case pass. The original R2.8
+bounded study is accepted with an **unresolved bundle finding**: no equivalence
+or circadian advantage. [All outcomes, failures and costs](artifacts/runs/r28-removal-confirmation-20261017/RESULTS.md).
+
+The [rehearsal CLI now has an explicit no-replay control](docs/stream-rehearsal.md#explicit-no-replay-control).
+It removes replay allocations and updates while preserving delayed wake training
+and optional isolated C probes. 222 focused checks and 13 describe-only previews
+pass. Existing native evidence is reused within scope; no new native run or
+circadian advantage is claimed. [Results and limitations](artifacts/runs/r28-no-replay-control-20261017/RESULTS.md).
+
+An [isolated C-task assay now reuses saved inversion checkpoints](artifacts/runs/r21-saved-inversion-probes-20261017/RESULTS.md)
+without repeating benchmark training.55restoration checks and one reviewed
+64-update probe run pass. All methods reduce C BCE slightly, with mixed accuracy;
+active CPC does not improve the gains. Benchmark B recovery remains censored.
+All probe, diagnostic, memory and computation costs are recorded.
+
+The [sensor demo now supports a fixed contrast-inversion condition](docs/sensor-drift-demo.md#fixed-contrast-inversion-condition)
+through `--contrast-inversion --monitoring --heldout`. The original R4.6 bounded
+engineering criteria are accepted:279checks and one reviewed seven-case run.
+All B prearrival accuracy remained0 and recovery was censored; partial replay
+readout gains disappeared on return. No circadian advantage is established.
+[Results, costs and limitations](artifacts/runs/r46-contrast-inversion-20261017/RESULTS.md).
+
+The [shift pilot can measure isolated learning after replay](docs/shift-signals.md#isolated-learnability-after-replay)
+with `--calibrated --incidents --incident-replay --learnability`. Probe updates
+stay separate from benchmark training. Saved results show positive BP fresh-task
+gains and negative warm PC/CPC endpoints. Corrected source and offline checks are
+accepted; the original run failed an incorrect snapshot-size parity gate and
+remains marked incomplete. [Evidence](artifacts/runs/r21-incident-learnability-20261017/RESULTS.md).
+
+The [shift pilot offers incident replay](docs/shift-signals.md#optional-incident-replay)
+with `--calibrated --incidents --incident-replay`. Its fixed stationary/recurring
+cases expose false-trigger costs and the tradeoff between learning B and retaining
+A. The 386 focused checks pass; all eight native cases finished, but the wrapper's tensor export
+failed, so native qualification remains incomplete. No circadian advantage is
+established. [Evidence and failure](artifacts/runs/r27-shift-incident-feedback-20261017/RESULTS.md).
+
+The [sensor CLI has a stationary monitoring control](docs/sensor-drift-demo.md#stationary-monitoring-control):
+`python -m scripts.run_sensor_drift_demo --describe --stationary --monitoring`.
+It counts eight post-calibration opportunities on unchanged A data and reports
+absent shift/return recovery as not applicable; no statistical FPR claim.
+
+The [sensor CLI now offers incident-gated replay](docs/sensor-drift-demo.md#incident-gated-replay)
+through `--replay --monitoring --incident-replay`. An arrived feature onset can
+admit one later replay boundary; clears, continuation, paid failures and pause
+state are explicit.437focused checks/scoped statics/26old descriptor matches and
+one independently reviewed16SGD52row case pass. Allaccuracy1/no deficit; no
+recovery or circadian advantage. [Resource observation limitation](artifacts/runs/r27-incident-replay-20261017/RESOURCE_NOTE.md).
+
+The [offline inspector also opens stationary sensor controls](docs/key-door-inspector.md#stationary-sensor-controls),
+with explicit absent phases, null recovery, partial costs and source pointers.
+Seven saved reports publish without learner work; 329 scoped checks and browser
+QA pass. Full research and release claims remain open.
+
+The [shared offline inspector now opens saved sensor reports](docs/key-door-inspector.md#recorded-sensor-evidence):
+prearrival, heldout and isolated-probe curves; signed retention; null recovery;
+partial failures and costs. Every recorded cell opens its source JSON pointer.
+277focused checks, scoped statics, six final CLI publications and independently
+reviewed browser evidence pass. Separate resource-file association is explicitly
+unverified. No new learner work or scientific advantage is claimed.
+
+The [sensor demo now measures heldout context outcomes](docs/sensor-drift-demo.md#heldout-context-readout)
+with `--heldout`, after all training and requested probes finish. All 13 checkpoints,
+signed retention metrics and partial failure costs are retained. 375 focused
+checks, scoped statics and six independently reviewed native cases pass. All
+heldout accuracies remain 100%; no forgetting deficit, recovery or CPC advantage
+is established. [Exact evidence and costs](artifacts/runs/r46-sensor-heldout-20261017/RESULTS.md).
+
+The [sensor demo now offers isolated fresh-task probes](docs/sensor-drift-demo.md#isolated-fresh-task-probes-and-activation-health)
+with `--learnability`. Existing probes and activation diagnostics observe fixed
+checkpoints without changing benchmark forecasts or the actor.193focused checks,
+scoped statics and four independently reviewed native cases pass. Small BCE gains
+coexist with worse cold-probe accuracy; no circadian advantage is established.
+
+The [sensor demo now supports existing PC/CPC methods](docs/sensor-drift-demo.md#existing-pc-and-cpc-methods)
+through `--method pc`, `neutral_cpc`, or `gated_cpc`. Preview with
+`python -m scripts.run_sensor_drift_demo --describe --method pc --monitoring`.
+150focused checks/scoped statics and three independently reviewed native qualifications pass.
+Neutral CPC exactly matches PC's parameter trajectory; active CPC provides no
+observed advantage. All accuracies remain100%; actual recovery/retention is open.
+
+The [sensor replay control](docs/sensor-drift-demo.md#arrived-only-recent-replay)
+now reuses arrived rows through the existing rehearsal helper. Preview with
+`python -m scripts.run_sensor_drift_demo --describe --replay --monitoring`.
+85focused checks/scoped statics and one independently reviewed native case pass:
+12wake updates/48rows plus10replay updates/10rows, bounded retention544numericB.
+Lower observed BCE uses extra exposure; allaccuracy1/no deficit, so recovery,
+matched comparative benefit and circadian advantage remain unproven.
+
+The [scheduled sensor baseline](docs/sensor-drift-demo.md#scheduled-finetuning-control)
+now buffers four arrived batches per BP update:12arrival receipts/3SGD48rows.
+Preview with `python -m scripts.run_sensor_drift_demo --describe --scheduled --monitoring`.
+96focused checks/scoped statics and corrected native qualification pass; the
+initial failed qualification is preserved. Accuracy remains100%, with higher
+lastprearrival BCE than onlineBP; no recovery or circadian advantage is claimed.
+
+The [sensor demo's opt-in monitoring](docs/sensor-drift-demo.md#opt-in-calibrated-monitoring)
+now calibrates on its stationary A prefix and reports alarms plus explicit
+no-deficit/censored recovery. Preview with
+`python -m scripts.run_sensor_drift_demo --describe --monitoring`.105focused
+checks/scoped statics and one native case pass. A return-window carryover alarm
+is retained; no learner recovery or circadian benefit is established.
+
+The [recurring sensor demo](docs/sensor-drift-demo.md) now predicts from the
+current shadow model before delayed labels arrive, using the existing stream
+and matched BP. Run `python -m scripts.run_sensor_drift_demo --describe` for the
+fixed small recipe.142focused checks, scoped statics and one independently
+reviewed12-update native qualification passed. This repeated-pattern fixture
+already had100%initial accuracy; recovery and comparative benefit remain open.
+
+The [public-history acquisition condition](docs/reports/paired-history-acquisition-20261017.md)
+completed with a negative result:17/18teacher actions and one of two native goals.
+The simpler raw paired control had greater CE improvement; joint acquisition is
+still false. Preview the separately budgeted condition with
+`python -m scripts.run_minigrid_paired_bc_smoke --describe --public-history`.
+
+The [paired public-history readout](docs/recurrent-episode-batches.md#cold-public-history-control)
+now scores original TRAIN-A traces and runs target-free native episodes using
+each episode's own first/current public frames.159focused checks and one cold
+two-cue native qualification passed with0training updates. Both cold episodes
+timed out without goals; acquisition and comparative benefit remain unproven.
+
+The [cold public-history recurrent control](docs/recurrent-episode-batches.md#cold-public-history-control)
+now runs through the existing delayed TRAIN stream. It copies the raw learner's
+starting predictions while adding trainable public first-frame inputs; trained
+state conversion is refused.223focused checks and one native3-update/54-row
+qualification passed. Useful acquisition and comparative benefit remain unproven.
+
+The [reserved-E experiment](docs/reports/paired-reserved-e-20261017.md) completed:
+both cold and A-trained paired checkpoints reduced E cross-entropy. The warm
+checkpoint already matched17/18teacher actions and gained no additional correct
+action. Its smaller CE gain does not establish plasticity loss. No learner live
+success, joint acquisition or circadian advantage follows from this probe.
+
+The [paired MiniGrid probe observer](docs/recurrent-episode-batches.md#warm-isolated-fresh-task-probes)
+now connects original reserved E episodes to the existing isolated runner with
+eight paired updates/144rows and separate local/native clocks.92focused checks
+and one native synthetic integration pass. Its actual fresh-task measurement is
+linked above; component checks establish source isolation and accounting.
+
+The [warm paired probe adapter](docs/recurrent-episode-batches.md#warm-isolated-fresh-task-probes)
+connects full paired checkpoints to the existing disposable fresh-task probe.
+It preserves optimizer history, original probe roles, source isolation and paid
+failure costs.196focused plus4native qualification cases pass, with scoped static
+checks. This establishes the component boundary; new-task/retention/recovery
+measurements and broader release gates remain open.
+
+The [endpoint-first paired measurement](artifacts/runs/r21-paired-endpoint-first-20261017/RESULTS.md)
+observed one of two native goals and failed joint acquisition. The original
+control matched goals/returns and had a larger CE gain in this fixed case.
+Endpoint evidence is validated; the full five-readout run remains incomplete.
+
+The [opt-in paired-episode recurrent learner](docs/recurrent-episode-batches.md)
+averages two independently reset episode losses in one SGD step, with separate
+step/episode/row clocks. The explicit TRAIN stream/raw/live integration passes
+scoped checks. Preview the row-matched acquisition protocol with
+`python -m scripts.run_minigrid_paired_bc_smoke --describe`; execution is separately
+budgeted. Useful acquisition and broader scientific claims remain open.
+The [first recorded case](artifacts/runs/r21-paired-acquisition-20261017/RESULTS.md)
+completed64updates but exhausted its diagnostic budget before endpoint readouts;
+acquisition is inconclusive. Its failed allowance is spent.
+Measured identity-comparison overhead has since been reduced with125focused
+cases passing; [the fake-route profile](artifacts/runs/r21-paired-readout-cost-20261017/RESULTS.md)
+does not establish native acquisition or completion within the readout limit.
+The [separately reviewed optimized native case](artifacts/runs/r21-paired-acquisition-optimized-20261017/RESULTS.md)
+also exhausted20seconds before the endpoint. Both failures and their costs are
+retained; acquisition remains inconclusive.
+The explicit `--endpoint-first --describe` option previews fixed endpoint-first
+observation in the same pilot. It preserves all five completion requirements and
+separates validated endpoint evidence from an incomplete full run; see the
+[paired learner guide](docs/recurrent-episode-batches.md#endpoint-first-observation).
+
+Preview the [RNN-only A128 gradient measurement](docs/minigrid-warm-gradients.md)
+with `python -m scripts.run_minigrid_gradient_smoke --describe`. It reuses the
+original warm reconstruction and parity checks, then reads frozen TRAIN gradients.
+Add `--cue-update-check --describe` to preview two isolated blue/red single-update
+arms with original momentum and all six TRAIN readouts; the default is unchanged.
+Every reconstruction is newly charged; scientific conclusions remain separate.
+
+The [TRAIN recurrent gradient diagnostic](docs/recurrent-gradient-geometry.md)
+compares original mean-CE gradients on detached snapshots, with signed geometry,
+explicit undefined zero-norm cosines and paid forward/backward counts. It applies
+no learner update. Component qualification and scientific conclusions are separate.
+Preview its existing checkpoint-scorer integration with
+`python -m scripts.run_coupled_attribution --scenario torch-minigrid-learnability --cue-gradient-geometry --describe`.
+The explicit option binds original TRAIN cue pairs and reports diagnostic costs.
+
+The [explicit native momentum-only control](docs/minigrid-momentum-control.md)
+is a component for matching additional SGD updates on unchanged observed TRAIN
+episodes. The explicit v2 mode completes the native paired updates and all three readouts.
+[The conditional result](docs/reports/minigrid-momentum-control-20261016.md) favors
+the simpler control on CE and one goal, while both fail joint acquisition. The
+original diagnostic timeout remains preserved.
+
+The [warm reward TRAIN readout route](docs/minigrid-warm-readout.md) supports owned
+128/136 snapshots with actual variable row counts. Preview it with
+`python -m scripts.run_minigrid_reward_smoke --warm-start --train-readouts --describe`.
+All reward training finishes before these known-TRAIN diagnostics; completed
+training charges stay frozen and diagnostic work has a separate bounded budget.
+Scoped checks pass; native qualification and learning claims are recorded separately.
+The first diagnostic-mode native attempt stopped at the original training deadline
+before readouts. Its paid partial work and failure remain preserved.
+A separately qualified repair then completed both readouts under unchanged limits;
+[the recorded endpoints](docs/reports/minigrid-warm-reward-readouts-20261016.md)
+show worse CE and lost goal successes, with no learning benefit established.
+
+Preview the [MiniGrid BC-to-reward continuation](docs/minigrid-reward-collection.md#fixed-bc-warm-prefix-opt-in)
+with `python -m scripts.run_minigrid_reward_smoke --warm-start --describe`.
+The opt-in warm prefix preserves full optimizer state; the cold route remains
+the default. Qualification and learning outcomes are recorded separately.
+The repaired route completed all eight native reward commits; the original
+six-commit budget failure remains preserved. Sampled outcomes show no benefit.
+
+Preview the [reference-based weighted recurrent control](docs/minigrid-weighted-bc.md)
+with `python -m scripts.run_minigrid_weighted_bc_smoke --describe`. It reuses the
+accepted unweighted A128 evidence and trains only the distinct weighted arm.
+The recorded case passes scoped qualification but both objectives still fail
+joint both-cue acquisition; weighting changes which cue succeeds.
+
+Preview the [MiniGrid delayed reward route](docs/minigrid-reward-collection.md#delayed-train-reward-runtime-route)
+with `python -m scripts.run_minigrid_reward_smoke --describe`. Its fixed TRAIN
+A/B/C/A stream uses the existing actor/inbox runtime and sampled reward learner.
+
+The [TRAIN-only MiniGrid reward collector](docs/minigrid-reward-collection.md)
+connects sampled native episodes to the existing recurrent reward-update port.
+It preserves truncation, raw seven-action draws, full behavior state and failed
+work; qualification evidence is recorded separately from learning claims.
+
+The [recorded MiniGrid inspector](artifacts/runs/r47-minigrid-inspector-20261016/inspector.html)
+shows all five learners, public observations, history inputs and saved success/
+failure traces without running a learner. [Build and use it](docs/key-door-inspector.md#recorded-minigrid-fixed-a-run).
+
+The existing history CLI also supports a [fixed-A acquisition control](docs/minigrid-history-evaluation.md#fixed-a128-acquisition-control):
+`python -m scripts.run_minigrid_history_evaluation_smoke --fixed-a-acquisition --describe`
+previews its128-update TRAIN-only protocol and joint raw/live acquisition criteria.
+
+Run the [public-history live boundary](docs/minigrid-history-evaluation.md) with
+`python -m scripts.run_minigrid_history_evaluation_smoke` (`--describe` previews
+its fixed local TRAIN-only protocol). It composes existing trained learners and
+target-free MiniGrid episodes; useful acquisition remains a separate outcome.
+
+Optional TRAIN-only native feature health: [usage and costs](docs/native-activation-health.md).
+
+Shared causal public-frame memory for all four feedforward controls:
+[usage, costs and limits](docs/minigrid-public-history.md).
+
+The [MiniGrid checkpoint learnability scenario](docs/minigrid-learnability.md)
+composes the existing stream with raw TRAIN-fit readouts and isolated E-task
+probes. Preview its fixed protocol with
+`python -m scripts.run_coupled_attribution --scenario torch-minigrid-learnability --describe`.
+It keeps final D unavailable and reports diagnostic work separately from training.
+
+The [existing isolated fresh-task probe](docs/categorical-fresh-task-probes.md#full-minigrid-observations)
+now accepts full148-coordinate MiniGrid packets and reserved E-blue/E-red contexts.
+Its bounded native component smoke passes for five learners; useful checkpoint
+learnability and complete-sequence learning remain separate unfinished outcomes.
+
+The [actual MiniGrid learning route](docs/minigrid-learning.md) composes five
+existing learners with the training-only stream and owned checkpoint readouts.
+Run `python -m scripts.run_coupled_attribution --scenario torch-minigrid-cue-key-door`
+after the optional installs; `--describe` previews the fixed local protocol.
+Raw TRAIN fit, live known layouts and final-only D remain separate evidence.
+The current native case exhausts its evaluation wall budget; its partial result
+and unfinished completion gate are recorded in the linked usage/evidence.
+
+The [actual MiniGrid cue/key/door game](docs/minigrid-key-door.md) has a transient
+cue, neutral lock and public-observation-only teacher across declared layouts.
+Run `python -m scripts.run_minigrid_key_door_demo` after the optional dependency
+install; `--describe` previews its bounded demonstration-only protocol.
+
+An [optional actual MiniGrid Memory adapter](docs/minigrid-memory.md) preserves
+the full public observation and seven native actions through existing episode
+ports. Install `requirements-minigrid.txt`, then run
+`python -m scripts.run_minigrid_memory_smoke` (`--describe` previews the fixed
+environment-only protocol). It performs no model updates.
+
+The [recorded key/door inspector](docs/key-door-inspector.md#acquired-task-train-reports)
+also supports single acquired-task TRAIN reports: the same offline builder
+shows every saved cue, recorded playback, wake/native clocks, metrics and costs.
+
+Existing replay can be compared in the acquired-task stream with
+`--scenario torch-key-door-acquired-recent48-replay` or
+`--scenario torch-key-door-acquired-coverage-replay` (`--describe` previews
+protocols). Each fixed arm uses320wake+160replay updates and isolated TRAIN
+readouts; [usage and interpretation](docs/acquired-task-return.md#existing-replay-controls).
+
+## Acquisition, retention and task return
+
+[The acquired-task return recipe](docs/acquired-task-return.md) runs with
+`--scenario torch-key-door-acquired-return` (`--describe` previews it).
+It extends the existing A192 prefix with C_train64/A64 and uses matching-law
+owned train-only readouts at192/256/320. Initial acquisition is verified for
+interpretation after fixed training; failures do not change its schedule.
+
+## Equal-A-exposure control
+
+[The A128 train-only control](docs/train-acquisition.md) runs with
+`--scenario torch-key-door-fixed-a-exposure` (`--describe` previews it).
+It matches the128A updates in the accepted A64→B64→A64 recipe while recording
+128vs192 total-update costs. Raw A comparisons and standalone legal live diagnosis
+remain separate; initial incomplete acquisition and historical negatives stay.
+
+329 focused cases and the bounded native run pass. The A128 control reaches
+93.75% trace accuracy but only one of two cues succeeds live. The return endpoint
+has better trace fit at equal A exposure and64extra B updates; no recovery-savings
+or circadian-benefit conclusion follows.
+
+## Train-only operational acquisition
+
+The explicit `--scenario torch-key-door-weighted-train-live` option composes the
+existing current-episode weighted objective at the same64-update dose/seed and
+raw scoring/legal readout. `--describe` previews its fixed protocol. Mean-CE
+defaults and the earlier weighted negative remain. See the
+[weighted option and boundaries](docs/train-policy-diagnostics.md).
+
+263 scoped tests and the single frozen weighted case pass. Weighting provides no
+endpoint live success or accuracy gain; raw CE is worse than the mean control.
+All intermediate points, refusals and costs remain visible; no CPC benefit claim.
+
+[Closed-loop train diagnosis](docs/train-policy-diagnostics.md) runs with
+`--scenario torch-key-door-train-live` (`--describe` previews the fixed recipe).
+197 focused checks and one bounded native case pass. Teacher fit improves after
+64 updates, but both training cues still fail live; the prior comparison is
+undefined after actual zero-legal-mass refusals. All costs and negative results
+are retained. Useful adaptation and circadian benefit remain unproven.
+
+## Matched replay controls
+
+[Recent-only and partitioned four-phase replay](docs/matched-four-phase-replay.md)
+now use matched update/storage ceilings. Both retain zero final B/C live success
+despite50% more training work than the earlier no-replay reference. All outcomes,
+cue-coverage limits, failed checks and costs remain visible; no CPC benefit claim.
+
+## Live four-phase behavior
+
+[Post-training four-phase evaluation](docs/four-phase-policy-evaluation.md) now
+keeps all40 actual episodes at five checkpoints. C_train succeeds at192 but is
+forgotten after A returns at256; both A episodes then succeed. All B/D attempts
+fail.153 focused cases and one frozen local run pass scoped checks/review;
+retention, generalization and circadian benefit remain unmet.
+
+## Four-phase context return
+
+[Run the train-only A→B→C_train→A sequence](docs/four-phase-training.md) through
+the existing stream and continuous recurrent optimizer. One frozen case learns
+both C training sequences then forgets them after A return; A refits fully.
+181 focused checks and the bounded native case pass. Live retention,
+generalization, recovery savings and circadian benefit remain unproven.
+
+## Inspect recorded game runs
+
+[Build an offline key/door inspector](docs/key-door-inspector.md) from saved
+single/paired reports. It plays actual recorded frames, preserves all failed
+episodes, shows independent fresh-task curves and replay/resource costs, and
+links readouts to source JSON. No training or server is required.
+
+## Fresh-task probes after context return
+
+Two explicit return-probe routes measure fixed E-task learning on disposable
+initial/post192 forks, with separate budgets and final evaluation unavailable.
+Both improve reserved fitting, but no complete E sequence is learned. Replay-on
+ends worse than replay-off on E despite a larger CE gain from a worse start.
+[Usage, source structure, limits and observed evidence](docs/return-fresh-task-probes.md).
+
+## Fixed context-return episode replay
+
+The `torch-key-door-return-replay` scenario adds the existing bounded complete-
+episode replay service to A64/B64/A64 and evaluates only after training finishes.
+One frozen case retains more B cached accuracy at50% extra training work, but
+B live success is absent at the final checkpoint and all held-out C/D attempts
+fail. No generalization/CPC advantage is established.
+[Usage, source structure and exact evidence](docs/return-episode-replay.md).
+
+[Post-training return-policy evaluation](docs/return-policy-evaluation.md) now
+runs with `--scenario torch-key-door-return-policy` (`--describe` previews it).
+Both A live episodes succeed at update192; all other30episodes fail, including
+all B/C/D attempts.152 focused cases and the frozen native run pass scoped review.
+Training matches the accepted case exactly; final evaluation never updates it.
+Known-context behavior is verified; retained B skill/generalization remain open.
+
+[Train-only context return](docs/train-acquisition.md)
+is runnable with `--scenario torch-key-door-train-return` (`--describe` previews
+it).199 focused cases and one frozen A64/B64/A64 run pass scoped review. A fits
+both training sequences by192, while B accuracy falls from87.5% to50% after the
+return. Initial A fit was incomplete; live success, generalization and recovery
+of fully learned skill remain unproven.
+
+[Train-only acquisition diagnostic](docs/train-acquisition.md) runs with
+`--scenario torch-key-door-train-fit` (`--describe` previews the fixed protocol).
+The 64-update case reaches62.5% train accuracy versus50% majority, but learns
+neither complete sequence.158 scoped cases qualify after one corrected test;
+independent review passes. This is partial train fit, not useful adaptation or
+generalization. Final evaluation is absent from this recipe.
+
+[Mean and weighted BC-only key/door recipes](docs/weighted-bc.md) are runnable via
+`--scenario torch-key-door-bc` and `--scenario torch-key-door-weighted-bc`.
+81 focused cases and one frozen weighted case pass scoped checks. Weighted CE
+and accuracy are worse than the accepted historical mean control; both have zero
+live success/return. Useful adaptation and circadian benefit remain unproven.
+
+[Explicit class-weighted demonstrations](docs/class-weighted-demonstrations.md)
+now use the existing recurrent owner and shadow runtime, with weights derived
+from each released train episode. Original mean-CE/reward behavior and snapshot
+formats remain unchanged.147 focused cases plus24 native math/state/runtime cases
+pass scoped checks/review. The first native launch remains unknown with its full
+allowance reserved; the observed recovery is preserved separately. No learning
+benefit has been measured. [Commands, failures and costs](artifacts/runs/r42-weighted-demonstration-20261016/RESULTS.md).
+
+[Key/door learnability diagnostics](docs/key-door-learnability.md) now run with
+`--scenario torch-key-door-learnability --probe-decision-diagnostics` (`--describe`
+previews the fixed protocol).88 focused cases and one frozen native measurement
+pass scoped checks/review. All four reserved probe endpoints choose left at every
+step, explaining majority-level50% accuracy; all80 benchmark live episodes still
+fail. Original results are exactly preserved. Useful acquisition, retention and
+recovery remain open. [Decisions and costs](docs/reports/key-door-decisions-20261016.md).
+
+[Reserved-probe decision diagnostics](docs/probe-decision-diagnostics.md) are
+available with `run_fresh_task_probe(..., decision_diagnostics=True)`: class
+support, confusion, per-class metrics and ordered row/episode decisions from
+existing predictions. Defaults and native work stay unchanged.155 focused cases
+and one native equivalence check pass scoped lint/format/types and independent
+review. This establishes reporting correctness; useful adaptation remains open.
+[Commands and costs](artifacts/runs/r21-probe-decision-diagnostics-20261016/RESULTS.md).
+
+[Matched warm-start control](docs/warm-start-control.md) now runs with
+`--scenario torch-key-door-warm-start-control` (`--describe` previews it). The
+BC-only and BC→reward arms match full native state before reward work and finish
+training before final evaluation.187 focused cases and one frozen native pair
+pass scoped checks/review. All64 live episodes fail; CE improves but accuracy
+falls, with zero reward signal and carried momentum. No useful-learning or
+circadian benefit established. [Results and costs](docs/reports/warm-start-control-20261016.md).
+
+[Demonstration→reward phases](docs/demonstration-reward-phases.md) now have a
+separate `--scenario torch-key-door-warm-start-rl` route (`--describe` previews it).
+Typed packets share one native optimizer and one original runtime budget.
+172 scoped cases qualify; a train-only native check verifies 11 SGD steps and
+exact owned continuation. Sampled rewards remain zero, and carried BC momentum
+moves weights. Its sixteen-update arm is now measured in the matched comparison
+above; useful learning remains unproven. Reserved per-decision/class diagnostics
+are available through the API above. [Phase engineering commands and costs](artifacts/runs/r42-demonstration-reward-phase-20261016/RESULTS.md).
+
+[Separate recurrent RL](docs/recurrent-rl-key-door.md) now runs through the existing
+runtime with `--scenario torch-key-door-rl`; `--describe` previews its protocol.
+125 focused cases qualify, scoped lint/format/types pass, and independent review
+accepts the route and one frozen native case. All eight sampled episodes returned
+zero reward; parameters stayed unchanged and all 40 final live episodes failed.
+Useful acquisition, recall, recovery and full R4.2 remain open. The diagnostic
+CLI above now measures reserved decisions while keeping original final isolation
+and metrics. [Pure-RL results and costs](docs/reports/recurrent-rl-key-door-20261016.md).
+
+[Recurrent reward learning](docs/recurrent-reward-learning.md) now adds an explicit
+reward-trajectory update and bounded actual policy sampling, alongside the
+existing supervised learner. Independent BPTT/SGD, atomicity, role isolation and
+owned RNG/optimizer continuation checks pass:175focused cases, scoped statics and
+independent review. Actual tiny sampled episodes still fail with zero reward.
+The separately evaluated route is now available above; useful navigation remains unfinished.
+
+[Checkpoint learnability measurements](docs/key-door-learnability.md) now run with
+`--scenario torch-key-door-learnability` (`--describe` previews the frozen protocol).
+Four reserved disposable probes reduce CE while preserving the complete original
+benchmark trajectory. Final probe accuracy50% matches a majority rule; all80
+benchmark live episodes still fail. This is limited deterministic-trace fitting,
+not useful navigation or a circadian advantage. [All curves/costs and next learner work](docs/reports/key-door-learnability-20261016.md).
+
+[Categorical complete-episode fresh-task probes](docs/categorical-fresh-task-probes.md)
+now run through the existing disposable-fork probe, with explicit reserved roles,
+class binding and unchanged binary behavior.197 scoped tests pass, including native
+recurrent source/serving-actor isolation; independent review accepts the component.
+The fixed checkpoint experiment above is now measured. No new learned
+navigation or scientific advantage is established; prior negatives remain intact.
+
+[Recurrent behavior cloning](docs/recurrent-behavior-cloning.md) now provides a
+trainable episode-history control through existing native/complete-packet ports,
+with full BPTT/SGD, owned continuation and isolated bounded live sessions.199
+scoped cases qualify after two fixture repairs; independent review accepts the
+component and stream integration. The existing CLI now also offers
+`--scenario torch-key-door-recurrent` with two recurrent replay arms and fresh
+live sessions; the original eight feedforward arms remain available. Its sole
+fixed case fails all80live episodes, preserving the old320failures. Reserved categorical checkpoint probes are measured above. No useful-adaptation
+or CPC claim.
+
+The attribution CLI now offers `--scenario torch-key-door` (`--describe`
+previews its fixed protocol). [Actual hidden-cue key/door navigation](docs/key-door-navigation.md)
+collects real complete demonstrations and executes isolated live categorical
+policies through the existing stream. Scoped implementation independently
+accepted:267 focused cases pass. All320 learned native episodes fail on illegal
+actions, with zero success/return; all16 scripted demonstrations succeed. These
+negative results establish no useful adaptation or circadian advantage. Next:
+trainable recurrent behavior cloning with explicit episode-state resets;
+separately evaluated recurrent RL and full R4.2 remain open.
+
+The attribution CLI now offers `--scenario torch-categorical-rehearsal` (use
+`--describe` for its fixed protocol). [Categorical demonstration replay](docs/categorical-trajectory-rehearsal.md)
+uses the existing stream for whole packets, bounded replay, resume and isolated
+final scoring. The accepted synthetic case changes no accuracy; no useful
+adaptation or circadian advantage follows. Actual key/door episodes are now
+implemented above, with their negative outcomes retained.
+
+The existing Torch feature learner now supports explicit categorical actions
+(`TorchFeaturePolicy(..., num_classes=3)`), retaining its binary default.
+[Categorical feature actions](docs/categorical-feature-actions.md) documents full
+probability outputs, owned continuation and the passing native checks. The
+[categorical stream path](docs/categorical-trajectory-rehearsal.md) is now accepted;
+MiniGrid, useful adaptation and scientific advantage remain unfinished.
+
+The attribution CLI now offers `--scenario torch-trajectory-rollouts` with an
+explicit `--source-artifact` (use `--describe` for the frozen protocol).
+[Live policy evaluation](docs/line-policy-evaluation.md) reproduces recorded
+native checkpoints, then records actual complete environment episodes with
+method/seed/local actor/task/evaluation/learning metadata and work costs.
+Independent original R4.1 acceptance:43 successes/21 illegal-action failures;
+every final B episode fails. No useful-retention or circadian-benefit claim.
+
+The existing attribution CLI now offers `--scenario torch-trajectory-rehearsal`
+(`--describe` previews it). [Complete demonstration replay](docs/trajectory-rehearsal.md)
+preserves ordered transitions and whole-episode charges through native Torch
+heads and owner-local resume. The accepted tiny case ends with B accuracy0
+in every arm; no useful-policy or circadian-benefit claim follows.
+
+The shift CLI now supports `--incidents` with either calibration mode.
+[Incident reporting](docs/shift-signals.md#optional-incident-transitions) distinguishes
+new onset from continued alarms without changing scores or thresholds. The
+accepted saved traces still have false feature incidents and no fresh return
+onset; this is no deployable-detection or scientific-benefit claim.
+
+The existing rehearsal CLI now offers `--scenario capacity-comparison` (add
+`--describe` to preview the frozen protocol). [Full capacity cohorts](docs/capacity-comparison.md)
+report actual capacity/work alongside split/prune, growth, fixed-width and
+renewal outcomes. The accepted case rejected every prune and selected no renewal
+units; all negatives remain. No efficiency or circadian advantage is claimed.
+
+The existing stream now supports [capacity measurements alongside bounded
+renewal](docs/renewal-capacity.md). Wake means, post-reset observations, original
+permanent charges and reset event time remain separate. Native measured/unmeasured
+PC/CPC trajectories match; the full comparison is accepted above with negative outcomes.
+
+The rehearsal CLI also offers `--scenario capacity-bp` (`--describe` previews
+the fixed protocol). [Structural matched BP](docs/structural-matched-bp.md)
+continues the unchanged raw BP learner after compatible split/merge/prune and
+rollback. Its accepted two-arm engineering case reuses the capacity runner and
+retained PC/CPC evidence. Full R2.6 is accepted above; useful adaptation remains open.
+
+The rehearsal CLI now offers `--scenario capacity` (`--describe` previews the
+fixed protocol). [Capacity boundaries](docs/stream-capacity.md) records actual
+stored arrays, completed work and wake-weighted means while guarding a scheduled
+split. The native example verifies accounting; the full R2.6 comparison and any
+efficiency or learning-benefit claim remain open.
+
+The existing rehearsal CLI now offers `--scenario slow-teacher` (`--describe`
+previews its fixed protocol). [Versioned teacher replay](docs/slow-teacher-replay.md)
+adds wake-only EMA and arrived-row native probability distillation. Its accepted
+local comparison shows more forgetting and less recovery in all four learners;
+all outcomes and extra teacher costs are retained. No scientific advantage claim.
+
+The attribution CLI now offers `--scenario torch-feature-rehearsal` (add
+`--describe` for its fixed protocol). [CPU native Torch feature rehearsal](docs/torch-feature-rehearsal.md)
+uses existing PC/CPC/matched BP heads and shared replay, with owned full state,
+separate wake/replay charges and unchanged native objectives. Whole-stream resume
+against the original local owner is now verified via
+[`--scenario torch-feature-continuation`](docs/attribution-stream-continuation.md),
+including actual candidate/inbox/buffer reconstruction and unchanged outcomes.
+Trajectory/process recovery and scientific benefit remain open.
+
+The rehearsal CLI's `--scenario long-stream` now runs64updates with the existing
+four matched learners and bounded replay. [Verified retention and sparse exposure](docs/reports/long-stream-rehearsal-20261016.md)
+complete R2.3's original implementation criteria; no circadian advantage is claimed.
+
+Opt-in [bounded unit renewal](docs/unit-renewal.md) now uses the existing candidate
+stream with fixed maturity/gradient eligibility and permanent replacement charges.
+The native reset and equal-capacity control are engineering checks; adaptation
+or circadian benefit has not been established.
+The existing attribution CLI now offers `--scenario renewal-learnability` (add
+`--describe` to inspect its frozen protocol). The first fixed setting selected
+zero units; [all outcomes and unchanged controls](docs/reports/unit-renewal-adaptation-20261016.md)
+are preserved without threshold tuning.
+
+Opt-in coupled PC/CPC models can now retain committed per-unit gradient histories
+and update ages through the existing owned learner and replay stream. See
+[learnability diagnostics](docs/learnability-diagnostics.md#opt-in-committed-histories-for-coupled-pccpc)
+for the API, bounded storage and explicit format-2 persistence limitations.
+Use `--scenario tracked-learnability` in the rehearsal CLI for the fixed combined
+history/probe case. [Verified diagnostics and isolation](docs/reports/tracked-learnability-20261016.md)
+include complete retained curves and measured costs; no learning advantage is claimed.
+
+For executed rehearsal on the coherent four-method stream, preview
+`python -m scripts.run_stream_rehearsal_pilot --describe`, then use `--run`.
+See [native shared rehearsal](docs/stream-rehearsal.md) for separate wake/replay
+budgets, failure charges, deferred scoring and the fixed small protocol.
+Add `--diagnose-learnability` for the separately budgeted reserved sixteen-step
+probes on copied rehearsed checkpoints; probes remain disposable and isolated.
+Use `--recent-only` for the matched recent FIFO control; it can be combined with
+the probe flag. Both retention composition and within-event ordering change.
+Use `--scenario paired-retention` for the fixed seeds41/59 comparison of both
+policies/all four methods, without probes (480updates/2496row exposures).
+The [paired initialization results](docs/reports/paired-retention-initializations-20261016.md)
+retain the A-versus-B tradeoff and all failures; no universal winner is established.
+
+For bounded recent/reservoir retention, the existing train-only replay schedule
+supports `--partitioned`. See [partitioned replay](docs/partitioned-replay.md)
+for quotas, detached selections and CLI usage. This emits proposed replay work;
+the separate legacy native consumer integration remains open.
+Add `--rotate-reservoir` to opt into deterministic reservoir exposure across
+boundaries; the original rank-first mode and negative trace remain available.
+
+For arrived-only uncertainty, input-feature drift and delayed residual signals,
+preview `python -m scripts.run_shift_signal_pilot --describe`, then use `--run`.
+The fixed matched stream keeps observations separate from training policy;
+see [shift observations](docs/shift-signals.md) for timing, bounds and limitations.
+The [guarded ticket diagnostic option](docs/context-shift-serving.md) adds
+measured arrived-only K6 predictions without changing serving decisions.
+The [arrived-before-wake option](docs/arrived-candidate-shift.md) can request
+bounded learning while the candidate waits. Its first native case trained old
+FIFO packets and left new-task data queued; useful scheduling remains unproved.
+The [same-recipe reference study](docs/context-fifo-reference-study.md) found
+17/24live successes for periodic and19/24for existing correct-example
+acknowledgement. Their costs differ; periodic has the higher frozen utility.
+A [separate role-bound stress validation](docs/context-reference-validation.md)
+kept configurations fixed before access. Both trained candidates were rejected
+under corrupted labels; all controls scored15/24, with no deployed gain.
+The [explicit categorical observer](docs/categorical-shift-observer.md) supports
+arrived K-class probabilities through the same bounded stream callback; binary
+defaults remain unchanged. The [fixed contextual study](docs/context-shift-study.md)
+observed uncertainty/residual onset after a known task change and no stationary
+alarms, but missed a separate return onset; feature drift missed both changes.
+The earlier fixed binary pilot missed every recurring change. All negatives are
+retained; no general deployable detection or circadian benefit is established.
+
+Opt-in `--calibrated` describes/runs a separate training-prefix calibration
+protocol with frozen fitted thresholds, explicit reachability and observation
+costs. It preserves the original defaults and negative evidence; see the guide.
+
+For isolated fresh-task learning, retention and context-return observations,
+preview `python -m scripts.run_learnability_pilot --describe`, then use `--run`
+for the fixed local four-method pilot. Probe updates stay separate from benchmark
+learners; see [learnability diagnostics](docs/learnability-diagnostics.md).
+
+The separately named `--scenario sixteen-update` records the full fixed
+0/1/2/4/8/16 probe curve using the same four methods and original data prefix.
+Use it with `--describe` to inspect its 328-update local budget. The original
+four-update scenario and its negative findings are preserved.
+
+For the legacy CPC learner's recorded unit importance, update age and lineage,
+run `python -m scripts.run_native_stream_demo --seed 23 --diagnose-units`.
+The read-only observations include measured overhead. Coupled models have no
+corresponding native histories; see the [field definitions and limits](docs/learnability-diagnostics.md#native-importance-and-age-observations).
+
+The capture API also supports successive successful current updates after a
+restore when both original history flags were enabled at construction. It keeps
+retired history fixed and verifies each current update under the original budgets;
+see [continued restored capture](docs/managed-composite-capture.md#one-current-update-after-restore).
+
+For a runnable continuation after restore, preview
+`python -m scripts.run_numpy_managed_capture --describe --successive-replay`,
+then use `--run --successive-replay`. This fixed three-update example includes
+pause/resume and reports complete detached data with original cumulative charges;
+see [successive replay example](docs/managed-composite-capture.md#runnable-successive-replay-example).
+
+For complete current/retired CPC replay observations after an actual managed
+restore, preview `python -m scripts.run_numpy_managed_capture --describe --restored-replay`,
+then use `--run --restored-replay`. This fixed one-update example preserves
+original paid limits and reports detached data; see
+[restored replay example](docs/managed-composite-capture.md#runnable-restored-replay-example).
+
+For a trained CPC checkpoint with nonempty replay, preview
+`python -m scripts.run_numpy_managed_capture --describe --issued-snapshot`, then
+use `--run --issued-snapshot` for the fixed one-update capture. The report includes
+complete snapshot data and original token/resource preservation; see
+[managed capture](docs/managed-composite-capture.md#runnable-issued-snapshot-example).
+
+For actual Backprop/CPC populated and retired holder capture, preview
+`python -m scripts.run_numpy_managed_capture --describe`, then use `--run` for the
+bounded zero-training example. See [complete managed capture](docs/managed-composite-capture.md).
+  Captured data grants no restoration authority. The callable capture API now
+  accepts original retained checkpoint constructor-copy witnesses through
+  `replay_copies`. Original still-pending issued snapshots use optional
+  `replay_checkpoints=manager` with its original `replay_origins=ledger`; other
+  roles remain unfinished. One unchanged restored current/retired pair can use
+  that same API when the original manager was constructed with
+  `retain_capture_history=True`; see
+  [restored replay capture](docs/managed-composite-capture.md#nonempty-replay-after-one-real-handoff).
+
+For a detached complete observation of an existing paused coupled managed owner,
+see [coupled managed capture](docs/coupled-managed-capture.md). The reusable API
+preserves full native policy/state, managed history and payload aliases under
+original limits. It does not grant restoration authority.
+For bounded bytes preserving that complete detached graph and its aliases, see
+[coupled composite checkpoints](docs/coupled-composite-codec.md). Decode returns
+data records and keeps live authority outside the format.
+To copy and verify those complete checkpoints on disk, use the
+[complete checkpoint file CLI](docs/coupled-composite-files.md):
+`python -m scripts.run_coupled_composite_files --describe` previews its finite
+bounds and independently supplied expectations without filesystem work.
+For complete B/C files produced during live managed continuation and cleanup,
+preview `python -m scripts.run_coupled_candidate_handoff --describe --complete-checkpoints`.
+The corresponding run requires `--run --complete-checkpoints --directory NEW`.
+
 For candidate handoff preserving complete learner policy, delayed-label cursor
 and original actor/resources, see [coupled candidate handoff](docs/coupled-candidate-handoff.md).
 `python -m scripts.run_coupled_candidate_handoff --describe` previews the fixed
@@ -23,6 +4202,14 @@ and process memory.
 Use `--elapsed-retention` for original-clock deadline refusal, automatic owned raw
 cleanup and bounded worker shutdown across a coupled handoff. The clock is injected;
 this validates deadline semantics and local threading without a physical-latency claim.
+Use `--managed-serving-expiry` to include a populated managed serving cache and
+pending promotion in expiry cleanup, preserving learned state and spent limits.
+Use `--cleanup-failure` for a fixed manual erasure fault and terminal retry,
+keeping candidates stopped and the original driver failed after raw cleanup.
+Use `--busy-serving-cleanup` to demonstrate a joined worker with unfinished
+cleanup, closed public access, and terminal cleanup after the busy holder releases.
+Use `--committed-serving-expiry` to expire current and previous bundles after a
+committed promotion and verify that rollback cannot resurrect expired data.
 
 For checkpoints containing complete coupled learner state and update settings,
 see [learner checkpoints](docs/coupled-learner-checkpoint.md).
@@ -172,13 +4359,13 @@ For the fixed/adaptive PC timing CLI, see
 `python -m scripts.run_coupled_inference_comparison --describe` prints the frozen
 protocol without training. Actual runs are local, prospectively budgeted experiments.
 
-For active work, start with the [research roadmap](RESEARCH_ROADMAP.md).
+For active work, start with the [GitHub tracker](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/18).
 The [R0 baseline audit](docs/r0-baseline-audit.md) records the checkout delta,
 platform-specific checks, supported test environments and remaining gates.
 
 Later Phase 6 progress notes and their “exact next action” passages record
-historical handoffs. Use the active roadmap and the latest
-[development log](docs/development-log.md) for current work. The owning-with
+historical handoffs. Use the owning GitHub issue and its latest comments
+for current work; the roadmap and development log preserve evidence. The owning-with
 guard repair is user-deferred; its counterexample keeps scientific admission
 closed. The supported local Linux baseline now passes; see the audit for exact
 counts, skips and remaining limits. The [first local pilot preflight](docs/local-pilot-budget.md)
@@ -230,10 +4417,18 @@ For an opt-in learner with one explicit differentiated scalar energy, see the
 [coupled predictive-coding guide](docs/coupled-predictive-coding.md). It includes
 the complete binary objective, native update example and numerical checks;
 legacy models and scientific comparison results remain separate.
+Use `python -m scripts.run_coupled_inference --stream` for the fixed bounded-policy
+A→B→A demo: PC/neutral/active CPC, original delayed stream and isolated final
+readouts, signed learning/retention/return scores and original resource limits.
+It is an engineering integration, with no matched-compute or advantage claim.
+
 Run `python -m scripts.run_coupled_inference` for the
 [bounded inference example](docs/coupled-bounded-inference.md): fixed steps,
 early stopping and explicit fallback with native PC/neutral-CPC parity. The
 default remains fixed-step; this example makes no efficiency or benefit claim.
+The [reviewed allocated-time comparison](docs/reports/engineering-preset-comparison-20261017.md)
+completed all six cases with the existing engineering stop preset. Its quality
+interval includes zero; earlier timing failures and fixed defaults are preserved.
 The [coupled neutral CPC control](docs/coupled-neutral-control.md) runs real
 chemistry while preserving exact PC wake updates at unit plasticity.
 Use `python -m scripts.run_native_stream_demo --scenario coupled-neutral --seed 23`
@@ -4339,3 +8534,203 @@ current development-log handoff. Pure checks: `python -B -m pytest
 tests/test_checkpoint_content.py tests/test_checkpoint_replay_handoff.py
 tests/test_checkpoint_gate_cleanup.py -q -o addopts= -p no:cacheprovider`.
 Native tests require their own prospectively declared small local budget.
+
+Declared task/cue episode coverage and equal-capacity controls: [usage and limits](docs/coverage-replay.md).
+
+Fresh-task E16 diagnostics at four-phase endpoints: [usage and costs](docs/four-phase-fresh-task-probes.md).
+
+Explicit legal-action-conditioned reward collection and native PG: [usage and boundaries](docs/legal-reward-trajectories.md).
+
+Explicit legal-action RL recipe: `python -m scripts.run_coupled_attribution --scenario torch-key-door-legal-rl --describe`
+(and omit `--describe` to run). [Usage and negative native result](docs/legal-reward-trajectories.md).
+
+Paired legal-action control: `python -m scripts.run_coupled_attribution --scenario torch-key-door-legal-warm-start-control --describe`.
+[Usage and negative paired result](docs/legal-reward-trajectories.md).
+
+
+### Canonical BP single-task acquisition
+
+The existing history-learnability CLI accepts `--invariant-history
+--qualification-method bp --acquisition-only --describe` with
+`--scenario torch-minigrid-history-learnability`. This previews a fixed A128
+TRAIN-only recipe, all-context fit readouts and two separate E16 probe forks.
+Default continual recipes and native settings remain unchanged. A-only reports
+omit forgetting/return claims; different context exposure prevents an interference
+or matched-compute conclusion. See [usage and recorded results](docs/minigrid-learnability.md#canonical-bp-a-only-acquisition-diagnostic).
+
+
+### Distinct public task probe
+
+The existing history-learnability CLI accepts `--invariant-history --distinct-probe`
+with its native method selector (and optional BP `--acquisition-only`). Fixed F
+keys sit one row nearer the door. Before disposable updates every F input must
+be unseen in the actual canonical TRAIN support. Old E/defaults/settings remain.
+[Usage, costs and executed evidence](docs/minigrid-learnability.md#distinct-public-probe-task)
+record304checks and a fixed BP case: post-A128 F accuracy66.7→77.8%, exactsequences0.
+Partial fit and unchanged source do not establish retention/recovery or benefit.
+
+
+### Old fit while learning F
+
+Add `--old-task-readouts` to the explicit distinct-task route to score original
+A blue/red TRAIN episodes on the same disposable learner at F0/4/8/16. F alone
+updates; A monitoring adds separately charged predictions/storage/time. Defaults
+are unchanged. [Usage and evidence](docs/minigrid-learnability.md#old-a-fit-during-disposable-f-learning)
+record435initial/251final affected checks and one frozen BP case. A128-derived
+F accuracy improves12/18 to14/18 while old A fit drops17/18 to14/18 and its one
+exact cue sequence is lost. A was not jointly acquired; return recovery, live
+success and comparative benefit remain unestablished.
+
+
+### Fixed return to A
+
+`--return-to-a` adds A16 on the same disposable F-adapted learner with a separate
+budget, owned update templates and existing A/F readouts. It requires
+`--old-task-readouts`. [Usage and full evidence](docs/minigrid-learnability.md#fixed-a-return-after-f-learning)
+record344finalfocused checks/scopedstatics/independentreview and one frozen BP case.
+A return lowers old A loss but leaves endpoint accuracy14/18; F falls14/18 to12/18.
+Joint acquisition/recovery, live success and CPC advantage remain unestablished.
+Original F/monitor results/defaults and all earlier negatives are preserved.
+
+### Qualified readiness demonstrations as learner inputs
+
+The existing stream and learned-robot CLIs accept `--readiness-teachers` for
+qualified, distinctly identified TRAIN17/19 demonstrations. Fixed-teacher defaults
+remain. [Usage and bounded learning-to-control evidence](docs/readiness-demonstration-learning.md)
+separate successful teaching, student imitation and native task performance.
+
+### A-only robot acquisition control
+
+The learned-robot API/CLI accepts `a_only_control=True` / `--a-only-control` to
+train A throughout while retaining B as read-only TRAIN diagnostics. Original
+defaults remain. [Usage and scoped evidence](docs/continuous-robot-a-only.md)
+record source/receipt checks, actual costs and native outcomes separately.
+
+Inspect a saved CPU/native memory report offline with the existing standalone
+[taskspace memory inspector](docs/taskspace-memory-inspector.md).
+
+A separately classified [memory development mode](docs/memory-development-contexts.md)
+scores two permitted PushCube resets absent from the bundled TRAIN memory.
+
+The optional [native Choice smoke](docs/native-choice-bridge.md#bounded-native-checkpoint-smoke)
+loads the pinned Open-Jev adapter/head through its original CPU loader, records
+one query plus an order control, and preserves failures without retry. Its
+separate inference environment and resource protocol leave calibration,
+adaptation and comparative scientific claims open.
+
+The [probability-only scorer](docs/native-choice-bridge.md#probability-only-scoring)
+reprocesses that saved native pair with NLL/Brier/ECE and explicit inherited
+token accounting, making no new model calls and preserving native confidence.
+
+The [fixed six-case comparison](docs/native-choice-bridge.md#fixed-six-case-comparison)
+reuses lexical results and the final frozen linear state. Native and linear both
+score4/6; lexical3/6. Missing candidates keep NLL infinite for all three.
+This small descriptive result establishes baseline plumbing, not calibration,
+adaptation or a native accuracy advantage over the smaller linear control.
+
+A trained catalog learner can supply frozen heads to the existing typed predictor
+through the [catalog inference binding](docs/clm-catalog-learning.md#bind-a-trained-catalog-learner-for-typed-prediction).
+This copies current heads; it does not promote a learner or establish task quality.
+The temporal CLI can also emit [actual typed development choices after training](docs/clm-catalog-learning.md#actual-typed-choices-after-a-stream)
+with an encoder allowance declared before work.
+
+
+The existing CLM temporal stream also supports optional finite TRAIN rehearsal
+inside disposable catalog probes. See [usage, isolation and extra exposure
+accounting](docs/clm-catalog-learning.md#isolated-catalog-probe-with-finite-train-rehearsal).
+This capability is separate from evidence of retention or circadian benefit.
+
+
+For a matched query-dose control to catalog-probe rehearsal, the same temporal
+CLI accepts `--probe-marker-control`. See [fixed packets, provenance and
+accounting](docs/clm-catalog-learning.md#matched-extra-marker-exposure-control).
+Equal compute counts alone do not establish a scientific retention benefit.
+
+Optional catalog probes can [observe retention on original arrived TRAIN separately from suffix heldouts](docs/clm-catalog-learning.md#observe-arrived-train-retention-separately), with explicit readout costs and unchanged update dose.
+
+Optional catalog probes support an [explicit state-only update control](docs/clm-catalog-learning.md#state-only-disposable-catalog-probe), fixing action projection and temperature while keeping the main learner unchanged.
+## Explicit state-only TRAIN catalog scope
+
+The temporal CLM runner accepts `--catalog-training --train-state-only` to use
+an independent TRAIN learner with fixed candidate projection and temperature.
+The default remains all-head learning. Its snapshot family is distinct from
+paired/all-head snapshots; probe scope is selected separately. See
+[usage and limits](docs/clm-catalog-learning.md#state-only-train-catalog-learner).
+
+## Paired TRAIN replay candidate
+
+The existing CLM temporal CLI supports a default-off `--paired-replay-candidate`
+using actual consented current-policy TRAIN receipts after source completion.
+See [usage, isolation and accounting](docs/clm-paired-replay.md). The candidate
+adds work and does not establish native retention or circadian benefit.
+
+## CLM training to local ticket effects
+
+The existing command has an explicit
+[direct-fit workflow control](docs/clm-linear-workflow.md) via
+`--linear-fit-control --public-observation-train`: one detached categorical fit,
+then the original typed ordinary, stale-state and permission-denial scenarios.
+The default contrastive route stays unchanged. Literal software checks do not
+establish pretrained task quality or a circadian benefit.
+
+The existing temporal runner also offers a [cold linear probe control](docs/clm-linear-probes.md)
+through `--catalog-training --reserved-task-probes --probe-linear-fit-control`.
+It records one two-row fit at each checkpoint and keeps probe work separate from
+the benchmark learner. Its old-task score is compatibility, not warm-head retention.
+
+The [warm linear temporal learner](docs/clm-linear-stream.md) runs the original
+delayed-label sequence with `--catalog-training --train-linear-update`. It keeps
+tool identities fixed across catalog changes and reports actual residual solves
+and row exposures separately from native head optimization.
+
+The [linear typed provider's active-catalog option](docs/clm-linear-active-catalog.md)
+binds a permitted tool subset while preserving the full fitted model and its
+source guards. Selection changes readout columns and performs no fitting.
+
+The [context workflow mode](docs/clm-linear-context-workflow.md),
+`--linear-context-updates --public-observation-train`, connects three explicit
+v1/v2/repeated-v1 TRAIN exposures to fourteen local tool episodes through the
+existing inbox and dispatcher. It measures old-context retention before return
+rehearsal and separates stale-state recovery from learning recovery. Literal
+checks establish software behavior; native usefulness remains unverified.
+
+The [direct categorical fit control](docs/clm-linear-fit-control.md) fits a
+detached linear classifier from existing frozen CLM features, including the
+4096-feature released encoder. It preserves the original source and older solver
+limits. This TRAIN-fit diagnostic is separate from native contrastive learning,
+closed-loop task success and retention.
+
+Native paired/catalog/state-only learners and disposable probes can
+[return the existing pre-clipping gradient norm](docs/clm-gradient-observation.md)
+with the original loss diagnostic. The existing workflow helper can opt into a
+bounded receipt-bound observation list; defaults and model snapshots stay unchanged.
+This diagnostic alone establishes no task-learning or circadian benefit.
+
+The fixed [CLM workflow driver](docs/clm-ticket-workflow.md) composes existing
+catalog training and frozen typed inference with complete bounded local episodes.
+Software qualification covers failures, source isolation and effect admission;
+no native task-quality or circadian benefit is claimed.
+Optional `--reuse-action-features` retains the five already-paid raw action
+embeddings with exact frozen catalog/encoder guards; both head projections still
+run for every decision. See the driver's reuse contract before enabling it.
+
+The [chronological NumPy ticket example](docs/recurring-ticket-workflow.md) trains
+invoice→parcel→invoice through the existing delayed stream and observes complete
+old/new tasks at every fixed checkpoint, reporting retention, return and costs.
+Its explicit `--replay recent|coverage` options use bounded complete TRAIN
+trajectories with separate replay authority/costs. The fixed comparison exposes
+an acquisition/retention tradeoff; see the same usage page for qualified results.
+
+The existing affine command also has a fixed, read-only
+[A4 development-layout mode](docs/affine-development-layout.md). It reuses actual
+ordinary main parameters without fitting. The measured variant result was1/2,
+with both the blue failure and red success retained; it is not broad reliability
+or a circadian advantage.
+
+Fresh [A4 TRAIN collection](docs/a4-train-collection.md) is available through the
+existing collection port. Both teacher demonstrations completed in nine steps,
+yielding18 TRAIN rows with no learner fitting. The subsequent
+[A3→A4→A3 adaptation mode](docs/minigrid-a4-adaptation.md) learned A4 from0/2 to2/2
+while retaining A3 at2/2, with both2/2 after return. This fixed TRAIN result used
+six fits/90row exposures; replay necessity, generalization and CPC benefit remain
+unproved.
