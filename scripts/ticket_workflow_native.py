@@ -47,6 +47,16 @@ def counted_learner(method, feature_dim, num_classes, before_update, after_updat
             after_update()
             return result
 
+        def train_batch_with_rate_and_gate(self, features, targets, multiplier, setting):
+            if multiplier == 1 or setting == "unchanged":
+                return super().train_batch_with_rate_and_gate(
+                    features, targets, multiplier, setting
+                )
+            before_update(features)
+            result = super().train_batch_with_rate_and_gate(features, targets, multiplier, setting)
+            after_update()
+            return result
+
     return CountedNativeLearner(
         TorchFeaturePolicy(method, feature_dim, 3, 17, num_classes=num_classes)
     )

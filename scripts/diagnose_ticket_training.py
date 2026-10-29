@@ -565,11 +565,56 @@ def diagnose_policy_study(source, *, work=None):
     )
 
 
+def _live_noise_cli(args, started, work):
+    from src.app.ticket_live_noise_diagnosis import diagnose_live_noise_pair
+
+    data = None
+    try:
+        if args.input.stat().st_size > 3 * 1024**2:
+            raise ValueError("source exceeds saved-score3MiB bound")
+        data = args.input.read_bytes()
+        result = diagnose_live_noise_pair(json.loads(data), work=work)
+    except Exception as error:
+        result = dict(complete=False, error=f"{type(error).__name__}: {error}", work=work)
+    result.update(
+        definition="ticket_live_saved_score_diagnosis_v1",
+        source_sha256=None if data is None else hashlib.sha256(data).hexdigest(),
+        source_scope="captured_bytes_only_no_postflight_seal",
+        elapsed_seconds=monotonic() - started,
+    )
+    try:
+        payload = json.dumps(result, indent=2, allow_nan=False).encode("utf8")
+    except (ValueError, TypeError, OverflowError) as error:
+        result = dict(
+            definition="ticket_live_saved_score_diagnosis_v1",
+            complete=False,
+            error=f"{type(error).__name__}: {error}",
+            work=work,
+            source_sha256=result["source_sha256"],
+            source_scope=result["source_scope"],
+        )
+        payload = json.dumps(result, indent=2, allow_nan=False).encode("utf8")
+    if len(payload) > 256 * 1024:
+        result = dict(
+            definition="ticket_live_saved_score_diagnosis_v1",
+            complete=False,
+            error="saved-score output exceeds256KiB bound",
+            work=work,
+            source_sha256=result["source_sha256"],
+            source_scope=result["source_scope"],
+        )
+        payload = json.dumps(result, indent=2, allow_nan=False).encode("utf8")
+    args.output.write_bytes(payload + b"\n")
+    return 0 if result["complete"] else 1
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--policy-comparison", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--policy-comparison", action="store_true")
+    mode.add_argument("--live-noise-comparison", action="store_true")
     args = parser.parse_args(argv)
     if args.input.resolve() == args.output.resolve():
         raise ValueError("input must stay sealed")
@@ -577,6 +622,8 @@ def main(argv=None):
         stream.write(b"{}\n")
     started = monotonic()
     work = dict(projection_calls=0, projection_rows=0, nominal_affine_terms=0)
+    if args.live_noise_comparison:
+        return _live_noise_cli(args, started, work)
     limit = 8 * 1024**2 if args.policy_comparison else 512 * 1024
     if args.input.stat().st_size > limit:
         raise ValueError("source exceeds declared diagnostic report bound")

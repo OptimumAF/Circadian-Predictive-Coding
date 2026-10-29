@@ -20,6 +20,8 @@ import numpy as np
 
 from scripts import run_bp_new_contexts as context
 from scripts import ticket_workflow_native as native
+from scripts.ticket_catalog_control import CatalogTicketControl
+from scripts.context_catalog_control import ContextCatalogControl
 from scripts.run_ticket_workflow import FEATURES
 from scripts.ticket_controller_streams import (
     TicketStreamRecipe,
@@ -34,7 +36,7 @@ from scripts.ticket_controller_streams import (
     POLICY_CHANGE_PHASES,
     POLICY_CHANGE_CHECKPOINTS,
 )
-from scripts.context_training_streams import CONTEXT_TRAINING_RECIPES
+from scripts.context_training_streams import CONTEXT_STREAM_RECIPES
 from scripts.ticket_serving_timeline import (
     LiveServingPlan,
     TicketServingTimeline,
@@ -136,6 +138,8 @@ def _reference_schedule(
     task_readout=None,
     followup_label_delay=None,
     arrived_shift_predict=None,
+    catalog_control=None,
+    decision_limit=None,
 ):
     """Same native arrival/runtime ports, finite observation horizon; no forced drain."""
     if arrived_shift_predict is not None and (
@@ -182,6 +186,31 @@ def _reference_schedule(
     ):
         raise ValueError("candidate feedback requires explicit fixed drift without followup")
     batches, _ = _validated_batches(batches, (), training_only=True)
+    if catalog_control is not None and (
+        type(catalog_control) not in (CatalogTicketControl, ContextCatalogControl)
+        or contextual_policy is not None
+        or live is not None
+        and type(catalog_control) is CatalogTicketControl
+        and (
+            catalog_control.trial
+            or type(live) is not TicketServingTimeline
+            or live.plan.opportunities != catalog_control.catalog.envelope.max_decisions
+            or catalog_control.live_recipe is None
+            and live.plan.opportunities != len(batches) + label_delay
+        )
+        or on_drain is not None
+        or followup_plan is not None
+        or policy_change
+        or candidate_predict is not None
+        or task_readout is not None
+        or arrived_shift_predict is not None
+        or acknowledge_correct
+    ):
+        raise ValueError(
+            "catalog schedule requires its original private recipe and fixed live horizon"
+        )
+    if type(catalog_control) is ContextCatalogControl:
+        catalog_control.require_live(live)
     if type(policy_change) is not bool:
         raise ValueError("policy-change mode must be an exact boolean")
     if policy_change:
@@ -205,7 +234,28 @@ def _reference_schedule(
         raise ValueError("reference schedule admits1..8fixed TRAIN batches")
     if type(label_delay) is not int or label_delay not in (1, 2):
         raise ValueError("reference schedule requires declared delay1or2")
+    if decision_limit is not None and (
+        type(decision_limit) is not int
+        or not len(batches) <= decision_limit <= len(batches) + label_delay
+        or live is not None
+        or followup_plan is not None
+        or policy_change
+        or candidate_predict is not None
+        or task_readout is not None
+        or arrived_shift_predict is not None
+    ):
+        raise ValueError("decision limit requires a bounded isolated deferred TRAIN horizon")
     horizon = len(batches) + label_delay if live is None else live.plan.opportunities
+    if catalog_control is not None:
+        horizon = catalog_control.bind_schedule(batches, label_delay)
+    if decision_limit is not None:
+        horizon = min(horizon, decision_limit)
+        if catalog_control is not None:
+            catalog_control.report["stream"].update(
+                observed_horizon=horizon,
+                decision_limit=decision_limit,
+                horizon_limited=horizon < catalog_control.report["stream"]["natural_horizon"],
+            )
     if followup_plan is not None:
         if (
             type(followup_plan) is not FollowupTrainingPlan
@@ -229,7 +279,11 @@ def _reference_schedule(
             report["followup_training"]["label_delay"] = followup_label_delay
     followup_pin = deepcopy(followup_plan)
     drain_count = len(batches) if followup_plan is None else followup_plan.first_batches
-    if horizon < len(batches) + label_delay:
+    if (
+        live is not None
+        and horizon < len(batches) + label_delay
+        and (catalog_control is None or catalog_control.live_recipe is None)
+    ):
         raise ValueError("live plan must include all original label arrivals")
     report["training_stream"] = dict(
         role="train",
@@ -247,27 +301,39 @@ def _reference_schedule(
         clock=clock,
         budget=budget,
         max_experiences=len(batches),
-        max_consolidations=0,
+        max_consolidations=0 if catalog_control is None else catalog_control.max_replays,
         actor=actor,
     )
     gate = sharing_gate or ServingPriorityGate(
-        SharingLimits(1, len(batches), 1), resource_available=lambda: True
+        SharingLimits(
+            1, len(batches) if catalog_control is None else catalog_control.admissions, 1
+        ),
+        resource_available=lambda: True,
     )
     if live is not None and live.gate is not gate:
         raise ValueError("live serving requires the original shared gate")
     if on_drain is not None and (live is None or not callable(on_drain)):
         raise ValueError("drained publication requires the original live schedule")
-    shared = ResourceSharedRuntime(
-        runtime,
-        gate,
-        action_envelope=AdaptationEnvelope(
-            (AdaptationAction("wait"), AdaptationAction("wake1", 1)), horizon, len(batches)
-        ),
+    shared = (
+        catalog_control.bind(runtime, source, gate)
+        if catalog_control is not None
+        else ResourceSharedRuntime(
+            runtime,
+            gate,
+            action_envelope=AdaptationEnvelope(
+                (AdaptationAction("wait"), AdaptationAction("wake1", 1)), horizon, len(batches)
+            ),
+        )
     )
-    policy = ReferencePolicy(mode) if contextual_policy is None else contextual_policy
-    report["reference_policy" if contextual_policy is None else "contextual_policy"] = asdict(
-        policy
+    policy = (
+        (ReferencePolicy(mode) if contextual_policy is None else contextual_policy)
+        if catalog_control is None
+        else catalog_control.record
     )
+    if catalog_control is None:
+        report["reference_policy" if contextual_policy is None else "contextual_policy"] = asdict(
+            policy
+        )
     report["controller_events"] = []
     paid = report["controller_work"] = dict(
         prediction_attempts=0,
@@ -313,6 +379,9 @@ def _reference_schedule(
     try:
         for tick in range(horizon):
             require_input()
+            if catalog_control is not None:
+                catalog_control.require_schedule_packets(batches)
+                catalog_control.require_candidate()
             if shift_reader is not None:
                 shift_reader.require_paid(report.get("arrived_shift_feedback"))
             if task_reader is not None:
@@ -456,21 +525,25 @@ def _reference_schedule(
             started = monotonic()
             try:
                 decision = (
-                    _retired_contextual_wait(
-                        actor,
-                        report,
-                        publication_pin,
-                        observation,
-                        pending=pending,
-                        arrived=arrived,
-                        consumed=budget.updates_completed,
-                        total=len(batches),
-                    )
-                    if contextual_policy is not None and publication_pin is not None
+                    catalog_control.choose(observation, progress)
+                    if catalog_control is not None
                     else (
-                        choose_reference(policy, observation)
-                        if contextual_policy is None
-                        else choose_contextual(contextual_policy, observation)
+                        _retired_contextual_wait(
+                            actor,
+                            report,
+                            publication_pin,
+                            observation,
+                            pending=pending,
+                            arrived=arrived,
+                            consumed=budget.updates_completed,
+                            total=len(batches),
+                        )
+                        if contextual_policy is not None and publication_pin is not None
+                        else (
+                            choose_reference(policy, observation)
+                            if contextual_policy is None
+                            else choose_contextual(contextual_policy, observation)
+                        )
                     )
                 )
                 paid["selections_returned"] += 1
@@ -491,8 +564,15 @@ def _reference_schedule(
             started = monotonic()
             try:
                 with live.opportunity(tick) if live is not None else nullcontext():
-                    poll = shared.train_action(decision.action_id)
+                    poll = (
+                        catalog_control.train_action(decision.action_id)
+                        if type(catalog_control) is ContextCatalogControl
+                        and catalog_control.resume_wake
+                        else shared.train_action(decision.action_id)
+                    )
                 event["poll"] = asdict(poll)
+                if type(catalog_control) is ContextCatalogControl and catalog_control.resume_wake:
+                    catalog_control.observe_poll(decision.action_id, poll)
             finally:
                 paid["admission_seconds"] += monotonic() - started
             if (
@@ -552,6 +632,15 @@ def _reference_schedule(
             - (len(runtime.acknowledged_experiences) if acknowledge_correct else 0),
             score_forward_calls=0,
         )
+        if (
+            decision_limit is not None
+            or catalog_control is not None
+            and catalog_control.stream_recipe is not None
+        ):
+            report["stream"].update(
+                unarrived_labels=len(batches) - arrived,
+                arrived_unapplied=arrived - budget.updates_completed,
+            )
         if followup_plan is not None:
             report["followup_training"]["status"] = (
                 "complete" if budget.updates_completed == len(batches) else "incomplete"
@@ -560,6 +649,10 @@ def _reference_schedule(
             report["policy_capture_complete"] = True
         return runtime, horizon
     finally:
+        if catalog_control is not None:
+            report["catalog_control"] = catalog_control.capture()
+            if catalog_control.replay_budget is not None:
+                report["replay_examples"] = catalog_control.replay_budget.replay_examples_completed
         if shift_reader is not None:
             report["arrived_shift_feedback"] = shift_reader.report
         if task_reader is not None:
@@ -856,7 +949,89 @@ def run_case(
     followup_plan: FollowupTrainingPlan | None = None,
     policy_change: bool = False,
     followup_training_recipe: LiveTrainingRecipe | None = None,
+    catalog_trial=None,
+    catalog_policy=None,
+    decision_limit=None,
+    publish_after_window: bool = False,
+    probe_after_window: bool = False,
 ) -> dict[str, Any]:
+    if (
+        type(probe_after_window) is not bool
+        or probe_after_window
+        and (
+            catalog_policy is None
+            or catalog_trial is not None
+            or serving_plan is None
+            or publish_after_window
+            or publish_on_drain
+            or deferred_evaluation
+        )
+    ):
+        raise ValueError("candidate probe requires an explicit frozen private catalog live window")
+    if (
+        type(publish_after_window) is not bool
+        or publish_after_window
+        and (catalog_policy is None or catalog_trial is not None or serving_plan is None)
+    ):
+        raise ValueError("terminal publication requires an explicit frozen catalog live window")
+    catalog_control = None
+    if catalog_trial is not None or catalog_policy is not None:
+        catalog_control = CatalogTicketControl(
+            catalog_trial,
+            catalog_policy,
+            training_context=training_context,
+            base_snapshot=base_snapshot,
+            batches=context.BATCHES_PER_PHASE,
+            stream_recipe=stream_recipe,
+            deferred_evaluation=deferred_evaluation,
+            live_recipe=live_training_recipe,
+            unsupported=(
+                reference_mode is not None
+                or contextual_policy is not None
+                or counterfactual is not False
+                or serving_plan is not None
+                and (
+                    catalog_trial is not None
+                    or stream_recipe is not None
+                    or deferred_evaluation is not False
+                )
+                or publish_on_drain is not False
+                or live_training_recipe is not None
+                and (serving_plan is None or publish_after_window)
+                or followup_plan is not None
+                or policy_change is not False
+                or followup_training_recipe is not None
+            ),
+        )
+        if serving_plan is not None and (
+            type(serving_plan) is not LiveServingPlan
+            or catalog_control.trial
+            or training_context != "new_contexts"
+            or serving_plan.opportunities != catalog_control.catalog.envelope.max_decisions
+        ):
+            raise ValueError(
+                "live catalog requires the original frozen application and exact horizon"
+            )
+    if decision_limit is not None and (
+        type(decision_limit) is not int
+        or type(stream_recipe) is not TicketStreamRecipe
+        or deferred_evaluation is not True
+        or not len(stream_recipe.contexts)
+        <= decision_limit
+        <= len(stream_recipe.contexts) + stream_recipe.label_delay
+        or catalog_trial is not None
+        or base_snapshot is not None
+        or counterfactual
+        or serving_plan is not None
+        or publish_on_drain
+        or live_training_recipe is not None
+        or followup_plan is not None
+        or policy_change
+        or followup_training_recipe is not None
+        or catalog_control is not None
+        and decision_limit > catalog_control.catalog.envelope.max_decisions
+    ):
+        raise ValueError("decision limit requires an exact declared deferred TRAIN horizon")
     if followup_training_recipe is not None:
         require_followup_recipe(followup_training_recipe)
         if followup_plan is None or live_training_recipe is not None:
@@ -923,6 +1098,7 @@ def run_case(
         serving_plan.__post_init__()
         if (
             reference_mode != ("drift" if followup_plan is None else "periodic")
+            and catalog_control is None
             or training_context != "new_contexts"
             or contextual_policy is not None
             or base_snapshot is not None
@@ -936,9 +1112,14 @@ def run_case(
     live_recipe_pin = deepcopy(live_training_recipe)
     if live_training_recipe is not None and serving_plan is not None:
         base_recipe = live_training_recipe.recipe
-        if serving_plan.opportunities < len(base_recipe.contexts) + base_recipe.label_delay:
+        if (
+            serving_plan.opportunities < len(base_recipe.contexts) + base_recipe.label_delay
+            and catalog_control is None
+        ):
             raise ValueError("live plan must contain all declared TRAIN label arrivals")
-    scheduled = reference_mode is not None or contextual_policy is not None
+    scheduled = (
+        reference_mode is not None or contextual_policy is not None or catalog_control is not None
+    )
     if (
         type(deferred_evaluation) is not bool
         or (stream_recipe is not None and not deferred_evaluation)
@@ -957,7 +1138,11 @@ def run_case(
     if (
         type(counterfactual) is not bool
         or (reference_mode is not None and contextual_policy is not None)
-        or (contextual_policy is None and (base_snapshot is not None or counterfactual))
+        or (
+            contextual_policy is None
+            and catalog_control is None
+            and (base_snapshot is not None or counterfactual)
+        )
         or (counterfactual and base_snapshot is None)
     ):
         raise ValueError("contextual trials require an explicit policy and detached base snapshot")
@@ -996,6 +1181,25 @@ def run_case(
             counterfactual=counterfactual,
             contextual_policy=asdict(contextual_policy),
         )
+    if catalog_control is not None:
+        report.update(
+            definition="catalog_bp_ticket_private_v1"
+            if serving_plan is None
+            else "live_catalog_bp_ticket_private_v1",
+            training_context=training_context,
+            catalog_control=catalog_control.report,
+            qualification="private controller TRAIN trials or frozen development application; no publication/final/probe",
+        )
+        if serving_plan is not None:
+            report["qualification"] = (
+                "frozen catalog with live original-actor service and private TRAIN candidate; "
+                "serving outcomes never feed selection; no publication/final/probe/comparison utility"
+            )
+        if publish_after_window:
+            report.update(
+                definition="live_catalog_bp_ticket_publication_v1",
+                qualification="terminal guarded publication after frozen live TRAIN window; pending old labels remain unapplied; no final/probe/comparison utility",
+            )
     if followup_training_recipe is not None:
         report.update(
             followup_training_recipe=asdict(followup_training_recipe),
@@ -1023,7 +1227,9 @@ def run_case(
         )
     if stream_recipe is not None:
         report.update(
-            definition="deferred_controller_stream_v1",
+            definition="deferred_controller_stream_v1"
+            if catalog_control is None
+            else "deferred_catalog_stream_v1",
             deferred_evaluation=True,
             stream_recipe=asdict(stream_recipe),
             known_train_label_corruptions=len(stream_recipe.contexts)
@@ -1051,9 +1257,20 @@ def run_case(
                 else len(live_training_recipe.recipe.contexts),
             ),
         )
+    if probe_after_window:
+        report.update(
+            definition="live_catalog_bp_ticket_probe_v1",
+            qualification="private live catalog plus separate disposable fixed TRAIN-derived probe; no promotion, final data or comparison utility",
+            reserved_probe_updates=64,
+            isolated_probe=dict(
+                status="not_run", complete=False, reason="original live window incomplete"
+            ),
+        )
     work = dict(attempted_updates=0, attempted_rows=0, returned_updates=0)
+    if decision_limit is not None:
+        report["decision_limit"] = decision_limit
     budget = stream = actor = source = predictor = torch = torch_rng = None
-    live = sharing_gate = None
+    live = sharing_gate = window = None
     drain_receipt = None
     published_state = None
     rng = np.random.get_state()
@@ -1072,7 +1289,11 @@ def run_case(
             if initial.completed_updates != 96 or initial.training_examples != 576:
                 raise ValueError("qualified native clock differs")
             digest = snapshot_digest(initial) if contextual_policy is not None else None
-            if base_snapshot is not None:
+            if catalog_control is not None:
+                catalog_control.require_source(
+                    initial, base_snapshot, digest=snapshot_digest, same_state=native.same_state
+                )
+            elif base_snapshot is not None:
                 if snapshot_digest(base_snapshot) != digest:
                     raise ValueError("counterfactual base differs from original complete source")
                 initial = base_snapshot
@@ -1115,9 +1336,19 @@ def run_case(
                 monotonic,
             )
             budget.attach_memory(sampler)
+            if catalog_control is not None:
+                batches = catalog_control.prepare_stream(batches)
+                catalog_control.prepare(budget, sampler)
 
             def require_input():
                 budget.before_final()
+                if catalog_control is not None:
+                    if serving_plan != serving_pin:
+                        raise ValueError("original live catalog plan changed")
+                    if live is not None:
+                        live._require_original()
+                    catalog_control.require_stream_packets(batches)
+                    catalog_control.before_work()
                 if followup_training_recipe is not None:
                     _require_followup_input(
                         followup_training_recipe, followup_recipe_pin, batches, followup_data_pin
@@ -1135,6 +1366,18 @@ def run_case(
 
             def require_serving_input():
                 # Worker source checks do not race the main budget's mutable clock.
+                if catalog_control is not None:
+                    catalog_control.require_pin()
+                    serving_state = actor.serving_snapshot_if_idle()
+                    if (
+                        serving_state.actor_version != catalog_control.record.learner_version
+                        or serving_state.generation != 0
+                        or not native.same_state(serving_state.model_state, initial)
+                        or serving_state.configuration != ServingConfiguration(3, 2)
+                        or serving_state.metadata
+                        != {"origin": context.SOURCE_SHA, "native_history": 96}
+                    ):
+                        raise ValueError("original live catalog actor changed")
                 if followup_training_recipe is not None:
                     _require_followup_input(
                         followup_training_recipe, followup_recipe_pin, batches, followup_data_pin
@@ -1169,7 +1412,12 @@ def run_case(
             predictor = TorchServingPredictor(actor, spec)
             if scheduled:
                 sharing_gate = ServingPriorityGate(
-                    SharingLimits(1, len(batches), 1), resource_available=lambda: True
+                    SharingLimits(
+                        1,
+                        len(batches) if catalog_control is None else catalog_control.admissions,
+                        1,
+                    ),
+                    resource_available=lambda: True,
                 )
             if serving_plan is not None:
                 live = TicketServingTimeline(
@@ -1210,22 +1458,25 @@ def run_case(
                     )
                 )
 
-            def episodes(phase, concepts, scenarios=("ordinary",)):
+            def episodes(phase, concepts, scenarios=("ordinary",), *, input_guard=None):
                 if deferred_evaluation or policy_change:
                     return
                 for concept in concepts:
                     for scenario in scenarios:
-                        require_input()
+                        check = require_input if input_guard is None else input_guard
+                        check()
                         versions = []
 
                         def predict(request):
-                            require_input()
+                            check()
                             with (
                                 sharing_gate.serving()
                                 if sharing_gate is not None
                                 else nullcontext()
                             ):
                                 result = predictor.serve(request)
+                            if input_guard is not None:
+                                check()
                             versions.append(
                                 dict(
                                     generation=result.generation,
@@ -1246,7 +1497,9 @@ def run_case(
                             dict(
                                 phase=phase,
                                 concept=concept,
-                                role="outer_selection",
+                                role="outer_selection"
+                                if input_guard is None
+                                else "serving_after_window",
                                 publications=versions,
                                 episode=episode,
                             )
@@ -1307,9 +1560,13 @@ def run_case(
                         else {"followup_label_delay": followup_training_recipe.recipe.label_delay}
                     ),
                     **({"policy_change": True} if policy_change else {}),
+                    **({} if catalog_control is None else {"catalog_control": catalog_control}),
+                    **({} if decision_limit is None else {"decision_limit": decision_limit}),
                 )
                 candidate = runtime.candidate_snapshot().state
                 report["applied_updates"] = [asdict(u) for u in runtime.applied_updates]
+                if catalog_control is not None:
+                    catalog_control.require_candidate()
                 if deferred_evaluation or policy_change:
                     report["candidate_checkpoint"] = native.checkpoint(
                         runtime.candidate_snapshot().wake_updates, candidate
@@ -1318,8 +1575,13 @@ def run_case(
                         native.policy_development_readout(spec, report, require_input)
                 else:
                     _candidate_tasks(spec, runtime, report, require_input)
+            if catalog_control is not None:
+                catalog_control.require_history(candidate, budget, runtime.applied_updates)
             if (
-                candidate.completed_updates != 96 + budget.updates_completed
+                (
+                    catalog_control is None
+                    and candidate.completed_updates != 96 + budget.updates_completed
+                )
                 or not native.same_state(source.snapshot_state(), initial)
                 or not native.same_state(
                     actor.snapshot_state().state,
@@ -1329,6 +1591,80 @@ def run_case(
                 )
             ):
                 raise ValueError("shadow/actor/source native clocks or ownership changed")
+            if catalog_control is not None:
+                require_input()
+                report.update(
+                    complete=True,
+                    source_unchanged=True,
+                    catalog_actor_unchanged=native.same_state(
+                        actor.snapshot_state().state, initial
+                    ),
+                    catalog_promotions=0,
+                )
+                if deferred_evaluation:
+                    report.update(
+                        deferred_actor_unchanged=report["catalog_actor_unchanged"],
+                        deferred_promotions=0,
+                    )
+                if publish_after_window:
+                    from scripts.ticket_catalog_publication import CatalogWindowPublication
+
+                    report["complete"] = False
+                    report["catalog_actor_unchanged_before_publication"] = report[
+                        "catalog_actor_unchanged"
+                    ]
+                    report["catalog_actor_unchanged"] = report["catalog_promotions"] = None
+                    live.close()
+                    report["live_serving"] = live.snapshot()
+
+                    def terminal_environment():
+                        budget.before_final()
+                        catalog_control.require_pin()
+                        catalog_control.replay_budget.before_final()
+                        live._require_original()
+                        if (
+                            serving_plan != serving_pin
+                            or input_path.read_bytes() != raw
+                            or not native.same_state(source.snapshot_state(), initial)
+                        ):
+                            raise ValueError("original terminal source or live plan changed")
+
+                    window = CatalogWindowPublication(
+                        catalog_control,
+                        runtime,
+                        sharing_gate,
+                        live,
+                        report,
+                        candidate,
+                        controller,
+                        guard_now,
+                        terminal_environment,
+                        {
+                            "origin": context.SOURCE_SHA,
+                            "native_history": candidate.completed_updates,
+                        },
+                    )
+                    window.publish(
+                        lambda: _publish_candidate(
+                            runtime,
+                            controller,
+                            spec,
+                            guard_now,
+                            report,
+                            window.require_before_commit,
+                            candidate.completed_updates - 96,
+                        )
+                    )
+                    report["catalog_actor_unchanged"] = native.same_state(
+                        actor.snapshot_state().state, initial
+                    )
+                    report["catalog_promotions"] = int(window.row["accepted"])
+                    phase = "window-published" if window.row["accepted"] else "window-rejected"
+                    publication(phase)
+                    episodes(phase, context.CONCEPTS, input_guard=window.require_current)
+                    window.require_current()
+                    report["complete"] = True
+                return report
             if counterfactual:
                 # A disposable training trial owns no deployed publication. All
                 # candidate/task/monitor work is paid even when its arm loses.
@@ -1391,14 +1727,50 @@ def run_case(
         except Exception as error:
             report.update(complete=False, error=f"{type(error).__name__}: {error}"[:512])
         finally:
+            if publish_after_window:
+                if not report["complete"]:
+                    report["catalog_actor_unchanged"] = None
+                if window is not None:
+                    report["catalog_promotions"] = (
+                        None if window.known_promotion is None else int(window.known_promotion)
+                    )
+            if publish_after_window and sharing_gate is not None:
+                report["final_sharing_snapshot"] = asdict(sharing_gate.snapshot())
+            if catalog_control is not None:
+                report["catalog_control"] = catalog_control.capture()
+                if catalog_control.replay_budget is not None:
+                    report["replay_examples"] = (
+                        catalog_control.replay_budget.replay_examples_completed
+                    )
             if live is not None:
                 live.close()
-                report["live_serving"] = live.snapshot()
+                final_live = live.snapshot()
+                if publish_after_window and "live_serving" in report:
+                    if not _same_value(report["live_serving"], final_live):
+                        report.update(complete=False, error="terminal live capture changed")
+                        report["changed_live_capture"] = final_live
+                else:
+                    report["live_serving"] = final_live
+                if catalog_control is not None and (
+                    not report["live_serving"]["closed"]
+                    or report["live_serving"]["stopped"]
+                    or report["live_serving"]["unreturned_work_unknown"]
+                    or len(report["live_serving"]["records"]) != serving_pin.opportunities
+                    or any(not row["complete"] for row in report["live_serving"]["records"])
+                ):
+                    report["complete"] = False
+                    report.setdefault("error", "incomplete or unknown live catalog service")
 
             report["training_work"] = dict(
                 **work,
                 unreturned_work_unknown=work["attempted_updates"] != work["returned_updates"],
             )
+            if catalog_control is not None and work["attempted_updates"]:
+                report["training_work"]["unreturned_work_unknown"] |= (
+                    report.get("action_snapshot", {})
+                    .get("progress", {})
+                    .get("unreturned_work_unknown", True)
+                )
             if predictor is not None:
                 report["serving_work"] = dict(predictor.work)
             if budget is not None:
@@ -1420,6 +1792,37 @@ def run_case(
             )
             if not report["numpy_rng_unchanged"] or report["torch_rng_unchanged"] is False:
                 report.update(complete=False, error="caller RNG changed")
+            if probe_after_window:
+                report["catalog_window_complete"] = report["complete"]
+                if report["complete"]:
+                    from scripts.ticket_catalog_probe import run_catalog_probe
+
+                    def require_probe_source():
+                        if input_path.read_bytes() != raw or serving_plan != serving_pin:
+                            raise ValueError("original probe source or live plan changed")
+
+                    run_catalog_probe(
+                        report,
+                        runtime=runtime,
+                        source=source,
+                        control=catalog_control,
+                        gate=sharing_gate,
+                        live=live,
+                        budget=budget,
+                        require_source=require_probe_source,
+                        spec=spec,
+                        memory=sampler,
+                    )
+                    diagnostic = report["isolated_probe"]
+                    report["complete"] = diagnostic["complete"]
+                    report["numpy_rng_unchanged"] = diagnostic["numpy_rng_unchanged"]
+                    report["torch_rng_unchanged"] = diagnostic["torch_rng_unchanged"]
+                    report["catalog_actor_unchanged"] = native.same_state(
+                        actor.snapshot_state().state, initial
+                    )
+                    report["source_unchanged"] = native.same_state(source.snapshot_state(), initial)
+                    if not diagnostic["complete"]:
+                        report["error"] = diagnostic.get("error", "isolated diagnostic incomplete")
             report["costs"] = dict(
                 elapsed_seconds=monotonic() - started,
                 sampled_process_rss=asdict(sampler.snapshot()),
@@ -1452,6 +1855,15 @@ def _require_legacy_task_evaluation(report):
 
 
 def _case_measures(result, seconds):
+    if result.get("definition") in (
+        "live_catalog_bp_ticket_private_v1",
+        "live_catalog_bp_ticket_publication_v1",
+        "live_catalog_bp_ticket_probe_v1",
+    ):
+        # Why: the old objective does not account for live-service violations/outcomes.
+        raise ValueError("live catalog service requires separate task and cost reporting")
+    if result.get("deferred_evaluation") is True and "catalog_control" in result:
+        raise ValueError("deferred catalog TRAIN completion requires separate outer readout")
     _require_legacy_task_evaluation(result)
     if not result["complete"] or result["training_work"]["unreturned_work_unknown"]:
         raise ValueError("failed or unknown native work has no outer utility")
@@ -1769,14 +2181,21 @@ def _main(argv, sources):
         "--followup-training-recipe", choices=tuple(n for n, _ in FOLLOWUP_TRAINING_RECIPES)
     )
     parser.add_argument(
-        "--context-stream-recipe", choices=tuple(r.recipe_id for r in CONTEXT_TRAINING_RECIPES)
+        "--context-stream-recipe", choices=tuple(r.recipe_id for r in CONTEXT_STREAM_RECIPES)
     )
     parser.add_argument("--periodic-report", type=Path)
     parser.add_argument("--fitted-report", type=Path)
     parser.add_argument(
+        "--catalog-fit",
+        action="store_true",
+        help="reuse a saved six-trial catalog fit; requires --controller-comparison --fitted-report",
+    )
+    parser.add_argument(
         "--live-training-recipe", choices=tuple(r.recipe.recipe_id for r in LIVE_TRAINING_RECIPES)
     )
     args = parser.parse_args(argv)
+    if args.catalog_fit and not args.controller_comparison:
+        parser.error("--catalog-fit requires --controller-comparison and --fitted-report")
     if args.followup_training_recipe is not None and not args.continue_training_after_publication:
         parser.error("--followup-training-recipe requires --continue-training-after-publication")
     if args.example_context_source and not args.context_head_serving:
@@ -1803,8 +2222,12 @@ def _main(argv, sources):
         parser.error("--context-withheld-orders requires context stream protocol or comparison")
     if args.context_live_reference is not None and not args.context_head_serving_live:
         parser.error("--context-live-reference requires --context-head-serving-live")
-    if args.context_stream_recipe is not None and not args.context_head_serving_live:
-        parser.error("--context-stream-recipe requires --context-head-serving-live")
+    if args.context_stream_recipe is not None and not (
+        args.context_head_serving_live or args.context_stream_protocol
+    ):
+        parser.error("--context-stream-recipe requires context live serving or stream protocol")
+    if args.context_stream_recipe is not None and args.context_withheld_orders:
+        parser.error("--context-stream-recipe is separate from --context-withheld-orders")
     if args.context_candidate_feedback and (
         not args.context_head_serving_live or args.context_live_reference != "drift"
     ):
@@ -1855,7 +2278,20 @@ def _main(argv, sources):
     if args.context_stream_protocol:
         from scripts.context_stream_comparison import protocol_snapshot
 
-        report = protocol_snapshot(**(dict(withheld=True) if args.context_withheld_orders else {}))
+        report = protocol_snapshot(
+            **(dict(withheld=True) if args.context_withheld_orders else {}),
+            **(
+                dict(
+                    recipe=next(
+                        r
+                        for r in CONTEXT_STREAM_RECIPES
+                        if r.recipe_id == args.context_stream_recipe
+                    )
+                )
+                if args.context_stream_recipe is not None
+                else {}
+            ),
+        )
     elif args.context_stream_comparison:
         from scripts.context_stream_comparison import run_comparison as run_stream_comparison
 
@@ -1897,7 +2333,7 @@ def _main(argv, sources):
             context_kwargs["arrived_shift"] = True
         if args.context_stream_recipe is not None:
             context_kwargs["stream_recipe"] = next(
-                r for r in CONTEXT_TRAINING_RECIPES if r.recipe_id == args.context_stream_recipe
+                r for r in CONTEXT_STREAM_RECIPES if r.recipe_id == args.context_stream_recipe
             )
         report = run_context_live(args.source, **context_kwargs)
     elif args.context_head_serving:
@@ -1909,7 +2345,9 @@ def _main(argv, sources):
     elif args.controller_comparison:
         from scripts.ticket_controller_comparison import run_comparison
 
-        report = run_comparison(args.source, args.fitted_report)
+        report = run_comparison(
+            args.source, args.fitted_report, **({"catalog_fit": True} if args.catalog_fit else {})
+        )
     elif args.policy_change_controller_comparison:
         from scripts.ticket_controller_comparison import run_comparison
 

@@ -16,7 +16,13 @@ from typing import Any
 from scripts import context_head_live as live
 from scripts.context_head_probe import HEAD_SOURCE_SHA, _source_bytes
 from scripts.context_head_serving import TASKS
-from scripts.context_training_streams import CONTEXT_TRAINING_RECIPES, WITHHELD_CONTEXT_RECIPES
+from scripts.context_training_streams import (
+    CONTEXT_TRAINING_RECIPES,
+    WITHHELD_CONTEXT_RECIPES,
+    CONTEXT_STREAM_RECIPES,
+    CONTEXT_PAIRED_REHEARSAL_RECIPES,
+    ContextTrainingRecipe,
+)
 from scripts.ticket_serving_timeline import serving_preview
 from src.app.probe_return_phase import paid_report_guard
 from src.core.contextual_controller import ContextualChoice, ContextualEstimate, FittedController
@@ -41,9 +47,11 @@ def _same(a, b):
     )
 
 
-def protocol_snapshot(*, withheld=False):
+def protocol_snapshot(*, withheld=False, recipe=None):
     if type(withheld) is not bool:
         raise ValueError("withheld comparison opt-in must be an exact boolean")
+    if recipe is not None:
+        return _recipe_protocol(recipe, withheld)
     result = dict(
         definition="context_stream_comparison_protocol_v1",
         complete=True,
@@ -64,6 +72,60 @@ def protocol_snapshot(*, withheld=False):
             qualification="fresh matched packet orders/delays; known TRAIN templates, denial22 retained; joint factors and serial/asymmetric costs, no sealed-task/CPC/efficiency claim",
         )
     return result
+
+
+def _recipe_protocol(recipe, withheld):
+    if type(recipe) is not ContextTrainingRecipe:
+        raise ValueError("recipe preview requires an exact named contextual recipe")
+    recipe.__post_init__()
+    if withheld or recipe not in CONTEXT_STREAM_RECIPES:
+        raise ValueError("select one named live recipe, separate from withheld comparison")
+    # Why: declare causal ordinary TRAIN exposure without opening/encoding data.
+    sizes = {
+        f"{kind}-{version}": value
+        for version in ("v1", "v2")
+        for kind, value in (
+            ("new", (3, 0)),
+            ("old", (0, 6)),
+            ("current9", (9, 0)),
+            ("joint", (3, 6)),
+        )
+    }
+    schedule = [
+        dict(
+            batch_index=i,
+            context=context,
+            observed_at=i,
+            label_arrival_at=i + recipe.label_delay,
+            new_rows=sizes[context][0],
+            old_rows=sizes[context][1],
+            rows=sum(sizes[context]),
+        )
+        for i, context in enumerate(recipe.contexts)
+    ]
+    paired = recipe in CONTEXT_PAIRED_REHEARSAL_RECIPES
+    plan = live.recipe_plan(**(dict(head_task_transfer=True) if paired else {}))
+    return dict(
+        definition="context_stream_recipe_protocol_v1",
+        complete=True,
+        recipe=asdict(recipe),
+        plan=asdict(plan),
+        opportunities=serving_preview(plan),
+        training_schedule=schedule,
+        training_exposures=dict(
+            updates=len(schedule),
+            rows=sum(r["rows"] for r in schedule),
+            new_rows=sum(r["new_rows"] for r in schedule),
+            old_rows=sum(r["old_rows"] for r in schedule),
+        ),
+        reference_policy=asdict(ReferencePolicy("periodic")),
+        wake_budget=dict(
+            max_training_updates=len(schedule),
+            max_wall_seconds=60,
+            max_process_rss_bytes=512 * 1024**2,
+        ),
+        qualification="declaration only for default periodic execution; no source/model IO or execution authority; repeated TRAIN exposure is counted, not matched computation or evidence of future task success",
+    )
 
 
 def _native_exposures(calls, receipts, row_counts, indices):

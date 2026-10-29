@@ -39,7 +39,7 @@ from src.core.learner_ports import (
     validate_learning_rate_multiplier,
     validate_gate_setting,
 )
-from src.core.inbox_cursor import InboxCursor, validate_inbox_cursor
+from src.core.inbox_cursor import InboxCursor, GenerationInboxCursor, validate_inbox_cursor
 from src.core.data_erasure import ErasedExperience, ErasureReason
 
 Features = TypeVar("Features")
@@ -157,6 +157,8 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         self._applied: dict[SampleKey, AppliedExperience] = {}
         self._erased: dict[SampleKey, ErasedExperience] = {}
         self._historical_completed_updates: int | None = None
+        if budget.updates_completed:
+            self._generation_start_updates = budget.updates_completed
         self._draining, self._stopped, self._last_time = False, False, -1
         self._registration_guard: Callable[[object], None] | None = None
         self._training_guard: (
@@ -252,8 +254,10 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         if self._draining:
             raise ValueError("inbox cursor capture requires a quiescent drain")
         self._require_history_indexes()
-        return InboxCursor(
-            2 if self._erased else 1,
+        generation = getattr(self, "_generation_start_updates", 0)
+        cursor_type = GenerationInboxCursor if generation else InboxCursor
+        return cursor_type(
+            3 if generation else 2 if self._erased else 1,
             self._learner_version,
             self._capacity,
             tuple(self._experiences[k] for k in sorted(self._experiences)),
@@ -263,6 +267,7 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
             self._stopped,
             self._completed_updates(),
             tuple(self._erased[k] for k in sorted(self._erased)),
+            **({"completed_before_generation": generation} if generation else {}),
         )
 
     def _require_training_scope(self) -> None:
@@ -335,6 +340,8 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
         prepared._last_time, prepared._stopped = owned.last_tick, owned.stopped
         prepared._draining = False
         prepared._historical_completed_updates = None
+        if type(owned) is GenerationInboxCursor:
+            prepared._generation_start_updates = owned.completed_before_generation
         # Why: restored payload history must retain the original live consent authority.
         prepared._registration_guard = self._registration_guard
         prepared._training_guard = self._training_guard
@@ -661,12 +668,16 @@ class ExperienceInbox(Generic[Features, Targets, Prediction, State]):
     ) -> tuple[AppliedExperience, ...]:
         validate_learning_rate_multiplier(learning_rate_multiplier)
         validate_gate_setting(gate_setting)
-        if gate_setting != "unchanged" and learning_rate_multiplier != 1:
-            raise ValueError("gate/rate combination is unsupported")
         if gate_setting != "unchanged":
             validator = getattr(self._learner, "validate_gate_setting", None)
             if not callable(validator) or not callable(
-                getattr(self._learner, "train_batch_with_gate_setting", None)
+                getattr(
+                    self._learner,
+                    "train_batch_with_rate_and_gate"
+                    if learning_rate_multiplier != 1
+                    else "train_batch_with_gate_setting",
+                    None,
+                )
             ):
                 raise ValueError("native gate executor is unsupported")
             # Direct inbox/runtime callers get the same pre-payload refusal as

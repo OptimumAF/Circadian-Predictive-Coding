@@ -71,6 +71,51 @@ class MiniGridEvaluationFailed(RuntimeError):
         super().__init__(str(report["reason"]))
 
 
+# Why: both fresh orchestration and the fitter validate this schema. Keeping
+# the shared check here avoids making those outer scripts import each other.
+def _require_phase(observed, *, nuisance=False):
+    from src.core.minigrid_key_door import MiniGridKeyDoorLayout
+
+    if type(nuisance) is not bool:
+        raise ValueError("nuisance phase requires an exact bool")
+    rows = observed.get("episodes", ())
+    if (
+        observed.get("status") != "complete"
+        or observed.get("state_unchanged") is not True
+        or len(rows) != 4
+    ):
+        raise ValueError("A4 phase capture incomplete")
+    if len({row["environment"]["episode_id"] for row in rows}) != 4:
+        raise ValueError("A3/A4 native episode identities must be distinct")
+    for row, (branch, color, cue) in zip(
+        rows,
+        tuple(
+            (branch, color, cue)
+            for branch, color in (
+                ((3, "grey"), (3, "red")) if nuisance else ((3, "grey"), (4, "grey"))
+            )
+            for cue in ("blue", "red")
+        ),
+        strict=True,
+    ):
+        environment = row["environment"]
+        if (
+            row["status"] != "complete"
+            or row["source_role"] != "train"
+            or row["cue"] != cue
+            or environment["role"] != "train"
+            or environment["cue"] != cue
+            or environment["layout"]
+            != asdict(MiniGridKeyDoorLayout("A", branch_row=branch, wall_color=color))
+            or environment["seed"] != 17
+            or environment["max_steps"] != 16
+            or environment["closed"] is not True
+            or environment["failure_work_may_be_unobserved"] is not False
+            or len(row["predictions"]) != environment["environment_steps"]
+        ):
+            raise ValueError("complete closed A3/A4 TRAIN phase evidence required")
+
+
 def _validate_native_rows(method: str, updates: int, native_training_examples: int | None) -> None:
     """Describe the fixed warm/reward clocks; the caller still proves receipts.
 
@@ -1314,6 +1359,12 @@ def evaluate_context_linear_stream_checkpoint(
     development_a4=False,
     a4_training=False,
     a4_current_only=False,
+    a4_current_repeated=False,
+    reference_window=False,
+    reference_catalogue=False,
+    reference_catalogue_cues=None,
+    reference_applied_cues=None,
+    reference_nuisance=False,
 ):
     """Known current-phase or retained old/new games; no new updates."""
     from src.adapters.minigrid_context_linear_learner import (
@@ -1325,11 +1376,52 @@ def evaluate_context_linear_stream_checkpoint(
 
     if type(source) is not ContextLinearLearner or type(budget) is not ToyBudgetSession:
         raise ValueError("causal affine games require exact learner and readout budget")
+    if type(reference_nuisance) is not bool or (
+        reference_nuisance and (reference_window is not True or reference_catalogue is not True)
+    ):
+        raise ValueError("nuisance readout requires the exact reference catalogue mode")
+    if reference_applied_cues is not None and (
+        reference_catalogue is not True
+        or reference_catalogue_cues is not None
+        or type(reference_applied_cues) is not tuple
+        or len(reference_applied_cues) > 4
+        or any(type(c) is not int or c not in (0, 1) for c in reference_applied_cues)
+    ):
+        raise ValueError(
+            "actual reference cue prefix requires0..4 exact bank cues and distinct mode"
+        )
+    if reference_catalogue_cues is not None and (
+        reference_catalogue is not True
+        or type(reference_catalogue_cues) is not tuple
+        or len(reference_catalogue_cues) != 4
+        or any(type(c) is not int or c not in (0, 1) for c in reference_catalogue_cues)
+    ):
+        raise ValueError("declared reference cue order requires four exact0/1 bank cues")
+    if type(reference_catalogue) is not bool or (
+        reference_catalogue and reference_window is not True
+    ):
+        raise ValueError("reference catalogue requires an exact explicit reference window")
+    if type(reference_window) is not bool or (
+        reference_window
+        and any(
+            (
+                retained_catalogue,
+                after_c_capacity,
+                recurring_catalogue,
+                development_a4,
+                a4_training,
+                a4_current_only,
+                a4_current_repeated,
+            )
+        )
+    ):
+        raise ValueError("reference window requires a distinct exact readout mode")
     if type(a4_current_only) is not bool or (
         a4_current_only
         and any(
             (
                 a4_training,
+                a4_current_repeated,
                 retained_catalogue,
                 after_c_capacity,
                 recurring_catalogue,
@@ -1346,10 +1438,27 @@ def evaluate_context_linear_stream_checkpoint(
                 after_c_capacity,
                 recurring_catalogue,
                 development_a4,
+                a4_current_repeated,
             )
         )
     ):
         raise ValueError("A4 TRAIN readout requires an exact distinct mode")
+    if type(a4_current_repeated) is not bool or (
+        a4_current_repeated
+        and any(
+            (
+                a4_current_only,
+                a4_training,
+                retained_catalogue,
+                after_c_capacity,
+                recurring_catalogue,
+                development_a4,
+                reference_window,
+            )
+        )
+    ):
+        raise ValueError("repeated-current A4 readout requires an exact distinct mode")
+    a4_matched_shape = a4_training or a4_current_repeated
     if type(development_a4) is not bool or (development_a4 and recurring_catalogue is not True):
         raise ValueError("development A4 requires an exact flag and ordinary recurring endpoint")
     if (
@@ -1362,7 +1471,42 @@ def evaluate_context_linear_stream_checkpoint(
         raise ValueError("exact mutually exclusive retained/after-C flags required")
     owned = copy_context_linear_training_snapshot(state)
     updates = owned.completed_updates
-    if (
+    if reference_window:
+        # Why: the first blue/red fits have no prior packet; each later FIFO
+        # fit adds nine current and nine previously arrived same-cue rows.
+        expected_rows = updates * 9 + (9 * max(updates - 2, 0) if reference_catalogue else 0)
+        expected_heads = (
+            None if updates == 0 else 18 if reference_catalogue and updates >= 3 else 9,
+            None if updates < 2 else 18 if reference_catalogue and updates >= 4 else 9,
+        )
+        if reference_catalogue_cues is not None:
+            if updates < 2:
+                raise ValueError("declared cue validation requires the warm2/18 prefix")
+            # Why: interleaved recurrence can fit one cue twice before the other.
+            # Keep strict history/row checks, derive heads from the declared FIFO.
+            cue_rows = [9, 9]
+            for cue in reference_catalogue_cues[: max(0, updates - 2)]:
+                cue_rows[cue] = 18
+            expected_heads = (cue_rows[0], cue_rows[1])
+        if reference_applied_cues is not None:
+            if updates != 2 + len(reference_applied_cues):
+                raise ValueError("actual committed cue count differs from native update history")
+            cue_rows = [9, 9]
+            for cue in reference_applied_cues:
+                cue_rows[cue] = 18
+            expected_heads = (cue_rows[0], cue_rows[1])
+        if (
+            not 0 <= updates <= 6
+            or owned.training_examples != expected_rows
+            or owned.failed_work is not None
+            or tuple(None if h is None else h.fit_rows for h in owned.heads) != expected_heads
+        ):
+            raise ValueError(
+                "reference catalogue prefix differs from original joint FIFO geometry"
+                if reference_catalogue
+                else "reference prefix requires0..6 actual nine-row fits and no failed work"
+            )
+    if not reference_window and (
         updates
         not in (
             (10,)
@@ -1376,7 +1520,7 @@ def evaluate_context_linear_stream_checkpoint(
         or owned.training_examples
         != (
             {2: 18, 4: 54, 6: 90}.get(updates, -1)
-            if a4_training
+            if a4_matched_shape
             else 252
             if recurring_catalogue
             else 108
@@ -1391,9 +1535,9 @@ def evaluate_context_linear_stream_checkpoint(
             or head.fit_rows
             != (
                 9
-                if a4_training and updates == 2
+                if a4_matched_shape and updates == 2
                 else 18
-                if a4_training
+                if a4_matched_shape
                 else 36
                 if recurring_catalogue
                 else 27
@@ -1441,10 +1585,17 @@ def evaluate_context_linear_stream_checkpoint(
     live_plan = (
         tuple(
             (item, cue, "train")
-            for item in (predefined_layouts()[0], MiniGridKeyDoorLayout("A", branch_row=4))
+            for item in (
+                (
+                    predefined_layouts()[0],
+                    MiniGridKeyDoorLayout("A", branch_row=3, wall_color="red"),
+                )
+                if reference_nuisance
+                else (predefined_layouts()[0], MiniGridKeyDoorLayout("A", branch_row=4))
+            )
             for cue in ("blue", "red")
         )
-        if a4_training or a4_current_only
+        if a4_training or a4_current_only or a4_current_repeated or reference_window
         else tuple(
             (MiniGridKeyDoorLayout("A", branch_row=4), cue, "probe_test") for cue in ("blue", "red")
         )
@@ -1471,7 +1622,15 @@ def evaluate_context_linear_stream_checkpoint(
         method="arrived_public_cue_affine_fit",
         updates=updates,
         layouts=(),
-        role="knownTRAIN_A3A4_current_only"
+        role="grey_red_A3_nuisance_TRAIN"
+        if reference_nuisance
+        else "knownTRAIN_A3A4_reference_catalogue_prefix"
+        if reference_catalogue
+        else "knownTRAIN_A3A4_reference_prefix"
+        if reference_window
+        else "knownTRAIN_A3A4_current_repeated"
+        if a4_current_repeated
+        else "knownTRAIN_A3A4_current_only"
         if a4_current_only
         else "knownTRAIN_A3A4_adaptation"
         if a4_training
@@ -1495,15 +1654,41 @@ def evaluate_context_linear_stream_checkpoint(
         representation_encoding=CONTEXT_HISTORY_ENCODING_ID,
         representation_feature_dim=298,
         return_metadata=dict(
+            **(
+                dict(nuisance_domain="grey_red_A3_train", endpoint_groups=["old_A3", "shifted_A3"])
+                if reference_nuisance
+                else {}
+            ),
             **({"evaluation_purpose": "development"} if development_a4 else {}),
+            **(
+                dict(
+                    reference_catalogue=True,
+                    source_current_row_exposures=updates * 9,
+                    source_replay_row_exposures=owned.training_examples - updates * 9,
+                )
+                if reference_catalogue
+                else {}
+            ),
+            **(
+                dict(reference_catalogue_cues=list(reference_catalogue_cues))
+                if reference_catalogue_cues is not None
+                else {}
+            ),
+            **(
+                dict(reference_applied_cues=list(reference_applied_cues))
+                if reference_applied_cues is not None
+                else {}
+            ),
             source_fit_calls=updates,
             source_fit_rows=owned.training_examples,
             new_fit_calls=0,
             new_optimizer_updates=0,
             model_encoding=CONTEXT_HISTORY_ENCODING_ID,
             readout_scope=(
-                "known TRAIN A3/A4 at fixed causal checkpoint; no refit/final/probe"
-                if a4_training or a4_current_only
+                "grey and red-wall A3 TRAIN nuisance at fixed causal checkpoint; no refit/final/probe"
+                if reference_nuisance
+                else "known TRAIN A3/A4 at fixed causal checkpoint; no refit/final/probe"
+                if a4_training or a4_current_only or a4_current_repeated or reference_window
                 else "A branch4 development observations via probe_test role; ordinary main state; no probe training or refit/final"
                 if development_a4
                 else "known G_train then returned A TRAIN; ten252-row causal fit; no refit/final/probe"
@@ -1518,7 +1703,9 @@ def evaluate_context_linear_stream_checkpoint(
     )
 
 
-def evaluate_context_linear_probe_checkpoint(source, state, *, phase, budget, check_boundary):
+def evaluate_context_linear_probe_checkpoint(
+    source, state, *, phase, budget, check_boundary, retained_a4=False
+):
     """Execute fixed F probe_test games from an owned before/after snapshot.
 
     No probe fitting or labels enter this binding. The ordinary game loop owns
@@ -1532,12 +1719,17 @@ def evaluate_context_linear_probe_checkpoint(source, state, *, phase, budget, ch
     from src.core.minigrid_context_encoding import CONTEXT_HISTORY_ENCODING_ID
     from src.core.minigrid_key_door import predefined_distinct_probe_layouts
 
+    if type(retained_a4) is not bool:
+        raise ValueError("retained_a4 must be an exact bool")
     if type(source) is not ContextLinearLearner or type(budget) is not ToyBudgetSession:
         raise ValueError("F games require exact learner and readout budget")
     if type(phase) is not str or phase not in ("before_probe", "after_probe"):
         raise ValueError("F games require an explicit before_probe or after_probe phase")
     owned = copy_context_linear_training_snapshot(state)
-    updates, rows, head_rows = (6, 108, 27) if phase == "before_probe" else (8, 126, 9)
+    if retained_a4:
+        updates, rows, head_rows = (4, 54, 18) if phase == "before_probe" else (6, 72, 9)
+    else:
+        updates, rows, head_rows = (6, 108, 27) if phase == "before_probe" else (8, 126, 9)
     if (
         (owned.completed_updates, owned.training_examples) != (updates, rows)
         or owned.failed_work is not None
@@ -1612,6 +1804,7 @@ def evaluate_context_linear_probe_checkpoint(source, state, *, phase, budget, ch
                 new_optimizer_updates=0,
                 model_encoding=CONTEXT_HISTORY_ENCODING_ID,
                 readout_scope="fixed F probe_test games; raw K7 argmax; no refit/final/promotion",
+                **(dict(source_recipe="retained_a4") if retained_a4 else {}),
             ),
         )
     except MiniGridEvaluationFailed as error:
@@ -1620,7 +1813,17 @@ def evaluate_context_linear_probe_checkpoint(source, state, *, phase, budget, ch
     return label_history(report)
 
 
-def evaluate_context_linear_rehearsal_checkpoint(source, state, *, arm, budget, check_boundary):
+def evaluate_context_linear_rehearsal_checkpoint(
+    source,
+    state,
+    *,
+    arm,
+    budget,
+    check_boundary,
+    short_return_phase=None,
+    qualified_boundary=None,
+    retained_a4=False,
+):
     """Read fixed F then returned A from the matched private two-fit endpoints."""
     from src.adapters.minigrid_context_linear_learner import (
         ContextLinearLearner,
@@ -1629,10 +1832,34 @@ def evaluate_context_linear_rehearsal_checkpoint(source, state, *, arm, budget, 
     from src.core.minigrid_context_encoding import CONTEXT_HISTORY_ENCODING_ID
     from src.core.minigrid_key_door import predefined_distinct_probe_layouts
 
-    if (
-        type(source) is not ContextLinearLearner
-        or type(arm) is not str
-        or arm not in ("current_only", "joint_ABC_F")
+    short_return = short_return_phase is not None
+    if type(retained_a4) is not bool or (
+        retained_a4
+        and (
+            short_return
+            or qualified_boundary is not None
+            or type(arm) is not str
+            or arm not in ("current_only", "joint_A3_A4_F")
+        )
+    ):
+        raise ValueError("retained rehearsal games require their exact arm and no return observer")
+    if type(source) is not ContextLinearLearner or (
+        (
+            arm is not None
+            or type(short_return_phase) is not str
+            or short_return_phase not in ("after_probe", "after_return")
+            or not callable(qualified_boundary)
+        )
+        if short_return
+        else (
+            type(arm) is not str
+            or arm
+            not in (
+                ("current_only", "joint_A3_A4_F")
+                if retained_a4
+                else ("current_only", "joint_ABC_F")
+            )
+        )
     ):
         raise ValueError("private return games require exact learner and matched arm")
     guard = _return_budget_guard(budget)
@@ -1647,12 +1874,21 @@ def evaluate_context_linear_rehearsal_checkpoint(source, state, *, arm, budget, 
             "private return games require original150s/512MiB zero-work readout budget"
         )
     owned = copy_context_linear_training_snapshot(state)
+    updates, rows, head_rows = (
+        ((6, 72, 9) if short_return_phase == "after_probe" else (8, 108, 18))
+        if short_return
+        else (6, 108, 27)
+        if retained_a4
+        else (8, 180, 36)
+    )
     if (
-        (owned.completed_updates, owned.training_examples) != (8, 180)
+        (owned.completed_updates, owned.training_examples) != (updates, rows)
         or owned.failed_work is not None
-        or any(h is None or h.fit_rows != 36 for h in owned.heads)
+        or any(h is None or h.fit_rows != head_rows for h in owned.heads)
     ):
-        raise ValueError("private return games require actual8/180/two36-row heads")
+        raise ValueError(
+            f"private return games require actual{updates}/{rows}/two{head_rows}-row heads"
+        )
 
     def copy_state(value):
         current = copy_context_linear_training_snapshot(value)
@@ -1672,14 +1908,25 @@ def evaluate_context_linear_rehearsal_checkpoint(source, state, *, arm, budget, 
         (layout, cue, "probe_test")
         for layout, cue in zip(predefined_distinct_probe_layouts(), ("blue", "red"))
     ) + tuple((predefined_layouts()[0], cue, "train") for cue in ("blue", "red"))
+    if short_return or retained_a4:
+        # Why: this declared recipe reads both original A3/A4 contexts; it is
+        # not the matched8/180 rehearsal endpoint or an inferred fit outcome.
+        plan += tuple(
+            (replace(predefined_layouts()[0], branch_row=4), cue, "train")
+            for cue in ("blue", "red")
+        )
     try:
         report = _run_checkpoint(
             source,
             owned,
             method="arrived_public_cue_affine_fit",
-            updates=8,
+            updates=updates,
             layouts=(),
-            role="private_F_then_returned_A",
+            role=f"private_retained_{arm}"
+            if retained_a4
+            else "private_F_then_old_A3_A4"
+            if short_return
+            else "private_F_then_returned_A",
             sources=(),
             budget=budget,
             check_boundary=check_boundary,
@@ -1692,12 +1939,34 @@ def evaluate_context_linear_rehearsal_checkpoint(source, state, *, arm, budget, 
             representation_feature_dim=298,
             return_metadata=dict(
                 rehearsal_arm=arm,
-                source_fit_calls=8,
-                source_fit_rows=180,
+                source_fit_calls=updates,
+                source_fit_rows=rows,
                 new_fit_calls=0,
                 new_optimizer_updates=0,
                 model_encoding=CONTEXT_HISTORY_ENCODING_ID,
                 readout_scope="fixed F probe_test then known returned A TRAIN; raw K7 argmax; no fit/final/promotion",
+                **(
+                    dict(
+                        short_return_phase=short_return_phase,
+                        source_recipe="short_affine_return",
+                        old_native_contexts="original A3/A4 blue/red TRAIN",
+                    )
+                    if short_return
+                    else {}
+                ),
+                **(
+                    dict(
+                        source_recipe="retained_a4_private_rehearsal",
+                        old_native_contexts="original A3/A4 blue/red TRAIN",
+                    )
+                    if retained_a4
+                    else {}
+                ),
+            ),
+            **(
+                dict(qualified_boundary=qualified_boundary)
+                if qualified_boundary is not None
+                else {}
             ),
         )
     except MiniGridEvaluationFailed as error:
@@ -2228,6 +2497,29 @@ def _live_slot(layout: MiniGridKeyDoorLayout, cue: str, role: str, status: str) 
     )
 
 
+def _live_episode_id(method, updates, layout, cue, role):
+    if role == "grey_red_A3_nuisance_TRAIN":
+        # Same context and branch: palette must distinguish these native episodes.
+        return (
+            f"live-{method}-{updates}-{layout.context}-row{layout.branch_row}"
+            f"-{layout.wall_color}-{cue}"
+        )
+    # A3 and A4 share the native context name; branch rows distinguish episodes.
+    if role in ("private_retained_current_only", "private_retained_joint_A3_A4_F"):
+        # Exact recipe names are report metadata; compact arm tags keep IDs <=64 bytes.
+        arm = "current" if role == "private_retained_current_only" else "joint"
+        return f"live-{method}-{arm}-{updates}-{layout.context}-row{layout.branch_row}-{cue}"
+    if role in (
+        "knownTRAIN_A3A4_adaptation",
+        "knownTRAIN_A3A4_current_only",
+        "knownTRAIN_A3A4_current_repeated",
+        "knownTRAIN_A3A4_reference_prefix",
+        "knownTRAIN_A3A4_reference_catalogue_prefix",
+    ):
+        return f"live-{method}-{updates}-{layout.context}-row{layout.branch_row}-{cue}"
+    return f"live-{method}-{updates}-{layout.context}-{cue}"
+
+
 def _run_checkpoint(
     source: Any,
     state: Any,
@@ -2251,8 +2543,27 @@ def _run_checkpoint(
     require_initial_source: bool = False,
     qualified_boundary: EndpointBoundary | None = None,
     timings: MiniGridEndpointTiming | None = None,
+    serving_binding=None,
 ) -> dict[str, Any]:
     """Execute already-admitted old readouts or the private fixed A/E contract."""
+    if serving_binding is not None:
+        from src.adapters.promotable_minigrid_binding import PromotableMiniGridBinding
+
+        if (
+            type(serving_binding) is not PromotableMiniGridBinding
+            or source is not serving_binding
+            or type(sources) is not tuple
+            or sources
+            or public_history is not True
+            or method != "arrived_public_cue_affine_fit"
+            or type(live_plan) is not tuple
+            or len(live_plan) != 1
+            or require_initial_source
+        ):
+            raise ValueError("published actor requires its exact single TRAIN serving binding")
+        serving_binding.check()
+        if not _same_value(state, serving_binding.state):
+            raise ValueError("published actor state differs from its admitted serving snapshot")
     if type(representation_feature_dim) is not int or representation_feature_dim not in (296, 298):
         raise ValueError("bound MiniGrid projection dimension must be296 or298")
     if timings is not None and type(timings) not in (
@@ -2471,19 +2782,23 @@ def _run_checkpoint(
         if not same_state(expected.policy, source_before.policy):
             raise ValueError("checkpoint and source native policies differ")
         check()
-        scorer = source.fork()
-        if scorer is source:
-            raise ValueError("readout requires an independent scorer fork")
-        # The new fork initially owns source state, so inspect the original guard
-        # before binding this fork to a potentially older owned checkpoint.
-        boundary()
-        if not same_state(expected, checkpoint_state()):
-            raise ValueError("fork changed the supplied readout checkpoint")
-        if not same_state(source_before, read_snapshot(source)):
-            raise ValueError("fork changed the readout source")
-        scorer.restore_state(
-            deepcopy(expected) if memory_copier is None else memory_copier(expected)
-        )
+        if serving_binding is None:
+            scorer = source.fork()
+            if scorer is source:
+                raise ValueError("readout requires an independent scorer fork")
+            # The new fork initially owns source state, so inspect the original guard
+            # before binding this fork to a potentially older owned checkpoint.
+            boundary()
+            if not same_state(expected, checkpoint_state()):
+                raise ValueError("fork changed the supplied readout checkpoint")
+            if not same_state(source_before, read_snapshot(source)):
+                raise ValueError("fork changed the readout source")
+            scorer.restore_state(
+                deepcopy(expected) if memory_copier is None else memory_copier(expected)
+            )
+        else:
+            # Published serving must use the actual actor, not a restored copy.
+            scorer = serving_binding
         check()
         for packet in sources:
             check()
@@ -2567,11 +2882,9 @@ def _run_checkpoint(
                     seed=17,
                     max_steps=16,
                     role=episode_role,
-                    episode_id=(
-                        f"live-{method}-{updates}-{layout.context}-row{layout.branch_row}-{cue}"
-                        if role in ("knownTRAIN_A3A4_adaptation", "knownTRAIN_A3A4_current_only")
-                        else f"live-{method}-{updates}-{layout.context}-{cue}"
-                    ),
+                    episode_id=serving_binding.episode_id
+                    if serving_binding is not None
+                    else _live_episode_id(method, updates, layout, cue, role),
                 )
                 work["environment_resets_completed"] += 1
                 history = None
@@ -2661,10 +2974,14 @@ def _run_checkpoint(
                     )
                     if qualified_boundary is None or current is not scorer:
                         check()
-                    if environment.legal_actions != tuple(range(7)):
-                        raise ValueError("MiniGrid must expose all seven valid native inputs")
-                    with timings.measure("physics") if timings is not None else nullcontext():
-                        environment.step(decision["action"])
+                    if serving_binding is None:
+                        if environment.legal_actions != tuple(range(7)):
+                            raise ValueError("MiniGrid must expose all seven valid native inputs")
+                        with timings.measure("physics") if timings is not None else nullcontext():
+                            environment.step(decision["action"])
+                    else:
+                        with timings.measure("physics") if timings is not None else nullcontext():
+                            serving_binding.step(environment, decision["action"])
                     check()
                     if environment.terminal:
                         break

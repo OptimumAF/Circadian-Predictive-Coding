@@ -17,6 +17,7 @@ from src.adapters.minigrid_linear_fit_control import (
     diagnose_context_train_linear_fit,
 )
 from src.core.demonstration_episode import DemonstrationEpisode, DemonstrationTransition
+from src.core.reference_controller import ReferencePolicy
 from src.adapters.minigrid_probe_support import (
     describe_train_fit_bounds,
     summarize_train_fit_bounds,
@@ -192,8 +193,11 @@ def _context_linear_training_snapshot(saved):
 
     fields = dict(saved)
     fields["policy"] = ContextLinearPolicy(**fields["policy"])
-    heads = []
+    heads: list[CategoricalLinearFit | None] = []
     for head in fields["heads"]:
+        if head is None:
+            heads.append(None)
+            continue
         model = dict(head)
         model["coefficients"] = tuple(tuple(row) for row in model["coefficients"])
         model["singular_values"] = tuple(model["singular_values"])
@@ -533,6 +537,98 @@ def describe_context_linear_stream():
     )
 
 
+def describe_context_linear_reference(
+    policy: ReferencePolicy,
+    *,
+    prequential_feedback=False,
+    ready_feedback=False,
+    retain_arrived=False,
+    a4_training=False,
+    acknowledge_correct=False,
+):
+    if type(acknowledge_correct) is not bool or (
+        acknowledge_correct and (not ready_feedback or prequential_feedback or a4_training)
+    ):
+        raise ValueError("correct acknowledgement requires ordinary ready-feedback references")
+    if (
+        type(policy) is not ReferencePolicy
+        or type(prequential_feedback) is not bool
+        or type(ready_feedback) is not bool
+        or type(retain_arrived) is not bool
+        or type(a4_training) is not bool
+        or (a4_training and not retain_arrived)
+        or (prequential_feedback and ready_feedback)
+        or (policy.mode == "drift" and not (prequential_feedback or ready_feedback))
+    ):
+        raise ValueError("affine reference requires an exact supported fixed ReferencePolicy")
+    policy.__post_init__()
+    protocol = describe_context_linear_stream()
+    del protocol["fit_calls"], protocol["fit_rows"]
+    result = dict(
+        protocol,
+        definition="minigrid_context_linear_reference_window_v1",
+        reference_policy=asdict(policy),
+        checkpoint_updates=tuple(range(7)),
+        window_opportunities=7,
+        fit_calls_upper_bound=6,
+        fit_rows_upper_bound=54,
+        arrival_rows=54,
+        score_calls=0,
+        score_rows=0,
+        game_episodes=0,
+        qualification="finite ordinary TRAIN window; pending is not completed training; no automatic scores/games/final/probe/retention claim",
+    )
+    if prequential_feedback:
+        result.update(
+            prequential_feedback=True,
+            diagnostic_forks_upper_bound=6,
+            diagnostic_prediction_calls_upper_bound=6,
+            diagnostic_prediction_rows_upper_bound=54,
+            feedback_version_policy="retire changed candidate version/update errors without a wake vote",
+        )
+    if ready_feedback:
+        result.update(
+            ready_feedback=True,
+            diagnostic_forks_upper_bound=6,
+            diagnostic_prediction_calls_upper_bound=6,
+            diagnostic_prediction_rows_upper_bound=54,
+            feedback_version_policy="current candidate and oldest eligible FIFO TRAIN packet after label arrival",
+        )
+    if retain_arrived:
+        result.update(
+            definition="minigrid_arrived_catalogue_reference_window_v1",
+            retain_arrived=True,
+            fit_rows_upper_bound=90,
+            replay_rows_upper_bound=36,
+            bank_policy="one prior arrived TRAIN episode per public cue, jointly fitted only on selected wakes",
+            prepared_input_array_bytes=90 * 297 * 8,
+            planned_peak_bank_rows=18,
+        )
+        if prequential_feedback or ready_feedback:
+            # Why: a waiting ready control can repeatedly diagnose an18-row
+            # oldest packet. This is a bound, not an executed work count.
+            result["diagnostic_prediction_rows_upper_bound"] = 108 if ready_feedback else 90
+    if a4_training:
+        result.update(
+            definition="minigrid_a3_a4_arrived_reference_window_v1",
+            schedule="original A3 blue/red, fresh A4 TRAIN blue/red, returned A3 blue/red",
+            checkpoint_export="actual completed prefixes only, unscored; logical observations2/4/6",
+        )
+    if acknowledge_correct:
+        proof_rows = result["diagnostic_prediction_rows_upper_bound"]
+        result.update(
+            acknowledge_correct=True,
+            acknowledgement_proof_forks_upper_bound=6,
+            acknowledgement_proof_prediction_calls_upper_bound=6,
+            acknowledgement_proof_prediction_rows_upper_bound=proof_rows,
+            diagnostic_forks_upper_bound=12,
+            diagnostic_prediction_calls_upper_bound=12,
+            diagnostic_prediction_rows_upper_bound=2 * proof_rows,
+            consumption="one fit OR fresh proof-bound correct acknowledgement per opportunity; consumed is not all fitted",
+        )
+    return result
+
+
 def describe_context_linear_catalogue():
     return dict(
         describe_context_linear_stream(),
@@ -603,6 +699,18 @@ def describe_context_linear_a4_current_only():
     )
 
 
+def describe_context_linear_a4_current_repeated():
+    return dict(
+        describe_context_linear_a4_current_only(),
+        definition="minigrid_affine_a3_a4_a3_current_repeated_v1",
+        fit_rows=90,
+        repeated_current_row_exposures=36,
+        current_packet_multiplicities=(1, 1, 2, 2, 2, 2),
+        bank_policy="current arrived TRAIN packet only, repeated within wake; no prior-packet bank",
+        qualification="six fits/90 row exposures match joint batch shapes; not matched wall/FLOPs, native usefulness or CPC benefit",
+    )
+
+
 def run_context_linear_stream(
     episodes,
     *,
@@ -613,18 +721,65 @@ def run_context_linear_stream(
     recurring_catalogue=False,
     a4_training=False,
     a4_current_only=False,
+    a4_current_repeated=False,
+    reference_policy: ReferencePolicy | None = None,
+    prequential_feedback=False,
+    ready_feedback=False,
+    shift_diagnostics=False,
+    acknowledge_correct=False,
 ):
     from src.adapters.minigrid_context_linear_learner import ContextLinearLearner
     from src.adapters.minigrid_train_catalogue import (
         _validate_sources,
         compose_arrived_cue_catalogue,
+        compose_repeated_current_training,
     )
     from src.app.actor_shadow import StableActor
-    from src.app.coupled_attribution import AttributionBatch, AttributionStream
+    from src.app.coupled_attribution import AttributionBatch, AttributionStream, _same_value
     from src.core.categorical_probability_scores import probability_scores
     from src.core.demonstration_episode import episode_arrays
     from src.core.learner_ports import TrainingUpdateFailed
 
+    reference_protocol = None
+    policy_pin = None
+    if type(acknowledge_correct) is not bool or (
+        acknowledge_correct
+        and (reference_policy is None or not ready_feedback or prequential_feedback or a4_training)
+    ):
+        raise ValueError("correct acknowledgement requires ordinary ready-feedback references")
+    if type(shift_diagnostics) is not bool or (shift_diagnostics and reference_policy is None):
+        raise ValueError("shift_diagnostics requires an exact bool and the native reference lane")
+    if (
+        type(prequential_feedback) is not bool
+        or type(ready_feedback) is not bool
+        or (prequential_feedback and ready_feedback)
+        or ((prequential_feedback or ready_feedback) and reference_policy is None)
+    ):
+        raise ValueError("prequential feedback requires an explicit reference and exact bool flag")
+    if reference_policy is not None:
+        reference_protocol = describe_context_linear_reference(
+            reference_policy,
+            prequential_feedback=prequential_feedback,
+            ready_feedback=ready_feedback,
+            retain_arrived=retain_arrived,
+            a4_training=a4_training,
+            **(dict(acknowledge_correct=True) if acknowledge_correct else {}),
+        )
+        policy_pin = deepcopy(reference_policy)
+        if (
+            any(
+                (
+                    abc_catalogue,
+                    recurring_catalogue,
+                    a4_current_only,
+                    a4_current_repeated,
+                )
+            )
+            or endpoint_observer is not None
+        ):
+            raise ValueError(
+                "reference window requires its distinct A/B or joint A4 route without endpoint handoff"
+            )
     if any(
         type(flag) is not bool
         for flag in (
@@ -633,6 +788,7 @@ def run_context_linear_stream(
             recurring_catalogue,
             a4_training,
             a4_current_only,
+            a4_current_repeated,
         )
     ):
         raise ValueError("catalogue flags must be exact bools")
@@ -640,7 +796,11 @@ def run_context_linear_stream(
         raise ValueError("A4 TRAIN requires retention and a distinct mode")
     if a4_current_only and (a4_training or retain_arrived or abc_catalogue or recurring_catalogue):
         raise ValueError("current-only A4 requires a distinct nonretained mode")
-    a4_mode = a4_training or a4_current_only
+    if a4_current_repeated and any(
+        (a4_current_only, a4_training, retain_arrived, abc_catalogue, recurring_catalogue)
+    ):
+        raise ValueError("repeated-current A4 requires a distinct nonretained mode")
+    a4_mode = a4_training or a4_current_only or a4_current_repeated
     if abc_catalogue and not retain_arrived:
         raise ValueError("ABC requires arrived catalogue retention")
     if recurring_catalogue and (not retain_arrived or abc_catalogue):
@@ -651,6 +811,8 @@ def run_context_linear_stream(
         if not callable(check_boundary):
             raise ValueError("outer TRAIN boundary must be callable")
         check_boundary()
+        if reference_policy is not None and reference_policy != policy_pin:
+            raise ValueError("original affine reference policy changed")
     contexts = (
         ("A", "A4-train")
         if a4_mode
@@ -689,7 +851,7 @@ def run_context_linear_stream(
     scheduled = []
     for i, index in enumerate(plan):
         episode = replace(selected[index], episode_id=f"{expected[index]}:wake:{i}")
-        if retain_arrived:
+        if retain_arrived or a4_current_repeated:
             scheduled.append(episode)
             continue
         x, y = episode_arrays(episode)
@@ -705,6 +867,10 @@ def run_context_linear_stream(
             )
         )
     catalogue = None
+    repetition = None
+    if a4_current_repeated:
+        repetition = compose_repeated_current_training(tuple(scheduled))
+        training = list(repetition.training)
     if retain_arrived:
         catalogue = (
             compose_arrived_cue_catalogue(tuple(scheduled), retained_per_cue=3, max_arrivals=10)
@@ -717,7 +883,11 @@ def run_context_linear_stream(
             raise ValueError("fixed catalogue protocol requires alternating public blue/red cues")
         training = list(catalogue.training)
     protocol = (
-        describe_context_linear_a4_current_only()
+        reference_protocol
+        if reference_protocol is not None
+        else describe_context_linear_a4_current_repeated()
+        if a4_current_repeated
+        else describe_context_linear_a4_current_only()
         if a4_current_only
         else describe_context_linear_a4()
         if a4_training
@@ -744,6 +914,25 @@ def run_context_linear_stream(
         score_calls_completed=0,
         score_rows_completed=0,
     )
+    shift = None
+    if shift_diagnostics:
+        from src.adapters.minigrid_shift_diagnostics import describe as describe_shift
+
+        protocol["shift_diagnostics"] = describe_shift()
+    if repetition is not None:
+        report["current_repetition"] = dict(
+            wakes=[
+                dict(asdict(wake), original_episode_id=expected[plan[i]])
+                for i, wake in enumerate(repetition.wakes)
+            ],
+            arrival_row_exposures=repetition.arrival_row_exposures,
+            repeated_current_row_exposures=repetition.repeated_current_row_exposures,
+            prior_packet_replay_rows=0,
+            fit_row_exposures=repetition.fit_row_exposures,
+            input_array_bytes=repetition.input_array_bytes,
+            retained_bank_rows=0,
+            accounting_scope="repeated current rows inside one native wake; no additional arrival or consolidation event",
+        )
     if catalogue is not None:
         report["catalogue"] = dict(
             wakes=[asdict(wake) for wake in catalogue.wakes],
@@ -757,11 +946,17 @@ def run_context_linear_stream(
             bank_storage_scope="shared source episode references; current+next observations and targets only; reward/metadata/Python overhead excluded; full source/stream copies count in RSS",
             accounting_scope="old rows fitted jointly inside native wake; explicit replay exposures, not separate consolidation-budget events",
         )
+        if reference_policy is not None:
+            # Why: a finite reference may consume none of this prepared plan.
+            # Storage/preparation is paid; planned exposures are not actual fits.
+            report["catalogue"] = dict(planned=report["catalogue"])
     limits = ToyExecutionBudget(
         max_training_updates=update_count, max_wall_seconds=90, max_process_rss_bytes=512 * 1024**2
     )
-    states = []
+    states: list[tuple[int, Any]] = []
     stream = None
+    verified_repeated_receipts: tuple[Any, ...] = ()
+    verified_repeated_state = None
     started = monotonic()
     with ProcessRssSampler(interval_seconds=0.02) as memory:
         budget = ToyBudgetSession(limits, monotonic)
@@ -772,25 +967,67 @@ def run_context_linear_stream(
         original_actor = actor.snapshot_state()
 
         def boundary():
-            if check_boundary is not None:
-                check_boundary()
+            if check_boundary is not None or a4_current_repeated:
+                if check_boundary is not None:
+                    check_boundary()
                 witness.check(selected)
                 if source.snapshot_state() != initial or actor.snapshot_state() != original_actor:
                     raise ValueError("outer TRAIN boundary changed source or actor")
+            if reference_policy is not None and reference_policy != policy_pin:
+                raise ValueError("original affine reference policy changed")
+
+        observed_fit_rows = 0
 
         def observe(n, state, batch):
+            nonlocal observed_fit_rows
             boundary()
             witness.check(selected)
-            if (catalogue is not None or a4_current_only) and (
-                state.completed_updates != n
-                or state.training_examples != sum(len(b.features) for b in training[:n])
+            expected_rows = sum(len(b.features) for b in training[:n])
+            if acknowledge_correct:
+                # ACKs consume packets without fits: the actual observed batch
+                # can follow skipped indices in the original prepared plan.
+                if n != len(states) or (n == 0) != (batch is None):
+                    raise ValueError("acknowledged window checkpoint order changed")
+                if batch is not None and not any(_same_value(batch, item) for item in training):
+                    raise ValueError("acknowledged window fitted an unknown TRAIN batch")
+                expected_rows = observed_fit_rows + (0 if batch is None else len(batch.features))
+            if (catalogue is not None or a4_current_only or a4_current_repeated) and (
+                state.completed_updates != n or state.training_examples != expected_rows
             ):
                 raise ValueError(
                     "arrived catalogue native fit/row counters disagree with receipt prefix"
                 )
             states.append((n, state))
+            observed_fit_rows = expected_rows
+
+        def observe_arrived(tick, index, batch, candidate):
+            boundary()
+            if not _same_value(batch, training[index]):
+                raise ValueError("arrived shift template differs from the original TRAIN plan")
+            # Joint fitting may contain replay. Diagnose only this newly labelled
+            # packet, never older replay rows or a future source's labels.
+            episode = replace(
+                selected[plan[index]], episode_id=f"{expected[plan[index]]}:wake:{index}"
+            )
+            x, y = episode_arrays(episode)
+            current = AttributionBatch(
+                "train",
+                episode.context,
+                tuple(f"{episode.episode_id}:step:{t.step}" for t in episode.transitions),
+                x,
+                y,
+                episode,
+                7,
+            )
+            assert shift is not None
+            shift.observe(tick, index, current, candidate)
+            boundary()
 
         try:
+            if shift_diagnostics:
+                from src.adapters.minigrid_shift_diagnostics import MiniGridShiftDiagnostics
+
+                shift = MiniGridShiftDiagnostics()
             stream = AttributionStream(
                 source,
                 tuple(training),
@@ -802,7 +1039,71 @@ def run_context_linear_stream(
                 observe_checkpoint=observe,
                 actor=actor,
             )
-            if check_boundary is None:
+            if reference_policy is not None:
+                # A terminal window can leave pending packets. Do not finish,
+                # score or treat partial states as six completed fits. Only the
+                # explicit A4 route returns its bounded unscored actual prefixes.
+                boundary()
+                arrived_options: dict[str, Any] = (
+                    dict(observe_arrived=observe_arrived) if shift_diagnostics else {}
+                )
+                if acknowledge_correct:
+                    arrived_options["acknowledge_correct"] = True
+                try:
+                    report["stream"] = stream.run_reference_window(
+                        reference_policy,
+                        prequential_feedback=prequential_feedback,
+                        ready_feedback=ready_feedback,
+                        **arrived_options,
+                    )
+                finally:
+                    if report["stream"] is None:
+                        report["stream"] = stream.reference_report
+                if report["stream"]["status"] != "complete":
+                    raise ValueError("affine reference window capture is incomplete")
+                witness.check(selected)
+                if source.snapshot_state() != initial or actor.snapshot_state() != original_actor:
+                    raise ValueError("affine reference changed source or actor")
+                budget.before_final()
+                boundary()
+                report.update(status="complete", source_unchanged=True, actor_unchanged=True)
+                return report
+            if a4_current_repeated:
+                verified_repeated_state = stream.candidate_snapshot()
+                for stop in range(1, update_count + 1):
+                    boundary()
+                    if not _same_value(
+                        stream.applied_updates, verified_repeated_receipts
+                    ) or not _same_value(stream.candidate_snapshot(), verified_repeated_state):
+                        raise ValueError("preceding repeated-current receipt or candidate changed")
+                    stream.run_until(stop)
+                    observed = stream.applied_updates
+                    current = stream.candidate_snapshot()
+                    if (
+                        len(observed) != stop
+                        or not _same_value(observed[:-1], verified_repeated_receipts)
+                        or observed[-1].sample_id != f"batch-{stop - 1}"
+                        or (
+                            observed[-1].observed_at,
+                            observed[-1].arrived_at,
+                            observed[-1].applied_at,
+                            observed[-1].update_number,
+                        )
+                        != (stop - 1, stop, stop, stop)
+                        or current.completed_updates != stop
+                        or current.training_examples
+                        != sum(len(b.features) for b in training[:stop])
+                        or current.failed_work is not None
+                    ):
+                        raise ValueError("repeated-current update lacks its original paid prefix")
+                    verified_repeated_receipts = deepcopy(observed)
+                    verified_repeated_state = current
+                boundary()
+                if not _same_value(
+                    stream.applied_updates, verified_repeated_receipts
+                ) or not _same_value(stream.candidate_snapshot(), verified_repeated_state):
+                    raise ValueError("final repeated-current evidence changed before finish")
+            elif check_boundary is None:
                 stream.run_until(update_count)
             else:
                 # Why: incremental advancement preserves delay-one receipts and
@@ -820,7 +1121,7 @@ def run_context_linear_stream(
                 budget.before_final()
                 witness.check(selected)
                 reader.restore_state(state)
-                row = dict(updates=n, state=asdict(state), scores={})
+                row: dict[str, Any] = dict(updates=n, state=asdict(state), scores={})
                 report["endpoints"].append(row)
                 for episode in selected:
                     boundary()
@@ -850,24 +1151,111 @@ def run_context_linear_stream(
             if isinstance(error, TrainingUpdateFailed):
                 report["failure_work"] = dict(definition=error.definition, work=error.work)
         finally:
+            if shift is not None:
+                report["shift_diagnostics"] = shift.report()
             report["observed_checkpoints"] = [n for n, state in states]
             scored = {row["updates"] for row in report["endpoints"]}
-            report["unscored_checkpoints"] = [
-                dict(updates=n, state=asdict(state)) for n, state in states if n not in scored
-            ]
+            report["unscored_checkpoints"] = (
+                [dict(updates=n, state=asdict(state)) for n, state in states if n not in scored]
+                if reference_policy is None or a4_training
+                else []
+            )
             report["committed_receipts"] = None
             report["receipt_capture_error"] = None
             if stream is not None:
                 try:
-                    report["committed_receipts"] = [asdict(r) for r in stream.applied_updates]
+                    captured = stream.applied_updates
+                    captured_indices = tuple(range(len(captured)))
+                    if acknowledge_correct and catalogue is not None:
+                        captured_indices = tuple(r.observed_at for r in captured)
+                        if any(
+                            type(i) is not int or not 0 <= i < len(catalogue.wakes)
+                            for i in captured_indices
+                        ) or captured_indices != tuple(sorted(set(captured_indices))):
+                            raise ValueError(
+                                "acknowledged reference receipts lost actual FIFO indices"
+                            )
+                    if (
+                        catalogue is not None
+                        and reference_policy is not None
+                        and (
+                            len(captured) > len(catalogue.wakes)
+                            or report["stream"] is None
+                            or not _same_value(
+                                [asdict(r) for r in captured],
+                                report["stream"].get("applied_updates"),
+                            )
+                            or any(
+                                r.sample_id != f"batch-{packet_index}"
+                                or r.update_number != i + 1
+                                or r.observed_at != catalogue.wakes[packet_index].observed_at
+                                or r.arrived_at != catalogue.wakes[packet_index].arrived_at
+                                or r.applied_at < r.arrived_at
+                                for i, (r, packet_index) in enumerate(
+                                    zip(captured, captured_indices, strict=True)
+                                )
+                            )
+                        )
+                    ):
+                        raise ValueError(
+                            "reference catalogue receipts differ from original FIFO prefix"
+                        )
+                    if a4_current_repeated and not _same_value(
+                        captured, verified_repeated_receipts
+                    ):
+                        raise ValueError(
+                            "repeated-current receipt capture changed or is unobserved"
+                        )
+                    report["committed_receipts"] = [asdict(r) for r in captured]
                 except Exception as error:
                     report["receipt_capture_error"] = f"{type(error).__name__}: {error}"[:512]
                     if report["status"] == "complete":
                         report.update(status="failed", reason="committed receipt capture failed")
+            if repetition is not None:
+                report["current_repetition"]["verified_receipts"] = [
+                    asdict(r) for r in verified_repeated_receipts
+                ]
+                verified_prefix = repetition.wakes[: len(verified_repeated_receipts)]
+                report["current_repetition"]["verified_rows"] = dict(
+                    arrivals=sum(w.current_rows for w in verified_prefix),
+                    repeated_current=sum(w.repeated_current_rows for w in verified_prefix),
+                    native=sum(w.current_rows + w.repeated_current_rows for w in verified_prefix),
+                )
+                receipts = report["committed_receipts"]
+                committed = None if receipts is None else len(receipts)
+                prefix = () if committed is None else repetition.wakes[:committed]
+                report["current_repetition"]["committed_rows"] = (
+                    None
+                    if committed is None
+                    else dict(
+                        arrivals=sum(w.current_rows for w in prefix),
+                        repeated_current=sum(w.repeated_current_rows for w in prefix),
+                        native=sum(w.current_rows + w.repeated_current_rows for w in prefix),
+                    )
+                )
+                report["current_repetition"]["failed_attempt_repeated_rows_upper_bound"] = (
+                    repetition.wakes[committed].repeated_current_rows
+                    if report["status"] != "complete"
+                    and committed is not None
+                    and committed < len(repetition.wakes)
+                    else None
+                )
+                report["current_repetition"]["failure_work_may_be_unobserved"] = (
+                    report["status"] != "complete"
+                )
             if catalogue is not None:
                 receipts = report["committed_receipts"]
                 committed = None if receipts is None else len(receipts)
                 prefix = () if committed is None else catalogue.wakes[:committed]
+                if acknowledge_correct and receipts is not None:
+                    indices = [receipt["observed_at"] for receipt in receipts]
+                    if any(
+                        type(i) is not int or not 0 <= i < len(catalogue.wakes) for i in indices
+                    ) or indices != sorted(set(indices)):
+                        raise ValueError(
+                            "acknowledged catalogue receipts require actual FIFO indices"
+                        )
+                    prefix = tuple(catalogue.wakes[i] for i in indices)
                 report["catalogue"]["committed_rows"] = (
                     None
                     if committed is None
@@ -878,7 +1266,11 @@ def run_context_linear_stream(
                     )
                 )
                 report["catalogue"]["failed_attempt_replay_rows_upper_bound"] = (
-                    catalogue.wakes[committed].replay_rows
+                    (
+                        max(w.replay_rows for w in catalogue.wakes)
+                        if acknowledge_correct
+                        else catalogue.wakes[committed].replay_rows
+                    )
                     if report["status"] != "complete"
                     and committed is not None
                     and committed < len(catalogue.wakes)
@@ -887,6 +1279,38 @@ def run_context_linear_stream(
                 report["catalogue"]["failure_work_may_be_unobserved"] = (
                     report["status"] != "complete"
                 )
+                if reference_policy is not None:
+                    window = report["stream"]
+                    attempts = None if window is None else window.get("attempted_wakes")
+                    attempted_prefix = (
+                        catalogue.wakes[:attempts]
+                        if type(attempts) is int and 0 <= attempts <= len(catalogue.wakes)
+                        else None
+                    )
+                    report["catalogue"]["attempted_rows_upper_bound"] = (
+                        None
+                        if attempted_prefix is None
+                        else dict(
+                            arrivals=sum(w.current_rows for w in attempted_prefix),
+                            replay=sum(w.replay_rows for w in attempted_prefix),
+                            native=sum(w.current_rows + w.replay_rows for w in attempted_prefix),
+                        )
+                    )
+                    if (
+                        acknowledge_correct
+                        and attempted_prefix is not None
+                        and type(attempts) is int
+                    ):
+                        # A failed call need not reveal its skipped packet index.
+                        # Keep actual committed charges exact and the attempted
+                        # ceiling conservative, including all possible prior rows.
+                        current_max = max(w.current_rows for w in catalogue.wakes)
+                        replay_max = max(w.replay_rows for w in catalogue.wakes)
+                        report["catalogue"]["attempted_rows_upper_bound"] = dict(
+                            arrivals=attempts * current_max,
+                            replay=attempts * replay_max,
+                            native=attempts * (current_max + replay_max),
+                        )
             report["budget"] = dict(
                 initial_limits=asdict(limits),
                 limits=asdict(budget.budget),
@@ -1072,9 +1496,49 @@ def main() -> None:
     )
     diagnostic = parser.add_mutually_exclusive_group()
     diagnostic.add_argument(
+        "--context-linear-retained-rehearsal",
+        choices=("diagnostics", "games"),
+        help="Fresh A3/A4 source then private equal-row F-only/joint rehearsal; optional fixed native games after both arms",
+    )
+    diagnostic.add_argument(
+        "--context-linear-controller",
+        choices=("current_only", "retain_arrived"),
+        help="Fit four TRAIN chooser trials and apply to fresh A4; warm/discard/application costs and pending packets reported",
+    )
+    diagnostic.add_argument(
+        "--context-linear-reference",
+        choices=("no_learning", "periodic", "drift", "budget_aware"),
+        help="Finite delayed TRAIN A/B/A window with original fixed policy defaults; pending reported, no scores/games",
+    )
+    diagnostic.add_argument(
+        "--example-affine-published",
+        action="store_true",
+        help="Train known A, guard and publish its actor, then play two known TRAIN games",
+    )
+    diagnostic.add_argument(
+        "--example-affine-live-a4",
+        action="store_true",
+        help="Publish A3, then learn fresh A4 privately while the shared actor keeps serving",
+    )
+    diagnostic.add_argument(
+        "--example-affine-deploy-a4",
+        action="store_true",
+        help="Publish A3, start from its actor, learn fresh A4 and guard its deployment; original lifetime budgets",
+    )
+    parser.add_argument(
+        "--example-affine-a4",
+        action="store_true",
+        help="Collect fresh A4 TRAIN, learn A3/A4/A3 and play both layouts; no saved source",
+    )
+    diagnostic.add_argument(
         "--context-linear-a4-current-only",
         action="store_true",
         help="Same-data A3/A4/A3 control without joint replay; six fits/54 total rows and both-layout games",
+    )
+    diagnostic.add_argument(
+        "--context-linear-a4-current-repeated",
+        action="store_true",
+        help="Repeat current arrived A3/A4/A3 rows: six fits/90 exposures, no prior-packet bank, both-layout games",
     )
     diagnostic.add_argument(
         "--context-linear-a4-adaptation",
@@ -1215,8 +1679,97 @@ def main() -> None:
         action="store_true",
         help="Explicit public cue-relative key encoding for the disposable constructive BP fit",
     )
+    parser.add_argument(
+        "--prequential-feedback",
+        action="store_true",
+        help="Explicit candidate predictions before labels for a reference window",
+    )
+    parser.add_argument(
+        "--ready-feedback",
+        action="store_true",
+        help="Diagnose the oldest eligible FIFO TRAIN packet on the current candidate after its label arrives",
+    )
+    parser.add_argument(
+        "--acknowledge-correct",
+        action="store_true",
+        help="Ordinary ready-feedback reference only: consume fresh proof-bound correct TRAIN without an optimizer update",
+    )
+    parser.add_argument(
+        "--reference-retain-arrived",
+        action="store_true",
+        help="jointly fit one prior arrived TRAIN episode per cue on selected reference wakes",
+    )
     args = parser.parse_args()
-    if args.context_linear_a4_adaptation or args.context_linear_a4_current_only:
+    if args.acknowledge_correct and (
+        args.context_linear_reference is None
+        or not args.ready_feedback
+        or args.prequential_feedback
+        or args.example_affine_a4
+    ):
+        parser.error(
+            "--acknowledge-correct requires an ordinary --context-linear-reference with --ready-feedback"
+        )
+    if args.example_affine_a4 and any(
+        v is not None and v is not False
+        for k, v in vars(args).items()
+        if k
+        not in (
+            {
+                "example_affine_a4",
+                "describe",
+                "output",
+                "context_linear_reference",
+                "ready_feedback",
+            }
+            if args.context_linear_reference is not None
+            else {"example_affine_a4", "context_linear_controller", "describe", "output"}
+            if args.context_linear_controller is not None
+            else {"example_affine_a4", "context_linear_retained_rehearsal", "describe", "output"}
+            if args.context_linear_retained_rehearsal is not None
+            else {"example_affine_a4", "describe", "output"}
+        )
+    ):
+        parser.error(
+            "fresh A4 accepts describe/output, an explicit reference with ready feedback, a controller, or retained rehearsal"
+        )
+    if args.context_linear_retained_rehearsal is not None:
+        if not args.example_affine_a4:
+            parser.error("--context-linear-retained-rehearsal requires --example-affine-a4")
+        from scripts.minigrid_a4_adaptation import handle_rehearsal_cli
+
+        handle_rehearsal_cli(args, parser)
+        return
+    if args.context_linear_controller is not None:
+        if not args.example_affine_a4:
+            parser.error("--context-linear-controller requires --example-affine-a4")
+        from scripts.minigrid_a4_adaptation import handle_controller_cli
+
+        handle_controller_cli(args, parser)
+        return
+    if args.reference_retain_arrived and args.context_linear_reference is None:
+        parser.error("--reference-retain-arrived requires --context-linear-reference")
+    if args.prequential_feedback and args.ready_feedback:
+        parser.error("choose only one feedback mode")
+    if (args.prequential_feedback or args.ready_feedback) and args.context_linear_reference is None:
+        parser.error("feedback requires --context-linear-reference")
+    if args.context_linear_reference == "drift" and not (
+        args.prequential_feedback or args.ready_feedback
+    ):
+        parser.error("drift requires explicit --prequential-feedback or --ready-feedback")
+    if (
+        args.example_affine_published
+        or args.example_affine_live_a4
+        or args.example_affine_deploy_a4
+    ):
+        from scripts.minigrid_affine_serving import handle_cli
+
+        handle_cli(args, parser)
+        return
+    if (
+        args.context_linear_a4_adaptation
+        or args.context_linear_a4_current_only
+        or args.context_linear_a4_current_repeated
+    ):
         from scripts.minigrid_a4_adaptation import handle_cli
 
         handle_cli(args, parser)
@@ -1226,8 +1779,16 @@ def main() -> None:
 
         handle_cli(args, parser)
         return
+    if args.example_affine_a4 and args.context_linear_reference is not None:
+        from scripts.minigrid_a4_adaptation import handle_reference_cli
+
+        handle_reference_cli(args, parser)
+        return
     first_party = (
-        args.example_affine_play or args.example_affine_adaptation or args.example_affine_recurring
+        args.example_affine_play
+        or args.example_affine_adaptation
+        or args.example_affine_recurring
+        or args.example_affine_a4
     )
     if first_party and (args.source is not None or args.retained_source is not None):
         parser.error("first-party affine examples use bundled TRAIN data, without saved sources")
@@ -1296,6 +1857,11 @@ def main() -> None:
     if args.describe:
         if args.source is not None or args.output is not None or args.retained_source is not None:
             parser.error("--describe accepts no source or output")
+        if args.example_affine_a4:
+            from scripts.minigrid_affine_workflow import describe_workflow
+
+            print(json.dumps(describe_workflow(a4_adaptation=True), indent=2, allow_nan=False))
+            return
         if args.example_affine_recurring:
             from scripts.minigrid_affine_workflow import describe_workflow
 
@@ -1355,6 +1921,14 @@ def main() -> None:
                 if args.context_linear_game
                 else describe_context_linear_stream()
                 if args.context_linear_stream
+                else describe_context_linear_reference(
+                    ReferencePolicy(args.context_linear_reference),
+                    prequential_feedback=args.prequential_feedback,
+                    ready_feedback=args.ready_feedback,
+                    retain_arrived=args.reference_retain_arrived,
+                    **(dict(acknowledge_correct=True) if args.acknowledge_correct else {}),
+                )
+                if args.context_linear_reference is not None
                 else describe_context_linear_catalogue()
                 if args.context_linear_catalogue
                 else describe_context_linear_causal_games()
@@ -1402,7 +1976,9 @@ def main() -> None:
         from scripts.minigrid_affine_probe_games import run_saved_affine_probe_games
 
         result = (
-            run_workflow(recurring_training=True)
+            run_workflow(a4_adaptation=True)
+            if args.example_affine_a4
+            else run_workflow(recurring_training=True)
             if args.example_affine_recurring
             else run_workflow(private_adaptation=True)
             if args.example_affine_adaptation
@@ -1428,6 +2004,15 @@ def main() -> None:
             if args.context_linear_retained_game
             else run_context_linear_stream(episodes)
             if args.context_linear_stream
+            else run_context_linear_stream(
+                episodes,
+                reference_policy=ReferencePolicy(args.context_linear_reference),
+                prequential_feedback=args.prequential_feedback,
+                ready_feedback=args.ready_feedback,
+                retain_arrived=args.reference_retain_arrived,
+                **(dict(acknowledge_correct=True) if args.acknowledge_correct else {}),
+            )
+            if args.context_linear_reference is not None
             else run_context_linear_stream(episodes, retain_arrived=True)
             if args.context_linear_catalogue
             else context_control.run_control(episodes)
@@ -1448,7 +2033,7 @@ def main() -> None:
     payload = json.dumps(result, indent=2, allow_nan=False)
     if args.context_linear_rehearsal and len(payload.encode("utf8")) > 4 * 1024**2:
         raise ValueError("private rehearsal report exceeds4MiB; numerical execution must not retry")
-    if first_party and len(payload.encode("utf8")) > 4 * 1024**2:
+    if first_party and not args.example_affine_a4 and len(payload.encode("utf8")) > 4 * 1024**2:
         raise ValueError("affine workflow report exceeds4MiB; execution must not retry")
     if args.context_linear_probe and len(payload.encode("utf8")) > 4 * 1024**2:
         raise ValueError("affine probe report exceeds4MiB; numerical execution must not retry")
@@ -1456,6 +2041,8 @@ def main() -> None:
         raise ValueError("new-C report exceeds4MiB; numerical execution must not retry")
     if args.context_linear_catalogue and len(payload.encode("utf8")) > 2 * 1024**2:
         raise ValueError("arrived catalogue report exceeds2MiB; numerical execution must not retry")
+    if args.example_affine_a4 and len(payload.encode("utf8")) > 8 * 1024**2:
+        raise ValueError("fresh A4 report exceeds8MiB; numerical execution must not retry")
     if (
         args.context_linear_causal_game
         or args.context_linear_retained_game
@@ -1468,6 +2055,8 @@ def main() -> None:
         )
     if args.context_linear_stream and len(payload.encode("utf8")) > 2 * 1024**2:
         raise ValueError("affine stream report exceeds2MiB; numerical execution must not retry")
+    if args.context_linear_reference is not None and len(payload.encode("utf8")) > 256 * 1024:
+        raise ValueError("affine reference report exceeds256KiB; execution must not retry")
     if args.context_linear_game and len(payload.encode("utf8")) > 2 * 1024**2:
         raise ValueError("affine game report exceeds2MiB; numerical execution must not retry")
     if args.context_linear_fit and len(payload.encode("utf8")) > 512 * 1024:

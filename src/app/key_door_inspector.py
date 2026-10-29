@@ -682,6 +682,7 @@ def project_key_door_report(
     if report.get("definition") in (
         "portable_affine_train_and_play_v1",
         "portable_affine_recurring_train_v1",
+        "portable_affine_a4_adaptation_v1",
     ):
         from src.app.minigrid_affine_inspector import project_affine_workflow_report
 
@@ -699,6 +700,7 @@ def project_key_door_report(
         "qualified_bp_new_contexts_v1",
         "matched_native_ticket_controls_v1",
         "fresh_bp_ticket_demo_v1",
+        "ticket_live_saved_score_diagnosis_v1",
     ):
         from src.app.ticket_workflow_inspector_projection import project_ticket_workflow_report
 

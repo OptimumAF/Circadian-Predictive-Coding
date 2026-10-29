@@ -294,10 +294,18 @@ def _trial(initial, batch, guards, action, require, *, task_outcomes=False):
     return report
 
 
-def run_study(input_path, *, task_outcomes=False):
+def run_study(input_path, *, task_outcomes=False, catalog=False):
     """Freeze four TRAIN estimates before application, never refit from its tasks."""
     if type(task_outcomes) is not bool:
         raise ValueError("task study opt-in must be an exact boolean")
+    if type(catalog) is not bool:
+        raise ValueError("catalog study opt-in must be an exact boolean")
+    if catalog:
+        if task_outcomes:
+            raise ValueError("catalog mode has its own fixed task readout protocol")
+        from scripts.context_catalog_learning import run_catalog_study
+
+        return run_catalog_study(input_path)
     started = monotonic()
     report: dict[str, Any] = dict(
         definition="context_controller_learning_v1",

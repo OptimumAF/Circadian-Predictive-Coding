@@ -606,6 +606,22 @@ class TorchFeatureLearner:
             return self.train_batch(features, targets)
         return self._train_batch(features, targets, 1.0, setting)
 
+    def train_batch_with_rate_and_gate(
+        self, features: Array, targets: Array, multiplier: float, setting: str
+    ) -> TrainingDiagnostic:
+        """Compose temporary effects in the existing single staged native step.
+
+        Why: sequential rate and gate calls would apply two gradients and spend
+        two updates. Preserve the original public dispatch for degenerate cases.
+        """
+        validate_learning_rate_multiplier(multiplier)
+        self.validate_gate_setting(setting)
+        if setting == "unchanged":
+            return self.train_batch_with_rate_multiplier(features, targets, multiplier)
+        if multiplier == 1:
+            return self.train_batch_with_gate_setting(features, targets, setting)
+        return self._train_batch(features, targets, multiplier, setting)
+
     def predict_logits(self, features: Array) -> Array:
         """Return owned finite BxK raw logits, before any candidate masking.
 

@@ -131,11 +131,16 @@ def observe_endpoint(
     return_limits,
     check_boundary: Callable[[], None] | None,
     original_probe_updates: int = 16,
+    short_affine_return: bool = False,
 ) -> None:
     """Run one observer, retaining the trusted complete report on any refusal."""
     paid_guard, trusted = paid_report_guard(report)
     try:
-        if type(original_probe_updates) is not int or original_probe_updates not in (16, 48):
+        if (
+            type(short_affine_return) is not bool
+            or type(original_probe_updates) is not int
+            or original_probe_updates not in ((2,) if short_affine_return else (16, 48))
+        ):
             raise ValueError(
                 "endpoint observer supports only explicit original F16 or F48 authority"
             )
@@ -147,7 +152,10 @@ def observe_endpoint(
         witnesses = (
             _BudgetWitness(budget, original_binding, original_limits, original_probe_updates),
             _BudgetWitness(
-                return_budget, return_binding, return_limits, 0 if phase == "after_probe" else 16
+                return_budget,
+                return_binding,
+                return_limits,
+                0 if phase == "after_probe" else 2 if short_affine_return else 16,
             ),
         )
 

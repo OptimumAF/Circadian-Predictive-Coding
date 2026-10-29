@@ -17,6 +17,7 @@ from scripts import ticket_workflow_native as native
 from scripts.diagnose_ticket_training import _teacher, POLICY
 from scripts.run_bp_new_contexts import _source, SOURCE_SHA
 from scripts.run_ticket_workflow import FEATURES, _encode_report
+from scripts.context_head_probe import TRANSFER_TASKS
 from src.adapters.torch_bp_record import bp_snapshot_from_record
 from src.adapters.context_perceptron import ContextPerceptronDecisionPredictor
 from src.app.coupled_attribution import AttributionBatch, _same_value
@@ -36,6 +37,19 @@ HEAD_LIMITS = ToyExecutionBudget(
     max_training_updates=16, max_wall_seconds=30, max_process_rss_bytes=512 * 1024**2
 )
 HEAD_TASKS = (*TASKS, ("v1", "legacy"), ("v2", "legacy"))
+TRANSFER_HEAD_TASKS = (*TASKS, *TRANSFER_TASKS)
+
+
+def _tasks(separate_context_heads, head_tasks):
+    if head_tasks is None:
+        return HEAD_TASKS if separate_context_heads else TASKS
+    if (
+        separate_context_heads is not True
+        or type(head_tasks) is not tuple
+        or head_tasks != TRANSFER_HEAD_TASKS
+    ):
+        raise ValueError("selected head probe requires its original fixed transfer tasks")
+    return head_tasks
 
 
 def build_cohorts(spec):
@@ -92,7 +106,7 @@ def _require_source_records(source):
             raise ValueError("original qualified native policy/clocks required")
 
 
-def _require_arm(row, *, separate_context_heads=False):
+def _require_arm(row, *, separate_context_heads=False, head_tasks=None):
     """Do not buy another arm after incomplete or replaced preceding evidence."""
     if len(row["sessions"]) != 2 or any(
         s["limits"] != asdict(HEAD_LIMITS if separate_context_heads else LIMITS)
@@ -123,25 +137,95 @@ def _require_arm(row, *, separate_context_heads=False):
         monitors = result["training_readouts"]
         if monitors["status"] != "complete" or len(monitors["checkpoints"]) != 4:
             raise ValueError("preceding old TRAIN readouts incomplete")
-    expected = [
-        (phase, version, concept)
-        for phase in ("after_probe", "after_return")
-        for version, concept in (HEAD_TASKS if separate_context_heads else TASKS)
-    ]
+    tasks = _tasks(separate_context_heads, head_tasks)
+    phases = (
+        ("before_probe", "after_probe", "after_return")
+        if head_tasks is not None
+        else ("after_probe", "after_return")
+    )
+    expected = [(phase, version, concept) for phase in phases for version, concept in tasks]
     if [(e["phase"], e["policy_version"], e["concept"]) for e in row["episodes"]] != expected:
         raise ValueError("preceding endpoint tasks missing/mixed")
     if any(
         e["role"] != "probe_test" or e["episode"]["complete"] is not True for e in row["episodes"]
     ):
         raise ValueError("preceding endpoint task work unknown")
+    if head_tasks is not None:
+        origin = {"warm": (12, 72), "fresh": (0, 0)}.get(row["mode"])
+        if origin is None or any(
+            type(row[k]) is not int or row[k] != n
+            for k, n in zip(("prior_native_updates", "prior_native_rows"), origin, strict=True)
+        ):
+            raise ValueError("selected transfer source origin differs")
+        if len(row["readout_work"]) != 3:
+            raise ValueError("selected transfer probe requires initial and both final readouts")
+        for reading, phase, delta, rows in zip(
+            row["readout_work"], phases, (0, 16, 32), (0, 48, 144), strict=True
+        ):
+            if (
+                any(type(reading[k]) is not int for k in ("native_updates", "native_rows"))
+                or any(
+                    type(reading["work"][k]) is not int
+                    for k in ("attempted_calls", "returned_calls", "validated_calls")
+                )
+                or reading["phase"] != phase
+                or reading["native_updates"] != row["prior_native_updates"] + delta
+                or reading["native_rows"] != row["prior_native_rows"] + rows
+                or not (
+                    6
+                    <= reading["work"]["attempted_calls"]
+                    == reading["work"]["returned_calls"]
+                    == reading["work"]["validated_calls"]
+                    <= 36
+                )
+            ):
+                raise ValueError("selected transfer readout origin/work differs")
 
 
-def _observe_tasks(learner, phase, boundary, row, spec, guard, *, separate_context_heads=False):
+def _observe_tasks(
+    learner,
+    phase,
+    boundary,
+    row,
+    spec,
+    guard,
+    *,
+    separate_context_heads=False,
+    head_tasks=None,
+    matched_head_exposure=False,
+):
+    tasks = _tasks(separate_context_heads, head_tasks)
+    if (
+        type(matched_head_exposure) is not bool
+        or matched_head_exposure
+        and (separate_context_heads is not True or head_tasks != TRANSFER_HEAD_TASKS)
+    ):
+        raise ValueError("matched exposure requires the fixed context transfer tasks")
+    if phase not in (
+        ("before_probe", "after_probe", "after_return")
+        if head_tasks is not None
+        else ("after_probe", "after_return")
+    ):
+        raise ValueError("unknown fixed probe observation phase")
     boundary()
     state = learner.snapshot_state()
     pinned = deepcopy(state)
-    expected = 16 if phase == "after_probe" else 32
-    rows = (48 if phase == "after_probe" else 144) if separate_context_heads else 3 * expected
+    expected = 0 if phase == "before_probe" else 16 if phase == "after_probe" else 32
+    rows = (
+        0
+        if phase == "before_probe"
+        else (48 if phase == "after_probe" else 144)
+        if separate_context_heads
+        else 3 * expected
+    )
+    if matched_head_exposure:
+        # Why: both explicit controls pay F48/144 and return16/96; replay's
+        # logical F16 clock must never stand in for its actual native F48 clock.
+        expected, rows = {
+            "before_probe": (0, 0),
+            "after_probe": (48, 144),
+            "after_return": (64, 240),
+        }[phase]
     if (
         state.completed_updates != row["prior_native_updates"] + expected
         or state.training_examples != row["prior_native_rows"] + rows
@@ -211,7 +295,7 @@ def _observe_tasks(learner, phase, boundary, row, spec, guard, *, separate_conte
         boundary(read, after_clocks=unchanged)
         return result
 
-    for version, concept in HEAD_TASKS if separate_context_heads else TASKS:
+    for version, concept in tasks:
         boundary()
         episode = run_workflow_episode(
             WorkflowState(
@@ -237,10 +321,61 @@ def _observe_tasks(learner, phase, boundary, row, spec, guard, *, separate_conte
             raise ValueError("endpoint episode has unknown paid work")
 
 
+def _observe_initial_tasks(seed, sessions, row, spec, guard, head_tasks):
+    """Read the unchanged seed using original zero-work budget witnesses."""
+    from src.app.probe_endpoint_observer import _BudgetWitness
+    from src.app.probe_return_phase import budget_binding
+
+    witnesses = tuple(_BudgetWitness(s, budget_binding(s), deepcopy(s.budget), 0) for s in sessions)
+
+    def boundary(read_ports=None, *, after_clocks=None):
+        guard()
+        for witness in witnesses:
+            witness.observe()
+        guard()
+        for witness in witnesses:
+            witness.check()
+        if read_ports is not None and read_ports() is not None:
+            raise ValueError("initial probe read ports must return None")
+        guard()
+        for witness in witnesses:
+            witness.observe()
+        if after_clocks is not None and after_clocks() is not None:
+            raise ValueError("initial final read ports must return None")
+        guard()
+        for witness in witnesses:
+            witness.check()
+
+    _observe_tasks(
+        seed,
+        "before_probe",
+        boundary,
+        row,
+        spec,
+        guard,
+        separate_context_heads=True,
+        head_tasks=head_tasks,
+    )
+
+
 def run_arm(
-    seed, state, cohorts, spec, guard, memory, name, *, row=None, separate_context_heads=False
+    seed,
+    state,
+    cohorts,
+    spec,
+    guard,
+    memory,
+    name,
+    *,
+    row=None,
+    separate_context_heads=False,
+    input_diagnostics=False,
+    head_tasks=None,
 ):
     """One original probe owner and two finite sessions, never budget renewal."""
+    if type(input_diagnostics) is not bool:
+        raise ValueError("input_diagnostics must be an exact bool")
+    _tasks(separate_context_heads, head_tasks)
     training, evaluation, monitors, returning = cohorts
     sessions = [
         ToyBudgetSession(HEAD_LIMITS if separate_context_heads else LIMITS, monotonic)
@@ -258,7 +393,10 @@ def run_arm(
         episodes=[],
         readout_work=[],
     )
+    probe_options: dict[str, Any] = {"input_diagnostics": True} if input_diagnostics else {}
     try:
+        if head_tasks is not None:
+            _observe_initial_tasks(seed, sessions, row, spec, guard, head_tasks)
         row["probe"] = run_fresh_task_probe(
             seed,
             state,
@@ -270,6 +408,7 @@ def run_arm(
             return_training=returning,
             return_budget=sessions[1],
             decision_diagnostics=True,
+            **probe_options,
             check_boundary=guard,
             endpoint_observer=lambda learner, phase, boundary: _observe_tasks(
                 learner,
@@ -279,6 +418,7 @@ def run_arm(
                 spec,
                 guard,
                 **({"separate_context_heads": True} if separate_context_heads else {}),
+                **(dict(head_tasks=head_tasks) if head_tasks is not None else {}),
             ),
         )
     finally:
@@ -292,17 +432,28 @@ def run_arm(
             for s in sessions
         ]
     guard()
-    _require_arm(row, **({"separate_context_heads": True} if separate_context_heads else {}))
+    _require_arm(
+        row,
+        **({"separate_context_heads": True} if separate_context_heads else {}),
+        **(dict(head_tasks=head_tasks) if head_tasks is not None else {}),
+    )
     return row
 
 
-def run_case(input_path, *, separate_context_heads=False):
+def run_case(input_path, *, separate_context_heads=False, head_task_transfer=False):
     if type(separate_context_heads) is not bool:
         raise ValueError("separate_context_heads must be an exact boolean")
+    if type(head_task_transfer) is not bool or head_task_transfer and not separate_context_heads:
+        raise ValueError("head task transfer requires explicit separate context heads")
     if separate_context_heads:
         from scripts.context_head_probe import run_context_case
 
-        return run_context_case(input_path, run_arm=run_arm, require_arm=_require_arm)
+        return run_context_case(
+            input_path,
+            run_arm=run_arm,
+            require_arm=_require_arm,
+            **(dict(head_task_transfer=True) if head_task_transfer else {}),
+        )
     started = monotonic()
     report: dict[str, Any] = dict(
         definition="isolated_ticket_policy_probe_v1",
@@ -401,13 +552,20 @@ def main(argv=None):
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--separate-context-heads", action="store_true")
+    parser.add_argument("--head-task-transfer", action="store_true")
     args = parser.parse_args(argv)
+    if args.head_task_transfer and not args.separate_context_heads:
+        parser.error("--head-task-transfer requires --separate-context-heads")
     if args.input.resolve() == args.output.resolve():
         raise ValueError("qualified source must stay sealed")
     with args.output.open("xb") as target:
         target.write(b"{}\n")
     report = (
-        run_case(args.input, separate_context_heads=True)
+        run_case(
+            args.input,
+            separate_context_heads=True,
+            **(dict(head_task_transfer=True) if args.head_task_transfer else {}),
+        )
         if args.separate_context_heads
         else run_case(args.input)
     )

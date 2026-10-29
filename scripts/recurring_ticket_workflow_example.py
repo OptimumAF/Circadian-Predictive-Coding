@@ -192,7 +192,20 @@ def run_example(
     policy_change=False,
     context_return=False,
     separate_context_heads=False,
+    private_adaptation=False,
 ):
+    if (
+        type(private_adaptation) is not bool
+        or private_adaptation
+        and (
+            separate_context_heads is not True
+            or context_return is not True
+            or policy_change is not False
+            or method != "perceptron"
+            or replay != "none"
+        )
+    ):
+        raise ValueError("private adaptation requires the separate-head context-return recipe")
     if type(separate_context_heads) is not bool or (
         separate_context_heads
         and (context_return is not True or method != "perceptron" or replay != "none")
@@ -530,6 +543,10 @@ def run_example(
 
                 def require_source():
                     context_guard()
+                    if private_adaptation and (
+                        stream.completed_updates != point or len(stream.applied_updates) != point
+                    ):
+                        raise ValueError("private source native/receipt progress changed")
                     if context_return and not _same_value(predict, readout_pin):
                         raise ValueError("context frozen predictor changed")
                     if (
@@ -628,7 +645,8 @@ def run_example(
                         raise RuntimeError("task episode has uncertain paid work")
             if policy_change or context_return:
                 require_source()
-            report["stream"] = stream.finish()
+            if not private_adaptation:
+                report["stream"] = stream.finish()
             if not same_state(learner.snapshot_state(), original_seed):
                 raise ValueError("original seed learner changed")
             if policy_change or context_return:
@@ -642,6 +660,30 @@ def run_example(
                 if policy_change
                 else summarize(report["episodes"])
             )
+            if private_adaptation:
+                from scripts.context_head_rehearsal import run_owned_pair
+
+                report["private_source_training"] = dict(
+                    completed_updates=stream.completed_updates,
+                    applied_update_count=len(stream.applied_updates),
+                )
+                # Why: hand off only the live qualified native checkpoint. Its
+                # original budget/clock and source/actor guards stay active;
+                # private fitting never advances the source runtime or budget.
+                report["private_adaptation"] = run_owned_pair(
+                    state, spec, report, budget, check_boundary=require_source, memory=sampler
+                )
+                private = report["private_adaptation"]
+                report["probe_updates"] = private["training_work"]["returned_updates"]
+                report["replay_examples"] = sum(
+                    s["replay"] for arm in private["cases"] for s in arm.get("sessions", [])
+                )
+                report.update(source_unchanged=None, actor_unchanged=None)
+                require_source()
+                report.update(source_unchanged=True, actor_unchanged=True)
+                if private["complete"] is not True:
+                    raise ValueError(f"private adaptation incomplete: {private.get('error')}")
+                report["stream"] = stream.finish()
             report["complete"] = True
         except Exception as error:
             report["error"] = f"{type(error).__name__}: {error}"[:512]
@@ -781,6 +823,7 @@ def main(argv=None):
     modes.add_argument("--policy-change", action="store_true")
     modes.add_argument("--context-return", action="store_true")
     parser.add_argument("--separate-context-heads", action="store_true")
+    parser.add_argument("--private-adaptation", action="store_true")
     parser.add_argument(
         "--method",
         choices=("perceptron", "bp", "pc", "neutral_cpc", "gated_cpc"),
@@ -796,6 +839,29 @@ def main(argv=None):
     ):
         parser.error(
             "--separate-context-heads requires --context-return --method perceptron --replay none"
+        )
+    if args.private_adaptation and not (args.separate_context_heads and args.context_return):
+        parser.error("--private-adaptation requires --context-return --separate-context-heads")
+    if args.private_adaptation:
+        if args.output.exists():
+            raise FileExistsError("private workflow output must be new")
+        report = run_example(
+            context_return=True, separate_context_heads=True, private_adaptation=True
+        )
+        from scripts.context_catalog_learning import write_catalog_report
+
+        return (
+            0
+            if write_catalog_report(
+                args.output,
+                report,
+                observed_work=dict(
+                    source=report.get("training_work"),
+                    private=report.get("private_adaptation", {}).get("training_work"),
+                ),
+                max_bytes=4 * 1024**2,
+            )
+            else 1
         )
     # Reserve before fitting; a failed case cannot overwrite an earlier result.
     with args.output.open("xb") as target:

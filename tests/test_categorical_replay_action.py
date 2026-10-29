@@ -99,7 +99,7 @@ def episode(role="train"):
     )
 
 
-def setup(*, available=None, limits=None, promotable=False, extra_actions=()):
+def setup(*, available=None, limits=None, promotable=False, extra_actions=(), action_envelope=None):
     wall = [0.0]
     timer = lambda: wall[0]
     wake = ToyBudgetSession(ToyExecutionBudget(max_training_updates=4, max_wall_seconds=10), timer)
@@ -142,7 +142,7 @@ def setup(*, available=None, limits=None, promotable=False, extra_actions=()):
     gate = ServingPriorityGate(
         limits or SharingLimits(2, 6, 2), resource_available=available or (lambda: True)
     )
-    envelope = AdaptationEnvelope(
+    envelope = action_envelope or AdaptationEnvelope(
         (
             AdaptationAction("wait"),
             AdaptationAction("wake", 1),
@@ -281,17 +281,34 @@ def test_unobserved_wake_is_not_accepted_as_a_legitimate_counter_change():
     assert source.calls == [2] and b.replay_examples_completed == 0
 
 
-def test_changed_prior_wake_or_replay_receipt_is_not_accepted():
+@pytest.mark.parametrize("fault", ["changed", "equal", "coerced"])
+def test_changed_prior_wake_or_replay_receipt_is_not_accepted(fault):
     for kind in ("wake", "replay"):
         w, r, replay, source, c, wake, b, g, _ = setup()
         if kind == "wake":
             ready(r, c)
             w.train_action("wake")
             key = next(iter(r._inbox._applied))
-            r._inbox._applied[key] = replace(r._inbox._applied[key], event_id="replaced")
+            receipt = r._inbox._applied[key]
+            if fault == "coerced":
+                object.__setattr__(receipt, "update_number", True)
+            else:
+                r._inbox._applied[key] = (
+                    replace(receipt, event_id="replaced")
+                    if fault == "changed"
+                    else replace(receipt)
+                )
         else:
             w.train_action("replay")
-            r._consolidations[0] = replace(r._consolidations[0], event_id="replaced")
+            receipt = r._consolidations[0]
+            if fault == "coerced":
+                object.__setattr__(receipt, "attempt_number", True)
+            else:
+                r._consolidations[0] = (
+                    replace(receipt, event_id="replaced")
+                    if fault == "changed"
+                    else replace(receipt)
+                )
         before = len(source.calls)
         with pytest.raises(ValueError):
             w.train_action("replay")
@@ -406,9 +423,9 @@ def test_replay_refuses_aliased_fork_before_native_or_exposure(alias, monkeypatc
     assert r.candidate_snapshot().state.completed_updates == 0 and replay.stopped
 
 
-def test_combined_wake_replay_remains_unsupported_before_resource_or_payload(monkeypatch):
+def test_combined_wake_replay_rate_remains_unsupported_before_resource_or_payload(monkeypatch):
     w, r, replay, source, c, wake, b, g, _ = setup(
-        extra_actions=(AdaptationAction("combined", 1, 3),)
+        extra_actions=(AdaptationAction("combined", 1, 3, learning_rate_multiplier=0.5),)
     )
     monkeypatch.setattr(
         g, "_resource", lambda: pytest.fail("resource probe for unsupported choice")

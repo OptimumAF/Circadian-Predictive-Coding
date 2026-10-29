@@ -27,18 +27,37 @@ def budget_binding(budget) -> tuple[Any, ...]:
     )
 
 
-def validate_return_envelope(training, evaluation, monitors, templates) -> None:
+def validate_return_envelope(
+    training, evaluation, monitors, templates, *, short_affine_return=False
+) -> None:
+    if type(short_affine_return) is not bool:
+        raise ValueError("short_affine_return must be an exact bool")
     if type(templates) is not tuple or len(templates) != 2:
         raise ValueError("return_training requires exactly two TRAIN templates")
     if (
         type(monitors) is not tuple
         or len(monitors) != 2
-        or len(training) != 16
+        or len(training) != (2 if short_affine_return else 16)
         or len(evaluation) != 2
     ):
         raise ValueError(
             "A return requires sixteen F updates, two F evaluations and two TRAIN readouts"
         )
+    if short_affine_return and any(
+        type(b) is not AttributionBatch
+        or type(b.features) is not np.ndarray
+        or b.features.dtype != np.float64
+        or b.features.shape != (rows, 296)
+        or type(b.targets) is not np.ndarray
+        or b.targets.dtype != np.float64
+        or b.targets.shape != (rows, 1)
+        or type(b.num_classes) is not int
+        or b.num_classes != 7
+        or b.episode is not None
+        for batches, rows in ((training, 9), (evaluation, 9), (monitors, 18), (templates, 18))
+        for b in batches
+    ):
+        raise ValueError("short affine return requires fixed raw296/K7 F9/oldTRAIN18 rows")
     original = (*training, *evaluation, *monitors)
     arrays = [array for batch in original for array in (batch.features, batch.targets)]
     for template, monitor in zip(templates, monitors, strict=True):

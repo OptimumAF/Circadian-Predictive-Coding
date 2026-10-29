@@ -173,18 +173,27 @@ class PromotableActor(StableActor[Features, Targets, Prediction, State]):
 
     def serving_snapshot(self) -> ServingSnapshot[State, Prediction]:
         with self._read_gate:
-            if self._payload_registry._lifecycle is not None:
-                self._payload_registry._lifecycle._require_access()
-            slot, bundle = self._slot, self._slot.bundle
-            return ServingSnapshot(
-                slot.generation,
-                bundle.version,
-                deepcopy(bundle.learner.snapshot_state()),
-                bundle.configuration,
-                deepcopy(bundle.cache),
-                deepcopy(bundle.metadata),
-                bundle.last_cache_tick,
-            )
+            return self._read_serving_snapshot()
+
+    def serving_snapshot_if_idle(self) -> ServingSnapshot[State, Prediction]:
+        """Refuse contention while reading the same complete serving payload."""
+        with self._payload_exclusive():
+            return self._read_serving_snapshot()
+
+    def _read_serving_snapshot(self) -> ServingSnapshot[State, Prediction]:
+        # Both public callers hold the original serving gate.
+        if self._payload_registry._lifecycle is not None:
+            self._payload_registry._lifecycle._require_access()
+        slot, bundle = self._slot, self._slot.bundle
+        return ServingSnapshot(
+            slot.generation,
+            bundle.version,
+            deepcopy(bundle.learner.snapshot_state()),
+            bundle.configuration,
+            deepcopy(bundle.cache),
+            deepcopy(bundle.metadata),
+            bundle.last_cache_tick,
+        )
 
     def serve(self, features: Features, *, now: int) -> ServingPrediction[Prediction]:
         require_tick(now, "serving cache tick")
@@ -504,6 +513,17 @@ class ServingPromotionController(Generic[Features, Targets, Prediction, State]):
         with self._exclusive():
             self._require_ticket(ticket)
             del self._pending[ticket]
+
+    def start_candidate(self, shared, publication: PromotionReceipt, *, candidate_version: str):
+        """Start from the current published model with the original spent resources.
+
+        Ordinary unmanaged TRAIN only. One attempt per latest publication;
+        caller pauses the original sharing gate. This cannot rebase an advanced
+        private model, renew quotas or authorize the next publication.
+        """
+        from src.app.published_candidate import start_published_candidate
+
+        return start_published_candidate(self, shared, publication, candidate_version)
 
     def rollback(self, receipt: PromotionReceipt) -> int:
         with self._exclusive():

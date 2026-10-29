@@ -59,6 +59,8 @@ def _validate_batches(
     evaluation: tuple[AttributionBatch, ...],
     training_readouts: tuple[AttributionBatch, ...] = (),
     return_training: tuple[AttributionBatch, ...] = (),
+    *,
+    short_affine_return: bool = False,
 ) -> None:
     if type(training) is not tuple or not 1 <= len(training) <= 16:
         raise ValueError("probe training must be a tuple containing 1..16 batches")
@@ -95,7 +97,13 @@ def _validate_batches(
     if type(training_readouts) is not tuple or training_readouts:
         validate_training_readout_envelope(training, evaluation, training_readouts)
     if type(return_training) is not tuple or return_training:
-        validate_return_envelope(training, evaluation, training_readouts, return_training)
+        validate_return_envelope(
+            training,
+            evaluation,
+            training_readouts,
+            return_training,
+            **(dict(short_affine_return=True) if short_affine_return else {}),
+        )
     for batches, role in ((training, "probe_train"), (evaluation, "probe_test")):
         for batch in batches:
             _validate_batch(batch, role, seen)
@@ -370,6 +378,7 @@ def run_fresh_task_probe(
     checkpoint_updates: tuple[int, ...],
     timer: Callable[[], float] = monotonic,
     decision_diagnostics: bool = False,
+    input_diagnostics: bool = False,
     check_boundary: Callable[[], None] | None = None,
     training_readouts: tuple[AttributionBatch, ...] = (),
     return_training: tuple[AttributionBatch, ...] = (),
@@ -377,6 +386,7 @@ def run_fresh_task_probe(
     endpoint_observer: EndpointObserver | None = None,
     rehearsal_factory: Callable[[Any, ToyBudgetSession, int], StreamRehearsal] | None = None,
     extra_f_exposure: bool = False,
+    short_affine_return: bool = False,
 ) -> dict[str, Any]:
     """Train fixed probe batches on an owned fork and retain measured partial work.
 
@@ -402,6 +412,10 @@ def run_fresh_task_probe(
     with fresh IDs/storage. Their fixed sixteen updates reuse this same learner
     with a separate fresh return_budget after F completion; original F accounting
     and timing remain separate from the nested return_phase report.
+    Explicit short_affine_return admits only two raw296/K7 nine-row F batches,
+    two eighteen-row old TRAIN monitors and independent equal return templates.
+    It uses each TRAIN template once, checkpoints0/1/2 and a separate original
+    two-update owner. The default sixteen-update recipe is unchanged.
     Optional endpoint_observer reads this same disposable learner after complete
     probe/return phases. It requires the full return recipe, owns its native-state
     checks and readout accounting, and must use the supplied protected boundary.
@@ -416,6 +430,19 @@ def run_fresh_task_probe(
     It requires the full separate A16 return recipe and admits no rehearsal; the
     original input envelope, array storage bound and role assignments remain fixed.
     """
+    if type(input_diagnostics) is not bool:
+        raise ValueError("input_diagnostics must be an exact bool")
+    if type(short_affine_return) is not bool:
+        raise ValueError("short_affine_return must be an exact bool")
+    if short_affine_return and (
+        extra_f_exposure is not False
+        or rehearsal_factory is not None
+        or type(return_training) is not tuple
+        or not return_training
+    ):
+        raise ValueError(
+            "short affine return requires its separate TRAIN return without extra F/rehearsal"
+        )
     if type(extra_f_exposure) is not bool:
         raise ValueError("extra_f_exposure must be an exact bool")
     if extra_f_exposure and (
@@ -433,8 +460,19 @@ def run_fresh_task_probe(
         raise ValueError(
             "extra F exposure requires the full original16 F/A16 recipe without rehearsal"
         )
-    original_probe_updates = 48 if extra_f_exposure else 16
-    original_checkpoints = (0, 12, 24, 48) if extra_f_exposure else (0, 4, 8, 16)
+    original_probe_updates = 2 if short_affine_return else 48 if extra_f_exposure else 16
+    original_checkpoints = (
+        (0, 1, 2) if short_affine_return else (0, 12, 24, 48) if extra_f_exposure else (0, 4, 8, 16)
+    )
+    return_checkpoints = (0, 1, 2) if short_affine_return else (0, 4, 8, 16)
+    return_updates = 2 if short_affine_return else 16
+    phase_options: dict[str, Any] = (
+        dict(original_probe_updates=2, short_affine_return=True)
+        if short_affine_return
+        else dict(original_probe_updates=48)
+        if extra_f_exposure
+        else {}
+    )
     if type(decision_diagnostics) is not bool:
         raise ValueError("decision_diagnostics must be an exact bool")
     if check_boundary is not None and not callable(check_boundary):
@@ -449,7 +487,13 @@ def run_fresh_task_probe(
     return_limits = None
     expected_return_limits = None
     if return_enabled:
-        _validate_batches(training, evaluation, training_readouts, return_training)
+        _validate_batches(
+            training,
+            evaluation,
+            training_readouts,
+            return_training,
+            **(dict(short_affine_return=True) if short_affine_return else {}),
+        )
         validate_training_readouts(training, evaluation, training_readouts)
         validate_return_values(training, evaluation, training_readouts, return_training)
         if return_budget is budget:
@@ -469,7 +513,7 @@ def run_fresh_task_probe(
                 if extra_f_exposure
                 else "A return requires fixed original checkpoints0/4/8/16"
             )
-        _validate_controls(return_budget, (0, 4, 8, 16), 16, timer)
+        _validate_controls(return_budget, return_checkpoints, return_updates, timer)
         return_limits = return_budget.budget
         expected_return_limits = deepcopy(return_limits)
     elif return_budget is not None:
@@ -515,6 +559,8 @@ def run_fresh_task_probe(
     readout_bytes = None
     return_bytes = None
     owned_return: tuple[AttributionBatch, ...] = ()
+    owned_training: tuple[AttributionBatch, ...] = ()
+    owned_readouts: tuple[AttributionBatch, ...] = ()
     episode_scope = None
     reason = None
     stream: AttributionStream | None = None
@@ -754,7 +800,7 @@ def run_fresh_task_probe(
                 fixed_budgets=fixed_budgets,
                 return_limits=expected_return_limits,
                 check_boundary=boundary,
-                **({"original_probe_updates": 48} if extra_f_exposure else {}),
+                **phase_options,
             )
         except Exception as error:
             reason = f"endpoint observer after_probe: {type(error).__name__}: {error}"
@@ -778,7 +824,7 @@ def run_fresh_task_probe(
             return_limits,
             expected_return_limits,
             fixed_budgets,
-            **({"original_probe_updates": 48} if extra_f_exposure else {}),
+            **phase_options,
         )
         if (
             endpoint_observer is not None
@@ -796,13 +842,36 @@ def run_fresh_task_probe(
                     fixed_budgets=fixed_budgets,
                     return_limits=expected_return_limits,
                     check_boundary=boundary,
-                    **({"original_probe_updates": 48} if extra_f_exposure else {}),
+                    **phase_options,
                 )
             except Exception as error:
                 report.update(
                     status="failed",
                     reason=f"endpoint observer after_return: {type(error).__name__}: {error}",
                     timing_status="unavailable" if measured is None else "partial",
+                )
+    if input_diagnostics:
+        # Why this: report-only constraints cannot affect learner callbacks,
+        # evaluation/selection or the preceding fixed probe and return phases.
+        diagnostic_work: dict[str, int] = {}
+        if not owned_training or (training_readouts and not owned_readouts):
+            report["input_diagnostics"] = dict(
+                status="not_run",
+                reason="original input detachment incomplete",
+                work=diagnostic_work,
+            )
+        else:
+            try:
+                from src.app.probe_input_diagnostics import diagnose_probe_inputs
+
+                report["input_diagnostics"] = diagnose_probe_inputs(
+                    owned_training, owned_readouts, work=diagnostic_work
+                )
+            except Exception as error:
+                report["input_diagnostics"] = dict(
+                    status="failed",
+                    reason=f"{type(error).__name__}: {error}"[:512],
+                    work=dict(diagnostic_work),
                 )
     return report
 
@@ -843,16 +912,30 @@ def _run_return_phase(
     fixed_budgets,
     *,
     original_probe_updates: int = 16,
+    short_affine_return: bool = False,
 ) -> dict[str, Any]:
     """Reuse the existing fixed scoring/training loop on the same native learner."""
-    if type(original_probe_updates) is not int or original_probe_updates not in (16, 48):
+    if (
+        type(short_affine_return) is not bool
+        or type(original_probe_updates) is not int
+        or original_probe_updates not in ((2,) if short_affine_return else (16, 48))
+    ):
         raise ValueError("A return supports only explicit original F16 or F48 authority")
+    checkpoints = (0, 1, 2) if short_affine_return else (0, 4, 8, 16)
+    repeats = 1 if short_affine_return else 8
     progress = _Progress()
     monitor_progress = TrainingReadoutProgress()
     elapsed = _Elapsed(timer)
     reason = None
     started = False
     paid_guard, expected = paid_report_guard(original)
+    guarded_inputs = (evaluation, monitors, templates)
+    input_baseline = deepcopy(guarded_inputs) if short_affine_return else ()
+    input_owners = (
+        tuple((id(b), id(b.features), id(b.targets)) for group in guarded_inputs for b in group)
+        if short_affine_return
+        else ()
+    )
     last_return_clock = None
 
     def budget_guard() -> None:
@@ -879,18 +962,29 @@ def _run_return_phase(
             raise ValueError("A return budget configuration or observed counters changed")
         last_return_clock = budget.last_clock
 
+    def check_inputs() -> None:
+        if short_affine_return:
+            # Why: callbacks cannot replace the admitted old TRAIN return data.
+            validate_return_values((), evaluation, monitors, templates)
+            if not _same_value(guarded_inputs, input_baseline) or input_owners != tuple(
+                (id(b), id(b.features), id(b.targets)) for group in guarded_inputs for b in group
+            ):
+                raise ValueError("original short return inputs changed")
+
     def guard() -> None:
         paid_guard()
         budget_guard()
+        check_inputs()
         if check_boundary is not None:
             check_boundary()
         paid_guard()
         budget_guard()
+        check_inputs()
 
     if original["status"] == "complete":
         started = True
         try:
-            _validate_controls(budget, (0, 4, 8, 16), 16, timer)
+            _validate_controls(budget, checkpoints, 2 * repeats, timer)
             guard()
             _score(
                 learner,
@@ -904,12 +998,12 @@ def _run_return_phase(
             )
             validate_return_zero(expected, progress, monitor_progress)
             guard()
-            schedule = tuple(templates[index] for index in (0, 1) * 8)
+            schedule = tuple(templates[index] for index in (0, 1) * repeats)
             _train(
                 learner,
                 schedule,
                 evaluation,
-                (0, 4, 8, 16),
+                checkpoints,
                 budget,
                 elapsed,
                 progress,
@@ -942,13 +1036,20 @@ def _run_return_phase(
         if reason is None
         else "partial",
         reserved_data_bytes=reserved_bytes,
-        checkpoint_updates=[0, 4, 8, 16],
-        schedule=[0, 1] * 8,
+        checkpoint_updates=list(checkpoints),
+        schedule=[0, 1] * repeats,
         scope="same disposable F16 learner and optimizer; explicit old TRAIN return templates only; relative return counts; no acquired-skill recovery/generalization claim",
     )
     if original_probe_updates == 48:
         report["scope"] = (
             "same disposable F48 learner and optimizer; explicit old TRAIN return templates only; relative return counts; no acquired-skill recovery/generalization claim"
+        )
+    if short_affine_return:
+        report["scope"] = (
+            "same private affine F2 learner; two fixed old TRAIN templates once each; separate return counts/costs, no native recovery/generalization claim"
+        )
+        report["input_guard_array_bytes"] = sum(
+            b.features.nbytes + b.targets.nbytes for group in input_baseline for b in group
         )
     failed = report.pop("_failed_native_work")
     if failed is not None:

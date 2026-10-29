@@ -379,6 +379,29 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
         finally:
             self._action_gate.release()
 
+    def _wake_action(self, action, replay) -> TrainingPoll:
+        def observe(stage, read_origin):
+            # Never acquire payload references; this internal counter observer
+            # is not controller-supplied executable code.
+            p = self._action_progress
+            if stage == "started":
+                self._action_progress = replace(p, native_attempts=p.native_attempts + 1)
+            elif stage == "completed":
+                self._action_progress = replace(p, native_completions=p.native_completions + 1)
+            if replay is not None:
+                replay.observe_wake(stage, read_origin)
+
+        training = self._train_ready(
+            min(action.wake_updates, self._sharing.snapshot().limits.max_updates_per_poll),
+            native_observer=observe,
+            count_action=True,
+            learning_rate_multiplier=action.learning_rate_multiplier,
+            gate_setting=action.gate_setting,
+        )
+        if replay is not None and training.updates:
+            replay.finish_wake()
+        return training
+
     def train_action(self, action_id: str) -> AdaptationPoll:
         """Select a declared scalar ID; never accept executable controller data.
 
@@ -398,9 +421,8 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
             )
             try:
                 replay = getattr(self, "_action_replay", None)
-                replay_only = (
+                replay_step = (
                     action.replay_examples > 0
-                    and action.wake_updates == 0
                     and action.learning_rate_multiplier == 1.0
                     and action.gate_setting == "unchanged"
                     and action.sleep_updates == 0
@@ -409,13 +431,11 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
                     action.wake_updates > 0
                     and action.replay_examples == 0
                     and action.learning_rate_multiplier != 1
-                    and action.gate_setting == "unchanged"
                     and action.sleep_updates == 0
                 )
                 gate_wake = (
                     action.wake_updates > 0
                     and action.replay_examples == 0
-                    and action.learning_rate_multiplier == 1
                     and action.gate_setting != "unchanged"
                     and action.sleep_updates == 0
                 )
@@ -427,11 +447,11 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
                     and action.gate_setting == "unchanged"
                 )
                 if action.needs_extended_executor and not (
-                    (replay_only and replay is not None) or rate_wake or gate_wake or sleep_only
+                    (replay_step and replay is not None) or rate_wake or gate_wake or sleep_only
                 ):
                     raise ValueError("replay/rate/gate/sleep adaptation executor is unsupported")
                 if getattr(self, "_action_sleep_stopped", False) and (
-                    action.wake_updates or replay_only or sleep_only
+                    action.wake_updates or replay_step or sleep_only
                 ):
                     raise ValueError("component sleep owner stopped; further native work refused")
                 if sleep_only:
@@ -451,23 +471,35 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
                     candidate = self._runtime._candidate
                     validator = getattr(candidate, "validate_gate_setting", None)
                     if not callable(validator) or not callable(
-                        getattr(candidate, "train_batch_with_gate_setting", None)
+                        getattr(
+                            candidate,
+                            "train_batch_with_rate_and_gate"
+                            if rate_wake
+                            else "train_batch_with_gate_setting",
+                            None,
+                        )
                     ):
                         raise ValueError("native gate executor is unsupported")
                     validator(action.gate_setting)
                 if rate_wake:
                     validate_learning_rate_multiplier(action.learning_rate_multiplier)
                     if not callable(
-                        getattr(self._runtime._candidate, "train_batch_with_rate_multiplier", None)
+                        getattr(
+                            self._runtime._candidate,
+                            "train_batch_with_rate_and_gate"
+                            if gate_wake
+                            else "train_batch_with_rate_multiplier",
+                            None,
+                        )
                     ):
                         raise ValueError("native learning-rate executor is unsupported")
                 if (
-                    replay_only
+                    replay_step
                     and action.replay_examples
                     > envelope.max_replay_examples - self._action_progress.replay_examples_charged
                 ):
                     raise ValueError("adaptation cumulative replay envelope exhausted")
-                if replay is not None and replay.stopped and (action.wake_updates or replay_only):
+                if replay is not None and replay.stopped and (action.wake_updates or replay_step):
                     raise ValueError("replay owner stopped; further native work refused")
                 if (
                     action.wake_updates
@@ -492,7 +524,7 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
                                 sleep_admissions=self._action_progress.sleep_admissions + 1,
                             )
                             sleep_receipt = self._sleep_once()
-                elif replay_only:
+                elif replay_step:
                     if replay is None:
                         raise ValueError("replay executor is unsupported")
                     with self._sharing.training() as admission:
@@ -520,37 +552,18 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
                                 )
                             finally:
                                 self._sync_replay_progress()
+                    if replay_receipt is not None and action.wake_updates:
+                        # Why: the phases are separately paid, not atomic. Prove
+                        # the preceding replay before admitting fresh work; a
+                        # deferred wake leaves that commit in the returned poll.
+                        self._runtime.with_candidate_snapshot(
+                            lambda view: replay.before_wake_admission()
+                        )
+                        training = self._wake_action(action, replay)
                 elif action.wake_updates == 0:
                     training = TrainingPoll((), None)
                 else:
-
-                    def observe(stage, read_origin):
-                        # Never acquire payload references; this internal counter
-                        # observer is not controller-supplied executable code.
-                        p = self._action_progress
-                        if stage == "started":
-                            self._action_progress = replace(
-                                p, native_attempts=p.native_attempts + 1
-                            )
-                        elif stage == "completed":
-                            self._action_progress = replace(
-                                p, native_completions=p.native_completions + 1
-                            )
-                        if replay is not None:
-                            replay.observe_wake(stage, read_origin)
-
-                    training = self._train_ready(
-                        min(
-                            action.wake_updates,
-                            self._sharing.snapshot().limits.max_updates_per_poll,
-                        ),
-                        native_observer=observe,
-                        count_action=True,
-                        learning_rate_multiplier=action.learning_rate_multiplier,
-                        gate_setting=action.gate_setting,
-                    )
-                    if replay is not None and training.updates:
-                        replay.finish_wake()
+                    training = self._wake_action(action, replay)
                 self._require_action_owner()
                 self._action_progress = replace(
                     self._action_progress,

@@ -13,6 +13,7 @@ from math import isfinite
 import numpy as np
 
 from src.app.actor_shadow import ActorShadowRuntime
+from src.app.coupled_attribution import _same_value
 from src.app.payload_ownership import PayloadOwnershipBusy
 from src.app.toy_execution_budget import ToyBudgetSession
 from src.core.actor_ports import AppliedConsolidation, ConsolidatedState
@@ -147,8 +148,10 @@ class CategoricalReplayAction:
                 runtime._candidate_version,
                 runtime._inbox._learner_version,
             )
-            self._wakes = deepcopy(runtime._inbox.applied_updates)
+            self._wake_owners = runtime._inbox.applied_updates
+            self._wakes = deepcopy(self._wake_owners)
             self._consolidations: tuple[AppliedConsolidation, ...] = ()
+            self._consolidation_owners: tuple[AppliedConsolidation, ...] = ()
             self._attempt_owner = runtime._attempted_ids
             self._attempts: set[str] = set()
             if runtime._attempted_ids or runtime._consolidations:
@@ -254,12 +257,24 @@ class CategoricalReplayAction:
         if (
             r._attempted_ids is not self._attempt_owner
             or r._attempted_ids != allowed
-            or r._inbox.applied_updates != self._wakes
-            or tuple(r._consolidations) != self._consolidations
+            or not self._same_receipts(r._inbox.applied_updates, self._wake_owners, self._wakes)
+            or not self._same_receipts(
+                tuple(r._consolidations), self._consolidation_owners, self._consolidations
+            )
         ):
             raise ValueError("original wake/replay receipt history changed without observed work")
         self._same(self._source, self._learner.snapshot_state())
         self._same(self._expected, state)
+
+    @staticmethod
+    def _same_receipts(current, owners, values):
+        # Values alone accept equal replacement and Python bool/int coercion.
+        # Keep only the existing bounded metadata prefix, never native-state history.
+        return (
+            len(current) == len(owners)
+            and all(a is b for a, b in zip(current, owners))
+            and _same_value(current, values)
+        )
 
     def before_wake_admission(self):
         # Called under the existing runtime lease AFTER sharing admission, before
@@ -320,6 +335,7 @@ class CategoricalReplayAction:
         if self._counts(state) != (u + 1, n + len(origin.features)):
             raise ValueError("observed wake native clock/row delta changed")
         self._wakes = (*self._wakes, deepcopy(receipt))
+        self._wake_owners = (*self._wake_owners, receipt)
         self._expected = deepcopy(state)
 
     def finish_wake(self):
@@ -415,21 +431,24 @@ class CategoricalReplayAction:
             or self._runtime._attempted_ids not in (self._attempts, self._attempts | {event})
         ):
             raise ValueError("replay event attempt history changed")
-        if self._runtime.applied_updates != self._wakes:
+        if not self._same_receipts(self._runtime.applied_updates, self._wake_owners, self._wakes):
             raise ValueError("wake receipt history changed during replay")
         receipts = self._runtime.applied_consolidations
         if len(receipts) == len(self._consolidations):
-            if receipts != self._consolidations:
+            if not self._same_receipts(receipts, self._consolidation_owners, self._consolidations):
                 raise ValueError("prior replay receipt replaced")
             return
         if (
             len(receipts) != len(self._consolidations) + 1
-            or receipts[:-1] != self._consolidations
+            or not self._same_receipts(
+                receipts[:-1], self._consolidation_owners, self._consolidations
+            )
             or receipts[-1].event_id != event
             or self._prepared is None
         ):
             raise ValueError("replay publication receipt history changed")
         self._consolidations = deepcopy(receipts)
+        self._consolidation_owners = receipts
         try:
             state = self._runtime.candidate_snapshot().state
             self._same(self._prepared, state)

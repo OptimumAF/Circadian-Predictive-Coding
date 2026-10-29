@@ -219,6 +219,12 @@ def project_ticket_workflow_report(
     resource_label: str | None = None,
 ) -> dict[str, Any]:
     """Observe saved evidence, preserving unknowns, negatives and original claims."""
+    if report.get("definition") == "ticket_live_saved_score_diagnosis_v1":
+        from src.app.ticket_score_inspector_projection import project_ticket_score_report
+
+        return project_ticket_score_report(
+            report, source_label=source_label, resources=resources, resource_label=resource_label
+        )
     _envelope(report, source_label)
     _validate(report)
     _require((resources is None) == (resource_label is None), "resources require a label")

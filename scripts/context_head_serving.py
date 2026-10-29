@@ -14,6 +14,7 @@ from typing import Any
 import numpy as np
 
 from scripts.context_head_probe import HEAD_SOURCE_SHA, _source_bytes, head_states
+from scripts.context_training_streams import PAIRED_NEW_TASKS
 from scripts.run_ticket_workflow import CONTEXT_FEATURES, build_joint_context_batch, training_cases
 from src.adapters.context_perceptron import ContextPerceptronLearner
 from src.adapters.context_serving import (
@@ -45,6 +46,7 @@ TASKS = (
     ("v1", "legacy"),
     ("v2", "legacy"),
 )
+PAIRED_TASKS = (*TASKS[:4], *PAIRED_NEW_TASKS)
 
 
 def policy():
@@ -60,31 +62,70 @@ def policy():
     )
 
 
-def prepare_data(spec):
+def prepare_data(spec, *, head_task_transfer=False):
+    if type(head_task_transfer) is not bool:
+        raise ValueError("paired ordinary TRAIN requires an exact boolean opt-in")
+    if head_task_transfer and (
+        type(spec) is not DecisionFeatureSpec
+        or spec != DecisionFeatureSpec(CONTEXT_FEATURES, CATALOG)
+    ):
+        raise ValueError("paired ordinary TRAIN requires original D9/catalog schema")
     teachers = {
         v: training_cases(policy_version=v, include_policy_context=True) for v in ("v1", "v2")
     }
     _, old = build_joint_context_batch(spec, teachers)
-    start = 3 * VOCABULARY.index("legacy")
-    legacy = tuple(
+    tasks = PAIRED_NEW_TASKS if head_task_transfer else (("v1", "legacy"), ("v2", "legacy"))
+    fresh = tuple(
         build_decision_training_batch(
-            teachers[v][start : start + 3], spec, f"legacy-{v}", allow_subsets=True
+            teachers[v][3 * VOCABULARY.index(c) : 3 * VOCABULARY.index(c) + 3],
+            spec,
+            f"{c}-{v}",
+            allow_subsets=True,
         )
-        for v in ("v1", "v2")
+        for v, c in tasks
     )
-    training = tuple(
-        AttributionBatch(
-            "train",
-            name,
-            tuple(f"update-{i}-{r}" for r in range(n)),
-            base.features[:n].copy(),
-            base.targets[:n].copy(),
-            num_classes=6,
+    if head_task_transfer:
+        train_packets = []
+        for i, (version, concept) in enumerate(tasks):
+            for context, base, start, concepts in (
+                (f"new-{version}", fresh[i], 0, (concept,)),
+                (
+                    f"old-{version}",
+                    old,
+                    i * 6,
+                    ("invoice", "password") if i == 0 else ("invoice", "parcel"),
+                ),
+            ):
+                n = 3 * len(concepts)
+                train_packets.append(
+                    AttributionBatch(
+                        "train",
+                        context,
+                        tuple(
+                            f"train:{version}:{c}:{stage}"
+                            for c in concepts
+                            for stage in ("sealed", "ready", "staged")
+                        ),
+                        base.features[start : start + n].copy(),
+                        base.targets[start : start + n].copy(),
+                        num_classes=6,
+                    )
+                )
+        training = tuple(train_packets)
+    else:
+        training = tuple(
+            AttributionBatch(
+                "train",
+                name,
+                tuple(f"update-{i}-{r}" for r in range(n)),
+                base.features[:n].copy(),
+                base.targets[:n].copy(),
+                num_classes=6,
+            )
+            for i, (name, base, n) in enumerate((("new-v1", fresh[0], 3), ("old-v1", old, 6)))
         )
-        for i, (name, base, n) in enumerate((("new-v1", legacy[0], 3), ("old-v1", old, 6)))
-    )
-    new_features = np.concatenate(tuple(b.features for b in legacy))
-    new_targets = np.concatenate(tuple(b.targets for b in legacy))
+    new_features = np.concatenate(tuple(b.features for b in fresh))
+    new_targets = np.concatenate(tuple(b.targets for b in fresh))
     guards = tuple(
         GuardBatch(
             name,
@@ -99,10 +140,12 @@ def prepare_data(spec):
     return training, guards
 
 
-def _episodes(predictor, phase, require, rows, *, role=None):
+def _episodes(predictor, phase, require, rows, *, role=None, tasks=None):
+    if tasks is not None and (type(tasks) is not tuple or tasks != PAIRED_TASKS):
+        raise ValueError("selected serving tasks require the fixed paired TRAIN family")
     if role is not None and (type(role) is not str or role != "controller_train"):
         raise ValueError("explicit development episodes require controller_train role")
-    for version, concept in TASKS:
+    for version, concept in TASKS if tasks is None else tasks:
         require()
         reads: list[dict[str, Any]] = []
         row = dict(

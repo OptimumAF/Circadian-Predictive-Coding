@@ -50,6 +50,16 @@ class RateControlledLearner(Protocol[Features, Targets]):
     ) -> "TrainingDiagnostic": ...
 
 
+class RateGateControlledLearner(Protocol[Features, Targets]):
+    """Optional atomic one-update composition, never two sequential updates."""
+
+    def validate_gate_setting(self, setting: str) -> None: ...
+
+    def train_batch_with_rate_and_gate(
+        self, features: Features, targets: Targets, multiplier: float, setting: str
+    ) -> "TrainingDiagnostic": ...
+
+
 @dataclass(frozen=True)
 class TrainingDiagnostic:
     definition: str

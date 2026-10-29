@@ -54,17 +54,18 @@ class CategoricalLinearFit:
             or self.squared_error < 0
         ):
             raise ValueError("linear fit requires finite complete rank/residual evidence")
-        if (
-            type(self.coefficients) is not tuple
-            or len(self.coefficients) != self.feature_dim + 1
-            or any(
-                type(row) is not tuple
-                or len(row) != self.num_classes
-                or any(type(value) is not float or not isfinite(value) for value in row)
-                for row in self.coefficients
-            )
-        ):
+        if type(self.coefficients) is not tuple or len(self.coefficients) != self.feature_dim + 1:
             raise ValueError("linear fit requires complete immutable finite float coefficients")
+        # Full validation stays per call; explicit loops avoid a generator for
+        # every short row on the frequently copied296/K7 prediction boundary.
+        for row in self.coefficients:
+            if type(row) is not tuple or len(row) != self.num_classes:
+                raise ValueError("linear fit requires complete immutable finite float coefficients")
+            for value in row:
+                if type(value) is not float or not isfinite(value):
+                    raise ValueError(
+                        "linear fit requires complete immutable finite float coefficients"
+                    )
 
 
 def _features(features: NDArray[np.float64], width: int | None = None) -> NDArray[np.float64]:

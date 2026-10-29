@@ -111,6 +111,36 @@ RECURRING = AffineRecipe(
     ),
 )
 
+A4_DEFINITION = "portable_affine_a4_adaptation_v1"
+A4 = AffineRecipe(
+    "a4_train",
+    "minigrid_affine_a3_a4_a3_train_v1",
+    POINTS,
+    (9, 9, 18, 18, 18, 18),
+    (0, 18, 54, 90),
+    tuple(
+        (f"minigrid-source-{identity}-{cue}", label, cue)
+        for identity, label in (("A", "A3"), ("A4-train", "A4"))
+        for cue in ("blue", "red")
+    ),
+    tuple((label, cue) for label in ("A3", "A4") for cue in ("blue", "red")),
+    {
+        label: dict(context="A", rotation=0, branch_row=row, swap_keys=False, wall_color="grey")
+        for label, row in (("A3", 3), ("A4", 4))
+    },
+    "knownTRAIN_A3A4_adaptation",
+    "A3/A4 TRAIN",
+    dict(
+        arrival_row_exposures=54,
+        replay_row_exposures=36,
+        fit_row_exposures=90,
+        peak_bank_rows=18,
+        input_array_bytes=213840,
+        peak_joint_template_array_bytes=42768,
+        peak_bank_observation_target_float64_equivalent_bytes=85392,
+    ),
+)
+
 
 def _object(value, name):
     _require(type(value) is dict, f"invalid {name}")
@@ -180,7 +210,7 @@ def _endpoints(record, done, recipe=NORMAL):
         "TRAIN checkpoint order mismatch",
     )
     for i, endpoint in enumerate(endpoints):
-        if recipe is RECURRING:
+        if recipe in (RECURRING, A4):
             _fixed(endpoint, "updates", recipe.points[i])
         _state(endpoint.get("state"), recipe.points[i], recipe)
         scores = _object(endpoint.get("scores"), "TRAIN scores")
@@ -231,6 +261,8 @@ def _catalogue(record, receipts, done, recipe=NORMAL):
             )
         if recipe is RECURRING:
             _recurring_wakes(wakes)
+        elif recipe is A4:
+            _a4_wakes(wakes)
         committed = catalogue.get("committed_rows")
         if committed is not None:
             n = len(receipts)
@@ -427,7 +459,7 @@ def _recurring_protocol(source):
     return costs
 
 
-def _teacher_transitions(record):
+def _teacher_transitions(record, *, require_success=True):
     transitions = _records(record.get("transitions", []), 16, "teacher transitions")
     attempted = _integer(record.get("environment_steps_attempted"), 0, 16, "teacher step attempts")
     returned = _integer(record.get("environment_steps"), 0, attempted, "teacher returned steps")
@@ -466,13 +498,16 @@ def _teacher_transitions(record):
                 _boolean(record.get(key), key) == transitions[-1][key], "teacher ending differs"
             )
     if record.get("status") == "complete":
-        _require(
-            attempted == returned == 9 and terminal and record["total_return"] > 0,
-            "complete G teacher lacks nine successful steps",
-        )
+        _require(attempted == returned and terminal, "complete teacher has unfinished steps")
+        if require_success:
+            _require(
+                attempted == 9 and record["total_return"] > 0,
+                "complete teacher lacks nine successful steps",
+            )
 
 
-def _recurring_collection(source, required):
+def _recurring_collection(source, required, recipe=RECURRING):
+    is_a4 = recipe is A4
     value: Any
     records = _records(source.get("collection", []), 2, "G teacher collection")
     good = True
@@ -487,10 +522,10 @@ def _recurring_collection(source, required):
         if not unknown:
             cue = ("blue", "red")[i]
             for key, value in dict(
-                context="G_train",
+                context="A" if is_a4 else "G_train",
                 cue=cue,
                 role="train",
-                episode_id=f"minigrid-source-G_train-{cue}",
+                episode_id=f"minigrid-source-{'A4-train' if is_a4 else 'G_train'}-{cue}",
             ).items():
                 _fixed(record, key, value)
             if record.get("status") != "construction_failed":
@@ -502,14 +537,18 @@ def _recurring_collection(source, required):
                     num_classes=7,
                     seed=17,
                     max_steps=16,
-                    layout=RECURRING.layouts["G_train"],
+                    layout=recipe.layouts["A4" if is_a4 else "G_train"],
                     reset_calls=1,
                     action_names=list(ACTIONS),
                 ).items():
                     _fixed(record, key, value)
                 if record.get("closed") is not None:
                     _boolean(record["closed"], "teacher closed")
-                _teacher_transitions(record)
+                _teacher_transitions(
+                    record,
+                    require_success=not is_a4
+                    or not (record.get("primary_error") or record.get("cleanup_error")),
+                )
         good = (
             not unknown
             and record.get("status") == "complete"
@@ -522,15 +561,27 @@ def _recurring_collection(source, required):
                 k: v
                 for k, v in record.items()
                 if k not in ("transitions", "initial_observation", "action_names")
+                and not (is_a4 and k == "total_return")
             },
             f"/collection/{i}",
-            "Original G TRAIN teacher collection",
+            "Original A4 TRAIN teacher collection"
+            if is_a4
+            else "Original G TRAIN teacher collection",
         )
+        if is_a4 and "total_return" in record:
+            # Returns are signed outcomes, unlike nonnegative compute counters.
+            costs.append(
+                dict(
+                    label="Original A4 teacher return",
+                    value=record["total_return"],
+                    pointer=f"/collection/{i}/total_return",
+                )
+            )
     _require(
         not required
         or len(records) == 2
         and good
-        and source.get("collection_capture_truncated") is False,
+        and (is_a4 or source.get("collection_capture_truncated") is False),
         "TRAIN requires two complete closed original G sources",
     )
     return costs
@@ -719,9 +770,12 @@ def _games(record, complete, recipe=NORMAL):
 def project_affine_workflow_report(report: dict[str, Any], *, source_label: str) -> dict[str, Any]:
     """Validate recorded consistency, retaining unknowns without granting authority."""
     _envelope(report, source_label)
+    if report.get("definition") == A4_DEFINITION:
+        return _project_a4(report, source_label)
     _require(
         report.get("definition") in (DEFINITION, RECURRING_DEFINITION), "invalid affine definition"
     )
+
     recipe = RECURRING if report["definition"] == RECURRING_DEFINITION else NORMAL
     _require(_status(report.get("status")), "invalid workflow status")
     source = deepcopy(report)
@@ -761,6 +815,269 @@ def project_affine_workflow_report(report: dict[str, Any], *, source_label: str)
                 wakes=wakes,
                 proofs=proofs + game_proofs,
                 costs=costs + game_costs,
+            )
+        ],
+    )
+
+
+def _a4_scope(source, complete):
+    protocol = _object(source.get("protocol"), "A4 protocol")
+    for key, value in dict(
+        definition=A4_DEFINITION,
+        source_origin="current_run_A4_TRAIN",
+        historical_source_reads=0,
+        teacher_step_limit=32,
+    ).items():
+        _fixed(protocol, key, value)
+    _require(
+        "source_sha256" not in protocol and "source_bytes" not in protocol,
+        "fresh collection cannot claim historical file binding",
+    )
+    planned = _object(protocol.get("training"), "A4 training plan")
+    for key, value in dict(
+        definition=A4.training_definition,
+        label_delay=1,
+        checkpoint_updates=list(A4.points),
+        fit_calls=6,
+        fit_rows=90,
+        score_calls=16,
+        score_rows=144,
+        arrival_row_exposures=54,
+        catalogue_replay_row_exposures=36,
+        distinct_source_rows=36,
+        classes=7,
+        wall_seconds=90,
+        peak_rss_bytes=512 * 1024**2,
+    ).items():
+        _fixed(planned, key, value)
+    costs = _flatten(planned, "/protocol/training", "TRAIN plan (not paid work)")
+    required = source.get("training") is not None or complete
+    costs += _recurring_collection(source, required, A4)
+    provenance = source.get("source")
+    _require(not required or provenance is not None, "A4 training lacks collection provenance")
+    if provenance is not None:
+        _object(provenance, "fresh provenance")
+        for key, value in dict(
+            origin="current_run_A4_TRAIN", teacher_steps=18, environment_episodes=2, history_rows=18
+        ).items():
+            _fixed(provenance, key, value)
+        _require(
+            "source_sha256" not in provenance and "source_bytes" not in provenance,
+            "fresh provenance claims historical binding",
+        )
+        _number(provenance.get("collection_seconds"), "collection interval", 0)
+        costs += _flatten(provenance, "/source", "Current-run collection scope")
+    budget = _object(source.get("readout_budget"), "A4 cumulative budget")
+    limits = _object(budget.get("limits"), "A4 cumulative limits")
+    _require(budget.get("initial_limits") == limits, "original A4 limits changed")
+    for key, value in dict(
+        max_training_updates=0,
+        max_replay_examples=0,
+        max_wall_seconds=150,
+        max_process_rss_bytes=512 * 1024**2,
+    ).items():
+        _fixed(limits, key, value)
+    for key in ("updates", "replay"):
+        _fixed(budget, key, 0)
+    start = _number(budget.get("started_at"), "A4 start", 0)
+    end = _number(budget.get("ended_at"), "A4 end", start)
+    _number(budget.get("observed_started_at"), "observed A4 start", 0)
+    _require(budget.get("observed_started_at") == start, "original A4 clock renewed")
+    _require(not complete or end - start <= 150, "complete A4 exceeds original clock")
+    if budget.get("sampled_peak_rss_bytes") is not None:
+        _integer(
+            budget["sampled_peak_rss_bytes"], 0, 512 * 1024**2 if complete else 2**53 - 1, "A4 RSS"
+        )
+    training = source.get("training")
+    if training is not None and training.get("budget") is not None:
+        nested = training["budget"]
+        _number(nested.get("started_at"), "TRAIN start in cumulative owner", start, end)
+        _number(nested.get("ended_at"), "TRAIN end in cumulative owner", nested["started_at"], end)
+    return costs + _flatten(budget, "/readout_budget", "Cumulative collection/TRAIN/game budget")
+
+
+def _a4_wakes(wakes):
+    previous: dict[str, tuple[str, int]] = {}
+    for i, wake in enumerate(wakes):
+        cue = ("blue", "red")[i % 2]
+        identity = "A4-train" if i in (2, 3) else "A"
+        current = f"minigrid-source-{identity}-{cue}:wake:{i}"
+        old = previous.get(cue)
+        spans = [dict(episode_id=old[0], context="A", start=0, stop=9)] if old else []
+        start = 9 if old else 0
+        spans.append(dict(episode_id=current, context="A", start=start, stop=start + 9))
+        for key, value in dict(
+            current_episode_id=current,
+            retained_episode_id=old[0] if old else None,
+            retained_arrived_at=old[1] if old else None,
+            source_spans=spans,
+            bank_rows_after=min(i + 1, 2) * 9,
+        ).items():
+            _fixed(wake, key, value)
+        previous[cue] = (current, i + 1)
+
+
+def _a4_phase(record, updates, path, complete):
+    _object(record, "A4 native phase")
+    for key, value in dict(
+        method=METHOD,
+        role=A4.game_role,
+        updates=updates,
+        source_fit_calls=updates,
+        source_fit_rows=A4.total_rows[A4.points.index(updates)],
+        new_fit_calls=0,
+        new_optimizer_updates=0,
+    ).items():
+        _fixed(record, key, value)
+    _require(_status(record.get("status")), "invalid A4 phase status")
+    done = record["status"] == "complete"
+    _require(not complete or done, "paid phase incomplete")
+    _require(not done or record.get("state_unchanged") is True, "complete A4 state changed")
+    _require(record.get("scores") == [], "A4 game must not add labelled scores")
+    rows = _records(record.get("episodes", []), 4, "A4 games")
+    _require(
+        not done or len(rows) == 4 and all(r.get("status") == "complete" for r in rows),
+        "complete A4 phase needs four completed games",
+    )
+    games, failed = [], False
+    label = {2: "After A3", 4: "After A4", 6: "Returned A3"}[updates]
+    for index, (context, cue) in enumerate(A4.slots):
+        game = _missing(0, label, context, cue, "train", updates)
+        if index < len(rows):
+            row, pointer = rows[index], f"{path}/episodes/{index}"
+            _require(
+                not failed or row.get("status") == "not_run", "A4 game continues after failed work"
+            )
+            if row.get("status") == "not_run":
+                for key, value in dict(
+                    context="A",
+                    cue=cue,
+                    source_role="train",
+                    prediction_calls_attempted=0,
+                    prediction_calls_returned=0,
+                ).items():
+                    _fixed(row, key, value)
+                _require(
+                    not row.get("predictions")
+                    and row.get("environment") is None
+                    and row.get("success") is None
+                    and row.get("return") is None
+                    and row.get("state_unchanged") is None,
+                    "unrun A4 game claims observed work",
+                )
+                game.update(pointer=pointer, record=deepcopy(row), derived=False)
+            else:
+                layout = A4.layouts[context]
+                game = _episode(
+                    row,
+                    pointer,
+                    METHOD,
+                    updates,
+                    cue,
+                    context="A",
+                    role="train",
+                    expected_layout=layout,
+                    allow_observed_failure_tail=True,
+                    expected_episode_id=f"live-{METHOD}-{updates}-A-row{layout['branch_row']}-{cue}",
+                )
+                game.update(source_updates=0, phase=label, context=context, derived=False)
+            failed = failed or row.get("status") != "complete"
+        games.append(game)
+    return (
+        games,
+        _proofs(record, path),
+        _native_costs(record, rows, pointer=path, label=label + " native work"),
+    )
+
+
+def _a4_summary(source):
+    summary = _object(source.get("summary"), "A4 summary")
+    if source["status"] != "complete":
+        _fixed(summary, "complete", False)
+        _require(
+            all(
+                summary.get(k) is None
+                for k in (
+                    "acquisition_gain",
+                    "old_retention_delta",
+                    "return_gain",
+                    "learning_recovery",
+                    "success_by_stage",
+                )
+            ),
+            "failed A4 aggregate claims outcomes",
+        )
+        return
+    _fixed(summary, "complete", True)
+    outcomes = [[e["success"] for e in phase["games"]["episodes"]] for phase in source["games"]]
+    rates = [dict(old_A3=sum(o[:2]) / 2, new_A4=sum(o[2:]) / 2) for o in outcomes]
+    _require(summary.get("success_by_stage") == rates, "A4 summary disagrees with games")
+    for recorded, expected in zip(summary["success_by_stage"], rates, strict=True):
+        for key in ("old_A3", "new_A4"):
+            _close(recorded[key], expected[key], key)
+    for key, value in dict(
+        acquisition_gain=rates[1]["new_A4"] - rates[0]["new_A4"],
+        old_retention_delta=rates[1]["old_A3"] - rates[0]["old_A3"],
+        return_gain=rates[2]["old_A3"] - rates[1]["old_A3"],
+    ).items():
+        _close(summary.get(key), value, key)
+    recovery = [outcomes[0][i] and not outcomes[1][i] and outcomes[2][i] for i in range(2)]
+    _require(
+        type(summary.get("learning_recovery")) is list
+        and all(type(v) is bool for v in summary["learning_recovery"])
+        and summary["learning_recovery"] == recovery,
+        "A4 recovery differs from loss/regain",
+    )
+
+
+def _project_a4(report, source_label):
+    _require(_status(report.get("status")), "invalid A4 workflow status")
+    source = deepcopy(report)
+    complete = source["status"] == "complete"
+    costs = _a4_scope(source, complete)
+    curves, receipts, wakes, train_costs, proofs = _training(source.get("training"), complete, A4)
+    phases = _records(source.get("games", []), 3, "paid A4 phases")
+    _require(not complete or len(phases) == 3, "complete A4 lacks three phases")
+    failed = source.get("failed_phase")
+    training = source.get("training")
+    _require(
+        not (phases or failed) or type(training) is dict and training.get("status") == "complete",
+        "A4 games precede training",
+    )
+    _require(failed is None or not complete and len(phases) < 3, "invalid failed A4 phase position")
+    games: list[dict[str, Any]] = []
+    for index, updates in enumerate((2, 4, 6)):
+        phase = phases[index] if index < len(phases) else failed if index == len(phases) else None
+        if phase is None:
+            label = {2: "After A3", 4: "After A4", 6: "Returned A3"}[updates]
+            games.extend(_missing(0, label, c, q, "train", updates) for c, q in A4.slots)
+            continue
+        _object(phase, "A4 stage")
+        _fixed(phase, "updates", updates)
+        path = f"/games/{index}/games" if index < len(phases) else "/failed_phase/games"
+        episodes, flags, work = _a4_phase(phase.get("games"), updates, path, index < len(phases))
+        games += episodes
+        proofs += flags
+        costs += work
+    _a4_summary(source)
+    return dict(
+        schema_id="minigrid_affine_inspector_v1",
+        recipe=A4.name,
+        source_label=source_label,
+        origin="recorded_artifact",
+        source=source,
+        conditions=[
+            dict(
+                key="Conventional affine learner",
+                pointer="",
+                status=source["status"],
+                source_role="train",
+                episodes=games,
+                curves=curves,
+                receipts=receipts,
+                wakes=wakes,
+                proofs=proofs,
+                costs=costs + train_costs,
             )
         ],
     )

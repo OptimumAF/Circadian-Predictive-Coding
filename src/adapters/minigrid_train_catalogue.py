@@ -14,7 +14,7 @@ from dataclasses import dataclass, replace
 import numpy as np
 
 from src.app.coupled_attribution import AttributionBatch
-from src.core.demonstration_episode import DemonstrationEpisode
+from src.core.demonstration_episode import DemonstrationEpisode, episode_arrays
 from src.core.demonstration_schedule_witness import DemonstrationScheduleWitness
 from src.core.minigrid_invariant_encoding import canonicalize_public_history
 from src.core.minigrid_cue_relative_encoding import cue_relative_public_history
@@ -23,6 +23,8 @@ from src.core.minigrid_context_encoding import context_public_history
 CATALOGUE_DEFINITION = "minigrid_joint_train_catalogue_v1"
 MAX_INPUT_ARRAY_BYTES = 16 * 1024**2
 
+CURRENT_REPETITIONS = (1, 1, 2, 2, 2, 2)
+
 
 @dataclass(frozen=True)
 class CatalogueSourceSpan:
@@ -30,6 +32,89 @@ class CatalogueSourceSpan:
     context: str
     start: int
     stop: int
+
+
+@dataclass(frozen=True)
+class CurrentRepetitionWake:
+    observed_at: int
+    arrived_at: int
+    current_episode_id: str
+    repetitions: int
+    current_rows: int
+    repeated_current_rows: int
+    source_spans: tuple[CatalogueSourceSpan, ...]
+
+
+@dataclass(frozen=True)
+class CurrentRepetitionPlan:
+    training: tuple[AttributionBatch, ...]
+    wakes: tuple[CurrentRepetitionWake, ...]
+    arrival_row_exposures: int
+    repeated_current_row_exposures: int
+    fit_row_exposures: int
+    input_array_bytes: int
+
+
+def compose_repeated_current_training(episodes: tuple[DemonstrationEpisode, ...]):
+    """Six arrived TRAIN packets, repeated within each wake without a bank.
+
+    Repetition matches the fixed one-prior-packet joint recipe's batch shapes.
+    It adds exposures, not observations, trajectories or replay authority.
+    """
+    if type(episodes) is not tuple or len(episodes) != 6:
+        raise ValueError("repeated-current control requires exactly six TRAIN packets")
+    witness, rows = _validate_sources(episodes, 6)
+    if (
+        any(len(episode.transitions) != 9 for episode in episodes)
+        or tuple(
+            int(context_public_history(episode.transitions[0].observation)[297])
+            for episode in episodes
+        )
+        != (0, 1) * 3
+    ):
+        raise ValueError(
+            "repeated-current control requires nine rows and alternating blue/red cues"
+        )
+    training, wakes = [], []
+    input_bytes = 0
+    for tick, (episode, copies) in enumerate(zip(episodes, CURRENT_REPETITIONS, strict=True)):
+        witness.check(episodes)
+        size = copies * 9 * 297 * 8
+        if input_bytes + size > MAX_INPUT_ARRAY_BYTES:
+            raise ValueError("repeated-current cumulative input arrays exceed16MiB")
+        x, y = episode_arrays(episode)
+        # Why: array rows remain independent supervised examples. Concatenating
+        # complete episode records would fabricate a trajectory/terminal order.
+        training.append(
+            AttributionBatch(
+                "train",
+                episode.context,
+                tuple(
+                    f"repeat-current:{tick}:copy:{copy}:step:{step.step}"
+                    for copy in range(copies)
+                    for step in episode.transitions
+                ),
+                np.tile(x, (copies, 1)),
+                np.tile(y, (copies, 1)),
+                None,
+                7,
+            )
+        )
+        spans = tuple(
+            CatalogueSourceSpan(episode.episode_id, episode.context, i * 9, (i + 1) * 9)
+            for i in range(copies)
+        )
+        wakes.append(
+            CurrentRepetitionWake(
+                tick, tick + 1, episode.episode_id, copies, 9, (copies - 1) * 9, spans
+            )
+        )
+        input_bytes += size
+    witness.check(episodes)
+    fit_rows = sum(len(batch.features) for batch in training)
+    return CurrentRepetitionPlan(
+        tuple(training), tuple(wakes), rows, fit_rows - rows, fit_rows, input_bytes
+    )
 
 
 @dataclass(frozen=True)

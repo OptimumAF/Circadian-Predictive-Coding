@@ -14,7 +14,12 @@ from typing import Any
 
 import numpy as np
 
-from scripts.run_ticket_workflow import CONTEXT_FEATURES, build_joint_context_batch, training_cases
+from scripts.run_ticket_workflow import (
+    CONTEXT_FEATURES,
+    CONTEXT_TASKS,
+    build_joint_context_batch,
+    training_cases,
+)
 from src.adapters.context_perceptron import ContextPerceptronLearner
 from src.adapters.perceptron_decision import build_decision_training_batch
 from src.app.coupled_attribution import AttributionBatch, _same_value
@@ -31,6 +36,7 @@ from src.core.ticket_workflow import CATALOG
 from src.shared.process_memory import ProcessRssSampler
 
 HEAD_SOURCE_SHA = "addf37403d32682b680b74ea7a1bfc16ced2895cffe09b8cc5fdf701179be943"
+TRANSFER_TASKS = (("v1", "parcel"), ("v2", "password"))
 
 
 def _source_bytes(path):
@@ -106,8 +112,10 @@ def head_states(source):
     return states
 
 
-def build_head_cohorts(spec):
+def build_head_cohorts(spec, *, head_task_transfer=False):
     """Project explicitly admitted TRAIN only; legacy selection is outcome-free."""
+    if type(head_task_transfer) is not bool:
+        raise ValueError("head task transfer requires an exact Boolean opt-in")
     if type(spec) is not DecisionFeatureSpec or spec != DecisionFeatureSpec(
         CONTEXT_FEATURES, CATALOG
     ):
@@ -116,12 +124,15 @@ def build_head_cohorts(spec):
         v: training_cases(policy_version=v, include_policy_context=True) for v in ("v1", "v2")
     }
     _, old = build_joint_context_batch(spec, teachers)
-    start = 3 * VOCABULARY.index("legacy")
+    tasks = TRANSFER_TASKS if head_task_transfer else (("v1", "legacy"), ("v2", "legacy"))
     fresh = [
         build_decision_training_batch(
-            teachers[v][start : start + 3], spec, f"legacy-{v}", allow_subsets=True
+            teachers[v][3 * VOCABULARY.index(c) : 3 * VOCABULARY.index(c) + 3],
+            spec,
+            f"{c}-{v}",
+            allow_subsets=True,
         )
-        for v in ("v1", "v2")
+        for v, c in tasks
     ]
 
     def batch(base, start, rows, role, context, identifier):
@@ -135,11 +146,14 @@ def build_head_cohorts(spec):
         )
 
     training = tuple(
-        batch(fresh[i % 2], 0, 3, "probe_train", f"legacy-v{i % 2 + 1}", f"probe-{i}")
+        batch(
+            fresh[i % 2], 0, 3, "probe_train", f"{tasks[i % 2][1]}-{tasks[i % 2][0]}", f"probe-{i}"
+        )
         for i in range(16)
     )
     evaluation = tuple(
-        batch(fresh[i], 0, 3, "probe_test", f"legacy-v{i + 1}", f"eval-{i}") for i in range(2)
+        batch(fresh[i], 0, 3, "probe_test", f"{tasks[i][1]}-{tasks[i][0]}", f"eval-{i}")
+        for i in range(2)
     )
     monitors = tuple(
         batch(old, i * 6, 6, "train", f"old-v{i + 1}", f"monitor-{i}") for i in range(2)
@@ -150,7 +164,38 @@ def build_head_cohorts(spec):
     return training, evaluation, monitors, returning
 
 
-def run_context_case(input_path, *, run_arm, require_arm):
+def _transfer_manifest(cohorts):
+    old = {
+        tuple(x): int(y[0]) for b in cohorts[2] for x, y in zip(b.features, b.targets, strict=True)
+    }
+    tasks = []
+    for (version, concept), batch in zip(TRANSFER_TASKS, cohorts[1], strict=True):
+        shared = [
+            (tuple(x), int(y[0]))
+            for x, y in zip(batch.features, batch.targets, strict=True)
+            if tuple(x) in old
+        ]
+        tasks.append(
+            dict(
+                policy_version=version,
+                concept=concept,
+                source_optimizer_task_seen=(version, concept) in CONTEXT_TASKS,
+                concept_seen_in_another_source_head=any(c == concept for _, c in CONTEXT_TASKS),
+                rows=len(batch.features),
+                shared_input_keys=len({x for x, _ in shared}),
+                shared_label_conflicts=sum(old[x] != y for x, y in shared),
+            )
+        )
+    return dict(
+        source_optimizer_tasks=CONTEXT_TASKS,
+        fresh_tasks=tasks,
+        qualification="new task/head READY pairing only; shared workflow stages and globally seen concepts, not disjoint/unseen data or proof of initial task failure",
+    )
+
+
+def run_context_case(input_path, *, run_arm, require_arm, head_task_transfer=False):
+    if type(head_task_transfer) is not bool:
+        raise ValueError("head task transfer requires an exact Boolean opt-in")
     started = monotonic()
     report: dict[str, Any] = dict(
         definition="isolated_context_head_legacy_probe_v1",
@@ -174,14 +219,31 @@ def run_context_case(input_path, *, run_arm, require_arm):
         state_pin = deepcopy(states)
         numpy_before = deepcopy(np.random.get_state())
         spec = DecisionFeatureSpec(CONTEXT_FEATURES, CATALOG)
-        cohorts = build_head_cohorts(spec)
+        cohorts = build_head_cohorts(
+            spec, **(dict(head_task_transfer=True) if head_task_transfer else {})
+        )
         cohort_pin = deepcopy(cohorts)
+        task_options = {}
+        manifest_pin = None
+        if head_task_transfer:
+            task_options = dict(head_tasks=(*CONTEXT_TASKS, *TRANSFER_TASKS))
+            report.update(
+                definition="isolated_context_head_task_transfer_probe_v1",
+                source_task_overlap=_transfer_manifest(cohorts),
+                scope="fixed new task/head combinations on private warm/fresh forks; initial success measured, shared inputs/global concepts acknowledged; no unseen-task/CPC/heldout/equalcompute claim",
+            )
+            manifest_pin = deepcopy(report["source_task_overlap"])
         seeds: list[tuple[Any, Any]] = []
         paid: list[Any] = []
         cases_owner = report["cases"]
         work = report["training_work"]
 
         def guard():
+            if head_task_transfer and not _same_value(
+                report.get("source_task_overlap"), manifest_pin
+            ):
+                report["source_task_overlap"] = deepcopy(manifest_pin)
+                raise ValueError("original task/source overlap declaration changed")
             if monotonic() - started > 120:
                 raise ValueError("original contextual probe case deadline exhausted")
             if (
@@ -244,8 +306,10 @@ def run_context_case(input_path, *, run_arm, require_arm):
                     name,
                     row=row,
                     separate_context_heads=True,
+                    **task_options,
+                    **(dict(input_diagnostics=True) if head_task_transfer else {}),
                 )
-                require_arm(row, separate_context_heads=True)
+                require_arm(row, separate_context_heads=True, **task_options)
                 guard()
                 check_paid, pin = paid_report_guard(row)
                 paid.append((row, pin, check_paid))

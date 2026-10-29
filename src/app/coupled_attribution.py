@@ -19,9 +19,11 @@ from typing import Any, Callable, Protocol, Iterator
 import numpy as np
 
 from src.app.actor_shadow import ActorShadowRuntime, StableActor
+from src.app.counterfactual_controller import CounterfactualController
 from src.app.stream_capacity import StreamCapacity
 from src.app.stream_rehearsal import StreamRehearsal
 from src.app.stream_unit_renewal import StreamUnitRenewal
+from src.app.reference_prequential import ReferencePrequential
 from src.app.toy_execution_budget import ToyBudgetSession
 from src.core.actor_ports import AppliedConsolidation, CandidateState, ForkableLearner
 from src.core.binary_probability_scores import probability_scores as _probability_scores
@@ -31,7 +33,9 @@ from src.core.categorical_probability_scores import (
     validate_class_targets,
 )
 from src.core.coupled_energy import Array
+from src.core.contextual_controller import FittedController, choose_contextual
 from src.core.demonstration_episode import DemonstrationEpisode, copy_episode, episode_arrays
+from src.core.reference_controller import ReferencePolicy, ReferenceObservation, choose_reference
 from src.core.experience import (
     AppliedExperience,
     Experience,
@@ -378,6 +382,11 @@ def _same_value(left: Any, right: Any) -> bool:
     """Exact owned-state values, including native Torch tensors without importing Torch."""
     if type(left) is not type(right):
         return False
+    # Why: owned snapshots contain millions of primitive coefficient/history
+    # leaves. Check them before reflective dataclass/tensor dispatch, preserving
+    # exact types and NaN inequality without caching or skipping nested values.
+    if type(left) in (str, int, float, bool, type(None)):
+        return bool(left == right)
     if type(left) is np.ndarray:
         return (
             left.dtype == right.dtype and left.shape == right.shape and np.array_equal(left, right)
@@ -390,8 +399,6 @@ def _same_value(left: Any, right: Any) -> bool:
         return left.keys() == right.keys() and all(_same_value(left[k], right[k]) for k in left)
     if type(left) in (list, tuple):
         return len(left) == len(right) and all(_same_value(a, b) for a, b in zip(left, right))
-    if type(left) in (str, int, float, bool, type(None)):
-        return bool(left == right)
     return False
 
 
@@ -700,7 +707,7 @@ class AttributionStream:
         if self._renewal is not None:
             self._renewal.check_progress(self._runtime, self._completed)
 
-    def _checkpoint(self) -> None:
+    def _checkpoint(self, *, batch_index: int | None = None) -> None:
         if self._completed not in self._checkpoints or self._completed == self._states[-1][0]:
             return
         self._states.append((self._completed, self._runtime.candidate_snapshot().state))
@@ -709,7 +716,9 @@ class AttributionStream:
             self._observer(
                 self._completed,
                 deepcopy(self._states[-1][1]),
-                _copy_batch(self._training[self._completed - 1]),
+                _copy_batch(
+                    self._training[self._completed - 1 if batch_index is None else batch_index]
+                ),
             )
             self._budget.before_final()
 
@@ -808,6 +817,608 @@ class AttributionStream:
             except BaseException:
                 self._failed = True
                 raise
+
+    @property
+    def reference_report(self) -> dict[str, Any] | None:
+        """Detached finite-window progress, including paid failed attempts."""
+        return deepcopy(getattr(self, "_reference_report", None))
+
+    def _observe_reference_arrival(self, tick, index, batch, observer, boundary):
+        """Read one admitted packet on a detached candidate under its existing lease."""
+        self._budget.before_final()
+        self._check_original()
+        runtime, clock = self._runtime, self._clock
+        source, actor = self._learner, runtime.actor
+        inbox, candidate_owner = runtime._inbox, runtime._candidate
+        source_state, actor_state = source.snapshot_state(), actor.snapshot_state()
+        original_batch = _copy_batch(batch)
+
+        def observe(candidate):
+            expected = deepcopy(candidate)
+            try:
+                observer(tick, index, _copy_batch(batch), deepcopy(candidate))
+            finally:
+                self._budget.before_final()
+            boundary()
+            if (
+                self._runtime is not runtime
+                or self._clock is not clock
+                or clock.now() != tick
+                or self._learner is not source
+                or runtime.actor is not actor
+                or runtime._inbox is not inbox
+                or runtime._candidate is not candidate_owner
+                or not _same_value(source_state, source.snapshot_state())
+                or not _same_value(actor_state, actor.snapshot_state())
+                or not _same_value(original_batch, batch)
+                or not _same_value(expected, runtime._snapshot_candidate())
+            ):
+                raise ValueError(
+                    "arrived observer changed source, actor, packet, clock or candidate"
+                )
+            self._check_original()
+
+        runtime.with_candidate_snapshot(observe)
+
+    def run_reference_window(
+        self,
+        policy: ReferencePolicy,
+        *,
+        prequential_feedback: bool = False,
+        ready_feedback: bool = False,
+        acknowledge_correct: bool = False,
+        observe_arrived: Callable[[int, int, AttributionBatch, CandidateState[Any]], None]
+        | None = None,
+    ) -> dict[str, Any]:
+        if type(policy) is not ReferencePolicy:
+            raise ValueError("reference window requires an exact fixed ReferencePolicy")
+        return self._run_policy_window(
+            policy,
+            prequential_feedback=prequential_feedback,
+            ready_feedback=ready_feedback,
+            acknowledge_correct=acknowledge_correct,
+            observe_arrived=observe_arrived,
+        )
+
+    def run_contextual_window(
+        self, controller: CounterfactualController, *, acknowledge_correct: bool = False
+    ) -> dict[str, Any]:
+        """Apply an existing source-bound fit with internal arrived TRAIN feedback.
+
+        No fit, arbitrary chooser callback, final/probe access or new budget is
+        granted. Original fit measures and application costs remain separate.
+        """
+        if type(controller) is not CounterfactualController:
+            raise ValueError("contextual window requires the original counterfactual owner")
+        return self._run_policy_window(
+            controller, ready_feedback=True, acknowledge_correct=acknowledge_correct
+        )
+
+    def _run_policy_window(
+        self,
+        selection: ReferencePolicy | CounterfactualController,
+        *,
+        prequential_feedback: bool = False,
+        ready_feedback: bool = False,
+        acknowledge_correct: bool = False,
+        observe_arrived: Callable[[int, int, AttributionBatch, CandidateState[Any]], None]
+        | None = None,
+    ) -> dict[str, Any]:
+        """Seal one ordinary TRAIN arrival window with fixed wake/wait choices.
+
+        Unlike finish(), completing this window need not consume every packet.
+        No final evaluation or implicit tail drain follows a waiting reference.
+        Checkpoint observers receive the original detached committed states.
+        """
+        with self._exclusive():
+            self._require_open()
+            controller = selection if type(selection) is CounterfactualController else None
+            policy = selection if type(selection) is ReferencePolicy else None
+            if (
+                type(acknowledge_correct) is not bool
+                or (acknowledge_correct and (not ready_feedback or prequential_feedback))
+                or type(prequential_feedback) is not bool
+                or type(ready_feedback) is not bool
+                or (observe_arrived is not None and not callable(observe_arrived))
+                or (observe_arrived is not None and controller is not None)
+                or (prequential_feedback and ready_feedback)
+                or (controller is not None and (prequential_feedback or not ready_feedback))
+                or (
+                    policy is not None
+                    and policy.mode == "drift"
+                    and not (prequential_feedback or ready_feedback)
+                )
+                or not self._training_only
+                or self._training_role != "train"
+                or self._next_tick != 0
+                or self._completed != 0
+                or self._checkpoints != tuple(range(len(self._training) + 1))
+                or self._budget.budget.max_training_updates is None
+                or any(
+                    helper is not None
+                    for helper in (
+                        self._rehearsal,
+                        self._renewal,
+                        self._capacity,
+                        self._feature_observer,
+                    )
+                )
+            ):
+                raise ValueError(
+                    "reference window requires a pristine ordinary TRAIN-only stream, "
+                    "all wake checkpoints, finite credit and a supported fixed policy"
+                )
+            if policy is not None:
+                policy.__post_init__()
+            if (
+                ready_feedback
+                and len(self._training) * max(len(b.features) for b in self._training) > 4096
+            ):
+                raise ValueError("ready feedback worst-case diagnostic rows exceed4096")
+            feedback_reader = ReferencePrequential(self._training) if prequential_feedback else None
+            ready_reader = ReferencePrequential(self._training) if ready_feedback else None
+            pinned: ReferencePolicy | FittedController | None = deepcopy(policy)
+            report: dict[str, Any] = dict(
+                status="running",
+                window_complete=False,
+                training_complete=False,
+                policy=asdict(policy) if policy is not None else None,
+                decisions=[],
+                attempted_wakes=0,
+            )
+            self._reference_report = report
+            arrival_attempts = arrival_returns = arrival_rows = returned_arrival_rows = 0
+            arrival_bytes = 0
+            arrival_record = None
+
+            def arrival_counts():
+                return dict(
+                    calls_attempted=arrival_attempts,
+                    calls_completed=arrival_returns,
+                    rows_attempted=arrival_rows,
+                    rows_completed=returned_arrival_rows,
+                    input_array_bytes_attempted=arrival_bytes,
+                    unreturned_work_unknown=arrival_attempts != arrival_returns,
+                )
+
+            if observe_arrived is not None:
+                report["arrived_observation"] = arrival_record = arrival_counts()
+
+            def observe_arrival(tick):
+                nonlocal arrival_attempts, arrival_returns, arrival_rows, returned_arrival_rows
+                nonlocal arrival_bytes, arrival_record
+                index = tick - self._delay
+                if observe_arrived is None or not 0 <= index < len(self._training):
+                    return
+                if report.get("arrived_observation") is not arrival_record or not _same_value(
+                    arrival_record, arrival_counts()
+                ):
+                    raise ValueError("preceding arrived diagnostic charges changed")
+                batch = self._training[index]
+                previous_counts = arrival_counts()
+                arrival_attempts += 1
+                arrival_rows += len(batch.features)
+                arrival_bytes += batch.features.nbytes + batch.targets.nbytes
+                try:
+                    self._observe_reference_arrival(tick, index, batch, observe_arrived, boundary)
+                    if report.get("arrived_observation") is not arrival_record or not _same_value(
+                        arrival_record, previous_counts
+                    ):
+                        raise ValueError("arrived diagnostic charges changed during callback")
+                    arrival_returns += 1
+                    returned_arrival_rows += len(batch.features)
+                finally:
+                    report["arrived_observation"] = arrival_record = arrival_counts()
+
+            if feedback_reader is not None:
+                report["prequential"] = feedback_reader.report
+            if ready_reader is not None:
+                report["ready_feedback"] = ready_reader.report
+                ready_reader.report["feedback_mode"] = "oldest_ready"
+            # Why: a verified consumption is not an optimizer update.
+            # Keep packet progress separate from native fit/checkpoint counts.
+            processed = 0
+            ack_pins: list[tuple[Any, Any, Any]] = []
+            ack_ledger = None
+            ack_attempts = ack_returns = 0
+            proof_reader = ReferencePrequential(self._training) if acknowledge_correct else None
+            if acknowledge_correct:
+                report["acknowledgement"] = dict(enabled=True)
+
+            binding = None
+            fitted: FittedController | None = None
+            application: dict[str, Any] = dict(binding_reads_attempted=0, binding_reads_completed=0)
+            if controller is not None:
+                report["controller_application"] = application
+
+            def read_binding():
+                assert controller is not None
+                self._check_original()
+                self._budget.before_final()
+                runtime, clock = self._runtime, self._clock
+                tick, candidate_owner = clock.now(), runtime._candidate
+
+                def observe(candidate):
+                    if not _same_value(candidate.state, self._states[-1][1]):
+                        raise ValueError(
+                            "contextual candidate differs from its last owned checkpoint"
+                        )
+                    expected = deepcopy(candidate)
+                    application["binding_reads_attempted"] += 1
+                    try:
+                        observed = controller.application_snapshot()
+                        application["binding_reads_completed"] += 1
+                    finally:
+                        self._budget.before_final()
+                    if (
+                        self._runtime is not runtime
+                        or self._clock is not clock
+                        or runtime._inbox._clock is not clock
+                        or clock.now() != tick
+                        or runtime._candidate is not candidate_owner
+                        or not _same_value(expected, runtime._snapshot_candidate())
+                    ):
+                        raise ValueError(
+                            "contextual binding callback changed original clock or candidate"
+                        )
+                    return observed
+
+                observed = runtime.with_candidate_snapshot(observe)
+                self._check_original()
+                return observed
+
+            def check_acknowledgements():
+                ledger = getattr(self._runtime._inbox, "_acknowledged", {})
+                if ack_ledger is not None and ledger is not ack_ledger:
+                    raise ValueError("original acknowledgement ledger was replaced")
+                if len(ledger) != len(ack_pins) or processed != self._completed + len(ack_pins):
+                    raise ValueError("processed cursor differs from original fit/ack receipts")
+                for key, receipt, saved in ack_pins:
+                    if ledger.get(key) is not receipt or not _same_value(receipt, saved):
+                        raise ValueError("preceding acknowledgement changed or was replaced")
+
+            def boundary():
+                if acknowledge_correct:
+                    check_acknowledgements()
+                self._reference_boundary(
+                    fitted if fitted is not None else policy, pinned, source, actor
+                )
+                if controller is not None:
+                    observed = read_binding()
+                    if not _same_value(observed, binding):
+                        raise ValueError("original contextual fit or source binding changed")
+                    for versioned in (observed["source"], observed["current_source"]):
+                        if (
+                            versioned.actor_version != self._runtime._base_actor_version
+                            or not _same_value(versioned.state, source)
+                            or not _same_value(versioned.state, actor.state)
+                        ):
+                            raise ValueError(
+                                "fitted controller belongs to a different complete source or actor"
+                            )
+                    self._reference_boundary(fitted, pinned, source, actor)
+
+            try:
+                self._check_original()
+                source = deepcopy(self._learner.snapshot_state())
+                actor = self._runtime.actor.snapshot_state()
+                if controller is not None:
+                    binding = read_binding()
+                    fitted = binding["policy"]
+                    assert type(fitted) is FittedController
+                    pinned = deepcopy(fitted)
+                    report["policy"] = asdict(fitted)
+                    application["fit"] = deepcopy(binding["fit"])
+                for tick in range(len(self._training) + self._delay):
+                    boundary()
+                    self._clock.advance_to(tick)
+                    if feedback_reader is not None and tick < len(self._training):
+                        self._predict_reference_packet(tick, feedback_reader)
+                        boundary()
+                    _record_tick(self._runtime, self._training, tick, self._delay)
+                    observe_arrival(tick)
+                    feedback = None
+                    label_index = tick - self._delay
+                    if feedback_reader is not None and 0 <= label_index < len(self._training):
+                        feedback = feedback_reader.arrive(
+                            label_index,
+                            tick,
+                            self._delay,
+                            self._training[label_index],
+                            self._runtime.candidate_snapshot(),
+                        )
+                    limit = self._budget.budget.max_training_updates
+                    assert limit is not None
+                    arrived = max(0, min(len(self._training), tick - self._delay + 1))
+                    index = processed if acknowledge_correct else self._completed
+                    if ready_reader is not None and index < arrived:
+                        feedback = self._predict_reference_packet(
+                            index,
+                            ready_reader,
+                            scored_at=tick,
+                            processed_index=index if acknowledge_correct else None,
+                        )
+                        boundary()
+                    observation = ReferenceObservation(
+                        tick,
+                        len(self._training) + self._delay - tick,
+                        arrived - index,
+                        max(0, limit - self._budget.updates_completed),
+                        self._runtime._base_actor_version,
+                        feedback,
+                    )
+                    if fitted is not None:
+                        choice = choose_contextual(fitted, observation)
+                    else:
+                        assert policy is not None
+                        choice = choose_reference(policy, observation)
+                    row = dict(
+                        observation=asdict(observation), choice=asdict(choice), returned=False
+                    )
+                    report["decisions"].append(row)
+                    if choice.action_id == "wake1":
+                        report["attempted_wakes"] += 1
+                        applied = self._runtime.train_ready(max_updates=1)
+                        self._completed += len(applied)
+                        if acknowledge_correct:
+                            processed += len(applied)
+                            self._checkpoint(batch_index=index)
+                        else:
+                            self._checkpoint()
+                    elif acknowledge_correct and feedback is not None and feedback.mistakes == 0:
+                        assert proof_reader is not None
+                        ack_attempts += 1
+                        receipt = self._acknowledge_reference_packet(
+                            index, proof_reader, check_acknowledgements
+                        )
+                        ack_returns += 1
+                        if receipt is not None:
+                            key = (receipt.episode_id, receipt.sample_id)
+                            if ack_ledger is None:
+                                ack_ledger = self._runtime._inbox._acknowledged
+                            ack_pins.append((key, receipt, deepcopy(receipt)))
+                            processed += 1
+                    self._next_tick += 1
+                    boundary()
+                    row.update(returned=True, completed_updates=self._completed)
+                report.update(status="complete", window_complete=True)
+                self._finished = True
+            except BaseException as error:
+                self._failed = True
+                report.update(status="failed", error=f"{type(error).__name__}: {error}"[:512])
+                raise
+            finally:
+                self._capture_reference_progress(report)
+                if acknowledge_correct:
+                    assert proof_reader is not None
+                    proof_reader.report.update(
+                        unreturned_prediction_unknown=proof_reader.report[
+                            "prediction_calls_attempted"
+                        ]
+                        > proof_reader.report["prediction_calls_completed"],
+                        unreturned_fork_unknown=proof_reader.report["fork_attempts"]
+                        > proof_reader.report["fork_completed"],
+                    )
+                    report["acknowledgement"].update(
+                        attempts=ack_attempts,
+                        returned=ack_returns,
+                        unreturned_work_unknown=ack_attempts > ack_returns,
+                        proof=deepcopy(proof_reader.report),
+                    )
+                    report["known_acknowledgements"] = [asdict(saved) for _, _, saved in ack_pins]
+                    try:
+                        receipts = self._runtime._inbox.acknowledged_experiences
+                        applied = self._runtime._inbox.applied_updates
+                        report.update(
+                            acknowledged_experiences=[asdict(r) for r in receipts],
+                            processed_packets=len(applied) + len(receipts),
+                            loop_processed_packets=processed,
+                            pending_unapplied=len(self._training) - len(applied) - len(receipts),
+                            unfitted_packets=len(self._training) - len(applied),
+                            consumption_complete=report["window_complete"]
+                            and len(applied) + len(receipts) == len(self._training),
+                            training_complete=report["window_complete"]
+                            and len(applied) == len(self._training),
+                            all_packets_fitted=len(applied) == len(self._training),
+                            training_examples=sum(
+                                len(self._training[r.observed_at].features) for r in applied
+                            ),
+                            applied_packet_indices=[r.observed_at for r in applied],
+                        )
+                    except BaseException as error:
+                        self._failed = True
+                        report.update(
+                            status="failed",
+                            training_complete=False,
+                            acknowledgement_capture_error=f"{type(error).__name__}: {error}"[:512],
+                        )
+            return deepcopy(report)
+
+    def _predict_reference_packet(
+        self,
+        tick,
+        reader: ReferencePrequential,
+        *,
+        scored_at=None,
+        processed_index=None,
+        owned_candidate=None,
+    ):
+        """Predict under a candidate lease without exposing labels to the fork."""
+        if scored_at is not None and (
+            type(scored_at) is not int
+            or scored_at != self._next_tick
+            or tick != (self._completed if processed_index is None else processed_index)
+            or tick + self._delay > scored_at
+        ):
+            raise ValueError("ready feedback requires the original oldest eligible FIFO packet")
+
+        def check_ready_clock():
+            if scored_at is not None and self._clock.now() != scored_at:
+                raise ValueError("original ready-feedback logical clock changed")
+
+        check_ready_clock()
+        batch = self._training[tick]
+        runtime = self._runtime
+        candidate_owner = runtime._candidate
+        features = batch.features.copy()
+        source = deepcopy(self._learner.snapshot_state())
+        actor = deepcopy(runtime.actor.snapshot_state())
+
+        def predict(candidate):
+            expected = deepcopy(candidate)
+            self._budget.before_final()
+            reader.report["fork_attempts"] += 1
+            predictor = self._learner.fork()
+            reader.report["fork_completed"] += 1
+            self._budget.before_final()
+            check_ready_clock()
+            if (
+                predictor is self._learner
+                or predictor is candidate_owner
+                or runtime.actor._owns(predictor)
+            ):
+                raise ValueError("prequential fork must be independently owned")
+            predictor.restore_state(deepcopy(candidate.state))
+            self._budget.before_final()
+            check_ready_clock()
+            if (
+                not _same_value(predictor.snapshot_state(), candidate.state)
+                or not _same_value(source, self._learner.snapshot_state())
+                or not _same_value(actor, runtime.actor.snapshot_state())
+                or not _same_value(expected, runtime._snapshot_candidate())
+            ):
+                raise ValueError("prequential fork differs from captured candidate")
+            reader.report["prediction_calls_attempted"] += 1
+            reader.report["prediction_rows_attempted"] += len(features)
+            try:
+                predictions = predictor.predict(features.copy())
+                reader.report["prediction_calls_completed"] += 1
+                reader.report["prediction_rows_completed"] += len(features)
+            finally:
+                self._budget.before_final()
+            check_ready_clock()
+            if (
+                runtime is not self._runtime
+                or runtime._candidate is not candidate_owner
+                or not _same_value(expected, runtime._snapshot_candidate())
+                or not _same_value(predictor.snapshot_state(), expected.state)
+                or not _same_value(features, batch.features)
+                or (
+                    owned_candidate is not None
+                    and (
+                        not _same_value(source, self._learner.snapshot_state())
+                        or not _same_value(actor, runtime.actor.snapshot_state())
+                    )
+                )
+            ):
+                raise ValueError("prequential prediction changed captured or native state")
+            reader.observe(tick, tick, batch, expected, predictions)
+            self._budget.before_final()
+            if scored_at is not None:
+                feedback = reader.arrive(tick, tick + self._delay, self._delay, batch, expected)
+                reader.report["events"][-1].update(
+                    scored_at=scored_at, feedback_source="oldest_ready"
+                )
+                return feedback
+
+        if owned_candidate is not None:
+            if not runtime._inbox._draining or not _same_value(
+                owned_candidate, runtime._snapshot_candidate()
+            ):
+                raise ValueError("acknowledgement proof requires original candidate lease")
+            result = predict(owned_candidate)
+        else:
+            result = runtime.with_candidate_snapshot(predict)
+        self._check_original()
+        return result
+
+    def _acknowledge_reference_packet(self, index, reader, check_acknowledgements):
+        """Fresh verification inside the existing exclusive acknowledgement port."""
+        runtime, batch = self._runtime, self._training[index]
+        episode = "attribution" if batch.episode is None else batch.episode.episode_id
+        key = (episode, f"batch-{index}")
+
+        def verify(candidate, source, label):
+            check_acknowledgements()
+            if (
+                source.key != key
+                or source.observed_at != index
+                or label.arrived_at != index + self._delay
+                or not _same_value(source.features, batch.features)
+                or not _same_value(label.targets, batch.targets)
+            ):
+                raise ValueError("acknowledgement differs from original arrived TRAIN packet")
+            feedback = self._predict_reference_packet(
+                index,
+                reader,
+                scored_at=self._clock.now(),
+                processed_index=index,
+                owned_candidate=candidate,
+            )
+            check_acknowledgements()
+            return feedback is not None and feedback.mistakes == 0
+
+        return runtime.acknowledge_ready(
+            key,
+            actor_version=runtime._base_actor_version,
+            learner_version=runtime._candidate_version,
+            wake_updates=self._budget.updates_completed,
+            verify=verify,
+        )
+
+    def _reference_boundary(self, policy, pinned, source, actor) -> None:
+        self._check_original()
+        self._budget.before_final()
+        if policy != pinned or not _same_value(self._learner.snapshot_state(), source):
+            raise ValueError("original reference policy or source learner changed")
+        if not _same_value(self._runtime.actor.snapshot_state(), actor):
+            raise ValueError("original reference actor changed")
+        self._check_original()
+
+    def _capture_reference_progress(self, report) -> None:
+        """A failed native return can leave receipts ahead of the loop counter."""
+        application = report.get("controller_application")
+        if application is not None:
+            application["unreturned_binding_unknown"] = (
+                application["binding_reads_attempted"] > application["binding_reads_completed"]
+            )
+        for key in ("prequential", "ready_feedback"):
+            if key not in report:
+                continue
+            diagnostics = report[key]
+            diagnostics["unreturned_prediction_unknown"] = (
+                diagnostics["prediction_calls_attempted"]
+                > diagnostics["prediction_calls_completed"]
+            )
+            diagnostics["unreturned_fork_unknown"] = (
+                diagnostics["fork_attempts"] > diagnostics["fork_completed"]
+            )
+        report.update(
+            completed_updates=self._completed,
+            next_tick=self._next_tick,
+            budget_updates=self._budget.updates_completed,
+            replay_examples=self._budget.replay_examples_completed,
+            score_forward_calls=0,
+        )
+        try:
+            receipts = self._runtime.applied_updates
+            report.update(
+                applied_updates=[asdict(receipt) for receipt in receipts],
+                training_examples=sum(len(b.features) for b in self._training[: len(receipts)]),
+                pending_unapplied=len(self._training) - len(receipts),
+                training_complete=report["window_complete"]
+                and len(receipts) == len(self._training),
+                unreturned_work_unknown=report["attempted_wakes"] > len(receipts),
+            )
+        except BaseException as error:
+            self._failed = True
+            report.update(
+                status="failed",
+                window_complete=False,
+                training_complete=False,
+                receipt_capture_error=f"{type(error).__name__}: {error}"[:512],
+                unreturned_work_unknown=True,
+            )
 
     def _observe_renewal(self) -> None:
         renewal = self._renewal

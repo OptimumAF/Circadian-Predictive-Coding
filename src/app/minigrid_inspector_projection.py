@@ -516,6 +516,7 @@ def _episode(
     branch_row: int = 3,
     allow_observed_failure_tail: bool = False,
     expected_layout: dict[str, Any] | None = None,
+    expected_episode_id: str | None = None,
 ) -> dict[str, Any]:
     _require(
         record.get("context") == context
@@ -589,7 +590,12 @@ def _episode(
             )
         _require(
             _status(environment.get("status"))
-            and environment.get("episode_id") == f"live-{method}-{updates}-{context}-{cue}",
+            and environment.get("episode_id")
+            == (
+                expected_episode_id
+                if expected_episode_id is not None
+                else f"live-{method}-{updates}-{context}-{cue}"
+            ),
             "native checkpoint episode identity mismatch",
         )
         _require(

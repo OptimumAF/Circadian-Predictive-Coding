@@ -42,14 +42,35 @@ class InboxCursor(Generic[Features, Targets]):
         validate_inbox_cursor(self)
 
 
+@dataclass(frozen=True)
+class GenerationInboxCursor(InboxCursor[Features, Targets]):
+    """Format3: explicit lifetime work before this generation's local receipts.
+
+    The offset accounts for already charged work; it does not authenticate the
+    preceding history. Ordinary format1/2 records retain their exact fields.
+    """
+
+    completed_before_generation: int = 0
+
+
 def validate_inbox_cursor(cursor: object) -> None:
+    if type(cursor) is not InboxCursor and type(cursor) is not GenerationInboxCursor:
+        raise ValueError("inbox cursor requires an exact supported cursor type")
+    assert isinstance(cursor, InboxCursor)
+    generation = type(cursor) is GenerationInboxCursor
     if (
-        type(cursor) is not InboxCursor
+        type(cursor) not in (InboxCursor, GenerationInboxCursor)
         or type(cursor.format_version) is not int
-        or cursor.format_version not in (1, 2)
+        or (cursor.format_version != 3 if generation else cursor.format_version not in (1, 2))
     ):
-        raise ValueError("inbox cursor requires supported exact format version 1 or 2")
-    if type(cursor.erased) is not tuple or (cursor.format_version == 1) != (not cursor.erased):
+        raise ValueError("inbox cursor requires its exact supported format1/2 or generation3")
+    if type(cursor) is GenerationInboxCursor:
+        require_tick(cursor.completed_before_generation, "cursor generation offset")
+        if not 0 < cursor.completed_before_generation <= cursor.completed_updates:
+            raise ValueError("generation cursor requires a positive prior-work offset")
+    if type(cursor.erased) is not tuple or (
+        not generation and (cursor.format_version == 1) != (not cursor.erased)
+    ):
         raise ValueError("format 2 requires tombstones; format 1 has no erased history")
     require_identifier(cursor.learner_version, "cursor learner_version")
     for name in ("capacity", "last_tick", "completed_updates"):
@@ -121,6 +142,7 @@ def _validate_events(cursor: InboxCursor[Features, Targets]):
 def _validate_applied(cursor: InboxCursor[Features, Targets], sources, labels, erased) -> None:
     seen = set()
     last_applied_tick = 0
+    offset = cursor.completed_before_generation if type(cursor) is GenerationInboxCursor else 0
     for number, receipt in enumerate(cursor.applied, 1):
         if type(receipt) is not AppliedExperience:
             raise ValueError("cursor receipt must be an exact AppliedExperience")
@@ -160,7 +182,7 @@ def _validate_applied(cursor: InboxCursor[Features, Targets], sources, labels, e
             event,
             observed,
             arrived,
-            number,
+            offset + number,
         )
         actual = (
             receipt.actor_version,
@@ -182,7 +204,7 @@ def _validate_applied(cursor: InboxCursor[Features, Targets], sources, labels, e
         ) != {field.name for field in fields(CategoricalPCTrainingDiagnostic)}:
             raise ValueError("bounded cursor diagnostic requires its exact complete fields")
         replace(receipt.diagnostic)
-    if cursor.completed_updates < len(cursor.applied) or (
-        not cursor.stopped and cursor.completed_updates != len(cursor.applied)
+    if cursor.completed_updates < offset + len(cursor.applied) or (
+        not cursor.stopped and cursor.completed_updates != offset + len(cursor.applied)
     ):
         raise ValueError("completed cursor work requires an exclusive consistent ledger")

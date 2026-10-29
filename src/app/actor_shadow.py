@@ -416,7 +416,7 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
     def _owns_candidate(self, learner: object) -> bool:
         return self._candidate is learner
 
-    def _prepare_handoff(self, candidate, cursor):
+    def _prepare_handoff(self, candidate, cursor, *, actor_version=None, candidate_version=None):
         """Materialize an independent owner under the caller's candidate lease.
 
         Why: constructors fork models and initialize cursors. This private path
@@ -426,8 +426,14 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
         prepared = object.__new__(type(self))
         prepared._training_role = self._training_role
         prepared._original_training_role = self._original_training_role
-        prepared._actor, prepared._base_actor_version = self._actor, self._base_actor_version
-        prepared._candidate, prepared._candidate_version = candidate, self._candidate_version
+        prepared._actor = self._actor
+        prepared._base_actor_version = (
+            self._base_actor_version if actor_version is None else actor_version
+        )
+        prepared._candidate = candidate
+        prepared._candidate_version = (
+            self._candidate_version if candidate_version is None else candidate_version
+        )
         prepared._inbox = self._inbox._materialize_cursor(candidate, cursor)
         prepared._budget, prepared._consolidation_limit = self._budget, self._consolidation_limit
         prepared._attempted_ids = self._attempted_ids.copy()

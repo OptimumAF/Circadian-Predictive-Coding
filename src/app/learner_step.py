@@ -37,17 +37,17 @@ def update_learner(
     validate_learning_rate_multiplier(learning_rate_multiplier)
     validate_gate_setting(gate_setting)
     gate_update = getattr(learner, "train_batch_with_gate_setting", None)
+    combined = gate_setting != "unchanged" and learning_rate_multiplier != 1
+    combined_update = getattr(learner, "train_batch_with_rate_and_gate", None)
     if gate_setting != "unchanged":
         gate_validator = getattr(learner, "validate_gate_setting", None)
-        if (
-            learning_rate_multiplier != 1
-            or not callable(gate_update)
-            or not callable(gate_validator)
+        if not callable(combined_update if combined else gate_update) or not callable(
+            gate_validator
         ):
             raise ValueError("native gate executor or gate/rate combination is unsupported")
         gate_validator(gate_setting)
     rate_update = getattr(learner, "train_batch_with_rate_multiplier", None)
-    if learning_rate_multiplier != 1 and not callable(rate_update):
+    if learning_rate_multiplier != 1 and not combined and not callable(rate_update):
         raise ValueError("native learning-rate executor is unsupported")
     if budget.budget.max_hidden_width is not None or budget.budget.max_replay_examples is not None:
         raise ValueError("learner step does not enforce width or replay limits")
@@ -56,7 +56,10 @@ def update_learner(
     budget.before_update()
     if on_started is not None:
         on_started()
-    if gate_setting != "unchanged":
+    if combined:
+        assert callable(combined_update)
+        diagnostic = combined_update(features, targets, learning_rate_multiplier, gate_setting)
+    elif gate_setting != "unchanged":
         assert callable(gate_update)
         diagnostic = gate_update(features, targets, gate_setting)
     elif learning_rate_multiplier == 1:
