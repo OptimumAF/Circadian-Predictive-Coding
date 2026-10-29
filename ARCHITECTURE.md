@@ -336,6 +336,24 @@ analysis only, with inference/cost provenance disclosed. See
 [usage/evidence](docs/context-head-probe.md) and
 [ADR0594](docs/adr/ADR-0594-isolated-context-head-probe.md).
 
+scripts/context_head_rehearsal certifies complete F and TRAIN teacher episodes,
+then composes the existing FreshTaskProbe/StreamRehearsal/return ports for fixed
+native-exposure-matched extra-F and old-TRAIN controls. The endpoint observer's
+default-off matched mode requires exact native48/144 then64/240 private work;
+logical F16 excludes the separately charged32 replay passes. Source-free CLI
+preview and capped report output remain script boundaries. No new core learner,
+runtime, final-data authority or deployment path. See
+[usage and executed scope](docs/context-head-rehearsal.md).
+
+recurring_ticket_workflow_example optionally hands its current qualified native
+checkpoint12 to context_head_rehearsal.run_owned_pair. Complete source training,
+receipts and ordinary task checks precede private construction; the source stream
+stays open under its original guard/budget during private work and seals after.
+An existing BudgetWitness rejects unobserved source clock/resource/counter changes.
+Common pair composition retains separate historical byte admission. New explicit
+CLI mode uses the existing capped writer; normal encoder and defaults remain.
+See [source-free workflow](docs/context-head-fresh-workflow.md).
+
 ## Conventional separate-context heads
 
 core/context_perceptron composes original pure D7perceptron states/rules with
@@ -480,6 +498,26 @@ metadata retain failure costs and prior receipt checks. Original model schemas,
 Torch no-sleep clocks, budgets and actor publication behavior are unchanged.
 See docs/component-sleep-actions.md and ADR-0581.
 
+## Fixed TRAIN reference windows
+
+`AttributionStream.run_reference_window` provides a separate terminal ordinary
+TRAIN window using the existing pure fixed-reference policy, delayed arrivals,
+FIFO and native update port. It seals with explicit pending work, without final
+evaluation or an implicit drain. Original always-train paths remain unchanged.
+The analytical game evaluator admits a distinct actual-prefix readout, including
+unfitted heads. [Contract](docs/attribution-reference-window.md) and
+[partial native qualification](docs/reports/affine-reference-window-20261025.md).
+The existing affine CLI/wrapper now exposes that terminal TRAIN path through an
+explicit fixed policy option. It returns receipts, costs and pending metadata
+without full-training finish, score/weight export or automatic games.
+[CLI qualification](docs/reports/affine-reference-cli-20261025.md).
+The same wrapper can opt into existing `compose_arrived_cue_catalogue` batches
+for selected reference wakes. It owns the bounded causal TRAIN plan; the stream
+still owns label release/FIFO/admission and the native port owns fitting.
+Planned storage/exposures remain separate from actual receipt-bound current and
+replay rows. No new learner, controller framework or consolidation authority is
+introduced. [Composition contract](docs/attribution-reference-window.md#optional-arrived-train-bank).
+
 ## Native gate action path
 
 `ResourceSharedRuntime → ActorShadowRuntime → ExperienceInbox → update_learner`
@@ -489,6 +527,11 @@ only the selected update's plasticity multiplication, with all other adaptive
 state native. Config/snapshot identities and durable receipt schemas stay fixed.
 Direct inbox callers receive the same pre-payload capability refusal. No adapter
 dependency enters app/core; existing ticket work counters cover the new port.
+The optional `RateGateControlledLearner` port composes a nonunit rate and gate
+inside that same staged update. Step, inbox and shared admission validate joint
+capability before payload/resource access; unity/unchanged retain the original
+public ports and their observers. No sequential double update or state-schema
+change is introduced. See the [qualification](docs/reports/combined-rate-gate-20261025.md).
 See [gate actions](docs/gate-actions.md) and ADR-0580.
 
 ## Final-only FIFO36 game readout
@@ -7299,3 +7342,80 @@ wrappers/bindings with immutable coefficient leaves. A narrow evaluator wrapper
 reuses the original game loop with a zero-update readout budget. The existing
 CLI binds the accepted fit bytes before inference; it creates no native
 optimizer/history authority. See ADR-0617 and [game evidence](docs/context-linear-games.md).
+
+`minigrid_serving` admits one known TRAIN episode and original readout budget;
+`promotable_minigrid_binding` pins the exact native backend/full serving bundle
+and delegates prediction to the actual public actor. The existing evaluator
+kernel owns observations, decisions, physical actions and cleanup. Its original
+detached scorer path remains. The binding depends on app serving ports and the
+native affine leaf; the app gains only a full nonblocking snapshot using its
+original lock, with no dependency on adapters. Physical actions lease that same
+gate to serialize ordinary commit/rollback. No extra runner, training/promotion
+authority, persisted history or new dependency. See [serving contract](docs/promotable-minigrid.md).
+
+`scripts/minigrid_affine_serving.py` is the fixed first-party composition behind
+`--example-affine-published` in the existing affine command. It preflights the
+optional runtime, then creates original budgets before data/models; existing
+TRAIN stream, disjoint guard evaluator, promotion controller and serving API
+own their behavior. Script helpers hold finite identity/value proofs and failed
+work reports, with no app/core/native changes or extra loop/framework. A normal
+two-fit/two-game native command/export qualifies; old checkpoint and other CLI
+paths remain. See [delivery evidence](docs/reports/published-affine-cli-20261025.md).
+
+Optional `shared_runtime` binds an exact existing ResourceSharedRuntime/actor
+pair. `minigrid_shared_prediction` owns finite control pins and start/latest
+observations, without scheduling or private-weight reads. Original shared
+predict owns request admission and calls the actual actor; actions retain their
+existing actor gate. App/core/CLI/native math are unchanged. Default serving/
+report behavior and caller consent/paid-work checks remain. No history/restore
+authority or new runner. See [sharing evidence](docs/reports/shared-minigrid-serving-20261025.md).
+The explicit `scripts/minigrid_live_adaptation.py` composition reuses the existing
+collector, cue catalogue, live actor/shadow runtime, sharing gate and native game
+readouts. One lifetime budget covers all private updates; the published actor
+stays fixed. This script owns the finite workflow/report and cannot rebase or
+authorize a second publication. No new learner, orchestration layer or evaluation
+authority is introduced; fixed TRAIN readouts never control learning decisions.
+
+`app/published_candidate.py` implements the promotion controller's ordinary
+current-actor candidate start. It validates the latest publication and consumed
+ledger, materializes an independent current-model owner, then retires the old
+owner while preserving original cumulative resources. Core `GenerationInboxCursor`
+format3 explicitly records prior lifetime work; ordinary format1/2 fields stay
+unchanged. Pending/unpublished or managed/action/consent-guard transitions are
+refused. No checkpoint, optimizer, new runner or implicit rebase is introduced.
+
+The existing live A4 script now has an explicit deployment branch selected by
+`--example-affine-deploy-a4`. It shares publication, actor-game and paid-prefix
+checks with the original private mode, then invokes the qualified app-level
+current-actor start between generations. One retired owner remains bounded and
+readable. No new orchestration layer is added; the original private recipe and
+report shape remain the default for its existing command.
+
+The fixed reference window has an optional readonly arrived-packet callback.
+It runs after delayed TRAIN admission, before choosing/fitting, under the
+existing candidate lease and original budget, even when the policy waits.
+Detached packet/candidate views and source/actor/runtime/clock/input guards
+preserve the learning path; failed calls retain bounded counters and stop.
+It does not add a callback to probe, contextual-controller or pause/restore paths.
+
+`adapters/minigrid_shift_diagnostics.py` composes this callback with the existing
+K7 shift metrics/detector/incidents. Native predictions retain all296inputs;
+fixed eight-value public image/direction summaries preserve the core detector's
+16-column limit. The native wrapper selects only newly arrived rows from joint
+fit templates. Diagnostics own one readonly reader and six scalar slots, report
+costs, and never return a training decision. Core binary/categorical metrics,
+default observers, original budgets, actors and solver behavior stay unchanged.
+
+`scripts/minigrid_controller_validation.py` also owns a fixed red-wall A3
+TRAIN nuisance recipe. The original grey A3/A4 chooser freezes before a separate
+validation study admits new sources. A fresh matching baseline and endpoints
+remain unavailable until all five training windows end; source, chooser,
+layout/role, RNG and original-budget bindings remain guarded. Existing paid
+evidence retains collection prefixes on refusal. Endpoint data never returns
+to fitting, and readout reuse cannot create a cheaper comparable utility.
+
+`adapters/minigrid_train_collection.py` shares the original bounded G/A4 teacher
+and cleanup loop with the new fixed red A3 profile. The workflow keeps its old
+wrapper; both script orchestrators depend on the adapter, which imports only
+core and infrastructure. No new script cycle, runner, cache or dependency is
+introduced. See [ADR-0640](docs/adr/ADR-0640-nuisance-train-validation-separation.md).

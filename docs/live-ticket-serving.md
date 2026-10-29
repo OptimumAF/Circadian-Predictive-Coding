@@ -20,6 +20,87 @@ reference, eight6row TRAIN batches and original delayed inbox/gate/budget. It is
 incompatible with other CLI study modes or custom deferred/fitted/counterfactual
 recipes. Other modes retain their defaults.
 
+The separate [frozen catalog API](contextual-controller.md#learn-privately-while-the-original-actor-serves)
+now supports the same live worker with the original catalog's nine-opportunity
+cap and a private candidate. It performs no publication or comparison scoring;
+its software checks are separate from the fixed-reference native observations
+below. [Explicit mixed/corrupted live TRAIN recipes](contextual-controller.md#mixed-or-corrupted-feedback-during-live-service)
+can now be composed with the private catalog path under the same nine-opportunity
+cap; delayed labels beyond it remain unarrived. Their native usefulness remains
+unqualified. Custom deferred and terminal-publication combinations remain refused.
+
+## Optional isolated diagnostic after a private catalog window
+
+The existing Python API can run the fixed warm/fresh learning diagnostic after
+a successful, fully captured private catalog live window:
+
+```python
+from scripts.run_bp_ticket_serving import run_case
+from scripts.ticket_serving_timeline import LiveServingPlan
+
+result = run_case(
+    source_path,
+    catalog_policy=frozen_policy,
+    serving_plan=LiveServingPlan(9, (2, 6)),
+    probe_after_window=True,
+)
+```
+
+Use the original qualified source and frozen catalog policy as in the catalog
+API above. This is an exact Boolean opt-in; trials, publication and deferred
+comparisons refuse it before source access. Defaults remain unchanged. Existing
+explicit live TRAIN recipes retain their original horizon and pending labels.
+
+The diagnostic reuses `probe_ticket_policy_learning.run_arm` and the existing
+disposable probe:16fixed TRAIN-derived policy-change updates followed by16old
+TRAIN-return updates, checkpoints0/4/8/16 and typed task readouts. One warm seed
+uses the **in-memory terminal candidate's full optimizer state**; another uses
+the original fixed fresh BP initialization. Separately counted diagnostic seeds
+avoid inheriting the live learner's benchmark callbacks. The four original
+diagnostic sessions reserve64updates/192rows total; each keeps the existing
+16update/120s/512MiB limit, with a separate180s aggregate diagnostic deadline.
+No budget is restored or renewed. Original live budget clocks/counters stay
+fixed; total elapsed time and RSS include the diagnostic.
+
+`catalog_window_complete` reports the preceding window separately from optional
+diagnostic completion. `isolated_probe` contains both arms, training/return
+costs, seed-construction attempts/unknown returns, task outcomes and failed
+prefixes. Failed or replaced prior evidence prevents further work. Original
+paid records are retained after refusing an edit; this restores evidence only,
+never model state or authority. Retention stays bounded to the original window
+and at most two diagnostic arms.
+
+The deployed actor, private candidate, source, pending labels, receipts, budgets,
+sharing and caller RNG are guarded throughout. Probe updates never enter live
+training, replay, promotion, final evaluation or controller selection. These
+known TRAIN-derived tasks are a diagnostic, not unseen-task generalization or
+proof of plasticity loss. Original comparison utility refuses this new report
+family because it does not price diagnostic work.
+
+[Software qualification and failures](reports/catalog-candidate-probe-20261027.md)
+cover the scripted connection. The [single native diagnostic](reports/catalog-candidate-probe-native-20261027.md)
+now completes: warm keeps both old tasks but still fails the changed invoice;
+fresh solves none of the four endpoint tasks. Row loss improves without full
+invoice acquisition. Warm never loses the old tasks, so return is not recovery.
+The run costs70updates228rows including its live prefix; no circadian advantage,
+plasticity-loss or generalization claim. Both diagnostic and earlier native
+allowances remain spent; no automatic retry or dose tuning.
+
+## Preserved native live observations
+
+[Native catalog live qualification](reports/catalog-live-native-20261027.md)
+now records one complete9opportunity application: private new tasks1/2→2/2,
+old2/2retained with6updates36rows, while the original actor serves9episodes
+(6success/29requests). It remains private: both live legacy requests still fail,
+and two TRAIN packets remain pending. This establishes no comparative advantage
+or broader long-duration reliability; original fixed-reference results remain below.
+
+For explicit publication after that frozen catalog window ends, see
+[terminal publication](contextual-controller.md#publish-after-the-live-window-ends).
+It uses the original inner guards, retires old training without draining pending
+packets, and reports post-window typed service separately. Its current evidence
+is software-only; it does not alter the original native observations below.
+
 `LiveServingPlan` optionally configures1..64opportunities, sorted contention ticks
 and at most10second coordination waits. The CLI freezes24ticks, contention2/6.
 The concept cycle is invoice,legacy,parcel,password. Invoice ticks4/12/20 inject

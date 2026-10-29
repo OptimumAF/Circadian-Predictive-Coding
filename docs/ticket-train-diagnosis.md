@@ -1,5 +1,68 @@
 # Diagnose saved native BP ticket TRAIN fit
 
+## Compare already-paid live clean/noisy decisions
+
+Use the separate saved-score route for a `native_catalog_live_noise_pair_v1`
+report:
+
+```powershell
+python -B -m scripts.diagnose_ticket_training --live-noise-comparison --input saved-live-pair.json --output fresh-score-comparison.json
+```
+
+This route performs no model reconstruction, NumPy reference projection,
+teacher generation, prediction or training. It rechecks typed saved decisions,
+retains every private task's recorded outcome and scores, and subtracts recorded
+scores to show winning margins. It compares only identical saved request/state/
+capability prefixes. Once selected actions differ, later different-world states
+remain separate. Ties are0; a sole eligible action has no comparative margin.
+
+Input is bounded3MiB; output must be fresh and is bounded256KiB. Malformed,
+unknown, inconsistent, nonfinite or oversized evidence fails with retained work
+counts. It reads once, hashes the captured bytes and reports
+`captured_bytes_only_no_postflight_seal`: this is a snapshot diagnosis, not proof
+of later file preservation, execution authenticity or model parity. It cannot
+feed training, promotion, tuning, replay or probe selection. Flags are mutually
+exclusive; original reference modes below preserve their existing contracts.
+
+[Executed diagnosis](reports/catalog-live-score-diagnosis-20261027.md) found the
+first selection difference at legacy's ready step: cleaninspect versusnoisydefer,
+with recorded raw gap crossing-0.052939→+0.184587. Password still passed but its
+winning raw margin shrank0.253496→0.010614. These are recorded decision facts,
+not a causal mechanism, calibrated confidence or evidence that wrong labels
+are beneficial. The original native experiment and all negative/spent results
+remain unchanged; this mode grants no new model-run budget.
+
+### Inspect the saved comparison offline
+
+Use the existing inspector command on the diagnosis output, with a fresh HTML
+destination:
+
+```powershell
+python -B -m scripts.build_key_door_inspector --source-artifact fresh-score-comparison.json --output fresh-score-inspector.html
+```
+
+The report shows both private candidates' old/new outcomes, first different
+action on the common observation prefix, every decision's recorded margins,
+all candidate scores, marked TRAIN corruption, exposure and diagnostic costs.
+Each observed value links to its exact detached source. Missing values remain
+unknown; recorded nulls, zeroes, failures and adverse gaps remain distinct.
+The page cannot train or promote and performs no rescoring. Separately supplied
+resources have an unverified association. Source snapshots do not authenticate
+execution or establish calibrated confidence, causality or a circadian benefit.
+
+New-mode failed CLI summaries now carry an explicit report-type tag and display
+their error and paid work without invented outcomes. Historical untagged failed
+summaries are not rewritten or guessed into this route. Complete reports require
+two known arms/four contexts and bounded decisions/scores; partial reports may
+omit unobserved rows.
+
+[Executed export and software checks](reports/catalog-score-inspector-20261027.md)
+include all24saved decisions/120scores and940source links without rereading the
+original native experiment. Browser appearance and interaction remain unverified;
+syntax and source-cell checks are not visual acceptance.
+
+## Original chronological reference diagnosis
+
 Run a read-only diagnosis of the saved chronological BP result:
 
 ```powershell

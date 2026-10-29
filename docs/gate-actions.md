@@ -38,8 +38,22 @@ freezes the finite catalog and hard envelope. Generic learners need the optional
 
 The scalar must be an exact native string. No callable, array, boolean, custom
 object or new parameter vector is accepted. Nondefault gate choices require
-positive wake, unit learning-rate multiplier, zero replay and zero sleep.
-Gate-only no-wake, gate+rate, gate+replay and gate+sleep combinations fail.
+positive wake, zero replay and zero sleep. A nonunit learning-rate multiplier
+also requires the optional `RateGateControlledLearner` port. Gate-only no-wake,
+gate+replay and gate+sleep combinations fail.
+
+For example, declare `AdaptationAction("half-neutral", wake_updates=1,
+learning_rate_multiplier=0.5, gate_setting="neutral")` in the immutable catalog,
+with both effects allowed by its envelope. `train_action("half-neutral")` applies
+both effects in **one** native update and spends one wake admission and budget
+charge. It never falls back to calling the separate ports twice. Unsupported
+joint capabilities fail before training payloads or resource callbacks.
+
+`TorchFeatureLearner.train_batch_with_rate_and_gate(features, targets, multiplier,
+setting)` validates both scalars and the bound policy. Unity or unchanged delegates
+the original public gate or rate method, retaining subclass observers. A true
+combined choice uses the existing staged update once. The policy capability table
+above still applies. See the [combined qualification](reports/combined-rate-gate-20261025.md).
 
 For gated CPC, neutral replaces only the per-unit plasticity multiplication in
 the existing hidden-output, input-hidden and hidden-bias gradients. The output

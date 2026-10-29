@@ -70,10 +70,33 @@ a success-model chain. Trusted local composition is not a hostile Python sandbox
 durable continuation format, hard native preemption or process-tree RSS guarantee.
 No final/probe/promotion/controller-fit port is supplied.
 
-Default wait/wake remains. Replay without an executor, combined wake+replay,
-replay+rate, gate and sleep effects remain refused. Separate per-update rate+wake
+Default wait/wake remains. Replay without an executor and replay combined with
+rate, gate or sleep effects remain refused. Separate per-update rate+wake
 is supported by the [optional native port](learning-rate-actions.md).
 Full R7.1 and broader goals remain open.
+
+## Replay followed by fresh learning
+
+An owner can also declare `AdaptationAction("rehearse_then_learn", 1, 3)` in the
+same envelope above. Selecting this ID requests one whole three-row replay event,
+then up to one original FIFO TRAIN update. Larger declared wake counts retain
+the original per-poll bound. Both cumulative envelope limits are checked before
+work. The existing full-state/receipt guard validates replay success before the
+separate wake admission; original clocks, role checks and budgets remain in force.
+
+This is one controller decision with two independently paid sharing admissions.
+It is not a transaction: a committed replay remains paid if the wake defers,
+has no arrived labels, or fails. The returned poll contains that replay receipt
+and the actual wake prefix/defer reason. If replay defers, no wake is attempted.
+Choose an already-declared wake-only ID to continue after a known deferral;
+selecting the composite ID again requests another paid replay. There is no hidden
+continuation, rollback, automatic retry or budget renewal. A thrown late failure
+retains known receipts on the original runtime and work counts on the wrapper;
+unknown work stops further native operations under the existing rules.
+
+The [replay/wake qualification](reports/replay-wake-action-20261027.md) separates
+scripted failure checks from a tiny native BP wiring equivalence case. Neither
+establishes task retention, recovery, controller benefit or a circadian advantage.
 
 ## Run and verify
 

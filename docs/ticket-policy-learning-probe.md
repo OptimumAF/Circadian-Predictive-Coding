@@ -69,10 +69,21 @@ and password persistence must remain separate. This qualification was recorded
 **before execution** in [PROTOCOL_NOTE.md](../artifacts/runs/policy-learning-probe-20261023/PROTOCOL_NOTE.md).
 It does not prove why the fixed probe failed to switch rules.
 
-The next implementation should expose ordinary observable policy context to the
-existing request/teacher/episode feature path, preserving these frozen D7 defaults.
-Check TRAIN/public alignment and removal of cross-policy label aliasing before a
-separately budgeted conventional context-aware fit. Do not silently tune this probe.
+The existing D9 context-observation path, joint TRAIN conflict checker and
+[context-head probe](context-head-probe.md) now provide that separate functionality.
+That older head probe uses a different legacy cohort; it is not a matched D7/D9
+comparison on this invoice/password cohort. Frozen D7 outcomes remain unchanged.
+
+`run_arm(..., input_diagnostics=True)` optionally forwards the generic
+[TRAIN input constraints](categorical-fresh-task-probes.md#optional-train-input-constraints)
+report. Its default remainsFalse. The current explicit live catalog probe enables
+it after the original probe/return/endpoints; unsupported or failed diagnostics
+do not gate arm admission. It compares the48 supplied F records and6 old TRAIN
+readout records, excluding duplicate return templates and probe-test labels.
+Equal record weighting does not represent the old phase's actual update exposure.
+The report-only same-task D7/D9 data qualification is recorded separately in
+[R2.1-ID.C](reports/probe-input-diagnostics-20261027.md); it does not fit a model,
+alter this recipe's encoding, explain a particular failure or establish task benefit.
 
 ## Costs, structure and checks
 

@@ -38,11 +38,13 @@ and bindings, alongside the existing runtime's supported recovery requirements.
 | Zero wake, unchanged other fields | Explicit no-update; no native state/payload read or sharing admission |
 | Positive wake bound | Existing causal inbox, serving priority and original budgets |
 | Replay amount | Optional fixed whole TRAIN bank executor; [contract](categorical-replay-actions.md) |
+| Replay plus positive wake bound | One fixed-bank replay, validate success, then separately admitted causal wake poll; [partial completion contract](categorical-replay-actions.md#replay-followed-by-fresh-learning) |
 | Learning-rate multiplier | Per-update rate+wake with optional native port; [contract](learning-rate-actions.md) |
 | Neutral/active gate setting | Optional one-update native plasticity port; [contract](gate-actions.md) |
 | Sleep allowance | One fixed-width NumPy component event; [contract](component-sleep-actions.md) |
 
-Structural renewal and combined effects remain unsupported. Sleep events count
+Structural renewal and other mixed replay/sleep effects remain unsupported.
+Rate plus gate on a wake uses the existing combined native port. Sleep events count
 separately from TRAIN updates and consume original consolidation/shared quotas.
 
 Unsupported choices never silently become wake or no-update. Full R7.1 remains

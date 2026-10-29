@@ -1,6 +1,9 @@
 # Contextual recurrence and TRAIN label noise
 
 ```powershell
+Set-Location D:\Dev\Repositories\Circadian
+$env:TEMP = 'D:\Dev\_Temp'
+$env:TMP = 'D:\Dev\_Temp'
 $env:PYTHONPATH = (Get-Location).Path
 .venv\Scripts\python.exe -m scripts.run_bp_ticket_serving --source artifacts/runs/context-head-control-20261023/actual.json --context-recipe-validation --output local-context-recipes.json
 ```
@@ -66,3 +69,71 @@ all24task/scenario pairs must be explicit before any new comparison. Existing
 cases are engineering evidence with that limitation, not confirmation evidence.
 Evidence: `artifacts/runs/context-training-recipes-20261023/` and
 [issue84](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/84).
+
+## Equal-row joint rehearsal and return
+
+`CONTEXT_REHEARSAL_RECIPES` adds two explicit Python recipes to the same runner:
+
+| Recipe | Learning packets | Common return | Total |
+|---|---|---|---|
+| `context_current9_return` | twice legacy3 repeated3times | invoice/password6 |3updates24rows|
+| `context_joint9_return` | twice legacy3 then invoice/password6 | invoice/password6 |3updates24rows|
+
+Both use delay1, the existing24-opportunity worker and original promotion/rollback
+guards. No learner algorithm changes. `current9-v1` and `joint-v1` packets own
+arrays and distinct exposure IDs; roles, semantic trace IDs, features and clean
+labels are revalidated from the original TRAIN prototypes. At most8packets72rows.
+Noise cannot be combined with these modes. Old named recipes/IDs/defaults remain.
+Explicit old-row reuse is training exposure, not free data or probe conversion.
+
+For a separately budgeted new local run, use the existing Python API from physical
+`D:\Dev\Repositories\Circadian`, with shell TEMP/TMP set to `D:\Dev\_Temp`:
+
+```python
+from scripts.context_training_streams import CONTEXT_REHEARSAL_RECIPES
+from scripts.context_head_live import run_case
+
+result = run_case(
+    "artifacts/runs/context-head-control-20261023/actual.json",
+    stream_recipe=CONTEXT_REHEARSAL_RECIPES[1],
+)
+```
+
+The ordinary CLI now accepts both names through `--context-stream-recipe`.
+Preview a selected recipe before source or model access:
+
+```powershell
+.venv\Scripts\python.exe -B -m scripts.run_bp_ticket_serving --source unused --context-stream-protocol --context-stream-recipe context_joint9_return --output joint-preview.json
+```
+
+`--source` remains a required CLI argument but is not opened in preview mode.
+The fresh output lists all24version/concept/scenario/contention rows, including
+stale4/12/20 and revoke6/14/22, plus each planned TRAIN packet's label arrival,
+rows and repeated old/new exposure. It describes the default periodic reference
+and original finite budget; it does not validate a source, run models or grant
+permission/budget/runtime authority. Selected-recipe preview cannot be combined
+with withheld comparison or live reference/feedback options. Existing unselected
+comparison/withheld previews retain their old behavior.
+
+For separately budgeted new local work, the existing live command dispatches
+the exact selected recipe to `run_case`:
+
+```powershell
+.venv\Scripts\python.exe -B -m scripts.run_bp_ticket_serving --source artifacts/runs/context-head-control-20261023/actual.json --context-head-serving-live --context-stream-recipe context_joint9_return --output joint-live.json
+```
+
+Both outputs must be new files. Existing reference/feedback options keep their
+original requirements; nonperiodic choices can leave training pending. A failed
+case keeps its known work and returns nonzero; a preview is not a successful
+learning result. Frozen scientific wrappers and spent comparisons must not be
+rerun as usage examples. [CLI checks and no-work execution](reports/context-rehearsal-cli-20261028.md)
+qualify this command path, not another learning experiment or repair of264.
+
+One completed bounded observation found joint new2/2 and old4/4 after learning
+and return. Equal-row current-only learned new2/2 but lost v1password (old3/4),
+then recovered it on the shared old return (new2/2,old4/4). Known TRAIN task
+endpoints, added readouts/costs and qualifications are recorded in
+[the result report](reports/context-joint-rehearsal-20261028.md). These facts
+do not establish heldout/reliable/CPC benefit or equal total computation. The
+worker scenario declaration and post-body RSS qualifications remain explicit;
+full prospective comparative qualification is unfinished in issue264.

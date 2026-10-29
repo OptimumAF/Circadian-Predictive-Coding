@@ -1,5 +1,18 @@
 # Circadian Predictive Coding
 
+The [affine command supports fixed TRAIN reference windows](docs/attribution-reference-window.md):
+no learning, periodic, explicit-feedback drift and budget-aware updates, with
+pending work kept visible. `--reference-retain-arrived` composes the existing
+bounded TRAIN bank on selected wakes, separating planned from actual replay
+exposures. With ready feedback, optional `--acknowledge-correct` consumes freshly
+proved-correct packets without optimizer work; proof costs, actual fits and
+pending packets remain separate. Defaults and original budgets are unchanged.
+Scoped software checks pass. One [native A4 composition study](docs/reports/affine-ready-replay-native-20261026.md)
+learns new goals while retaining old ones; the public A/B-only wrapper's native
+A4 path remains unsupported. The [current-only native trace](docs/reports/affine-ready-native-20261026.md)
+learns new/relearns old but forgets the other task. The earlier failed game
+comparison remains incomplete; no CPC, generalization or efficiency claim.
+
 [Detached CLM probe reviews can now be inspected offline](docs/clm-probe-inspector.md)
 through the existing export command. Recorded marker learning, old TRAIN errors,
 costs and missing native outcomes remain visible without loading models or
@@ -111,6 +124,12 @@ the fixed recipe before work, or a new `--output` path to retain its result. It
 uses bundled TRAIN data and the existing G collector/learner; no research archive
 or saved model is required. Normal/private modes and final-evaluation separation
 remain unchanged.
+
+For the [A3→A4→A3 learning workflow](docs/minigrid-a4-adaptation.md), use
+`circadian-affine-game --example-affine-a4 --describe`, then omit `--describe`
+and add a new `--output` path to collect fresh A4 TRAIN and run the fixed
+six-update joint learning/game sequence. It needs no historical experiment
+file. Known TRAIN outcomes and costs do not establish generalization or CPC benefit.
 
 Replay that saved result in the [shared offline inspector](docs/affine-workflow-inspector.md#ordinary-recurring-reports):
 `python -m scripts.build_key_door_inspector --source-artifact new-recurring-run.json --output recurring-learning.html`.
@@ -298,6 +317,19 @@ The [isolated head probe](docs/context-head-probe.md) now tests further learning
 the warm control learns v1legacy, loses password temporarily, then recovers it
 while retaining both legacy tasks. The fresh control loses v1legacy on return.
 Probe weights remain separate from benchmark/deployed models; all costs are recorded.
+
+The [matched head rehearsal command](docs/context-head-rehearsal.md) compares extra
+new-task training with fixed old-TRAIN replay on private copies. In one fixed
+case both learned the two new tasks; replay retained4/4 old tasks versus2/4 at
+equal native updates, rows and head exposure. Both ended6/6 after the return.
+Preview reads no source or model. This is conventional same-template evidence;
+costs, failed engineering checks and broader limitations remain explicit.
+
+The [fresh private workflow](docs/context-head-fresh-workflow.md) trains that
+paired-head source from zero and runs the same private controls without a
+historical checkpoint: add `--private-adaptation` to the existing
+`--context-return --separate-context-heads` command. Source and private costs
+remain separate; private weights never enter the deployed learner.
 
 The [separate-head conventional control](docs/context-head-control.md) now learns
 both known public contexts and retains all four workflows through A→B→A. It uses
@@ -8732,5 +8764,82 @@ existing collection port. Both teacher demonstrations completed in nine steps,
 yielding18 TRAIN rows with no learner fitting. The subsequent
 [A3→A4→A3 adaptation mode](docs/minigrid-a4-adaptation.md) learned A4 from0/2 to2/2
 while retaining A3 at2/2, with both2/2 after return. This fixed TRAIN result used
-six fits/90row exposures; replay necessity, generalization and CPC benefit remain
-unproved.
+six fits/90row exposures. The [current-only control](docs/reports/a4-current-only-20261025.md)
+used54exposures, learned A4 but forgot A3, then recovered A3 through returning
+TRAIN data while forgetting A4. This fixed-task retention/relearning tradeoff is
+not matched-compute, generalization or CPC benefit.
+
+[Published affine actor serving](docs/promotable-minigrid.md) connects one known
+TRAIN MiniGrid episode to the actual actor's public prediction method and the
+existing episode loop. It pins the complete serving bundle and leases the same
+actor gate during physical actions. Literal software checks pass; native
+Windows games achieved0/2 cold,2/2 after publication and0/2 after rollback using
+two fits/18 rows. The initial Linux dependency refusal and prospectively reviewed
+admission correction are retained. This demonstrates known-task serving, not
+old-task retention, generalization or a circadian advantage.
+
+The existing affine command exposes that workflow as
+`--example-affine-published` (`--describe` for its fixed costs and settings).
+It checks optional dependencies before data/model/budget work, trains two
+arrived batches, applies disjoint B guards, publishes through the existing
+controller and plays known A blue/red with the actual actor. The executed
+command solved2/2 games; [usage and limits](docs/promotable-minigrid.md).
+
+The serving API also accepts an existing shared runtime for request admission.
+The real gate deferred ready training during a request, then admitted one private
+update after release while both known A games completed. Original charges and
+actor pins remain; [sharing contract](docs/promotable-minigrid.md#shared-prediction-requests).
+The extra nine A rows were re-exposure, not new-task or circadian benefit.
+Fresh-task private adaptation with published serving is available through
+`python -m scripts.run_minigrid_linear_fit_control --example-affine-live-a4 --describe`.
+The explicit mode combines fresh A4 TRAIN collection, the existing arrived-cue
+catalogue and fixed old/new task readouts while the original actor serves through
+its sharing gate. See [usage and limits](docs/promotable-minigrid.md#fresh-a4-private-learning-with-published-serving).
+
+The public [current-actor candidate API](docs/promotable-minigrid.md#start-the-next-candidate-from-a-published-actor)
+also supports guarded deployment of the next learned task without resetting
+lifetime resources. One native A3/A4 case retained A3 success2/2 and improved the
+actual served A4 policy0/2→2/2 after a second publication. This is known TRAIN
+evidence, not generalization or circadian advantage.
+
+Run `python -m scripts.run_minigrid_linear_fit_control --example-affine-deploy-a4 --describe`
+to inspect the explicit deployment workflow, or add `--output deployed-a4.json`
+instead of `--describe` to execute it. The original private-learning command
+stays available. [Command behavior and qualification](docs/promotable-minigrid.md#deploy-fresh-a4-through-the-live-command)
+include preserved lifetime budgets, failed-work records and known-TRAIN limits.
+
+The fresh A4 command also exposes a [trained wait/wake chooser](docs/minigrid-controller-learning.md):
+
+`python -m scripts.run_minigrid_linear_fit_control --example-affine-a4 --context-linear-controller retain_arrived --describe`.
+Replace `--describe` with `--output fresh-controller.json` to collect TRAIN data,
+fit four disposable trials and apply the frozen chooser, retaining warmup,
+discarded-trial, replay, application and pending-work costs. The explicit
+`current_only` alternative preserves its negative result. The shared native
+bank composition learned new cues and retained old ones with2application fits,
+while paying12fits/198rows overall; this is known-TRAIN usefulness, not controller
+or CPC advantage/generalization. The new public route has scoped software
+qualification; earlier native evidence belongs to its shared composition.
+
+Its Python API has an explicit
+[separate-source TRAIN nuisance validation recipe](docs/minigrid-controller-learning.md)
+that freezes the chooser before collecting red-wall A3 examples and defers
+matching grey/red A3 endpoints until all validation training ends. Scripted
+software checks pass; native nuisance performance remains unverified.
+
+The fresh command also offers the existing private retained-A3/A4 rehearsal:
+`python -m scripts.run_minigrid_linear_fit_control --example-affine-a4 --context-linear-retained-rehearsal diagnostics --describe`.
+Use `games` to describe the fixed native readouts after both private arms fit.
+Descriptions run no collection or learning. A separately budgeted execution
+replaces `--describe` with `--output new-rehearsal.json`; source games still run
+in diagnostics mode. Reports preserve failed/unknown outcomes and paid costs,
+without deploying either private learner. The first native comparison failed
+before its private games; joint retention remains unverified. See
+[commands, budgets and evidence](docs/affine-fresh-task-probe.md#run-retained-rehearsal-from-the-normal-command).
+
+The existing native reference Python API also offers
+[`shift_diagnostics=True`](docs/attribution-reference-window.md#opt-in-native-minigrid-shift-diagnostics).
+It reports arrived-packet uncertainty, public feature drift and delayed residuals,
+including when no learning occurs. Measurements use a separate readonly reader,
+exclude replay/probe/final rows, and do not change reference choices. Counts,
+time, memory and failed work are explicit. This is verified diagnostic software;
+useful task-change detection still needs a frozen local experiment.

@@ -1,5 +1,11 @@
 # Inspect affine learning and native games
 
+Fresh A3→A4→A3 reports use the same command below. Their export includes all
+three causal stages, twelve public-view game slots, acquisition/retention/return
+summary and separate teacher/fit/replay/game costs. [A4 export evidence](reports/a4-affine-inspector-20261025.md)
+distinguishes passing saved-data/software checks from pending browser interaction
+and visual verification. This extension does not rerun training or games.
+
 Export a saved train-and-play result with the existing inspector command:
 
 ```powershell

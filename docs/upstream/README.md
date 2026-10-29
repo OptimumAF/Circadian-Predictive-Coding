@@ -9,8 +9,8 @@ remain separate references, not substitutes for these trained systems.
 |---|---|---|
 | [Open-Jev](open-jev.md) | Independent candidate scalar readout with saved calibration, typed Choice/Noul/Score | Source/package/base pins, codec and bounded native load/fit/workflow cases executed; serving parity and broader competence remain unproved |
 | [Contrastive LM](contrastive-lm.md) | Separate state/action embeddings and contrastive heads | Source/head/encoder metadata pinned; full BF16 encoder exceeds10GiB GPU; pooling/runtime/calibration parity unexecuted |
-| [Context LM](context-and-causal.md) | Context-file editing agent harness | Source pin and protected-prefix/edit semantics inspected; trained RL checkpoint unidentified in bounded inspection |
-| [Causal Qwen](context-and-causal.md#causal-control-loader-tokens-and-output) | Native generated tokens/model-specific logits | Exact model/config/template pin; task decision mapping/local execution unqualified |
+| [Context LM](context-and-causal.md) | Context-file editing agent harness | Official source/release metadata rechecked2026-10-26; unchanged source pin, no trained RL checkpoint identified in inspected release/README/RL metadata; tokenizer/weight terms unresolved |
+| [Causal Qwen](context-and-causal.md#causal-control-loader-tokens-and-output) | Native generated tokens/model-specific logits | Exact model/config/template pin; [pure generated-ID decoder](../causal-generated-decisions.md) qualified on fixtures, native tokenizer/provider/model execution unqualified |
 
 Full R5.1 remains open. The original bounded R5.2 typed-decision criterion has
 since been accepted; its newer execution evidence does not qualify the other
@@ -20,3 +20,8 @@ The native codec does not authenticate an actual loaded model or provider work.
 [Executed scalar checks, source-read failure and next action](../../artifacts/runs/native-decision-contracts-20261022/RESULTS.md).
 
 Later native execution: [workflow](../../artifacts/runs/native-ticket-workflow-20261022/RESULTS.md). This updates execution status only; the original source-inspection records remain historical evidence.
+
+The [dated Context LM release recheck](context-and-causal.md#official-release-metadata-recheck--2026-10-26)
+preserves the unresolved trained-checkpoint prerequisite. Harness packages,
+ContextBench data and a separately released causal model do not resolve it.
+R5.1 remains open; this source-only discovery does not qualify model execution.

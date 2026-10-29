@@ -37,8 +37,13 @@ The multiplier must be an exact native int/float in(0,4], finite and within the
 owner's immutable envelope. Four is an implementation ceiling, not a tuned dose.
 The effective parameter-learning rate must remain finite and positive. Bool,
 NumPy scalar, NaN, infinity, overflow/underflow to zero and unsupported owners
-are refused. Rate-only zero-wake, replay+rate, rate+gate and sleep remain
-unsupported. There is no implicit replay scaling. A rate wake may interleave
+are refused. Rate-only zero-wake, replay+rate and sleep remain
+unsupported. A joint rate+gate wake requires the optional
+`RateGateControlledLearner` port and a compatible bound native gate policy;
+both effects execute in one staged update with one charge. It cannot use two
+separate updates as a fallback. See [gate actions](gate-actions.md) and the
+[combined qualification](reports/combined-rate-gate-20261025.md).
+There is no implicit replay scaling. A rate wake may interleave
 with separately selected fixed replay under its original predecessor checks.
 
 ## Native state and failure semantics
@@ -93,6 +98,6 @@ Five unchanged full checkpoint/consolidation parity cases were reused/deselected
 
 This is single-agent self-review and scoped engineering evidence. No rate
 optimization, retention/recovery, controller efficiency or CPC advantage is
-demonstrated. Full R7.1 (gate/sleep/combinations), R7.7 and release/science goals
+demonstrated. Full R7.1 (remaining sleep/replay combinations), R7.7 and release/science goals
 remain open. Add effects through original native/runtime ports with bounded
 failure accounting; never select parameters from sealed task outcomes.

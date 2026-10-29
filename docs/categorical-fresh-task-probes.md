@@ -83,6 +83,41 @@ Old binary reports without episode metadata keep their original shape.
 
 ## Structure and checks
 
+### Optional TRAIN input constraints
+
+Pass `input_diagnostics=True` to the existing `run_fresh_task_probe` to attach
+`input_diagnostics` after all original probe, old-TRAIN return and endpoint work.
+The default is `False` and preserves the original report. The IO-free projection
+in `src/app/probe_input_diagnostics.py` reuses the existing core exact-input bounds.
+Only the original detached `probe_train` and old TRAIN readout arrays enter it;
+probe-test/final labels and duplicate return templates do not. It makes no learner,
+prediction, timer or budget calls, and its failure never gates the learner result.
+
+The report contains per-cohort/joint frequency accuracy ceilings and normalized
+simplex CE floors, a count of cross-cohort conflicting input keys, and at most
+eight deterministic detached row/label witness pairs with explicit truncation.
+Float equality merges signed zeros, keeps adjacent finite float64 values distinct,
+and applies no tolerance. All supplied records have equal weight, including repeated
+templates. These are not optimizer exposure weights, heldout scores or phasewise
+objectives. Bounds constrain one fixed row-only predictor; they do not establish
+finite-model attainability, convergence, recurrent/stateful behavior, task success,
+causal plasticity loss or generalization.
+
+The projection admits categorical3..16, widths1..296, at most128 joint rows and
+65536 input feature/target entries. Valid unsupported binary data, missing old
+readouts, larger joint cohorts or features outside[-1,1] produce `unavailable`
+with unknown bounds/counts. Incomplete original input detachment produces
+`not_run`; a reporting exception produces `failed` with retained partial work.
+Malformed roles/schema are rejected by the direct projection. Attempted/returned
+core reductions, rows/coordinates and concatenated array bytes are recorded.
+The bounded worst-case concatenations are608256 bytes; temporary validation,
+Python/witness/core allocations and process RSS are additional. Original probe
+phase times exclude this post-work analysis; a caller's outer time includes it.
+
+Use `tests/test_probe_input_diagnostics.py` for scoped checks. Keep new evidence
+report-only and freeze a separate budget before experiments; no extra training
+or model advantage follows from these mathematical constraints.
+
 ```text
 src/core/demonstration_episode.py            explicit reserved complete record roles
 src/app/fresh_task_probe.py                 existing isolated probe/metric dispatch

@@ -4,7 +4,10 @@ The existing ticket probe recipe now supports the qualified conventional head
 control from77:
 
 ```powershell
-python -m scripts.probe_ticket_policy_learning --separate-context-heads --input artifacts/runs/context-head-control-20261023/actual.json --output head-probe.json
+Set-Location D:\Dev\Repositories\Circadian
+$env:TEMP = 'D:\Dev\_Temp'
+$env:TMP = 'D:\Dev\_Temp'
+.venv\Scripts\python.exe -B -m scripts.probe_ticket_policy_learning --separate-context-heads --input artifacts/runs/context-head-control-20261023/actual.json --output head-probe.json
 ```
 
 The input must match the qualified local source exactly; output must be new.
@@ -96,3 +99,37 @@ costs and rollback preserved. The [live worker](context-head-live.md) now suppor
 public contexts too; its sole case observed zero typed-request/model-call overlap.
 Next compare existing fixed controllers on this learnable policy, reusing the
 periodic result. No new runtime or probe-to-deployment path is needed.
+
+## Fixed new task/head transfer
+
+For separately budgeted new local work, `--head-task-transfer` selects v1parcel
+and v2password through the same generic F16/return16 probe:
+
+```powershell
+.venv\Scripts\python.exe -B -m scripts.probe_ticket_policy_learning --separate-context-heads --head-task-transfer --input artifacts/runs/context-head-control-20261023/actual.json --output task-transfer-probe.json
+```
+
+The flag requires separate heads before source/output/model IO. Defaultlegacy
+and D7 behavior remains unchanged. The new pair is fixed from source optimizer
+task metadata, not selected by scores. Both concepts appeared in the other head,
+and sealed/staged inputs overlap old tasks; this is not wholly unseen/disjoint
+data. Reports include task/source overlap and existing exact input diagnostics.
+Probe TRAIN/test roles, owned arrays/IDs and old TRAIN monitors/return remain
+separate. Final data is unavailable; private updates never deploy or train the
+source/benchmark learner.
+
+Selected mode adds initial ordinary workflow readings for old4+new2tasks before
+F, using original born-zero-work session witnesses. It repeats the same six
+tasks after F and old return. Sources, frozen readers, budgets/clocks/counters,
+RNG and preceding paid evidence are checked before further work. Initial success
+is measured as task success: already-correct transfer is not new acquisition.
+All36ordinary slots, doses and costs must be frozen before another scientific
+case; the sole stored wrapper is spent and must not be rerun as an example.
+
+One fixed observation learned both initially failing tasks in warm and fresh
+arms. Warm temporarily lost v1password and v2parcel, then recovered both after
+old return; both controls ended6/6. The fresh control's old return successes were
+acquisition/transfer, not recovery from initially known tasks. Equal private dose
+is not equal prior training/all-in computation. The [executed result](reports/context-head-transfer-20261028.md)
+records baseline/phase outcomes, intermediate losses, resource costs and scope;
+it does not establish CPC benefit, generalization, reliability or release readiness.

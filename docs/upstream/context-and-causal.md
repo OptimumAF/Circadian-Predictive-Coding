@@ -3,7 +3,39 @@
 This is source/metadata inspection, not model execution or task accuracy evidence.
 Context Language Models and Contrastive Language Models are separate families.
 No model weights, tokenizer vocabulary, dataset examples, packages or device state
-were loaded. Full R5.1/R5.2 acceptance remains open.
+were loaded. Full R5.1 remains open. The original bounded R5.2 typed-decision
+baseline was accepted separately; that does not qualify these unexecuted native
+Context LM or causal interfaces.
+
+## Official release metadata recheck — 2026-10-26
+
+[Issue189](https://github.com/OptimumAF/Circadian-Predictive-Coding/issues/189)
+rechecked the public source/release metadata without model execution. The
+[current-commit response](https://api.github.com/repos/facebookresearch/context-language-models/commits?per_page=1)
+still returned `483198229ab7b90c0eed4651306ab3b3505aaf50` (2026-10-14), matching
+the original pin below. The inspected
+[release response](https://api.github.com/repos/facebookresearch/context-language-models/releases?per_page=5)
+was empty. Neither a GitHub source pin nor an empty releases list establishes
+whether model weights exist elsewhere.
+
+The exact pinned [README](https://github.com/facebookresearch/context-language-models/blob/483198229ab7b90c0eed4651306ab3b3505aaf50/README.md)
+and [RL instructions](https://github.com/facebookresearch/context-language-models/blob/483198229ab7b90c0eed4651306ab3b3505aaf50/clm/clm_rl/README.md)
+still did not identify a released trained RL model handle. The advertised
+zero-shot harness and community integration packages are code/interfaces; the
+linked ContextBench artifact is a dataset. The named Qwen3.5-9B base and external
+training instructions do not supply an immutable trained Context LM checkpoint.
+No weight/tokenizer revision or applicable trained-weight terms can be pinned
+from this bounded evidence. They remain **unresolved external prerequisites**,
+not permission to substitute random/unofficial weights or label a causal base
+as the trained RL result. Existing source and data terms remain separate.
+
+Five bounded direct requests returned32,347raw bytes, allHTTP200; request time
+2.568708s/network phase18.547254s. One ancillary official web view verified the
+public repository; its transport bytes were not metered. Three unused requests
+were not repurposed into speculative model searches. No weights/vocabulary/
+dataset examples/upstream imports/model/RNG/device work or installs. This is a
+dated bounded finding, not a global absence claim or legal interpretation.
+[Protocol, request ledger, captured permitted metadata and self-review](../../artifacts/runs/contextlm-release-metadata-20261026/RESULTS.md).
 
 ## Pinned records
 
@@ -94,6 +126,10 @@ Native outputs are generated tokens/text (and model-specific token logits), not
 project candidate probabilities. A task prompt, label-token mapping, sequence
 scoring/termination policy and calibration contract would need separate validation;
 no class softmax or raw candidate logits may be invented from a text reply.
+The [pure generated-ID contract](../causal-generated-decisions.md) now validates
+exact request/model/allowedID/stop/reported-usage bindings on zero-model fixtures,
+without probabilities. This is not tokenizer/template/provider/model execution
+or authentication of physical weights/work; those gates remain separate.
 [The model LICENSE](https://huggingface.co/Qwen/Qwen3.5-2B/blob/15852e8c16360a2fea060d615a32b45270f8a8fc/LICENSE)
 is Apache-2.0; that does not license unrelated Context LM code or benchmark data.
 
