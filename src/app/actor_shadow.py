@@ -284,24 +284,44 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
         with self._exclusive():
             return self._inbox.acknowledged_experiences
 
-    def acknowledge_ready(self, key, *, actor_version, learner_version, wake_updates, verify):
+    def acknowledge_ready(
+        self, key, *, actor_version, learner_version, wake_updates, verify, require_actor=None
+    ):
         """Verify current detached state and arrived TRAIN under one exclusive lease.
 
         Trusted verifier receives (candidate, source, label); it must be read-only.
         No prior scalar diagnostic authorizes consumption. Managed/probe/sleep
         owners are unsupported; their capture and consent contracts stay intact.
+        An explicit actor guard may authenticate a previously observed publication
+        without rebasing this candidate. It must pin the complete serving state
+        and return its original (generation, version) before and after verification.
         """
         require_identifier(actor_version, "actor_version")
         require_identifier(learner_version, "learner_version")
         if not callable(verify) or type(wake_updates) is not int:
             raise ValueError("acknowledgement requires a verifier and exact update count")
+        if require_actor is not None and not callable(require_actor):
+            raise ValueError("acknowledgement publication guard must be callable")
         with self._exclusive():
             self._require_open()
+            base_actor_version = self._base_actor_version
+            actor_pin = None if require_actor is None else require_actor()
+            if require_actor is not None and (
+                type(actor_pin) is not tuple
+                or len(actor_pin) != 2
+                or type(actor_pin[0]) is not int
+                or actor_pin[0] < 0
+                or type(actor_pin[1]) is not str
+                or actor_pin[1] != actor_version
+            ):
+                raise ValueError("acknowledgement requires an exact verified actor pin")
             if (
                 self._training_role != "train"
+                or self._base_actor_version != base_actor_version
                 or self._actor._payload_registry._lifecycle is not None
                 or self._consolidation_limit != 0
-                or actor_version != self._base_actor_version
+                or require_actor is None
+                and actor_version != self._base_actor_version
                 or actor_version != self._actor.version
                 or learner_version != self._candidate_version
                 or wake_updates != self._budget.updates_completed
@@ -317,12 +337,16 @@ class ActorShadowRuntime(Generic[Features, Targets, Prediction, State]):
                 # Why: the candidate lease alone does not pin the serving actor
                 # across a verifier callback or a concurrent actor swap.
                 if (
-                    actor_version != self._base_actor_version
+                    require_actor is None
+                    and actor_version != self._base_actor_version
                     or actor_version != self._actor.version
+                    or self._base_actor_version != base_actor_version
                     or learner_version != self._candidate_version
                     or wake_updates != self._budget.updates_completed
                     or revision != self._revision
                     or self._actor._payload_registry._lifecycle is not None
+                    or require_actor is not None
+                    and require_actor() != actor_pin
                 ):
                     raise ValueError(
                         "acknowledgement candidate or serving source changed during proof"

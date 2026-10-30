@@ -120,6 +120,46 @@ def _solve_design(design, one_hot):
     return coefficients, rank, singular_values, float(np.sum(error * error))
 
 
+def _solve_minimum_change(design, one_hot, prior_coefficients):
+    """Shared residual arithmetic; public callers retain their own geometry gates."""
+    weights = np.array(prior_coefficients, dtype=np.float64)
+    with np.errstate(over="raise", invalid="raise"):
+        residual_targets = one_hot - design @ weights
+        correction, rank, singular, _ = _solve_design(design, residual_targets)
+        coefficients = weights + correction
+        error = design @ coefficients - one_hot
+        squared_error = float(np.sum(error * error))
+    return coefficients, rank, singular, squared_error
+
+
+def update_categorical_linear(
+    prior: CategoricalLinearFit, features: NDArray[np.float64], targets: NDArray[np.float64]
+) -> CategoricalLinearFit:
+    """Minimum-change current-packet fit; no old-prediction/replay guarantee.
+
+    Why: preserve prior coefficient components invisible to the current design.
+    Rank/residual/fit_rows describe this batch, not lifetime memory or work.
+    """
+    if type(prior) is not CategoricalLinearFit:
+        raise ValueError("an exact CategoricalLinearFit prior is required")
+    prior.__post_init__()
+    design = _features(features, prior.feature_dim)
+    validate_class_targets(targets, len(design), prior.num_classes)
+    one_hot = np.eye(prior.num_classes, dtype=np.float64)[targets[:, 0].astype(np.int64)]
+    coefficients, rank, singular, squared_error = _solve_minimum_change(
+        design, one_hot, prior.coefficients
+    )
+    return CategoricalLinearFit(
+        prior.feature_dim,
+        prior.num_classes,
+        len(features),
+        tuple(tuple(float(v) for v in row) for row in coefficients),
+        int(rank),
+        tuple(float(v) for v in singular),
+        squared_error,
+    )
+
+
 def predict_categorical_linear(
     model: CategoricalLinearFit, features: NDArray[np.float64]
 ) -> NDArray[np.float64]:
@@ -129,6 +169,25 @@ def predict_categorical_linear(
     model.__post_init__()
     design = _features(features, model.feature_dim)
     return _predict_design(design, model.coefficients)
+
+
+def predict_categorical_linear_logits(
+    model: CategoricalLinearFit, features: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """Owned full-class affine scores for candidate-local typed normalization.
+
+    Why: slicing global probabilities can erase all allowed mass by underflow.
+    This uses the same fixed design/coefficients, without fitting or selecting.
+    """
+    if type(model) is not CategoricalLinearFit:
+        raise ValueError("an exact CategoricalLinearFit is required")
+    model.__post_init__()
+    design = _features(features, model.feature_dim)
+    with np.errstate(over="raise", invalid="raise"):
+        logits = design @ np.array(model.coefficients, dtype=np.float64)
+        if not np.isfinite(logits).all():
+            raise ValueError("linear prediction produced nonfinite scores")
+    return logits
 
 
 def _predict_design(design, coefficients):

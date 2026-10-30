@@ -21,6 +21,8 @@ from scripts.context_head_serving import prepare_data, _episodes, TASKS
 from scripts.run_bp_ticket_serving import _reference_schedule, _violation_count
 from scripts.run_ticket_workflow import CONTEXT_FEATURES
 from src.adapters.context_perceptron import ContextPerceptronLearner
+from src.adapters.context_linear_fit_learner import ContextLinearFitLearner
+from src.adapters.context_linear_serving import ContextLinearServingPredictor
 from src.adapters.context_serving import snapshot_digest, ContextServingPredictor
 from src.app.actor_shadow import StableActor
 from src.app.counterfactual_controller import CounterfactualController, CounterfactualReturn
@@ -93,10 +95,18 @@ def _task_counts(rows, phase, native_updates):
     ]
 
 
-def _task_readout(state, phase, require, report):
+def _task_readout(state, phase, require, report, *, linear_fit=False):
     """Existing typed workflows on a private frozen actor, never a deployment."""
+    if type(linear_fit) is not bool:
+        raise ValueError("LS task readout requires an exact Boolean opt-in")
+    learner_type: type[ContextPerceptronLearner] | type[ContextLinearFitLearner] = (
+        ContextPerceptronLearner
+    )
+    predictor_type = ContextServingPredictor
+    if linear_fit:
+        learner_type, predictor_type = ContextLinearFitLearner, ContextLinearServingPredictor
     rows = report["task_outcomes"][phase]
-    learner = ContextPerceptronLearner(state.policy)
+    learner = learner_type(state.policy)
     learner.restore_state(state)
     actor = PromotableActor(
         learner,
@@ -105,7 +115,7 @@ def _task_readout(state, phase, require, report):
         feature_digest=lambda x: sha256(x.tobytes()).hexdigest(),
         metadata={"role": "controller_train"},
     )
-    predictor = ContextServingPredictor(actor, DecisionFeatureSpec(CONTEXT_FEATURES, CATALOG))
+    predictor = predictor_type(actor, DecisionFeatureSpec(CONTEXT_FEATURES, CATALOG))
     report["task_readout_work"][phase] = predictor.work
     pin = deepcopy(state)
 
@@ -119,7 +129,14 @@ def _task_readout(state, phase, require, report):
             raise ValueError("original per-trial typed development allowance exhausted")
         return predictor.serve(request)
 
-    _episodes(SimpleNamespace(serve=serve), phase, check, rows, role="controller_train")
+    try:
+        _episodes(SimpleNamespace(serve=serve), phase, check, rows, role="controller_train")
+    finally:
+        if linear_fit:
+            from dataclasses import asdict
+
+            assert isinstance(predictor, ContextLinearServingPredictor)
+            report.setdefault("task_readout_native_work", {})[phase] = asdict(predictor.native_work)
     return _task_counts(rows, phase, state.completed_updates)
 
 

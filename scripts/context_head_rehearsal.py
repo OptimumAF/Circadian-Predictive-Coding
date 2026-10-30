@@ -116,6 +116,113 @@ def _limits(updates=None, replay=None):
     )
 
 
+def joint_probe_factory(cohorts, bank, control, replay, guard):
+    """Bind four original TRAIN episodes; only the current probe packet is transient."""
+    from src.core.context_joint_replay import JointContextReplayPolicy
+    from src.core.demonstration_episode import episode_arrays
+
+    if type(control) is not str or control not in ("joint", "current_only"):
+        raise ValueError("unknown isolated joint control")
+    if type(bank) is not tuple or len(bank) != 4:
+        raise ValueError("joint probe requires its four original TRAIN episodes")
+    for i, (episode, task) in enumerate(zip(bank, probe.TASKS, strict=True)):
+        if type(episode) is not DemonstrationEpisode:
+            raise ValueError("joint probe requires original TRAIN episode records")
+        x, y = episode_arrays(episode)
+        original = cohorts[2][i // 2]
+        start = 3 * (i % 2)
+        if (
+            episode.role != "train"
+            or episode.context != f"{task[1]}-{task[0]}"
+            or not np.array_equal(x, original.features[start : start + 3])
+            or not np.array_equal(y, original.targets[start : start + 3])
+        ):
+            raise ValueError("joint bank differs from admitted old TRAIN rows")
+    pinned, owners = deepcopy(bank), tuple(id(e) for e in bank)
+
+    def boundary():
+        guard()
+        if tuple(id(e) for e in bank) != owners or not _same_value(bank, pinned):
+            raise ValueError("original fixed TRAIN bank changed during joint probe")
+
+    def factory(learner, budget, count):
+        boundary()
+        return StreamRehearsal(
+            learner,
+            budget,
+            RecentStreamReplayPolicy(1, 12, ReplayRetentionBudget(12, 8192)),
+            replay_budget=replay,
+            total_updates=count,
+            input_dim=9,
+            episode_schema=SCHEMA,
+            fixed_training_episodes=bank,
+            wake_role="probe_train",
+            joint_context=JointContextReplayPolicy(9, 6, (4, 5), control),
+            check_boundary=boundary,
+        )
+
+    boundary()
+    return boundary, factory
+
+
+def require_joint_probe(row, control):
+    """Reconcile physical joint work rather than interpreting logical F as native fits."""
+    if type(control) is not str or control not in ("joint", "current_only"):
+        raise ValueError("unknown isolated joint control")
+    session = row["joint_replay_session"]
+    helper = row["probe"]["rehearsal"]
+    if (
+        row.get("joint_rehearsal_control") != control
+        or not _same_value(session["limits"], asdict(_limits(replay=144)))
+        or type(session["updates"]) is not int
+        or session["updates"] != 0
+        or type(session["replay"]) is not int
+        or session["replay"] != 144
+        or type(session["started_at"]) is not float
+        or type(session["last_clock"]) is not float
+        or not 0 <= session["last_clock"] - session["started_at"] <= 30
+        or helper["fixed_bank"]["native_transition_count"] != 12
+        or helper["joint_context"]["policy"]["control"] != control
+        or any(
+            type(helper[k]) is not int or helper[k] != n
+            for k, n in (
+                ("attempted_updates", 16),
+                ("returned_updates", 16),
+                ("committed_updates", 16),
+                ("charged_exposures", 144),
+                ("replay_budget_charged_exposures", 144),
+            )
+        )
+        or len(helper["events"]) != 16
+    ):
+        raise ValueError("joint probe paid sessions/native history differs")
+    for event in helper["events"]:
+        detail = event["joint_context"]
+        if (
+            event["status"] != "complete"
+            or any(
+                type(event[k]) is not int or event[k] != n
+                for k, n in (
+                    ("attempted_updates", 1),
+                    ("returned_updates", 1),
+                    ("committed_updates", 1),
+                    ("charged_exposures", 9),
+                )
+            )
+            or detail["control"] != control
+            or detail["current_role"] != "probe_train"
+            or detail["retained_role"] != "train"
+            or detail["current_packet_rows"] != 3
+            or detail["retained_rows_available"] != 6
+            or detail["total_fit_rows"] != 9
+            or detail["retained_train_rows_used"] != (6 if control == "joint" else 0)
+            or detail["current_rows_used"] != (3 if control == "joint" else 9)
+            or len(event["selected_episodes"]) != 2
+            or any(e["role"] != "train" for e in event["selected_episodes"])
+        ):
+            raise ValueError("joint probe event roles/exposures differ")
+
+
 def run_arm(seed, state, cohorts, bank, spec, guard, memory, control, row):
     """Pay original sessions once; admit no arm after failed preceding evidence."""
     if type(control) is not str or control not in CONTROLS:
@@ -426,46 +533,111 @@ def run_case(input_path):
     return report
 
 
-def run_owned_pair(state, spec, source_report, source_budget, *, check_boundary, memory):
-    """Use the current workflow's qualified state; no historical file or SHA claim."""
+def prepare_owned_source(
+    state,
+    spec,
+    source_report,
+    source_budget,
+    *,
+    check_boundary,
+    training_key="private_source_training",
+    linear_fit=False,
+    catalog_study=False,
+    reference_validation=False,
+    retained_probe=False,
+):
+    """Share the existing live source qualification; grant no new training authority."""
+    from threading import RLock
     from src.app.probe_endpoint_observer import _BudgetWitness
     from src.app.probe_return_phase import budget_binding
     from src.core.context_perceptron import copy_context_snapshot, ContextPerceptronPolicy
 
-    started = monotonic()
-    report = _pair_report("fresh_context_head_private_adaptation_v1")
-    report["source_provenance"] = "current_workflow_train_checkpoint12"
-    try:
-        if not callable(check_boundary) or type(source_budget) is not ToyBudgetSession:
-            raise ValueError("owned source requires its original guard and budget")
-        state = copy_context_snapshot(state)
-        if (
-            state.policy != ContextPerceptronPolicy(9, 6, (4, 5))
-            or (state.completed_updates, state.training_examples, state.mistake_updates)
-            != (12, 72, 16)
-            or [(h.completed_updates, h.training_examples) for h in state.heads]
-            != [(8, 48), (4, 24)]
-        ):
-            raise ValueError("owned source requires original paired TRAIN checkpoint12")
-        witness = _BudgetWitness(source_budget, budget_binding(source_budget), _limits(12), 12)
-        source_pin = deepcopy(
-            (source_report.get("private_source_training"), source_report.get("summary"))
-        )
+    if (
+        type(catalog_study) is not bool
+        or type(retained_probe) is not bool
+        or retained_probe
+        and (not linear_fit or catalog_study or reference_validation)
+        or type(reference_validation) is not bool
+        or reference_validation
+        and (not linear_fit or catalog_study)
+        or catalog_study
+        and not linear_fit
+        or type(linear_fit) is not bool
+        or linear_fit
+        and training_key != "serving_source_training"
+        or not callable(check_boundary)
+        or type(source_budget) is not ToyBudgetSession
+        or training_key not in ("private_source_training", "serving_source_training")
+        or type(spec) is not source.DecisionFeatureSpec
+        or spec != source.DecisionFeatureSpec(source.CONTEXT_FEATURES, source.CATALOG)
+    ):
+        raise ValueError("owned source requires its original schema, guard and budget")
+    definition = "separate_context_head_ticket_workflow_v1"
+    if linear_fit:
+        from src.core.context_linear_state import ContextLinearFitPolicy, copy_context_linear_state
 
-        def check_source():
+        state = copy_context_linear_state(state)
+        definition = "separate_context_linear_ticket_workflow_v1"
+        valid = state.policy == ContextLinearFitPolicy(9, 6, (4, 5)) and (
+            state.completed_updates,
+            state.training_examples,
+        ) == (12, 72)
+    else:
+        state = copy_context_snapshot(state)
+        valid = state.policy == ContextPerceptronPolicy(9, 6, (4, 5)) and (
+            state.completed_updates,
+            state.training_examples,
+            state.mistake_updates,
+        ) == (12, 72, 16)
+    if not valid or [(h.completed_updates, h.training_examples) for h in state.heads] != [
+        (8, 48),
+        (4, 24),
+    ]:
+        raise ValueError("owned source requires original paired TRAIN checkpoint12")
+    limits = _limits(12)
+    if catalog_study or reference_validation:
+        from dataclasses import replace
+
+        # Why: born once for the declared study/validation, never extend an
+        # already running source or change private-probe/fixed-trial limits.
+        limits = replace(limits, max_wall_seconds=240)
+    elif retained_probe:
+        from dataclasses import replace
+
+        # Why: this explicitly born combined workflow includes retained learning
+        # then the original probe/return clocks. Never extend an existing source.
+        limits = replace(limits, max_wall_seconds=120)
+    witness = _BudgetWitness(source_budget, budget_binding(source_budget), limits, 12)
+    source_pin = deepcopy((source_report.get(training_key), source_report.get("summary")))
+    keys = (training_key, "summary", "checkpoints", "episodes")
+    owners = tuple(source_report.get(k) for k in keys)
+    row_owners = tuple(tuple(id(row) for row in source_report[k]) for k in keys[-2:])
+    lock = RLock()
+
+    def check_source():
+        # The serving worker and owner observe the SAME original source session.
+        # Serialize witness reads/updates; never bless an outside clock change.
+        with lock:
+            if any(
+                source_report.get(k) is not owner for k, owner in zip(keys, owners, strict=True)
+            ) or any(
+                tuple(id(row) for row in source_report[k]) != rows
+                for k, rows in zip(keys[-2:], row_owners, strict=True)
+            ):
+                raise ValueError("original owned source evidence was replaced")
             witness.observe()
             if check_boundary() is not None:
                 raise ValueError("source guard must return None")
             witness.check()
             if (
-                source_report.get("definition") != "separate_context_head_ticket_workflow_v1"
+                source_report.get("definition") != definition
                 or source_report.get("source_unchanged") is not True
                 or source_report.get("actor_unchanged") is not True
                 or not _same_value(
-                    (source_report.get("private_source_training"), source_report.get("summary")),
+                    (source_report.get(training_key), source_report.get("summary")),
                     source_pin,
                 )
-                or source_report["private_source_training"]
+                or source_report[training_key]
                 != dict(completed_updates=12, applied_update_count=12)
                 or [p["source_updates"] for p in source_report["checkpoints"]] != [0, 4, 8, 12]
                 or not _same_value(source_report["checkpoints"][-1]["state"], asdict(state))
@@ -482,9 +654,26 @@ def run_owned_pair(state, spec, source_report, source_budget, *, check_boundary,
                 or e["episode"].get("success") is not True
                 for e in ordinary
             ):
-                raise ValueError("private adaptation requires all four qualified source tasks")
+                raise ValueError("owned adaptation requires all four qualified source tasks")
             witness.check()
 
+    check_source()
+    return state, check_source
+
+
+def run_owned_pair(state, spec, source_report, source_budget, *, check_boundary, memory):
+    """Use the current workflow's qualified state; no historical file or SHA claim."""
+    started = monotonic()
+    report = _pair_report("fresh_context_head_private_adaptation_v1")
+    report["source_provenance"] = "current_workflow_train_checkpoint12"
+    try:
+        state, check_source = prepare_owned_source(
+            state,
+            spec,
+            source_report,
+            source_budget,
+            check_boundary=check_boundary,
+        )
         _run_pair(state, spec, report, started, check_source, memory)
     except Exception as error:
         report["error"] = f"{type(error).__name__}: {error}"[:1024]

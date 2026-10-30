@@ -12,7 +12,9 @@ def require_torch() -> Any:
         return importlib.import_module("torch")
     except ModuleNotFoundError as exc:
         raise RuntimeError(
-            "PyTorch is required for ResNet benchmarks. Install requirements-resnet.txt first."
+            "PyTorch is required for native neural workflows. Install "
+            "circadian-predictive-coding[native]; vision benchmarks additionally "
+            "require requirements-resnet.txt."
         ) from exc
 
 

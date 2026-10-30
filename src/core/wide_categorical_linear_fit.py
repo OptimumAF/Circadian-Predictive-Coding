@@ -11,7 +11,12 @@ from math import isfinite
 import numpy as np
 from numpy.typing import NDArray
 
-from src.core.categorical_linear_fit import RCOND as RCOND, _solve_design, _predict_design
+from src.core.categorical_linear_fit import (
+    RCOND as RCOND,
+    _solve_design,
+    _predict_design,
+    _solve_minimum_change,
+)
 from src.core.categorical_probability_scores import validate_class_count, validate_class_targets
 
 MAX_ROWS = 16
@@ -155,13 +160,9 @@ def update_wide_categorical_linear(
     design = _features(features, prior.feature_dim)
     validate_class_targets(targets, len(design), prior.num_classes)
     one_hot = np.eye(prior.num_classes, dtype=np.float64)[targets[:, 0].astype(np.int64)]
-    weights = np.array(prior.coefficients, dtype=np.float64)
-    with np.errstate(over="raise", invalid="raise"):
-        residual_targets = one_hot - design @ weights
-        correction, rank, singular, _ = _solve_design(design, residual_targets)
-        coefficients = weights + correction
-        error = design @ coefficients - one_hot
-        squared_error = float(np.sum(error * error))
+    coefficients, rank, singular, squared_error = _solve_minimum_change(
+        design, one_hot, prior.coefficients
+    )
     return WideCategoricalLinearFit(
         prior.feature_dim,
         prior.num_classes,

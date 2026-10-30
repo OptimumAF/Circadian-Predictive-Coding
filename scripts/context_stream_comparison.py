@@ -11,11 +11,11 @@ import json
 from math import isfinite
 from pathlib import Path
 from time import monotonic
-from typing import Any
+from typing import Any, Callable
 
 from scripts import context_head_live as live
 from scripts.context_head_probe import HEAD_SOURCE_SHA, _source_bytes
-from scripts.context_head_serving import TASKS
+from scripts.context_head_serving import TASKS, PAIRED_TASKS
 from scripts.context_training_streams import (
     CONTEXT_TRAINING_RECIPES,
     WITHHELD_CONTEXT_RECIPES,
@@ -23,7 +23,7 @@ from scripts.context_training_streams import (
     CONTEXT_PAIRED_REHEARSAL_RECIPES,
     ContextTrainingRecipe,
 )
-from scripts.ticket_serving_timeline import serving_preview
+from scripts.ticket_serving_timeline import serving_preview, FollowupTrainingPlan
 from src.app.probe_return_phase import paid_report_guard
 from src.core.contextual_controller import ContextualChoice, ContextualEstimate, FittedController
 from src.core.controller_objective import (
@@ -39,6 +39,7 @@ FIT_SHA = "d96f68a5a821cb6be1e7f55a0f7dd0cedc6519600322a7b68272cb0eff39dc3b"
 MISSING = ("no_learning", "drift", "budget_aware", "fitted", "candidate_drift")
 MODES = ("no_learning", "periodic", "drift", "budget_aware", "fitted", "candidate_drift")
 WITHHELD_MODES = (*MODES, "acknowledgement_drift")
+OWNED_LINEAR_MODES = ("no_learning", "periodic", "acknowledgement_drift")
 
 
 def _same(a, b):
@@ -47,11 +48,43 @@ def _same(a, b):
     )
 
 
-def protocol_snapshot(*, withheld=False, recipe=None):
+def protocol_snapshot(
+    *, withheld=False, recipe=None, publish_after_learning=False, owned_linear=False
+):
+    if type(owned_linear) is not bool:
+        raise ValueError("owned LS protocol requires an exact boolean opt-in")
+    if owned_linear:
+        if withheld is not True or recipe is not None or publish_after_learning is not False:
+            raise ValueError(
+                "owned LS protocol requires its separate withheld reference foundation"
+            )
+        return dict(
+            definition="owned_linear_reference_validation_protocol_v1",
+            complete=True,
+            runtime_authority=False,
+            learner_family="context_linear_fit",
+            prior_training=dict(updates=12, rows=72),
+            recipes=[asdict(r) for r in WITHHELD_CONTEXT_RECIPES],
+            modes=OWNED_LINEAR_MODES,
+            case_count=6,
+            plan=asdict(live.recipe_plan()),
+            opportunities=serving_preview(live.recipe_plan()),
+            source_limits=dict(updates=12, seconds=240, process_rss_bytes=512 * 1024**2),
+            endpoint_release="after all six complete execution cases; known TRAIN templates only",
+            task_order=TASKS,
+            promotions=False,
+            final_examples=0,
+            probe_updates=0,
+            qualification="three-reference foundation, not full learned-controller validation, unseen-task generalization, matched compute or CPC benefit",
+        )
     if type(withheld) is not bool:
         raise ValueError("withheld comparison opt-in must be an exact boolean")
+    if type(publish_after_learning) is not bool:
+        raise ValueError("learning-boundary preview requires an exact boolean opt-in")
+    if publish_after_learning and (withheld or recipe not in CONTEXT_PAIRED_REHEARSAL_RECIPES):
+        raise ValueError("learning-boundary preview requires one exact paired recipe")
     if recipe is not None:
-        return _recipe_protocol(recipe, withheld)
+        return _recipe_protocol(recipe, withheld, publish_after_learning)
     result = dict(
         definition="context_stream_comparison_protocol_v1",
         complete=True,
@@ -74,7 +107,7 @@ def protocol_snapshot(*, withheld=False, recipe=None):
     return result
 
 
-def _recipe_protocol(recipe, withheld):
+def _recipe_protocol(recipe, withheld, publish_after_learning=False):
     if type(recipe) is not ContextTrainingRecipe:
         raise ValueError("recipe preview requires an exact named contextual recipe")
     recipe.__post_init__()
@@ -91,12 +124,19 @@ def _recipe_protocol(recipe, withheld):
             ("joint", (3, 6)),
         )
     }
-    schedule = [
+    followup = FollowupTrainingPlan(4, 12) if publish_after_learning else None
+    observed = [
+        i
+        if followup is None or i < followup.first_batches
+        else followup.start_tick + i - followup.first_batches
+        for i in range(len(recipe.contexts))
+    ]
+    schedule: list[dict[str, Any]] = [
         dict(
             batch_index=i,
             context=context,
-            observed_at=i,
-            label_arrival_at=i + recipe.label_delay,
+            observed_at=observed[i],
+            label_arrival_at=observed[i] + recipe.label_delay,
             new_rows=sizes[context][0],
             old_rows=sizes[context][1],
             rows=sum(sizes[context]),
@@ -105,7 +145,7 @@ def _recipe_protocol(recipe, withheld):
     ]
     paired = recipe in CONTEXT_PAIRED_REHEARSAL_RECIPES
     plan = live.recipe_plan(**(dict(head_task_transfer=True) if paired else {}))
-    return dict(
+    result = dict(
         definition="context_stream_recipe_protocol_v1",
         complete=True,
         recipe=asdict(recipe),
@@ -126,6 +166,24 @@ def _recipe_protocol(recipe, withheld):
         ),
         qualification="declaration only for default periodic execution; no source/model IO or execution authority; repeated TRAIN exposure is counted, not matched computation or evidence of future task success",
     )
+    if followup is not None:
+        result.update(
+            definition="context_learning_boundary_protocol_v1",
+            learning_boundary_plan=asdict(followup),
+            publication_policy=dict(
+                first="after four original native returns and receipts drain with idle gate",
+                return_if_rejected="after all six return receipts drain; measured unchanged-actor refusal required",
+                maximum_guard_attempts=2,
+                maximum_accepted_publications=1,
+            ),
+            readout_schedule=dict(
+                phases=("published", "rollback"),
+                tasks=PAIRED_TASKS,
+                maximum_episodes=12,
+                condition="only if promoted",
+            ),
+        )
+    return result
 
 
 def _native_exposures(calls, receipts, row_counts, indices):
@@ -505,7 +563,35 @@ def score_cases(cases, fitted, *, withheld=False):
     return scored
 
 
-def run_comparison(input_path, periodic_path, fitted_path, *, withheld=False):
+def run_comparison(
+    input_path,
+    periodic_path,
+    fitted_path,
+    *,
+    withheld=False,
+    _owned_source=None,
+    _memory=None,
+    _linear_fit=False,
+):
+    if type(_linear_fit) is not bool:
+        raise ValueError("owned reference LS family requires an exact boolean")
+    if _linear_fit:
+        if (
+            input_path is not None
+            or periodic_path is not None
+            or fitted_path is not None
+            or withheld is not True
+            or type(_owned_source) is not tuple
+            or len(_owned_source) != 2
+            or not callable(_owned_source[1])
+            or _memory is None
+        ):
+            raise ValueError(
+                "owned LS validation requires its original source/guard/sampler, no files"
+            )
+        return _run_owned_references(_owned_source, _memory)
+    if _owned_source is not None or _memory is not None:
+        raise ValueError("owned reference source requires explicit LS family")
     if type(withheld) is not bool:
         raise ValueError("withheld comparison opt-in must be an exact boolean")
     if withheld and periodic_path is not None:
@@ -639,4 +725,188 @@ def run_comparison(input_path, periodic_path, fitted_path, *, withheld=False):
             report["error"] = f"{type(error).__name__}: {error}"[:512]
         finally:
             report.update(elapsed_seconds=monotonic() - started, memory=asdict(memory.snapshot()))
+    return report
+
+
+def _run_owned_references(owned, memory):
+    """Six private applications then deferred TRAIN endpoints; no restored authority."""
+    from scripts.context_controller_learning import _task_readout
+    from src.core.context_linear_state import copy_context_linear_state, ContextLinearFitSnapshot
+    from src.app.coupled_attribution import _same_value
+
+    started = monotonic()
+    initial = copy_context_linear_state(owned[0])
+    protocol = protocol_snapshot(withheld=True, owned_linear=True)
+    rows: list[dict[str, Any]] = []
+    validation: list[dict[str, Any]] = []
+    report: dict[str, Any] = dict(
+        definition="owned_linear_reference_validation_v1",
+        complete=False,
+        protocol=protocol,
+        cases=rows,
+        validation=validation,
+        prior_training=dict(updates=12, rows=72, mistakes=None),
+        source_provenance="current_workflow_train_checkpoint12",
+        learner_family="context_linear_fit",
+        final_examples=0,
+        probe_updates=0,
+        endpoint_release_after_cases=None,
+    )
+    paid: list[tuple[dict[str, Any], dict[str, Any], Callable[[], None]]] = []
+    states: list[ContextLinearFitSnapshot] = []
+    evaluated: list[tuple[dict[str, Any], dict[str, Any], Callable[[], None]]] = []
+    active_readout: dict[str, Any] | None = None
+    calls = dict(attempts=0, returns=0)
+
+    def check():
+        owned[1]()
+        if monotonic() - started > 240:
+            raise ValueError("original owned reference validation deadline exhausted")
+        if not _same_value(owned[0], initial) or not _same_value(
+            protocol, protocol_snapshot(withheld=True, owned_linear=True)
+        ):
+            raise ValueError("original owned source or validation protocol changed")
+        if report["cases"] is not rows or len(rows) != len(paid):
+            report["cases"] = rows
+            rows[:] = [row for row, _, _ in paid]
+            raise ValueError("preceding paid validation cases replaced")
+        for i, (row, expected, guard) in enumerate(paid):
+            changed = rows[i] is not row
+            try:
+                guard()
+            except ValueError:
+                changed = True
+            if changed:
+                row.clear()
+                row.update(deepcopy(expected))
+                rows[i] = row
+                raise ValueError("preceding paid validation case corrupted")
+        if len(states) != len(rows) or any(
+            not _same_value(asdict(state), row["result"].get("candidate_state"))
+            for state, row in zip(states, rows, strict=True)
+        ):
+            raise ValueError("detached validation candidate changed or replaced")
+        expected_validation = [row for row, _, _ in evaluated]
+        if active_readout is not None:
+            expected_validation.append(active_readout)
+        if (
+            report["validation"] is not validation
+            or any(
+                actual is not expected for actual, expected in zip(validation, expected_validation)
+            )
+            or len(validation) != len(expected_validation)
+        ):
+            report["validation"] = validation
+            validation[:] = expected_validation
+            raise ValueError("preceding validation readout replaced")
+        for item, expected, guard in evaluated:
+            try:
+                guard()
+            except ValueError:
+                item.clear()
+                item.update(deepcopy(expected))
+                raise ValueError("preceding validation readout corrupted") from None
+
+    try:
+        check()
+        for recipe in WITHHELD_CONTEXT_RECIPES:
+            for mode in OWNED_LINEAR_MODES:
+                check()
+                captured: list[ContextLinearFitSnapshot] = []
+
+                def capture(state):
+                    check()
+                    if captured:
+                        raise ValueError("validation candidate exported more than once")
+                    captured.append(copy_context_linear_state(state))
+
+                calls["attempts"] += 1
+                result = live.run_case(
+                    None,
+                    stream_recipe=recipe,
+                    reference_mode="drift" if mode == "acknowledgement_drift" else mode,
+                    candidate_feedback=mode == "acknowledgement_drift",
+                    acknowledge_correct=mode == "acknowledgement_drift",
+                    _owned_source=(initial, check),
+                    _memory=memory,
+                    _linear_fit=True,
+                    _reference_validation=True,
+                    _capture_candidate=capture,
+                )
+                calls["returns"] += 1
+                row = dict(recipe_id=recipe.recipe_id, mode=mode, result=result)
+                rows.append(row)
+                guard, expected = paid_report_guard(row)
+                paid.append((row, expected, guard))
+                if result.get("complete") is not True or len(captured) != 1:
+                    raise ValueError("paid reference case incomplete; later work closed")
+                work = result["training_work"]
+                state = captured[0]
+                if (
+                    result.get("source_unchanged") is not True
+                    or result.get("actor_unchanged") is not True
+                    or result.get("role") != "reference_validation_train"
+                    or any(
+                        type(work.get(k)) is not int or work[k] < 0
+                        for k in ("attempted_updates", "attempted_rows", "returned_updates")
+                    )
+                    or not _same_value(result.get("context_recipe"), asdict(recipe))
+                    or result.get("reference_policy")
+                    != asdict(ReferencePolicy("drift" if mode == "acknowledgement_drift" else mode))
+                    or work["attempted_updates"] != work["returned_updates"]
+                    or not 0 <= work["returned_updates"] <= 6
+                    or sum(call["rows"] for call in result["native_calls"])
+                    != work["attempted_rows"]
+                    or len(result["native_calls"]) != work["attempted_updates"]
+                    or any(call.get("complete") is not True for call in result["native_calls"])
+                    or mode == "no_learning"
+                    and (work["attempted_updates"] != 0 or state != initial)
+                    or mode == "periodic"
+                    and (work["returned_updates"] != 6 or work["attempted_rows"] != 27)
+                    or mode == "acknowledgement_drift"
+                    and (
+                        result.get("receipt_progress", {}).get("complete") is not True
+                        or result["receipt_progress"].get("consumed") != 6
+                    )
+                    or state.completed_updates != 12 + work["returned_updates"]
+                    or state.training_examples != 72 + work["attempted_rows"]
+                    or state.policy != initial.policy
+                    or not _same_value(asdict(state), result.get("candidate_state"))
+                ):
+                    raise ValueError("reference case lost source, capture or known native work")
+                states.append(state)
+                check()
+        # No task endpoint reader is invoked until the whole execution cohort passes.
+        report["endpoint_release_after_cases"] = len(rows)
+        for state, label in [(initial, "source"), *zip(states, range(6), strict=True)]:
+            check()
+            readout: dict[str, Any] = dict(task_outcomes={"after": []}, task_readout_work={})
+            item = dict(case=label, readout=readout)
+            validation.append(item)  # Keep paid partial reads on failure.
+            active_readout = item
+            item["counts"] = _task_readout(state, "after", check, readout, linear_fit=True)
+            guard, expected = paid_report_guard(item)
+            evaluated.append((item, expected, guard))
+            active_readout = None
+            check()
+        report.update(complete=True, source_unchanged=True, actor_unchanged=True)
+    except Exception as error:
+        report["error"] = f"{type(error).__name__}: {error}"[:512]
+    finally:
+        fields = ("attempted_updates", "attempted_rows", "returned_updates")
+        work = [
+            row["result"].get("training_work") if type(row["result"]) is dict else None
+            for row in rows
+        ]
+        known = calls["attempts"] == calls["returns"] == len(rows) and all(
+            type(w) is dict and all(type(w.get(k)) is int and w[k] >= 0 for k in fields)
+            for w in work
+        )
+        report.update(
+            delegated_calls=calls,
+            training_work={k: sum(w[k] for w in work) if known else None for k in fields},
+            delegated_work_unknown=not known,
+            elapsed_seconds=monotonic() - started,
+            memory=asdict(memory.snapshot()),
+        )
     return report

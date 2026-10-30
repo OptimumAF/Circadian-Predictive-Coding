@@ -82,7 +82,7 @@ def test_should_refuse_nontrain_before_projecting_or_learning(role, monkeypatch)
     [
         dict(context_return=1),
         dict(context_return=True, policy_change=True),
-        dict(context_return=True, method="bp"),
+        dict(context_return=True, method="unknown"),
         dict(context_return=True, replay="unknown"),
     ],
 )
@@ -239,7 +239,7 @@ def test_should_keep_cli_output_exclusive_and_refuse_bad_modes_before_reserving(
 ):
     p = tmp_path / "case.json"
     with pytest.raises(SystemExit):
-        study.main(["--context-return", "--method", "bp", "--output", str(p)])
+        study.main(["--context-return", "--method", "bp", "--replay", "recent", "--output", str(p)])
     assert not p.exists()
     seen = []
 

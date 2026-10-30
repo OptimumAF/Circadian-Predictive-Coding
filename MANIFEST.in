@@ -1,6 +1,7 @@
 include LICENSE
 include THIRD_PARTY_NOTICES.md
 include docs/native-memory-setup.md
+include docs/native-ticket-setup.md
 include docs/continuous-comparison-inspector.md
 include docs/portable-continuous-comparison.md
 include docs/portable-ticket-examples.md

@@ -56,6 +56,7 @@ class AttributionBatch:
     targets: Array
     episode: DemonstrationEpisode | None = None
     num_classes: int = 2
+    packet_episodes: tuple[DemonstrationEpisode, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -87,6 +88,11 @@ def _validate_batch(batch: AttributionBatch, role: str, seen_rows: set[str]) -> 
         raise ValueError("batches must contain exact AttributionBatch records")
     if type(batch.role) is not str or batch.role != role:
         raise ValueError(f"batch role must be {role}")
+    if type(batch.packet_episodes) is not tuple or (
+        batch.packet_episodes
+        and (role != "train" or batch.episode is not None or len(batch.packet_episodes) > 2)
+    ):
+        raise ValueError("packet episodes require one or two ordered TRAIN episodes alone")
     _identifier(batch.context, "batch context")
     _matrix(batch.features, "batch features")
     _matrix(batch.targets, "batch targets")
@@ -121,6 +127,19 @@ def _validate_batch(batch: AttributionBatch, role: str, seen_rows: set[str]) -> 
             raise ValueError(
                 "episode batch metadata, ordered features and action targets must agree"
             )
+    if batch.packet_episodes:
+        episodes = tuple(copy_episode(ep) for ep in batch.packet_episodes)
+        arrays = tuple(episode_arrays(ep) for ep in episodes)
+        if (
+            any(
+                ep.role != role or ep.context != batch.context or ep.num_classes != classes
+                for ep in episodes
+            )
+            or len({ep.episode_id for ep in episodes}) != len(episodes)
+            or not np.array_equal(batch.features, np.concatenate([x for x, _ in arrays]))
+            or not np.array_equal(batch.targets, np.concatenate([y for _, y in arrays]))
+        ):
+            raise ValueError("ordered packet episodes must exactly match the paid TRAIN batch")
 
 
 def _copy_batch(batch: AttributionBatch) -> AttributionBatch:
@@ -132,6 +151,7 @@ def _copy_batch(batch: AttributionBatch) -> AttributionBatch:
         batch.targets.copy(),
         None if batch.episode is None else copy_episode(batch.episode),
         batch.num_classes,
+        tuple(copy_episode(ep) for ep in batch.packet_episodes),
     )
 
 
@@ -162,11 +182,14 @@ def _validated_batches(
         _validate_batch(batch, "final_test", seen_rows)
     if any(batch.num_classes != training[0].num_classes for batch in (*training, *heldout)):
         raise ValueError("all training and heldout class counts must match")
-    episodes = [batch.episode for batch in (*training, *heldout)]
-    if any(episode is not None for episode in episodes):
-        if any(episode is None for episode in episodes):
+    groups = [
+        ((batch.episode,) if batch.episode is not None else batch.packet_episodes)
+        for batch in (*training, *heldout)
+    ]
+    if any(groups):
+        if not all(groups):
             raise ValueError("episode streams require complete episode metadata for every batch")
-        episode_ids = [episode.episode_id for episode in episodes if episode is not None]
+        episode_ids = [episode.episode_id for group in groups for episode in group]
         if len(episode_ids) != len(set(episode_ids)):
             raise ValueError("episode IDs must be globally unique across training and final data")
     contexts = tuple(batch.context for batch in heldout)
@@ -212,7 +235,15 @@ def _record_tick(
     training: tuple[AttributionBatch, ...],
     tick: int,
     delay: int,
+    *,
+    replay_consent: bool = False,
 ) -> None:
+    if (
+        type(replay_consent) is not bool
+        or replay_consent
+        and any(b.role != "train" for b in training)
+    ):
+        raise ValueError("replay consent requires explicit ordinary TRAIN recording")
     if tick < len(training):
         episode = training[tick].episode
         runtime.record_experience(
@@ -223,7 +254,7 @@ def _record_tick(
                 runtime._base_actor_version,
                 training[tick].features,
                 require_training_role(training[tick].role),
-                ExperiencePermissions(training=True),
+                ExperiencePermissions(training=True, replay=replay_consent),
             )
         )
     label_index = tick - delay
@@ -491,15 +522,26 @@ class AttributionStream:
             if type(rehearsal) is not StreamRehearsal:
                 raise ValueError("rehearsal must be an exact StreamRehearsal or None")
             schema = rehearsal.episode_schema
-            if (schema is None) != (training[0].episode is None):
+            if any(batch.packet_episodes for batch in training) and (
+                not training_only or role != "train" or not rehearsal.packet_episode_replay
+            ):
+                raise ValueError("packet episodes require ordinary TRAIN-only joint rehearsal")
+            if (schema is None) != (
+                training[0].episode is None and not training[0].packet_episodes
+            ):
                 raise ValueError("episode replay requires its declared episode schema and metadata")
             if training[0].num_classes > 2 and schema is None:
                 raise ValueError(
                     "categorical rehearsal requires complete episodes and class schema"
                 )
             if schema is not None and any(
-                batch.episode is None
-                or len(batch.episode.transitions) != schema.steps_per_episode
+                not (batch.episode is not None or batch.packet_episodes)
+                or any(
+                    len(ep.transitions) != schema.steps_per_episode
+                    for ep in (
+                        (batch.episode,) if batch.episode is not None else batch.packet_episodes
+                    )
+                )
                 or batch.num_classes != schema.num_classes
                 for batch in training
             ):
@@ -514,7 +556,10 @@ class AttributionStream:
                 maximum = rehearsal.bind(
                     learner, budget, len(training), training[0].features.shape[1], wake_role=role
                 )
+        elif any(batch.packet_episodes for batch in training):
+            raise ValueError("packet episodes require joint rehearsal")
         self._learner, self._budget = learner, budget
+        self._packet_metadata = deepcopy(tuple(batch.packet_episodes for batch in training))
         self._training, self._heldout = training, heldout
         # Why this: evaluation authority is fixed at admission, never inferred
         # from mutable data or a later reporting choice.
@@ -643,10 +688,16 @@ class AttributionStream:
                 or (
                     batch.episode is not None and batch.episode.role != self._original_training_role
                 )
+                or any(ep.role != self._original_training_role for ep in batch.packet_episodes)
                 for batch in self._training
             )
         ):
             raise ValueError("attribution requires its original training role")
+        if tuple(batch.packet_episodes for batch in self._training) != self._packet_metadata:
+            raise ValueError("original packet episode metadata changed")
+        for batch in self._training:
+            if batch.packet_episodes:
+                _validate_batch(batch, self._original_training_role, set())
         self._runtime._inbox._require_training_scope()
         if self._feature_observer is not self._original_feature_observer:
             raise ValueError("attribution requires its original feature observer")
@@ -791,7 +842,15 @@ class AttributionStream:
                     self._completed += newly_completed
                     if self._rehearsal is not None and newly_completed:
                         batch = self._training[self._completed - 1]
-                        if batch.episode is None:
+                        if batch.packet_episodes:
+                            self._rehearsal.after_update(
+                                self._runtime,
+                                self._completed,
+                                batch.features,
+                                batch.targets,
+                                packet_episodes=batch.packet_episodes,
+                            )
+                        elif batch.episode is None:
                             self._rehearsal.after_update(
                                 self._runtime, self._completed, batch.features, batch.targets
                             )

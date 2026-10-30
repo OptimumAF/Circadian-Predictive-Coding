@@ -27,7 +27,16 @@ def read_candidate_feedback(
     require_input,
     consumed=None,
     acknowledge_correct=False,
+    expected_candidate=None,
+    label_clock=None,
+    require_actor=None,
 ):
+    if (label_clock is not None or require_actor is not None) and (
+        acknowledge_correct is not True or require_actor is not None and not callable(require_actor)
+    ):
+        raise ValueError("declared clocks and actor guard require explicit TRAIN acknowledgement")
+    if expected_candidate is not None and acknowledge_correct is not True:
+        raise ValueError("pinned candidate requires explicit TRAIN acknowledgement")
     if type(acknowledge_correct) is not bool or (
         consumed is not None
         and (not acknowledge_correct or type(consumed) is not int or consumed < completed)
@@ -37,7 +46,15 @@ def read_candidate_feedback(
     if arrived <= index:
         return None
     batch = batches[index]
-    if batch.role != "train" or not index + label_delay <= tick:
+    clock = (index, index + label_delay) if label_clock is None else label_clock
+    if (
+        type(clock) is not tuple
+        or len(clock) != 2
+        or any(type(v) is not int for v in clock)
+        or not index <= clock[0] < clock[1] <= tick
+        or clock[1] - clock[0] not in (1, 2)
+        or batch.role != "train"
+    ):
         raise ValueError("candidate feedback requires already-arrived ordinary TRAIN")
     if paid["rows_attempted"] + len(batch.features) > paid.get("row_limit", 84):
         raise ValueError("original candidate diagnostic row allowance exhausted")
@@ -49,11 +66,13 @@ def read_candidate_feedback(
             index,
             completed,
             tick,
-            label_delay,
+            clock,
             actor_version,
             predict,
             paid,
             require_input,
+            expected_candidate,
+            require_actor,
         )
     snapshot = runtime.candidate_snapshot()
     return _diagnose(
@@ -62,7 +81,7 @@ def read_candidate_feedback(
         index,
         completed,
         tick,
-        label_delay,
+        clock,
         actor_version,
         predict,
         paid,
@@ -77,20 +96,26 @@ def _read_and_acknowledge(
     index,
     completed,
     tick,
-    label_delay,
+    label_clock,
     actor_version,
     predict,
     paid,
     require_input,
+    expected_candidate,
+    require_actor,
 ):
     feedback = None
 
     def verify(snapshot, source, label):
         nonlocal feedback
+        # Why: the schedule's pre-read pin must survive its input hook before
+        # ACK acquires the original lease and takes its own current snapshot.
+        if expected_candidate is not None and not _same_value(snapshot, expected_candidate):
+            raise ValueError("original pinned ACK candidate changed before verification")
         if (
             source.key != ("attribution", f"batch-{index}")
-            or source.observed_at != index
-            or label.arrived_at != index + label_delay
+            or source.observed_at != label_clock[0]
+            or label.arrived_at != label_clock[1]
             or not _same_value(source.features, batch.features)
             or not _same_value(label.targets, batch.targets)
         ):
@@ -101,12 +126,17 @@ def _read_and_acknowledge(
             index,
             completed,
             tick,
-            label_delay,
+            label_clock,
             actor_version,
             predict,
             paid,
             require_input,
             runtime._snapshot_candidate,
+            **(
+                dict(source_actor_version=runtime._base_actor_version)
+                if require_actor is not None
+                else {}
+            ),
         )
         return feedback.mistakes == 0
 
@@ -116,6 +146,7 @@ def _read_and_acknowledge(
         learner_version="c0",
         wake_updates=completed,
         verify=verify,
+        **(dict(require_actor=require_actor) if require_actor is not None else {}),
     )
     return feedback
 
@@ -126,21 +157,27 @@ def _diagnose(
     index,
     completed,
     tick,
-    label_delay,
+    label_clock,
     actor_version,
     predict,
     paid,
     require_input,
     current_snapshot,
+    *,
+    source_actor_version=None,
 ):
-    if snapshot.actor_version != actor_version or snapshot.wake_updates != completed:
+    if (
+        snapshot.actor_version
+        != (actor_version if source_actor_version is None else source_actor_version)
+        or snapshot.wake_updates != completed
+    ):
         raise ValueError("candidate feedback belongs to a stale source or update count")
     pin = deepcopy(snapshot)
     row = dict(
         role="train",
         index=index,
-        label_observed_at=index,
-        label_arrived_at=index + label_delay,
+        label_observed_at=label_clock[0],
+        label_arrived_at=label_clock[1],
         read_at=tick,
         base_actor_version=snapshot.actor_version,
         candidate_version=snapshot.learner_version,

@@ -19,7 +19,7 @@ import numpy as np
 from scripts.recurring_ticket_workflow_example import CHECKPOINTS, PHASES, episode_slots
 from scripts.run_ticket_workflow import FEATURES, training_cases
 from src.adapters.perceptron_decision import build_decision_training_batch
-from src.core.categorical_probability_margins import probability_margins
+from scripts.ticket_train_fit import summarize_logits as _summarize_logits
 from src.core.decision_features import DecisionFeatureSpec, encode_decision
 from src.core.temporal_decision_sequence import VOCABULARY
 from src.core.ticket_workflow import CATALOG
@@ -261,18 +261,6 @@ def _native_parity(source, parameters, spec, work):
         absolute_tolerance=TOLERANCE,
         ambiguous_decisions=ambiguous,
     )
-
-
-def _summarize_logits(logits, targets):
-    shifted = logits - logits.max(axis=1, keepdims=True)
-    weights = np.exp(shifted)
-    probabilities = weights / weights.sum(axis=1, keepdims=True)
-    labels = targets[:, 0].astype(np.int64)
-    ce = np.log(weights.sum(axis=1)) - shifted[np.arange(len(labels)), labels]
-    competitors = logits.copy()
-    competitors[np.arange(len(labels)), labels] = -np.inf
-    margins = logits[np.arange(len(labels)), labels] - competitors.max(axis=1)
-    return probabilities, ce, margins, probability_margins(probabilities, targets, logits.shape[1])
 
 
 def diagnose(source, *, work=None):

@@ -5,6 +5,7 @@ runner, optimizer, final/probe labels, promotion or comparative study selection.
 """
 
 from copy import deepcopy
+from contextlib import nullcontext
 from dataclasses import asdict
 from hashlib import sha256
 import json
@@ -20,6 +21,7 @@ from scripts.context_head_serving import prepare_data
 from scripts.run_bp_ticket_serving import _violation_count, _reported_work_fields
 from scripts.run_ticket_workflow import CONTEXT_FEATURES
 from src.adapters.context_perceptron import ContextPerceptronLearner
+from src.adapters.context_linear_fit_learner import ContextLinearFitLearner
 from src.adapters.context_serving import snapshot_digest
 from src.app.actor_shadow import StableActor
 from src.app.counterfactual_controller import CounterfactualController, CatalogCounterfactualReturn
@@ -255,7 +257,47 @@ def catalog_measures(result):
     )
 
 
-def run_catalog_study(input_path):
+def _study_training_work(report, calls):
+    fields = ("attempted_updates", "attempted_rows", "returned_updates")
+    results = [row.get("result") for row in report["trials"]]
+    if report.get("application") is not None:
+        results.append(report["application"])
+    known = calls["attempts"] == calls["returns"] == len(results)
+    work = [result.get("training_work") if type(result) is dict else None for result in results]
+    known = known and all(
+        type(row) is dict and all(type(row.get(k)) is int and row[k] >= 0 for k in fields)
+        for row in work
+    )
+    if not known:
+        return dict.fromkeys(fields)
+    totals = dict.fromkeys(fields, 0)
+    for row in work:
+        assert isinstance(row, dict)
+        for key in fields:
+            totals[key] += row[key]
+    return totals
+
+
+def run_catalog_study(input_path, *, _owned_source=None, _memory=None, _linear_fit=False):
+    if (
+        type(_linear_fit) is not bool
+        or _linear_fit
+        and _owned_source is None
+        or _owned_source is not None
+        and (
+            not _linear_fit
+            or input_path is not None
+            or type(_owned_source) is not tuple
+            or len(_owned_source) != 2
+            or not callable(_owned_source[1])
+            or _memory is None
+        )
+        or _owned_source is None
+        and _memory is not None
+    ):
+        raise ValueError(
+            "owned catalog study requires explicit LS source, guard and original sampler"
+        )
     started = monotonic()
     objective, catalog = ControllerObjective(), context_catalog()
     report: dict[str, Any] = dict(
@@ -273,20 +315,47 @@ def run_catalog_study(input_path):
         qualification="six known TRAIN context/arm trials then one original-source frozen development application; unequal added replay work, no heldout/generalization/CPC/efficiency claim",
     )
     trainer = None
-    with ProcessRssSampler(interval_seconds=0.02) as memory:
+    calls = dict(attempts=0, returns=0)
+    if _linear_fit:
+        report.pop("source_sha256")
+        report.update(
+            source_provenance="current_workflow_train_checkpoint12",
+            prior_training=dict(updates=12, rows=72, mistakes=None),
+            learner_family="context_linear_fit",
+        )
+    with (
+        ProcessRssSampler(interval_seconds=0.02) if _memory is None else nullcontext(_memory)
+    ) as memory:
         try:
-            raw = live._source_bytes(input_path)
-            if sha256(raw).hexdigest() != live.HEAD_SOURCE_SHA:
-                raise ValueError("original qualified contextual source replaced")
-            initial = live.head_states(json.loads(raw))[0]
-            source = ContextPerceptronLearner(initial.policy)
+            digest_state = snapshot_digest
+            source_type: type[ContextPerceptronLearner] | type[ContextLinearFitLearner] = (
+                ContextPerceptronLearner
+            )
+            source_version = "qualified-12"
+            if _owned_source is None:
+                raw = live._source_bytes(input_path)
+                if sha256(raw).hexdigest() != live.HEAD_SOURCE_SHA:
+                    raise ValueError("original qualified contextual source replaced")
+                initial = live.head_states(json.loads(raw))[0]
+            else:
+                from src.adapters.context_linear_serving import snapshot_digest as linear_digest
+                from src.core.context_linear_state import copy_context_linear_state
+
+                _owned_source[1]()
+                initial = copy_context_linear_state(_owned_source[0])
+                digest_state, source_type, source_version = (
+                    linear_digest,
+                    ContextLinearFitLearner,
+                    "context-ls-12",
+                )
+            source = source_type(initial.policy)
             source.restore_state(initial)
-            actor = StableActor(source, version="qualified-12")
+            actor = StableActor(source, version=source_version)
             data = prepare_data(DecisionFeatureSpec(CONTEXT_FEATURES, CATALOG))
             data_pin, rng = deepcopy(data), deepcopy(np.random.get_state())
             clock = LogicalClock()
             trainer = CounterfactualController(
-                actor.snapshot_state, snapshot_digest, objective, clock, catalog=catalog
+                actor.snapshot_state, digest_state, objective, clock, catalog=catalog
             )
             rows = report["trials"]
             paid: list[Any] = []
@@ -294,8 +363,14 @@ def run_catalog_study(input_path):
             def check():
                 if monotonic() - started > 240 or memory.snapshot().peak_bytes > 512 * 1024**2:
                     raise ValueError("context catalog original whole-case allowance exhausted")
+                if _owned_source is not None:
+                    _owned_source[1]()
                 if (
-                    live._source_bytes(input_path) != raw
+                    (
+                        live._source_bytes(input_path) != raw
+                        if _owned_source is None
+                        else not _same_value(_owned_source[0], initial)
+                    )
                     or source.snapshot_state() != initial
                     or actor.snapshot_state().state != initial
                     or not _same_value(data, data_pin)
@@ -342,13 +417,27 @@ def run_catalog_study(input_path):
 
                     def operation(request, state):
                         check()
-                        if state != initial or snapshot_digest(state) != request.state_digest:
+                        if state != initial or digest_state(state) != request.state_digest:
                             raise ValueError(
                                 "catalog trial requires original complete contextual source"
                             )
+                        calls["attempts"] += 1
                         result = live.run_case(
-                            input_path, catalog_trial=request, catalog_base=state
+                            input_path,
+                            catalog_trial=request,
+                            catalog_base=state,
+                            **(
+                                dict(
+                                    _owned_source=(initial, check),
+                                    _memory=memory,
+                                    _linear_fit=True,
+                                    resume_catalog_wake=True,
+                                )
+                                if _linear_fit
+                                else {}
+                            ),
                         )
+                        calls["returns"] += 1
                         row = dict(request=asdict(request), result=result)
                         rows.append(row)
                         guard, expected = paid_report_guard(row)
@@ -373,7 +462,22 @@ def run_catalog_study(input_path):
             fitted = trainer.freeze()
             report["fitted_policy"] = asdict(fitted)
             check()
-            result = live.run_case(input_path, catalog_policy=fitted)
+            calls["attempts"] += 1
+            result = live.run_case(
+                input_path,
+                catalog_policy=fitted,
+                **(
+                    dict(
+                        _owned_source=(initial, check),
+                        _memory=memory,
+                        _linear_fit=True,
+                        resume_catalog_wake=True,
+                    )
+                    if _linear_fit
+                    else {}
+                ),
+            )
+            calls["returns"] += 1
             report["application"] = result
             if result.get("complete") is not True:
                 raise ValueError("frozen catalog application incomplete")
@@ -388,9 +492,14 @@ def run_catalog_study(input_path):
             )
             check()
             report["complete"] = True
+            report.update(source_unchanged=True, actor_unchanged=True)
         except Exception as error:
             report["error"] = f"{type(error).__name__}: {error}"[:512]
         finally:
+            report["delegated_calls"] = dict(calls)
+            report["training_work"] = _study_training_work(report, calls)
+            if calls["attempts"] != calls["returns"]:
+                report["delegated_work_unknown"] = True
             if trainer is not None:
                 try:
                     report["controller"] = controller_record(trainer.snapshot())

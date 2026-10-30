@@ -13,13 +13,13 @@ from typing import Any
 
 import numpy as np
 
-from scripts.diagnose_ticket_training import _summarize_logits, _teacher
+from scripts.diagnose_ticket_training import _teacher
+from scripts.ticket_train_fit import teacher_fit as _teacher_fit
 from scripts.run_ticket_workflow import (
     FEATURES,
     CONTEXT_FEATURES,
     CONTEXT_TASKS,
     training_cases,
-    build_joint_context_batch,
     _encode_report,
 )
 from scripts import ticket_workflow_native as native
@@ -34,50 +34,21 @@ UPDATES = 96
 
 
 def _context_teacher(spec):
-    """Admit only aligned known TRAIN context templates before model construction."""
-    if spec != DecisionFeatureSpec(CONTEXT_FEATURES, CATALOG):
-        raise ValueError("context qualification requires the exact D9 schema")
-    teachers = {
-        v: training_cases(policy_version=v, include_policy_context=True) for v in ("v1", "v2")
-    }
-    return build_joint_context_batch(spec, teachers)
+    """Keep the established qualification factory patch point."""
+    from scripts.ticket_train_fit import context_teacher
+
+    return context_teacher(spec, training_cases)
 
 
-def _teacher_fit(logits, cases, batch, *, tasks=None):
-    _, ce, margins, summary = _summarize_logits(logits, batch.targets)
-    ids = tuple(c.candidate_id for c in CATALOG)
-    rows = []
-    for i, case in enumerate(cases):
-        allowed = sorted(c.candidate_id for c in case.request.allowed_candidates)
-        winner = min(allowed, key=lambda key: (-float(logits[i, ids.index(key)]), key))
-        target_value = float(logits[i, ids.index(case.target_id)])
-        alternative = max(
-            float(logits[i, ids.index(key)]) for key in allowed if key != case.target_id
-        )
-        rows.append(
-            dict(
-                concept=("invoice", "parcel")[i // 3] if tasks is None else tasks[i // 3][1],
-                phase=("sealed", "ready", "staged")[i % 3],
-                target_id=case.target_id,
-                selected_id=winner,
-                allowed_correct=winner == case.target_id,
-                allowed_raw_margin=target_value - alternative,
-                global_raw_margin=float(margins[i]),
-            )
-        )
-        if tasks is not None:
-            rows[-1]["policy_version"] = tasks[i // 3][0]
-    return dict(
-        global_mean_ce=float(np.mean(ce)),
-        global_probability_margins=summary,
-        allowed_correct_rows=sum(r["allowed_correct"] for r in rows),
-        rows=rows,
-    )
-
-
-def run_qualification(*, policy_context=False):
+def run_qualification(*, policy_context=False, linear_reference=False):
+    if type(linear_reference) is not bool or (linear_reference and policy_context is not True):
+        raise ValueError("linear reference requires explicit policy_context=True")
     if type(policy_context) is not bool:
         raise ValueError("policy_context must be an exact bool")
+    if linear_reference:
+        from scripts.ticket_linear_reference import run_reference
+
+        return run_reference(_context_teacher)
     started = monotonic()
     width = len(CONTEXT_FEATURES if policy_context else FEATURES)
     rows_per_update = 12 if policy_context else 6
@@ -344,15 +315,24 @@ def run_qualification(*, policy_context=False):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--linear-reference", action="store_true")
     parser.add_argument(
         "--policy-context",
         action="store_true",
         help="qualify the fixed joint D9 public-context TRAIN recipe",
     )
     args = parser.parse_args(argv)
+    if args.linear_reference and not args.policy_context:
+        parser.error("--linear-reference requires --policy-context")
     with args.output.open("xb") as target:
         target.write(b"{}\n")
-    result = run_qualification(policy_context=True) if args.policy_context else run_qualification()
+    result = (
+        run_qualification(policy_context=True, linear_reference=True)
+        if args.linear_reference
+        else run_qualification(policy_context=True)
+        if args.policy_context
+        else run_qualification()
+    )
     args.output.write_bytes(_encode_report(result))
     return 0 if result["complete"] else 1
 

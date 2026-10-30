@@ -37,6 +37,10 @@ from src.core.demonstration_episode import (
 from src.core.demonstration_schedule_witness import DemonstrationScheduleWitness
 from src.core.coverage_replay import CoverageReplayBuffer
 from src.core.learner_ports import TrainingDiagnostic
+from src.core.learner_ports import TrainingUpdateFailed
+from src.core.context_joint_replay import JointContextReplayPolicy
+from src.core.context_linear_state import ContextLinearFitSnapshot
+from src.app.context_joint_rehearsal import prepare_joint_rehearsal
 from src.core.incident_replay import IncidentReplayGate
 from src.core.shift_incidents import ShiftIncidentDecision
 from src.core.replay_retention import ReplayRetentionPolicy
@@ -239,6 +243,7 @@ class StreamRehearsal:
         fixed_training_episodes: tuple[DemonstrationEpisode, ...] = (),
         wake_role: str = "train",
         check_boundary: Callable[[], None] | None = None,
+        joint_context: JointContextReplayPolicy | None = None,
     ) -> None:
         if check_boundary is not None and not callable(check_boundary):
             raise ValueError("rehearsal boundary must be callable or None")
@@ -282,6 +287,37 @@ class StreamRehearsal:
                 self._episode_schema.num_classes,
             ),
         )
+        if joint_context is not None:
+            if type(joint_context) is not JointContextReplayPolicy:
+                raise ValueError("joint context requires an exact JointContextReplayPolicy")
+            joint_context = replace(joint_context)
+            state = learner.snapshot_state()
+            if (
+                type(policy) is not RecentStreamReplayPolicy
+                or episode_schema is None
+                or distillation is not None
+                or incident_channel is not None
+                or type(state) is not ContextLinearFitSnapshot
+                or (
+                    state.policy.feature_dim,
+                    state.policy.num_classes,
+                    state.policy.context_columns,
+                )
+                != (
+                    joint_context.feature_dim,
+                    joint_context.num_classes,
+                    joint_context.context_columns,
+                )
+                or episode_schema.num_classes != joint_context.num_classes
+                or episode_schema.observation_dim != joint_context.feature_dim
+            ):
+                raise ValueError(
+                    "joint context requires original categorical LS episode replay geometry alone"
+                )
+        self._joint_context = joint_context
+        self._joint_context_owner = joint_context
+        self._joint_context_pin = deepcopy(joint_context)
+        self._joint_paid: list[tuple[Any, Any]] = []
         if self._episode_schema is not None:
             if distillation is not None:
                 raise ValueError("episode rehearsal does not support teacher distillation")
@@ -373,6 +409,10 @@ class StreamRehearsal:
         self._fixed_bank_owner = self._fixed_bank_birth
         self._remember_fixed_buffer_owner()
         self._learner, self._budget, self._replay_budget = learner, budget, replay_budget
+        self._joint_budget_birth = (
+            self._joint_budget_signature() if joint_context is not None else None
+        )
+        self._joint_replay_work = 0
         self._total_updates, self._input_dim = total_updates, input_dim
         self._incident_channel_birth = incident_channel
         self._incident_gate = (
@@ -420,6 +460,8 @@ class StreamRehearsal:
         if self._episode_schema is not None:
             for row in self._events:
                 row["selected_episodes"] = []
+        self._joint_events_owner = self._events
+        self._joint_event_rows = tuple(self._events) if joint_context is not None else ()
 
     def _fixed_buffer_configuration(self) -> bytes:
         buffer = self._buffer
@@ -491,8 +533,51 @@ class StreamRehearsal:
         if tuple(owners) != self._fixed_array_owners:
             raise ValueError("fixed training bank arrays were replaced")
 
+    def _joint_budget_signature(self):
+        return tuple(
+            (
+                id(s),
+                id(s.budget),
+                deepcopy(s.budget),
+                id(s.clock),
+                s.started_at,
+                id(s.process_rss_sampler),
+            )
+            for s in (self._budget, self._replay_budget)
+        )
+
     def _check_schema(self) -> EpisodeReplaySchema | None:
-        """Bind codec geometry to its owned birth record, including after tampering."""
+        """Keep codec, optional joint configuration and paid evidence source-bound."""
+        if self._joint_context is not None and (
+            self._joint_budget_signature() != self._joint_budget_birth
+            or self._replay_budget.replay_examples_completed != self._joint_replay_work
+        ):
+            self._stopped, self._reason = True, "original joint replay budget changed"
+            raise ValueError(self._reason)
+        if (
+            self._joint_context is not self._joint_context_owner
+            or self._joint_context != self._joint_context_pin
+        ):
+            raise ValueError("original joint replay policy changed")
+        changed_container = self._joint_context is not None and (
+            self._events is not self._joint_events_owner
+            or len(self._events) != len(self._joint_event_rows)
+        )
+        changed_paid = not changed_container and any(
+            self._events[value["updates"] // self._policy.every_updates - 1] is not row
+            or pickle.dumps(row) != pickle.dumps(value)
+            for row, value in self._joint_paid
+        )
+        if changed_container or changed_paid:
+            self._events = self._joint_events_owner
+            self._events[:] = self._joint_event_rows
+            for row, value in self._joint_paid:
+                index = value["updates"] // self._policy.every_updates - 1
+                row.clear()
+                row.update(deepcopy(value))
+                self._events[index] = row
+            self._stopped, self._reason = True, "preceding paid joint replay evidence changed"
+            raise ValueError(self._reason)
         if self._check_boundary is not self._original_check_boundary:
             raise ValueError("original replay boundary was replaced")
         schema = self._episode_schema
@@ -517,6 +602,16 @@ class StreamRehearsal:
         """Expose detached geometry for stream-ingress preflight, without authority."""
         schema = self._check_schema()
         return None if schema is None else replace(schema)
+
+    @property
+    def packet_episode_replay(self) -> bool:
+        """Only ordinary dynamic joint replay admits multi-episode paid packets."""
+        self._check_schema()
+        return (
+            self._joint_context is not None
+            and self._wake_role == "train"
+            and self._fixed_bank_birth is None
+        )
 
     def bind(
         self,
@@ -576,7 +671,7 @@ class StreamRehearsal:
             or len(self._runtime._inbox._applied) != self._observed
         ):
             raise ValueError("rehearsal continuation wake receipts differ")
-        binding = (
+        binding: tuple[Any, ...] = (
             id(self),
             id(self._learner),
             id(self._runtime),
@@ -590,7 +685,12 @@ class StreamRehearsal:
             _continuation_budget(self._replay_budget),
             self._episode_schema_birth,
         )
-        return binding if self._wake_role == "train" else (*binding, self._wake_role)
+        binding = binding if self._wake_role == "train" else (*binding, self._wake_role)
+        return (
+            binding
+            if self._joint_context is None
+            else (*binding, id(self._joint_context), self._joint_context)
+        )
 
     def _capture_continuation(self) -> _RehearsalContinuation:
         """Copy bounded NumPy replay data while the owner holds its runtime lease."""
@@ -664,6 +764,14 @@ class StreamRehearsal:
         self._reason = prepared.reason
         self._incident_gate = prepared.incident_gate
         self._incident_gate_owner = self._incident_gate
+        if self._joint_context is not None:
+            # prepare validated exact same-owner content before this authorized
+            # replacement; pins follow those detached rows without renewing work.
+            self._joint_events_owner = self._events
+            self._joint_event_rows = tuple(self._events)
+            self._joint_paid = [
+                (r, deepcopy(r)) for r in self._events if r["updates"] <= self._observed
+            ]
         self._remember_fixed_buffer_owner()
 
     def _check_incident_gate(self) -> IncidentReplayGate | None:
@@ -771,23 +879,50 @@ class StreamRehearsal:
         return diagnostic
 
     def _operation(
-        self, state: Any, selection: SharedReplaySelection, row: dict[str, Any]
+        self,
+        state: Any,
+        selection: SharedReplaySelection,
+        row: dict[str, Any],
+        joint_packet: tuple[Array, Array] | None = None,
+        packet_guard: Callable[[], None] | None = None,
     ) -> ConsolidatedState[Any]:
+        before = self._before_native if packet_guard is None else packet_guard
         self._check_schema()
-        self._before_native()
+        before()
         learner = self._learner.fork()
         if learner is self._learner:
             raise ValueError("rehearsal fork must be distinct from its source learner")
-        self._before_native()
+        before()
         learner.restore_state(deepcopy(state))
-        self._before_native()
+        before()
         diagnostic = None
-        for features, targets in selection.training_batches():
-            self._before_native()
+        for features, targets in (
+            (joint_packet,) if joint_packet is not None else selection.training_batches()
+        ):
+            before()
             if self._distillation is None:
-                self._replay_budget.record_replay(len(features))
+                if joint_packet is None:
+                    self._replay_budget.record_replay(len(features))
+                else:
+                    charged_before, returned = self._joint_replay_work, False
+                    try:
+                        self._replay_budget.record_replay(len(features))
+                        returned = True
+                    finally:
+                        delta = self._replay_budget.replay_examples_completed - charged_before
+                        self._joint_replay_work += delta
+                        if delta not in (0, len(features)) or returned and delta != len(features):
+                            row["replay_charge_unknown"] = True
+                            raise ValueError("joint replay observed an invalid charge transition")
                 row["attempted_updates"] += 1
-                diagnostic = learner.train_batch(features, targets)
+                try:
+                    diagnostic = learner.train_batch(features, targets)
+                except TrainingUpdateFailed as error:
+                    if joint_packet is not None:
+                        row["native_failure_work"] = dict(
+                            definition=error.definition, work=error.work
+                        )
+                    raise
             else:
                 diagnostic = self._distillation_step(learner, features, targets, row)
             row["returned_updates"] += 1
@@ -797,17 +932,21 @@ class StreamRehearsal:
                 )
             diagnostic = replace(diagnostic)
             row["diagnostics"].append(asdict(diagnostic))
-            self._before_native()
+            before()
         if diagnostic is None:
             raise ValueError("rehearsal selection must contain at least one row")
         result = learner.snapshot_state()
-        self._before_native()
+        before()
         # The receipt retains the last native pre-update diagnostic; all native
         # diagnostics remain in the event report, with their original objectives.
         return ConsolidatedState(deepcopy(result), diagnostic)
 
     def _run_event(
-        self, runtime: ActorShadowRuntime[Array, Array, Array, Any], row: dict[str, Any]
+        self,
+        runtime: ActorShadowRuntime[Array, Array, Array, Any],
+        row: dict[str, Any],
+        current: tuple[Array, Array] | None = None,
+        packet_guard: Callable[[], None] | None = None,
     ) -> None:
         initial_charge = self._replay_budget.replay_examples_completed
         try:
@@ -826,7 +965,11 @@ class StreamRehearsal:
                 )
             elif type(self._policy) is RecentStreamReplayPolicy:
                 # Preserve the existing selector's latest-n arrival chronology.
-                selection = self._buffer.select_recent(maximum)
+                selection = self._buffer.select_recent(
+                    self._policy.retention.max_examples // steps
+                    if self._joint_context is not None
+                    else maximum
+                )
                 partitions = None
                 cursor = None
             else:
@@ -835,6 +978,24 @@ class StreamRehearsal:
                 if partitions is None:
                     raise ValueError("rehearsal buffer lost its configured allocation")
                 cursor = asdict(self._buffer.rotation_cursor)
+            joint_packet = None
+            if self._joint_context is not None:
+                assert schema is not None and current is not None and packet_guard is not None
+                packet_guard()
+                selection, joint_packet, detail = prepare_joint_rehearsal(
+                    self._joint_context,
+                    schema,
+                    selection,
+                    current,
+                    self._policy.rows_per_event,
+                    self._wake_role,
+                )
+                row["joint_context"] = detail
+                if joint_packet is None:
+                    row.update(
+                        status="skipped", reason="no prior distinct same-context TRAIN episode"
+                    )
+                    return
             row.update(
                 selected_ids=list(selection.sample_ids),
                 retention=asdict(self.retention),
@@ -851,24 +1012,65 @@ class StreamRehearsal:
                     selection.sample_ids, tuple(episode_arrays(episode) for episode in episodes)
                 )
             remaining = self._replay_budget.remaining_replay_examples
-            exposures = sum(len(features) for features, _ in selection._rows)
+            exposures = (
+                len(joint_packet[0])
+                if joint_packet is not None
+                else sum(len(features) for features, _ in selection._rows)
+            )
             if remaining is None or remaining < exposures:
                 self._replay_budget.stop_replay()
-            self._before_native()
-            receipt = runtime.consolidate(
-                row["event_id"], lambda state: self._operation(state, selection, row)
+            operation_row = row
+            before_operation = packet_guard
+            if joint_packet is not None:
+                pending = deepcopy(row)
+                operation_row = deepcopy(row)
+                index = row["updates"] // self._policy.every_updates - 1
+
+                def before_operation():
+                    try:
+                        assert packet_guard is not None
+                        packet_guard()
+                    finally:
+                        if self._events[index] is not row or pickle.dumps(row) != pickle.dumps(
+                            pending
+                        ):
+                            row.clear()
+                            row.update(deepcopy(pending))
+                            self._events[index] = row
+                            raise ValueError("pending joint replay metadata changed")
+
+            (self._before_native if before_operation is None else before_operation)()
+            operation = (
+                (lambda state: self._operation(state, selection, row))
+                if joint_packet is None
+                else (
+                    lambda state: self._operation(
+                        state, selection, operation_row, joint_packet, before_operation
+                    )
+                )
             )
+            try:
+                receipt = runtime.consolidate(row["event_id"], operation)
+            finally:
+                if joint_packet is not None:
+                    row.clear()
+                    row.update(operation_row)
             row.update(
                 status="complete",
                 reason=None,
                 receipt=asdict(receipt),
-                committed_updates=len(selection.sample_ids),
+                committed_updates=1 if joint_packet is not None else len(selection.sample_ids),
             )
         except Exception as error:
             # consolidate can publish a receipt then fail its final budget check.
             for receipt in runtime.applied_consolidations:
                 if receipt.event_id == row["event_id"]:
-                    row.update(receipt=asdict(receipt), committed_updates=len(row["selected_ids"]))
+                    row.update(
+                        receipt=asdict(receipt),
+                        committed_updates=1
+                        if self._joint_context is not None
+                        else len(row["selected_ids"]),
+                    )
                     break
             row.update(status="failed", reason=f"{type(error).__name__}: {error}")
             raise
@@ -885,6 +1087,7 @@ class StreamRehearsal:
         targets: Array,
         *,
         episode: DemonstrationEpisode | None = None,
+        packet_episodes: tuple[DemonstrationEpisode, ...] = (),
     ) -> None:
         self._check_schema()
         if not self._bound or self._stopped:
@@ -919,7 +1122,31 @@ class StreamRehearsal:
             # Whole-packet validation below supplies finite bounded observations;
             # do not coerce categorical actions through the binary label contract.
             validate_class_targets(targets, len(features), schema.num_classes)
-        retained_features, retained_targets = self._retained_arrays(features, targets, episode)
+        if type(packet_episodes) is not tuple or (
+            packet_episodes
+            and (episode is not None or len(packet_episodes) > 2 or not self.packet_episode_replay)
+        ):
+            raise ValueError(
+                "packet episodes require one or two ordinary joint TRAIN episodes alone"
+            )
+        if packet_episodes:
+            owned = tuple(copy_episode(ep) for ep in packet_episodes)
+            if len({ep.episode_id for ep in owned}) != len(owned):
+                raise ValueError("packet episode IDs must be unique")
+            arrays = tuple(episode_arrays(ep) for ep in owned)
+            packet = (
+                np.concatenate([x for x, _ in arrays]),
+                np.concatenate([y for _, y in arrays]),
+            )
+            if not np.array_equal(features, packet[0]) or not np.array_equal(targets, packet[1]):
+                raise ValueError("packet episodes must exactly match completed training arrays")
+            encoded = tuple(
+                self._retained_arrays(x, y, ep) for ep, (x, y) in zip(owned, arrays, strict=True)
+            )
+            retained_features = np.concatenate([x for x, _ in encoded])
+            retained_targets = np.concatenate([y for _, y in encoded])
+        else:
+            retained_features, retained_targets = self._retained_arrays(features, targets, episode)
         replace(self._policy)
         _sessions(self._budget, self._replay_budget, fresh=False)
         try:
@@ -936,7 +1163,30 @@ class StreamRehearsal:
                     if not admission["admitted"]:
                         row.update(status="skipped", reason=admission["reason"])
                         return
-                self._run_event(runtime, row)
+                if self._joint_context is None:
+                    self._run_event(runtime, row)
+                else:
+                    current_episodes = packet_episodes
+                    if not current_episodes:
+                        assert episode is not None
+                        current_episodes = (episode,)
+                        packet = episode_arrays(copy_episode(episode))
+                    originals = tuple(copy_episode(ep) for ep in current_episodes)
+
+                    def packet_guard():
+                        self._before_native()
+                        self._check_schema()
+                        if (
+                            not np.array_equal(features, packet[0])
+                            or not np.array_equal(targets, packet[1])
+                            or tuple(copy_episode(ep) for ep in current_episodes) != originals
+                        ):
+                            raise ValueError("joint replay current paid wake packet changed")
+
+                    try:
+                        self._run_event(runtime, row, packet, packet_guard)
+                    finally:
+                        self._joint_paid.append((row, deepcopy(row)))
         except Exception as error:
             self._stopped, self._reason = True, f"{type(error).__name__}: {error}"
             raise
@@ -1016,6 +1266,11 @@ class StreamRehearsal:
         )
         if type(self._policy) is RecentStreamReplayPolicy:
             report["control"] = "recent_fifo_v1"
+        if self._joint_context is not None:
+            report["joint_context"] = dict(
+                policy=asdict(self._joint_context),
+                scope="one additional joint fit per eligible event; charge all native matrix rows including repeated current; no probe labels enter retention",
+            )
         if self._fixed_bank_birth is not None:
             birth = self._fixed_bank_birth
             report.update(

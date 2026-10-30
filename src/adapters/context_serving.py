@@ -45,7 +45,7 @@ def build_context(state: ContextPerceptronSnapshot) -> ContextPerceptronLearner:
     return ContextPerceptronLearner(copy_context_snapshot(state).policy)
 
 
-def categorical_guard(spec: DecisionFeatureSpec, clock: Any) -> Any:
+def _categorical_guard(spec, clock, *, build_learner, copy_state, resource_bytes, state_digest):
     if type(spec) is not DecisionFeatureSpec:
         raise ValueError("context guard requires fixed feature spec")
     spec.__post_init__()
@@ -53,7 +53,7 @@ def categorical_guard(spec: DecisionFeatureSpec, clock: Any) -> Any:
 
     def state_valid(state):
         try:
-            _head_spec(spec, copy_context_snapshot(state))
+            _head_spec(spec, copy_state(state))
         except (ValueError, TypeError):
             return False
         return True
@@ -82,14 +82,25 @@ def categorical_guard(spec: DecisionFeatureSpec, clock: Any) -> Any:
         return float(np.mean(np.argmax(p, axis=1) == targets[:, 0]))
 
     return PromotionGuardEvaluator(
-        build_learner=build_context,
+        build_learner=build_learner,
         utility=utility,
         actions=lambda p: tuple(ids[int(i)] for i in np.argmax(p, axis=1)),
         state_valid=state_valid,
         prediction_valid=valid,
+        resource_bytes=resource_bytes,
+        state_digest=state_digest,
+        clock=clock,
+    )
+
+
+def categorical_guard(spec: DecisionFeatureSpec, clock: Any) -> Any:
+    return _categorical_guard(
+        spec,
+        clock,
+        build_learner=build_context,
+        copy_state=copy_context_snapshot,
         resource_bytes=snapshot_record_bytes,
         state_digest=snapshot_digest,
-        clock=clock,
     )
 
 
@@ -126,9 +137,7 @@ class ContextServingPredictor:
             self.work["attempts"] += 1
             publication = self._actor.serving_snapshot()
             self.work["readouts"] += 1
-            predictor = ContextPerceptronDecisionPredictor(self._spec, publication.model_state)
-            self.work["typed_attempts"] += 1
-            result = predictor(request)
+            result = self._predict(publication.model_state, request)
             self.work["returns"] += 1
             return ContextServedDecision(
                 publication.generation,
@@ -141,6 +150,11 @@ class ContextServingPredictor:
             raise
         finally:
             self._gate.release()
+
+    def _predict(self, state, request):
+        predictor = ContextPerceptronDecisionPredictor(self._spec, state)
+        self.work["typed_attempts"] += 1
+        return predictor(request)
 
     def __call__(self, request: DecisionRequest) -> DecisionResult:
         return self.serve(request).result

@@ -1,4 +1,4 @@
-"""Fixed invoice→parcel→invoice TRAIN with complete task readouts between phases.
+"""Fixed invoiceâ†’parcelâ†’invoice TRAIN with complete task readouts between phases.
 
 Composes the existing learner, delayed stream and dispatcher; no new learning
 rule, callback controller, probe/final data, replay, restoration or tool handler.
@@ -10,6 +10,7 @@ from dataclasses import asdict, replace
 from pathlib import Path
 from time import monotonic
 from typing import Any
+import random
 
 import numpy as np
 
@@ -157,8 +158,10 @@ def summarize_policy_changes(episodes, *, opportunity_axis=False):
     return result
 
 
-def summarize_context_return(episodes):
+def summarize_context_return(episodes, *, seeded_initial=False):
     """Signed fixed-policy changes, with conditional loss/recovery definitions."""
+    if type(seeded_initial) is not bool:
+        raise ValueError("initial-state description requires an exact boolean")
     ordinary = {
         p: {
             f"{r['policy_version']}:{r['concept']}": r["episode"]["success"]
@@ -181,7 +184,9 @@ def summarize_context_return(episodes):
         a_return_change={t: int(ordinary[12][t]) - int(ordinary[8][t]) for t in old},
         acquired_a_recovered_on_return={t: ordinary[12][t] if lost[t] else None for t in old},
         b_success_change_during_return={t: int(ordinary[12][t]) - int(ordinary[8][t]) for t in new},
-        interpretation="same-policy known-template descriptive outcomes; null recovery means no acquired skill was lost; zero-state control reused, not compute matched or CPC/generalization evidence",
+        interpretation="same-policy known-template descriptive outcomes; null recovery means no acquired skill was lost; "
+        + ("seeded initial-state" if seeded_initial else "zero-state")
+        + " control reused, not compute matched or CPC/generalization evidence",
     )
 
 
@@ -193,7 +198,162 @@ def run_example(
     context_return=False,
     separate_context_heads=False,
     private_adaptation=False,
+    paired_serving=None,
+    probe_rehearsal=None,
+    adaptive_serving=False,
+    incident_stream=None,
+    calibrated_serving=False,
+    catalog_action=None,
+    catalog_context=None,
+    catalog_study=False,
+    reference_validation=False,
+    record_train_fit=False,
+    class_balanced_bp=False,
 ):
+    if probe_rehearsal is not None and (
+        type(probe_rehearsal) is not str
+        or probe_rehearsal not in ("joint", "current_only")
+        or paired_serving != "retained_joint_probe"
+        or method != "linear_fit"
+        or context_return is not True
+        or separate_context_heads is not True
+    ):
+        raise ValueError("probe rehearsal requires explicit owned LS retained probe")
+    if (
+        type(reference_validation) is not bool
+        or reference_validation
+        and not (
+            method == "linear_fit"
+            and context_return is True
+            and separate_context_heads is True
+            and private_adaptation is False
+            and paired_serving is None
+            and adaptive_serving is False
+            and catalog_action is None
+            and catalog_context is None
+            and catalog_study is False
+            and incident_stream is None
+            and calibrated_serving is False
+            and replay == "none"
+            and policy_change is False
+            and record_train_fit is False
+            and class_balanced_bp is False
+        )
+    ):
+        raise ValueError("reference validation requires its explicit ordinary owned LS mode")
+    if (
+        type(catalog_study) is not bool
+        or catalog_study
+        and not (
+            method == "linear_fit"
+            and context_return is True
+            and separate_context_heads is True
+            and private_adaptation is False
+            and paired_serving is None
+            and adaptive_serving is False
+            and catalog_action is None
+            and catalog_context is None
+            and incident_stream is None
+            and calibrated_serving is False
+            and replay == "none"
+            and policy_change is False
+            and record_train_fit is False
+            and class_balanced_bp is False
+        )
+    ):
+        raise ValueError("catalog study requires its explicit ordinary owned LS mode")
+    owned_serving = (
+        paired_serving is not None
+        or catalog_action is not None
+        or catalog_study
+        or reference_validation
+    )
+    source_handoff = private_adaptation or owned_serving
+    if (catalog_action is not None or catalog_context is not None) and not (
+        type(catalog_action) is str
+        and catalog_action in ("wait", "wake1", "replay6-wake1")
+        and type(catalog_context) is str
+        and catalog_context in ("clean", "mistakes")
+        and method == "linear_fit"
+        and context_return is True
+        and separate_context_heads is True
+        and private_adaptation is False
+        and paired_serving is None
+        and adaptive_serving is False
+        and incident_stream is None
+        and calibrated_serving is False
+        and replay == "none"
+        and policy_change is False
+        and record_train_fit is False
+        and class_balanced_bp is False
+    ):
+        raise ValueError("catalog serving requires explicit ordinary owned LS action/context")
+    if (
+        type(calibrated_serving) is not bool
+        or calibrated_serving
+        and incident_stream is None
+        or incident_stream is not None
+        and (
+            type(incident_stream) is not str
+            or incident_stream not in ("stationary", "shift")
+            or adaptive_serving is not True
+            or paired_serving != "joint"
+        )
+    ):
+        raise ValueError("incident serving requires explicit adaptive joint mode and stream")
+    if (
+        type(adaptive_serving) is not bool
+        or adaptive_serving
+        and not (
+            method == "linear_fit"
+            and context_return is True
+            and separate_context_heads is True
+            and paired_serving in ("current", "joint", "same_context_joint")
+            and private_adaptation is False
+            and replay == "none"
+            and policy_change is False
+        )
+    ):
+        raise ValueError("adaptive serving requires explicit ordinary owned LS paired mode")
+    if method == "linear_fit" and (
+        context_return is not True
+        or replay != "none"
+        or policy_change is not False
+        or type(separate_context_heads) is not bool
+        or private_adaptation is not False
+        or record_train_fit is not False
+        or class_balanced_bp is not False
+    ):
+        raise ValueError(
+            "linear_fit requires ordinary context-return/replay none without TRAIN diagnostics"
+        )
+    if (
+        type(class_balanced_bp) is not bool
+        or class_balanced_bp
+        and (
+            context_return is not True
+            or method != "bp"
+            or replay != "none"
+            or policy_change is not False
+            or separate_context_heads is not False
+            or private_adaptation is not False
+            or paired_serving is not None
+        )
+    ):
+        raise ValueError("class-balanced BP requires the ordinary native BP context-return recipe")
+    if (
+        type(record_train_fit) is not bool
+        or record_train_fit
+        and (
+            context_return is not True
+            or method not in ("bp", "pc", "neutral_cpc", "gated_cpc")
+            or replay != "none"
+            or separate_context_heads is not False
+            or private_adaptation is not False
+            or paired_serving is not None
+        )
+    ):
+        raise ValueError("TRAIN fit diagnostics require the native context-return recipe")
     if (
         type(private_adaptation) is not bool
         or private_adaptation
@@ -206,17 +366,48 @@ def run_example(
         )
     ):
         raise ValueError("private adaptation requires the separate-head context-return recipe")
-    if type(separate_context_heads) is not bool or (
-        separate_context_heads
-        and (context_return is not True or method != "perceptron" or replay != "none")
+    if paired_serving is not None and (
+        type(paired_serving) is not str
+        or paired_serving
+        not in (
+            "current",
+            "joint",
+            "same_context_joint",
+            "retained_joint",
+            "retained_joint_publish",
+            "retained_joint_probe",
+        )
+        or paired_serving
+        in (
+            "same_context_joint",
+            "retained_joint",
+            "retained_joint_publish",
+            "retained_joint_probe",
+        )
+        and method != "linear_fit"
+        or private_adaptation
+        or separate_context_heads is not True
+        or context_return is not True
+        or policy_change is not False
+        or method not in ("perceptron", "linear_fit")
+        or replay != "none"
     ):
         raise ValueError(
-            "separate context heads require explicit context-return, perceptron and replay=none"
+            "paired serving requires separate-head context-return without private adaptation"
         )
-    if type(context_return) is not bool or (
-        context_return and (policy_change is not False or method != "perceptron")
+    if type(separate_context_heads) is not bool or (
+        separate_context_heads
+        and (
+            context_return is not True
+            or method not in ("perceptron", "linear_fit")
+            or replay != "none"
+        )
     ):
-        raise ValueError("context-return requires perceptron and policy_change=False")
+        raise ValueError(
+            "separate context heads require explicit context-return, perceptron or linear_fit and replay=none"
+        )
+    if type(context_return) is not bool or (context_return and policy_change is not False):
+        raise ValueError("context-return requires policy_change=False")
     if type(policy_change) is not bool or (policy_change and replay != "none"):
         raise ValueError("policy-change recipe requires explicit boolean and replay=none")
     if type(replay) is not str or replay not in ("none", "recent", "coverage"):
@@ -227,12 +418,16 @@ def run_example(
         "pc",
         "neutral_cpc",
         "gated_cpc",
+        "linear_fit",
     ):
         raise ValueError("method must be an explicit supported learner")
     if method != "perceptron" and replay != "none":
         raise ValueError("native chronological recipe requires replay=none")
     native: Any = None
-    if method != "perceptron":
+    linear: Any = None
+    if method == "linear_fit":
+        from scripts import ticket_workflow_linear as linear
+    elif method != "perceptron":
         from scripts import ticket_workflow_native as native
     started = monotonic()
     report: dict[str, Any] = dict(
@@ -254,6 +449,10 @@ def run_example(
     snapshot_states: dict[int, Any] = {}
     same_state = (lambda a, b: a == b) if native is None else native.same_state
     torch_rng = None
+    python_rng = random.getstate() if linear is not None else None
+    readout_key = "linear_readout_work" if linear is not None else "native_readout_work"
+    if linear is not None:
+        report.update(method=method, linear_readout_work=[])
     if native is not None:
         torch_rng = native.require_torch().get_rng_state().clone()
         report.update(
@@ -283,6 +482,18 @@ def run_example(
             scope="fresh-zero known-template true context return; no final/probe/replay/native or comparative benefit claim",
             no_learning_control="same deterministic tasks and unchanged zero snapshot; reuse update0 outcomes without retraining",
         )
+        if native is not None:
+            report.update(
+                definition="native_context_return_ticket_workflow_v1",
+                scope="fixed native D9 known-context return; no heldout, matched-total-compute or CPC benefit claim",
+                no_learning_control="same deterministic tasks and unchanged seeded initial snapshot; reuse update0 outcomes without retraining",
+            )
+        if linear is not None:
+            report.update(
+                definition="linear_context_return_ticket_workflow_v1",
+                scope="current-packet fixed LS known-context return; no heldout, matched compute, CPC or release claim",
+                no_learning_control="same deterministic tasks and unchanged unfitted uniform initial state; reuse update0 outcomes without fitting",
+            )
     if separate_context_heads:
         report.update(
             definition="separate_context_head_ticket_workflow_v1",
@@ -296,11 +507,37 @@ def run_example(
             ),
             scope="fixed known public-context conventional control; increased capacity96vs60, not matched capacity/compute or CPC/generalization/release benefit",
         )
+        if linear is not None:
+            report.update(
+                definition="separate_context_linear_ticket_workflow_v1",
+                scope="fixed public-context LS heads, increased capacity96vs60; no context discovery, matched compute, CPC/generalization/release claim",
+            )
+    if record_train_fit:
+        report.update(
+            train_fit_readouts=[],
+            train_fit_scope="fixed original TRAIN truth at four checkpoints; descriptive diagnostics, not arrived online/controller feedback or selection",
+        )
+    balanced = native.ClassBalancedUpdates(report) if class_balanced_bp else None
     context_guard = lambda: None
     rehearsal_options = {"context_return": True} if context_return else {}
 
     def before_update(features):
         nonlocal attempted_updates, attempted_rows
+        if (native is not None or linear is not None) and context_return:
+            context_guard()
+        if balanced is not None:
+            assert stream is not None
+            inbox = stream._runtime._inbox
+            ready = inbox._ready(inbox._last_time)
+            if len(ready) != 1:
+                raise ValueError("class-balanced update requires one ready TRAIN packet")
+            key = ready[0]
+            balanced.admit(
+                inbox._experiences[key],
+                inbox._labels[key],
+                inbox._last_time,
+                inbox._learner_version,
+            )
         attempted_updates += 1
         attempted_rows += len(features)
 
@@ -348,6 +585,7 @@ def run_example(
                 if policy_change
                 else prepare_training()
             )
+            fit_source = native.prepare_train_fit(spec) if record_train_fit else None
             if replay != "none":
                 from scripts.ticket_workflow_rehearsal import trajectory_batches
 
@@ -383,14 +621,22 @@ def run_example(
             budget = ToyBudgetSession(
                 ToyExecutionBudget(
                     max_training_updates=12,
-                    max_wall_seconds=30,
+                    max_wall_seconds=240
+                    if catalog_study or reference_validation
+                    else 120
+                    if paired_serving == "retained_joint_probe"
+                    else 30,
                     max_process_rss_bytes=512 * 1024**2,
                 ),
                 monotonic,
             )
             budget.attach_memory(sampler)
             learner = (
-                CountedContextLearner(
+                linear.counted_learner(
+                    before_update, after_update, separate=separate_context_heads, spec=spec
+                )
+                if linear is not None
+                else CountedContextLearner(
                     ContextPerceptronPolicy(
                         len(spec.vocabulary),
                         len(CATALOG),
@@ -401,7 +647,12 @@ def run_example(
                 else CountedLearner(PerceptronPolicy(len(spec.vocabulary), len(CATALOG)))
                 if native is None
                 else native.counted_learner(
-                    method, len(FEATURES), len(CATALOG), before_update, after_update
+                    method,
+                    len(spec.vocabulary),
+                    len(CATALOG),
+                    before_update,
+                    after_update,
+                    **({"balanced": balanced} if balanced is not None else {}),
                 )
             )
             original_seed = learner.snapshot_state()
@@ -430,7 +681,7 @@ def run_example(
                 stream._runtime.actor.snapshot_state() if policy_change or context_return else None
             )
             if context_return:
-                input_pin = deepcopy((spec, batches, report["training_data"]))
+                input_pin = deepcopy((spec, batches, report["training_data"], fit_source))
                 budget_pin = (
                     id(budget.budget),
                     budget.budget,
@@ -443,12 +694,27 @@ def run_example(
                 paid_checkpoints = report["checkpoints"]
                 episode_pins: list[Any] = []
                 checkpoint_pins: list[Any] = []
+                paid_fits = report.get("train_fit_readouts", [])
+                fit_pins: list[Any] = []
+                paid_linear_reads = report.get("linear_readout_work", [])
+                linear_read_pins: list[Any] = []
 
                 def context_guard():
-                    if not _same_value((spec, batches, report["training_data"]), input_pin):
+                    if balanced is not None:
+                        # Already inside the runtime write lease during training.
+                        balanced.require_receipts(stream._runtime._inbox.applied_updates)
+                    if not _same_value(
+                        (spec, batches, report["training_data"], fit_source), input_pin
+                    ):
                         raise ValueError("context TRAIN input changed")
                     if (
                         not _same_value(np.random.get_state(), rng)
+                        or linear is not None
+                        and random.getstate() != python_rng
+                        or native is not None
+                        and not native.require_torch().equal(
+                            torch_rng, native.require_torch().get_rng_state()
+                        )
                         or not same_state(learner.snapshot_state(), original_seed)
                         or not same_state(stream._runtime.actor.snapshot_state(), actor_pin)
                         or budget_pin
@@ -463,8 +729,20 @@ def run_example(
                     ):
                         raise ValueError("context source/RNG/budget origin changed")
                     for key, owner, pins in (
-                        ("episodes", paid_episodes, episode_pins),
-                        ("checkpoints", paid_checkpoints, checkpoint_pins),
+                        (
+                            ("episodes", paid_episodes, episode_pins),
+                            ("checkpoints", paid_checkpoints, checkpoint_pins),
+                        )
+                        + (
+                            (("train_fit_readouts", paid_fits, fit_pins),)
+                            if record_train_fit
+                            else ()
+                        )
+                        + (
+                            (("linear_readout_work", paid_linear_reads, linear_read_pins),)
+                            if linear is not None
+                            else ()
+                        )
                     ):
                         if (
                             report[key] is not owner
@@ -515,7 +793,9 @@ def run_example(
                     )
                     replay_pin = helper.report
                 report["checkpoints"].append(
-                    dict(
+                    linear.checkpoint(point, state)
+                    if linear is not None
+                    else dict(
                         source_updates=point,
                         source_rows=state.training_examples,
                         source_mistakes=state.mistake_updates,
@@ -529,26 +809,41 @@ def run_example(
                         (report["checkpoints"][-1], deepcopy(report["checkpoints"][-1]))
                     )
                 predict = (
-                    ContextPerceptronDecisionPredictor(spec, state)
+                    linear.readout(spec, state)
+                    if linear is not None
+                    else ContextPerceptronDecisionPredictor(spec, state)
                     if separate_context_heads
                     else PerceptronDecisionPredictor(spec, state)
                     if native is None
                     else native.readout(spec, state)
                 )
-                if native is not None:
-                    report["native_readout_work"].append(
+                if native is not None or linear is not None:
+                    report[readout_key].append(
                         dict(source_updates=point, work=asdict(predict.work))
                     )
-                readout_pin = deepcopy(predict) if context_return else None
+                if linear is not None:
+                    linear_read_pins.append(
+                        (report[readout_key][-1], deepcopy(report[readout_key][-1]))
+                    )
+                readout_pin = (
+                    deepcopy(predict)
+                    if context_return and native is None and linear is None
+                    else None
+                )
 
                 def require_source():
                     context_guard()
-                    if private_adaptation and (
+                    if source_handoff and (
                         stream.completed_updates != point or len(stream.applied_updates) != point
                     ):
                         raise ValueError("private source native/receipt progress changed")
-                    if context_return and not _same_value(predict, readout_pin):
-                        raise ValueError("context frozen predictor changed")
+                    if context_return:
+                        if linear is not None:
+                            linear.require_readout(predict, spec, state)
+                        elif native is not None:
+                            native.require_readout(predict, spec, state)
+                        elif not _same_value(predict, readout_pin):
+                            raise ValueError("context frozen predictor changed")
                     if (
                         not same_state(stream.candidate_snapshot(), state)
                         or budget.updates_completed != point
@@ -556,9 +851,9 @@ def run_example(
                         raise ValueError(
                             "frozen task readout changed original TRAIN source or budget"
                         )
-                    if (native is not None or policy_change) and not same_state(
-                        learner.snapshot_state(), original_seed
-                    ):
+                    if (
+                        native is not None or linear is not None or policy_change
+                    ) and not same_state(learner.snapshot_state(), original_seed):
                         raise ValueError("frozen task readout changed original seed learner")
                     if policy_change and not same_state(
                         stream._runtime.actor.snapshot_state(), actor_pin
@@ -585,10 +880,59 @@ def run_example(
                     finally:
                         if native is not None:
                             report["native_readout_work"][-1]["work"] = asdict(predict.work)
+                        if linear is not None:
+                            linear.record_readout_work(
+                                report, paid_linear_reads, linear_read_pins, predict
+                            )
                         if context_return:
                             require_source()
                     require_source()
                     return result
+
+                if record_train_fit:
+                    row = dict(source_updates=point, role="train", complete=False)
+                    report["pending_train_fit"] = row
+
+                    def require_fit_source():
+                        if (
+                            report["pending_train_fit"] is not row
+                            or type(row.get("source_updates")) is not int
+                            or row["source_updates"] != point
+                            or row.get("role") != "train"
+                        ):
+                            raise ValueError("pending TRAIN fit metadata changed")
+                        budget.before_final()
+                        require_source()
+
+                    try:
+                        native.record_train_fit(predict, fit_source, row, require_fit_source)
+                        if (
+                            report["pending_train_fit"] is not row
+                            or type(row.get("source_updates")) is not int
+                            or row["source_updates"] != point
+                            or row.get("role") != "train"
+                            or row.get("complete") is not True
+                            or not native.same_state(
+                                row.get("work"),
+                                dict(
+                                    native_forward_attempts=1,
+                                    rows_attempted=12,
+                                    native_forward_returns=1,
+                                    rows_returned=12,
+                                    summary_returns=1,
+                                    unreturned_work_unknown=False,
+                                ),
+                            )
+                        ):
+                            raise ValueError("returned TRAIN fit evidence changed or incomplete")
+                    except Exception as error:
+                        row.update(complete=False, error=f"{type(error).__name__}: {error}"[:512])
+                        raise
+                    finally:
+                        report["train_fit_readouts"].append(row)
+                        fit_pins.append((row, deepcopy(row)))
+                        report["pending_train_fit"] = None
+                    require_source()
 
                 slots = episode_slots(point)
                 if policy_change:
@@ -645,7 +989,7 @@ def run_example(
                         raise RuntimeError("task episode has uncertain paid work")
             if policy_change or context_return:
                 require_source()
-            if not private_adaptation:
+            if not source_handoff:
                 report["stream"] = stream.finish()
             if not same_state(learner.snapshot_state(), original_seed):
                 raise ValueError("original seed learner changed")
@@ -654,7 +998,9 @@ def run_example(
                     raise ValueError("original actor changed at finish")
                 report.update(source_unchanged=True, actor_unchanged=True)
             report["summary"] = (
-                summarize_context_return(report["episodes"])
+                summarize_context_return(report["episodes"], seeded_initial=True)
+                if context_return and native is not None
+                else summarize_context_return(report["episodes"])
                 if context_return
                 else summarize_policy_changes(report["episodes"])
                 if policy_change
@@ -684,12 +1030,77 @@ def run_example(
                 if private["complete"] is not True:
                     raise ValueError(f"private adaptation incomplete: {private.get('error')}")
                 report["stream"] = stream.finish()
+            if owned_serving:
+                from scripts.context_head_live import run_owned_case
+
+                report["serving_source_training"] = dict(
+                    completed_updates=stream.completed_updates,
+                    applied_update_count=len(stream.applied_updates),
+                )
+                # Keep the source open and guarded, exactly as for private
+                # adaptation, but train/publish only the ordinary TRAIN child.
+                child_key = (
+                    "reference_validation"
+                    if reference_validation
+                    else "catalog_study"
+                    if catalog_study
+                    else "paired_serving"
+                    if paired_serving is not None
+                    else "catalog_serving"
+                )
+                report[child_key] = run_owned_case(
+                    state,
+                    spec,
+                    report,
+                    budget,
+                    control=(
+                        "reference_validation"
+                        if reference_validation
+                        else "catalog_study"
+                        if catalog_study
+                        else paired_serving
+                        if paired_serving is not None
+                        else "catalog"
+                    ),
+                    check_boundary=require_source,
+                    memory=sampler,
+                    **(
+                        dict(probe_rehearsal=probe_rehearsal) if probe_rehearsal is not None else {}
+                    ),
+                    **(dict(linear_fit=True) if linear is not None else {}),
+                    **(dict(adaptive=True) if adaptive_serving else {}),
+                    **(
+                        dict(catalog_action=catalog_action, catalog_context=catalog_context)
+                        if catalog_action is not None
+                        else {}
+                    ),
+                    **(
+                        dict(incident_stream=incident_stream, calibrated=calibrated_serving)
+                        if incident_stream is not None
+                        else {}
+                    ),
+                )
+                report.update(source_unchanged=None, actor_unchanged=None)
+                require_source()
+                report.update(source_unchanged=True, actor_unchanged=True)
+                serving = report[child_key]
+                if serving["complete"] is not True:
+                    raise ValueError(f"paired serving incomplete: {serving.get('error')}")
+                report["stream"] = stream.finish()
             report["complete"] = True
         except Exception as error:
             report["error"] = f"{type(error).__name__}: {error}"[:512]
+            if linear is not None:
+                from src.core.learner_ports import TrainingUpdateFailed
+
+                if isinstance(error, TrainingUpdateFailed):
+                    report["native_failure_definition"] = error.definition
+                    report["native_failure_work"] = error.work
             if helper is not None:
                 report["preserved_replay_receipts"] = previous_receipts
         finally:
+            if balanced is not None:
+                balanced.finish()
             report["training_work"] = dict(
                 attempted_updates=attempted_updates,
                 attempted_rows=attempted_rows,
@@ -796,7 +1207,7 @@ def run_example(
             if separate_context_heads:
                 report["costs"].update(
                     model_coefficient_bytes=768,
-                    context_routing="each homogeneous TRAIN/readout routes by public onehot; typed requests add full-D9 encode before original D7 readout; copies/projection/validation counted separately in meter",
+                    context_routing="each homogeneous TRAIN/readout routes by public onehot; typed requests add full-D9 encode before original D7 readout; route rows/feature values and token visits are API quantities, not all copy/validation or total compute",
                 )
             if native is not None:
                 report["torch_rng_unchanged"] = bool(
@@ -811,7 +1222,25 @@ def run_example(
                     "retained_checkpoint_coefficient_bytes",
                 ):
                     report["costs"].pop(key)
-                report["costs"].update(native.native_costs(report, attempted_rows, method))
+                report["costs"].update(
+                    native.native_costs(
+                        report,
+                        attempted_rows,
+                        method,
+                        feature_dim=len(CONTEXT_FEATURES) if context_return else len(FEATURES),
+                    )
+                )
+            if linear is not None:
+                report["python_rng_unchanged"] = random.getstate() == python_rng
+                if not report["python_rng_unchanged"]:
+                    report.update(complete=False, error="caller Python RNG changed")
+                for key in (
+                    "attempted_training_affine_terms",
+                    "validated_readout_affine_terms",
+                    "retained_checkpoint_coefficient_bytes",
+                ):
+                    report["costs"].pop(key)
+                report["costs"].update(linear.costs(report))
     return report
 
 
@@ -823,25 +1252,244 @@ def main(argv=None):
     modes.add_argument("--policy-change", action="store_true")
     modes.add_argument("--context-return", action="store_true")
     parser.add_argument("--separate-context-heads", action="store_true")
-    parser.add_argument("--private-adaptation", action="store_true")
+    parser.add_argument("--record-train-fit", action="store_true")
+    parser.add_argument("--class-balanced-bp", action="store_true")
+    adaptation = parser.add_mutually_exclusive_group()
+    adaptation.add_argument("--private-adaptation", action="store_true")
+    adaptation.add_argument(
+        "--paired-serving",
+        choices=(
+            "current",
+            "joint",
+            "same_context_joint",
+            "retained_joint",
+            "retained_joint_publish",
+            "retained_joint_probe",
+        ),
+    )
+    adaptation.add_argument("--catalog-action", choices=("wait", "wake1", "replay6-wake1"))
+    adaptation.add_argument("--catalog-study", action="store_true")
+    adaptation.add_argument("--reference-validation", action="store_true")
+    parser.add_argument("--reference-validation-protocol", action="store_true")
+    parser.add_argument("--catalog-context", choices=("clean", "mistakes"))
+    parser.add_argument("--probe-rehearsal", choices=("joint", "current_only"))
+    parser.add_argument("--adaptive-serving", action="store_true")
+    parser.add_argument("--incident-stream", choices=("stationary", "shift"))
+    parser.add_argument("--calibrated-serving", action="store_true")
     parser.add_argument(
         "--method",
-        choices=("perceptron", "bp", "pc", "neutral_cpc", "gated_cpc"),
+        choices=("perceptron", "bp", "pc", "neutral_cpc", "gated_cpc", "linear_fit"),
         default="perceptron",
     )
     args = parser.parse_args(argv)
-    if args.policy_change and args.replay != "none":
-        parser.error("--policy-change requires --replay none")
-    if args.context_return and args.method != "perceptron":
-        parser.error("--context-return requires --method perceptron")
-    if args.separate_context_heads and (
-        not args.context_return or args.method != "perceptron" or args.replay != "none"
+    if args.probe_rehearsal is not None and (
+        args.paired_serving != "retained_joint_probe"
+        or args.method != "linear_fit"
+        or not args.context_return
+        or not args.separate_context_heads
     ):
         parser.error(
-            "--separate-context-heads requires --context-return --method perceptron --replay none"
+            "--probe-rehearsal requires ordinary owned LS --paired-serving retained_joint_probe"
+        )
+    if args.reference_validation_protocol and not args.reference_validation:
+        parser.error("--reference-validation-protocol requires --reference-validation")
+    if args.reference_validation and not (
+        args.method == "linear_fit"
+        and args.context_return
+        and args.separate_context_heads
+        and not args.adaptive_serving
+        and args.incident_stream is None
+        and not args.calibrated_serving
+        and args.catalog_context is None
+        and args.replay == "none"
+        and not args.policy_change
+        and not args.record_train_fit
+        and not args.class_balanced_bp
+    ):
+        parser.error("--reference-validation requires ordinary owned LS context heads")
+    if args.reference_validation_protocol:
+        from scripts.context_stream_comparison import protocol_snapshot
+        from scripts.context_catalog_learning import write_catalog_report
+
+        if args.output.exists():
+            raise FileExistsError("reference validation protocol output must be new")
+        return (
+            0
+            if write_catalog_report(
+                args.output, protocol_snapshot(withheld=True, owned_linear=True), max_bytes=1024**2
+            )
+            else 1
+        )
+    if args.catalog_study and not (
+        args.method == "linear_fit"
+        and args.context_return
+        and args.separate_context_heads
+        and not args.private_adaptation
+        and args.paired_serving is None
+        and args.catalog_action is None
+        and args.catalog_context is None
+        and not args.adaptive_serving
+        and args.incident_stream is None
+        and not args.calibrated_serving
+    ):
+        parser.error("--catalog-study requires its separate ordinary owned LS context heads")
+    if (args.catalog_action is not None or args.catalog_context is not None) and not (
+        args.catalog_action is not None
+        and args.catalog_context is not None
+        and args.method == "linear_fit"
+        and args.context_return
+        and args.separate_context_heads
+        and not args.private_adaptation
+        and args.paired_serving is None
+        and not args.adaptive_serving
+        and args.incident_stream is None
+        and not args.calibrated_serving
+    ):
+        parser.error("--catalog-action/--catalog-context require ordinary owned LS context heads")
+    if (
+        args.calibrated_serving
+        and args.incident_stream is None
+        or args.incident_stream is not None
+        and (not args.adaptive_serving or args.paired_serving != "joint")
+    ):
+        parser.error(
+            "--incident-stream requires --adaptive-serving --paired-serving joint; calibration requires a stream"
+        )
+    if args.adaptive_serving and not (
+        args.method == "linear_fit"
+        and args.context_return
+        and args.separate_context_heads
+        and args.paired_serving in ("current", "joint", "same_context_joint")
+        and not args.private_adaptation
+        and args.replay == "none"
+    ):
+        parser.error("--adaptive-serving requires ordinary owned LS --paired-serving mode")
+    if args.method == "linear_fit" and not (
+        args.context_return
+        and args.replay == "none"
+        and not args.private_adaptation
+        and not args.record_train_fit
+        and not args.class_balanced_bp
+    ):
+        parser.error(
+            "linear_fit requires ordinary --context-return --replay none without TRAIN diagnostics"
+        )
+    if args.class_balanced_bp and not (
+        args.context_return
+        and args.method == "bp"
+        and args.replay == "none"
+        and not args.separate_context_heads
+        and not args.private_adaptation
+        and args.paired_serving is None
+    ):
+        parser.error(
+            "--class-balanced-bp requires ordinary --context-return --method bp --replay none"
+        )
+    if args.record_train_fit and not (args.context_return and args.method != "perceptron"):
+        parser.error("--record-train-fit requires --context-return and a native method")
+    if args.policy_change and args.replay != "none":
+        parser.error("--policy-change requires --replay none")
+    if args.method != "perceptron" and args.replay != "none":
+        parser.error("native workflows require --replay none")
+    if args.separate_context_heads and (
+        not args.context_return
+        or args.method not in ("perceptron", "linear_fit")
+        or args.replay != "none"
+    ):
+        parser.error(
+            "--separate-context-heads requires --context-return --method perceptron or linear_fit --replay none"
         )
     if args.private_adaptation and not (args.separate_context_heads and args.context_return):
         parser.error("--private-adaptation requires --context-return --separate-context-heads")
+    if args.paired_serving is not None and not (
+        args.separate_context_heads and args.context_return
+    ):
+        parser.error("--paired-serving requires --context-return --separate-context-heads")
+    if args.paired_serving == "same_context_joint" and args.method != "linear_fit":
+        parser.error("--paired-serving same_context_joint requires --method linear_fit")
+    if (
+        args.paired_serving is not None
+        or args.catalog_action is not None
+        or args.catalog_study
+        or args.reference_validation
+    ):
+        if args.output.exists():
+            raise FileExistsError("paired serving workflow output must be new")
+        report = run_example(
+            context_return=True,
+            separate_context_heads=True,
+            **(
+                dict(reference_validation=True)
+                if args.reference_validation
+                else dict(catalog_study=True)
+                if args.catalog_study
+                else (
+                    dict(paired_serving=args.paired_serving)
+                    if args.paired_serving is not None
+                    else dict(
+                        catalog_action=args.catalog_action, catalog_context=args.catalog_context
+                    )
+                )
+            ),
+            **(dict(method="linear_fit") if args.method == "linear_fit" else {}),
+            **(
+                dict(probe_rehearsal=args.probe_rehearsal)
+                if args.probe_rehearsal is not None
+                else {}
+            ),
+            **(dict(adaptive_serving=True) if args.adaptive_serving else {}),
+            **(
+                dict(
+                    incident_stream=args.incident_stream, calibrated_serving=args.calibrated_serving
+                )
+                if args.incident_stream is not None
+                else {}
+            ),
+        )
+        from scripts.context_catalog_learning import write_catalog_report
+
+        source_work = report.get("training_work", {})
+        source_work = source_work if type(source_work) is dict else {}
+        serving = report.get(
+            "reference_validation",
+            report.get(
+                "paired_serving", report.get("catalog_serving", report.get("catalog_study"))
+            ),
+        )
+        serving_work = serving.get("training_work") if type(serving) is dict else {}
+        serving_work = serving_work if type(serving_work) is dict else {}
+        totals: dict[str, Any] = {}
+        private_work = (
+            serving.get("isolated_transfer_probe", {}).get("private_work", {})
+            if type(serving) is dict and args.paired_serving == "retained_joint_probe"
+            else None
+        )
+        for field, key in (
+            ("train_passes", "attempted_updates"),
+            ("training_rows", "attempted_rows"),
+        ):
+            values = (
+                source_work.get(key),
+                serving_work.get(key) if serving is not None else 0,
+                private_work.get("attempted_training_examples" if key == "attempted_rows" else key)
+                if private_work is not None
+                else 0,
+            )
+            totals[field] = sum(values) if all(type(v) is int and v >= 0 for v in values) else None
+        return (
+            0
+            if write_catalog_report(
+                args.output,
+                report,
+                max_bytes=(24 if args.catalog_study or args.reference_validation else 4) * 1024**2,
+                observed_work=dict(
+                    seconds=report.get("elapsed_seconds"),
+                    peak_rss_bytes=report.get("memory", {}).get("peak_bytes"),
+                    counts=totals,
+                ),
+            )
+            else 1
+        )
     if args.private_adaptation:
         if args.output.exists():
             raise FileExistsError("private workflow output must be new")
@@ -867,10 +1515,25 @@ def main(argv=None):
     with args.output.open("xb") as target:
         target.write(b"{}\n")
     if args.separate_context_heads:
-        report = run_example(context_return=True, separate_context_heads=True)
+        report = run_example(
+            context_return=True,
+            separate_context_heads=True,
+            **({"method": "linear_fit"} if args.method == "linear_fit" else {}),
+        )
     elif args.context_return:
         report = (
-            run_example(context_return=True)
+            run_example(
+                context_return=True,
+                method="bp",
+                class_balanced_bp=True,
+                **({"record_train_fit": True} if args.record_train_fit else {}),
+            )
+            if args.class_balanced_bp
+            else run_example(context_return=True, method=args.method, record_train_fit=True)
+            if args.record_train_fit
+            else run_example(context_return=True, method=args.method)
+            if args.method != "perceptron"
+            else run_example(context_return=True)
             if args.replay == "none"
             else run_example(context_return=True, replay=args.replay)
         )

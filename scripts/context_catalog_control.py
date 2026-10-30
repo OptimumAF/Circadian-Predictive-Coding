@@ -18,6 +18,7 @@ from src.app.toy_execution_budget import ToyBudgetSession, ToyExecutionBudget
 from src.core.adaptation_action import AdaptationAction, AdaptationEnvelope
 from src.core.catalog_contextual_controller import ContextualArmCatalog, FittedCatalogController
 from src.core.contextual_controller import training_context
+from src.core.context_linear_state import ContextLinearFitSnapshot
 from src.core.decision_features import DecisionFeatureSpec
 from src.core.experience import require_identifier, require_tick
 from src.core.ticket_workflow import CATALOG
@@ -39,7 +40,12 @@ def context_catalog():
 
 
 class ContextCatalogControl(CatalogTicketControl):
-    def __init__(self, trial=None, policy=None, *, base_snapshot=None, resume_wake=False):
+    def __init__(
+        self, trial=None, policy=None, *, base_snapshot=None, resume_wake=False, linear_fit=False
+    ):
+        if type(linear_fit) is not bool:
+            raise ValueError("context catalog LS binding requires an exact Boolean opt-in")
+        self._linear_fit = self._linear_fit_pin = linear_fit
         if type(resume_wake) is not bool:
             raise ValueError("context wake continuation requires an exact Boolean opt-in")
         self.resume_wake = self._resume_pin = resume_wake
@@ -58,11 +64,13 @@ class ContextCatalogControl(CatalogTicketControl):
         else:
             policy.__post_init__()
         if (
-            record.learner_version != "qualified-12"
+            record.learner_version != ("context-ls-12" if linear_fit else "qualified-12")
             or type(record.catalog) is not ContextualArmCatalog
             or record.catalog != context_catalog()
         ):
-            raise ValueError("context catalog requires original qualified-12 source and envelope")
+            raise ValueError(
+                "context catalog requires its explicit family source version and envelope"
+            )
         record.catalog.__post_init__()
         require_identifier(record.state_digest, "context source digest")
         if trial is not None:
@@ -89,6 +97,13 @@ class ContextCatalogControl(CatalogTicketControl):
             source_binding_verified=False,
             promotions=0,
         )
+        if linear_fit:
+            self.report["learner_binding"] = dict(
+                family="context_linear_fit",
+                source_version="context-ls-12",
+                history="12updates72rows, heads8/48+4/24; no Perceptron mistake counter",
+                scope="typed metadata/digest binding; training provenance belongs to source owner",
+            )
 
     @property
     def max_replays(self):
@@ -121,6 +136,8 @@ class ContextCatalogControl(CatalogTicketControl):
         return self._packets
 
     def require_pin(self):
+        if type(self._linear_fit) is not bool or self._linear_fit is not self._linear_fit_pin:
+            raise ValueError("original context catalog learner family changed")
         if type(self.resume_wake) is not bool or self.resume_wake is not self._resume_pin:
             raise ValueError("original context wake continuation option changed")
         if self._continuation is not self._continuation_owner:
@@ -140,19 +157,40 @@ class ContextCatalogControl(CatalogTicketControl):
 
     def require_source(self, initial, base_snapshot, *, digest, same_state):
         self.require_pin()
+        if not self._linear_fit and type(initial) is ContextLinearFitSnapshot:
+            raise ValueError("context catalog LS source requires its explicit family opt-in")
+        linear_pin = None
+        if self._linear_fit:
+            from src.core.context_linear_state import (
+                ContextLinearFitPolicy,
+                copy_context_linear_state,
+            )
+
+            linear_pin = copy_context_linear_state(initial)
+            if linear_pin.policy != ContextLinearFitPolicy(
+                9, 6, (CONTEXT_FEATURES.index("policy_v1"), CONTEXT_FEATURES.index("policy_v2"))
+            ) or tuple((h.completed_updates, h.training_examples) for h in linear_pin.heads) != (
+                (8, 48),
+                (4, 24),
+            ):
+                raise ValueError("context catalog requires complete original LS head history")
         if (
             type(initial.completed_updates) is not int
             or initial.completed_updates != 12
             or type(initial.training_examples) is not int
             or initial.training_examples != 72
-            or type(initial.mistake_updates) is not int
-            or initial.mistake_updates != 16
+            or not self._linear_fit
+            and (type(initial.mistake_updates) is not int or initial.mistake_updates != 16)
             or digest(initial) != self.record.state_digest
             or not same_state(base_snapshot, self._base)
             or self.trial
             and not same_state(base_snapshot, initial)
         ):
             raise ValueError("context catalog requires complete original qualified source/base")
+        if self._linear_fit:
+            self.require_pin()
+            if not _same_value(initial, linear_pin):
+                raise ValueError("original LS source changed during digest binding")
         self.report["source_binding_verified"] = True
 
     def prepare(self, wake, sampler):
@@ -214,6 +252,21 @@ class ContextCatalogControl(CatalogTicketControl):
             or gate.snapshot().limits.max_admitted_updates != self.admissions
         ):
             raise ValueError("context catalog requires original budgets and shared admissions")
+        if self._linear_fit:
+            from src.adapters.context_linear_serving import snapshot_digest
+
+            # Why: admission must bind the actual executor owners, not just a
+            # previously checked snapshot with the same aggregate counters.
+            self.require_source(
+                source.snapshot_state(), self._base, digest=snapshot_digest, same_state=_same_value
+            )
+            if (
+                runtime._base_actor_version != self.record.learner_version
+                or snapshot_digest(runtime.candidate_snapshot().state) != self.record.state_digest
+            ):
+                raise ValueError(
+                    "context catalog LS runtime/source differs from bound initial state"
+                )
         self.report["preparation"]["attempts"] += 1
         self.replay = compose_context_replay(
             runtime,
@@ -221,6 +274,7 @@ class ContextCatalogControl(CatalogTicketControl):
             self.replay_budget,
             DecisionFeatureSpec(CONTEXT_FEATURES, CATALOG),
             self._old,
+            **(dict(linear_fit=True) if self._linear_fit else {}),
         )
         self.report["preparation"].update(
             returned=True, retained_episodes=2, retained_rows=6, retained_numeric_bytes=2608

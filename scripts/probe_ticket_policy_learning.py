@@ -106,7 +106,9 @@ def _require_source_records(source):
             raise ValueError("original qualified native policy/clocks required")
 
 
-def _require_arm(row, *, separate_context_heads=False, head_tasks=None):
+def _require_arm(
+    row, *, separate_context_heads=False, head_tasks=None, linear_fit=False, joint_rehearsal=None
+):
     """Do not buy another arm after incomplete or replaced preceding evidence."""
     if len(row["sessions"]) != 2 or any(
         s["limits"] != asdict(HEAD_LIMITS if separate_context_heads else LIMITS)
@@ -140,7 +142,7 @@ def _require_arm(row, *, separate_context_heads=False, head_tasks=None):
     tasks = _tasks(separate_context_heads, head_tasks)
     phases = (
         ("before_probe", "after_probe", "after_return")
-        if head_tasks is not None
+        if head_tasks is not None or linear_fit
         else ("after_probe", "after_return")
     )
     expected = [(phase, version, concept) for phase in phases for version, concept in tasks]
@@ -150,7 +152,41 @@ def _require_arm(row, *, separate_context_heads=False, head_tasks=None):
         e["role"] != "probe_test" or e["episode"]["complete"] is not True for e in row["episodes"]
     ):
         raise ValueError("preceding endpoint task work unknown")
-    if head_tasks is not None:
+    if linear_fit:
+        if joint_rehearsal is not None:
+            from scripts.context_head_rehearsal import require_joint_probe
+
+            require_joint_probe(row, joint_rehearsal)
+        if any(
+            type(row[k]) is not int or row[k] < 0
+            for k in ("prior_native_updates", "prior_native_rows")
+        ):
+            raise ValueError("linear probe requires actual nonnegative native donor counters")
+        if head_tasks is not None and not _same_value(row.get("selected_head_tasks"), head_tasks):
+            raise ValueError("linear transfer task selection differs from admitted tasks")
+        for reading, phase, delta, rows in zip(
+            row["readout_work"],
+            phases,
+            (0, 32, 48) if joint_rehearsal is not None else (0, 16, 32),
+            (0, 192, 288) if joint_rehearsal is not None else (0, 48, 144),
+            strict=True,
+        ):
+            work = reading["work"]
+            if (
+                any(
+                    type(reading[k]) is not int or reading[k] < 0
+                    for k in ("native_updates", "native_rows")
+                )
+                or reading["phase"] != phase
+                or reading["native_updates"] != row["prior_native_updates"] + delta
+                or reading["native_rows"] != row["prior_native_rows"] + rows
+                or not 6 <= work["decision_attempts"] == work["decision_returns"] <= 36
+                or work["routing_attempts"] != work["routing_returns"]
+                or work["affine_attempts"] != work["affine_returns"]
+                or work["unfitted_attempts"] != work["unfitted_returns"]
+            ):
+                raise ValueError("linear probe endpoint paid history differs")
+    if head_tasks is not None and not linear_fit:
         origin = {"warm": (12, 72), "fresh": (0, 0)}.get(row["mode"])
         if origin is None or any(
             type(row[k]) is not int or row[k] != n
@@ -193,8 +229,13 @@ def _observe_tasks(
     separate_context_heads=False,
     head_tasks=None,
     matched_head_exposure=False,
+    joint_head_exposure=False,
+    linear_pins=None,
+    linear_episode_pins=None,
 ):
     tasks = _tasks(separate_context_heads, head_tasks)
+    if type(joint_head_exposure) is not bool:
+        raise ValueError("joint exposure requires an exact bool")
     if (
         type(matched_head_exposure) is not bool
         or matched_head_exposure
@@ -203,7 +244,7 @@ def _observe_tasks(
         raise ValueError("matched exposure requires the fixed context transfer tasks")
     if phase not in (
         ("before_probe", "after_probe", "after_return")
-        if head_tasks is not None
+        if head_tasks is not None or linear_pins is not None
         else ("after_probe", "after_return")
     ):
         raise ValueError("unknown fixed probe observation phase")
@@ -218,6 +259,14 @@ def _observe_tasks(
         if separate_context_heads
         else 3 * expected
     )
+    if joint_head_exposure:
+        if not separate_context_heads or head_tasks != TRANSFER_HEAD_TASKS or matched_head_exposure:
+            raise ValueError("joint exposure requires the fixed isolated transfer tasks")
+        expected, rows = {
+            "before_probe": (0, 0),
+            "after_probe": (32, 192),
+            "after_return": (48, 288),
+        }[phase]
     if matched_head_exposure:
         # Why: both explicit controls pay F48/144 and return16/96; replay's
         # logical F16 clock must never stand in for its actual native F48 clock.
@@ -242,6 +291,13 @@ def _observe_tasks(
         reading.update(
             state=asdict(state), work=dict(attempted_calls=0, returned_calls=0, validated_calls=0)
         )
+    linear: Any = None
+    if linear_pins is not None:
+        from scripts import ticket_workflow_linear as linear
+
+        linear_pins.append((reading, deepcopy(reading)))
+        readout_owner = row["readout_work"]
+        work_report = dict(linear_readout_work=readout_owner)
 
     def unchanged():
         guard()
@@ -255,15 +311,19 @@ def _observe_tasks(
     def construct():
         unchanged()
         holder.append(
-            ContextPerceptronDecisionPredictor(spec, state)
+            linear.readout(spec, state)
+            if linear is not None
+            else ContextPerceptronDecisionPredictor(spec, state)
             if separate_context_heads
             else native.readout(spec, state)
         )
+        if linear is not None:
+            linear.record_readout_work(work_report, readout_owner, linear_pins, holder[0])
         unchanged()
 
     boundary(construct, after_clocks=unchanged)
     reader: Any = holder[0]
-    reader_pin = deepcopy(reader) if separate_context_heads else None
+    reader_pin = deepcopy(reader) if separate_context_heads and linear is None else None
 
     def predict(request):
         unchanged()
@@ -271,6 +331,16 @@ def _observe_tasks(
 
         def read():
             nonlocal result
+            if linear is not None:
+                linear.require_readout(reader, spec, state)
+                try:
+                    result = reader(request)
+                finally:
+                    linear.record_readout_work(work_report, readout_owner, linear_pins, reader)
+                    guard()
+                linear.require_readout(reader, spec, state)
+                unchanged()
+                return
             if separate_context_heads:
                 if not _same_value(reader, reader_pin):
                     raise ValueError("frozen contextual probe readout changed")
@@ -315,13 +385,18 @@ def _observe_tasks(
                 episode=episode,
             )
         )
+        if linear_episode_pins is not None:
+            episode_row = row["episodes"][-1]
+            linear_episode_pins.append((episode_row, deepcopy(episode_row)))
         boundary()
         unchanged()
         if not episode["complete"]:
             raise ValueError("endpoint episode has unknown paid work")
 
 
-def _observe_initial_tasks(seed, sessions, row, spec, guard, head_tasks):
+def _observe_initial_tasks(
+    seed, sessions, row, spec, guard, head_tasks, *, linear_pins=None, linear_episode_pins=None
+):
     """Read the unchanged seed using original zero-work budget witnesses."""
     from src.app.probe_endpoint_observer import _BudgetWitness
     from src.app.probe_return_phase import budget_binding
@@ -355,6 +430,10 @@ def _observe_initial_tasks(seed, sessions, row, spec, guard, head_tasks):
         guard,
         separate_context_heads=True,
         head_tasks=head_tasks,
+        **(dict(linear_pins=linear_pins) if linear_pins is not None else {}),
+        **(
+            dict(linear_episode_pins=linear_episode_pins) if linear_episode_pins is not None else {}
+        ),
     )
 
 
@@ -371,11 +450,51 @@ def run_arm(
     separate_context_heads=False,
     input_diagnostics=False,
     head_tasks=None,
+    linear_fit=False,
+    joint_rehearsal=None,
+    training_bank=(),
 ):
     """One original probe owner and two finite sessions, never budget renewal."""
     if type(input_diagnostics) is not bool:
         raise ValueError("input_diagnostics must be an exact bool")
+    if (
+        joint_rehearsal is not None
+        and (
+            type(joint_rehearsal) is not str
+            or joint_rehearsal not in ("joint", "current_only")
+            or linear_fit is not True
+            or head_tasks != TRANSFER_HEAD_TASKS
+        )
+        or joint_rehearsal is None
+        and training_bank
+    ):
+        raise ValueError("joint rehearsal requires explicit LS transfer and original TRAIN bank")
+    if (
+        type(linear_fit) is not bool
+        or linear_fit
+        and (separate_context_heads is not True or input_diagnostics)
+    ):
+        raise ValueError("linear_fit requires ordinary separate heads without extra diagnostics")
     _tasks(separate_context_heads, head_tasks)
+    if (
+        linear_fit
+        and row is not None
+        and "selected_head_tasks" in row
+        and not _same_value(row["selected_head_tasks"], head_tasks)
+    ):
+        raise ValueError("linear probe row task selection differs from invocation")
+    if linear_fit:
+        from scripts.ticket_linear_probe import bind_source
+
+        guard = bind_source(
+            seed,
+            state,
+            cohorts,
+            spec,
+            guard,
+            **(dict(head_tasks=head_tasks) if head_tasks is not None else {}),
+            **(dict(episode_cohorts=True) if joint_rehearsal is not None else {}),
+        )
     training, evaluation, monitors, returning = cohorts
     sessions = [
         ToyBudgetSession(HEAD_LIMITS if separate_context_heads else LIMITS, monotonic)
@@ -393,10 +512,46 @@ def run_arm(
         episodes=[],
         readout_work=[],
     )
+    if linear_fit and head_tasks is not None:
+        row["selected_head_tasks"] = head_tasks
+    linear_pins: list[Any] | None = [] if linear_fit else None
+    linear_episode_pins = None
+    if linear_fit:
+        from scripts.ticket_linear_probe import bind_readouts
+
+        guard, linear_episode_pins = bind_readouts(row, linear_pins, guard)
     probe_options: dict[str, Any] = {"input_diagnostics": True} if input_diagnostics else {}
+    replay = None
+    if joint_rehearsal is not None:
+        from scripts.context_head_rehearsal import _limits, joint_probe_factory
+
+        replay = ToyBudgetSession(_limits(replay=144), monotonic)
+        if memory is not None:
+            replay.attach_memory(memory)
+        row["joint_rehearsal_control"] = joint_rehearsal
+        previous_guard = guard
+
+        def joint_guard():
+            previous_guard()
+            if row.get("joint_rehearsal_control") != joint_rehearsal:
+                raise ValueError("joint probe paid control changed")
+
+        guard, factory = joint_probe_factory(
+            cohorts, training_bank, joint_rehearsal, replay, joint_guard
+        )
+        probe_options["rehearsal_factory"] = factory
     try:
-        if head_tasks is not None:
-            _observe_initial_tasks(seed, sessions, row, spec, guard, head_tasks)
+        if head_tasks is not None or linear_fit:
+            _observe_initial_tasks(
+                seed,
+                sessions,
+                row,
+                spec,
+                guard,
+                head_tasks,
+                **(dict(linear_pins=linear_pins) if linear_fit else {}),
+                **(dict(linear_episode_pins=linear_episode_pins) if linear_fit else {}),
+            )
         row["probe"] = run_fresh_task_probe(
             seed,
             state,
@@ -419,9 +574,20 @@ def run_arm(
                 guard,
                 **({"separate_context_heads": True} if separate_context_heads else {}),
                 **(dict(head_tasks=head_tasks) if head_tasks is not None else {}),
+                **(dict(joint_head_exposure=True) if joint_rehearsal is not None else {}),
+                **(dict(linear_pins=linear_pins) if linear_fit else {}),
+                **(dict(linear_episode_pins=linear_episode_pins) if linear_fit else {}),
             ),
         )
     finally:
+        if replay is not None:
+            row["joint_replay_session"] = dict(
+                limits=asdict(replay.budget),
+                updates=replay.updates_completed,
+                replay=replay.replay_examples_completed,
+                started_at=replay.started_at,
+                last_clock=replay.last_clock,
+            )
         row["sessions"] = [
             dict(
                 limits=asdict(s.budget),
@@ -436,6 +602,8 @@ def run_arm(
         row,
         **({"separate_context_heads": True} if separate_context_heads else {}),
         **(dict(head_tasks=head_tasks) if head_tasks is not None else {}),
+        **(dict(linear_fit=True) if linear_fit else {}),
+        **(dict(joint_rehearsal=joint_rehearsal) if joint_rehearsal is not None else {}),
     )
     return row
 

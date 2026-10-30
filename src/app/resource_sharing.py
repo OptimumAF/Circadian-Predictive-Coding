@@ -5,17 +5,17 @@ native call, creates background work, measures p50/p95 or claims a hard RSS cap.
 All supported shared predict/serve/train calls must pass through the wrapper.
 """
 
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from copy import deepcopy
 from dataclasses import replace
 from threading import Lock
-from typing import Callable, Generic, Iterator, TypeVar
+from typing import Any, Callable, Generic, Iterator, TypeVar, cast
 
 from src.app.actor_shadow import ActorShadowRuntime
 from src.app.categorical_replay_action import CategoricalReplayAction
 from src.app.serving_promotion import PromotableActor
 from src.app.payload_ownership import PayloadOwnershipBusy
-from src.core.actor_ports import VersionedPrediction, ConsolidatedState
+from src.core.actor_ports import VersionedPrediction, ConsolidatedState, CandidateState
 from src.core.learner_ports import validate_learning_rate_multiplier, validate_gate_setting
 from src.core.adaptation_action import (
     AdaptationEnvelope,
@@ -24,6 +24,7 @@ from src.core.adaptation_action import (
     AdaptationSnapshot,
 )
 from src.core.native_update_origin import NativeUpdateObserver
+from src.core.coupled_energy import Array
 from src.core.resource_sharing import (
     DeferReason,
     SharingLimits,
@@ -127,9 +128,13 @@ class ServingPriorityGate:
         self._deferrals[reason] = self._deferrals.get(reason, 0) + 1
         return TrainingAdmission(False, reason)
 
-    def _admit(self) -> TrainingAdmission:
+    def _admit(self, attempts: int = 1) -> TrainingAdmission:
+        if type(attempts) is not int or attempts not in (1, 2):
+            raise ValueError("training reservation requires one or two exact attempts")
         with self._gate:
             reason = self._reason()
+            if reason is None and self._admitted + attempts > self._limits.max_admitted_updates:
+                reason = "work_quota"
             if reason is not None:
                 return self._deny(reason)
         # Why: never hold the gate while an external resource probe runs. A
@@ -139,17 +144,19 @@ class ServingPriorityGate:
             raise ValueError("resource probe must return an exact boolean")
         with self._gate:
             reason = self._reason()
+            if reason is None and self._admitted + attempts > self._limits.max_admitted_updates:
+                reason = "work_quota"
             if reason is None and not available:
                 reason = "resource_unavailable"
             if reason is not None:
                 return self._deny(reason)
             self._training = True
-            self._admitted += 1  # charge attempts before callbacks/native work
+            self._admitted += attempts  # reservations stay paid even when a fit skips/fails
             return TrainingAdmission(True, None)
 
     @contextmanager
-    def training(self) -> Iterator[TrainingAdmission]:
-        decision = self._admit()
+    def training(self, *, attempts: int = 1) -> Iterator[TrainingAdmission]:
+        decision = self._admit(attempts)
         try:
             yield decision
         finally:
@@ -166,6 +173,8 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
         *,
         action_envelope: AdaptationEnvelope | None = None,
         replay_action: CategoricalReplayAction | None = None,
+        wake_rehearsal=None,
+        rehearsal_packets=(),
     ) -> None:
         if not isinstance(runtime, ActorShadowRuntime) or type(gate) is not ServingPriorityGate:
             raise ValueError("resource sharing requires an actor/shadow runtime and priority gate")
@@ -200,6 +209,50 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
             replay_action.bind(runtime, gate, token)
             self._action_replay = self._action_replay_pin = replay_action
             self._action_replay_token = token
+        if wake_rehearsal is not None or rehearsal_packets:
+            from src.app.stream_rehearsal import StreamRehearsal
+            from src.app.coupled_attribution import _validated_batches
+
+            if (
+                type(wake_rehearsal) is not StreamRehearsal
+                or not wake_rehearsal.packet_episode_replay
+                or replay_action is not None
+                or action_envelope is None
+                or gate.snapshot().limits.max_updates_per_poll != 1
+                or any(
+                    a.wake_updates not in (0, 1) or a.needs_extended_executor
+                    for a in action_envelope.actions
+                )
+            ):
+                raise ValueError(
+                    "wake rehearsal requires separate ordinary single-wake packet actions"
+                )
+            packets, _ = _validated_batches(rehearsal_packets, (), training_only=True)
+            helper = wake_rehearsal
+            maximum = helper._replay_budget.budget.max_replay_examples
+            if (
+                not all(b.packet_episodes for b in packets)
+                or not helper._bound
+                or helper._budget is not runtime._budget
+                or helper._observed != 0
+                or helper._total_updates != len(packets)
+                or helper._runtime is not None
+                or runtime._consolidation_limit != len(helper._events)
+                or maximum is None
+                or maximum > action_envelope.max_replay_examples
+            ):
+                raise ValueError("wake rehearsal requires its original fresh packet/budget binding")
+            self._wake_rehearsal = self._wake_rehearsal_owner = helper
+            self._rehearsal_packets = packets
+            self._rehearsal_packet_pin = deepcopy(packets)
+            self._rehearsal_admitted = gate.snapshot().admitted_updates
+            self._rehearsal_candidate = runtime.candidate_snapshot()
+            self._rehearsal_candidate_owner = runtime._candidate
+            self._rehearsal_inbox = runtime._inbox
+            self._rehearsal_wake_owners = runtime.applied_updates
+            self._rehearsal_joint_owners = runtime.applied_consolidations
+            self._rehearsal_paid_wakes = deepcopy(runtime.applied_updates)
+            self._rehearsal_paid_joint = deepcopy(runtime.applied_consolidations)
 
     def predict(self, features: Features) -> VersionedPrediction[Prediction]:
         with self._sharing.serving():
@@ -268,6 +321,34 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
             raise ValueError("adaptation requires original envelope, runtime, gate and budget")
         if self._action_envelope is None:
             raise ValueError("no adaptation action envelope configured")
+        helper = getattr(self, "_wake_rehearsal", None)
+        if helper is not getattr(self, "_wake_rehearsal_owner", None):
+            raise ValueError("original wake rehearsal owner changed")
+        if helper is not None:
+            from src.app.coupled_attribution import _same_value
+
+            if not _same_value(self._rehearsal_packets, self._rehearsal_packet_pin):
+                raise ValueError("original paid rehearsal packets changed")
+            helper._check_schema()
+            if gate.snapshot().admitted_updates != self._rehearsal_admitted:
+                raise ValueError("unobserved rehearsal sharing reservation changed")
+            if helper._stopped or helper._observed != runtime._budget.updates_completed:
+                raise ValueError("wake rehearsal stopped or observed wake provenance changed")
+            if (
+                runtime._candidate is not self._rehearsal_candidate_owner
+                or runtime._inbox is not self._rehearsal_inbox
+                or any(
+                    a is not b for a, b in zip(runtime.applied_updates, self._rehearsal_wake_owners)
+                )
+                or any(
+                    a is not b
+                    for a, b in zip(runtime.applied_consolidations, self._rehearsal_joint_owners)
+                )
+                or runtime.candidate_snapshot() != self._rehearsal_candidate
+                or runtime.applied_updates != self._rehearsal_paid_wakes
+                or runtime.applied_consolidations != self._rehearsal_paid_joint
+            ):
+                raise ValueError("preceding paid rehearsal candidate or receipts changed")
         if getattr(self, "_action_replay", None) is not getattr(self, "_action_replay_pin", None):
             raise ValueError("original categorical replay executor replaced")
         self._action_envelope.__post_init__()
@@ -391,6 +472,8 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
             if replay is not None:
                 replay.observe_wake(stage, read_origin)
 
+        if getattr(self, "_wake_rehearsal", None) is not None:
+            return self._rehearsed_wake(observe)
         training = self._train_ready(
             min(action.wake_updates, self._sharing.snapshot().limits.max_updates_per_poll),
             native_observer=observe,
@@ -401,6 +484,124 @@ class ResourceSharedRuntime(Generic[Features, Targets, Prediction, State]):
         if replay is not None and training.updates:
             replay.finish_wake()
         return training
+
+    def _rehearsed_wake(self, observe) -> TrainingPoll:
+        """Reserve both possible fits and keep their original gate lease together."""
+        import numpy as np
+
+        helper = self._wake_rehearsal
+        runtime = cast(ActorShadowRuntime[Array, Array, Array, Any], self._runtime)
+        deferred = []
+        index = helper._observed
+        if index >= len(self._rehearsal_packets):
+            return TrainingPoll((), None)
+        batch = self._rehearsal_packets[index]
+        completed = []
+
+        def original(stage, read_origin):
+            if stage not in ("started", "completed"):
+                observe(stage, read_origin)
+                return
+            origin = read_origin()
+            if (
+                origin.learner is not runtime._candidate
+                or origin.source.sample_id != f"batch-{index}"
+                or origin.source.role != "train"
+                or origin.label.role != "train"
+                or origin.source.permissions.training is not True
+                or origin.source.permissions.replay is not True
+                or not np.array_equal(origin.features, batch.features)
+                or not np.array_equal(origin.targets, batch.targets)
+            ):
+                raise ValueError(
+                    "joint rehearsal requires exact original arrived TRAIN/replay consent"
+                )
+            observe(stage, read_origin)
+            if stage == "completed":
+                completed.append(origin.receipt)
+
+        with ExitStack() as leases:
+
+            @contextmanager
+            def admission():
+                decision = leases.enter_context(self._sharing.training(attempts=2))
+                expected = self._rehearsal_admitted + (2 if decision.allowed else 0)
+                if self._sharing.snapshot().admitted_updates != expected:
+                    raise ValueError("rehearsal sharing reservation did not match admission")
+                self._rehearsal_admitted = expected
+                if decision.reason is not None:
+                    deferred.append(decision.reason)
+                if decision.allowed:
+                    self._action_progress = replace(
+                        self._action_progress,
+                        wake_admissions=self._action_progress.wake_admissions + 1,
+                    )
+                yield decision.allowed
+
+            updates = runtime.train_ready(
+                max_updates=1, before_each_update=admission, native_observer=original
+            )
+            if updates:
+                if tuple(completed) != updates or len(updates) != 1:
+                    raise ValueError("rehearsal wake return differs from observed native receipt")
+                before = helper.report
+                try:
+                    helper.after_update(
+                        runtime,
+                        index + 1,
+                        batch.features,
+                        batch.targets,
+                        packet_episodes=batch.packet_episodes,
+                    )
+                finally:
+                    after = helper.report
+                    attempts = after["attempted_updates"] - before["attempted_updates"]
+                    returns = after["returned_updates"] - before["returned_updates"]
+                    p = self._action_progress
+                    self._action_progress = replace(
+                        p,
+                        native_attempts=p.native_attempts + attempts,
+                        native_completions=p.native_completions + returns,
+                        replay_admissions=p.replay_admissions + int(attempts > 0),
+                        replay_examples_charged=helper._replay_budget.replay_examples_completed,
+                        replay_native_attempts=after["attempted_updates"],
+                        replay_native_completions=after["returned_updates"],
+                        replay_commits=after["committed_updates"],
+                        replay_publication_unknown=after["returned_updates"]
+                        > after["committed_updates"],
+                        unreturned_work_unknown=p.unreturned_work_unknown
+                        or after["attempted_updates"] > after["returned_updates"],
+                    )
+                current = runtime.candidate_snapshot()
+                previous = cast(CandidateState[Any], self._rehearsal_candidate)
+                if (
+                    current.actor_version != previous.actor_version
+                    or current.learner_version != previous.learner_version
+                    or current.wake_updates != previous.wake_updates + 1
+                    or current.state.completed_updates
+                    != previous.state.completed_updates
+                    + 1
+                    + after["committed_updates"]
+                    - before["committed_updates"]
+                    or current.state.training_examples
+                    != previous.state.training_examples
+                    + len(batch.features)
+                    + after["charged_exposures"]
+                    - before["charged_exposures"]
+                    or runtime.applied_updates != (*self._rehearsal_paid_wakes, *updates)
+                    or runtime.applied_consolidations[: len(self._rehearsal_paid_joint)]
+                    != self._rehearsal_paid_joint
+                ):
+                    raise ValueError(
+                        "rehearsal candidate did not match observed paid wake/joint transitions"
+                    )
+                self._rehearsal_candidate = current
+                self._rehearsal_candidate_owner = self._runtime._candidate
+                self._rehearsal_wake_owners = runtime.applied_updates
+                self._rehearsal_joint_owners = runtime.applied_consolidations
+                self._rehearsal_paid_wakes = deepcopy(runtime.applied_updates)
+                self._rehearsal_paid_joint = deepcopy(runtime.applied_consolidations)
+            return TrainingPoll(updates, deferred[-1] if deferred else None)
 
     def train_action(self, action_id: str) -> AdaptationPoll:
         """Select a declared scalar ID; never accept executable controller data.

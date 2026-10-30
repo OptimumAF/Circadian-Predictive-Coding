@@ -19,6 +19,10 @@ _PAIRED_CONTEXTS = {
     "context_paired_current9_return": ("current9-v1", "current9-v2") * 2 + ("old-v1", "old-v2"),
     "context_paired_joint9_return": ("joint-v1", "joint-v2") * 2 + ("old-v1", "old-v2"),
 }
+_INCIDENT_CONTEXTS = {
+    "context_incident_stationary": ("prefix-v1",) * 8,
+    "context_incident_shift": ("prefix-v1",) * 6 + ("joint-v1", "joint-v2"),
+}
 
 
 @dataclass(frozen=True)
@@ -47,6 +51,7 @@ class ContextTrainingRecipe:
                     "old-v2",
                     "current9-v2",
                     "joint-v2",
+                    "prefix-v1",
                 )
                 for c in self.contexts
             )
@@ -64,9 +69,11 @@ class ContextTrainingRecipe:
             raise ValueError(
                 "contextual noise requires separate old TRAIN packets without nine-row rehearsal"
             )
-        if self.recipe_id in _PAIRED_CONTEXTS or any(c.endswith("-v2") for c in self.contexts):
+        if self.recipe_id in (*_PAIRED_CONTEXTS, *_INCIDENT_CONTEXTS) or any(
+            c.endswith("-v2") or c == "prefix-v1" for c in self.contexts
+        ):
             if (
-                self.contexts != _PAIRED_CONTEXTS.get(self.recipe_id)
+                self.contexts != {**_PAIRED_CONTEXTS, **_INCIDENT_CONTEXTS}.get(self.recipe_id)
                 or self.label_delay != 1
                 or self.noisy_old_invoice
             ):
@@ -104,6 +111,11 @@ CONTEXT_REHEARSAL_RECIPES = tuple(
 # Keep scientific comparison cohorts unchanged; this is the explicit CLI menu.
 CONTEXT_PAIRED_REHEARSAL_RECIPES = tuple(
     ContextTrainingRecipe(name, contexts, 1) for name, contexts in _PAIRED_CONTEXTS.items()
+)
+
+# Separate menu: do not expand saved paired/replay comparison cohorts.
+CONTEXT_INCIDENT_RECIPES = tuple(
+    ContextTrainingRecipe(name, contexts, 1) for name, contexts in _INCIDENT_CONTEXTS.items()
 )
 
 CONTEXT_STREAM_RECIPES = (
@@ -188,7 +200,7 @@ def build_context_stream(recipe, new, old, *, second_head=None):
         if (
             type(second_head) is not tuple
             or len(second_head) != 2
-            or recipe not in CONTEXT_PAIRED_REHEARSAL_RECIPES
+            or recipe not in (*CONTEXT_PAIRED_REHEARSAL_RECIPES, *CONTEXT_INCIDENT_RECIPES)
         ):
             raise ValueError("paired TRAIN requires its exact named recipe and second-head tuple")
         packets, _ = _validated_batches((new, old, *second_head), (), training_only=True)
@@ -212,7 +224,7 @@ def build_context_stream(recipe, new, old, *, second_head=None):
                 _named_rows(batch, concepts, version=version, paired=True),
             )
         return _compose_stream(recipe, prototypes)
-    if recipe in CONTEXT_PAIRED_REHEARSAL_RECIPES or any(
+    if recipe in (*CONTEXT_PAIRED_REHEARSAL_RECIPES, *CONTEXT_INCIDENT_RECIPES) or any(
         c.endswith("-v2") for c in recipe.contexts
     ):
         raise ValueError("paired recipe requires explicit second-head ordinary TRAIN prototypes")
@@ -236,11 +248,24 @@ def build_context_stream(recipe, new, old, *, second_head=None):
 def _compose_stream(recipe, prototypes):
     batches, noise = [], []
     for index, context in enumerate(recipe.contexts):
-        base, names = (
-            _rehearsal_prototype(context, prototypes)
-            if context.startswith(("current9-", "joint-"))
-            else prototypes[context]
-        )
+        if context == "prefix-v1":
+            old, old_names = prototypes["old-v1"]
+            positions = [i for i, name in enumerate(old_names) if name.startswith("v1:invoice:")]
+            names = tuple(old_names[i] for i in positions)
+            base = AttributionBatch(
+                "train",
+                context,
+                tuple(old.row_ids[i] for i in positions),
+                old.features[positions].copy(),
+                old.targets[positions].copy(),
+                num_classes=6,
+            )
+        else:
+            base, names = (
+                _rehearsal_prototype(context, prototypes)
+                if context.startswith(("current9-", "joint-"))
+                else prototypes[context]
+            )
         targets = base.targets.copy()
         ids = tuple(f"{recipe.recipe_id}:batch{index}:{name}" for name in names)
         if recipe.noisy_old_invoice and context == "old-v1":

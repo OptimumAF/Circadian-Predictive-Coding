@@ -36,7 +36,10 @@ from scripts.ticket_controller_streams import (
     POLICY_CHANGE_PHASES,
     POLICY_CHANGE_CHECKPOINTS,
 )
-from scripts.context_training_streams import CONTEXT_STREAM_RECIPES
+from scripts.context_training_streams import (
+    CONTEXT_STREAM_RECIPES,
+    CONTEXT_PAIRED_REHEARSAL_RECIPES,
+)
 from scripts.ticket_serving_timeline import (
     LiveServingPlan,
     TicketServingTimeline,
@@ -81,8 +84,13 @@ from src.core.reference_controller import (
     choose_reference,
 )
 from src.core.resource_sharing import SharingLimits
-from src.core.promotion_guard import GuardBatch, PromotionPolicy
-from src.core.serving_ports import PromotionReceipt, ServingConfiguration
+from src.core.promotion_guard import (
+    GuardBatch,
+    PromotionPolicy,
+    PromotionGuardReport,
+    decide_promotion,
+)
+from src.core.serving_ports import PromotionReceipt, ServingConfiguration, ServingSnapshot
 from src.core.ticket_workflow import ACTION_IDS, CATALOG, WorkflowCapabilities, WorkflowState
 from src.shared.process_memory import ProcessRssSampler
 
@@ -140,14 +148,44 @@ def _reference_schedule(
     arrived_shift_predict=None,
     catalog_control=None,
     decision_limit=None,
+    rejected_guard_digest=None,
+    shift_calibration=None,
+    shift_model_id=None,
+    shift_prefix_rows=None,
+    wake_rehearsal=None,
 ):
     """Same native arrival/runtime ports, finite observation horizon; no forced drain."""
+    calibrated_shift = any(
+        value is not None for value in (shift_calibration, shift_model_id, shift_prefix_rows)
+    )
+    shift_reader = None
+    if calibrated_shift:
+        if (
+            shift_calibration is None
+            or arrived_shift_predict is None
+            or candidate_predict is None
+            or acknowledge_correct is not True
+        ):
+            raise ValueError("calibrated shift requires explicit current-candidate verified ACK")
+        from scripts.arrived_candidate_shift import ArrivedCandidateShift
+
+        # Validate declared controls before any runtime enrollment or model copy.
+        shift_reader = ArrivedCandidateShift(
+            arrived_shift_predict,
+            calibration=shift_calibration,
+            calibration_model_id=shift_model_id,
+            calibration_prefix_rows=shift_prefix_rows,
+        )
+    if rejected_guard_digest is not None and (
+        not callable(rejected_guard_digest) or followup_plan is None and wake_rehearsal is None
+    ):
+        raise ValueError("rejected guard followup requires an explicit digest and two windows")
     if arrived_shift_predict is not None and (
         not callable(arrived_shift_predict)
         or mode != "drift"
         or contextual_policy is not None
-        or candidate_predict is not None
-        or acknowledge_correct
+        or not calibrated_shift
+        and (candidate_predict is not None or acknowledge_correct)
         or task_readout is not None
         or policy_change
         or followup_plan is not None
@@ -183,9 +221,35 @@ def _reference_schedule(
         or contextual_policy is not None
         or policy_change
         or followup_plan is not None
+        and not acknowledge_correct
     ):
-        raise ValueError("candidate feedback requires explicit fixed drift without followup")
+        raise ValueError("candidate feedback requires fixed drift and verified ACK for followup")
     batches, _ = _validated_batches(batches, (), training_only=True)
+    rehearsal_limit = 0
+    if wake_rehearsal is not None:
+        from src.app.stream_rehearsal import StreamRehearsal
+
+        if (
+            type(wake_rehearsal) is not StreamRehearsal
+            or not wake_rehearsal.packet_episode_replay
+            or mode != "periodic"
+            or contextual_policy is not None
+            or candidate_predict is not None
+            or acknowledge_correct
+            or task_readout is not None
+            or followup_plan is not None
+            or catalog_control is not None
+            or policy_change
+            or on_drain is not None
+            and (rejected_guard_digest is None or live is None)
+            or not all(b.packet_episodes for b in batches)
+        ):
+            raise ValueError("wake rehearsal requires explicit private periodic TRAIN packets")
+        rehearsal_limit = wake_rehearsal.bind(
+            source, budget, len(batches), batches[0].features.shape[1]
+        )
+    if calibrated_shift and len(shift_prefix_rows) >= len(batches):
+        raise ValueError("calibrated schedule prefix must leave an actual monitoring batch")
     if catalog_control is not None and (
         type(catalog_control) not in (CatalogTicketControl, ContextCatalogControl)
         or contextual_policy is not None
@@ -263,6 +327,7 @@ def _reference_schedule(
             or on_drain is None
             or contextual_policy is not None
             or mode != "periodic"
+            and not (mode == "drift" and candidate_predict is not None and acknowledge_correct)
         ):
             raise ValueError("followup requires explicit live publication and fixed reference")
         followup_plan.__post_init__()
@@ -301,12 +366,18 @@ def _reference_schedule(
         clock=clock,
         budget=budget,
         max_experiences=len(batches),
-        max_consolidations=0 if catalog_control is None else catalog_control.max_replays,
+        max_consolidations=rehearsal_limit
+        if catalog_control is None
+        else catalog_control.max_replays,
         actor=actor,
     )
     gate = sharing_gate or ServingPriorityGate(
         SharingLimits(
-            1, len(batches) if catalog_control is None else catalog_control.admissions, 1
+            1,
+            len(batches) * (2 if wake_rehearsal is not None else 1)
+            if catalog_control is None
+            else catalog_control.admissions,
+            1,
         ),
         resource_available=lambda: True,
     )
@@ -321,7 +392,17 @@ def _reference_schedule(
             runtime,
             gate,
             action_envelope=AdaptationEnvelope(
-                (AdaptationAction("wait"), AdaptationAction("wake1", 1)), horizon, len(batches)
+                (AdaptationAction("wait"), AdaptationAction("wake1", 1)),
+                horizon,
+                len(batches),
+                max_replay_examples=0
+                if wake_rehearsal is None
+                else wake_rehearsal._replay_budget.budget.max_replay_examples,
+            ),
+            **(
+                {}
+                if wake_rehearsal is None
+                else dict(wake_rehearsal=wake_rehearsal, rehearsal_packets=batches)
             ),
         )
     )
@@ -350,22 +431,93 @@ def _reference_schedule(
     pending = {}
     feedback = None
     drain_attempted = False
+    return_drain_attempted = False
     publication_pin = None
+    boundary_pin = None
+    first_boundary_pin = None
+    boundary_key = "drain_publication"
+    followup_candidate_pin = (
+        runtime.candidate_snapshot() if followup_plan is not None and acknowledge_correct else None
+    )
+    followup_origin = (runtime._base_actor_version, runtime._candidate_version)
+
+    def require_boundary():
+        if (
+            followup_candidate_pin is not None
+            and (runtime._base_actor_version, runtime._candidate_version) != followup_origin
+        ):
+            raise ValueError("original followup candidate origin changed")
+        if first_boundary_pin is not None and first_boundary_pin is not boundary_pin:
+            _require_boundary_evidence(report, first_boundary_pin, "drain_publication")
+        return _require_followup_boundary(actor, report, boundary_pin, key=boundary_key)
+
     arrived = 0
     task_reader = None
-    shift_reader = None
     if arrived_shift_predict is not None:
         from scripts.arrived_candidate_shift import ArrivedCandidateShift
 
-        shift_reader = ArrivedCandidateShift(arrived_shift_predict)
+        if shift_reader is None:
+            shift_reader = ArrivedCandidateShift(arrived_shift_predict)
         report["arrived_shift_feedback"] = shift_reader.report
+    episode_until = 0
+    episode_work: dict[str, Any] = dict(
+        definition="calibrated_onset_arrived_fifo_v1",
+        episodes=[],
+        through_arrived=0,
+        horizon=horizon,
+        renewal="onset only; continued alarms never extend arrived boundary",
+    )
+    candidate_pin = None
+    candidate_origin = None
+    candidate_paid_pin = None
+    if calibrated_shift:
+        report["calibrated_shift_schedule"] = deepcopy(episode_work)
+
+    def require_episode_evidence():
+        if not _same_value(report.get("calibrated_shift_schedule"), episode_work):
+            raise ValueError("original calibrated shift episode evidence changed")
+        if candidate_paid_pin is not None and not _same_value(
+            report.get("candidate_feedback"), candidate_paid_pin
+        ):
+            raise ValueError("original calibrated current-candidate cost evidence changed")
+
+    def require_episode():
+        require_episode_evidence()
+        if candidate_pin is not None and not _same_value(
+            runtime.candidate_snapshot(), candidate_pin
+        ):
+            raise ValueError("calibrated current candidate changed outside observed admission")
+
+    def require_candidate_input():
+        require_input()
+        # May run inside the ACK lease; existing diagnostic/ACK checks weights
+        # there, without recursively acquiring the runtime's exclusive lease.
+        require_episode_evidence()
+        assert shift_reader is not None
+        shift_reader.require_paid(report.get("arrived_shift_feedback"))
+
+    def pin_episode_candidate():
+        nonlocal candidate_pin, candidate_origin
+        snapshot = runtime.candidate_snapshot()
+        origin = (
+            snapshot.actor_version,
+            snapshot.learner_version,
+            snapshot.state.completed_updates - snapshot.wake_updates,
+        )
+        if snapshot.wake_updates != budget.updates_completed or (
+            candidate_origin is not None and origin != candidate_origin
+        ):
+            raise ValueError("calibrated current candidate native origin changed")
+        candidate_pin, candidate_origin = snapshot, origin
+
     if task_readout is not None:
         from scripts.candidate_task_feedback import CandidateTaskFeedback
 
         task_reader = CandidateTaskFeedback(task_readout, horizon)
         report["task_feedback"] = task_reader.report
+    candidate_paid = None
     if candidate_predict is not None:
-        report["candidate_feedback"] = dict(
+        candidate_paid = dict(
             definition="arrived_train_candidate_diagnostic_v1",
             attempts=0,
             returns=0,
@@ -375,10 +527,24 @@ def _reference_schedule(
             records=[],
         )
         if candidate_row_limit != 84:
-            report["candidate_feedback"]["row_limit"] = candidate_row_limit
+            candidate_paid["row_limit"] = candidate_row_limit
+        report["candidate_feedback"] = (
+            deepcopy(candidate_paid) if calibrated_shift else candidate_paid
+        )
+    if calibrated_shift:
+        candidate_paid_pin = deepcopy(candidate_paid)
+        pin_episode_candidate()
     try:
         for tick in range(horizon):
             require_input()
+            if followup_candidate_pin is not None and not _same_value(
+                runtime.candidate_snapshot(), followup_candidate_pin
+            ):
+                raise ValueError("followup candidate changed without observed successful work")
+            if calibrated_shift:
+                require_episode()
+            if boundary_pin is not None:
+                require_boundary()
             if catalog_control is not None:
                 catalog_control.require_schedule_packets(batches)
                 catalog_control.require_candidate()
@@ -397,7 +563,7 @@ def _reference_schedule(
                     tick if followup_plan is None else followup_plan.index_at(tick, len(batches))
                 )
                 if followup_plan is not None and tick >= followup_plan.start_tick:
-                    if _require_followup_publication(actor, report) != publication_pin:
+                    if require_boundary() != publication_pin:
                         raise ValueError("original verified publication changed")
                     report["followup_training"]["status"] = "started"
                 if index is not None and index < len(batches):
@@ -408,7 +574,7 @@ def _reference_schedule(
                     if followup_plan is not None and observed.actor_version != actor.version:
                         raise ValueError("fresh observation has stale actor version")
                     if followup_plan is not None and tick >= followup_plan.start_tick:
-                        if _require_followup_publication(actor, report) != publication_pin:
+                        if require_boundary() != publication_pin:
                             raise ValueError(
                                 "original verified publication changed during prediction"
                             )
@@ -427,7 +593,13 @@ def _reference_schedule(
                         paid["prediction_records_peak"], len(pending)
                     )
                 if followup_plan is None:
-                    _record_tick(runtime, batches, tick, label_delay)
+                    _record_tick(
+                        runtime,
+                        batches,
+                        tick,
+                        label_delay,
+                        **({} if wake_rehearsal is None else dict(replay_consent=True)),
+                    )
                 label_index = (
                     tick - label_delay
                     if followup_plan is None
@@ -456,30 +628,94 @@ def _reference_schedule(
                         int(np.sum(predicted != targets)),
                         len(targets),
                     )
+                if shift_reader is not None:
+                    shift_reader.require_paid(report.get("arrived_shift_feedback"))
+                    shift_paid_before = deepcopy(report["arrived_shift_feedback"])
+                    try:
+                        shift_feedback = shift_reader.read(
+                            runtime,
+                            batches,
+                            arrived=arrived,
+                            completed=budget.updates_completed,
+                            tick=tick,
+                            label_delay=label_delay,
+                            actor_version=actor.version,
+                            require_input=require_input,
+                        )
+                        if calibrated_shift and not _same_value(
+                            report.get("arrived_shift_feedback"), shift_paid_before
+                        ):
+                            raise ValueError(
+                                "original arrived shift cost report changed during read"
+                            )
+                    finally:
+                        report["arrived_shift_feedback"] = shift_reader.report
                 if candidate_predict is not None:
                     from scripts.candidate_training_feedback import read_candidate_feedback
 
-                    feedback = read_candidate_feedback(
-                        runtime,
-                        batches,
-                        arrived=arrived,
-                        completed=budget.updates_completed,
-                        tick=tick,
-                        label_delay=label_delay,
-                        actor_version=actor.version,
-                        predict=candidate_predict,
-                        paid=report["candidate_feedback"],
-                        require_input=require_input,
-                        **(
-                            dict(
-                                consumed=budget.updates_completed
-                                + len(runtime.acknowledged_experiences),
-                                acknowledge_correct=True,
+                    if calibrated_shift:
+                        require_episode()
+                    try:
+                        clock_kwargs: dict[str, Any] = {}
+                        if followup_pin is not None:
+                            clock_kwargs["expected_candidate"] = followup_candidate_pin
+                            packet_index = budget.updates_completed + len(
+                                runtime.acknowledged_experiences
                             )
-                            if acknowledge_correct
-                            else {}
-                        ),
-                    )
+                            first_window = packet_index < followup_pin.first_batches
+                            observed_at = (
+                                packet_index
+                                if first_window
+                                else followup_pin.start_tick
+                                + packet_index
+                                - followup_pin.first_batches
+                            )
+                            clock_kwargs["label_clock"] = (
+                                observed_at,
+                                observed_at
+                                + (label_delay if first_window else followup_label_delay),
+                            )
+                            if boundary_pin is not None:
+                                clock_kwargs["require_actor"] = require_boundary
+                        feedback = read_candidate_feedback(
+                            runtime,
+                            batches,
+                            arrived=arrived,
+                            completed=budget.updates_completed,
+                            tick=tick,
+                            label_delay=label_delay,
+                            actor_version=actor.version,
+                            predict=candidate_predict,
+                            paid=candidate_paid,
+                            require_input=require_candidate_input
+                            if calibrated_shift
+                            else require_input,
+                            **clock_kwargs,
+                            **(
+                                dict(
+                                    consumed=budget.updates_completed
+                                    + len(runtime.acknowledged_experiences),
+                                    acknowledge_correct=True,
+                                    **(
+                                        dict(expected_candidate=candidate_pin)
+                                        if calibrated_shift
+                                        else {}
+                                    ),
+                                )
+                                if acknowledge_correct
+                                else {}
+                            ),
+                        )
+                    finally:
+                        if calibrated_shift:
+                            candidate_paid_pin = deepcopy(candidate_paid)
+                            report["candidate_feedback"] = deepcopy(candidate_paid)
+                    if calibrated_shift:
+                        # ACK verifies the current learner; the frozen reference
+                        # can open an episode but cannot establish competence.
+                        require_episode_candidate = runtime.candidate_snapshot()
+                        if not _same_value(require_episode_candidate, candidate_pin):
+                            raise ValueError("calibrated diagnostic changed current candidate")
                 if task_reader is not None:
                     feedback = task_reader.read(
                         runtime,
@@ -492,20 +728,27 @@ def _reference_schedule(
                         require_input=require_input,
                     )
                     task_reader.require_paid(report.get("task_feedback"))
-                if shift_reader is not None:
-                    try:
-                        feedback = shift_reader.read(
-                            runtime,
-                            batches,
-                            arrived=arrived,
-                            completed=budget.updates_completed,
-                            tick=tick,
-                            label_delay=label_delay,
-                            actor_version=actor.version,
-                            require_input=require_input,
+                if calibrated_shift:
+                    assert shift_reader is not None
+                    if (
+                        shift_feedback is not None
+                        and "onset" in shift_reader.report["records"][-1]["incident"]["states"]
+                    ):
+                        episode_until = arrived
+                        episode_work["episodes"].append(
+                            dict(opened_at=tick, through_arrived=arrived)
                         )
-                    finally:
-                        report["arrived_shift_feedback"] = shift_reader.report
+                        episode_work["through_arrived"] = episode_until
+                    # Fresh current feedback drives the unchanged error rule
+                    # only inside an onset's already-arrived FIFO boundary.
+                    if (
+                        budget.updates_completed + len(runtime.acknowledged_experiences)
+                        >= episode_until
+                    ):
+                        feedback = None
+                    report["calibrated_shift_schedule"] = deepcopy(episode_work)
+                elif shift_reader is not None:
+                    feedback = shift_feedback
                 progress = shared.adaptation_snapshot().progress
                 observation = ReferenceObservation(
                     tick,
@@ -551,6 +794,8 @@ def _reference_schedule(
             finally:
                 paid["selection_seconds"] += monotonic() - started
             require_input()
+            if calibrated_shift:
+                require_episode()
             if shift_reader is not None:
                 shift_reader.require_paid(report.get("arrived_shift_feedback"))
                 shift_reader.require_current(runtime)
@@ -559,7 +804,7 @@ def _reference_schedule(
             if followup_plan is not None:
                 followup_plan.__post_init__()
             if followup_plan is not None and tick >= followup_plan.start_tick:
-                if _require_followup_publication(actor, report) != publication_pin:
+                if require_boundary() != publication_pin:
                     raise ValueError("original verified publication changed before admission")
             started = monotonic()
             try:
@@ -571,11 +816,51 @@ def _reference_schedule(
                         else shared.train_action(decision.action_id)
                     )
                 event["poll"] = asdict(poll)
+                if followup_candidate_pin is not None:
+                    current = runtime.candidate_snapshot()
+                    returned = len(poll.training.updates)
+                    if (
+                        (current.actor_version, current.learner_version) != followup_origin
+                        or returned not in (0, 1)
+                        or current.wake_updates - followup_candidate_pin.wake_updates != returned
+                        or current.state.completed_updates
+                        - followup_candidate_pin.state.completed_updates
+                        != returned
+                        or current.wake_updates != budget.updates_completed
+                        or returned == 0
+                        and not _same_value(current, followup_candidate_pin)
+                        or returned
+                        and tuple(runtime.applied_updates[-returned:]) != poll.training.updates
+                    ):
+                        raise ValueError("followup candidate differs from observed poll receipts")
+                    followup_candidate_pin = current
+                if calibrated_shift:
+                    # Only this original runtime admission may advance weights;
+                    # unchanged origin is required even after a deferred poll.
+                    before_poll = candidate_pin
+                    assert before_poll is not None
+                    pin_episode_candidate()
+                    assert candidate_pin is not None
+                    if candidate_pin.wake_updates - before_poll.wake_updates not in (
+                        0,
+                        1,
+                    ) or candidate_pin.wake_updates - before_poll.wake_updates != len(
+                        poll.training.updates
+                    ):
+                        raise ValueError(
+                            "calibrated candidate differs from completed poll receipts"
+                        )
+                    if candidate_pin.wake_updates == before_poll.wake_updates and not _same_value(
+                        candidate_pin, before_poll
+                    ):
+                        raise ValueError("calibrated candidate changed without a completed update")
+                if boundary_pin is not None:
+                    require_boundary()
                 if type(catalog_control) is ContextCatalogControl and catalog_control.resume_wake:
                     catalog_control.observe_poll(decision.action_id, poll)
             finally:
                 paid["admission_seconds"] += monotonic() - started
-            if (
+            first_due = (
                 on_drain is not None
                 and not drain_attempted
                 and budget.updates_completed
@@ -583,32 +868,132 @@ def _reference_schedule(
                 == drain_count
                 and tick >= drain_count - 1 + label_delay
                 and not pending
+            )
+            return_due = (
+                rejected_guard_digest is not None
+                and followup_plan is not None
+                and drain_attempted
+                and not return_drain_attempted
+                and not report["drain_publication"]["accepted"]
+                and budget.updates_completed
+                + (len(runtime.acknowledged_experiences) if acknowledge_correct else 0)
+                == len(batches)
+                and not pending
+            )
+            if (
+                (acknowledge_correct and followup_plan is not None or wake_rehearsal is not None)
+                and (first_due or return_due)
+                and gate.snapshot().active_serving_requests
             ):
+                # ACK is read-only and can finish while serving owns the gate;
+                # publication still waits for the original idle admission.
+                report.setdefault(
+                    "ack_publication_deferrals"
+                    if wake_rehearsal is None
+                    else "rehearsal_publication_deferrals",
+                    [],
+                ).append(tick)
+                first_due = return_due = False
+            if first_due or return_due:
+                target_count = drain_count if first_due else len(batches)
+                record_key = "drain_publication" if first_due else "return_publication"
                 progress = shared.adaptation_snapshot().progress
                 admission = gate.snapshot()
+                rehearsal_before_guard = (
+                    _rehearsal_drain_values(wake_rehearsal, shared, budget, runtime)
+                    if wake_rehearsal is not None
+                    else None
+                )
                 if (
                     len(runtime.applied_updates)
                     + (len(runtime.acknowledged_experiences) if acknowledge_correct else 0)
-                    != drain_count
-                    or progress.native_completions != budget.updates_completed
+                    != target_count
+                    or progress.native_completions
+                    != budget.updates_completed
+                    + (0 if wake_rehearsal is None else len(runtime.applied_consolidations))
                     or admission.training_active
                     or admission.active_serving_requests
                 ):
                     raise ValueError(
                         "drained publication requires completed receipts and idle gate"
                     )
-                drain_attempted = True
-                feedback = _publish_at_drain(
-                    actor, runtime, on_drain, tick, feedback, report, budget.updates_completed
+                budget_before_guard = (
+                    _boundary_budget_values(budget, runtime)
+                    if rejected_guard_digest is not None
+                    else None
                 )
-                if followup_plan is not None:
-                    report["drain_publication"]["scope"] = "first_predeclared_training_window"
+                if first_due:
+                    drain_attempted = True
+                else:
+                    return_drain_attempted = True
+
+                def require_retained_guard():
+                    if not _same_value(
+                        rehearsal_before_guard,
+                        _rehearsal_drain_values(wake_rehearsal, shared, budget, runtime),
+                    ):
+                        raise ValueError(
+                            "retained guard changed original paid candidate/budget/history/sharing before commit"
+                        )
+
+                feedback = _publish_at_drain(
+                    actor,
+                    runtime,
+                    on_drain,
+                    tick,
+                    feedback,
+                    report,
+                    budget.updates_completed,
+                    rejected_guard_digest=rejected_guard_digest,
+                    record_key=record_key,
+                    **(
+                        dict(before_commit=require_retained_guard)
+                        if wake_rehearsal is not None
+                        else {}
+                    ),
+                )
+                if wake_rehearsal is not None:
+                    if not _same_value(
+                        rehearsal_before_guard,
+                        _rehearsal_drain_values(wake_rehearsal, shared, budget, runtime),
+                    ):
+                        raise ValueError(
+                            "retained guard changed original paid candidate/budget/history/sharing"
+                        )
+                    report[record_key]["paid_rehearsal"] = dict(
+                        wake_receipts=len(runtime.applied_updates),
+                        joint_receipts=len(runtime.applied_consolidations),
+                        native_completions=progress.native_completions,
+                        replay_examples=progress.replay_examples_charged,
+                        reserved_attempts=admission.admitted_updates,
+                    )
+                if (rejected_guard_digest is not None or wake_rehearsal is not None) and (
+                    not _same_value(_boundary_budget_values(budget, runtime), budget_before_guard)
+                    or not _same_value(gate.snapshot(), admission)
+                ):
+                    raise ValueError("guard changed original budget, receipts or sharing counters")
+                if followup_plan is not None and first_due:
+                    report[record_key]["scope"] = "first_predeclared_training_window"
                     for row in report["feedback_invalidations"]:
                         row["reason"] = "verified publication after first-window labels consumed"
                 if (followup_plan is not None or contextual_policy is not None) and report[
-                    "drain_publication"
+                    record_key
                 ]["accepted"]:
-                    publication_pin = _require_followup_publication(actor, report)
+                    publication_pin = _require_followup_publication(actor, report, key=record_key)
+                if rejected_guard_digest is not None and (
+                    report[record_key]["accepted"] or "rejected_guard" in report[record_key]
+                ):
+                    row = report[record_key]
+                    boundary_pin = (
+                        row,
+                        deepcopy(row),
+                        row.get("rejected_guard"),
+                        _followup_actor_values(actor.serving_snapshot()),
+                    )
+                    boundary_key = record_key
+                    if first_due:
+                        first_boundary_pin = boundary_pin
+                    publication_pin = require_boundary()
             if tick == len(batches) // 2:
                 midway()
             if policy_change and tick in dict(POLICY_CHANGE_CHECKPOINTS):
@@ -621,6 +1006,8 @@ def _reference_schedule(
                         checkpoint=native.checkpoint(state.wake_updates, state.state),
                     )
                 )
+        if boundary_pin is not None:
+            require_boundary()
         report["stream"] = dict(
             evaluation_scope="reference_observation_only",
             opportunities=horizon,
@@ -643,12 +1030,23 @@ def _reference_schedule(
             )
         if followup_plan is not None:
             report["followup_training"]["status"] = (
-                "complete" if budget.updates_completed == len(batches) else "incomplete"
+                "complete"
+                if budget.updates_completed
+                + (len(runtime.acknowledged_experiences) if acknowledge_correct else 0)
+                == len(batches)
+                else "incomplete"
             )
         if policy_change:
             report["policy_capture_complete"] = True
         return runtime, horizon
     finally:
+        if wake_rehearsal is not None:
+            report["joint_rehearsal"] = wake_rehearsal.report
+            report["replay_examples"] = wake_rehearsal._replay_budget.replay_examples_completed
+        if calibrated_shift:
+            report["calibrated_shift_schedule"] = deepcopy(episode_work)
+            if candidate_paid_pin is not None:
+                report["candidate_feedback"] = deepcopy(candidate_paid_pin)
         if catalog_control is not None:
             report["catalog_control"] = catalog_control.capture()
             if catalog_control.replay_budget is not None:
@@ -713,8 +1111,8 @@ def _retired_contextual_wait(actor, report, pin, observation, *, pending, arrive
     return ReferenceDecision("wait", "owner_wait_after_verified_contextual_retirement")
 
 
-def _require_followup_publication(actor, report):
-    row = report.get("drain_publication", {})
+def _require_followup_publication(actor, report, *, key="drain_publication"):
+    row = report.get(key, {})
     if (
         row.get("accepted") is not True
         or row.get("completed") is not True
@@ -734,6 +1132,163 @@ def _require_followup_publication(actor, report):
     ):
         raise ValueError("followup requires the verified first publication generation")
     return current.generation, current.actor_version
+
+
+def _followup_actor_values(snapshot):
+    if type(snapshot) is not ServingSnapshot:
+        raise ValueError("rejected guard requires the original complete serving snapshot")
+    # Serving may populate its ordinary cache. None of the model, publication,
+    # configuration or metadata fields may change after either guard outcome.
+    return (
+        snapshot.generation,
+        snapshot.actor_version,
+        snapshot.model_state,
+        snapshot.configuration,
+        snapshot.metadata,
+    )
+
+
+def _boundary_budget_values(budget, runtime):
+    # Readonly guard work may advance the existing monotonic clock, but cannot
+    # replace its origin/limits or create training charges and receipts.
+    return (
+        id(budget.budget),
+        budget.budget,
+        budget.started_at,
+        id(budget.clock),
+        budget.updates_completed,
+        runtime.applied_updates,
+        runtime.acknowledged_experiences,
+        runtime._base_actor_version,
+        runtime._candidate_version,
+    )
+
+
+def _rehearsal_drain_values(helper, shared, budget, runtime):
+    """Read the original paid history, never substitute wakes for joint work."""
+    progress = shared.adaptation_snapshot().progress  # validates detached pins/owners
+    paid, replay = helper.report, helper._replay_budget
+    candidate = runtime.candidate_snapshot()
+    wakes, joint = runtime.applied_updates, runtime.applied_consolidations
+    count = len(joint)
+    flags = ("unreturned_work_unknown", "replay_publication_unknown", "sleep_publication_unknown")
+    if (
+        any(value is not False for name, value in asdict(progress).items() if name in flags)
+        or any(
+            type(value) is not int or value < 0
+            for name, value in asdict(progress).items()
+            if name not in flags
+        )
+        or any(
+            getattr(progress, name) != 0
+            for name in (
+                "sleep_admissions",
+                "sleep_native_attempts",
+                "sleep_native_completions",
+                "sleep_commits",
+            )
+        )
+        or helper._budget is not budget
+        or helper._runtime is not runtime
+        or len(wakes) != budget.updates_completed
+        or helper._observed != len(wakes)
+        or candidate.wake_updates != len(wakes)
+        or candidate.consolidation_attempts != count
+        or candidate.consolidations_completed != count
+        or any(
+            paid[key] != count
+            for key in ("attempted_updates", "returned_updates", "committed_updates")
+        )
+        or any(event["status"] not in ("complete", "skipped") for event in paid["events"])
+        or progress.wake_admissions != len(wakes)
+        or progress.poll_updates_returned != len(wakes)
+        or progress.native_attempts != len(wakes) + count
+        or progress.native_completions != len(wakes) + count
+        or progress.replay_native_attempts != count
+        or progress.replay_native_completions != count
+        or progress.replay_commits != count
+        or progress.replay_admissions != count
+        or progress.decisions_returned != progress.decisions_attempted
+        or progress.decisions_refused != 0
+        or progress.replay_examples_charged != replay.replay_examples_completed
+        or paid["charged_exposures"] != replay.replay_examples_completed
+        or shared._sharing.snapshot().admitted_updates != 2 * len(wakes)
+        or progress.unreturned_work_unknown
+        or progress.replay_publication_unknown
+    ):
+        raise ValueError("retained publication requires complete original wake/joint paid history")
+    return deepcopy(
+        (
+            _boundary_budget_values(budget, runtime),
+            candidate,
+            wakes,
+            joint,
+            paid,
+            progress,
+            shared._sharing.snapshot(),
+            id(replay),
+            id(replay.budget),
+            replay.budget,
+            replay.started_at,
+            id(replay.clock),
+            id(replay.process_rss_sampler),
+            id(replay.progress),
+            replay.updates_completed,
+            replay.replay_examples_completed,
+        )
+    )
+
+
+def _require_boundary_evidence(report, boundary_pin, key):
+    row, values, guard, _ = boundary_pin
+    if (
+        report.get(key) is not row
+        or row.get("rejected_guard") is not guard
+        or not _same_value(row, values)
+        or row.get("completed") is not True
+        or row.get("publication_unknown") is not False
+    ):
+        raise ValueError("original guard boundary evidence changed or was replaced")
+
+
+def _require_followup_boundary(actor, report, boundary_pin, *, key="drain_publication"):
+    if boundary_pin is None:
+        return _require_followup_publication(actor, report, key=key)
+    _require_boundary_evidence(report, boundary_pin, key)
+    row, _, _, actor_values = boundary_pin
+    if row["accepted"]:
+        _require_followup_publication(actor, report, key=key)
+    current = actor.serving_snapshot()
+    if not _same_value(_followup_actor_values(current), actor_values):
+        raise ValueError("actor changed after the original guard boundary")
+    return current.generation, current.actor_version
+
+
+def _require_rejected_guard(runtime, before, candidate, after, guard, digest, tick):
+    if (
+        type(guard) is not PromotionGuardReport
+        or guard.decision != decide_promotion(guard.policy, guard.evidence)
+        or guard.decision.accepted is not False
+        or not guard.decision.reasons
+        or guard.assessed_at != tick
+        or type(guard.assessed_at) is not int
+        or guard.actor_version != before.actor_version
+        or guard.learner_version != candidate.learner_version
+        or not _same_value(
+            guard.candidate_revision,
+            (
+                candidate.wake_updates,
+                candidate.consolidation_attempts,
+                candidate.consolidations_completed,
+            ),
+        )
+        or guard.actor_snapshot_digest != digest(before.model_state)
+        or guard.candidate_snapshot_digest != digest(candidate.state)
+        or not _same_value(before, after)
+        or not _same_value(candidate, runtime.candidate_snapshot())
+    ):
+        raise ValueError("rejected guard does not bind unchanged original actor/candidate evidence")
+    _followup_actor_values(after)
 
 
 def _record_window_source(runtime, batch, index, tick, version):
@@ -856,12 +1411,26 @@ def _publish_candidate(runtime, controller, spec, now, report, require_input, co
     return receipt
 
 
-def _publish_at_drain(actor, runtime, on_drain, tick, feedback, report, completed_updates):
+def _publish_at_drain(
+    actor,
+    runtime,
+    on_drain,
+    tick,
+    feedback,
+    report,
+    completed_updates,
+    *,
+    rejected_guard_digest=None,
+    record_key="drain_publication",
+    before_commit=None,
+):
     """Consume a single owner callback; never rebind old-version feedback."""
-    if "drain_publication" in report:
+    if record_key not in ("drain_publication", "return_publication"):
+        raise ValueError("publication record must name one of the two declared boundaries")
+    if record_key in report:
         raise ValueError("drained publication was already attempted")
     before = actor.serving_snapshot()
-    row = report["drain_publication"] = dict(
+    row = report[record_key] = dict(
         tick=tick,
         wake_updates=completed_updates,
         pending_predictions=0,
@@ -882,7 +1451,28 @@ def _publish_at_drain(actor, runtime, on_drain, tick, feedback, report, complete
         if feedback is not None and feedback.actor_version != before.actor_version:
             raise ValueError("stale feedback cannot be rebound at drained publication")
         row["publication_unknown"] = True  # A lost callback return may hide a committed swap.
-        receipt = on_drain(runtime, tick)
+        candidate = runtime.candidate_snapshot() if rejected_guard_digest is not None else None
+        try:
+            receipt = on_drain(
+                runtime,
+                tick,
+                **({} if before_commit is None else dict(before_commit=before_commit)),
+            )
+        except PromotionRejected as rejection:
+            if rejected_guard_digest is None:
+                raise
+            after_refusal = actor.serving_snapshot()
+            _require_rejected_guard(
+                runtime,
+                before,
+                candidate,
+                after_refusal,
+                rejection.report,
+                rejected_guard_digest,
+                tick,
+            )
+            row["rejected_guard"] = asdict(rejection.report)
+            receipt = None
         after = actor.serving_snapshot()
         if type(after.generation) is not int or type(after.actor_version) is not str:
             raise ValueError("drained publication returned non-native generation/version types")
@@ -893,6 +1483,8 @@ def _publish_at_drain(actor, runtime, on_drain, tick, feedback, report, complete
         if receipt is None:
             if changed:
                 raise ValueError("unobserved publication has no original commit receipt")
+            if "rejected_guard" in row and not _same_value(before, after):
+                raise ValueError("actor changed after measuring the rejected guard")
         elif (
             type(receipt) is not PromotionReceipt
             or type(receipt.generation) is not int
@@ -2138,6 +2730,68 @@ def main(argv=None):
         return _main(argv, sources)
 
 
+def _boundary_report_bytes(report):
+    """Reuse the command's reserved output; keep paid scalar costs on failure."""
+    limit = 3 * 1024**2
+    report_bytes = None
+    try:
+        if type(report) is not dict or type(report.get("complete")) is not bool:
+            raise ValueError("learning-boundary report requires an exact completion flag")
+        data = (json.dumps(report, indent=2, allow_nan=False) + "\n").encode()
+        report_bytes = len(data)
+        if report_bytes > limit:
+            raise ValueError("learning-boundary report exceeds declared byte limit")
+        return data, report["complete"]
+    except (TypeError, ValueError, OverflowError, RecursionError) as error:
+        record = report if type(report) is dict else {}
+        budget = record.get("budget")
+        budget = budget if type(budget) is dict else {}
+        # Why: encoding failure cannot refund native work or establish a swap.
+        # Fixed scalar fields retain producer reports without reconstructing it.
+        failure = dict(
+            definition="context_learning_boundary_output_failure_v1",
+            complete=False,
+            error=f"{type(error).__name__}: {error}"[:512],
+            producer_complete=record.get("complete")
+            if type(record.get("complete")) is bool
+            else None,
+            report_bytes=report_bytes,
+            report_byte_limit=limit,
+            detailed_report_available=False,
+            task_outcomes_available=False,
+            publication_receipts_available=False,
+            qualification="producer-reported scalar costs only; null means unavailable; no validated receipts or recovered outcomes",
+            reported=dict(
+                training_work=_reported_work_fields(
+                    record.get("training_work"),
+                    ("attempted_updates", "attempted_rows", "returned_updates"),
+                ),
+                budget=dict(
+                    **_reported_work_fields(budget, ("updates", "started_at", "last_clock")),
+                    limits=_reported_work_fields(
+                        budget.get("limits"),
+                        (
+                            "max_training_updates",
+                            "max_wall_seconds",
+                            "max_replay_examples",
+                            "max_hidden_width",
+                            "max_process_rss_bytes",
+                        ),
+                    ),
+                ),
+                memory=_reported_work_fields(
+                    record.get("memory"),
+                    ("start_bytes", "peak_bytes", "sample_count", "interval_seconds"),
+                ),
+                **_reported_work_fields(record, ("elapsed_seconds",)),
+            ),
+        )
+        data = (json.dumps(failure, indent=2, allow_nan=False) + "\n").encode()
+        if len(data) > 32 * 1024:
+            raise ValueError("learning-boundary failed scalar output exceeds32KiB") from error
+        return data, False
+
+
 def _main(argv, sources):
     parser = argparse.ArgumentParser(description=__doc__)
     source = parser.add_mutually_exclusive_group(required=True)
@@ -2167,6 +2821,11 @@ def _main(argv, sources):
     mode.add_argument("--context-stream-protocol", action="store_true")
     mode.add_argument("--context-stream-comparison", action="store_true")
     parser.add_argument("--context-live-reference", choices=REFERENCE_MODES)
+    parser.add_argument(
+        "--context-publish-after-learning",
+        action="store_true",
+        help="paired periodic learning/return guard boundaries; supports live mode or source-free protocol preview",
+    )
     parser.add_argument("--context-candidate-feedback", action="store_true")
     parser.add_argument("--context-acknowledge-correct", action="store_true")
     parser.add_argument("--context-task-feedback", action="store_true")
@@ -2194,6 +2853,21 @@ def _main(argv, sources):
         "--live-training-recipe", choices=tuple(r.recipe.recipe_id for r in LIVE_TRAINING_RECIPES)
     )
     args = parser.parse_args(argv)
+    if args.context_publish_after_learning and (
+        not (args.context_head_serving_live or args.context_stream_protocol)
+        or args.context_stream_recipe
+        not in tuple(r.recipe_id for r in CONTEXT_PAIRED_REHEARSAL_RECIPES)
+        or args.context_live_reference not in (None, "periodic")
+        or args.context_candidate_feedback
+        or args.context_acknowledge_correct
+        or args.context_task_feedback
+        or args.context_arrived_shift
+        or args.context_shift_diagnostics
+        or args.context_withheld_orders
+    ):
+        parser.error(
+            "--context-publish-after-learning requires an exact paired periodic live recipe or protocol preview without extra feedback"
+        )
     if args.catalog_fit and not args.controller_comparison:
         parser.error("--catalog-fit requires --controller-comparison and --fitted-report")
     if args.followup_training_recipe is not None and not args.continue_training_after_publication:
@@ -2279,6 +2953,7 @@ def _main(argv, sources):
         from scripts.context_stream_comparison import protocol_snapshot
 
         report = protocol_snapshot(
+            **(dict(publish_after_learning=True) if args.context_publish_after_learning else {}),
             **(dict(withheld=True) if args.context_withheld_orders else {}),
             **(
                 dict(
@@ -2321,6 +2996,8 @@ def _main(argv, sources):
         from scripts.context_head_live import run_case as run_context_live
 
         context_kwargs: dict[str, Any] = {}
+        if args.context_publish_after_learning:
+            context_kwargs["publish_after_learning"] = True
         if args.context_live_reference is not None:
             context_kwargs["reference_mode"] = args.context_live_reference
         if args.context_candidate_feedback:
@@ -2389,6 +3066,10 @@ def _main(argv, sources):
             if args.reference is None
             else run_case(args.source, reference_mode=args.reference)
         )
+    if args.context_publish_after_learning:
+        data, complete = _boundary_report_bytes(report)
+        args.output.write_bytes(data)
+        return 0 if complete else 1
     data = (json.dumps(report, indent=2, allow_nan=False) + "\n").encode()
     limit = (
         8
