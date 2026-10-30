@@ -354,7 +354,135 @@ Common pair composition retains separate historical byte admission. New explicit
 CLI mode uses the existing capped writer; normal encoder and defaults remain.
 See [source-free workflow](docs/context-head-fresh-workflow.md).
 
+The same workflow's explicit `paired_serving` option shares
+`context_head_rehearsal.prepare_owned_source` with ordinary serving through
+`context_head_live.run_owned_case`. The original witness is serialized across
+worker/owner checks; source identity, roles, clocks and charges remain guarded.
+The source stream stays open under its original session while the child reuses
+the existing runtime and sampler, then seals normally. No historical file or
+private weights enter this branch. Lost delegated reports retain unknown work,
+not zero; bounded output cannot restore authority. Why: remove the historical
+source dependency by composing qualified TRAIN with the existing serving ports.
+See [usage and executed scope](docs/fresh-paired-serving.md).
+The same modules are delivered by the explicit existing package list; a separate
+[installed qualification](docs/reports/fresh-paired-installed-20261029.md) covers
+the offline wheel and isolated native runtime without checkout source access.
+
+The explicit paired ordinary TRAIN recipes extend the existing contextual data
+factory and stream adapter with four detached, semantically checked prototypes
+across the two public heads. Live selection changes only the declared task family,
+worker slots and rollback readouts; original budgets, sharing and promotion ports
+remain in use. Probe weights never enter the lane. Why: ordinary deployment must
+learn from its own TRAIN source rather than publish a disposable diagnostic owner.
+See [scope, commands and evidence](docs/paired-context-training.md).
+
+The optional paired learning boundary composes the existing FollowupTrainingPlan
+and drain callback. An observed PromotionRejected binds original actor/candidate
+digests, revision and decision before unchanged-actor continuation. A second fixed
+drain record may publish the return repair; an early accepted publication skips
+it. Both records stay pinned while the latest actor's model/configuration/metadata
+and version remain guarded. No lifetime budget, receipt or sharing counter is
+reset. Why: a rejected candidate should not strand causal TRAIN, and a qualified
+candidate should serve before the return phase. See [usage and limits](docs/paired-learning-boundary.md).
+
+The ordinary command forwards that option explicitly and its existing preview
+declares the same two windows without loading data. A mode-specific3MiB encoder
+retains bounded producer-only costs/clocks on output failure; no receipts or
+outcomes are reconstructed. Existing command limits and reserved-output behavior
+remain unchanged for other modes. This is delivery composition, not a new runtime.
+
 ## Conventional separate-context heads
+
+`adapters/torch_array_weighted` is a separate explicit operation on the generic
+native BP owner. It reuses native detached head/optimizer staging, existing
+weight validation and complete-state comparison, then publishes one payload only
+after donor/input/RNG/mode and optimizer-binding proofs. Caller owns TRAIN release,
+weights and budgets. Base learner/game episode ports and snapshot schemas remain.
+Why: the raw296 invariant-game weighted adapter cannot admit generic D9 arrays.
+[API and verified scope](docs/torch-array-weighted.md).
+
+The existing recurring native factory optionally uses this helper for one
+class-balanced BP update per arrived ordinary TRAIN batch. Its bounded journal
+derives counts from that call's targets, binds the original released source/label
+before delegation and verifies complete causal receipts before further work.
+Neither the static TRAIN diagnostic teacher nor final/probe labels set weights.
+The original stream owns roles, clocks and budgets; default training is unchanged.
+[Composition and negative development result](docs/reports/context-class-balanced-20261029.md).
+
+The optional `native` packaging extra reuses the existing Torch dependency range;
+the base package remains NumPy-only. Its offline setup guide is installed under
+`share/doc/circadian-predictive-coding`. This does not change learner behavior or
+choose an SDK/device. [Installed-project qualification and dependency limits](docs/reports/native-ticket-installed-20261029.md).
+
+`core/categorical_linear_fit` also exposes owned full-class logits from its
+existing fixed design. `adapters/linear_fit_decision` binds copied model/spec to
+typed requests and normalizes only allowed candidates, avoiding global-probability
+underflow. The existing ticket qualifier optionally delegates a disposable joint
+TRAIN reference to `scripts/ticket_linear_reference`; teacher/role admission,
+one-fit budget, immutable inputs and bounded paid task attempts stay at that
+application boundary. No native/deployed owner is constructed or changed.
+[Interface and scope](docs/context-linear-reference.md).
+
+`core/categorical_linear_state` defines bounded immutable policy/snapshot state
+for a current-packet conventional learner. `adapters/linear_fit_learner` stages
+one existing fixed LS fit and commits one complete validated state; it implements
+the ordinary NativeLearner port without retaining a row/history bank. The
+existing delayed AttributionStream owns roles, consent, budgets and exclusive
+access. Paid unpublished failures use the existing TrainingUpdateFailed scalar
+receipt. This adds no scheduler, controller, optimizer or native mechanism.
+[API and qualification](docs/current-linear-learner.md).
+
+The existing recurring recipe accepts explicit `method="linear_fit"` for
+ordinary context return. `scripts/ticket_workflow_linear` supplies counted owned
+forks, scalar checkpoints, frozen typed readouts and distinct fit/read/storage
+costs. An explicit model=None readout reports unfitted zero-logit construction
+separately from affine matrix work. The original stream, budget and task guards
+remain in charge; no second orchestration framework or deployed update is added.
+[Chronological observation and retention limits](docs/reports/linear-context-return-20261029.md).
+
+Explicit `separate_context_heads=True` also supports fixed LS. New
+`core/context_linear_state` owns two complete linear snapshots and summed counters;
+`adapters/context_linear_fit_learner` reuses the existing public-context projection
+and one existing LS update on a private active-head fork before atomic publication.
+`adapters/context_linear_fit_decision` freezes both heads, validates known public
+tags and counts full-query routing plus selected-head work. Inactive heads persist
+without a row bank. Why: isolate measured current-packet overwrite using the
+existing control pattern, with explicit extra96vs60coefficient capacity. Original
+stream roles/budgets/guards remain authoritative. [Evidence and limits](docs/reports/context-linear-heads-20261029.md).
+
+The existing `probe_ticket_policy_learning.run_arm` has an explicit contextual LS
+mode. It composes the original FreshTaskProbe, old-TRAIN return and endpoint
+observer with the frozen LS reader. `scripts/ticket_linear_probe` binds source,
+inputs/RNG and paid readout/episode/history evidence around external callbacks.
+It adds no training runtime or saved-source loader; source and deployed learners
+remain separate from disposable probe updates. [API and qualification](docs/context-linear-probe.md).
+
+Optional joint-context replay reuses `app.stream_rehearsal` consolidation and
+existing categorical episode retention. `core.context_joint_replay` owns bounded
+same-context packet algebra and the equal-row current-only control;
+`app.context_joint_rehearsal` selects original TRAIN episodes by public context
+and content. Ordinary TRAIN can retain new TRAIN tasks; private probe mode keeps
+its fixed TRAIN bank and never retains probe inputs. New authority/work/evidence
+guards stay in the existing replay owner; no optimizer or second stream is added.
+Why: sequential replace-head fits overwrite preceding same-context skills.
+[Usage and qualification](docs/context-joint-rehearsal.md).
+
+Optional native TRAIN fit reads reuse the current frozen readout and original
+teacher truth, separately charging matrix attempts/rows/returns. The existing
+context guard pins teacher inputs and completed diagnostic records; active
+checkpoint/role/work/type invariants are checked before acceptance. No diagnostic
+result enters the learner/controller. Pure calculations are shared in
+`scripts/ticket_train_fit.py`; legacy qualifier/diagnosis entrypoints remain.
+Why: avoid a native↔qualification script cycle while preserving existing math.
+[Contract and observed fit gap](docs/reports/context-train-fit-20261029.md).
+
+The recurring workflow also admits existing Torch learners on its joint D9
+context-return stream through `ticket_workflow_native`, using the actual feature
+width. The native helper binds complete frozen state/spec independently of paid
+inference counters; original source/actor/RNG/causal guards and runtime limits
+remain. This native-family mode uses joint-feature learning; separate-head serving
+supports the conventional perceptron and fixed LS controls. Why: expose the same explicit context stream to existing native
+models without adding routing or another learner. [Scope and negative evidence](docs/reports/native-context-return-20261029.md).
 
 core/context_perceptron composes original pure D7perceptron states/rules with
 strict public-onehot routing, atomic updates and complete two-head/globalcounter
@@ -7419,3 +7547,166 @@ and cleanup loop with the new fixed red A3 profile. The workflow keeps its old
 wrapper; both script orchestrators depend on the adapter, which imports only
 core and infrastructure. No new script cycle, runner, cache or dependency is
 introduced. See [ADR-0640](docs/adr/ADR-0640-nuisance-train-validation-separation.md).
+
+
+The explicit `adapters.context_linear_serving` binding supplies the complete LS
+record/digest, native guard learner and typed readout to the existing atomic
+actor/promotion ports. It reuses categorical guard utility and the default
+serving slot/fault gate from `adapters.context_serving`; the Perceptron public
+binding remains strict. `scripts.context_head_live` chooses this binding only
+for an explicitly qualified owned LS source and keeps its original lifetime
+budget/receipt checks. No new training or serving scheduler is introduced.
+
+
+The explicit owned LS `adaptive_serving` composition reuses the existing
+`candidate_training_feedback` and core drift reference through the same live
+schedule. A verified `acknowledge_ready` consumes an original arrived TRAIN
+receipt without a native update; the report separates updates, ACKs and consumed
+receipts. Publication waits for complete consumption and unchanged guards.
+Post-publication task readouts remain outside control inputs. No new detector,
+controller law, threshold fitting, runtime or authority layer is introduced.
+
+
+`ArrivedCandidateShift` can optionally delegate to the existing core calibrated
+detector. Its declared TRAIN row-ID prefix and owned frozen diagnostic reference
+remain separate from current learner admission snapshots. Reference/value pins
+are bounded, configuration and callback identities are checked, and cached
+completed scalar fits remain cost evidence on downstream failure. Core threshold
+and incident laws are unchanged; no new runtime/source authority is introduced.
+
+The optional calibrated schedule composes that observer with current-candidate
+TRAIN verification through the same `_reference_schedule`. An observed onset
+fixes an arrived FIFO boundary; continued alarms do not renew it. Correct ACKs
+use a privately owned diagnostic cost ledger and an expected candidate pin
+checked inside the original ACK lease. Each fit still uses a fresh current error,
+original wake credit and finite horizon. No new runner or core controller law is
+introduced. See [usage and limits](docs/calibrated-shift-schedule.md).
+
+The owned LS workflow exposes that composition through explicit incident-stream
+options. Exact stationary/shift recipes have a separate menu, preserving saved
+paired/replay cohorts. Both trigger choices use the same original source, finite
+timeline, current-candidate ACK and promotion/rollback ports. No new runner is
+introduced; guards/task readouts remain outside trigger inputs. The scoped
+native comparison found no added calibration benefit, so defaults are unchanged.
+
+ContextCatalogControl and compose_context_replay optionally bind the contextual
+LS family explicitly, using complete source/head history and its native residual
+diagnostic. Actual source/candidate digests are checked before bank construction;
+Perceptron defaults retain their separate mistake-history contract. The original
+categorical replay executor, role/receipt guards and independent exposure budget
+are reused. The owned live catalog path now uses those bindings and an optional
+LS private typed readout, while Perceptron defaults remain separate. Parent source
+handoff/keep-open and progress checks share one predicate so private catalog
+work cannot run after its source is finished. Private candidates are not published;
+the owned catalog study now freezes the existing scalar chooser after six complete
+TRAIN trials and applies it to the original source. Original source lifetime,
+sampler and prior paid-outcome guards remain binding. Missing delegated work is
+unknown, and study-mode source lifetime is declared at budget birth. The bounded
+study chose waiting; this does not qualify beneficial or generalizing selection.
+
+Explicit same_context_joint owned LS serving reuses the existing single-context
+joint9/joint9/old6 TRAIN recipe. FollowupTrainingPlan(2,12) supplies its original
+two windows; paired modes keep4/12. The original source30second budget/guard/
+sampler spans the child. Published and rollback readouts use the legacy task
+family, and private return-candidate state remains separate from the served
+accepted learning snapshot. No catalog law or new orchestration layer is added.
+
+Optional same-context ACK serving composes the existing error/ACK schedule with
+the same two windows. Declared label clocks are checked against original receipt
+payloads inside the ACK lease. An explicit full publication-boundary guard permits
+the changed served version while preserving candidate origin; default ACK keeps
+its strict base=current rule. One candidate snapshot advances only after matching
+observed successful poll receipts. Publication pins both fit and ACK history and
+waits for the serving gate. Final private TRAIN readout follows all consumption
+and cannot select training or promotion. Original budgets are not renewed.
+
+An explicit owned-LS branch of context_stream_comparison keeps the historical
+Perceptron comparison separate. It collects six private reference cases against
+one current source/guard/sampler, suppresses publication, and retains six detached
+candidate snapshots as data. Sealed prior cases/captures precede more work;
+missing delegated work remains unknown. Only a complete execution cohort admits
+source/candidate TRAIN task readouts, whose prior outcomes are also guarded.
+The source240second lifetime is declared at birth only for this explicit mode.
+The three-reference foundation does not replace the full learned-controller
+contract. No new runner, optimizer or checkpoint authority is introduced.
+
+Ordinary TRAIN-only dynamic joint rehearsal accepts optional ordered
+`AttributionBatch.packet_episodes`: one or two complete episodes whose joined
+arrays must exactly equal the original paid packet. The existing stream copies
+and pins metadata; existing rehearsal stores each whole episode in its bounded
+buffer without splitting the wake. Episodes wholly present in the current packet
+are excluded by exact contiguous feature/target equality. Consolidation and all
+repeated row exposure use existing budgets. Single-episode/fixed-probe paths keep
+their prior contract; ACK still refuses unsupported consolidation histories.
+[API and scope](docs/context-packet-rehearsal.md).
+
+Explicit retained private serving binds that helper to `ResourceSharedRuntime`.
+Each actual wake reserves two attempt slots before work; `ExitStack` keeps the
+same serving-gate lease through wake return and optional joint consolidation.
+Reservations remain paid when replay skips or fails. Original native packet and
+replay consent are checked at ingress; detached paid receipt values/raw owner
+identities and one current candidate pin reject unobserved changes. Default
+single-attempt actions are unchanged. Terminal TRAIN tasks read only the private
+candidate after workers close; this mode does not publish or extend ACK authority.
+[Contract and frozen protocol](docs/context-retained-serving.md).
+
+Separate `retained_joint_publish` uses the existing promotion controller after
+both wake and joint receipts drain. Exact progress/paid histories/idle gate are
+checked; the original readonly paid-state verifier runs after guard preparation
+and BEFORE commit, with a second check after the callback. Observed publication
+invalidates prior-version feedback and pins the accepted/rejected boundary for
+later serving ticks. Published and rollback TRAIN tasks use actual actor versions;
+rollback restores source weights/version at a new generation. Existing policy,
+private mode and ACK authority remain unchanged.
+[Contract](docs/context-retained-publication.md).
+
+`probe_ticket_policy_learning.run_arm` composes the existing isolated probe and
+return with explicit LS task/head selection. `ticket_linear_probe` certifies the
+fixed supplied cohort semantics once, then pins original source/spec/input/RNG
+and selected-task report metadata. LS endpoint counters/work remain separate
+from Perceptron's original fixed transfer origins and work schema. Only the
+disposable fork updates; original16/48 probe and16/96 return budgets/checkpoints/
+metrics remain. No source loader, new runner or deployed update.
+[API](docs/context-linear-transfer-probe.md).
+
+Explicit `retained_joint_probe` composes that API after the ordinary retained
+stream closes all serving workers. `context_retained_probe` binds the original
+runtime candidate lease, inbox/consent/label/clock/budget/receipt and preceding
+paid-report state, then restores the actual23/144 candidate into a plain separate
+LS donor. Existing run_arm owns the disposable updates and fixed readouts; the
+original actor, candidate and replay bank receive none. The new source120s
+lifetime is declared at birth only for this composition; existing component
+budgets remain. No additional loader, runner or core training loop.
+[Contract and evidence](docs/context-retained-transfer-probe.md).
+
+Opt-in probe rehearsal reuses `context_head_rehearsal`'s certified cohorts and
+fixed four-episode TRAIN bank through the generic probe's existing factory port.
+The original F/return sessions remain; one separate144-row replay session is born
+once. `JointContextReplayPolicy` performs the same-context joint/current-only
+packet, while `StreamRehearsal` owns atomic consolidation, role isolation and
+permanent charges. Physical endpoint deltas32/192 and48/288 are checked separately
+from logical F16. No replay during old return; probe inputs remain transient.
+Original episode owners and bank values stay pinned, and missing replay readback
+leaves total work unknown. Core math/runtime loops and sequential defaults remain.
+[API and qualification scope](docs/context-retained-joint-probe.md).
+
+The unchanged public composition has one actual-source native qualification:
+source12/72 +retained11/72 +private48/288 =71LS432rows. Original candidate/actor
+remain unchanged while the disposable joint probe acquires selected tasks and
+retains old tasks immediately after F; selected tasks are lost on old return.
+[Executed protocol, costs and limits](docs/reports/context-retained-native-joint-probe-20261029.md).
+
+An existing current-only native control now has189 exact recorded matching checks
+against that saved joint case, plus unchanged deterministic cohort admission.
+Both pay71LS432rows; joint retains two more old tasks after F, while both lose
+selected tasks on old return. No new runtime, learning rule or production source
+change was needed. [Comparison scope and remaining gap](docs/reports/context-retained-native-current-control-20261029.md).
+
+
+Generic and wide categorical updates share one private minimum-change residual
+kernel in the core, behind their existing distinct geometry gates. The generic
+owner exposes `train_batch_minimum_change` as a nonsticky per-call operation,
+staging a separate complete prior before its existing atomic state replacement.
+Policy/snapshot formats and default cold fits remain. Caller owns roles/budgets;
+the operation adds no replay/history or runtime. Contextual routing/composition
+has not adopted this port yet. [Contract](docs/linear-minimum-change-owner.md).

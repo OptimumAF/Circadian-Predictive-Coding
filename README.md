@@ -1,5 +1,73 @@
 # Circadian Predictive Coding
 
+The recurring ticket command now accepts the [current-packet linear learner](docs/current-linear-learner.md).
+The [single-head case](docs/reports/linear-context-return-20261029.md) learns both
+contexts and recovers A invoice, but forgets other tasks. The explicit
+[two-head extension](docs/reports/context-linear-heads-20261029.md) retains all four
+known tasks through A→B→A, using public context labels and more coefficients.
+Those original commands use frozen candidate readouts and leave the deployed actor unchanged.
+No CPC or generalization benefit is established.
+
+The explicit [owned LS serving option](docs/context-linear-serving.md) now uses
+the existing live actor, promotion guards and rollback. Full Windows/Linux CLI
+checks publish a policy that completes six known workflows, serve78worker
+requests, then restore the exact source. This is scoped TRAIN-template serving
+evidence, not an autonomous adaptation or CPC advantage claim.
+
+The optional [arrived-TRAIN error control](docs/context-linear-adaptive-serving.md)
+now fits only when the current candidate exceeds the existing error threshold
+and verifies correct acknowledgements. Both platform CLI checks consume six
+packets with two child fits and four ACKs, retaining seven diagnostic reads/
+57rows of cost. All six published known workflows complete; calibrated shift
+and broader scientific claims remain open.
+
+The optional [before-wake calibration API](docs/arrived-calibrated-shift.md) now
+checks a predeclared TRAIN prefix and keeps an owned fixed diagnostic baseline
+separate from the learner. Scripted checks cover prefix suppression, incident
+edges, unreachable thresholds and paid failures; native detection remains open.
+
+The opt-in [joint rehearsal API](docs/context-joint-rehearsal.md) now fits current
+and retained same-context TRAIN examples together through the existing stream.
+Its corrected stream fixture executes all six known workflows after old/new/
+old-task return. A frozen scientific comparison and broader retention claims
+remain open; replay exposure and memory are explicit.
+
+The ticket qualifier now has a disposable [fixed linear TRAIN-fit reference](docs/context-linear-reference.md).
+Its 27 focused checks pass on both platforms. The frozen study stopped before
+fitting because of a cross-platform source-path error, so scientific fit/task
+outcomes remain unknown. [Failure, costs and limits](docs/reports/context-linear-reference-20261029.md).
+
+An optional [`native` installation extra](docs/native-ticket-setup.md) now declares
+Torch for the native ticket/array heads. A [fresh installed wheel check](docs/reports/native-ticket-installed-20261029.md)
+passes with an explicitly reused Linux Torch SDK; fresh SDK installation and
+broader release readiness remain unqualified.
+
+The recurring workflow now offers [explicit current-batch class-balanced BP](docs/context-return-stream.md#current-batch-class-balanced-bp).
+Its checks pass, but the [single frozen development case](docs/reports/context-class-balanced-20261029.md)
+still misses all ready actions and ordinary tasks. The unweighted default stays
+available; weighting has not established useful acquisition or recovery. The
+[underlying array helper](docs/torch-array-weighted.md) preserves ordinary BP
+exactly for all-one weights.
+
+Optional [native TRAIN fit diagnostics](docs/reports/context-train-fit-20261029.md)
+now show that BP's recurring-workflow failures already occur on the ready-phase
+TRAIN actions, despite falling aggregate loss. Training and task outcomes remain
+unchanged; the diagnosis establishes no successful repair or circadian benefit.
+
+The [context-return workflow now accepts the existing native learners](docs/context-return-stream.md#native-family-context-return).
+Its [fixed four-family observation](docs/reports/native-context-return-20261029.md)
+completed, but all ordinary tasks failed at every checkpoint. The D9 adapter
+works; useful BP/PC/CPC acquisition and a circadian advantage remain unproved.
+
+The [fresh ordinary serving command](docs/fresh-paired-serving.md) now trains and
+qualifies its source from zero, then learns paired tasks through the existing
+guarded runtime. Its single joint qualification passed all six published task
+checks and eight fixed late worker checks, paying 18 training passes/120 row
+exposures. [Evidence and limits](docs/reports/fresh-paired-serving-20261029.md)
+separate known-task retention from recovery, generalization and release claims.
+The [new offline wheel qualification](docs/reports/fresh-paired-installed-20261029.md)
+also passes from a clean installed Linux environment without checkout reads.
+
 The [affine command supports fixed TRAIN reference windows](docs/attribution-reference-window.md):
 no learning, periodic, explicit-feedback drift and budget-aware updates, with
 pending work kept visible. `--reference-retain-arrived` composes the existing
@@ -324,6 +392,21 @@ case both learned the two new tasks; replay retained4/4 old tasks versus2/4 at
 equal native updates, rows and head exposure. Both ended6/6 after the return.
 Preview reads no source or model. This is conventional same-template evidence;
 costs, failed engineering checks and broader limitations remain explicit.
+
+The [paired-head ordinary TRAIN recipes](docs/paired-context-training.md) now use
+that task family through the existing guarded serving path. In one fixed case,
+joint rehearsal preserved4/4old tasks during learning versus2/4for current-only;
+both recovered, published the same final learner and served7/8fixed late ordinary
+slots. This establishes no serving or circadian advantage.
+
+Its explicit [learning-boundary API](docs/paired-learning-boundary.md) now publishes
+qualified learning before return. In a separately frozen local case, joint
+rehearsal published at10 and served8/8 late ordinary slots; current-only's guard
+refused an old-task regression, then published its repair at16 and served7/8.
+Both finished6/6 tasks and rolled back fully. This is known-template usefulness;
+generalization and circadian benefit remain unqualified. The same guide now
+documents `--context-publish-after-learning` in the existing live command and
+source-free preview, with scoped zero-model CLI/output qualification.
 
 The [fresh private workflow](docs/context-head-fresh-workflow.md) trains that
 paired-head source from zero and runs the same private controls without a
@@ -8843,3 +8926,111 @@ including when no learning occurs. Measurements use a separate readonly reader,
 exclude replay/probe/final rows, and do not change reference choices. Counts,
 time, memory and failed work are explicit. This is verified diagnostic software;
 useful task-change detection still needs a frozen local experiment.
+
+The existing TRAIN scheduling Python API also supports an explicit
+[calibrated incident composition](docs/calibrated-shift-schedule.md): correct
+packets are verified against the current learner and acknowledged; incident
+onsets permit bounded work on already-arrived packets. It preserves original
+time and update limits. Scripted tests pass on Windows and Linux; the owned LS
+native qualification is described below. See the
+[executed checks, failures and costs](docs/reports/calibrated-shift-schedule-20261029.md).
+
+The normal owned LS command now offers
+[`--incident-stream` and `--calibrated-serving`](docs/context-incident-serving.md).
+Four small native cases completed: both shifted controls learned two new known
+task pairings and retained four old tasks. Calibration used extra diagnostics
+and published one tick later with the same final model; the simpler error/ACK
+control remains the default. See [results and costs](docs/reports/context-incident-serving-20261029.md).
+
+The existing contextual catalog also has an explicit
+[LS source/replay Python binding](docs/context-linear-catalog.md). One bounded
+private replay→wake integration passed with complete source history and separate
+wake/replay charges. A [fixed private live trial](docs/context-linear-live-catalog.md)
+is now available in the normal CLI. It learned one missing legacy task but lost
+two old tasks; the served source stayed unchanged. The
+[owned catalog study](docs/context-linear-catalog-study.md) now fits and freezes
+the existing chooser on six TRAIN trials. Its bounded application chose waiting
+in both contexts, retaining old tasks while leaving one new task unlearned.
+Generalization and beneficial adaptation remain unverified; defaults are unchanged.
+
+For a conventional retention-preserving training packet, the explicit
+[same-context joint LS mode](docs/context-linear-same-context.md) reuses the
+existing joint TRAIN recipe through the fresh workflow. Its bounded observation
+published an actor that passed all six known tasks, including the previously
+failing legacy task. The old-only return changes a private candidate separately;
+the accepted served snapshot and exact rollback remain isolated. This is known
+TRAIN task usefulness, not held-out generalization or a circadian comparison.
+
+That same-context mode also supports `--adaptive-serving`: current-candidate
+verification acknowledges correct repeated/return packets instead of refitting.
+The [bounded ACK observation](docs/reports/context-same-context-ack-20261029.md)
+used one joint fit and two acknowledgements, retaining6/6known tasks in both
+the final private candidate and published actor. Diagnostics and both engineering
+attempts remain paid; no overall efficiency or generalization claim is implied.
+
+The [fresh owned LS reference comparison](docs/context-owned-reference-validation.md)
+now tests two existing withheld-order recipes with no learning, periodic fitting
+and verified acknowledgements. All candidate task readouts wait for all six
+cases. ACK used fewer fits but matched periodic endpoints: one order learned the
+new task while losing two old tasks; the other ended with source abilities.
+This negative retention result is preserved. The full learned-controller and
+model-family comparisons remain open.
+
+The [ordinary packet rehearsal API](docs/context-packet-rehearsal.md) now retains
+the complete episodes inside three- or six-row TRAIN updates without splitting
+the paid wake. Bounded stream checks retain supplied old/new TRAIN rows through
+an old-task return, including pause/resume and explicit repeated-row costs.
+This removes a packet geometry prerequisite; deployed serving and a new fair
+retention comparison remain open. [Executed checks and limits](docs/reports/context-packet-rehearsal-20261029.md).
+
+The [retained private-serving mode](docs/context-retained-serving.md) connects
+that rehearsal to ordinary serving updates. One native case ended with all six
+known TRAIN tasks solved by the private candidate, while the original actor kept
+serving unchanged. The child paid six wake fits and five joint fits/72 rows;
+including source preparation,23 solves/144 rows. That private mode keeps the
+actor unchanged; fair comparative evaluation remains open.
+[Checks, costs and preserved failures](docs/reports/context-retained-serving-20261029.md).
+
+The explicit [guarded retained-serving mode](docs/context-retained-publication.md)
+now publishes that candidate through the existing promotion policy. One native
+case served all six known TRAIN tasks from the accepted actor, then rolled back
+to the exact source model and its original legacy-task failure. Source included:
+23 solves/144 rows; no unseen-task or comparative benefit claim.
+[Executed serving, rollback and limits](docs/reports/context-retained-publication-20261029.md).
+
+The existing [isolated LS probe API](docs/context-linear-transfer-probe.md) now
+accepts fixed parcel-v1/password-v2 task/head combinations and a current donor's
+native counters. Admission checks supplied task/role/label semantics before
+forking; probe and old-TRAIN return update only a disposable learner. Both
+platforms passed the bounded software checks, preserving new-task loss on return
+in the literal fixture. [Execution and scope](docs/reports/context-linear-transfer-probe-20261029.md).
+
+The [owned retained-donor workflow](docs/context-retained-transfer-probe.md) now
+runs that private probe on its actual learned candidate after serving workers
+close. One bounded native observation learned both selected tasks while old-task
+success fell4/4 to2/4; old-TRAIN return restored4/4 but lost both selected tasks.
+The original actor and learner stayed unchanged. This demonstrates fixed-task
+learning and recovery, with simultaneous retention still unresolved.
+[Checks, full costs and limitations](docs/reports/context-retained-transfer-probe-20261029.md).
+
+That workflow now accepts [explicit joint TRAIN rehearsal](docs/context-retained-joint-probe.md)
+during its isolated probe. It combines transient probe rows with the existing old
+TRAIN bank; an equal-row current-only option is available. Software fixtures solved
+all six fixed tasks after joint probing, while current-only lost two old tasks.
+Both lost the selected tasks on old-task return. Original serving state stayed
+unchanged. One [real-source native qualification](docs/reports/context-retained-native-joint-probe-20261029.md)
+also retained all four old tasks while learning both selected tasks after joint
+probing, then lost the selected tasks on old return. The [native current-only control](docs/reports/context-retained-native-current-control-20261029.md)
+used the same physical fits/rows and matching learned starting state: it retained
+two of four old tasks after probing, while joint retained four. Both lost the
+selected tasks on return. This fixed-case result does not establish matched total
+compute or broader scientific benefit.
+[Executed checks, failed commands and costs](docs/reports/context-retained-joint-probe-20261029.md).
+
+
+The generic linear owner now has an [explicit minimum-change update](docs/linear-minimum-change-owner.md)
+that reuses the existing wide residual arithmetic and preserves prior components
+invisible to a new packet. Ordinary fits remain cold refits. Both platforms passed
+the bounded math, ownership, failure and delayed-TRAIN checks; contextual/native
+retention with this port is still unverified.
+[Implementation, costs and remaining work](docs/reports/linear-minimum-change-owner-20261029.md).
