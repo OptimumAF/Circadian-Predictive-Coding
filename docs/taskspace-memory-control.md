@@ -1,5 +1,16 @@
 # Fixed-input taskspace memory control
 
+An existing memory checkpoint can now enter the [isolated reserved-task probe](nearest-reserved-probe.md)
+through the existing continuous probe runtime. One private append stays within
+256prototypes; source/actor and score-only test inputs remain protected. Scoped
+software behavior is verified. One [reserved23/24 imitation probe](reports/nearest-reserved-probe-study-20261101.md)
+has completed with lower test error and unchanged three stored old TRAIN scores;
+The [native follow-up](reports/nearest-reserved-native-study-20261101.md) found
+reset24still fails before/after. An [original training23 qualification](reports/nearest-training-native-20261101.md)
+then changed failure50→success18 after the private append and exactly reproduced
+its18model-input/action rows. Known-training reproduction does not establish
+unseen transfer, broader task learning or a circadian benefit.
+
 The existing bounded nearest learner can explicitly keep already-scaled inputs.
 `FixedInputNearestContinuousBCPolicy(spec)` selects identity copies and stores
 `observation_standardization=None`. The original `NearestContinuousBCPolicy`

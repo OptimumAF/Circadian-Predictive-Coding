@@ -1,5 +1,12 @@
 # Install and check the affine workflow
 
+The [current all-old package attempt](reports/all-old-affine-wheel-20261031.md)
+built and privately installed a new Windows wheel containing the adaptation guide.
+Seven isolated parser/refusal cases and the generated console's expected
+description ran, but the smoke and saved-log checks failed. Full qualification
+remains open; final byte-identity checks and some origin/resource records are
+unavailable. This does not renew any native allowance or qualify a full release.
+
 The base package needs Python 3.11+ and NumPy. It supports bundled TRAIN data,
 command descriptions and saved-result inspection. Playing native games also
 requires the pinned `minigrid` optional dependencies declared in pyproject.toml.

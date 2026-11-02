@@ -11,6 +11,32 @@ The second command needs both qualified local sources, optional MiniGrid
 dependencies already available, and a prospective budget. Existing outputs and
 fit overrides are refused. Old CLI modes/defaults remain. No new dependency.
 
+The ordinary after-C probe also accepts explicit `--probe-update minimum_change`
+(API `probe_update="minimum_change"`). For a description without model work:
+
+```powershell
+python -m scripts.run_minigrid_linear_fit_control --context-linear-probe --probe-update minimum_change --describe
+```
+
+Only the disposable child uses the existing incremental least-squares operation.
+Its owned forks keep the choice; a snapshot restored into an ordinary learner
+still uses the cold default. Original six-update/108-row admission, two F updates,
+collection, old-task monitors, roles, limits and clocks remain. The new option
+refuses retained-A4, return, native-game and other CLI profiles before collection
+or model/source work. Omission preserves earlier cold behavior and reports.
+Changed intent or child ownership refuses further work and retains known paid
+work, including a successful fit whose outer return is lost.
+
+[Focused software checks](reports/minigrid-minimum-change-probe-20261031.md)
+exercise actual adapter/runner/CLI isolation with scripted fits, predictions and
+collection. One [actual incremental fixed case](reports/minigrid-minimum-change-probe-native-20261031.md)
+fits F15/18→18/18 while A stays18/18 and B/C each fall17/18. Source state is
+unchanged. Historical cold endpoints are16/14/14 on A/B/C with the same F fit;
+the descriptive applicability checks pass, but total computation is not matched.
+Native learned gameplay, recovery and generalization are unmeasured for this
+incremental case; original engineering timing-proof qualification remains open.
+The observed diagnostic below remains the original cold case.
+
 It collects the existing Fblue/Fred train/test teacher episodes, seed17/max16,
 then fits only the firsttwo predetermined training packets on one disposable
 fork. The original16train/2test release is validated before selection. All7
@@ -34,7 +60,7 @@ work/readouts and one private endpoint; budgets and clocks cannot renew.
 No final/controller-validation data, replay, return phase or promotion. The
 existing16step return option remains available elsewhere with its own criteria.
 
-## Observed fixed diagnostic
+## Observed original cold diagnostic
 
 | Private probe updates | F correct | A correct | B correct | C_train correct |
 | ---: | ---: | ---: | ---: | ---: |

@@ -1,5 +1,13 @@
 # Isolated continuous fresh-task probes
 
+The existing API also supports an explicit [fixed-input nearest memory control](nearest-reserved-probe.md):
+one private reserved-packet append, source/actor unchanged, score-only test/old
+inputs, prototype/retrieval costs and guarded partial results. Scoped software
+checks pass. One [reserved-memory imitation case](reports/nearest-reserved-probe-study-20261101.md)
+improved score-only24error while three stored old TRAIN scores stayed unchanged;
+native24success is unmeasured. The accepted neural
+experiments below remain unchanged and are not matched-compute memory comparisons.
+
 ## Accepted private probe after three-context recovery
 
 The fixed rehearsed48/2896 BP policy retains local imitation learnability under
@@ -435,3 +443,92 @@ The next R4.5 integration is exact PC/CPC admission/fullwake frozen checking in
 the existing robot rollout; real simulator/constraints/generalization remain open.
 [All executed commands, failures, gains/costs and next action](../artifacts/runs/continuous-probe-direction-20261020/RESULTS.md) ·
 [independent review](../artifacts/runs/continuous-probe-direction-20261020/REVIEW.md).
+
+## Fixed native neural probe-training readouts
+
+The existing frozen robot rollout now accepts explicit `probe_train_seed=23`
+for exact BP/PC/neutral-CPC/active-CPC as well as nearest-memory learners. This
+is inference on the reserved training reset, with the original TRAIN-policy,
+role/spec/reset/exclusive-mode and frozen-owner checks. It grants no training,
+role conversion or publication. The new neural23 output retains independent
+attempted/returned controls in `neural_probe_control_calls`, scoped native work
+in `neural_probe_work_scope`, and uncertainty in
+`unreturned_neural_probe_control_possible`, including a failed work getter.
+Default TRAIN and reserved24 routes retain their contracts.
+
+[The executed BP probe](reports/neural-native-probe-20261101.md) completed16
+private SGD updates but both23/24 native resets failed before and after. Fresh
+imitation improved and all3old imitation errors worsened. Native old17 was
+partial and old19/20unrun after a logical-copy cap; retention/recovery are unknown.
+Four-family literal boundary checks passed; only BP received this native study.
+Its spent protocol is not a runnable example allowance. Reuse captured evidence,
+not its exclusive-marker command. No scientific advantage or release claim.
+
+## Explicit disposable full-network fitting control
+
+For an exact BP source, opt in on the existing plan:
+
+```python
+plan = ContinuousProbePlan(
+    training=reserved_training,       # released probe_train episode
+    evaluation=reserved_readout,      # probe_test; inference only
+    updates=2,                       # prospectively authorized dose, at most16
+    optimizer="full-gauss-newton",
+)
+report = run_continuous_probe(source, plan, training_readouts=old_train_episodes)
+```
+
+This uses the existing delayed-label runtime and shared owned all-parameter
+proposal/commit. An immutable binding admits only the released training packet's
+exact features/targets. The child retains its TRAIN policy; separate runtime
+`probe_train` authority permits the private update without relabeling data or
+calling the public TRAIN-only fitting entry. Source, deployed actor, old TRAIN
+readouts and reserved evaluation labels supply no updates or replay. The returned
+report contains scores/receipts/costs, never the adapted learner or weights.
+
+Default `optimizer="sgd"` retains its previous schema and behavior. Full-network
+mode rejects PC/CPC/nearest and SGD-specific direction/zero-velocity controls
+before fitting. Each accepted update pays one proposal, original loss/kernel
+and solver work, and resets all momentum. It is not equal compute to one SGD
+update. Per-update records retain `loss_after`, `step_norm`, `momentum_reset` and
+the owned `work` counters. Boolean unknown flags remain booleans; derived SGD
+cost fields are inapplicable and zero, with `bp_sgd_cost_applicable=False`.
+Solver arithmetic/workspace, additional copies and process RSS remain extra.
+
+A failed native step preserves `failed_native_work`; already returned updates
+remain charged after later history erasure/injection or candidate replacement.
+Failure permanently refuses more work/forking on that private port. A new probe
+call is a new prospectively budgeted scope, never automatic retry or renewal.
+
+[Scoped implementation evidence](reports/private-full-fit-probe-20261101.md):
+21final literal checks passed, including actual delayed two-update composition;
+this is not native task success, acquisition/retention/recovery or comparative
+benefit. The previous SGD native negatives and missing retention remain intact.
+A real comparative case still requires a separate frozen reviewed protocol.
+
+The subsequent [fixed native fitting control](reports/private-full-fit-native-20261101.md)
+completed16private full-network updates. Training23MSE fell to .0000296891, yet
+both fresh native resets failed and all3old native tasks lost their previous
+successes in the private learner. Original source/deployed actor stayed unchanged.
+All final integrity/resource gates passed. This negative is retained alongside
+the earlier incomplete SGD case; it does not complete that case's missing gates
+or establish native acquisition, recovery, generalization or CPC benefit.
+
+## New reserved-training labels on learner-visited states
+
+The [fixed23 correction path](reserved-student-corrections.md) now collects
+separate provisional teacher targets on a frozen student's actual raw42trace,
+then passes arrived labels into the existing private probe runtime. It uses
+explicit new `ProbeCorrectionConsent` and keeps TS12 history tied to executed
+student commands. Original TRAIN APIs,18row teacher exports and24/final refusals
+remain intact. 39distinct literal checks and one metadata-only capture check
+qualify the scoped software; real corrective native benefit remains unmeasured.
+
+
+## Explicit private full-network joint rehearsal
+
+The existing BP full-network probe now accepts separately consented old TRAIN
+replay inputs and their original exposure budget. Readouts remain score-only
+unless explicitly supplied as replay. [API, role/cost limits and focused checks](private-continuous-rehearsal.md).
+This is scoped software correctness; actual native acquisition/retention benefit
+is unmeasured. Existing negative controls and default probe behavior are preserved.

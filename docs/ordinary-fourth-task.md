@@ -148,3 +148,34 @@ The checkout also offers a fixed [A4 development-layout observation](affine-deve
 from the actual saved ordinary main model, with no fitting or teacher work. The
 sole case was1/2: blue truncated after16 steps, red succeeded after13. This
 preserves known G/A results while exposing a bounded transfer limitation.
+
+## Repeated-current baseline
+
+The existing workflow exposes the same ten-arrival recipe with only current
+TRAIN packets repeated to match the joint recipe's physical fit-row shapes:
+
+```powershell
+python -m scripts.run_minigrid_linear_fit_control --example-affine-recurring --recurring-current-only --describe
+```
+
+Python callers use
+`run_workflow(recurring_training=True, recurring_current_only=True)`.
+This cold-only option refuses private/A4/minimum-change modes and changes no old
+default. Actual execution performs native work and needs a prospective allowance;
+the recorded397case is spent and must not be rerun for documentation.
+
+Why this: extra exposure alone must be separated from old-data reuse. Both
+recipes have10fits/252rows, but this control's162extra rows repeat CURRENT data,
+with0prior-packetreplay/0retainedbank.18return-A arrival rows still reuse A data;
+source/plan/stream/snapshot storage and controller/validation work remain costs.
+Different rank/SVD/memory/wall prevent equal-compute claims.
+
+The sole fixed current-only observation reached G18/18 TRAIN actions, then lost
+G to15/18 when A returned. Final native G0/2 and A2/2; all six environments closed.
+Accepted historical joint retains all four TRAIN tasks and solves G/A4/4, with
+its earlier confidence regressions unchanged. This is a historical known-task
+reference, not fresh pairing, generalization, reliability or CPC advantage.
+Native G at update8 and pre-return A goals were unmeasured; action-score recovery
+must not be described as measured native-goal recovery.
+
+[Executed implementation,95distinctchecks, independent review, full costs and limits](reports/recurring-current-workflow-20261101.md).

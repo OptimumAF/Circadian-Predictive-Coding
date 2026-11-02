@@ -1378,7 +1378,30 @@ Pick/Push rollout ports at one detached final checkpoint. It owns bounded partia
 capture and validates prior model/report/file evidence before each next scene.
 Native results never feed training or promotion; no inner-layer dependency changes.
 
+The explicit `--training-probe ORIGINAL23_JSON` mode qualifies one separately
+supplied fixed-digest probe_train23 export through the existing single-role IO
+helper. The same adapter's typed `run_demo(..., training_probe=episode)` owns and
+validates it, prepares the existing seven-packet source stream, then calls the
+existing private delayed nearest probe at the final detached checkpoint. CPU
+fit/conflict/provenance reports require no SDK. The optional outer native
+composition observes that probe's two borrowed endpoints through the original
+probe_train23 port; `NativeScene` retains ordinary TRAIN17/19/20 rights only.
+Pure paid-prefix witnesses surround capture reads and run before further work;
+bounded failure captures retain paid returns. No evaluation packet, source
+promotion, adapted-model export, new runner or dependency is introduced.
+
 ## Bounded grouped supervision diagnosis
+
+`core/continuous_command_fidelity.py` describes bounded normalized actions after
+native32 conversion, preserving original row/stage provenance and cumulative
+conversion/comparison/payload costs. It contains no learner, role authority or
+IO. The explicit `command_fidelity=True` TRAIN readout captures the existing
+residual predictions through `continuous_learnability_modes`, then applies that
+pure helper after retaining paid residuals. Default calls use the original BP
+method unchanged; no extra model pass, evaluator, runner or dependency is added.
+Source/detached/paid-input/work witnesses enclose the description. Gripper margins
+describe analog endpoint alignment, never a new native threshold or success rule.
+[Usage and boundaries](docs/train-command-fidelity.md).
 
 A new pure core composition calls the unchanged100-row consistency kernel in bounded group blocks and maps all pairs to original global identities. The outer fixed CLI admits accepted TRAIN inputs and checks both byte sources after math before publication. Paid partial work remains visible. Why: test exact supervision ambiguity without changing learner/labels or broadening the existing kernel; no new runner, dependency or inner-layer IO.
 [Usage, boundaries and commands](docs/aggregated-supervision-consistency.md) · [Evidence and next action](artifacts/runs/aggregated-supervision-consistency-20261021/RESULTS.md).
@@ -1811,6 +1834,14 @@ work remain outside GN benchmark authority; fulloriginal benchmark is checked
 unchanged. No production wrapper or new framework was added. [Evidence](artifacts/runs/gn-checkpoint-probes-20261021/RESULTS.md).
 
 ## Original-MSE BP head update (2026-10-20)
+
+The separate `core/continuous_full_gauss_newton` opt-in owns a bounded full-MLP
+logit Jacobian and generalized curvature for the original normalized MSE/optional
+gripper2z CE/positive weights. One damped solve and one original-loss trial can
+change every parameter block. Existing `adapters.numpy_continuous_bc` alone owns
+TRAIN role checks, normalization, original nested owners, atomic commit and all
+momentum reset; core grants no runtime/evaluation/IO authority. Default SGD/head
+methods are unchanged. [API and scoped evidence](docs/bp-full-network-fit.md).
 
 core/continuous_head_gauss_newton owns pure bounded linearization, one damped
 per-active-axis solve, global head-step cap and original-objective acceptance.
@@ -2299,6 +2330,23 @@ preserves existing reports/calls; no native optimizer API or new runner.
 [Accepted evidence](artifacts/runs/continuous-probe-direction-20261020/RESULTS.md).
 
 ## Current integration: disposable continuous probes
+
+The nearest training-only entrypoint in this adapter uses an explicit owned
+single-packet plan with no evaluation object and the same delayed private-update
+runtime. `continuous_nearest_probe` composes existing nearest/residual/consistency
+core kernels, retaining training-fit/selection/conflict evidence and paid work;
+it supplies no data loading, scheduling or model release. The script's separate
+train23 reader reuses original per-role qualification without opening test24.
+Why: demonstration fitting must be observable without importing transfer labels
+or enabling neural gradient diagnostics. Existing paired paths remain unchanged.
+[Training-only contract](docs/nearest-training-diagnostic.md).
+
+That training-only wrapper optionally forwards the existing synchronous endpoint
+observer with its full nested identity witness. Explicit frozen native23 history
+binds original probe_train role/context to a distinct inference trace, preserving
+the teacher source identity. It grants no new labels, training conversion or other
+reset rights. Native costs/capture/prior-evidence guards remain caller-owned;
+the frozen port guards full source/private state and paid controls through cleanup.
 
 continuous_probe.py is a focused adapter leaf composing the existing probe_train
 ActorShadowRuntime. The existing continuous runner invokes four fixed independent
@@ -2882,6 +2930,14 @@ ADR0455. The generic runtime is not yet wired to this continuous recipe; stage
 acquisition evidence does not imply deployed online adaptation or visual support.
 
 ## Bounded continuous nearest-observation control
+
+Explicit continued-memory mode adds `core/nearest_retention` (pure existing-rule
+selection) and `adapters/numpy_retained_nearest_bc` (distinct full snapshot,
+bounded IDs/counters and inherited prediction math). The same delayed sequence
+accepts it only with fixed-input TRAIN retention. Cumulative exposure is separate
+from stored rows. Known-TRAIN Pick/Push explicitly admit only the exact new
+full-state type; reserved/probe/publication admission remains unchanged.
+No new runner, optimizer or dependency. [State/cost contract](docs/retained-nearest-memory.md).
 
 core/nearest_continuous_bc depends inward on continuous data/array contracts and
 owns pure retrieval/work counts. adapters/numpy_nearest_continuous_bc owns frozen
@@ -7708,5 +7764,199 @@ kernel in the core, behind their existing distinct geometry gates. The generic
 owner exposes `train_batch_minimum_change` as a nonsticky per-call operation,
 staging a separate complete prior before its existing atomic state replacement.
 Policy/snapshot formats and default cold fits remain. Caller owns roles/budgets;
-the operation adds no replay/history or runtime. Contextual routing/composition
-has not adopted this port yet. [Contract](docs/linear-minimum-change-owner.md).
+the operation adds no replay/history or runtime. The contextual owner now delegates
+an explicitly named operation to that generic port after homogeneous public-tag
+routing, retaining strong raw-owner references through one whole-state commit.
+Its ordinary cold path remains unchanged. The existing retained-probe composition
+can choose a disposable subclass whose forks keep the explicit operation; original
+source/actor guards and F/return stream remain. CLI opt-in is sequential LS only,
+paid intent and16 diagnostic records per phase are validated, no learner mode or
+new runtime is stored. Native retention remains separately unverified.
+[Contract](docs/linear-minimum-change-owner.md).
+
+Ordinary separate-head LS source/live training uses one shared counted-learner
+helper. Its optional `train_update` selects the explicit operation in the existing
+invocation/fork closure, with original callbacks and stream/rehearsal accounting.
+Paid root/child method intent is guarded for both explicit and omitted cold choices;
+no model mode or probe-state promotion. Existing APIs refuse other modes until
+separately qualified. [Ordinary scope and partial legacy outcome](docs/reports/context-minimum-change-train-20261029.md).
+
+`core.probe_task_outcomes` owns pure endpoint changes and conditional recovery.
+`app.reserved_probe_summary` admits fixed ordinary TRAIN episode headers,
+withholds comparisons for incomplete six-task phases and projects paid work into
+a detached result. Runner appends it after original source/probe/failure
+bookkeeping. Neither module imports learners, numerical libraries or outer
+adapters; summaries never feed training or selection. Original A/B summaries,
+raw authority and cost records stay authoritative.
+[Scoped evidence](docs/reports/reserved-probe-summary-20261030.md).
+
+The existing `ticket_native_probe` handoff explicitly supports a direct contextual
+LS source alongside native families. It selects the existing minimum-change owner
+only for detached LS descendants, uses pure comparison and LS typed readers,
+and preserves native defaults. Original source authority and separate F/return
+sessions remain with the existing runner/app. Completed LS readout pins have
+three-phase storage bounds;326's summary remains post-run metadata. The existing
+retained23/144 donor route is distinct from this12/72 entry.
+[Software evidence and limits](docs/reports/ordinary-linear-reserved-probe-20261030.md).
+
+`app.reserved_probe_inspector_projection` validates fixed ordinary report families,
+roles/task headers, phases and bounded saved curves, then projects detached source
+cells. It does not recompute summaries, authenticate preservation or import a
+learner/numerical library. Existing `app.key_door_inspector` dispatch and
+`infra.key_door_inspector_files` publish through the shared inert offline template;
+its optional branch renders four CE panels and source dialogs. Why this: one
+saved-value boundary preserves unknowns and adverse curves without a parallel
+viewer/runner. A new source family needs its own admission tests; absent data
+must remain unknown. [Usage and boundaries](docs/ordinary-probe-inspector.md).
+
+`scripts.ticket_ce_tasks` composes the existing TRAIN-only CE fitter, frozen
+typed predictor and task loop after the ordinary runner qualifies checkpoint12.
+The runner retains source/seed/actor/RNG and original budget authority. A returned
+closure pins auxiliary evidence and clocks through finish and final report
+callbacks; corruption preserves canonical paid records and refuses completion.
+Why this: fitting is separate from source training and publication authority,
+so a successful auxiliary rollout must not become an unguarded actor update or
+claim free SGD/rehearsal. No new learner or orchestration layer is introduced.
+[Usage and limits](docs/ordinary-ce-tasks.md).
+
+CE source validation uses the ordinary public snapshot until stream finish.
+After observed successful finish, a private sealed read holds the existing lock,
+verifies finish-record/runtime/candidate ownership and original bindings, then
+uses the same runtime snapshot. Helper source/fit/receipt/budget pins stay active.
+Why: final read validation must preserve the public open-only boundary, without
+reopening the stream. [Repair evidence](docs/reports/ordinary-ce-guard-diagnosis-20261030.md).
+
+`core.shared_linear_replay` composes bounded owned arrays for joint and equal-row
+current-only shared-head updates; it grants no role or replay authority.
+`scripts.ticket_linear_rehearsal` certifies two fixed, originally consented arrived
+TRAIN packets from the live source and binds a separate paid auxiliary session
+to the existing isolated fresh/return callback. Diagnostic monitors never supply
+fitting labels. Original source/actor/probe clocks and ownership remain with the
+existing runner. Known application requires a verified post-state; unreadable
+application stays unknown and stops further work. Why this: reuse the runner and
+LS operation while separating private fitting from deployment/source authority.
+The single admission/failure boundary keeps its receipt ledger together rather
+than introducing another orchestration layer.
+[Usage and cost scopes](docs/shared-linear-probe-rehearsal.md).
+
+Ordinary shared-head TRAIN replay can explicitly bind `SharedJointReplayPolicy`
+at the existing `StreamRehearsal` joint boundary. The contextual policy still
+requires routed heads; shared mode requires the existing two-key coverage bank,
+original per-experience replay consent, and TRAIN-only source geometry. The same
+consolidation port fits one current-plus-distinct-retained packet and charges all
+matrix rows. A single bounded bank ownership/value pin advances only at owned
+arrival/selection or authorized continuation, while prior event/budget guards
+remain active. Proposal application, uncertain returns and candidate publication
+are separate; none promotes the actor. No second bank, solver or runner is added.
+[Ordinary joint mode and costs](docs/linear-train-replay.md).
+
+The optional once-return recipe validates the full original bank, then removes
+only the whole TRAIN packet already present as current input. Its separate
+288-row authority and observed6/12row charges stay in the same callback ledger;
+the pure core grants no replay role. Why: eliminate a known duplicate exposure
+without changing the existing18-row default, solver or original source authority.
+
+`adapters.linear_fit_serving` binds exact shared `LinearFitSnapshot` geometry and
+canonical complete state to the existing atomic actor/controller/typed serving
+ports. A private optional guard-validator port preserves contextual validation
+as its default. Shared readers/guards own their fixed schema; fitted/unfitted
+native read work stays separate and lost returns remain paid. No fitting or
+source/replay/publication authority lives in this adapter. Direct tiny atomic
+controls pass. `scripts.shared_linear_publication` composes the same ordinary
+AttributionStream with a birth actor/gate, original source/replay owners and
+paused-source guards. Source/cursor/receipt/bank/clock/paid-row pins remain bounded;
+only observed commit/rollback or owned admission/deferral changes advance their
+matching expectation. A birth-budget identity pin prevents replacement sessions
+from bypassing original per-read wall/RSS checks. Guard instrumentation wraps
+existing measurement; the controller publishes plain learners. Typed/generic
+native reads preserve actual slot/version, rollback and stale/refusal behavior.
+Scripted ordinary integration passes; genuine ordinary serving remains unqualified.
+[Usage, costs and qualifications](docs/shared-linear-serving.md).
+
+
+## Public-cue recurrent reward component
+
+`src/adapters/minigrid_public_cue_reward.py` wraps the existing two-head owner
+with an exact TRAIN trajectory/full behavior DTO. Initial public cue selects
+one native gamma1 reward update, keeping the inactive head and full optimizer
+continuation. Native reward mathematics and ordinary BC remain unchanged.
+The adapter delegates collection/release/budgets to existing MiniGrid collector
+and ActorShadowRuntime ports; it does not add a runner or evaluation authority.
+Local identity/value guards cover nested native and packet ownership across
+callbacks, and lost/corrupt work remains permanently failed.
+Usage and qualification limits: docs/public-cue-recurrent-reward.md.
+The single-use `minigrid_joint_warm` bridge now supplies the actual joint stream
+endpoint to the existing reward pilot's warm-start boundary. It preserves both
+heads and original source/actor/benchmark authority, with distinct reward and
+zero-loss candidates. The common evaluator admits their exact observed TRAIN
+row clocks and records explicit BC/reward/momentum comparison identities.
+The complete command has scoped software evidence; native qualification remains
+unfinished. No new orchestration framework or reward mathematics was added.
+
+The explicit retained-memory API/CLI composes the existing `run_sequence` with
+`ReplayRetentionPolicy` and exact retained native pins. CPU descriptive command
+fidelity consumes already-returned predictions; it never supplies labels to the
+learner. Native endpoint validation keeps cumulative exposure and current search
+bank size separate. Serialized receipt comparison canonicalizes JSON containers
+while retaining primitive types. No new runner, dependency, data authority,
+publication path or layer-crossing import is introduced. See
+[workflow usage](docs/taskspace-memory-demo.md#explicit-bounded-retained-memory).
+
+Explicit retained-source fresh-task probes reuse `continuous_probe` for private
+runtime orchestration and `continuous_nearest_probe` for exact native ownership,
+readout work and storage facts. `advance_retained` validates each declared child
+update. The benchmark source/stable actor, original role-bound data and budget/
+clock/receipt owners stay separate; probe reports export no adapted model. The
+existing generic/neural and append-only entries retain their original admissions.
+
+The retained private23 native readout composes the existing synchronous probe
+endpoint loan with `run_frozen_rollout`. Existing retained full-state/source-fork
+pins and the reserved native-call witness close after opaque public getters,
+including role/reset/history/recipe/spec and original work owners. This adds
+readout authority for original23 only; it adds no runner, learner update path,
+probe-test data admission or model publication/export boundary.
+
+An explicit retained old-TRAIN return composes the same disposable probe loop
+twice through `continuous_nearest_return`. The return owns a separate budget and
+logical clock admitted before private acquisition. Its original unspent witness
+survives source observation and initial boundaries until the existing runtime
+takes budget authority. The earlier private report, borrowed source and original
+owners remain guarded through the child return. Two bounded reports and a
+zero-return score continuity check replace any unbounded success chain. The
+default one-stage route remains separate; see
+[return API](docs/nearest-reserved-probe.md#explicit-old-task-return).
+
+The first-party CPU memory workflow selects this composition explicitly through
+`taskspace_memory_adaptation`. It owns typed reserved-pair/group selection and
+bounded report guards, then delegates source preparation and both private phases
+to the existing stream/probe. IO stays in the existing CLI/strict pair reader;
+fallback uses the already encoded paid birth rather than a mutated live holder.
+The default reproduction/native paths remain separate, and CPU native outcomes
+stay unmeasured. No learner kernel, runner or data authority is duplicated.
+
+`scripts/taskspace_memory_native_adaptation.py` adds an explicit final-endpoint
+observer to this same CPU workflow. It owns five fixed native receipts and four
+Pick captures through existing frozen ports, checks prior birth/holder/file
+identity before further work, and protects the returned CPU report during final
+capture. Original23 keeps its separate inference authority. The report names
+unobserved native phases instead of inferring a native before/after comparison.
+The existing ordinary native and single-training-probe routes remain separate.
+
+
+The nearest-only `RecentPriorityRetentionPolicy` composes the existing ordered-ID
+selection kernel, retained full state, stream and CLI ports. It shares the original
+pure seeded SHA primitive with replay while preserving replay exact-type refusal.
+Why this: binary replay partitions cannot own the continuous-action pairs without
+changing content identity/contracts. A fixed half-capacity recent window and
+priority eviction use bounded current IDs, with no history ledger or new runner.
+Existing source/fork/publication/probe guards and role authority remain in place;
+[semantics and cost limits](docs/reports/recent-priority-memory-20261102.md).
+
+
+The explicit retained TRAIN-only probe reuses `_NearestTrainingPlan` and the
+existing single-probe runtime. The small `continuous_retained_training` data helper
+maps actual selected indices to bounded source/incoming content IDs and records
+coverage/hash/materialization costs. Why this: append offsets become invalid
+after eviction. No new prediction, runner, loader or evaluation object is needed;
+existing native/source/actor/budget/receipt guards own update authority. Membership
+is current-bank content, not historical provenance. [API and limits](docs/nearest-training-diagnostic.md#explicit-retained-train-only-learnability).

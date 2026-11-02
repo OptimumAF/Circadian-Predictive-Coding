@@ -1,5 +1,9 @@
 # Bounded nearest-observation continuous BC
 
+The original append-only behavior below remains unchanged. The explicit
+[continued-memory mode](retained-nearest-memory.md) adds bounded TRAIN retention
+through the existing stream; its new type is not yet qualified for native serving.
+
 This control stores released observation/action pairs and retrieves the physical
 action of the nearest stored observation. It uses frozen TRAIN population
 statistics, squared L2 distance, and the earliest stored row when computed

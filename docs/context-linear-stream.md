@@ -1,8 +1,41 @@
 # Arrived affine TRAIN updates
 
-The separate `ContextLinearLearner` begins untrained. Each admitted homogeneous
-public-cue batch replaces one head using existing fixed one-hot least squares.
+The separate `ContextLinearLearner` begins untrained. By default each admitted
+homogeneous public-cue batch replaces one head using fixed one-hot least squares.
 The other head remains unchanged; unfitted heads predict uniform K7.
+
+The adapter also exposes explicit `train_batch_minimum_change(features, targets)`
+for use under the same exclusive admitted TRAIN lease. The first fit is identical
+to the default; later fits reuse existing core math to preserve coefficients
+invisible to the current rows. This does not guarantee preserving all old
+predictions. It is nonsticky: a later `train_batch` still cold-refits. No old rows,
+optimizer, role authority or budget is stored in the model.
+
+The stream accepts `train_update="minimum_change"`; the choice follows every
+owned candidate fork and does not change a restored snapshot's default operation.
+The CLI exposes `--train-update minimum_change` with `--context-linear-stream`,
+`--example-affine-play` and `--example-affine-recurring`. Omission keeps cold fits.
+Private, A4, reference and unrelated CLI profiles refuse that new option before
+data/model work. For example, this describes the recipe without running it:
+
+```powershell
+python -m scripts.run_minigrid_linear_fit_control --example-affine-recurring --train-update minimum_change --describe
+```
+
+Original data, schedules, role admission, budgets, clocks, receipts and output
+limits remain. Changed update intent refuses further work. The
+[adapter evidence](reports/minigrid-minimum-change-20261031.md) and
+[stream/CLI evidence](reports/minigrid-minimum-change-stream-20261031.md) are
+correctness checks. Integration fits, predictions and game results are scripted;
+they do not qualify learned navigation, held-out layouts, comparisons or release.
+Any genuine execution needs a separately budgeted protocol.
+
+The [single incremental recurring-game qualification](reports/minigrid-minimum-change-native-20261031.md)
+completed 10 solves/252 row exposures and all four final G/A games, each nine
+steps. Old tasks stayed correct in the TRAIN curves, with the original A/C
+confidence regressions. The earlier cold recipe already has the same
+correctness curve and game successes; this result establishes no additional
+navigation benefit, native recovery after forgetting or generalization.
 
 Why this: the successful offline joint model already knows A/B/C and cannot
 establish new-task learning. This owner exposes chronological acquisition and

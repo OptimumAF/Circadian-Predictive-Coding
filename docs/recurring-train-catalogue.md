@@ -120,3 +120,51 @@ source and its ordinary learning/native G/A observation through existing ports.
 This pure/integration fixture result remains distinct from that actual case.
 Reserved F/probe and D/final separation and all failed120/108 evidence remain;
 no native/comparative allowance or retry follows from this API alone.
+
+## Matched physical-row current-only control
+
+The same runner provides an explicit cold-fit control using the current TRAIN
+packet repeatedly, without retaining previous packets:
+
+```python
+report = run_context_linear_stream(
+    episodes, recurring_catalogue=True, recurring_current_only=True
+)
+```
+
+Supply the same eight original TRAIN sources described above; keep
+`retain_arrived=False` (its default). The ten-arrival ABCGA schedule, delay1,
+checkpoints, original ten-update/90s/512MiB limits and deferred TRAIN monitors
+are unchanged. This option refuses joint retention, ABC, A4, reference and
+minimum-change modes. Existing callers keep their behavior. There is no new CLI
+flag, dependency or environment setting. Use
+`describe_context_linear_recurring_current_only()` for metadata without execution.
+
+Why this: a comparison with one nine-row current fit would confound old-data
+reuse with the joint learner's additional physical row exposures. This control
+has multiplicities1,1,2,2,3,3,4,4,4,4 and the same252 fit rows as the recurring
+joint recipe. Reported162 extra rows repeat CURRENT data; prior-TRAIN replay and
+retained bank rows are0. The90 arrivals include18return-A exposures, from72
+distinct source rows. Materialized inputs still cost598752array bytes; a zero
+bank does not mean zero source/plan/stream/snapshot memory. Different matrix
+rank, SVD, memory, copies and wall time prevent an equal-compute claim.
+
+The pure composer also accepts
+`compose_repeated_current_training(ten_episodes, recurring=True)` for exactly ten
+complete alternating-public-cue TRAIN episodes. Omission preserves six arrivals
+and the original1,1,2,2,2,2 recipe. Complete source witnesses and original roles
+remain checked before and during materialization; no trajectories are joined.
+The runner verifies each paid receipt/candidate prefix before the next update.
+Lost fit returns preserve earlier receipts and unknown failed work; they do not
+renew budgets or authorize scoring/incomplete endpoint handoff.
+
+[Software evidence and limitations](reports/recurring-current-control-20261101.md)
+are separate from the accepted joint native observation. Literal solver results
+verify integration, not new learned navigation or a comparison outcome. A new
+native comparison requires a separately frozen small protocol.
+
+That single [workflow/native control](reports/recurring-current-workflow-20261101.md)
+has now completed: G TRAIN actions18/18→15/18 after A returns; final G0/2,
+A2/2, all six environments closed. The existing workflow/CLI expose the option;
+see [usage and comparison limits](ordinary-fourth-task.md#repeated-current-baseline).
+The historical joint result remains a reference, not a new equal-compute/CPC claim.

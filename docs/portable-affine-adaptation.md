@@ -1,9 +1,76 @@
 # From-birth private adaptation and returning-context games
 
-Current qualification is **incomplete**: the sole installed run finished all
+An installed wheel exposes the same options through `circadian-affine-game`:
+
+```text
+circadian-affine-game --example-affine-adaptation --all-old-tasks --describe
+circadian-affine-game --example-affine-adaptation --all-old-tasks --output matched-all-old.json
+```
+
+The wheel includes this guide under `share/doc/circadian-predictive-coding/`.
+Description is metadata only and needs the NumPy base dependency. Actual learning
+and gameplay require the pinned MiniGrid extra, a new output file and an explicit
+local execution budget. Package installation does not renew any spent experiment
+allowance or establish native task success. The all-old roster and original
+matched controls below are unchanged.
+
+The explicit terminal joint-only mode uses the existing stronger affine control:
+
+```powershell
+python -m scripts.run_minigrid_linear_fit_control --example-affine-adaptation --heldout-joint --describe
+python -m scripts.run_minigrid_linear_fit_control --example-affine-adaptation --heldout-joint --output joint-heldout.json
+```
+
+This mode pays the fresh source's six fits/108 row exposures, then only the
+fixed `joint_ABC_F` arm's two fits/72 row exposures. The actual endpoint has
+eight fits/180 exposures and two36-row heads. It plays only D blue/red with
+FINAL roles, seed17 and max16 steps, through the existing read-only kernel.
+There are no F-only fits, repeated known-task games or fits after final access.
+The API option is `run_workflow(private_adaptation=True, joint_heldout=True)`;
+it cannot combine with other adaptation modifiers. The original default
+comparison and historical ordinary10/252 held-out admission remain available.
+
+Why this: the joint control was selected from known TRAIN results before D
+access. Its paid endpoint and returned results are pinned around boundary
+callbacks; corruption refuses completion while preserving paid observations.
+D is excluded from this model's fits but globally seen in repository development.
+This mode does not establish untouched statistical generalization or authorize
+tuning, selection or promotion from final outcomes. See the
+[scoped evidence](reports/affine-joint-heldout-20261031.md).
+
+The earlier installed qualification is **incomplete**: that run finished all
 ten fits and both private comparisons, then reached its declared work deadline
 after five of eight native games. The failed attempt and partial report are
 preserved; no automatic retry is authorized by the recorded protocol.
+
+An explicit full-old readout is now available for the same cold comparison:
+
+```powershell
+python -m scripts.run_minigrid_linear_fit_control --example-affine-adaptation --all-old-tasks --describe
+python -m scripts.run_minigrid_linear_fit_control --example-affine-adaptation --all-old-tasks --output matched-all-old.json
+```
+
+Each original arm reads F blue/red and all old A/B/C_train blue/red tasks, for
+sixteen games total. The learner, original data/seed/metrics, two36-row fits per
+arm, old-TRAIN charges, source6/108 and private8/180 endpoints stay unchanged.
+Readout still has zero updates/replay under the same original shared150s budget;
+whole180s/170s work deadline and512MiB supervision remain. No final labels,
+promotion or source F update enter this workflow. The choice cannot be mixed
+with TRAIN/probe update selection, recurring training or A4. The API option is
+`run_workflow(private_adaptation=True, all_old_tasks=True)`.
+
+The full sixteen-game report uses compact JSON to preserve every value under
+the unchanged4MiB output cap; older modes keep pretty JSON. Focused
+[software evidence](reports/minigrid-matched-all-old-20261031.md) covers40 cases
+per platform, paid-prefix and role isolation, strict admission and output limits.
+One separately frozen and reviewed [native full-old case](reports/minigrid-matched-all-old-native-20261031.md)
+completed: current-only solved F2/2 and old0/6; joint rehearsal solved F2/2 and
+old6/6. All sixteen games closed. Actual source plus both arms used ten cold
+fits/252 row exposures. Joint old confidence still worsened relative to the
+reference, and its F confidence was worse than current-only. This does not
+complete or retry the earlier installed failure, or establish native-before
+recovery, reliability, heldout generalization, matched compute or a circadian
+advantage. Old TRAIN and overlapping F trajectories are explicit limitations.
 
 With the existing pinned MiniGrid optional requirements available:
 

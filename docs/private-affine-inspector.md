@@ -1,5 +1,16 @@
 # Inspect private learning, retention and partial games
 
+The source checkout also supports `portable_affine_matched_all_old_v1` reports:
+both fixed private arms show F blue/red followed by every old A/B/C_train
+blue/red game, eight per arm. Select either control to inspect all its records,
+including failed goals, costs and source pointers. Exact B/C rotation and key
+swaps are validated; no layout is inferred from a successful outcome.
+
+The new all-old route retains the old four-game F/A route. Its code-level tests
+and actual16-game export pass; desktop/narrow browser acceptance remains open.
+See [evidence and limitations](reports/all-old-affine-inspector-20261031.md).
+The earlier installed wheel predates this source-checkout extension.
+
 Export a saved first-party private-adaptation report through the existing offline builder:
 
 ```powershell

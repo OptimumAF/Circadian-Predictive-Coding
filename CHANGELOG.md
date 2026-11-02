@@ -1,5 +1,41 @@
 # Changelog
 
+## Native final endpoint for bounded adaptation — 2026-11-02
+
+The existing memory command permits explicit `--adaptation-probe ... --native`.
+It observes five known TRAIN scenes after acquisition or the optional original
+old-task return, preserves finite paid captures and leaves unobserved native
+phases unmeasured. Scoped29 literal checks pass; actual integration evidence is
+recorded separately. [Usage](docs/taskspace-memory-demo.md#native-final-endpoint-after-isolated-adaptation).
+
+## First-party bounded CPU adaptation — 2026-11-02
+
+The existing memory demo accepts an explicit original reserved pair and optional
+old TRAIN return with retained memory. Final32 checks and one actual fixed-input
+CPU command pass; late capture failure preserves paid results. Native command
+integration remains open. [Usage](docs/taskspace-memory-demo.md#explicit-isolated-bounded-adaptation-on-cpu),
+[evidence and preserved failures](docs/reports/retained-adaptation-workflow-20261102.md).
+
+## Explicit isolated old-TRAIN return — 2026-11-02
+
+The retained nearest probe can compose one fresh-task update with one original
+old TRAIN return on a detached child. Separate prospective resources, guarded
+prior results and bounded phase reports preserve costs and source isolation.
+[API and limits](docs/nearest-reserved-probe.md#explicit-old-task-return).
+
+One fixed bounded-memory return recovered Pick17 and retained new23/old19;
+Pick20/Push17 still failed. Original failed engineering attempt, cumulative costs
+and limited direct peer field inspection are preserved in the
+[result report](docs/reports/retained-memory-return-20261102.md).
+
+## Explicit full-network BP TRAIN fit control — 2026-11-01
+
+The continuous learner offers one bounded all-parameter GGN update for its
+original normalized regression/optional gripper CE objective and row weights.
+Strict descent is required; failed/rejected work stays paid without publication.
+Defaults are unchanged. Tiny software checks pass; actual native control and
+scientific benefit remain unqualified. [API](docs/bp-full-network-fit.md).
+
 ## Detached CLM probe inspection — 2026-10-25
 
 The existing offline inspector exports detached workflow32 CLM probe reviews,
@@ -6378,3 +6414,20 @@ See docs/replay-capture-origins.md and current development log for qualification
   replaced prior evidence. Final344focused/scopedstatics/independentreview and
   one frozen192update case accepted. A loss improves without accuracy restoration;
   F fit worsens. Evidence: artifacts/runs/minigrid-a-return-20261017/RESULTS.md.
+
+- Added opt-in FIFO/reservoir retention to the existing task-space memory CPU/native
+  API and command. Scored retained readouts separate saved TRAIN rewards from new
+  simulator outcomes; exact default replay and isolated probe behavior remain.
+  Native evidence validation distinguishes cumulative exposure from stored rows
+  and canonical JSON comparison refuses primitive-type capture changes.
+
+- Added explicit isolated bounded-memory fresh-task probes through the existing
+  continuous probe runtime, with four old-task readouts, fresh TRAIN/test scores,
+  full retained-state ownership and separate exposure/storage/retrieval costs.
+  Lost returns stay spent with unknown resulting storage; equal-rule replacement
+  during update is refused. Existing public/default and native admissions remain.
+
+- Added exact retained-nearest original23 frozen scoring through the existing
+  native port. Combined full-state/history/role/work closure preserves paid
+  returns after late getter, counter or native metadata failures. Existing
+  ordinary TRAIN/default/unbounded and retained24/guard exclusions remain.
