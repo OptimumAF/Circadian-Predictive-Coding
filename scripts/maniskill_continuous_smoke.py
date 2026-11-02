@@ -19,6 +19,7 @@ import traceback
 from typing import cast, Any
 
 import numpy as np
+from src.adapters import continuous_nearest_probe as nearest_probe
 
 from src.app.readiness_roll_in import ReadinessRollInLedger
 from src.core.pick_cube_readiness_roll_in import (
@@ -35,6 +36,10 @@ from src.adapters.numpy_continuous_bc import (
     ContinuousBCSnapshot,
     NumpyContinuousBCLearner,
     _snapshot as validate_bc_snapshot,
+)
+from src.adapters.readonly_continuous_affine import (
+    ContinuousAffineSnapshot,
+    ReadonlyContinuousAffine,
 )
 from src.adapters.continuous_correction_demo import run_continuous_correction_update
 from src.adapters.continuous_head_learnability import head_protocol
@@ -146,11 +151,39 @@ from src.infra.maniskill_continuous import (
     validate_joint_position_work,
     PANDA_JOINT_NAMES,
 )
-from src.infra.maniskill_corrections import PickCubeCorrectionQuery
+from src.infra.maniskill_corrections import PickCubeCorrectionQuery, ProbeTrainCorrectionQuery
+from src.core.pick_cube_probe_corrections import (
+    ProbeCorrectionConsent,
+    ProbeCorrectionBatch,
+    PROVENANCE as PROBE_CORRECTION_PROVENANCE,
+)
+from src.core.pick_cube_readiness_teacher import (
+    GOAL_CONSISTENT_OBSERVED_GRASP_DEFINITION as PROBE_TEACHER_DEFINITION,
+)
 
 
-Learner = NumpyContinuousBCLearner | NumpyNearestContinuousBCLearner | NumpyContinuousPCLearner
-Snapshot = ContinuousBCSnapshot | NearestContinuousBCSnapshot | ContinuousPCSnapshot
+from src.adapters.numpy_retained_nearest_bc import (
+    OBJECTIVE as RETAINED_UPDATE,
+    NumpyRetainedNearestBCLearner,
+    RetainedNearestSnapshot,
+    pin_retained_native,
+    require_retained_native,
+    retained_snapshot,
+    retained_costs,
+    same_retained_state,
+)
+
+
+TrainableLearner = (
+    NumpyContinuousBCLearner | NumpyNearestContinuousBCLearner | NumpyContinuousPCLearner
+)
+Learner = TrainableLearner | ReadonlyContinuousAffine
+Snapshot = (
+    ContinuousBCSnapshot
+    | NearestContinuousBCSnapshot
+    | ContinuousPCSnapshot
+    | ContinuousAffineSnapshot
+)
 ObservationProjection = (
     public_vectors.PickCubePublicVectorProjection
     | state_quaternions.PickCubeStateQuaternionProjection
@@ -174,6 +207,10 @@ def _base_policy(state: Snapshot):
 
 
 def _same_state(before: Snapshot, after: Snapshot) -> bool:
+    if type(before) is RetainedNearestSnapshot or type(after) is RetainedNearestSnapshot:
+        return same_retained_state(before, after)
+    if type(before) is ContinuousAffineSnapshot or type(after) is ContinuousAffineSnapshot:
+        return type(before) is type(after) and before == after
     if type(before) is ContinuousPCSnapshot or type(after) is ContinuousPCSnapshot:
         if isinstance(before, ContinuousPCSnapshot) and isinstance(after, ContinuousPCSnapshot):
             return same_continuous_state(before, after)
@@ -221,6 +258,14 @@ def _require_controller_policy(policy) -> None:
 
 
 def _prepare_learner(learner: Learner) -> Snapshot:
+    if type(learner) is NumpyRetainedNearestBCLearner:
+        retained_state = pin_retained_native(learner).state
+        _require_controller_policy(retained_state.policy)
+        return retained_state
+    if type(learner) is ReadonlyContinuousAffine:
+        affine_state = learner.snapshot_state()
+        _require_controller_policy(affine_state.policy)
+        return affine_state
     if type(learner) is NumpyContinuousPCLearner:
         pc_state = validate_pc_snapshot(learner.snapshot_state(), learner.policy)
         _require_controller_policy(pc_state.policy.base)
@@ -232,6 +277,23 @@ def _prepare_learner(learner: Learner) -> Snapshot:
     if type(learner) is NumpyNearestContinuousBCLearner and state.training_examples == 0:
         raise ValueError("nearest rollout requires released prototypes before native creation")
     return state
+
+
+def _require_affine_rollout(
+    recipe, *, actor, guard_seed, probe_test_seed, interventions, probe_train_seed=None
+):
+    """Admit only ordinary TRAIN inference; never corrections or reserved scoring."""
+    if (
+        recipe is None
+        or not action_history.is_taskspace_recipe(recipe)
+        or action_history.validate_action_history_recipe(recipe).mode != "executed"
+        or actor is not None
+        or guard_seed is not None
+        or probe_test_seed is not None
+        or probe_train_seed is not None
+        or any(interventions)
+    ):
+        raise ValueError("readonly affine rollout requires unmodified TRAIN executed taskspace12")
 
 
 def _prepare_actor(actor: NearestActor) -> _StableNearestBinding | PromotableRobotBinding:
@@ -411,7 +473,12 @@ def _check_canonical_corrective_owners(source, original, candidate=None, candida
 
 
 def _predict_nearest(model, original: NearestContinuousBCSnapshot, features, result):
-    rows, dimensions = original.training_examples, _base_policy(original).spec.observation_dim
+    rows = (
+        original.retained_rows
+        if type(original) is RetainedNearestSnapshot
+        else original.training_examples
+    )
+    dimensions = _base_policy(original).spec.observation_dim
     result["nearest_prediction_attempts"] += 1
     result["nearest_distance_candidate_upper_bound"] += rows
     result["nearest_distance_feature_upper_bound"] += rows * dimensions
@@ -724,9 +791,21 @@ def _check_projection(projection, result) -> None:
 def _check_state_projection_frozen(learner, model, original, result) -> None:
     """Finish this recipe's public ownership observers from native-owned state."""
     _check_frozen(learner, model, original, result)
+    if type(original) is ContinuousAffineSnapshot:
+        if (
+            type(learner) is not ReadonlyContinuousAffine
+            or type(model) is not ReadonlyContinuousAffine
+            or learner is model
+        ):
+            result["frozen_state_exact"] = result["original_owner_exact"] = None
+            raise ValueError("readonly affine requires separate exact inference/source owners")
+        return
     expected_type: type
     validator: Any
-    if type(original) is ContinuousPCSnapshot:
+    if type(original) is RetainedNearestSnapshot:
+        expected_type = NumpyRetainedNearestBCLearner
+        validator = lambda state, policy: retained_snapshot(state, policy, original.retention)
+    elif type(original) is ContinuousPCSnapshot:
         expected_type, validator = NumpyContinuousPCLearner, validate_pc_snapshot
     elif type(original) is NearestContinuousBCSnapshot:
         expected_type, validator = NumpyNearestContinuousBCLearner, validate_nearest_snapshot
@@ -828,10 +907,25 @@ def _probe_test_reset(seed):
     return binding.seed, binding.context, "pick-cube-probe-test-smoke-24"
 
 
+def _probe_train_reset(seed):
+    """Read original training reset23 without borrowing its teacher episode ID."""
+    binding = pick_cube_probe_binding("probe_train")
+    if type(seed) is not int or seed != binding.seed:
+        raise ValueError("probe-train reproduction requires the exact native seed23")
+    return binding.seed, binding.context, "pick-cube-probe-train-smoke-23"
+
+
 def _check_action_history_port(
-    port, encoding, result, *, returned_record=None, guard_seed=None, probe_test_seed=None
+    port,
+    encoding,
+    result,
+    *,
+    returned_record=None,
+    guard_seed=None,
+    probe_test_seed=None,
+    probe_train_seed=None,
 ):
-    if guard_seed is not None and probe_test_seed is not None:
+    if sum(seed is not None for seed in (guard_seed, probe_test_seed, probe_train_seed)) > 1:
         raise ValueError("guard and probe-test history bindings are exclusive")
     encoding.check(result.get("action_history"))
     binding, role = encoding.native_binding, encoding.native_role
@@ -841,18 +935,30 @@ def _check_action_history_port(
 
     def check_binding():
         expected_role = (
-            "probe_test"
+            "probe_train"
+            if probe_train_seed is not None
+            else "probe_test"
             if probe_test_seed is not None
             else "inner_guard"
             if guard_seed is not None
             else "train"
         )
+        if probe_train_seed is not None and (
+            binding != _probe_train_reset(probe_train_seed)
+            or type(result.get("probe_train_seed")) is not int
+            or result["probe_train_seed"] != probe_train_seed
+            or result.get("scoring_only") is not True
+            or "guard_seed" in result
+            or "probe_test_seed" in result
+        ):
+            raise ValueError("causal history lost its original read-only probe-train request")
         if probe_test_seed is not None and (
             binding != _probe_test_reset(probe_test_seed)
             or type(result.get("probe_test_seed")) is not int
             or result["probe_test_seed"] != probe_test_seed
             or result.get("scoring_only") is not True
             or "guard_seed" in result
+            or "probe_train_seed" in result
         ):
             raise ValueError(
                 "causal action history lost its original scoring-only probe-test request"
@@ -888,7 +994,11 @@ def _check_action_history_port(
             or port._episode_id != episode_id
             or port._spec.observation_dim != 42
             or (
-                (guard_seed is not None or probe_test_seed is not None)
+                (
+                    guard_seed is not None
+                    or probe_test_seed is not None
+                    or probe_train_seed is not None
+                )
                 and port._monitor_joint_positions is not False
             )
         ):
@@ -933,8 +1043,15 @@ def _check_guard_native_frozen(learner, model, original):
     """Final guard closure after history callbacks, using only owned native fields."""
     validator: Any
     kind, validator = (
-        (NumpyContinuousPCLearner, validate_pc_snapshot)
+        (
+            NumpyRetainedNearestBCLearner,
+            lambda state, policy: retained_snapshot(state, policy, original.retention),
+        )
+        if type(original) is RetainedNearestSnapshot
+        else (NumpyContinuousPCLearner, validate_pc_snapshot)
         if type(original) is ContinuousPCSnapshot
+        else (NumpyNearestContinuousBCLearner, validate_nearest_snapshot)
+        if type(original) is NearestContinuousBCSnapshot
         else (NumpyContinuousBCLearner, validate_bc_snapshot)
     )
     if type(learner) is not kind or type(model) is not kind or learner is model:
@@ -945,8 +1062,44 @@ def _check_guard_native_frozen(learner, model, original):
         raise ValueError("guard frozen native owner changed")
 
 
+def _pin_nearest_probe(owner):
+    """Capture native fields before any opaque public learner observation."""
+    state = nearest_probe.native_state(owner)
+    _require_controller_policy(state.policy)
+    if state.policy.spec.observation_dim != 12:
+        raise ValueError("nearest reserved scoring requires fixed taskspace12")
+    return owner, _nearest_probe_identity(owner), state
+
+
+def _nearest_probe_identity(owner):
+    policy = owner._state.policy
+    return (
+        *nearest_probe.owner_identity(owner),
+        policy,
+        policy.spec,
+        owner._policy.spec.action_units,
+        owner._policy.spec.lower_bounds,
+        owner._policy.spec.upper_bounds,
+        policy.spec.action_units,
+        policy.spec.lower_bounds,
+        policy.spec.upper_bounds,
+    )
+
+
+def _require_nearest_probe(binding):
+    owner, identity, expected = binding
+    if any(a is not b for a, b in zip(_nearest_probe_identity(owner), identity, strict=True)):
+        raise ValueError("nearest reserved source/inference owner or arrays replaced")
+    nearest_probe.native_state(owner, expected)
+
+
 def _check_mass_history_frozen(port, encoding, learner, model, original, mass, readback, result):
     """Close composed callbacks with owned proofs, without another native read."""
+    if type(original) is ContinuousAffineSnapshot:
+        # Why: the last history observer may replace a source or private owner.
+        # Affine has no mass callback, but still needs this final ownership check.
+        _check_state_projection_frozen(learner, model, original, result)
+        return
     if encoding is None or encoding.mass_context is None:
         return
     if mass is None or readback is None:
@@ -978,10 +1131,16 @@ def _rollout(
     action_decoding=None,
     guard_seed=None,
     probe_test_seed=None,
+    probe_train_seed=None,
+    frozen_guard=None,
 ) -> None:
     history_binding_options = {
         name: seed
-        for name, seed in (("guard_seed", guard_seed), ("probe_test_seed", probe_test_seed))
+        for name, seed in (
+            ("guard_seed", guard_seed),
+            ("probe_test_seed", probe_test_seed),
+            ("probe_train_seed", probe_train_seed),
+        )
         if seed is not None
     }
     _check_mass_port(port, mass_context, result, mass_readback)
@@ -999,6 +1158,8 @@ def _rollout(
         action_decoding.check(result["action_decoding"], tuple(port._records))
     if model is not None and expected_spec != _base_policy(original).spec:
         raise ValueError("native observation/action spec differs from BC policy")
+    if frozen_guard is not None:
+        frozen_guard()
     for step in range(HORIZON):
         if action_decoding is not None:
             action_decoding.check(result["action_decoding"], tuple(port._records))
@@ -1066,6 +1227,8 @@ def _rollout(
             else:
                 if action_decoding is not None:
                     action_decoding.check(result["action_decoding"], tuple(port._records))
+                if frozen_guard is not None:
+                    frozen_guard()
                 action = _predict_action(learner, model, original, observation, result)
             if action_decoding is not None:
                 try:
@@ -1164,7 +1327,11 @@ def _rollout(
         _check_mass_history_frozen(
             port, history_encoding, learner, model, original, mass_context, mass_readback, result
         )
+        if frozen_guard is not None:
+            frozen_guard("attempted")
         record = port.step(action)
+        if frozen_guard is not None:
+            frozen_guard("returned")
         if action_decoding is not None:
             # A returned control is paid before later history/owner checks.
             try:
@@ -1207,6 +1374,8 @@ def _rollout(
         history_encoding.verify_episode(episode)
     if action_decoding is not None:
         action_decoding.verify_episode(episode, result["action_decoding"])
+    if frozen_guard is not None:
+        frozen_guard()
     result.update(
         episode=asdict(episode),
         sparse_return=sum(record.reward for record in episode.transitions),
@@ -1228,7 +1397,7 @@ class FrozenRolloutResult:
     """Owned report and usable paired corrections only after all final checks."""
 
     report: dict[str, Any]
-    corrections: PickCubeCorrectionBatch | ReadinessCorrectionBatch | None
+    corrections: PickCubeCorrectionBatch | ReadinessCorrectionBatch | ProbeCorrectionBatch | None
 
 
 def _check_roll_in_result(ledger, result):
@@ -1311,6 +1480,35 @@ def _check_correction_mode(
     report, batch, readiness: bool, observed_grasp: bool = False, goal_consistent: bool = False
 ) -> None:
     """Bind the requested label source to exact returned provenance and family."""
+    if type(batch) is ProbeCorrectionBatch:
+        batch._require_original()
+        query_rows = len(batch.labels)
+        if (
+            readiness
+            or observed_grasp
+            or goal_consistent
+            or type(report) is not dict
+            or report.get("provenance") != PROBE_CORRECTION_PROVENANCE
+            or report.get("teacher_definition") != PROBE_TEACHER_DEFINITION
+            or report.get("role") != "probe_train"
+            or type(report.get("seed")) is not int
+            or report["seed"] != 23
+            or report.get("failed") is not False
+            or report.get("consent") != asdict(batch.consent)
+            or tuple(report.get("observed_grasp", ())) != batch.observed_grasp
+            or any(
+                type(report.get(k)) is not int or report[k] != query_rows
+                for k in (
+                    "geometry_attempts",
+                    "geometry_returns",
+                    "teacher_action_attempts",
+                    "teacher_actions",
+                    "teacher_decision_steps",
+                )
+            )
+        ):
+            raise ValueError("reserved corrective report lost original query authority/work")
+        return
     expected = (
         GoalConsistentObservedGraspCorrectionBatch
         if goal_consistent
@@ -1537,6 +1735,8 @@ def run_frozen_rollout(
     action_decoding_recipe: PickCubeBinaryGripperRecipe | None = None,
     guard_seed: int | None = None,
     probe_test_seed: int | None = None,
+    probe_train_seed: int | None = None,
+    probe_correction_consent: ProbeCorrectionConsent | None = None,
 ) -> FrozenRolloutResult:
     """Programmatic entry to the same exclusive-output frozen rollout as the CLI."""
     args = argparse.Namespace(
@@ -1552,8 +1752,12 @@ def run_frozen_rollout(
         monitor_joint_positions=monitor_joint_positions,
     )
     readiness_options: dict[str, Any] = {}
+    if probe_correction_consent is not None:
+        readiness_options["probe_correction_consent"] = probe_correction_consent
     if probe_test_seed is not None:
         readiness_options["probe_test_seed"] = probe_test_seed
+    if probe_train_seed is not None:
+        readiness_options["probe_train_seed"] = probe_train_seed
     if guard_seed is not None:
         readiness_options["guard_seed"] = guard_seed
     if action_decoding_recipe is not None:
@@ -1612,6 +1816,8 @@ def _execute_frozen_rollout(
     action_decoding_recipe=None,
     guard_seed=None,
     probe_test_seed=None,
+    probe_train_seed=None,
+    probe_correction_consent=None,
 ) -> FrozenRolloutResult:
     # Reserve the destination before admitting simulator work. No existing
     # trace can be overwritten, including a failed attempt's receipt.
@@ -1637,6 +1843,8 @@ def _execute_frozen_rollout(
                 if learner is None
                 else "frozen_continuous_pc"
                 if type(learner) is NumpyContinuousPCLearner
+                else "frozen_readonly_continuous_affine"
+                if type(learner) is ReadonlyContinuousAffine
                 else "frozen_continuous_bc"
             ),
             complete=False,
@@ -1707,26 +1915,225 @@ def _execute_frozen_rollout(
         pc_dense_per_prediction = None
         model: Learner | _StableNearestBinding | PromotableRobotBinding | None = None
         corrections: PickCubeCorrectionQuery | None = None
-        released_batch: PickCubeCorrectionBatch | ReadinessCorrectionBatch | None = None
+        released_batch: (
+            PickCubeCorrectionBatch | ReadinessCorrectionBatch | ProbeCorrectionBatch | None
+        ) = None
         released_batch_evidence = None
         roll_in = None
         observed_grasp_mode = False
         goal_consistent_mode = False
         history_binding_options = {
             name: seed
-            for name, seed in (("guard_seed", guard_seed), ("probe_test_seed", probe_test_seed))
+            for name, seed in (
+                ("guard_seed", guard_seed),
+                ("probe_test_seed", probe_test_seed),
+                ("probe_train_seed", probe_train_seed),
+            )
             if seed is not None
         }
 
-        scoring_binding = None
+        scoring_binding: tuple[int, str, str] | None = None
+        admitted_probe_consent = None
+        probe_consent_seal = None
         scoring_role = None
+        scoring_error_key = (
+            "probe_train_error"
+            if probe_train_seed is not None
+            else "probe_test_error"
+            if probe_test_seed is not None
+            else "guard_error"
+        )
+        # Reuse the reserved call witness for newly admitted neural23 too.
+        # It must survive broken native work getters/counters after paid steps.
+        neural_probe_train = probe_train_seed is not None and type(learner) in (
+            NumpyContinuousBCLearner,
+            NumpyContinuousPCLearner,
+        )
+        retained_probe_train = (
+            probe_train_seed is not None and type(learner) is NumpyRetainedNearestBCLearner
+        )
+        work_scope_key = "neural_probe_work_scope" if neural_probe_train else "nearest_work_scope"
+        nearest_bindings: list[Any] = []
+        retained_bindings: list[Any] = []
+        retained_calls = dict(attempted=0, returned=0)
+
+        def check_retained_frozen(stage=None):
+            if stage == "returned":
+                retained_calls["returned"] += 1  # returned native work stays paid on refusal
+            for owner, pin in retained_bindings:
+                require_retained_native(owner, pin)
+            # The final public callback may corrupt an earlier owner. Close all
+            # bindings from native fields before admitting another control.
+            for owner, pin in retained_bindings:
+                require_retained_native(owner, pin, observe=False)
+            if len(retained_bindings) == 2:
+                first, second = (item[0] for item in retained_bindings)
+                if first is second or any(
+                    np.shares_memory(a, b)
+                    for a in (first._state.prototype_features, first._state.prototype_actions)
+                    for b in (second._state.prototype_features, second._state.prototype_actions)
+                ):
+                    raise ValueError("retained source and inference arrays alias")
+            if stage == "attempted":
+                if retained_calls["attempted"] != retained_calls["returned"]:
+                    raise ValueError("preceding retained control return is missing")
+                retained_calls["attempted"] += 1
+
+        nearest_work_birth: Any = None
+        nearest_work_observed = False
+        retained_history_birth: Any = None
+        retained_history_seal: Any = None
+        nearest_control_calls = dict(attempted=0, returned=0)
+
+        def preserve_nearest_control_work():
+            # The outer call witness survives broken native counters/getters.
+            # A failed call may precede SDK submission, so this is an upper bound.
+            attempted = nearest_control_calls["attempted"]
+            returned = nearest_control_calls["returned"]
+            ratio = nearest_work_birth[2] if nearest_work_birth is not None else 0
+            result["work"] = dict(
+                step_attempts=attempted,
+                completed_steps=returned,
+                completed_control_physics_steps=returned * ratio,
+                possible_failed_physics_steps=(attempted - returned) * ratio,
+            )
+            result[work_scope_key] = "outer_call_bounds_native_metadata_untrusted"
+
+        def check_nearest_frozen(control_event=None):
+            if not nearest_bindings and not neural_probe_train and not retained_probe_train:
+                return
+            # A returned control remains paid even if the following proof fails.
+            if control_event == "returned":
+                nearest_control_calls["returned"] += 1
+            result["original_owner_exact"] = result["frozen_state_exact"] = None
+            if neural_probe_train:
+                _check_guard_native_frozen(learner, model, original)
+            elif retained_probe_train:
+                # Retained state needs its full pin, while the existing reserved
+                # witness still owns native port/call counts and failure bounds.
+                check_retained_frozen(control_event)
+            else:
+                if learner is not nearest_bindings[0][0] or (
+                    len(nearest_bindings) == 2 and model is not nearest_bindings[1][0]
+                ):
+                    raise ValueError("nearest reserved original learner binding replaced")
+                for binding in nearest_bindings:
+                    _require_nearest_probe(binding)
+            if nearest_work_birth is not None:
+                original_port, records, ratio = nearest_work_birth
+                if (
+                    port is not original_port
+                    or port._records is not records
+                    or type(port._physics_ratio) is not int
+                    or port._physics_ratio != ratio
+                ):
+                    raise ValueError("nearest reserved native work binding replaced")
+                attempted, completed = port._attempts, port._completed
+                if (
+                    type(attempted) is not int
+                    or type(completed) is not int
+                    or not 0 <= completed <= attempted
+                    or attempted != nearest_control_calls["attempted"]
+                    or completed != nearest_control_calls["returned"]
+                    or len(records) != completed
+                ):
+                    raise ValueError("nearest reserved native work counters changed")
+                expected_work = dict(
+                    step_attempts=attempted,
+                    completed_steps=completed,
+                    completed_control_physics_steps=completed * ratio,
+                    possible_failed_physics_steps=(attempted - completed) * ratio,
+                )
+                if nearest_work_observed and (
+                    type(result["work"]) is not dict
+                    or set(result["work"]) != set(expected_work)
+                    or any(
+                        type(result["work"][key]) is not int or result["work"][key] != value
+                        for key, value in expected_work.items()
+                    )
+                ):
+                    result["work"] = expected_work
+                    raise ValueError("nearest reserved returned work metadata changed")
+                if retained_probe_train and (
+                    scoring_binding is None
+                    or history_encoding is None
+                    or retained_history_birth is None
+                ):
+                    raise ValueError("retained probe lost its admitted native history")
+                if (
+                    retained_probe_train
+                    and scoring_binding is not None
+                    and (
+                        type(port) is not ManiSkillPickCubeEpisode
+                        or type(port._seed) is not int
+                        or port._seed != 23
+                        or port._role != "probe_train"
+                        or result.get("role") != "probe_train"
+                        or port._context != scoring_binding[1]
+                        or result.get("context") != scoring_binding[1]
+                        or port._episode_id != scoring_binding[2]
+                        or type(result.get("seed")) is not int
+                        or result["seed"] != 23
+                        or result.get("scoring_only") is not True
+                        or port._visual_observation is not False
+                        or port._monitor_joint_positions is not False
+                        or port._camera_context is not None
+                        or port._mass_context is not None
+                        or port._lighting_context is not None
+                        or history_encoding is not retained_history_birth[0]
+                        or history_encoding.recipe is not retained_history_birth[1]
+                        or json.dumps(
+                            asdict(history_encoding.recipe), sort_keys=True, allow_nan=False
+                        )
+                        != retained_history_birth[2]
+                        or port._spec is not retained_history_birth[3]
+                        or json.dumps(asdict(port._spec), sort_keys=True, allow_nan=False)
+                        != retained_history_birth[4]
+                        or history_encoding.native_binding != scoring_binding
+                        or history_encoding.native_role != "probe_train"
+                        or retained_history_seal is not None
+                        and json.dumps(
+                            result.get("action_history"), sort_keys=True, allow_nan=False
+                        )
+                        != retained_history_seal
+                    )
+                ):
+                    raise ValueError("retained probe original role/reset/history binding changed")
+            if control_event == "attempted":
+                nearest_control_calls["attempted"] += 1
+            result["original_owner_exact"] = True
+            if (
+                len(nearest_bindings) == 2
+                or neural_probe_train
+                or (retained_probe_train and len(retained_bindings) == 2)
+            ):
+                result["frozen_state_exact"] = True
+
+        def check_probe_consent():
+            if probe_correction_consent is not None:
+                current = ProbeCorrectionConsent(
+                    probe_correction_consent.max_queries,
+                    probe_correction_consent.role,
+                    probe_correction_consent.seed,
+                )
+                if (
+                    type(probe_correction_consent) is not ProbeCorrectionConsent
+                    or asdict(current) != probe_consent_seal
+                ):
+                    raise ValueError("original probe correction consent changed")
 
         def check_scoring_request():
-            if guard_seed is not None and probe_test_seed is not None:
+            check_probe_consent()
+            if (
+                sum(seed is not None for seed in (guard_seed, probe_test_seed, probe_train_seed))
+                > 1
+            ):
                 raise ValueError("guard and probe-test scoring resets are exclusive")
             context = (
                 pick_cube_guard_context(guard_seed)
                 if guard_seed is not None
+                else _probe_train_reset(probe_train_seed)[1]
+                if probe_train_seed is not None
                 else _probe_test_reset(probe_test_seed)[1]
             )
             if (
@@ -1734,7 +2141,14 @@ def _execute_frozen_rollout(
                 or train_seed != 17
                 or type(args.train_seed) is not int
                 or args.train_seed != 17
-                or type(learner) not in (NumpyContinuousBCLearner, NumpyContinuousPCLearner)
+                or (
+                    type(learner) not in (NumpyContinuousBCLearner, NumpyContinuousPCLearner)
+                    and not (
+                        (probe_test_seed is not None or probe_train_seed is not None)
+                        and type(learner) is NumpyNearestContinuousBCLearner
+                    )
+                    and not retained_probe_train
+                )
                 or actor is not None
                 or observation_clock is not None
                 or visual_observation is not False
@@ -1761,22 +2175,91 @@ def _execute_frozen_rollout(
                 or lighting_context is not None
                 or not action_history.is_taskspace_recipe(action_history_recipe)
             ):
-                mode = "guard" if guard_seed is not None else "probe-test"
+                mode = (
+                    "guard"
+                    if guard_seed is not None
+                    else "probe-train"
+                    if probe_train_seed is not None
+                    else "probe-test"
+                )
                 raise ValueError(
                     mode
-                    + " scoring requires exact BC/PC and executed TS12 without TRAIN seed19 or optional modes"
+                    + " scoring requires exact BC/PC (or fixed nearest for reserved scoring) and executed TS12 without TRAIN seed19 or optional modes"
                 )
             config = action_history.validate_action_history_recipe(action_history_recipe)
             if config.mode != "executed":
                 mode = "guard" if guard_seed is not None else "probe-test"
                 raise ValueError(mode + " scoring requires the fixed executed taskspace12 recipe")
+            if type(learner) is NumpyNearestContinuousBCLearner:
+                if not nearest_bindings:
+                    nearest_bindings.append(_pin_nearest_probe(learner))
+                check_nearest_frozen()
             return context
 
         try:
             _check_completion_request(completion_request)
             # Validate the native API value before argparse can coerce string defaults.
             pick_cube_training_context(train_seed)
-            if guard_seed is not None or probe_test_seed is not None:
+            if type(learner) is NumpyRetainedNearestBCLearner:
+                if retained_probe_train:
+                    _probe_train_reset(probe_train_seed)
+                    if guard_seed is not None or probe_test_seed is not None:
+                        raise ValueError("retained probe-train23 excludes other scoring roles")
+                    if type(train_seed) is not int or train_seed != 17:
+                        raise ValueError(
+                            "retained probe-train readout requires original TRAIN seed17"
+                        )
+                retained_bindings.append((learner, pin_retained_native(learner)))
+                if (
+                    actor is not None
+                    or observation_clock is not None
+                    or visual_observation is not False
+                    or corrective_queries is not False
+                    or camera_context is not None
+                    or mass_context is not None
+                    or lighting_context is not None
+                    or observation_projection is not None
+                    or monitor_joint_positions is not False
+                    or readiness_corrections is not False
+                    or readiness_roll_in is not None
+                    or observed_grasp_corrections is not False
+                    or goal_consistent_corrections is not False
+                    or action_decoding_recipe is not None
+                    or guard_seed is not None
+                    or probe_test_seed is not None
+                    or probe_correction_consent is not None
+                    or not action_history.is_taskspace_recipe(action_history_recipe)
+                    or action_history.validate_action_history_recipe(action_history_recipe).mode
+                    != "executed"
+                    or retained_bindings[0][1].state.policy.spec.observation_dim != 12
+                ):
+                    raise ValueError(
+                        "retained nearest requires ordinary TRAIN or original probe-train23 executed TS12"
+                    )
+                check_retained_frozen()
+            if probe_correction_consent is not None:
+                if (
+                    type(probe_correction_consent) is not ProbeCorrectionConsent
+                    or type(probe_train_seed) is not int
+                    or probe_train_seed != 23
+                    or type(learner) is not NumpyContinuousBCLearner
+                ):
+                    raise ValueError(
+                        "new corrective consent requires exact BP and explicit probe_train23"
+                    )
+                admitted_probe_consent = ProbeCorrectionConsent(
+                    probe_correction_consent.max_queries,
+                    probe_correction_consent.role,
+                    probe_correction_consent.seed,
+                )
+                probe_consent_seal = asdict(admitted_probe_consent)
+                result["probe_correction_consent"] = dict(probe_consent_seal)
+                result["provisional_training_labels_collected"] = True
+            if (
+                guard_seed is not None
+                or probe_test_seed is not None
+                or probe_train_seed is not None
+            ):
                 scoring_context = check_scoring_request()
                 if guard_seed is not None:
                     scoring_binding = (
@@ -1786,6 +2269,12 @@ def _execute_frozen_rollout(
                     )
                     scoring_role = "inner_guard"
                     result.update(guard_seed=guard_seed, scoring_only=True, role=scoring_role)
+                elif probe_train_seed is not None:
+                    scoring_binding = _probe_train_reset(probe_train_seed)
+                    scoring_role = "probe_train"
+                    result.update(
+                        probe_train_seed=probe_train_seed, scoring_only=True, role=scoring_role
+                    )
                 else:
                     scoring_binding = _probe_test_reset(probe_test_seed)
                     scoring_role = "probe_test"
@@ -1929,6 +2418,8 @@ def _execute_frozen_rollout(
                         NumpyContinuousBCLearner,
                         NumpyContinuousPCLearner,
                         NumpyNearestContinuousBCLearner,
+                        NumpyRetainedNearestBCLearner,
+                        ReadonlyContinuousAffine,
                     )
                     or actor is not None
                     or observation_clock is not None
@@ -1944,7 +2435,11 @@ def _execute_frozen_rollout(
                         "action history requires the frozen nonvisual TRAIN state learner without interventions"
                     )
                 history_encoding = (
-                    ActionHistoryEncoding(action_history_recipe, probe_test_seed=probe_test_seed)
+                    ActionHistoryEncoding(action_history_recipe, probe_train_seed=probe_train_seed)
+                    if probe_train_seed is not None
+                    else ActionHistoryEncoding(
+                        action_history_recipe, probe_test_seed=probe_test_seed
+                    )
                     if probe_test_seed is not None
                     else ActionHistoryEncoding(action_history_recipe, guard_seed=guard_seed)
                     if guard_seed is not None
@@ -1959,6 +2454,27 @@ def _execute_frozen_rollout(
             ):
                 raise ValueError(
                     "fixed-input nearest serving requires explicit executed taskspace12"
+                )
+            if type(learner) is ReadonlyContinuousAffine:
+                _require_affine_rollout(
+                    action_history_recipe,
+                    actor=actor,
+                    guard_seed=guard_seed,
+                    probe_test_seed=probe_test_seed,
+                    probe_train_seed=probe_train_seed,
+                    interventions=(
+                        args.corrective_queries,
+                        readiness_mode,
+                        observed_grasp_mode,
+                        goal_consistent_mode,
+                        readiness_roll_in is not None,
+                        action_decoding_recipe is not None,
+                        mass_context is not None,
+                        lighting_context is not None,
+                        camera_context is not None,
+                        observation_clock is not None,
+                        observation_projection is not None,
+                    ),
                 )
             if observation_projection is not None:
                 projection = _validate_projection(observation_projection)
@@ -2076,8 +2592,15 @@ def _execute_frozen_rollout(
             observed_rollout_options: dict[str, Any] = (
                 {"observed_grasp_corrections": True} if observed_grasp_mode else {}
             )
-            if probe_test_seed is not None:
-                observed_rollout_options["probe_test_seed"] = probe_test_seed
+            if retained_bindings:
+                observed_rollout_options["frozen_guard"] = check_retained_frozen
+            if probe_test_seed is not None or probe_train_seed is not None:
+                key = "probe_train_seed" if probe_train_seed is not None else "probe_test_seed"
+                observed_rollout_options[key] = (
+                    probe_train_seed if probe_train_seed is not None else probe_test_seed
+                )
+                if nearest_bindings or neural_probe_train or retained_probe_train:
+                    observed_rollout_options["frozen_guard"] = check_nearest_frozen
             if guard_seed is not None:
                 observed_rollout_options["guard_seed"] = guard_seed
             if completion_request is not None:
@@ -2133,6 +2656,8 @@ def _execute_frozen_rollout(
                     if readiness_mode
                     else PickCubeCorrectionQuery(args.train_seed)
                 )
+            if admitted_probe_consent is not None:
+                corrections = ProbeTrainCorrectionQuery(admitted_probe_consent)
             if observation_clock is not None:
                 clock = clocks._clock(observation_clock)
                 signature = (clock.horizon, clock.elapsed)
@@ -2145,13 +2670,21 @@ def _execute_frozen_rollout(
                 pinned_history_owner = None
                 if history_encoding is not None or observed_grasp_mode:
                     pinned_history_owner = (
-                        validate_pc_snapshot(learner._state, learner._policy)
+                        retained_snapshot(learner._state, learner._policy, learner._retention)
+                        if type(learner) is NumpyRetainedNearestBCLearner
+                        else learner.snapshot_state()
+                        if type(learner) is ReadonlyContinuousAffine
+                        else validate_pc_snapshot(learner._state, learner._policy)
                         if type(learner) is NumpyContinuousPCLearner
                         else validate_nearest_snapshot(learner._state, learner._policy)
                         if type(learner) is NumpyNearestContinuousBCLearner
                         else validate_bc_snapshot(learner._state, learner._policy)
                     )
                 original = _prepare_learner(learner)
+                if retained_bindings:
+                    check_retained_frozen()
+                if nearest_bindings:
+                    check_nearest_frozen()
                 if pinned_history_owner is not None and not _same_state(
                     pinned_history_owner, original
                 ):
@@ -2179,6 +2712,33 @@ def _execute_frozen_rollout(
                         raise ValueError("continuous PC rollout requires a separate exact PC fork")
                     _check_frozen(learner, forked, original, result)
                 model = forked
+                if retained_bindings:
+                    if type(model) is not NumpyRetainedNearestBCLearner or model is learner:
+                        raise ValueError("retained inference requires a separate exact fork")
+                    retained_bindings.append((model, pin_retained_native(model)))
+                    if not same_retained_state(original, retained_bindings[1][1].state):
+                        raise ValueError("retained inference fork differs from source")
+                    check_retained_frozen()
+                if nearest_bindings:
+                    check_nearest_frozen()
+                    if model is learner or type(model) is not NumpyNearestContinuousBCLearner:
+                        raise ValueError("nearest reserved scoring requires a detached exact fork")
+                    nearest_bindings.append(_pin_nearest_probe(model))
+                    if not _same_state(original, nearest_bindings[1][2]) or any(
+                        np.shares_memory(first, second)
+                        for first in (
+                            learner._state.prototype_features,
+                            learner._state.prototype_actions,
+                        )
+                        for second in (
+                            model._state.prototype_features,
+                            model._state.prototype_actions,
+                        )
+                    ):
+                        raise ValueError(
+                            "nearest reserved inference fork differs or aliases source"
+                        )
+                    check_nearest_frozen()
                 if history_encoding is not None or observed_grasp_mode:
                     _check_state_projection_frozen(learner, model, pinned_history_owner, result)
                 result["state_guard_scope"] = "private_fork_and_original_learner"
@@ -2213,6 +2773,13 @@ def _execute_frozen_rollout(
                 result["learner_policy"] = asdict(original.policy)
                 result["source_updates"] = original.completed_updates
                 result["source_training_rows"] = original.training_examples
+                if type(original) is ContinuousAffineSnapshot:
+                    result["policy"] = "frozen_readonly_continuous_affine"
+                    result["source_update_definition"] = original.policy.definition
+                    result["source_affine_fit_rows"] = original.model.fit_rows
+                    result["source_affine_rank"] = original.model.rank
+                    result["source_affine_condition_number"] = original.model.condition_number
+                    result["continuous_prediction_math"] = "physical_affine_then_componentwise_clip"
                 if type(original) is ContinuousPCSnapshot:
                     result["policy"] = "frozen_continuous_pc"
                     result["source_update_definition"] = CONTINUOUS_PC_ENERGY_ID
@@ -2240,7 +2807,15 @@ def _execute_frozen_rollout(
                     if actor is None:
                         result["policy"] = "frozen_nearest_continuous_bc"
                     result["source_update_definition"] = NEAREST_UPDATE
-                    result["nearest_prototype_rows"] = original.training_examples
+                    result["nearest_prototype_rows"] = (
+                        original.retained_rows
+                        if type(original) is RetainedNearestSnapshot
+                        else original.training_examples
+                    )
+                    if type(original) is RetainedNearestSnapshot:
+                        result["policy"] = "frozen_retained_nearest_continuous_bc"
+                        result["source_update_definition"] = RETAINED_UPDATE
+                        result["retention"] = retained_costs(original)
                     result["nearest_prototype_numeric_bytes"] = (
                         original.prototype_features.nbytes + original.prototype_actions.nbytes
                     )
@@ -2273,11 +2848,16 @@ def _execute_frozen_rollout(
                 assert history_encoding is not None
                 history_encoding.check(result.get("action_history"))
                 _check_guard_native_frozen(learner, model, original)
+                scoring_key = (
+                    "guard_seed"
+                    if guard_seed is not None
+                    else "probe_train_seed"
+                    if probe_train_seed is not None
+                    else "probe_test_seed"
+                )
                 if (
-                    type(result.get("guard_seed" if guard_seed is not None else "probe_test_seed"))
-                    is not int
-                    or result.get("guard_seed" if guard_seed is not None else "probe_test_seed")
-                    != scoring_binding[0]
+                    type(result.get(scoring_key)) is not int
+                    or result.get(scoring_key) != scoring_binding[0]
                     or result.get("scoring_only") is not True
                     or result.get("role") != scoring_role
                     or type(result.get("seed")) is not int
@@ -2296,6 +2876,21 @@ def _execute_frozen_rollout(
                 **visual_options,
             )
             result["creation_returns"] += 1
+            if nearest_bindings or neural_probe_train or retained_probe_train:
+                nearest_work_birth = (port, port._records, port._physics_ratio)
+                if retained_probe_train:
+                    if history_encoding is None:
+                        raise ValueError("retained probe requires admitted executed history")
+                    retained_history_birth = (
+                        history_encoding,
+                        history_encoding.recipe,
+                        json.dumps(
+                            asdict(history_encoding.recipe), sort_keys=True, allow_nan=False
+                        ),
+                        port._spec,
+                        json.dumps(asdict(port._spec), sort_keys=True, allow_nan=False),
+                    )
+                check_nearest_frozen()
             if joint_monitoring:
                 joint_limits = _read_joint_position_report(port, result)
                 if model is not None:
@@ -2387,7 +2982,11 @@ def _execute_frozen_rollout(
                         port._spec,
                         tuple(port._records),
                     )
-                    history_finished_batch = corrections.finish(raw_episode)
+                    history_finished_batch = (
+                        corrections.finish_probe(raw_episode)
+                        if type(corrections) is ProbeTrainCorrectionQuery
+                        else corrections.finish(raw_episode)
+                    )
                     history_finished_batch_evidence = json.dumps(
                         asdict(history_finished_batch), sort_keys=True, allow_nan=False
                     )
@@ -2423,7 +3022,16 @@ def _execute_frozen_rollout(
                     port.close()
                 except Exception as error:
                     result.update(complete=False, cleanup_error=str(error))
-                result["work"] = asdict(port.work)
+                if nearest_bindings or neural_probe_train or retained_probe_train:
+                    nearest_work_observed = True
+                    try:
+                        result["work"] = asdict(port.work)
+                        result[work_scope_key] = "native_metadata_pending_validation"
+                    except Exception as error:
+                        result.update(complete=False, work_error=str(error))
+                        preserve_nearest_control_work()
+                else:
+                    result["work"] = asdict(port.work)
                 if args.visual_observation:
                     try:
                         visual_work = port.visual_work
@@ -2472,6 +3080,7 @@ def _execute_frozen_rollout(
                             batch = history_finished_batch
                         else:
                             batch = corrections.finish(port.episode())
+                        check_probe_consent()
                         _check_correction_mode(
                             result["corrections"],
                             batch,
@@ -2496,7 +3105,11 @@ def _execute_frozen_rollout(
                                 "released correction labels differ from query receipts"
                             )
                         batch_metadata = dict(
-                            train_seed=batch.train_seed,
+                            **(
+                                {"probe_train_seed": 23}
+                                if isinstance(batch, ProbeCorrectionBatch)
+                                else {"train_seed": batch.train_seed}
+                            ),
                             episode_id=batch.episode.episode_id,
                             rows=len(batch.labels),
                             labels_arrived_at=batch.labels[-1].labels_arrived_at,
@@ -2506,6 +3119,7 @@ def _execute_frozen_rollout(
                         _check_visual_recipe(port, result)
                         _check_projection(projection, result)
                         _check_frozen(learner, model, original, result)
+                        check_probe_consent()
                         _check_correction_mode(
                             result["corrections"],
                             batch,
@@ -2691,7 +3305,7 @@ def _execute_frozen_rollout(
                         _check_correction_mode(
                             result["corrections"],
                             released_batch,
-                            True,
+                            not isinstance(released_batch, ProbeCorrectionBatch),
                             observed_grasp_mode,
                             goal_consistent_mode,
                         )
@@ -2779,7 +3393,7 @@ def _execute_frozen_rollout(
                         corrections._check_readiness_binding()
                         observed_report = corrections.report()
                         observed_report["batch"] = dict(
-                            train_seed=released_batch.train_seed,
+                            train_seed=cast(ReadinessCorrectionBatch, released_batch).train_seed,
                             episode_id=released_batch.episode.episode_id,
                             rows=len(released_batch.labels),
                             labels_arrived_at=released_batch.labels[-1].labels_arrived_at,
@@ -2839,9 +3453,53 @@ def _execute_frozen_rollout(
                     _check_guard_native_frozen(learner, model, original)
                 except Exception as error:
                     result.update(complete=False, action_history_exact=None)
-                    result["probe_test_error" if probe_test_seed is not None else "guard_error"] = (
-                        str(error)
+                    result[scoring_error_key] = str(error)
+            if retained_probe_train and history_encoding is not None:
+                retained_history_seal = json.dumps(
+                    result.get("action_history"), sort_keys=True, allow_nan=False
+                )
+            if nearest_bindings or neural_probe_train or retained_probe_train:
+                try:
+                    check_nearest_frozen()
+                except Exception as error:
+                    result.update(complete=False, action_history_exact=None)
+                    result[scoring_error_key] = str(error)
+                    if nearest_work_observed:
+                        preserve_nearest_control_work()
+                else:
+                    if result.get(work_scope_key) == "native_metadata_pending_validation":
+                        result[work_scope_key] = "validated_native_work"
+                calls_key = (
+                    "neural_probe_control_calls" if neural_probe_train else "nearest_control_calls"
+                )
+                unknown_key = (
+                    "unreturned_neural_probe_control_possible"
+                    if neural_probe_train
+                    else "unreturned_nearest_control_possible"
+                )
+                result[calls_key] = dict(nearest_control_calls)
+                result[unknown_key] = (
+                    nearest_control_calls["attempted"] != nearest_control_calls["returned"]
+                )
+            if retained_bindings:
+                try:
+                    if retained_probe_train:
+                        # Finish native port/work proof after the last retained
+                        # public getters, which can also affect other owners.
+                        check_nearest_frozen()
+                    else:
+                        check_retained_frozen()
+                except Exception as error:
+                    result.update(
+                        complete=False, frozen_state_exact=None, original_owner_exact=None
                     )
+                    result["retained_state_error"] = str(error)
+                    if retained_probe_train and nearest_work_observed:
+                        preserve_nearest_control_work()
+                result["retained_control_calls"] = dict(retained_calls)
+                result["unreturned_retained_control_possible"] = (
+                    retained_calls["attempted"] != retained_calls["returned"]
+                )
             json.dump(result, handle, indent=2, allow_nan=False)
             handle.write("\n")
     return FrozenRolloutResult(result, released_batch if result["complete"] else None)
@@ -3006,7 +3664,7 @@ def _canonical_correction_metadata(batch, projection):
 
 
 def run_corrective_adaptation(
-    source: Learner,
+    source: TrainableLearner,
     *,
     output_directory: Path,
     visual_observation: bool = True,
@@ -3426,6 +4084,8 @@ def run_corrective_adaptation(
         ):
             raise ValueError("source collection incomplete or original learner changed")
         batch = collected.corrections
+        if isinstance(batch, ProbeCorrectionBatch):
+            raise ValueError("reserved corrections cannot enter the TRAIN correction update API")
         _check_correction_mode(
             collected.report.get("corrections"),
             batch,

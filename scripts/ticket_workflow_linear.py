@@ -8,12 +8,17 @@ from copy import deepcopy
 from dataclasses import asdict, fields
 
 from src.adapters.linear_fit_decision import LinearFitDecisionPredictor, LinearDecisionWork
-from src.adapters.linear_fit_learner import LinearFitLearner, LINEAR_RESIDUAL_ID
+from src.adapters.linear_fit_learner import (
+    LinearFitLearner,
+    LINEAR_RESIDUAL_ID,
+    MINIMUM_CHANGE_RESIDUAL_ID,
+)
 from src.core.categorical_linear_state import LinearFitPolicy
 from src.core.context_linear_state import ContextLinearFitPolicy, ContextLinearFitSnapshot
 from src.adapters.context_linear_fit_learner import (
     ContextLinearFitLearner,
     CONTEXT_LINEAR_RESIDUAL_ID,
+    CONTEXT_MINIMUM_CHANGE_RESIDUAL_ID,
 )
 from src.adapters.context_linear_fit_decision import (
     ContextLinearFitDecisionPredictor,
@@ -22,7 +27,28 @@ from src.adapters.context_linear_fit_decision import (
 from src.app.coupled_attribution import _same_value
 
 
-def counted_learner(before_update, after_update, *, separate=False, spec=None):
+def require_train_update(report, selected):
+    """Bind paid intent, including an omitted cold choice; never restore weights."""
+    changed = (
+        "linear_train_update" in report
+        if selected is None
+        else type(report.get("linear_train_update")) is not str
+        or report["linear_train_update"] != selected
+    )
+    if changed:
+        if selected is None:
+            report.pop("linear_train_update", None)
+        else:
+            report["linear_train_update"] = selected
+        raise ValueError("selected TRAIN update intent changed")
+
+
+def counted_learner(before_update, after_update, *, separate=False, spec=None, train_update=None):
+    if train_update is not None and (
+        type(train_update) is not str or train_update != "minimum_change"
+    ):
+        raise ValueError("minimum-change TRAIN requires an explicit LS operation")
+
     class CountedLinearLearner(LinearFitLearner):
         def fork(self):
             child = CountedLinearLearner(self.policy)
@@ -31,7 +57,13 @@ def counted_learner(before_update, after_update, *, separate=False, spec=None):
 
         def train_batch(self, features, targets):
             before_update(features)
-            diagnostic = super().train_batch(features, targets)
+            # Why: bind the operation to this invocation and every owned fork,
+            # without changing the persisted model or the cold-fit default.
+            diagnostic = (
+                super().train_batch_minimum_change(features, targets)
+                if train_update is not None
+                else super().train_batch(features, targets)
+            )
             after_update()
             return diagnostic
 
@@ -43,7 +75,13 @@ def counted_learner(before_update, after_update, *, separate=False, spec=None):
 
         def train_batch(self, features, targets):
             before_update(features)
-            diagnostic = super().train_batch(features, targets)
+            # Why: operation choice belongs to this invocation/fork closure,
+            # never a persisted model mode or a restored probe state.
+            diagnostic = (
+                super().train_batch_minimum_change(features, targets)
+                if train_update is not None
+                else super().train_batch(features, targets)
+            )
             after_update()
             return diagnostic
 
@@ -119,7 +157,7 @@ def record_readout_work(report, owner, pins, reader):
         raise ValueError("linear pending readout metadata changed")
 
 
-def costs(report):
+def costs(report, *, wake_rows=(), wake_commits=None):
     records = report.get("linear_readout_work")
     separate = report.get("separate_context_heads") is True
     names = tuple(
@@ -134,8 +172,12 @@ def costs(report):
     totals = {n: sum(row["work"][n] for row in records) if valid else None for n in names}
     work = report["training_work"]
     known = work["attempted_updates"] == work["returned_updates"]
-    return dict(
-        objective=CONTEXT_LINEAR_RESIDUAL_ID if separate else LINEAR_RESIDUAL_ID,
+    result = dict(
+        objective=(CONTEXT_MINIMUM_CHANGE_RESIDUAL_ID if separate else MINIMUM_CHANGE_RESIDUAL_ID)
+        if report.get("linear_train_update") == "minimum_change"
+        else CONTEXT_LINEAR_RESIDUAL_ID
+        if separate
+        else LINEAR_RESIDUAL_ID,
         learner_fit_calls_attempted=work["attempted_updates"],
         fit_rows_attempted=work["attempted_rows"],
         fit_calls_returned=work["returned_updates"],
@@ -157,4 +199,36 @@ def costs(report):
         ),
         fitted_coefficient_bytes=768 if separate else 480,
         qualification="fixed LS residual/SVD work is not a single affine SGD step; reader nominal terms exclude fit/copies/validation/softmax; no matched compute claim",
+    )
+    if "replay_mode" in report:
+        result["fit_exposure_breakdown"] = replay_costs(
+            report, wake_rows=wake_rows, wake_commits=wake_commits
+        )
+    return result
+
+
+def replay_costs(report, *, wake_rows=(), wake_commits=None):
+    """Use caller-bound source lengths/receipts, never editable display rows."""
+
+    def count(record, key):
+        value = record.get(key) if type(record) is dict else None
+        return value if type(value) is int and value >= 0 else None
+
+    replay = report.get("replay")
+    wake_count = wake_commits if type(wake_commits) is int and wake_commits >= 0 else None
+    complete_prefix = (
+        type(wake_rows) is tuple
+        and type(wake_count) is int
+        and wake_count <= len(wake_rows)
+        and all(type(rows) is int and rows >= 0 for rows in wake_rows[:wake_count])
+    )
+    return dict(
+        all_counted_fit_ports=dict(report["training_work"]),
+        wake_committed_updates=wake_count,
+        wake_committed_rows=sum(wake_rows[:wake_count]) if complete_prefix else None,
+        replay_charged_rows=count(report, "replay_examples"),
+        replay_admissions=count(replay, "attempted_updates"),
+        replay_returned_updates=count(replay, "returned_updates"),
+        replay_committed_updates=count(replay, "committed_updates"),
+        qualification="all fit ports include wake and replay; replay admissions may fail before a native call; charged rows survive failure; missing work is unknown, not zero; not matched compute",
     )

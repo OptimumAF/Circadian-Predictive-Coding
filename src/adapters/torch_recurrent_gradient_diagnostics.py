@@ -8,6 +8,7 @@ Whole-episode alignment can hide conflict on a few cue-dependent decisions.
 
 from copy import deepcopy
 from dataclasses import fields
+from math import hypot, isfinite
 import random
 from typing import Any, cast
 
@@ -219,3 +220,111 @@ def diagnose_episode_gradients(
         raise GradientDiagnosticFailed(report) from failure
     report.update(status="complete", joint_geometry=joint, per_parameter_geometry=per_parameter)
     return report
+
+
+def _update_block(before: Any, after: Any, name: str, index: int) -> dict[str, Any]:
+    old = before.parameters[name].reshape(-1).tolist()
+    new = after.parameters[name].reshape(-1).tolist()
+    gradient = after.gradients[name].reshape(-1).tolist()
+    momenta = []
+    for state in (before, after):
+        entry = state.optimizer_state["state"].get(index)
+        momenta.append(
+            [0.0] * len(old) if entry is None else entry["momentum_buffer"].reshape(-1).tolist()
+        )
+    delta = [b - a for a, b in zip(old, new, strict=True)]
+    direction = momenta[1] if after.policy.momentum else gradient
+    rate = after.policy.learning_rate
+    result = dict(
+        parameter_values=len(old),
+        parameter_before_l2=hypot(*old),
+        parameter_after_l2=hypot(*new),
+        gradient_l2=hypot(*gradient),
+        momentum_before_l2=hypot(*momenta[0]),
+        momentum_after_l2=hypot(*momenta[1]),
+        parameter_delta_l2=hypot(*delta),
+        nominal_sgd_delta_l2=rate * hypot(*direction),
+        sgd_max_abs_residual=max(abs(d + rate * m) for d, m in zip(delta, direction, strict=True)),
+    )
+    if not all(isfinite(value) for value in result.values()):
+        raise ValueError("nonfinite recurrent update summary")
+    return result
+
+
+def summarize_recurrent_update(
+    before: native.TorchRecurrentSnapshot,
+    after: native.TorchRecurrentSnapshot,
+    *,
+    rows: int,
+) -> dict[str, Any]:
+    """Read actual step buffers, without constructing a learner or recomputing gradients.
+
+    Consecutive metadata is admission, not provenance proof. The caller owns the
+    observed TRAIN operation; snapshots do not encode its objective or data role.
+    A nonzero SGD residual is reported, never hidden by enforcing a pass threshold.
+    """
+    if type(rows) is not int or not 1 <= rows <= 16:
+        raise ValueError("recurrent update summary requires1..16 exact TRAIN rows")
+    old, new = native._snapshot(before), native._snapshot(after)
+    if (
+        old.policy != new.policy
+        or rows > old.policy.max_episode_steps
+        or new.completed_updates != old.completed_updates + 1
+        or new.training_examples != old.training_examples + rows
+    ):
+        raise ValueError("recurrent update summary requires consecutive identical-policy states")
+    groups = {name: _update_block(old, new, name, i) for i, name in enumerate(native._NAMES)}
+    values = sum(group["parameter_values"] for group in groups.values())
+    buffer_states = int(bool(old.completed_updates and old.policy.momentum)) + int(
+        bool(new.policy.momentum)
+    )
+    return dict(
+        definition="recurrent_committed_update_norms_v1",
+        before_updates=old.completed_updates,
+        after_updates=new.completed_updates,
+        rows=rows,
+        groups=groups,
+        work=dict(
+            snapshot_validations=2,
+            parameter_scalars=2 * values,
+            gradient_scalars=values,
+            momentum_scalars=buffer_states * values,
+            synthetic_zero_momentum_scalars=(2 - buffer_states) * values,
+            parameter_delta_scalars=values,
+        ),
+    )
+
+
+def summarize_public_cue_update(before: Any, after: Any, *, rows: int) -> dict[str, Any]:
+    """Compose the native summary for exactly one changed public-cue head.
+
+    Why this: aggregate clocks alone would hide an unobserved change to the
+    inactive head. No live source, learner, budget or receipt is modified here.
+    """
+    from src.adapters import minigrid_public_cue_recurrent_learner as public
+
+    if type(rows) is not int or not 1 <= rows <= 16:
+        raise ValueError("public-cue update summary requires1..16 exact TRAIN rows")
+    old, new = public.copy_snapshot(before), public.copy_snapshot(after)
+    if (
+        old.policy != new.policy
+        or old.failed_work is not None
+        or new.failed_work is not None
+        or new.completed_updates != old.completed_updates + 1
+        or new.training_examples != old.training_examples + rows
+    ):
+        raise ValueError("public-cue summary requires one consecutive successful update")
+    changed = [i for i in range(2) if not _same_state(old.heads[i], new.heads[i])]
+    if len(changed) != 1:
+        raise ValueError("public-cue summary requires exactly one changed head")
+    index = changed[0]
+    result = summarize_recurrent_update(old.heads[index], new.heads[index], rows=rows)
+    return dict(
+        definition="public_cue_committed_update_norms_v1",
+        head_index=index,
+        before_updates=old.completed_updates,
+        after_updates=new.completed_updates,
+        rows=rows,
+        selected_head=result,
+        work=dict(public_snapshot_copies=2, head_comparisons=2),
+    )

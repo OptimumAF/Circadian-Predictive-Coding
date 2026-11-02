@@ -1266,8 +1266,10 @@ def evaluate_context_linear_checkpoint(source, state, *, budget, check_boundary)
     )
 
 
-def evaluate_heldout_context_linear_checkpoint(source, state, *, budget, check_boundary):
-    """Final D only from the frozen ordinary ten-fit endpoint; never refit/select."""
+def evaluate_heldout_context_linear_checkpoint(
+    source, state, *, budget, check_boundary, joint_private_endpoint=False
+):
+    """Final D only from its named frozen ordinary or private joint endpoint."""
     from src.adapters.minigrid_context_linear_learner import (
         ContextLinearLearner,
         copy_context_linear_training_snapshot,
@@ -1275,6 +1277,9 @@ def evaluate_heldout_context_linear_checkpoint(source, state, *, budget, check_b
     from src.adapters.minigrid_context_linear_policy import ContextLinearPolicy
     from src.core.minigrid_context_encoding import CONTEXT_HISTORY_ENCODING_ID
 
+    if type(joint_private_endpoint) is not bool:
+        raise ValueError("joint_private_endpoint must be an exact bool")
+    updates, fit_rows = (8, 180) if joint_private_endpoint else (10, 252)
     if type(source) is not ContextLinearLearner or not callable(check_boundary):
         raise ValueError("held-out affine games require exact learner and original boundary")
     guard = _return_budget_guard(budget)
@@ -1293,19 +1298,28 @@ def evaluate_heldout_context_linear_checkpoint(source, state, *, budget, check_b
         if (
             owned.policy != policy
             or owned.failed_work is not None
-            or (owned.completed_updates, owned.training_examples) not in ((0, 0), (10, 252))
+            or (owned.completed_updates, owned.training_examples)
+            not in ((0, 0), (updates, fit_rows))
             or (
-                owned.completed_updates == 10
+                owned.completed_updates == updates
                 and any(head is None or head.fit_rows != 36 for head in owned.heads)
             )
         ):
-            raise ValueError("held-out affine games require original0 or fixed10/252/head36 data")
+            raise ValueError(
+                "held-out joint games require original0 or fixed8/180/head36 data"
+                if joint_private_endpoint
+                else "held-out affine games require original0 or fixed10/252/head36 data"
+            )
         return owned
 
     owned = copy_state(state)
     initial = copy_state(source.snapshot_state())
-    if owned.completed_updates != 10 or initial.completed_updates != 0:
-        raise ValueError("held-out affine readout requires source0 and ordinary final10 endpoint")
+    if owned.completed_updates != updates or initial.completed_updates != 0:
+        raise ValueError(
+            "held-out affine readout requires source0 and private joint8 endpoint"
+            if joint_private_endpoint
+            else "held-out affine readout requires source0 and ordinary final10 endpoint"
+        )
     guard()
     layout = predefined_layouts()[3]
     frame_scope = (
@@ -1317,7 +1331,7 @@ def evaluate_heldout_context_linear_checkpoint(source, state, *, budget, check_b
             source,
             owned,
             method="arrived_public_cue_affine_fit",
-            updates=10,
+            updates=updates,
             layouts=(),
             role="final_test",
             sources=(),
@@ -1332,12 +1346,17 @@ def evaluate_heldout_context_linear_checkpoint(source, state, *, budget, check_b
             representation_encoding=CONTEXT_HISTORY_ENCODING_ID,
             representation_feature_dim=298,
             return_metadata=dict(
-                source_fit_calls=10,
-                source_fit_rows=252,
+                source_fit_calls=updates,
+                source_fit_rows=fit_rows,
                 new_fit_calls=0,
                 new_optimizer_updates=0,
                 model_encoding=CONTEXT_HISTORY_ENCODING_ID,
-                readout_scope="fixed final D blue/red from ordinary affine10/252; no training/probe/selection/promotion; not a globally unseen benchmark",
+                readout_scope=(
+                    "fixed final D blue/red from private joint affine8/180; no training/probe/selection/promotion; not a globally unseen benchmark"
+                    if joint_private_endpoint
+                    else "fixed final D blue/red from ordinary affine10/252; no training/probe/selection/promotion; not a globally unseen benchmark"
+                ),
+                **(dict(joint_private_endpoint=True) if joint_private_endpoint else {}),
             ),
         )
     except MiniGridEvaluationFailed as error:
@@ -1704,9 +1723,9 @@ def evaluate_context_linear_stream_checkpoint(
 
 
 def evaluate_context_linear_probe_checkpoint(
-    source, state, *, phase, budget, check_boundary, retained_a4=False
+    source, state, *, phase, budget, check_boundary, retained_a4=False, include_old_tasks=False
 ):
-    """Execute fixed F probe_test games from an owned before/after snapshot.
+    """Execute fixed F games, optionally followed by all old A/B/C TRAIN games.
 
     No probe fitting or labels enter this binding. The ordinary game loop owns
     scorer restoration, raw K7 decisions, public history, cleanup and RNG checks.
@@ -1717,10 +1736,14 @@ def evaluate_context_linear_probe_checkpoint(
     )
     from src.app.probe_return_phase import budget_binding
     from src.core.minigrid_context_encoding import CONTEXT_HISTORY_ENCODING_ID
-    from src.core.minigrid_key_door import predefined_distinct_probe_layouts
+    from src.core.minigrid_key_door import predefined_distinct_probe_layouts, predefined_layouts
 
     if type(retained_a4) is not bool:
         raise ValueError("retained_a4 must be an exact bool")
+    if type(include_old_tasks) is not bool or (
+        include_old_tasks and (retained_a4 or type(phase) is not str or phase != "after_probe")
+    ):
+        raise ValueError("include_old_tasks requires only an ordinary after_probe checkpoint")
     if type(source) is not ContextLinearLearner or type(budget) is not ToyBudgetSession:
         raise ValueError("F games require exact learner and readout budget")
     if type(phase) is not str or phase not in ("before_probe", "after_probe"):
@@ -1765,11 +1788,14 @@ def evaluate_context_linear_probe_checkpoint(
         return current
 
     def label_history(report):
-        # Why: the shared loop also serves TRAIN games; this invocation owns
-        # only a target-free probe_test initial frame, never a TRAIN packet.
+        # Why: the shared loop owns one target-free public frame at a time;
+        # mixed-role readout adds no label packet or training authority.
         if "public_history" in report:
             report["public_history"]["storage_scope"] = (
-                "one148-value public probe_test initial frame per active episode; "
+                "one148-value public probe_test/known TRAIN initial frame per active episode; "
+                if include_old_tasks
+                else "one148-value public probe_test initial frame per active episode; "
+            ) + (
                 "numericfloat64 bytes exclude native/Python/report/copy overhead; no readout updates"
             )
         return report
@@ -1793,6 +1819,15 @@ def evaluate_context_linear_probe_checkpoint(
             live_plan=tuple(
                 (layout, cue, "probe_test")
                 for layout, cue in zip(predefined_distinct_probe_layouts(), ("blue", "red"))
+            )
+            + (
+                tuple(
+                    (layout, cue, "train")
+                    for layout in predefined_layouts()[:3]
+                    for cue in ("blue", "red")
+                )
+                if include_old_tasks
+                else ()
             ),
             representation_encoding=CONTEXT_HISTORY_ENCODING_ID,
             representation_feature_dim=298,
@@ -1803,8 +1838,13 @@ def evaluate_context_linear_probe_checkpoint(
                 new_fit_calls=0,
                 new_optimizer_updates=0,
                 model_encoding=CONTEXT_HISTORY_ENCODING_ID,
-                readout_scope="fixed F probe_test games; raw K7 argmax; no refit/final/promotion",
+                readout_scope=(
+                    "fixed F probe_test then all old A/B/C TRAIN games; raw K7 argmax; no refit/final/promotion"
+                    if include_old_tasks
+                    else "fixed F probe_test games; raw K7 argmax; no refit/final/promotion"
+                ),
                 **(dict(source_recipe="retained_a4") if retained_a4 else {}),
+                **(dict(include_old_tasks=True) if include_old_tasks else {}),
             ),
         )
     except MiniGridEvaluationFailed as error:
@@ -1823,8 +1863,9 @@ def evaluate_context_linear_rehearsal_checkpoint(
     short_return_phase=None,
     qualified_boundary=None,
     retained_a4=False,
+    include_old_tasks=False,
 ):
-    """Read fixed F then returned A from the matched private two-fit endpoints."""
+    """Read F then returned A, or all old ABC from the ordinary matched endpoint."""
     from src.adapters.minigrid_context_linear_learner import (
         ContextLinearLearner,
         copy_context_linear_training_snapshot,
@@ -1833,6 +1874,11 @@ def evaluate_context_linear_rehearsal_checkpoint(
     from src.core.minigrid_key_door import predefined_distinct_probe_layouts
 
     short_return = short_return_phase is not None
+    if type(include_old_tasks) is not bool or (
+        include_old_tasks
+        and (retained_a4 is not False or short_return or qualified_boundary is not None)
+    ):
+        raise ValueError("include_old_tasks requires only the ordinary matched rehearsal endpoint")
     if type(retained_a4) is not bool or (
         retained_a4
         and (
@@ -1899,7 +1945,10 @@ def evaluate_context_linear_rehearsal_checkpoint(
     def label_history(report):
         if "public_history" in report:
             report["public_history"]["storage_scope"] = (
-                "one148-value public initial frame per active F probe_test or A TRAIN episode; "
+                "one148-value public initial frame per active F probe_test or old ABC TRAIN episode; "
+                if include_old_tasks
+                else "one148-value public initial frame per active F probe_test or A TRAIN episode; "
+            ) + (
                 "numericfloat64 bytes exclude native/Python/report/copy overhead; no readout updates"
             )
         return report
@@ -1908,6 +1957,14 @@ def evaluate_context_linear_rehearsal_checkpoint(
         (layout, cue, "probe_test")
         for layout, cue in zip(predefined_distinct_probe_layouts(), ("blue", "red"))
     ) + tuple((predefined_layouts()[0], cue, "train") for cue in ("blue", "red"))
+    if include_old_tasks:
+        # Why: both fixed arms must expose B/C outcomes as well as A, without
+        # changing their original fit/replay recipe or selecting favorable tasks.
+        plan += tuple(
+            (layout, cue, "train")
+            for layout in predefined_layouts()[1:3]
+            for cue in ("blue", "red")
+        )
     if short_return or retained_a4:
         # Why: this declared recipe reads both original A3/A4 contexts; it is
         # not the matched8/180 rehearsal endpoint or an inferred fit outcome.
@@ -1922,7 +1979,9 @@ def evaluate_context_linear_rehearsal_checkpoint(
             method="arrived_public_cue_affine_fit",
             updates=updates,
             layouts=(),
-            role=f"private_retained_{arm}"
+            role="private_F_then_all_old_ABC"
+            if include_old_tasks
+            else f"private_retained_{arm}"
             if retained_a4
             else "private_F_then_old_A3_A4"
             if short_return
@@ -1944,7 +2003,12 @@ def evaluate_context_linear_rehearsal_checkpoint(
                 new_fit_calls=0,
                 new_optimizer_updates=0,
                 model_encoding=CONTEXT_HISTORY_ENCODING_ID,
-                readout_scope="fixed F probe_test then known returned A TRAIN; raw K7 argmax; no fit/final/promotion",
+                readout_scope=(
+                    "fixed F probe_test then all old ABC TRAIN; raw K7 argmax; no fit/final/promotion"
+                    if include_old_tasks
+                    else "fixed F probe_test then known returned A TRAIN; raw K7 argmax; no fit/final/promotion"
+                ),
+                **(dict(include_old_tasks=True) if include_old_tasks else {}),
                 **(
                     dict(
                         short_return_phase=short_return_phase,
@@ -1973,6 +2037,172 @@ def evaluate_context_linear_rehearsal_checkpoint(
         label_history(error.report)
         raise
     return label_history(report)
+
+
+def evaluate_recurrent_readout_checkpoint(source, state, *, sources, budget, check_boundary):
+    """Admit only the new two-fit TRAIN-A readout, then reuse the native loop."""
+    from src.adapters.minigrid_recurrent_readout import (
+        METHOD,
+        RecurrentReadoutLearner,
+        RecurrentReadoutPolicy,
+        copy_snapshot,
+        _owners,
+    )
+
+    if type(source) is not RecurrentReadoutLearner or not callable(check_boundary):
+        raise ValueError("recurrent readout requires its exact owner and original guard")
+    owned = copy_snapshot(state)
+    if (
+        owned.policy != RecurrentReadoutPolicy()
+        or owned.failure is not None
+        or owned.fit_updates != (1, 1)
+        or owned.fit_rows != (9, 9)
+    ):
+        raise ValueError("native recurrent readout requires exactly two nine-row fits")
+    if type(sources) is not tuple or len(sources) != 2:
+        raise ValueError("native recurrent readout requires two original TRAIN-A packets")
+    seen: set[str] = set()
+    from src.adapters import minigrid_public_cue_recurrent_learner as public
+
+    for i, packet in enumerate(sources):
+        _validate_batch(packet, "train", seen)
+        if (
+            packet.context != "A"
+            or packet.features.shape != (9, 148)
+            or packet.num_classes != 7
+            or packet.episode is None
+            or packet.episode.episode_id != "minigrid-source-A-" + ("blue", "red")[i]
+            or public._cue(public._raw(packet.features)[0]) != i
+        ):
+            raise ValueError("native recurrent readout requires original ordered A cues")
+    if budget.budget.max_training_updates != 0 or budget.budget.max_replay_examples != 0:
+        raise ValueError("native recurrent readout has no update or replay authority")
+    budget_guard = _return_budget_guard(budget)
+    pins = _owners(state)
+
+    def guard():
+        check_boundary()
+        budget_guard()
+        if _owners(state) != pins or not _same_state(state, owned):
+            raise ValueError("original fitted readout checkpoint changed or was replaced")
+
+    guard()
+    layout = predefined_layouts()[0]
+    return _run_checkpoint(
+        source,
+        state,
+        method=METHOD,
+        updates=2,
+        layouts=(layout,),
+        role="train",
+        sources=sources,
+        budget=budget,
+        check_boundary=check_boundary,
+        public_history=False,
+        native_training_examples=18,
+        memory_copier=copy_snapshot,
+        extra_check=guard,
+        state_equal=_same_state,
+        live_plan=((layout, "blue", "train"), (layout, "red", "train")),
+        return_metadata=dict(
+            readout_fit_updates=2,
+            readout_fit_rows=18,
+            native_recurrent_updates=0,
+            native_recurrent_training_rows=0,
+            inference_cost="bounded prefix recomputation: sum1..n native forward rows per episode",
+            qualification="known TRAIN-A target-free games; no generalization/recovery/CPC claim",
+        ),
+    )
+
+
+def evaluate_recurring_recurrent_readout_checkpoint(
+    source, state, *, updates, sources, budget, check_boundary
+):
+    """Read only the arrived TRAIN prefix of the explicit eight-fit recipe.
+
+    Why a separate facade: ordinary native SGD clocks and the exact two-fit A
+    facade keep their admission rules; readout fits are a different control.
+    """
+    from src.adapters.minigrid_recurrent_readout import (
+        METHOD,
+        RecurrentReadoutLearner,
+        RecurrentReadoutPolicy,
+        copy_snapshot,
+        _owners,
+    )
+    from src.adapters import minigrid_public_cue_recurrent_learner as public
+
+    if type(updates) is not int or updates not in (2, 4, 6, 8):
+        raise ValueError("sequential readout requires an original2/4/6/8 fit point")
+    if type(source) is not RecurrentReadoutLearner or not callable(check_boundary):
+        raise ValueError("sequential readout requires its exact owner and original guard")
+    owned = copy_snapshot(state)
+    if (
+        owned.policy != RecurrentReadoutPolicy()
+        or owned.failure is not None
+        or owned.fit_updates != (updates // 2, updates // 2)
+        or owned.fit_rows != (9 * updates // 2, 9 * updates // 2)
+        or any(model is None or model.fit_rows != 9 for model in owned.readouts)
+    ):
+        raise ValueError("sequential readout requires original per-cue nine-row fits/clocks")
+    count = min(updates, 6)
+    if type(sources) is not tuple or len(sources) != count:
+        raise ValueError("sequential readout requires only its arrived TRAIN source prefix")
+    seen: set[str] = set()
+    contexts = ("A", "B", "C_train")[: count // 2]
+    for i, packet in enumerate(sources):
+        _validate_batch(packet, "train", seen)
+        context, cue = contexts[i // 2], ("blue", "red")[i % 2]
+        if (
+            packet.context != context
+            or packet.features.shape != (9, 148)
+            or packet.num_classes != 7
+            or packet.episode is None
+            or packet.episode.episode_id != f"minigrid-source-{context}-{cue}"
+            or public._cue(public._raw(packet.features)[0]) != i % 2
+        ):
+            raise ValueError("sequential readout requires original ordered arrived TRAIN cues")
+    if type(budget) is not ToyBudgetSession or (
+        budget.budget.max_training_updates != 0 or budget.budget.max_replay_examples != 0
+    ):
+        raise ValueError("sequential readout has no update or replay authority")
+    budget_guard = _return_budget_guard(budget)
+    pins = _owners(state)
+
+    def guard():
+        check_boundary()
+        budget_guard()
+        if _owners(state) != pins or not _same_state(state, owned):
+            raise ValueError("original sequential readout checkpoint changed or was replaced")
+
+    guard()
+    layouts = predefined_layouts()[: count // 2]
+    return _run_checkpoint(
+        source,
+        state,
+        method=METHOD,
+        updates=updates,
+        layouts=layouts,
+        role="train",
+        sources=sources,
+        budget=budget,
+        check_boundary=check_boundary,
+        public_history=False,
+        native_training_examples=9 * updates,
+        memory_copier=copy_snapshot,
+        extra_check=guard,
+        state_equal=_same_state,
+        live_plan=tuple((layout, cue, "train") for layout in layouts for cue in ("blue", "red")),
+        return_metadata=dict(
+            readout_fit_updates=updates,
+            readout_fit_rows=9 * updates,
+            native_recurrent_updates=0,
+            native_recurrent_training_rows=0,
+            arrived_contexts=list(contexts),
+            inference_cost="bounded prefix recomputation: sum1..n native forward rows per episode",
+            qualification="known arrived TRAIN tasks; acquisition/retention/return separate; no generalization/CPC claim",
+        ),
+    )
 
 
 def evaluate_standardized_neural_checkpoint(
@@ -2034,21 +2264,29 @@ def evaluate_standardized_neural_checkpoint(
     )
 
 
-def _copy_public_cue_probe_snapshot(state, *, source_updates, phase):
-    """Only the fixed two-warm-update, balanced F16/A16 probe recipe."""
+def _copy_public_cue_probe_snapshot(
+    state, *, source_updates, phase, joint_public_cue=False, comparison_arm=None
+):
+    """Admit only named source/phase doses, with exact balanced native clocks."""
     from src.adapters.minigrid_public_cue_recurrent_learner import (
         PublicCueRecurrentPolicy,
         copy_snapshot,
     )
 
     if (
-        type(source_updates) is not int
-        or source_updates != 2
+        type(joint_public_cue) is not bool
+        or type(source_updates) is not int
+        or source_updates != (0 if comparison_arm == "cold_F" else 128 if joint_public_cue else 2)
         or type(phase) is not str
         or phase not in ("after_probe", "after_return")
     ):
-        raise ValueError("public-cue probe requires source2 and an exact paid F/return phase")
-    count = source_updates + (16 if phase == "after_probe" else 32)
+        raise ValueError("public-cue probe requires its exact declared source and paid phase")
+    _validate_joint_comparison_arm(comparison_arm, joint_public_cue)
+    count = (
+        source_updates
+        + (16 if phase == "after_probe" else 32)
+        + (32 if comparison_arm is not None else 0)
+    )
     owned = copy_snapshot(state)
     if (
         owned.policy != PublicCueRecurrentPolicy()
@@ -2063,8 +2301,34 @@ def _copy_public_cue_probe_snapshot(state, *, source_updates, phase):
     return owned
 
 
+def _validate_joint_comparison_arm(value, joint):
+    if value is not None and (
+        joint is not True or type(value) is not str or value not in ("extra_F", "old_ABC", "cold_F")
+    ):
+        raise ValueError("recurrent readout requires its explicit extra_F/old_ABC/cold_F mode")
+
+
+def _public_cue_probe_plan(phase, *, joint_public_cue=False):
+    """Fixed roles per episode; mixed joint readouts never relabel old TRAIN."""
+    blue, red = predefined_distinct_probe_layouts()
+    fresh = ((blue, "blue", "probe_test"), (red, "red", "probe_test"))
+    old = tuple(
+        (layout, cue, "train") for layout in predefined_layouts()[:3] for cue in ("blue", "red")
+    )
+    return fresh + old if joint_public_cue else fresh if phase == "after_probe" else old[:2]
+
+
 def evaluate_public_cue_probe_checkpoint(
-    source, state, *, source_updates, phase, budget, check_boundary, qualified_boundary=None
+    source,
+    state,
+    *,
+    source_updates,
+    phase,
+    budget,
+    check_boundary,
+    qualified_boundary=None,
+    joint_public_cue=False,
+    comparison_arm=None,
 ):
     """Target-free F after probe or A after return on the actual disposable state.
 
@@ -2081,28 +2345,46 @@ def evaluate_public_cue_probe_checkpoint(
         and not callable(qualified_boundary)
     ):
         raise ValueError("public-cue probe requires its exact learner and completed-work boundary")
-    owned = _copy_public_cue_probe_snapshot(state, source_updates=source_updates, phase=phase)
+    owned = _copy_public_cue_probe_snapshot(
+        state,
+        source_updates=source_updates,
+        phase=phase,
+        joint_public_cue=joint_public_cue,
+        comparison_arm=comparison_arm,
+    )
     guard = _return_budget_guard(budget)
     expected_budget = ToyExecutionBudget(
-        max_training_updates=0, max_replay_examples=0, max_wall_seconds=40.0
+        max_training_updates=0,
+        max_replay_examples=0,
+        max_wall_seconds=120.0
+        if comparison_arm is not None
+        else 80.0
+        if joint_public_cue
+        else 40.0,
     )
     if not _same_value(vars(budget.budget), vars(expected_budget)):
-        raise ValueError("public-cue probe games require original40s zero-work readout budget")
+        raise ValueError("public-cue probe games require their exact zero-work readout budget")
 
     def copy_state(value):
-        current = _copy_public_cue_probe_snapshot(value, source_updates=source_updates, phase=phase)
+        current = _copy_public_cue_probe_snapshot(
+            value,
+            source_updates=source_updates,
+            phase=phase,
+            joint_public_cue=joint_public_cue,
+            comparison_arm=comparison_arm,
+        )
         if not _same_value(current, owned):
             raise ValueError("public-cue live source/scorer/checkpoint differs from paid endpoint")
         return current
 
-    a = predefined_layouts()[0]
-    blue, red = predefined_distinct_probe_layouts()
-    role = "probe_test" if phase == "after_probe" else "train"
-    plan = (
-        ((blue, "blue", role), (red, "red", role))
+    role = (
+        "probe_test_and_train"
+        if joint_public_cue
+        else "probe_test"
         if phase == "after_probe"
-        else ((a, "blue", role), (a, "red", role))
+        else "train"
     )
+    plan = _public_cue_probe_plan(phase, joint_public_cue=joint_public_cue)
     return _run_checkpoint(
         source,
         owned,
@@ -2125,9 +2407,26 @@ def evaluate_public_cue_probe_checkpoint(
             native_training_updates=owned.completed_updates,
             native_training_examples=owned.training_examples,
             native_head_updates=[h.completed_updates for h in owned.heads],
-            logical_probe_updates=16,
+            logical_probe_updates=48 if comparison_arm in ("extra_F", "cold_F") else 16,
             logical_return_updates=16 if phase == "after_return" else 0,
-            readout_scope="same disposable public-cue learner; target-free F probe_test after F16 or A TRAIN after return16; no final/update/promotion",
+            readout_scope=(
+                "disposable public-cue learner: F probe_test plus all ABC TRAIN at declared paid phase endpoints; no final/update/promotion"
+                if joint_public_cue
+                else "same disposable public-cue learner; target-free F probe_test after F16 or A TRAIN after return16; no final/update/promotion"
+            ),
+            **(
+                {}
+                if comparison_arm is None
+                else dict(
+                    comparison_arm=comparison_arm,
+                    additional_probe_native_updates=32,
+                    comparison_scope=(
+                        "cold0 F48/A16 learnability; A first acquisition, not recovery; warm result reused, not equal total work"
+                        if comparison_arm == "cold_F"
+                        else "matched48 native updates/432rows, extraF vs oldTRAIN information; not equal FLOPs/time"
+                    ),
+                )
+            ),
         ),
     )
 
@@ -2143,6 +2442,7 @@ def evaluate_public_cue_recurrent_checkpoint(
     recurring_training=False,
     recurrent_replay=None,
     class_balanced_training=False,
+    joint_comparison=False,
 ):
     """Read fixed-A or explicitly declared recurring known-TRAIN checkpoints."""
     from src.adapters.minigrid_public_cue_recurrent_learner import (
@@ -2157,6 +2457,20 @@ def evaluate_public_cue_recurrent_checkpoint(
         raise ValueError("public-cue readout requires its exact learner and completed-work guard")
     if type(recurring_training) is not bool:
         raise ValueError("recurring_training must be an exact boolean")
+    if (
+        type(joint_comparison) is not bool
+        or joint_comparison
+        and (
+            not recurring_training
+            or recurrent_replay is not None
+            or class_balanced_training is not False
+            or type(updates) is not int
+            or updates not in (0, 128)
+        )
+    ):
+        raise ValueError(
+            "joint comparison baseline requires only original0/128 unweighted TRAIN readouts"
+        )
     if type(class_balanced_training) is not bool or (
         class_balanced_training and (not recurring_training or recurrent_replay is not None)
     ):
@@ -2219,7 +2533,7 @@ def evaluate_public_cue_recurrent_checkpoint(
     expected = ToyExecutionBudget(
         max_training_updates=0,
         max_replay_examples=0,
-        max_wall_seconds=200 if recurring_training else 100,
+        max_wall_seconds=420 if joint_comparison else 200 if recurring_training else 100,
         max_process_rss_bytes=768 * 1024**2,
     )
     if not _same_value(vars(budget.budget), vars(expected)):
@@ -2265,6 +2579,125 @@ def evaluate_public_cue_recurrent_checkpoint(
         require_initial_source=True,
         live_plan=tuple((layout, cue, "train") for layout in layouts for cue in ("blue", "red")),
         **replay_options,
+    )
+
+
+def evaluate_joint_reward_checkpoint(
+    source, state, *, updates, sources, episodes, budget, check_boundary
+):
+    """Fixed TRAIN readouts of the owned joint128 and sampled136 endpoints.
+
+    Variable row clocks come from the exact eight observed TRAIN trajectories,
+    not an arbitrary counter allowance. No fitting or final-data access occurs.
+    """
+    from src.adapters.minigrid_public_cue_reward import PublicCueRewardLearner
+    from src.adapters.minigrid_public_cue_recurrent_learner import (
+        METHOD,
+        PublicCueRecurrentPolicy,
+        copy_snapshot,
+        _cue,
+    )
+    from src.adapters.torch_train_episode_batch import _binding, _same_schedule
+    from src.core.policy_gradient_episode import copy_policy_gradient_episode
+
+    if type(source) is not PublicCueRewardLearner or not callable(check_boundary):
+        raise ValueError("joint reward readout requires its exact warm owner and paid guard")
+    if type(updates) is not int or updates not in (128, 136):
+        raise ValueError("joint reward readout requires fixed128/136 endpoints")
+    schedule = tuple((c, cue) for c in ("A", "B", "C_train", "A") for cue in ("blue", "red"))
+    if type(episodes) is not tuple or len(episodes) != 8:
+        raise ValueError("joint reward readout requires eight observed TRAIN trajectories")
+    original_episodes = tuple(copy_policy_gradient_episode(e) for e in episodes)
+    episode_pins = _binding(episodes)
+    head_rows = [0, 0]
+    for index, (episode, (context, cue)) in enumerate(
+        zip(original_episodes, schedule, strict=True)
+    ):
+        rows = np.array([t.observation for t in episode.transitions], dtype=np.float64)
+        if (
+            episode.role != "train"
+            or episode.context != context
+            or episode.num_classes != 7
+            or _cue(rows[0]) != index % 2
+            or episode.episode_id != f"minigrid-reward-train-{index}"
+        ):
+            raise ValueError("joint reward trajectory lost its actual TRAIN schedule/cue/identity")
+        head_rows[index % 2] += len(rows)
+    contexts = ("A", "B", "C_train")
+    if type(sources) is not tuple or len(sources) != 6:
+        raise ValueError("joint reward readout requires original six TRAIN sources")
+    seen: set[str] = set()
+    for i, packet in enumerate(sources):
+        _validate_batch(packet, "train", seen)
+        if (
+            packet.context != contexts[i // 2]
+            or packet.num_classes != 7
+            or packet.features.shape != (9, 148)
+            or packet.episode is None
+            or packet.episode.episode_id
+            != f"minigrid-source-{contexts[i // 2]}-{('blue', 'red')[i % 2]}"
+            or _cue(packet.features[0]) != i % 2
+        ):
+            raise ValueError("joint reward readout requires ordered original raw148 TRAIN sources")
+
+    def copy_state(value):
+        owned = copy_snapshot(value)
+        if owned.policy != PublicCueRecurrentPolicy() or owned.failed_work is not None:
+            raise ValueError("joint reward checkpoint policy or failed work differs")
+        extra = 0 if owned.completed_updates == 128 else 4
+        if owned.completed_updates not in (128, 136) or any(
+            (h.completed_updates, h.training_examples)
+            != (64 + extra, 576 + (head_rows[i] if extra else 0))
+            for i, h in enumerate(owned.heads)
+        ):
+            raise ValueError("joint reward checkpoint clocks differ from observed per-head work")
+        return owned
+
+    warm = copy_state(source.snapshot_state())
+    owned = copy_state(state)
+    if warm.completed_updates != 128 or owned.completed_updates != updates:
+        raise ValueError("joint reward source/declared point differs from its paid endpoint")
+    if updates == 128 and not _same_value(warm, owned):
+        raise ValueError("frozen joint BC readout differs from its original warm source")
+    wall = budget.budget.max_wall_seconds
+    if (
+        budget.budget.max_training_updates != 0
+        or budget.budget.max_replay_examples != 0
+        or budget.updates_completed != 0
+        or budget.replay_examples_completed != 0
+        or type(wall) not in (int, float)
+        or not 0 < wall <= 210
+        or budget.budget.max_process_rss_bytes != 1024**3
+    ):
+        raise ValueError("joint reward readout requires original bounded zero-update authority")
+    budget_guard = _return_budget_guard(budget)
+
+    def guard():
+        budget_guard()
+        if not _same_schedule(episodes, episode_pins) or not _same_value(
+            episodes, original_episodes
+        ):
+            raise ValueError("observed reward trajectory evidence changed before readout")
+
+    return _run_checkpoint(
+        source,
+        owned,
+        method=METHOD,
+        updates=updates,
+        layouts=(),
+        role="train",
+        sources=sources,
+        budget=budget,
+        check_boundary=check_boundary,
+        public_history=False,
+        memory_copier=copy_state,
+        state_equal=_same_value,
+        extra_check=guard,
+        live_plan=tuple(
+            (layout, cue, "train") for layout in predefined_layouts()[:3] for cue in ("blue", "red")
+        ),
+        native_training_examples=owned.training_examples,
+        return_metadata=dict(joint_reward_training=True, observed_reward_rows=sum(head_rows)),
     )
 
 
@@ -2546,6 +2979,7 @@ def _run_checkpoint(
     serving_binding=None,
 ) -> dict[str, Any]:
     """Execute already-admitted old readouts or the private fixed A/E contract."""
+    recurrent_session = method in _RECURRENT_METHODS or method == "recurrent_readout_fit"
     if serving_binding is not None:
         from src.adapters.promotable_minigrid_binding import PromotableMiniGridBinding
 
@@ -2863,7 +3297,7 @@ def _run_checkpoint(
             problem: Exception | None = None
             try:
                 check()
-                if method in _RECURRENT_METHODS:
+                if recurrent_session:
                     current = scorer.start_episode()
                     work["live_sessions_started"] += 1
                     if current is scorer or any(current is old for old in sessions):
@@ -2908,7 +3342,7 @@ def _run_checkpoint(
                             check_boundary()
                             if extra_check is not None:
                                 extra_check()
-                    if method in _RECURRENT_METHODS and (
+                    if recurrent_session and (
                         type(current.completed_steps) is not int
                         or current.completed_steps != slot["prediction_calls_returned"]
                     ):
@@ -2960,7 +3394,7 @@ def _run_checkpoint(
                         expected, read_snapshot(current)
                     ):
                         raise ValueError("live prediction changed learned state")
-                    if method in _RECURRENT_METHODS and (
+                    if recurrent_session and (
                         type(current.completed_steps) is not int
                         or current.completed_steps != slot["prediction_calls_returned"]
                     ):

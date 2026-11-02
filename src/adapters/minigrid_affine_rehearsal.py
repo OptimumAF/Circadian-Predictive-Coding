@@ -32,7 +32,15 @@ ARMS = ("current_only", "joint_ABC_F")
 RETAINED_ARMS = ("current_only", "joint_A3_A4_F")
 
 
-def describe_protocol(*, fresh_reference=False, retained_a4=False):
+def describe_protocol(*, fresh_reference=False, retained_a4=False, joint_only=False):
+    if (
+        type(joint_only) is not bool
+        or joint_only
+        and (fresh_reference is not True or retained_a4 is not False)
+    ):
+        raise ValueError(
+            "joint_only requires the exact fresh ordinary reference, without retained A4"
+        )
     if type(retained_a4) is not bool:
         raise ValueError("retained_a4 must be an exact bool")
     if type(fresh_reference) is not bool:
@@ -68,6 +76,16 @@ def describe_protocol(*, fresh_reference=False, retained_a4=False):
             upstream_paid_fits=6,
             upstream_paid_rows=108,
             reference_origin="current_workflow_actual_TRAIN_endpoint",
+        )
+    if joint_only:
+        protocol.update(
+            definition="minigrid_private_affine_joint_only_v1",
+            arms=("joint_ABC_F",),
+            joint_only=True,
+            total_new_fits=2,
+            total_new_fit_rows=72,
+            current_only_F_exposures=0,
+            current_only_extra_F_exposures=0,
         )
     if retained_a4:
         # Why: two retained contexts require18 old rows per cue, rather than
@@ -433,8 +451,11 @@ def compare_private_rehearsal(
     check_boundary=lambda: None,
     fresh_reference=False,
     retained_a4=False,
+    joint_only=False,
 ):
-    protocol = describe_protocol(fresh_reference=fresh_reference, retained_a4=retained_a4)
+    protocol = describe_protocol(
+        fresh_reference=fresh_reference, retained_a4=retained_a4, joint_only=joint_only
+    )
     reuse_rows = protocol["joint_old_TRAIN_reuse_exposures"]
     report: dict[str, Any] = dict(
         definition=protocol["definition"],
@@ -444,7 +465,7 @@ def compare_private_rehearsal(
         arms=[],
     )
     limits = ToyExecutionBudget(
-        max_training_updates=4,
+        max_training_updates=2 if joint_only else 4,
         max_replay_examples=reuse_rows,
         max_wall_seconds=90,
         max_process_rss_bytes=512 * 1024**2,
@@ -521,7 +542,11 @@ def compare_private_rehearsal(
                         or type(session.replay_examples_completed) is not int
                         or not 0
                         <= session.replay_examples_completed
-                        <= (reuse_rows if index == 1 and index <= active_index else 0)
+                        <= (
+                            reuse_rows
+                            if protocol["arms"][index] != "current_only" and index <= active_index
+                            else 0
+                        )
                         or not arm_floors[index] <= session.last_clock
                     ):
                         raise ValueError("original preallocated private arm authority changed")

@@ -14,6 +14,7 @@ from typing import Any
 
 from src.adapters.continuous_probe import ContinuousProbePlan
 from src.core.cube_taskspace_state import cube_taskspace_spec
+from src.core.continuous_demonstration import ContinuousEpisode
 from src.core.pick_cube_action_history import validate_action_history_probe_episode
 from src.core.pick_cube_probe_context import pick_cube_probe_binding
 from src.core.pick_cube_taskspace_history import PickCubeTaskSpaceHistoryRecipe
@@ -43,59 +44,69 @@ def _bytes(path: Path) -> bytes:
     return payload
 
 
-def load_reserved_probe_inputs() -> tuple[ContinuousProbePlan, list[dict[str, Any]]]:
-    """Load the fixed split without granting new collection or training authority.
+def _load_role(role: str, path: Path | None = None) -> tuple[ContinuousEpisode, dict[str, Any]]:
+    """Keep the original complete byte, identity and history qualification.
 
     Why: the existing reader opens its own file. Compare the complete original
     bytes again after parsing, rather than treating a pathname hash as proof of
     which version was read. The reader's original byte receipt is retained.
     """
-    recipe = PickCubeTaskSpaceHistoryRecipe(mode="executed")
-    episodes = []
-    receipts: list[dict[str, Any]] = []
-    for role in ("probe_train", "probe_test"):
-        path, expected_digest = PROBES[role]
-        original = _bytes(path)
-        digest = hashlib.sha256(original).hexdigest()
-        if digest != expected_digest:
-            raise ValueError(f"reserved {role} input digest differs from the fixed export")
-        episode, reader_receipt = read_continuous_probe_episode(path, role=role)
-        if _bytes(path) != original or reader_receipt != len(original):
-            raise ValueError(f"reserved {role} bytes changed across the existing reader")
-        # Bind the returned episode itself, including non-history coordinates,
-        # to the hashed payload; a byte-count receipt alone cannot establish it.
-        if json.dumps(asdict(episode), sort_keys=True, allow_nan=False) != json.dumps(
-            json.loads(original), sort_keys=True, allow_nan=False
-        ):
-            raise ValueError(f"reserved {role} decoded episode differs from the original bytes")
-        binding = pick_cube_probe_binding(role)
-        if (
-            episode.role != binding.role
-            or episode.context != binding.context
-            or episode.episode_id != binding.episode_id
-            or len(episode.transitions) != 18
-            or episode.spec != cube_taskspace_spec()
-        ):
-            raise ValueError(f"reserved {role} identity,18rows or taskspace spec differs")
-        episode = validate_action_history_probe_episode(episode, recipe)
-        episodes.append(episode)
-        receipts.append(
-            {
-                "path": str(path),
-                "sha256": digest,
-                "bytes": len(original),
-                "role": episode.role,
-                "context": episode.context,
-                "episode_id": episode.episode_id,
-                "rows": len(episode.transitions),
-                "reader_receipt": reader_receipt,
-            }
-        )
+    default_path, expected_digest = PROBES[role]
+    path = default_path if path is None else path
+    original = _bytes(path)
+    digest = hashlib.sha256(original).hexdigest()
+    if digest != expected_digest:
+        raise ValueError(f"reserved {role} input digest differs from the fixed export")
+    episode, reader_receipt = read_continuous_probe_episode(path, role=role)
+    if _bytes(path) != original or reader_receipt != len(original):
+        raise ValueError(f"reserved {role} bytes changed across the existing reader")
+    # Bind the decoded values too; a byte count alone cannot prove the payload.
+    if json.dumps(asdict(episode), sort_keys=True, allow_nan=False) != json.dumps(
+        json.loads(original), sort_keys=True, allow_nan=False
+    ):
+        raise ValueError(f"reserved {role} decoded episode differs from the original bytes")
+    binding = pick_cube_probe_binding(role)
+    if (
+        episode.role != binding.role
+        or episode.context != binding.context
+        or episode.episode_id != binding.episode_id
+        or len(episode.transitions) != 18
+        or episode.spec != cube_taskspace_spec()
+    ):
+        raise ValueError(f"reserved {role} identity,18rows or taskspace spec differs")
+    episode = validate_action_history_probe_episode(
+        episode, PickCubeTaskSpaceHistoryRecipe(mode="executed")
+    )
+    return episode, {
+        "path": str(path),
+        "sha256": digest,
+        "bytes": len(original),
+        "role": episode.role,
+        "context": episode.context,
+        "episode_id": episode.episode_id,
+        "rows": len(episode.transitions),
+        "reader_receipt": reader_receipt,
+    }
+
+
+def load_reserved_training_input(
+    path: Path | None = None,
+) -> tuple[ContinuousEpisode, dict[str, Any]]:
+    """Qualify original train23 without opening test24 or granting new learning."""
+    return _load_role("probe_train", path)
+
+
+def load_reserved_probe_inputs(
+    training_path: Path | None = None, evaluation_path: Path | None = None
+) -> tuple[ContinuousProbePlan, list[dict[str, Any]]]:
+    """Load the original fixed split, preserving pair defaults and qualification."""
+    training, training_receipt = _load_role("probe_train", training_path)
+    evaluation, evaluation_receipt = _load_role("probe_test", evaluation_path)
     plan = ContinuousProbePlan(
-        episodes[0],
-        episodes[1],
+        training,
+        evaluation,
         updates=1,
         diagnostics=True,
         zero_velocity_control=False,
     )
-    return plan, receipts
+    return plan, [training_receipt, evaluation_receipt]

@@ -28,16 +28,27 @@ def budget_binding(budget) -> tuple[Any, ...]:
 
 
 def validate_return_envelope(
-    training, evaluation, monitors, templates, *, short_affine_return=False
+    training,
+    evaluation,
+    monitors,
+    templates,
+    *,
+    short_affine_return=False,
+    short_readout_return=False,
 ) -> None:
     if type(short_affine_return) is not bool:
         raise ValueError("short_affine_return must be an exact bool")
+    if type(short_readout_return) is not bool:
+        raise ValueError("short_readout_return must be an exact bool")
+    if short_affine_return and short_readout_return:
+        raise ValueError("short return modes are mutually exclusive")
+    short_return = short_affine_return or short_readout_return
     if type(templates) is not tuple or len(templates) != 2:
         raise ValueError("return_training requires exactly two TRAIN templates")
     if (
         type(monitors) is not tuple
         or len(monitors) != 2
-        or len(training) != (2 if short_affine_return else 16)
+        or len(training) != (2 if short_return else 16)
         or len(evaluation) != 2
     ):
         raise ValueError(
@@ -58,6 +69,32 @@ def validate_return_envelope(
         for b in batches
     ):
         raise ValueError("short affine return requires fixed raw296/K7 F9/oldTRAIN18 rows")
+    if short_readout_return and any(
+        type(b) is not AttributionBatch
+        or type(b.features) is not np.ndarray
+        or b.features.dtype != np.float64
+        or b.features.shape != (9, 148)
+        or type(b.targets) is not np.ndarray
+        or b.targets.dtype != np.float64
+        or b.targets.shape != (9, 1)
+        or type(b.num_classes) is not int
+        or b.num_classes != 7
+        or b.episode is not None
+        or bool(b.packet_episodes)
+        for batches in (training, evaluation, monitors, templates)
+        for b in batches
+    ):
+        raise ValueError("short readout return requires fixed metadata-free raw148/K7 nine rows")
+    if short_readout_return and any(
+        tuple(b.context for b in batches) != contexts
+        for batches, contexts in (
+            (training, ("F-blue", "F-red")),
+            (evaluation, ("F-blue", "F-red")),
+            (monitors, ("A", "A")),
+            (templates, ("A", "A")),
+        )
+    ):
+        raise ValueError("short readout return requires ordered F blue/red and old A packets")
     original = (*training, *evaluation, *monitors)
     arrays = [array for batch in original for array in (batch.features, batch.targets)]
     for template, monitor in zip(templates, monitors, strict=True):

@@ -409,16 +409,14 @@ def _state(
             num_classes=policy.num_classes,
             device="cpu",
         )
-        state.update({name: getattr(head, name).detach().clone() for name in _PARAMETERS})
+        # The snapshot constructor validates and copies these local detached views.
+        # Why: cloning here too duplicates each owned parameter/gradient buffer.
+        state.update({name: getattr(head, name).detach() for name in _PARAMETERS})
         if isinstance(head, PredictiveCodingHead):
-            state.update(
-                traffic_sum=head._traffic_sum.detach().clone(), traffic_steps=head._traffic_steps
-            )
+            state.update(traffic_sum=head._traffic_sum.detach(), traffic_steps=head._traffic_steps)
     gradients = (
         {
-            name: None
-            if getattr(head, name).grad is None
-            else getattr(head, name).grad.detach().clone()
+            name: None if getattr(head, name).grad is None else getattr(head, name).grad.detach()
             for name in _PARAMETERS
         }
         if policy.method == "bp"
@@ -473,6 +471,26 @@ def _features(features: Array, width: int) -> Any:
     if not np.isfinite(converted).all():
         raise ValueError("features must remain finite after float32 conversion")
     return require_torch().from_numpy(converted)
+
+
+def _step_output_only(head, optimizer, torch):
+    """Skip hidden SGD, retaining computed gradients for complete snapshots."""
+    hidden = (head.weight_feature_hidden, head.bias_hidden)
+    gradients = tuple(parameter.grad for parameter in hidden)
+    # Cold snapshots have no momentum yet. Explicit zeros preserve the strict
+    # complete four-buffer schema after the first update, without moving hidden
+    # parameters or relaxing validation. Existing buffers stay bitwise intact.
+    if optimizer.param_groups[0]["momentum"] > 0:
+        for parameter in hidden:
+            if parameter not in optimizer.state:
+                optimizer.state[parameter]["momentum_buffer"] = torch.zeros_like(parameter)
+    for parameter in hidden:
+        parameter.grad = None
+    try:
+        optimizer.step()
+    finally:
+        for parameter, gradient in zip(hidden, gradients, strict=True):
+            parameter.grad = gradient
 
 
 class TorchFeatureLearner:
@@ -540,10 +558,32 @@ class TorchFeatureLearner:
             return self.train_batch(features, targets)
         return self._train_batch(features, targets, multiplier)
 
+    def train_batch_output_only(self, features: Array, targets: Array) -> TrainingDiagnostic:
+        """Keep hidden parameters/momentum while paying the original full backward.
+
+        This explicit port is used by disposable BP probes; the normal training
+        port and snapshot schema retain their existing semantics.
+        """
+        if self.policy.method != "bp":
+            raise ValueError("output-only updates require BP")
+        return self._train_batch(features, targets, 1.0, output_only=True)
+
     def _train_batch(
-        self, features: Array, targets: Array, multiplier: float, gate_setting: str = "unchanged"
+        self,
+        features: Array,
+        targets: Array,
+        multiplier: float,
+        gate_setting: str = "unchanged",
+        *,
+        output_only: bool = False,
     ) -> TrainingDiagnostic:
         policy = self.policy
+        if (
+            type(output_only) is not bool
+            or output_only
+            and (policy.method != "bp" or gate_setting != "unchanged")
+        ):
+            raise ValueError("output-only updates require an explicit BP-only scope")
         effective_rate = policy.learning_rate * multiplier
         _number(effective_rate, "effective learning rate")
         values = _features(features, policy.feature_dim)
@@ -570,7 +610,10 @@ class TorchFeatureLearner:
             diagnostic = TrainingDiagnostic(TORCH_CE_ID, float(loss.item()))
             loss.backward()
             optimizer.param_groups[0]["lr"] = float(effective_rate)
-            optimizer.step()
+            if output_only:
+                _step_output_only(head, optimizer, torch)
+            else:
+                optimizer.step()
             optimizer.param_groups[0]["lr"] = float(policy.learning_rate)
         else:
             energy = head.train_step(

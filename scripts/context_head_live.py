@@ -156,8 +156,33 @@ def run_owned_case(
     catalog_action=None,
     catalog_context=None,
     probe_rehearsal=None,
+    probe_update=None,
+    train_update=None,
 ):
     """Serve ordinary TRAIN from the current workflow; never load probe weights."""
+    if train_update is not None and (
+        type(train_update) is not str
+        or train_update != "minimum_change"
+        or type(control) is not str
+        or control not in ("retained_joint", "joint")
+        or linear_fit is not True
+        or adaptive is not False
+        or calibrated is not False
+        or incident_stream is not None
+        or catalog_action is not None
+        or catalog_context is not None
+        or probe_update is not None
+        or probe_rehearsal is not None
+    ):
+        raise ValueError("minimum-change TRAIN requires ordinary owned retained or paired-joint LS")
+    if probe_update is not None and (
+        type(probe_update) is not str
+        or probe_update != "minimum_change"
+        or control != "retained_joint_probe"
+        or linear_fit is not True
+        or probe_rehearsal is not None
+    ):
+        raise ValueError("minimum-change probe requires sequential owned LS retained probe")
     from scripts.context_head_rehearsal import prepare_owned_source
 
     report: dict[str, Any] = dict(
@@ -326,6 +351,7 @@ def run_owned_case(
                         _retained_joint=True,
                         _publish_retained=publish_retained,
                         _probe_retained=probe_retained,
+                        **(dict(_probe_update=probe_update) if probe_update is not None else {}),
                         **(
                             dict(_probe_rehearsal=probe_rehearsal)
                             if probe_rehearsal is not None
@@ -336,6 +362,7 @@ def run_owned_case(
                     else {}
                 ),
                 _owned_source=(state, guard),
+                **(dict(_train_update=train_update) if train_update is not None else {}),
                 _memory=memory,
                 **(dict(_linear_fit=True) if linear_fit else {}),
                 **catalog_options,
@@ -399,9 +426,48 @@ def run_case(
     _publish_retained=False,
     _probe_retained=False,
     _probe_rehearsal=None,
+    _probe_update=None,
+    _train_update=None,
 ):
     from scripts.context_catalog_control import ContextCatalogControl
 
+    if _train_update is not None and (
+        type(_train_update) is not str
+        or _train_update != "minimum_change"
+        or not (
+            _retained_joint is True
+            or _retained_joint is False
+            and stream_recipe == CONTEXT_PAIRED_REHEARSAL_RECIPES[1]
+            and reference_mode == "periodic"
+            and publish_after_learning is True
+        )
+        or _linear_fit is not True
+        or _owned_source is None
+        or _probe_retained is not False
+        or _publish_retained is not False
+        or _probe_update is not None
+        or _probe_rehearsal is not None
+        or _reference_validation is not False
+        or contextual_policy is not None
+        or catalog_trial is not None
+        or catalog_policy is not None
+        or catalog_base is not None
+        or incident_stream is not None
+        or calibrated_serving is not False
+        or candidate_feedback is not False
+        or acknowledge_correct is not False
+        or task_feedback is not False
+        or arrived_shift is not False
+    ):
+        raise ValueError("minimum-change TRAIN requires ordinary owned retained or paired-joint LS")
+    if _probe_update is not None and (
+        type(_probe_update) is not str
+        or _probe_update != "minimum_change"
+        or _probe_retained is not True
+        or _linear_fit is not True
+        or _probe_rehearsal is not None
+    ):
+        raise ValueError("minimum-change probe requires sequential private retained LS probe")
     if _probe_rehearsal is not None and (
         type(_probe_rehearsal) is not str
         or _probe_rehearsal not in ("joint", "current_only")
@@ -522,6 +588,7 @@ def run_case(
     if _linear_fit:
         from src.adapters import context_linear_serving as linear_binding
         from src.core.context_linear_state import copy_context_linear_state
+        from scripts.ticket_workflow_linear import require_train_update
 
         copy_owned_state = copy_context_linear_state
         digest_state, record_size = (
@@ -682,6 +749,8 @@ def run_case(
     )
     if adaptive_owned:
         report["training_control"] = "arrived_candidate_error_ack_v1"
+    if _train_update is not None:
+        report["linear_train_update"] = _train_update
     if _reference_validation:
         report.update(
             definition="fresh_context_linear_reference_validation_case_v1",
@@ -804,6 +873,8 @@ def run_case(
                 catalog_control.prepare(budget, sampler)
 
             def require_source():
+                if _linear_fit:
+                    require_train_update(report, _train_update)
                 # Shared worker read-only checks never mutate the main budget clock.
                 if monotonic() - started > (120 if stream_recipe is None else 180):
                     raise ValueError("original live case deadline exhausted")
@@ -898,7 +969,11 @@ def run_case(
                     report["training_work"]["returned_updates"] += 1
 
                 source = counted_learner(
-                    before_linear_fit, after_linear_fit, separate=True, spec=spec
+                    before_linear_fit,
+                    after_linear_fit,
+                    separate=True,
+                    spec=spec,
+                    **(dict(train_update=_train_update) if _train_update is not None else {}),
                 )
             else:
                 source = CountedLearner(initial.policy)
@@ -1101,6 +1176,7 @@ def run_case(
                         sampler,
                         report,
                         probe_record,
+                        **(dict(probe_update=_probe_update) if _probe_update is not None else {}),
                         **(
                             dict(rehearsal_control=_probe_rehearsal)
                             if _probe_rehearsal is not None

@@ -153,8 +153,8 @@ def _successful_work(policy, rows, *, weighted=False):
 
 def _admit_maximum_rows(value: int) -> int:
     """Only the existing or explicitly expanded mixed TRAIN scope is supported."""
-    if type(value) is not int or value not in (148, 198):
-        raise ValueError("mixed maximum_rows must be the exact integer148 or198")
+    if type(value) is not int or value not in (148, 198, 220):
+        raise ValueError("mixed maximum_rows must be the exact integer148,198 or220")
     return value
 
 
@@ -314,7 +314,7 @@ class RecordedContinuousMixed:
         if (
             type(self._maximum_rows) is not int
             or type(self._maximum_rows_original) is not int
-            or self._maximum_rows_original not in (148, 198)
+            or self._maximum_rows_original not in (148, 198, 220)
             or self._maximum_rows != self._maximum_rows_original
         ):
             raise RuntimeError("mixed original row scope was replaced")
@@ -378,13 +378,13 @@ class RecordedContinuousMixed:
         self.require_latest()
         # Default forks keep their original call shape. Expanded scopes are
         # explicit configuration and must survive every actor/candidate fork.
-        if self._maximum_rows == 198:
+        if self._maximum_rows != 148:
             if self._row_weights is None:
                 return RecordedContinuousMixed(
                     child,
                     self._reports,
                     self._limit,
-                    maximum_rows=198,
+                    maximum_rows=self._maximum_rows,
                     _records=self._records,
                     _latest=self._latest,
                 )
@@ -392,7 +392,7 @@ class RecordedContinuousMixed:
                 child,
                 self._reports,
                 self._limit,
-                maximum_rows=198,
+                maximum_rows=self._maximum_rows,
                 row_weights=self._row_weights.copy(),
                 _records=self._records,
                 _latest=self._latest,

@@ -33,11 +33,18 @@ class ActionHistoryEncoding:
         train_seed=None,
         guard_seed=None,
         probe_test_seed=None,
+        probe_train_seed=None,
         mass_context: PickCubeMassContext | None = None,
     ):
         self.recipe = history.validate_action_history_recipe(recipe)
         self._recipe_binding = json.dumps(asdict(self.recipe), sort_keys=True, allow_nan=False)
-        if sum(value is not None for value in (train_seed, guard_seed, probe_test_seed)) > 1:
+        if (
+            sum(
+                value is not None
+                for value in (train_seed, guard_seed, probe_test_seed, probe_train_seed)
+            )
+            > 1
+        ):
             raise ValueError(
                 "causal history requires separate TRAIN, guard or probe-test reset binding"
             )
@@ -50,6 +57,7 @@ class ActionHistoryEncoding:
                 or train_seed != mass.seed
                 or guard_seed is not None
                 or probe_test_seed is not None
+                or probe_train_seed is not None
                 or not history.is_taskspace_recipe(self.recipe)
                 or self.recipe.mode != "executed"
             ):
@@ -65,14 +73,17 @@ class ActionHistoryEncoding:
             else None,
         )
         probe_binding = None
-        if probe_test_seed is not None:
-            probe_binding = pick_cube_probe_binding("probe_test")
-            if type(probe_test_seed) is not int or probe_test_seed != probe_binding.seed:
-                raise ValueError("causal probe-test history requires the exact native seed24")
+        if probe_test_seed is not None or probe_train_seed is not None:
+            probe_binding = pick_cube_probe_binding(
+                "probe_train" if probe_train_seed is not None else "probe_test"
+            )
+            seed = probe_train_seed if probe_train_seed is not None else probe_test_seed
+            if type(seed) is not int or seed != probe_binding.seed:
+                raise ValueError("causal probe history requires its original native seed23/24")
             if not history.is_taskspace_recipe(self.recipe) or self.recipe.mode != "executed":
                 raise ValueError("causal probe-test history requires fixed executed taskspace12")
         self.native_role = (
-            "probe_test"
+            probe_binding.role
             if probe_binding is not None
             else "inner_guard"
             if guard_seed is not None
@@ -81,7 +92,11 @@ class ActionHistoryEncoding:
             else None
         )
         self.native_binding = (
-            (probe_binding.seed, probe_binding.context, "pick-cube-probe-test-smoke-24")
+            (
+                probe_binding.seed,
+                probe_binding.context,
+                f"pick-cube-{probe_binding.role.replace('_', '-')}-smoke-{probe_binding.seed}",
+            )
             if probe_binding is not None
             else (
                 guard_seed,

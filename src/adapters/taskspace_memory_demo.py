@@ -7,12 +7,12 @@ model export or physical-success claim is provided.
 """
 
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import json
 import math
 from pathlib import Path
 import struct
-from typing import Any
+from typing import Any, TypedDict
 
 import numpy as np
 
@@ -22,6 +22,16 @@ from src.adapters.numpy_nearest_continuous_bc import (
     NumpyNearestContinuousBCLearner,
     _snapshot,
 )
+from src.adapters.numpy_retained_nearest_bc import (
+    NumpyRetainedNearestBCLearner,
+    RetainedNativePin,
+    pin_retained_native,
+    require_retained_native,
+    retained_costs,
+)
+from src.core.nearest_retention import capacity, retention_policy, rank_evaluations_per_discard
+from src.core.nearest_retention import NearestRetentionPolicy
+from src.core.continuous_command_fidelity import continuous_command_fidelity
 from src.core.continuous_demonstration import (
     ContinuousActionSpec,
     ContinuousEpisode,
@@ -30,6 +40,8 @@ from src.core.continuous_demonstration import (
 from src.core.cube_taskspace_state import cube_taskspace_spec
 from src.core.nearest_continuous_bc import NearestPrediction
 from src.core.pick_cube_action_history import _validate_encoded_history
+from src.core.pick_cube_action_history import validate_action_history_probe_episode
+from src.core.pick_cube_probe_context import pick_cube_probe_binding
 from src.core.pick_cube_taskspace_history import PickCubeTaskSpaceHistoryRecipe
 from src.core.pick_cube_train_context import pick_cube_training_context
 
@@ -37,6 +49,11 @@ DEFINITION = "taskspace_memory_demo_v1"
 MAX_BUNDLE_BYTES = 512 * 1024
 TRAINING_GROUPS = ("a", "b", "train20", "push", "corrections", "current_corrections", "b22")
 REPLAY_SCENES = (("pick19", 19), ("pick17", 17), ("pick20", 20), ("push17", 17))
+
+
+class _RetentionOptions(TypedDict, total=False):
+    retention: NearestRetentionPolicy
+    max_prototypes: int
 
 
 def _fields(value, names, label):
@@ -282,6 +299,8 @@ def _prediction_report(value):
 
 
 def _pin_readout(readout):
+    if type(readout) is NumpyRetainedNearestBCLearner:
+        return pin_retained_native(readout)
     if (
         type(readout) is not NumpyNearestContinuousBCLearner
         or type(readout._policy) is not FixedInputNearestContinuousBCPolicy
@@ -298,6 +317,9 @@ def _pin_readout(readout):
 
 
 def _require_readout(readout, pin):
+    if type(pin) is RetainedNativePin:
+        require_retained_native(readout, pin)
+        return
     if (
         type(readout) is not NumpyNearestContinuousBCLearner
         or readout._state is not pin[0]
@@ -310,8 +332,199 @@ def _require_readout(readout, pin):
         raise RuntimeError("recorded replay changed its frozen readout")
 
 
-def run_demo(payload: dict) -> dict[str, Any]:
+def _readout_state(pin):
+    return pin.state if type(pin) is RetainedNativePin else pin[4]
+
+
+def _retention_options(retention, max_prototypes):
+    capacity(max_prototypes)
+    if retention is None:
+        if max_prototypes != 256:
+            raise ValueError("nondefault memory capacity requires explicit retention")
+        return None
+    owned = retention_policy(retention)
+    rank_evaluations_per_discard(max_prototypes, owned)
+    return owned
+
+
+def _training_input(training):
+    """Own typed original23 data; file qualification belongs to the IO adapter."""
+    binding = pick_cube_probe_binding("probe_train")
+    owned = validate_action_history_probe_episode(
+        training, PickCubeTaskSpaceHistoryRecipe(mode="executed")
+    )
+    if (
+        owned.role != binding.role
+        or owned.context != binding.context
+        or owned.episode_id != binding.episode_id
+        or len(owned.transitions) != 18
+        or owned.spec != cube_taskspace_spec()
+    ):
+        raise ValueError("memory probe requires the original18-row probe_train23 identity")
+    return owned
+
+
+def _run_training_probe_demo(payload, training, endpoint_observer, check_boundary):
+    from src.adapters.continuous_probe import run_nearest_training_probe
+    from src.adapters.continuous_nearest_probe import native_state, training_owner_identity
+    from src.app.probe_return_phase import paid_report_guard
+
+    if endpoint_observer is not None and not callable(endpoint_observer):
+        raise ValueError("endpoint_observer must be callable or None")
+    if check_boundary is not None and not callable(check_boundary):
+        raise ValueError("check_boundary must be callable or None")
+    training = _training_input(training)
+    episodes, _, provenance = _admit(payload)
+    rows = sum(len(episode.transitions) for episode in episodes)
+    if rows + len(training.transitions) > 256:
+        raise ValueError("private memory probe exceeds original256-prototype capacity")
+    inputs = [asdict(item) for item in (*episodes, training)]
+    input_seal = json.dumps(inputs, sort_keys=True, allow_nan=False)
+    report: dict[str, Any] = dict(
+        definition="taskspace_memory_training_probe_v1",
+        mode="private_training_reproduction",
+        classification="known probe_train23 fit; no transfer, retention or native-success claim",
+        complete=False,
+        error=None,
+        stream=None,
+        probe=None,
+        provenance=provenance,
+    )
+    final_seen = False
+    probe_guard = None
+    trusted_probe = None
+
+    def inputs_exact():
+        if check_boundary is not None:
+            check_boundary()
+        if (
+            json.dumps(
+                [asdict(item) for item in (*episodes, training)], sort_keys=True, allow_nan=False
+            )
+            != input_seal
+        ):
+            raise RuntimeError("memory probe original inputs changed")
+        if probe_guard is not None:
+            probe_guard()
+
+    def observe(readout, metadata):
+        nonlocal final_seen, probe_guard, trusted_probe
+        inputs_exact()
+        if metadata["phase"] != "after_release" or metadata["packet_index"] != 5:
+            return {}
+        if final_seen:
+            raise RuntimeError("memory probe final checkpoint repeated")
+        final_seen = True
+        state, identities = native_state(readout), training_owner_identity(readout)
+        seal = json.dumps(metadata, sort_keys=True, allow_nan=False)
+        if (
+            state.completed_updates != 7
+            or state.training_examples != rows
+            or metadata["completed_updates"] != 7
+            or metadata["prototype_rows"] != rows
+            or metadata["known_episode_ids"] != [item.episode_id for item in episodes]
+        ):
+            raise RuntimeError("memory probe checkpoint differs from seven TRAIN releases")
+
+        def guard():
+            inputs_exact()
+            native_state(readout, state)
+            if (
+                any(
+                    a is not b
+                    for a, b in zip(training_owner_identity(readout), identities, strict=True)
+                )
+                or json.dumps(metadata, sort_keys=True, allow_nan=False) != seal
+            ):
+                raise RuntimeError("memory probe source owner or checkpoint changed")
+
+        returned = run_nearest_training_probe(
+            readout, training, check_boundary=guard, endpoint_observer=endpoint_observer
+        )
+        # Keep the paid return before any subsequent validation/callback.
+        report["probe"] = returned
+        paid_guard, trusted_probe = paid_report_guard({"probe": returned})
+
+        def require_probe():
+            if report["probe"] is not returned:
+                raise RuntimeError("paid private probe return replaced")
+            paid_guard()
+
+        probe_guard = require_probe
+        guard()
+        if returned.get("complete") is not True:
+            raise RuntimeError(f"private training probe incomplete: {returned.get('error')}")
+        return dict(private_probe_updates=returned["progress"]["updates_completed"])
+
+    try:
+        report["stream"] = run_sequence(
+            episodes[0], episodes[1:], observe, fixed_input=True, maximum_releases=6
+        )
+        inputs_exact()
+        if report["stream"].get("complete") is not True or not final_seen:
+            raise RuntimeError(f"memory probe stream incomplete: {report['stream'].get('error')}")
+        report["complete"] = True
+    except Exception as error:
+        report["error"] = f"{type(error).__name__}: {error}"
+        if trusted_probe is not None:
+            report["probe"] = trusted_probe["probe"]
+    return deepcopy(report)
+
+
+def training_probe_outputs(output: Path) -> tuple[Path, ...]:
+    """Refuse all bounded capture collisions before input/model/native work."""
+    paths = (
+        output,
+        output.with_suffix(".failure.json"),
+        output.parent / f"{output.stem}-before_probe.json",
+        output.parent / f"{output.stem}-after_probe.json",
+    )
+    if (
+        len(set(paths)) != len(paths)
+        or not output.parent.is_dir()
+        or any(path.exists() or path.is_symlink() for path in paths)
+    ):
+        raise ValueError("training probe requires distinct fresh outputs in an existing directory")
+    return paths
+
+
+def run_demo(
+    payload: dict,
+    *,
+    training_probe: ContinuousEpisode | None = None,
+    endpoint_observer=None,
+    check_boundary=None,
+    retention: NearestRetentionPolicy | None = None,
+    max_prototypes: int = 256,
+    adaptation_probe=None,
+    return_task: str | None = None,
+) -> dict[str, Any]:
     """Append only TRAIN inputs, then reproduce selectors/commands offline."""
+    retention = _retention_options(retention, max_prototypes)
+    if adaptation_probe is not None:
+        if training_probe is not None or retention is None:
+            raise ValueError(
+                "adaptation_probe requires explicit retention and excludes training_probe"
+            )
+        from src.adapters.taskspace_memory_adaptation import run_adaptation
+
+        return run_adaptation(
+            payload,
+            adaptation_probe,
+            retention=retention,
+            max_prototypes=max_prototypes,
+            return_task=return_task,
+            endpoint_observer=endpoint_observer,
+            check_boundary=check_boundary,
+        )
+    if return_task is not None:
+        raise ValueError("return_task requires explicit adaptation_probe")
+    if training_probe is not None and retention is not None:
+        raise ValueError("retained TRAIN mode and private training probe are incompatible")
+    if training_probe is not None:
+        return _run_training_probe_demo(payload, training_probe, endpoint_observer, check_boundary)
+    if endpoint_observer is not None or check_boundary is not None:
+        raise ValueError("probe callbacks require an explicit training_probe")
     episodes, recordings, provenance = _admit(payload)
     bank_rows = sum(len(episode.transitions) for episode in episodes)
     work = dict(
@@ -343,6 +556,15 @@ def run_demo(payload: dict) -> dict[str, Any]:
         work=work,
     )
     final_seen = False
+    if retention is not None:
+        report.update(
+            definition="taskspace_retained_memory_readout_v1",
+            mode="offline_retained_training_readout",
+            classification="Scores on saved TRAIN inputs; simulator outcomes unmeasured",
+            retention_options=dict(rule=asdict(retention), max_prototypes=max_prototypes),
+            recorded_outcomes_scope="original recordings, not this retained policy",
+            native_outcomes=None,
+        )
 
     def observer(readout, metadata):
         nonlocal final_seen
@@ -352,14 +574,18 @@ def run_demo(payload: dict) -> dict[str, Any]:
             raise RuntimeError("demo final checkpoint was repeated")
         final_seen = True
         pin = _pin_readout(readout)
+        state = _readout_state(pin)
+        stored_rows = state.retained_rows if type(pin) is RetainedNativePin else bank_rows
         if (
-            pin[4].completed_updates != 7
-            or pin[4].training_examples != bank_rows
+            state.completed_updates != 7
+            or state.training_examples != bank_rows
             or metadata["completed_updates"] != 7
-            or metadata["prototype_rows"] != bank_rows
+            or metadata["prototype_rows"] != stored_rows
             or metadata["known_episode_ids"] != [episode.episode_id for episode in episodes]
         ):
             raise RuntimeError("demo final checkpoint differs from seven original TRAIN releases")
+        if retention is not None:
+            report["retention"] = retained_costs(state)
         raw_reports: list[tuple[Any, Any, dict[str, Any], str]] = []
         metadata_seal = json.dumps(metadata, sort_keys=True, allow_nan=False)
 
@@ -394,8 +620,8 @@ def run_demo(payload: dict) -> dict[str, Any]:
             report["replays"].append(entry)
             work["prediction_attempts"] += 1
             work["query_rows_attempted"] += rows
-            work["distance_candidate_upper_bound"] += rows * bank_rows
-            work["distance_feature_upper_bound"] += rows * bank_rows * 12
+            work["distance_candidate_upper_bound"] += rows * stored_rows
+            work["distance_feature_upper_bound"] += rows * stored_rows * 12
             work["unknown_unreturned_prediction_work"] = True
             try:
                 features = np.asarray(
@@ -422,13 +648,13 @@ def run_demo(payload: dict) -> dict[str, Any]:
                 if (
                     type(returned) is not NearestPrediction
                     or type(returned.distance_candidates) is not int
-                    or returned.distance_candidates != rows * bank_rows
+                    or returned.distance_candidates != rows * stored_rows
                     or type(returned.distance_feature_values) is not int
-                    or returned.distance_feature_values != rows * bank_rows * 12
+                    or returned.distance_feature_values != rows * stored_rows * 12
                     or type(returned.selected_indices) is not tuple
                     or len(returned.selected_indices) != rows
                     or any(
-                        type(index) is not int or not 0 <= index < bank_rows
+                        type(index) is not int or not 0 <= index < stored_rows
                         for index in returned.selected_indices
                     )
                     or type(returned.actions) is not np.ndarray
@@ -443,11 +669,27 @@ def run_demo(payload: dict) -> dict[str, Any]:
                 work["distance_feature_values_completed"] += returned.distance_feature_values
                 work["unknown_unreturned_prediction_work"] = False
                 work["unknown_unvalidated_prediction_work"] = False
-                entry["selected_indices_exact"] = returned.selected_indices == item.indices
+                entry["selected_indices_exact"] = (
+                    returned.selected_indices == item.indices if retention is None else None
+                )
                 actual_bytes = tuple(struct.pack("<4f", *row) for row in returned.actions)
                 entry["native_actions_exact"] = actual_bytes == item.action_bytes
-                if not entry["selected_indices_exact"] or not entry["native_actions_exact"]:
+                if retention is None and (
+                    not entry["selected_indices_exact"] or not entry["native_actions_exact"]
+                ):
                     raise ValueError("recorded replay selectors or nativefloat32 commands differ")
+                if retention is not None:
+                    entry["selector_scope"] = (
+                        "indices in retained bank; full-bank indices incomparable"
+                    )
+                    entry["command_fidelity"] = continuous_command_fidelity(
+                        returned.actions,
+                        np.asarray(
+                            [row.action for row in item.episode.transitions], dtype=np.float64
+                        ),
+                        state.policy.spec,
+                        ("recorded_train",) * rows,
+                    )
                 guard()
                 entry["complete"] = True
                 work["validated_replays"] += 1
@@ -457,9 +699,17 @@ def run_demo(payload: dict) -> dict[str, Any]:
         guard()
         return dict(offline_recorded_replays=work["validated_replays"], simulator_controls=0)
 
+    options: _RetentionOptions = (
+        dict(retention=retention, max_prototypes=max_prototypes) if retention is not None else {}
+    )
     try:
         stream = run_sequence(
-            episodes[0], episodes[1:], observer, fixed_input=True, maximum_releases=6
+            episodes[0],
+            episodes[1:],
+            observer,
+            fixed_input=True,
+            maximum_releases=6,
+            **options,
         )
         report["stream"] = deepcopy(stream)
         if stream.get("complete") is not True or not final_seen or work["validated_replays"] != 4:

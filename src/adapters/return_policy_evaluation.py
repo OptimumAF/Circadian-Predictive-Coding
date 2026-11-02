@@ -6,13 +6,17 @@ outcomes and partial work. No training, promotion, checkpoint selection or IO.
 """
 
 from dataclasses import asdict
-from typing import Any, Callable
+from typing import Any, Callable, TypedDict
 
 from src.adapters import key_door_pilot as shared
 from src.app.coupled_attribution import _score_checkpoints, _validate_batch, _validated_batches
 
 EVALUATION_POINTS = (0, 64, 128, 192)
 FOUR_PHASE_EVALUATION_POINTS = (0, 64, 128, 192, 256)
+
+
+class _LiveLayoutOptions(TypedDict, total=False):
+    declared_layouts: tuple[Any, ...]
 
 
 def _evaluation_layouts(four_phase: bool) -> tuple[Any, ...]:
@@ -205,6 +209,8 @@ def evaluate_policy(
             check_boundary=check_boundary,
         )
         check_boundary()
+        # Keep the old route's layout keyword absent while typing the optional field.
+        live_options: _LiveLayoutOptions = {"declared_layouts": declared} if four_phase else {}
         shared._live(
             row,
             source,
@@ -212,7 +218,7 @@ def evaluate_policy(
             budget,
             task_sequence=("A", "B", "C_train", "A") if four_phase else ("A", "B", "A"),
             check_boundary=check_boundary,
-            **({"declared_layouts": declared} if four_phase else {}),
+            **live_options,
         )
         check_boundary()
         row["outcomes"] = (

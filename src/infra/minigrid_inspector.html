@@ -39,6 +39,8 @@
 "use strict";
 const DATA=JSON.parse(document.getElementById("inspector-data").textContent),$=id=>document.getElementById(id);
 const PRIVATE=DATA.schema_id==="minigrid_private_affine_inspector_v1";
+const ALL_OLD=PRIVATE&&DATA.all_old_tasks===true;
+const SEQUENTIAL=DATA.schema_id==="recurrent_readout_inspector_v1";
 const AFFINE=DATA.schema_id==="minigrid_affine_inspector_v1"||PRIVATE;
 const RECURRING=AFFINE&&DATA.recipe==="recurring_train";
 const A4=AFFINE&&DATA.recipe==="a4_train";
@@ -68,8 +70,8 @@ else if(object===9)g.append(svg("text",{x:left+25,y:top+32,"text-anchor":"middle
 if(x===3&&y===6){g.append(svg("rect",{x:left+2,y:top+2,width:45,height:45,fill:"none",stroke:"#285c87","stroke-width":2}));g.append(svg("path",{d:`M${left+40} ${top+8}l-6 12h12z`,fill:"#285c87",stroke:"#fff","stroke-width":1}));}view.append(g);}host.append(view);}
 function renderFrame(){const entry=E(),current=F(),slot=entry?.record;$("frame-evidence").replaceChildren();$("decision-evidence").replaceChildren();$("actions").replaceChildren();
 draw($("board"),current?.image,"Recorded public observation");draw($("initial"),entry?.initial_image,"Recorded initial public observation");
-$("initial-note").textContent=!entry?.initial_image?"Initial public frame not recorded.":C().key==="recurrent_bc"?"Reference only · recurrent input stays148; hidden state is not recorded.":"First public frame retained for this episode's296-value input.";
-$("initial-title").textContent=!entry?.initial_image?"Initial public frame":C().key==="recurrent_bc"?"Initial frame · reference":"Initial frame · retained history";
+$("initial-note").textContent=!entry?.initial_image?"Initial public frame not recorded.":(C().key==="recurrent_bc"||SEQUENTIAL)?"Reference only · recurrent input stays148; hidden state is not recorded.":"First public frame retained for this episode's296-value input.";
+$("initial-title").textContent=!entry?.initial_image?"Initial public frame":(C().key==="recurrent_bc"||SEQUENTIAL)?"Initial frame · reference":"Initial frame · retained history";
 const count=entry?.frames.length??0;$("timeline").max=String(Math.max(0,count-1));$("timeline").value=String(frame);$("timeline").disabled=count===0;$("previous").disabled=count===0||frame===0;$("next").disabled=count===0||frame>=count-1;$("play").disabled=count<2;
 $("frame-label").textContent=count?`Frame ${frame} / ${count-1} · ${current.decision_pointer?"before decision":"after recorded action · no decision recorded"}`:"No recorded frames";
 $("direction").textContent=current?`Recorded direction: ${["east","south","west","north"][current.direction]}`:"Direction not recorded";
@@ -80,9 +82,9 @@ if(decision?.probabilities){decision.probabilities.forEach((probability,i)=>{con
 if(current?.decision_pointer)$("decision-evidence").append(source(current.decision_pointer,"Decision source"));if(current?.transition_pointer)$("decision-evidence").append(source(current.transition_pointer,"Physics transition"));
 $("episode-fields").replaceChildren();if(slot){
 const pointer=key=>typeof entry.pointer==="string"&&Object.hasOwn(slot,key)?`${entry.pointer}/${key}`:undefined;
-if(LEARNABILITY||FINAL_FIFO){if(LEARNABILITY){if(!AFFINE)field($("episode-fields"),"Source checkpoint",entry.source_updates);field($("episode-fields"),AFFINE?"Phase":"Disposable phase",entry.phase);}field($("episode-fields"),"Context",entry.context,pointer("context"));field($("episode-fields"),"Role",slot.source_role??slot.role,pointer(Object.hasOwn(slot,"source_role")?"source_role":"role"));}
-field($("episode-fields"),"Native updates",entry.updates,FINAL_FIFO?"/benchmark_updates":undefined);field($("episode-fields"),"Cue",slot.cue,pointer("cue"));field($("episode-fields"),"Goal reached",slot.success,pointer("success"));field($("episode-fields"),"Return",slot.return,pointer("return"));field($("episode-fields"),"Physics steps",slot.environment?.environment_steps,pointer("environment"));field($("episode-fields"),"End flags",slot.environment?`terminated ${fmt(slot.environment.terminated)} · truncated ${fmt(slot.environment.truncated)}`:null,pointer("environment"));}
-$("episode-title").textContent=slot?((PRIVATE||A4)?`${entry.phase} · ${entry.context} ${slot.cue} · ${entry.updates} fits`:AFFINE?`Known ${entry.context} ${slot.cue} · ${entry.updates} fits`:LEARNABILITY?`${entry.source_updates} source · ${entry.phase} · ${entry.context} ${slot.cue}`:`${entry.updates} updates · ${FINAL_FIFO?"D":"A"} ${slot.cue}`):"No recorded episode";
+if(LEARNABILITY||FINAL_FIFO||SEQUENTIAL){if(LEARNABILITY){if(!AFFINE)field($("episode-fields"),"Source checkpoint",entry.source_updates);field($("episode-fields"),AFFINE?"Phase":"Disposable phase",entry.phase);}field($("episode-fields"),"Context",entry.context,pointer("context"));field($("episode-fields"),"Role",slot.source_role??slot.role,pointer(Object.hasOwn(slot,"source_role")?"source_role":"role"));}
+field($("episode-fields"),SEQUENTIAL?"Readout fits":"Native updates",entry.updates,FINAL_FIFO?"/benchmark_updates":undefined);field($("episode-fields"),"Cue",slot.cue,pointer("cue"));field($("episode-fields"),"Goal reached",slot.success,pointer("success"));field($("episode-fields"),"Return",slot.return,pointer("return"));field($("episode-fields"),"Physics steps",slot.environment?.environment_steps,pointer("environment"));field($("episode-fields"),"End flags",slot.environment?`terminated ${fmt(slot.environment.terminated)} · truncated ${fmt(slot.environment.truncated)}`:null,pointer("environment"));}
+$("episode-title").textContent=slot?(SEQUENTIAL?`${entry.phase} · ${entry.context} ${slot.cue} · ${entry.updates} fits`:(PRIVATE||A4)?`${entry.phase} · ${entry.context} ${slot.cue} · ${entry.updates} fits`:AFFINE?`Known ${entry.context} ${slot.cue} · ${entry.updates} fits`:LEARNABILITY?`${entry.source_updates} source · ${entry.phase} · ${entry.context} ${slot.cue}`:`${entry.updates} updates · ${FINAL_FIFO?"D":"A"} ${slot.cue}`):"No recorded episode";
 $("status").textContent=slot?episodeStatus(slot):"Not run";$("reason").textContent=entry?.derived?"Planned slot was not run. No source episode, outcome or frame was recorded.":slot?.reason??"";
 }
 function selectEpisode(index){stop();episode=index;frame=0;$("episode").value=String(index);renderFrame();}
@@ -111,7 +113,7 @@ function episodeStatus(record){
 const outcome=record.success===true?"Goal":record.success===false?(record.environment?.truncated?"Timeout":record.environment?.terminated?"Terminal failure":"No goal"):"Outcome unknown";
 return record.status==="not_run"?"Not run · outcome unknown":`${record.status} · ${outcome}`;
 }
-function renderCondition(){stop();episode=0;frame=0;$("episode").replaceChildren();C().episodes.forEach((entry,i)=>{const r=entry.record,label=AFFINE?`${A4?entry.phase+" · ":""}${entry.context} ${r.cue} · ${episodeStatus(r)}`:LEARNABILITY?`${entry.source_updates} source · ${entry.phase} · ${entry.context} ${r.cue} · ${episodeStatus(r)}`:`${entry.updates} updates · ${r.cue} · ${episodeStatus(r)}`,option=node("option",label);option.value=String(i);$("episode").append(option);});$("episode").disabled=C().episodes.length===0;$("identity").replaceChildren();for(const [label,value] of [["Method",C().key],["Seed",FINAL_FIFO||AFFINE?E()?.record.environment?.seed:DATA.source.protocol?.seed],["Role",PRIVATE?C().source_role:FINAL_FIFO?"final_test":AFFINE?"TRAIN":LEARNABILITY?"TRAIN + probe_test":"TRAIN"],["Learning","Inactive"],["Inputs",C().key==="recurrent_bc"?"148 · recurrent":"296 · initial + current"],["State",PRIVATE?`Fit ${C().status} · games ${C().native_status??"Not planned"}`:FINAL_FIFO?C().status:R().status]]){const item=node("div");item.append(node("span",label,"muted"),node("b",fmt(value)));$("identity").append(item);}renderFrame();renderTables();renderCosts();}
+function renderCondition(){stop();episode=0;frame=0;$("episode").replaceChildren();C().episodes.forEach((entry,i)=>{const r=entry.record,label=SEQUENTIAL?`${entry.updates} fits · ${entry.phase} · ${entry.context} ${r.cue} · ${episodeStatus(r)}`:AFFINE?`${A4?entry.phase+" · ":""}${entry.context} ${r.cue} · ${episodeStatus(r)}`:LEARNABILITY?`${entry.source_updates} source · ${entry.phase} · ${entry.context} ${r.cue} · ${episodeStatus(r)}`:`${entry.updates} updates · ${r.cue} · ${episodeStatus(r)}`,option=node("option",label);option.value=String(i);$("episode").append(option);});$("episode").disabled=C().episodes.length===0;$("identity").replaceChildren();for(const [label,value] of [["Method",C().key],["Seed",FINAL_FIFO||AFFINE||SEQUENTIAL?E()?.record.environment?.seed:DATA.source.protocol?.seed],["Role",PRIVATE?C().source_role:FINAL_FIFO?"final_test":AFFINE?"TRAIN":LEARNABILITY?"TRAIN + probe_test":"TRAIN"],["Learning","Inactive"],["Inputs",(C().key==="recurrent_bc"||SEQUENTIAL)?"148 · recurrent":"296 · initial + current"],["State",PRIVATE?`Fit ${C().status} · games ${C().native_status??"Not planned"}`:FINAL_FIFO?C().status:R().status]]){const item=node("div");item.append(node("span",label,"muted"),node("b",fmt(value)));$("identity").append(item);}renderFrame();renderTables();renderCosts();}
 
 // Separate phase panels keep disposable cohorts and source checkpoints distinct.
 // Only observed complete numeric checkpoints become dots; no missing interval is interpolated.
@@ -131,6 +133,7 @@ panel.append(chart,node("p",observed?"Dots are recorded values. No interpolation
 }
 }
 function renderTables(){
+if(SEQUENTIAL){renderSequentialTables();return;}
 if(AFFINE){renderAffineTables();return;}
 if(FINAL_FIFO){renderFinalTables();return;}
 if(!LEARNABILITY){renderLegacyTables();return;}
@@ -149,6 +152,7 @@ for(const [key,child] of entries)scalarFields(host,child,`${pointer}/${pointerKe
 }else field(host,label,value,pointer);
 }
 function renderCosts(){
+if(SEQUENTIAL){renderSequentialCosts();return;}
 if(AFFINE){renderAffineCosts();return;}
 if(FINAL_FIFO){renderFinalCosts();return;}
 if(!LEARNABILITY){renderLegacyCosts();return;}
@@ -215,10 +219,10 @@ return [button,c.status,c.native_status??"Not planned",training?r?.budget?.updat
 })));
 }
 if(PRIVATE){
-document.querySelector("h1").textContent="Private learning, retention and return";$("recorded-origin").textContent=`Recorded private adaptation · ${DATA.source.status}`;
+document.querySelector("h1").textContent=ALL_OLD?"Private learning and old-room retention":"Private learning, retention and return";$("recorded-origin").textContent=`Recorded private adaptation · ${DATA.source.status}`;
 $("fit-title").textContent="Fresh F learning and old A/B/C fit";
 $("saved-scope").hidden=false;$("saved-scope").querySelector("h2").textContent="Frozen reference and both private controls";
-$("saved-scope-note").textContent="Two independent private learners start from the same six-fit TRAIN reference. F-only repeats F; joint fitting reuses old TRAIN. Read both fit and native outcomes: the interrupted joint readout has missing games and an unestablished final preservation flag. No model is promoted or selected.";
+$("saved-scope-note").textContent=ALL_OLD?"Both controls use the fixed F, then all old A/B/C room roster. Read fit and native outcomes separately; missing games and unestablished preservation stay unknown. These are known tasks, not a recovery or generalization test. No model is promoted or selected.":"Two independent private learners start from the same six-fit TRAIN reference. F-only repeats F; joint fitting reuses old TRAIN. Read both fit and native outcomes: the interrupted joint readout has missing games and an unestablished final preservation flag. No model is promoted or selected.";
 $("condition").setAttribute("aria-label","Learner / control");
 }
 
@@ -268,6 +272,27 @@ $("proof-title").textContent="Preservation and native call evidence";
 $("proof-note").textContent="False and unknown flags remain visible; they do not establish acceptance. Derived call counts cite the transition arrays. Native index validity is not geometric progress or safety. Uniform probabilities retain the first raw argmax (Left).";
 }
 
+function renderSequentialTables(){
+$("curves").hidden=true;
+const live=C().episodes.map((entry,i)=>{const b=node("button",`${entry.updates} fits · ${entry.phase} · ${entry.context} ${entry.record.cue}`);b.addEventListener("click",()=>selectEpisode(i));const r=entry.record;return[b,r.status,r.success,r.return,r.environment?.environment_steps,r.state_unchanged,source(entry.pointer)];});
+$("episodes").replaceChildren(table(["Fit · current phase · task","Status","Goal","Return","Steps","Preserved","Evidence"],live));
+$("raw").replaceChildren(table(["Fits","Context","Cue","CE ↓","Accuracy ↑","Exact ↑","Evidence"],C().scores.map(s=>[s.updates,s.record.context,s.record.cue,s.record.ce,s.record.accuracy,s.record.exact_sequence_accuracy,source(s.pointer)])));
+$("acquisition").replaceChildren();const outcomes=DATA.source.outcomes;
+if(!outcomes)field($("acquisition"),"Complete acquisition/retention/return summary",null,"/outcomes");
+for(const [i,row] of (outcomes?.acquisition??[]).entries())field($("acquisition"),`${row.context} ${row.cue} after ${row.updates} fits`,row.success,`/outcomes/acquisition/${i}/success`);
+$("comparisons").replaceChildren(table(["Return A cue","Initially acquired","Lost before return","Return success","Observed relearning","Evidence"],(outcomes?.returning_A??[]).map((r,i)=>[r.cue,r.initially_acquired,r.failed_before_return,r.return_success,r.observed_recovery,source(`/outcomes/returning_A/${i}`)])));
+}
+function renderSequentialCosts(){
+$("costs").replaceChildren();for(const cost of C().costs)field($("costs"),cost.label,cost.value,cost.pointer);
+$("run-costs").replaceChildren();for(const [label,key] of [["Run status","status"],["Failure reason","reason"],["App seconds","seconds"],["App sampled RSS bytes","peak_bytes"]])field($("run-costs"),label,DATA.source[key],Object.hasOwn(DATA.source,key)?`/${key}`:undefined);
+for(const key of ["completed_updates","training_examples"])field($("run-costs"),`Readout fit ${key}`,DATA.source.training?.[key],DATA.source.training&&Object.hasOwn(DATA.source.training,key)?`/training/${key}`:undefined);
+field($("run-costs"),"Outer observer time / memory / call counts",null);
+$("footer").textContent="Recorded TRAIN only · learning inactive in this player. Readout least-squares fits are separate from frozen native RNN SGD. The fixed full recipe plans 72 exposures: 54 unique TRAIN rows plus 18 repeated A rows; partial runs do not inherit those charges. All old-task failures and unknowns remain visible. A return after repeated training is not old-task retention or reliable recovery. No prefit B/C game control: postfit competence is not an estimated gain. App clocks/RSS exclude outer observer scope; missing costs stay unknown. No generalization, matched-compute, efficiency or circadian advantage is established.";
+}
+if(SEQUENTIAL){
+$("comparison-section").hidden=false;$("comparison-section").querySelector("h2").textContent="Observed A relearning on return";
+document.querySelector("h1").textContent="Learn, forget and relearn";$("recorded-origin").textContent=`Recorded sequential TRAIN · ${DATA.source.status}`;$("fit-title").textContent="Recorded TRAIN scores";$("proof-title").textContent="Current-task competence and A return";$("proof-note").textContent="All old-task checks are in the episode table, including failures. Recovery is conditional on recorded acquisition, later loss and regain. Missing outcomes and false preservation flags are not acceptance. This viewer checks saved consistency, not authenticity.";
+}
 function advance(delta){frame=Math.max(0,Math.min((E()?.frames.length??1)-1,frame+delta));renderFrame();if(frame>=(E()?.frames.length??0)-1)stop();}
 $("source-name").textContent=DATA.source_label;$("source-root").addEventListener("click",()=>openSource(""));$("close-source").addEventListener("click",()=>$("source-dialog").close());DATA.conditions.forEach((c,i)=>{const o=node("option",SAVED_FIFO||FINAL_FIFO?"FIFO36 count control":c.key);o.value=String(i);$("condition").append(o);});$("condition").value=String(condition);$("condition").addEventListener("change",e=>{condition=Number(e.target.value);renderCondition();});$("episode").addEventListener("change",e=>selectEpisode(Number(e.target.value)));$("previous").addEventListener("click",()=>{stop();advance(-1);});$("next").addEventListener("click",()=>{stop();advance(1);});$("timeline").addEventListener("input",e=>{stop();frame=Number(e.target.value);renderFrame();});$("play").addEventListener("click",()=>{if(timer!==null){stop();return;}if(frame>=(E()?.frames.length??0)-1)frame=0;timer=setInterval(()=>advance(1),450);$("play").textContent="Pause trace";renderFrame();});document.addEventListener("visibilitychange",()=>{if(document.hidden)stop();});
 try{renderCondition();}catch(error){stop();$("main").replaceChildren(node("p","Unable to display this recorded report: "+error.message,"error"));throw error;}

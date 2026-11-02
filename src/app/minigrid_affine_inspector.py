@@ -644,7 +644,11 @@ def _recurring_scope(source, complete):
     return costs
 
 
-def _native_costs(record, records, *, pointer="/games", label="Known-game work"):
+def _native_costs(record, records, *, pointer="/games", label="Known-game work", episode_limit=4):
+    _require(
+        type(episode_limit) is int and episode_limit in (4, 8), "unsupported native roster size"
+    )
+    _require(len(records) <= episode_limit, "native roster exceeds its recorded scope")
     costs = []
     done = record["status"] == "complete"
     _require(not done or record.get("work") is not None, "complete native report lacks costs")
@@ -670,7 +674,7 @@ def _native_costs(record, records, *, pointer="/games", label="Known-game work")
             known = sum(
                 e["environment"][field] for e in records if e.get("environment") is not None
             )
-            value = _integer(work.get(key), known, 64, key)
+            value = _integer(work.get(key), known, 16 * episode_limit, key)
             _require(not done or value == known, "native work disagrees with completed games")
         environments = [e["environment"] for e in records if e.get("environment") is not None]
         resets = _integer(
@@ -682,7 +686,9 @@ def _native_costs(record, records, *, pointer="/games", label="Known-game work")
         returned = _integer(
             work.get("environment_resets_completed"), len(environments), resets, "reset returns"
         )
-        _require(not done or resets == returned == 4, "complete native reset count mismatch")
+        _require(
+            not done or resets == returned == episode_limit, "complete native reset count mismatch"
+        )
         costs.extend(_flatten(work, f"{pointer}/work", label))
     return costs
 

@@ -199,8 +199,8 @@ def test_should_preserve_default_recent_report_when_explicit_fixed_bank_is_empty
     )
 
 
-@pytest.mark.parametrize("fault", ["missing_schema", "coverage_policy", "replaced_array"])
-def test_should_require_original_recent_schema_and_owned_encoded_arrays(fault):
+@pytest.mark.parametrize("fault", ["missing_schema", "missing_coverage_key", "replaced_array"])
+def test_should_require_original_schema_contexts_and_owned_encoded_arrays(fault):
     if fault == "replaced_array":
         source, wake, replay, helper = setup()
         key = next(iter(helper._buffer._rows))
@@ -213,8 +213,8 @@ def test_should_require_original_recent_schema_and_owned_encoded_arrays(fault):
         wake = ToyBudgetSession(ToyExecutionBudget(max_training_updates=4), lambda: 0.0)
         replay = ToyBudgetSession(ToyExecutionBudget(max_replay_examples=8), lambda: 0.0)
         selected = (
-            CoverageStreamReplayPolicy(2, 4, ReplayRetentionBudget(4, ROW_BYTES * 2), ("A", "B"))
-            if fault == "coverage_policy"
+            CoverageStreamReplayPolicy(2, 4, ReplayRetentionBudget(4, ROW_BYTES * 2), ("A", "C"))
+            if fault == "missing_coverage_key"
             else policy()
         )
         with pytest.raises(ValueError):

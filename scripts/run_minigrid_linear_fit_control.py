@@ -79,8 +79,11 @@ def run_saved_context_linear_new_c(path, retained_path):
     return result
 
 
-def run_saved_context_linear_probe(path, retained_path):
-    from src.adapters.minigrid_affine_probe import run_affine_fresh_probe
+def run_saved_context_linear_probe(path, retained_path, *, probe_update=None):
+    from src.adapters.minigrid_affine_probe import run_affine_fresh_probe, describe_protocol
+
+    if probe_update is not None:
+        describe_protocol(probe_update=probe_update)  # Refuse unsupported intent before file IO.
 
     raw = _qualified_after_c_bytes(retained_path)
     saved = _after_c_affine_state(json.loads(raw))
@@ -94,7 +97,12 @@ def run_saved_context_linear_probe(path, retained_path):
             raise ValueError("affine probe readonly TRAIN source changed")
 
     guard()
-    result = run_affine_fresh_probe(episodes, saved, check_boundary=guard)
+    result = run_affine_fresh_probe(
+        episodes,
+        saved,
+        check_boundary=guard,
+        **(dict(probe_update=probe_update) if probe_update is not None else {}),
+    )
     result["source_bindings"] = dict(
         after_c_sha256=QUALIFIED_AFTER_C_SHA,
         after_c_bytes=len(raw),
@@ -519,21 +527,36 @@ def run_saved_context_linear_causal_games(
     return report
 
 
-def describe_context_linear_stream():
+def _train_update_protocol(protocol, train_update) -> dict[str, Any]:
+    if train_update is None:
+        return protocol
+    if type(train_update) is not str or train_update != "minimum_change":
+        raise ValueError("TRAIN update must be an explicit minimum_change operation")
     return dict(
-        definition="minigrid_arrived_context_linear_train_stream_v1",
-        schedule="A blue, A red, B blue, B red, A blue, A red; one complete9-row episode/update",
-        label_delay=1,
-        checkpoint_updates=(0, 2, 4, 6),
-        fit_calls=6,
-        fit_rows=54,
-        score_calls=16,
-        score_rows=144,
-        classes=7,
-        seed=None,
-        wall_seconds=90,
-        peak_rss_bytes=512 * 1024**2,
-        qualification="TRAIN-only causal fit/forgetting/return; no gameplay, final or probe evaluation",
+        protocol,
+        train_update=train_update,
+        update_scope="cold first fit per cue; warm minimum-change squared residual; no guarantee of old-task retention or matched compute",
+    )
+
+
+def describe_context_linear_stream(*, train_update=None):
+    return _train_update_protocol(
+        dict(
+            definition="minigrid_arrived_context_linear_train_stream_v1",
+            schedule="A blue, A red, B blue, B red, A blue, A red; one complete9-row episode/update",
+            label_delay=1,
+            checkpoint_updates=(0, 2, 4, 6),
+            fit_calls=6,
+            fit_rows=54,
+            score_calls=16,
+            score_rows=144,
+            classes=7,
+            seed=None,
+            wall_seconds=90,
+            peak_rss_bytes=512 * 1024**2,
+            qualification="TRAIN-only causal fit/forgetting/return; no gameplay, final or probe evaluation",
+        ),
+        train_update,
     )
 
 
@@ -675,6 +698,18 @@ def describe_context_linear_recurring():
     )
 
 
+def describe_context_linear_recurring_current_only():
+    return dict(
+        describe_context_linear_recurring(),
+        definition="minigrid_recurring_current_repeated_train_stream_v1",
+        catalogue_replay_row_exposures=0,
+        repeated_current_row_exposures=162,
+        current_packet_multiplicities=(1, 1, 2, 2, 3, 3, 4, 4, 4, 4),
+        bank_policy="current arrived TRAIN packet only, repeated within wake; no prior-packet bank",
+        qualification="ten cold fits/252 physical row exposures match recurring joint batch shapes; not matched SVD/rank/memory/wall/FLOPs or a native/CPC benefit claim",
+    )
+
+
 def describe_context_linear_a4():
     return dict(
         describe_context_linear_catalogue(),
@@ -719,6 +754,7 @@ def run_context_linear_stream(
     endpoint_observer=None,
     check_boundary=None,
     recurring_catalogue=False,
+    recurring_current_only=False,
     a4_training=False,
     a4_current_only=False,
     a4_current_repeated=False,
@@ -727,7 +763,19 @@ def run_context_linear_stream(
     ready_feedback=False,
     shift_diagnostics=False,
     acknowledge_correct=False,
+    train_update=None,
 ):
+    _train_update_protocol({}, train_update)
+    if train_update is not None and (
+        reference_policy is not None
+        or a4_training
+        or a4_current_only
+        or a4_current_repeated
+        or recurring_current_only
+    ):
+        raise ValueError(
+            "minimum-change TRAIN requires the ordinary stream without A4/reference modes"
+        )
     from src.adapters.minigrid_context_linear_learner import ContextLinearLearner
     from src.adapters.minigrid_train_catalogue import (
         _validate_sources,
@@ -771,6 +819,7 @@ def run_context_linear_stream(
                 (
                     abc_catalogue,
                     recurring_catalogue,
+                    recurring_current_only,
                     a4_current_only,
                     a4_current_repeated,
                 )
@@ -786,6 +835,7 @@ def run_context_linear_stream(
             retain_arrived,
             abc_catalogue,
             recurring_catalogue,
+            recurring_current_only,
             a4_training,
             a4_current_only,
             a4_current_repeated,
@@ -803,8 +853,13 @@ def run_context_linear_stream(
     a4_mode = a4_training or a4_current_only or a4_current_repeated
     if abc_catalogue and not retain_arrived:
         raise ValueError("ABC requires arrived catalogue retention")
-    if recurring_catalogue and (not retain_arrived or abc_catalogue):
+    if recurring_current_only and (not recurring_catalogue or retain_arrived or abc_catalogue):
+        raise ValueError("recurring current-only requires its distinct nonretained recurring mode")
+    if recurring_catalogue and (
+        (not retain_arrived and not recurring_current_only) or abc_catalogue
+    ):
         raise ValueError("recurring catalogue requires retention and a distinct mode from ABC")
+    repeated_current = a4_current_repeated or recurring_current_only
     if endpoint_observer is not None and not callable(endpoint_observer):
         raise ValueError("endpoint observer must be callable")
     if check_boundary is not None:
@@ -851,7 +906,7 @@ def run_context_linear_stream(
     scheduled = []
     for i, index in enumerate(plan):
         episode = replace(selected[index], episode_id=f"{expected[index]}:wake:{i}")
-        if retain_arrived or a4_current_repeated:
+        if retain_arrived or repeated_current:
             scheduled.append(episode)
             continue
         x, y = episode_arrays(episode)
@@ -868,8 +923,12 @@ def run_context_linear_stream(
         )
     catalogue = None
     repetition = None
-    if a4_current_repeated:
-        repetition = compose_repeated_current_training(tuple(scheduled))
+    if repeated_current:
+        repetition = (
+            compose_repeated_current_training(tuple(scheduled), recurring=True)
+            if recurring_current_only
+            else compose_repeated_current_training(tuple(scheduled))
+        )
         training = list(repetition.training)
     if retain_arrived:
         catalogue = (
@@ -882,9 +941,11 @@ def run_context_linear_stream(
         if tuple(wake.cue for wake in catalogue.wakes) != ("blue", "red") * (update_count // 2):
             raise ValueError("fixed catalogue protocol requires alternating public blue/red cues")
         training = list(catalogue.training)
-    protocol = (
+    protocol: dict[str, Any] = (
         reference_protocol
         if reference_protocol is not None
+        else describe_context_linear_recurring_current_only()
+        if recurring_current_only
         else describe_context_linear_a4_current_repeated()
         if a4_current_repeated
         else describe_context_linear_a4_current_only()
@@ -899,6 +960,7 @@ def run_context_linear_stream(
         if retain_arrived
         else describe_context_linear_stream()
     )
+    protocol = _train_update_protocol(protocol, train_update)
     report: dict[str, Any] = dict(
         definition=protocol["definition"],
         protocol=protocol,
@@ -914,6 +976,8 @@ def run_context_linear_stream(
         score_calls_completed=0,
         score_rows_completed=0,
     )
+    if train_update is not None:
+        report["train_update"] = train_update
     shift = None
     if shift_diagnostics:
         from src.adapters.minigrid_shift_diagnostics import describe as describe_shift
@@ -961,13 +1025,39 @@ def run_context_linear_stream(
     with ProcessRssSampler(interval_seconds=0.02) as memory:
         budget = ToyBudgetSession(limits, monotonic)
         budget.attach_memory(memory)
-        source = ContextLinearLearner()
+        if train_update is None:
+            source = ContextLinearLearner()
+        else:
+
+            class IncrementalLearner(ContextLinearLearner):
+                # Bind selection to this invocation and every owned fork,
+                # never to restored model state or the default adapter method.
+                def fork(self):
+                    child = IncrementalLearner()
+                    child.restore_state(self.snapshot_state())
+                    return child
+
+                def train_batch(self, features, targets):
+                    return super().train_batch_minimum_change(features, targets)
+
+            source = IncrementalLearner()
         initial = source.snapshot_state()
         actor = StableActor(source.fork(), version="affine-untrained")
         original_actor = actor.snapshot_state()
 
+        def require_update_intent():
+            if train_update is not None and (
+                report.get("train_update") != train_update
+                or type(report.get("train_update")) is not str
+                or report.get("protocol") is not protocol
+                or protocol.get("train_update") != train_update
+                or type(protocol.get("train_update")) is not str
+            ):
+                raise ValueError("original TRAIN update intent changed or was replaced")
+
         def boundary():
-            if check_boundary is not None or a4_current_repeated:
+            require_update_intent()
+            if check_boundary is not None or repeated_current:
                 if check_boundary is not None:
                     check_boundary()
                 witness.check(selected)
@@ -975,6 +1065,7 @@ def run_context_linear_stream(
                     raise ValueError("outer TRAIN boundary changed source or actor")
             if reference_policy is not None and reference_policy != policy_pin:
                 raise ValueError("original affine reference policy changed")
+            require_update_intent()
 
         observed_fit_rows = 0
 
@@ -991,7 +1082,7 @@ def run_context_linear_stream(
                 if batch is not None and not any(_same_value(batch, item) for item in training):
                     raise ValueError("acknowledged window fitted an unknown TRAIN batch")
                 expected_rows = observed_fit_rows + (0 if batch is None else len(batch.features))
-            if (catalogue is not None or a4_current_only or a4_current_repeated) and (
+            if (catalogue is not None or a4_current_only or repeated_current) and (
                 state.completed_updates != n or state.training_examples != expected_rows
             ):
                 raise ValueError(
@@ -1068,7 +1159,7 @@ def run_context_linear_stream(
                 boundary()
                 report.update(status="complete", source_unchanged=True, actor_unchanged=True)
                 return report
-            if a4_current_repeated:
+            if repeated_current:
                 verified_repeated_state = stream.candidate_snapshot()
                 for stop in range(1, update_count + 1):
                     boundary()
@@ -1200,9 +1291,7 @@ def run_context_linear_stream(
                         raise ValueError(
                             "reference catalogue receipts differ from original FIFO prefix"
                         )
-                    if a4_current_repeated and not _same_value(
-                        captured, verified_repeated_receipts
-                    ):
+                    if repeated_current and not _same_value(captured, verified_repeated_receipts):
                         raise ValueError(
                             "repeated-current receipt capture changed or is unobserved"
                         )
@@ -1665,6 +1754,31 @@ def main() -> None:
     )
     parser.add_argument("--fit-seconds", type=float, help="TRAIN fit wall cap in(0,90] (default90)")
     parser.add_argument(
+        "--train-update",
+        choices=("minimum_change",),
+        help="explicit incremental update for ordinary affine stream/fresh play/recurring TRAIN only",
+    )
+    parser.add_argument(
+        "--recurring-current-only",
+        action="store_true",
+        help="repeat only current TRAIN rows in the cold --example-affine-recurring control",
+    )
+    parser.add_argument(
+        "--probe-update",
+        choices=("minimum_change",),
+        help="incremental isolated F child for --context-linear-probe or --example-affine-adaptation",
+    )
+    parser.add_argument(
+        "--all-old-tasks",
+        action="store_true",
+        help="read F and every old ABC task for both original cold --example-affine-adaptation arms",
+    )
+    parser.add_argument(
+        "--heldout-joint",
+        action="store_true",
+        help="terminal D FINAL games from the fixed joint-only affine private endpoint",
+    )
+    parser.add_argument(
         "--train-a-rollout",
         action="store_true",
         help="Two target-free known TRAIN A games from the explicit H32/128 endpoint",
@@ -1700,6 +1814,37 @@ def main() -> None:
         help="jointly fit one prior arrived TRAIN episode per cue on selected reference wakes",
     )
     args = parser.parse_args()
+    if args.recurring_current_only and (
+        not args.example_affine_recurring or args.train_update is not None
+    ):
+        parser.error("--recurring-current-only requires only cold --example-affine-recurring")
+    if args.heldout_joint and (
+        not args.example_affine_adaptation
+        or args.all_old_tasks
+        or args.train_update is not None
+        or args.probe_update is not None
+    ):
+        parser.error("--heldout-joint requires only ordinary --example-affine-adaptation")
+    if args.all_old_tasks and (
+        not args.example_affine_adaptation
+        or args.train_update is not None
+        or args.probe_update is not None
+    ):
+        parser.error(
+            "--all-old-tasks requires the ordinary cold --example-affine-adaptation comparison"
+        )
+    if args.probe_update is not None and (
+        not (args.context_linear_probe or args.example_affine_adaptation) or args.example_affine_a4
+    ):
+        parser.error(
+            "--probe-update requires ordinary --context-linear-probe or --example-affine-adaptation without A4"
+        )
+    if args.train_update is not None and not (
+        args.context_linear_stream or args.example_affine_play or args.example_affine_recurring
+    ):
+        parser.error(
+            "--train-update requires --context-linear-stream, --example-affine-play or --example-affine-recurring"
+        )
     if args.acknowledge_correct and (
         args.context_linear_reference is None
         or not args.ready_feedback
@@ -1865,17 +2010,60 @@ def main() -> None:
         if args.example_affine_recurring:
             from scripts.minigrid_affine_workflow import describe_workflow
 
-            print(json.dumps(describe_workflow(recurring_training=True), indent=2, allow_nan=False))
+            print(
+                json.dumps(
+                    describe_workflow(
+                        recurring_training=True,
+                        **(
+                            dict(recurring_current_only=True) if args.recurring_current_only else {}
+                        ),
+                        **(
+                            dict(train_update=args.train_update)
+                            if args.train_update is not None
+                            else {}
+                        ),
+                    ),
+                    indent=2,
+                    allow_nan=False,
+                )
+            )
             return
         if args.example_affine_play:
             from scripts.minigrid_affine_workflow import describe_workflow
 
-            print(json.dumps(describe_workflow(), indent=2, allow_nan=False))
+            print(
+                json.dumps(
+                    describe_workflow(
+                        **(
+                            dict(train_update=args.train_update)
+                            if args.train_update is not None
+                            else {}
+                        )
+                    ),
+                    indent=2,
+                    allow_nan=False,
+                )
+            )
             return
         if args.example_affine_adaptation:
             from scripts.minigrid_affine_workflow import describe_workflow
 
-            print(json.dumps(describe_workflow(private_adaptation=True), indent=2, allow_nan=False))
+            print(
+                json.dumps(
+                    describe_workflow(
+                        private_adaptation=True,
+                        **(dict(all_old_tasks=True) if args.all_old_tasks else {}),
+                        **(dict(joint_heldout=True) if args.heldout_joint else {}),
+                        **(
+                            dict(probe_update=args.probe_update)
+                            if args.probe_update is not None
+                            else {}
+                        ),
+                    ),
+                    indent=2,
+                    allow_nan=False,
+                )
+            )
             return
         if args.context_linear_probe_game:
             from scripts.minigrid_affine_probe_games import describe_protocol as game_protocol
@@ -1904,7 +2092,19 @@ def main() -> None:
         if args.context_linear_probe:
             from src.adapters.minigrid_affine_probe import describe_protocol as probe_protocol
 
-            print(json.dumps(probe_protocol(), indent=2, allow_nan=False))
+            print(
+                json.dumps(
+                    probe_protocol(
+                        **(
+                            dict(probe_update=args.probe_update)
+                            if args.probe_update is not None
+                            else {}
+                        )
+                    ),
+                    indent=2,
+                    allow_nan=False,
+                )
+            )
             return
         if args.context_linear_after_c_game:
             print(json.dumps(describe_context_linear_after_c_games(), indent=2, allow_nan=False))
@@ -1919,7 +2119,13 @@ def main() -> None:
                 if args.context_linear_fit
                 else describe_context_linear_games()
                 if args.context_linear_game
-                else describe_context_linear_stream()
+                else describe_context_linear_stream(
+                    **(
+                        dict(train_update=args.train_update)
+                        if args.train_update is not None
+                        else {}
+                    )
+                )
                 if args.context_linear_stream
                 else describe_context_linear_reference(
                     ReferencePolicy(args.context_linear_reference),
@@ -1978,11 +2184,22 @@ def main() -> None:
         result = (
             run_workflow(a4_adaptation=True)
             if args.example_affine_a4
-            else run_workflow(recurring_training=True)
+            else run_workflow(
+                recurring_training=True,
+                **(dict(recurring_current_only=True) if args.recurring_current_only else {}),
+                **(dict(train_update=args.train_update) if args.train_update is not None else {}),
+            )
             if args.example_affine_recurring
-            else run_workflow(private_adaptation=True)
+            else run_workflow(
+                private_adaptation=True,
+                **(dict(all_old_tasks=True) if args.all_old_tasks else {}),
+                **(dict(joint_heldout=True) if args.heldout_joint else {}),
+                **(dict(probe_update=args.probe_update) if args.probe_update is not None else {}),
+            )
             if args.example_affine_adaptation
-            else run_workflow()
+            else run_workflow(
+                **(dict(train_update=args.train_update) if args.train_update is not None else {})
+            )
             if args.example_affine_play
             else run_saved_affine_probe_games(args.source, rehearsal=True)
             if args.context_linear_return_game
@@ -1990,7 +2207,11 @@ def main() -> None:
             if args.context_linear_probe_game
             else run_saved_context_linear_rehearsal(args.source, args.retained_source)
             if args.context_linear_rehearsal
-            else run_saved_context_linear_probe(args.source, args.retained_source)
+            else run_saved_context_linear_probe(
+                args.source,
+                args.retained_source,
+                **(dict(probe_update=args.probe_update) if args.probe_update is not None else {}),
+            )
             if args.context_linear_probe
             else run_saved_context_linear_causal_games(args.source, after_c_capacity=True)
             if args.context_linear_after_c_game
@@ -2002,7 +2223,10 @@ def main() -> None:
             if args.context_linear_causal_game
             else run_saved_context_linear_causal_games(args.source, retained_catalogue=True)
             if args.context_linear_retained_game
-            else run_context_linear_stream(episodes)
+            else run_context_linear_stream(
+                episodes,
+                **(dict(train_update=args.train_update) if args.train_update is not None else {}),
+            )
             if args.context_linear_stream
             else run_context_linear_stream(
                 episodes,
@@ -2030,7 +2254,14 @@ def main() -> None:
     except LinearFitAdmissionFailed as error:
         result = error.report
     result["runtime"] = dict(numpy=np.__version__, python=sys.version)
-    payload = json.dumps(result, indent=2, allow_nan=False)
+    # Why: the new sixteen-game roster can exceed4MiB through whitespace alone.
+    # Keep every value and the original byte limit; older modes stay readable.
+    payload = json.dumps(
+        result,
+        indent=None if args.all_old_tasks else 2,
+        separators=(",", ":") if args.all_old_tasks else None,
+        allow_nan=False,
+    )
     if args.context_linear_rehearsal and len(payload.encode("utf8")) > 4 * 1024**2:
         raise ValueError("private rehearsal report exceeds4MiB; numerical execution must not retry")
     if first_party and not args.example_affine_a4 and len(payload.encode("utf8")) > 4 * 1024**2:

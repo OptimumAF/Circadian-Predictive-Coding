@@ -25,6 +25,16 @@ from src.adapters.numpy_nearest_continuous_bc import (
     _snapshot,
 )
 from src.app.actor_shadow import ActorShadowRuntime
+from src.adapters.numpy_retained_nearest_bc import (
+    OBJECTIVE as RETAINED_OBJECTIVE,
+    NumpyRetainedNearestBCLearner,
+    RetainedNearestSnapshot,
+    advance_retained,
+    retained_costs,
+    retained_snapshot,
+)
+from src.core.nearest_retention import capacity, retention_policy, rank_evaluations_per_discard
+from src.core.nearest_retention import NearestRetentionPolicy
 from src.app.toy_execution_budget import ToyBudgetSession, ToyExecutionBudget
 from src.core.continuous_demonstration import (
     ContinuousEpisode,
@@ -38,7 +48,11 @@ Observer = Callable[[NumpyNearestContinuousBCLearner, dict[str, Any]], dict[str,
 
 
 def _episodes(
-    warm: ContinuousEpisode, releases: tuple[ContinuousEpisode, ...], *, maximum_releases=3
+    warm: ContinuousEpisode,
+    releases: tuple[ContinuousEpisode, ...],
+    *,
+    maximum_releases=3,
+    retained: bool = False,
 ):
     if type(releases) is not tuple or not 1 <= len(releases) <= maximum_releases:
         raise ValueError(f"sequence requires1..{maximum_releases} new TRAIN releases")
@@ -50,12 +64,29 @@ def _episodes(
         raise ValueError("sequence episodes must have the same spec")
     if len({item.episode_id for item in owned}) != len(owned):
         raise ValueError("sequence episodes require distinct identities")
-    if sum(len(item.transitions) for item in owned) > 256:
+    if any(not 1 <= len(item.transitions) <= 256 for item in owned):
+        raise ValueError("sequence packets require1..256 rows")
+    if not retained and sum(len(item.transitions) for item in owned) > 256:
         raise ValueError("sequence exceeds256 prototype rows")
     return owned
 
 
 def _same(first: NearestContinuousBCSnapshot, second: NearestContinuousBCSnapshot) -> bool:
+    if type(first) is not type(second):
+        return False
+    if type(first) is RetainedNearestSnapshot and type(second) is RetainedNearestSnapshot:
+        if any(
+            getattr(first, name) != getattr(second, name)
+            for name in (
+                "retention",
+                "prototype_ids",
+                "duplicate_rows",
+                "discarded_rows",
+                "selection_candidates",
+                "reservoir_rank_evaluations",
+            )
+        ):
+            return False
     return (
         first.policy == second.policy
         and first.completed_updates == second.completed_updates
@@ -66,6 +97,14 @@ def _same(first: NearestContinuousBCSnapshot, second: NearestContinuousBCSnapsho
 
 
 def _owned_state(learner: NumpyNearestContinuousBCLearner, expected):
+    if type(expected) is RetainedNearestSnapshot:
+        if type(learner) is not NumpyRetainedNearestBCLearner or learner._policy != expected.policy:
+            raise ValueError("retained sequence learner owner or frozen policy changed")
+        if not _same(
+            retained_snapshot(learner._state, learner._policy, learner._retention), expected
+        ):
+            raise ValueError("retained sequence state changed outside its declared update")
+        return
     if type(learner) is not NumpyNearestContinuousBCLearner or learner._policy != expected.policy:
         raise ValueError("sequence learner owner or frozen policy changed")
     if not _same(_snapshot(learner._state, learner._policy), expected):
@@ -81,10 +120,25 @@ def _json_result(value: Any) -> dict[str, Any]:
     return json.loads(encoded)
 
 
+def _rows(state: NearestContinuousBCSnapshot) -> int:
+    return (
+        state.retained_rows if type(state) is RetainedNearestSnapshot else state.training_examples
+    )
+
+
 class _Sequence:
-    def __init__(self, records, observer: Observer | None, *, fixed_input: bool = False):
+    def __init__(
+        self,
+        records,
+        observer: Observer | None,
+        *,
+        fixed_input: bool = False,
+        retention: NearestRetentionPolicy | None = None,
+        max_prototypes: int = 256,
+    ):
         self.records, self.observer = records, observer
         self.fixed_input = fixed_input
+        self.retention, self.max_prototypes = retention, max_prototypes
         self.work = dict(
             fit_attempts=0 if fixed_input else 1,
             fit_returns=0,
@@ -125,6 +179,8 @@ class _Sequence:
                 normalization_calls="identity_copy_of_already_encoded_inputs",
             )
         self.tick = 0
+        if retention is not None:
+            self.work["runtime_attempted_rows"] = 0
 
     def setup(self):
         records = self.records
@@ -132,13 +188,21 @@ class _Sequence:
         if self.fixed_input:
             # Why: already encoded physical inputs must not acquire an empirical
             # transform merely to enter the existing delayed-release sequence.
-            policy = FixedInputNearestContinuousBCPolicy(records[0].spec)
+            policy = FixedInputNearestContinuousBCPolicy(
+                records[0].spec, max_prototypes=self.max_prototypes
+            )
         else:
             statistics = fit_training_standardization(records[0])
             self.work["fit_returns"] = 1
             policy = NearestContinuousBCPolicy(records[0].spec, statistics)
         self.work["model_initialization_attempts"] = 1
-        self.source = NumpyNearestContinuousBCLearner(policy)
+        self.source = (
+            NumpyRetainedNearestBCLearner(
+                cast(FixedInputNearestContinuousBCPolicy, policy), self.retention
+            )
+            if self.retention is not None
+            else NumpyNearestContinuousBCLearner(policy)
+        )
         self.work["model_initializations"] = 1
         self.work["warm_append_attempts"] = 1
         self.source.train_episode(records[0])
@@ -226,9 +290,11 @@ class _Sequence:
             tick=self.tick,
             episode_id=episode_id,
             known_episode_ids=list(self.known),
-            prototype_rows=self.expected.training_examples,
+            prototype_rows=_rows(self.expected),
             completed_updates=self.expected.completed_updates,
         )
+        if type(self.expected) is RetainedNearestSnapshot:
+            metadata["training_examples"] = self.expected.training_examples
         entry = dict(metadata, result=None)
         self.report["checkpoints"].append(entry)
         if self.observer is None:
@@ -284,6 +350,8 @@ class _Sequence:
                 )
                 self.guard()
                 self.work["runtime_append_attempts"] += 1
+                if self.retention is not None:
+                    self.work["runtime_attempted_rows"] += len(x)
             paid = self.runtime.train_ready(max_updates=1)
             # Preserve paid receipts before snapshot/diagnostic validation.
             self.report["applied"].extend(asdict(item) for item in paid)
@@ -300,7 +368,7 @@ class _Sequence:
                     packet_index=index,
                     label_available=offset == 2,
                     applied=[asdict(item) for item in paid],
-                    candidate_prototype_rows=self.expected.training_examples,
+                    candidate_prototype_rows=_rows(self.expected),
                     candidate_publications=self.expected.completed_updates,
                     budget_updates=self.budget.updates_completed,
                 )
@@ -317,7 +385,8 @@ class _Sequence:
             or receipt.arrived_at != self.tick
             or receipt.applied_at != self.tick
             or receipt.update_number != index + 1
-            or receipt.diagnostic.definition != OBJECTIVE
+            or receipt.diagnostic.definition
+            != (RETAINED_OBJECTIVE if self.retention is not None else OBJECTIVE)
             or receipt.diagnostic.value != len(x)
             or receipt.episode_id != self.records[index + 1].episode_id
             or receipt.sample_id != "episode-pairs"
@@ -331,12 +400,16 @@ class _Sequence:
         )
         self.work["validation_normalization_rows"] += len(x)
         before = self.expected
-        expected = NearestContinuousBCSnapshot(
-            before.policy,
-            np.concatenate((before.prototype_features, normalized)),
-            np.concatenate((before.prototype_actions, y)),
-            before.completed_updates + 1,
-            before.training_examples + len(x),
+        expected = (
+            advance_retained(before, normalized, y)
+            if type(before) is RetainedNearestSnapshot
+            else NearestContinuousBCSnapshot(
+                before.policy,
+                np.concatenate((before.prototype_features, normalized)),
+                np.concatenate((before.prototype_actions, y)),
+                before.completed_updates + 1,
+                before.training_examples + len(x),
+            )
         )
         _owned_state(self.candidate, expected)
         self.expected = expected
@@ -353,10 +426,10 @@ class _Sequence:
             self.initial.policy.spec.observation_dim + len(self.initial.policy.spec.action_units)
         ) * 8
         self.report["memory"] = dict(
-            source_prototype_bytes=self.initial.training_examples * row_bytes,
-            actor_prototype_bytes=self.initial.training_examples * row_bytes,
-            candidate_prototype_bytes=self.expected.training_examples * row_bytes,
-            readout_prototype_bytes_max=self.expected.training_examples * row_bytes,
+            source_prototype_bytes=_rows(self.initial) * row_bytes,
+            actor_prototype_bytes=_rows(self.initial) * row_bytes,
+            candidate_prototype_bytes=_rows(self.expected) * row_bytes,
+            readout_prototype_bytes_max=_rows(self.expected) * row_bytes,
             retained_episode_rows=sum(len(item.transitions) for item in self.records),
             checkpoint_records=len(self.report["checkpoints"]),
             scope="per-owner numeric payloads; excludes Python, snapshots, callback retention and RSS",
@@ -368,9 +441,14 @@ class _Sequence:
         self.report["model_state"] = dict(
             source_publications=self.initial.completed_updates,
             candidate_publications=self.expected.completed_updates,
-            candidate_prototype_rows=self.expected.training_examples,
+            candidate_prototype_rows=_rows(self.expected),
             durable_checkpoint=False,
         )
+        if type(self.expected) is RetainedNearestSnapshot:
+            self.report["retention"] = retained_costs(self.expected)
+            self.report["model_state"]["candidate_training_examples"] = (
+                self.expected.training_examples
+            )
         self.guard()
         return self.report
 
@@ -382,6 +460,8 @@ def run_sequence(
     *,
     fixed_input: bool = False,
     maximum_releases: int = 3,
+    retention: NearestRetentionPolicy | None = None,
+    max_prototypes: int = 256,
 ) -> dict[str, Any]:
     """Run bounded cumulative delayed releases; retain paid partial reports.
 
@@ -392,6 +472,14 @@ def run_sequence(
     """
     if type(fixed_input) is not bool:
         raise ValueError("fixed_input must be an exact bool")
+    capacity(max_prototypes)
+    if retention is not None:
+        retention = retention_policy(retention)
+        rank_evaluations_per_discard(max_prototypes, retention)
+        if not fixed_input:
+            raise ValueError("retained memory requires explicit fixed_input=True")
+    elif max_prototypes != 256:
+        raise ValueError("nondefault prototype capacity requires explicit retention")
     if type(maximum_releases) is not int or maximum_releases not in (3, 5, 6):
         raise ValueError("maximum_releases must be the native integer3,5 or6")
     if maximum_releases > 3 and not fixed_input:
@@ -400,14 +488,19 @@ def run_sequence(
         raise ValueError("checkpoint observer must be callable or None")
     # Why: complete B22 coverage is a separate seventh episode; keep every
     # existing correction identity/order rather than inventing a merged path.
-    records = (
-        _episodes(warm, releases, maximum_releases=maximum_releases)
-        if maximum_releases > 3
-        else _episodes(warm, releases)
-    )
+    if retention is not None:
+        records = _episodes(warm, releases, maximum_releases=maximum_releases, retained=True)
+    elif maximum_releases > 3:
+        records = _episodes(warm, releases, maximum_releases=maximum_releases)
+    else:
+        records = _episodes(warm, releases)
     started = monotonic()
     sequence = (
-        _Sequence(records, observer, fixed_input=True)
+        _Sequence(
+            records, observer, fixed_input=True, retention=retention, max_prototypes=max_prototypes
+        )
+        if retention is not None
+        else _Sequence(records, observer, fixed_input=True)
         if fixed_input
         else _Sequence(records, observer)
     )
@@ -451,17 +544,29 @@ def run_sequence(
         observed = {}
         for name in ("source", "candidate"):
             owner = getattr(sequence, name, None)
-            if type(owner) is NumpyNearestContinuousBCLearner:
+            if owner is None:
+                continue
+            if type(owner) in (NumpyNearestContinuousBCLearner, NumpyRetainedNearestBCLearner):
                 try:
-                    state = _snapshot(owner._state, owner._policy)
+                    state = (
+                        retained_snapshot(owner._state, owner._policy, owner._retention)
+                        if type(owner) is NumpyRetainedNearestBCLearner
+                        else _snapshot(owner._state, owner._policy)
+                    )
                     observed[name] = dict(
                         completed_updates=state.completed_updates,
                         training_examples=state.training_examples,
                         status="observed_native_counts_not_validated_success",
                     )
+                    if type(state) is RetainedNearestSnapshot:
+                        observed[name]["retention"] = retained_costs(state)
                 except Exception:
                     observed[name] = dict(status="invalid_native_state")
         sequence.report["observed_native_on_failure"] = observed
+        if retention is not None:
+            sequence.report["unreturned_append_possible"] = (
+                sequence.work["runtime_append_attempts"] != sequence.work["runtime_append_returns"]
+            )
     if "elapsed_seconds" not in sequence.report:
         sequence.report["elapsed_seconds"] = monotonic() - started
     return sequence.report

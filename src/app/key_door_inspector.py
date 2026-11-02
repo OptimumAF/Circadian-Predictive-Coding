@@ -667,12 +667,38 @@ def project_key_door_report(
     """Validate all conditions/slots before returning detached recorded playback."""
     _text(source_label, "source_label", 1024)
     _json_envelope(report)
+    if (
+        report.get("definition")
+        in (
+            "native_context_return_ticket_workflow_v1",
+            "separate_context_linear_ticket_workflow_v1",
+            "linear_context_return_ticket_workflow_v1",
+        )
+        and report.get("reserved_probe_requested") is True
+    ):
+        from src.app.reserved_probe_inspector_projection import project_reserved_probe_report
+
+        return project_reserved_probe_report(
+            report, source_label=source_label, resources=resources, resource_label=resource_label
+        )
     from src.app.clm_probe_inspector_projection import REVIEW_KEYS, project_clm_probe_review
+
+    if report.get("definition") == "separate_context_linear_ticket_workflow_v1":
+        from src.app.context_linear_workflow_inspector_projection import (
+            project_context_linear_workflow_report,
+        )
+
+        return project_context_linear_workflow_report(
+            report, source_label=source_label, resources=resources, resource_label=resource_label
+        )
 
     if REVIEW_KEYS <= report.keys():
         _require(resources is None and resource_label is None, "CLM review owns its recorded costs")
         return project_clm_probe_review(report, source_label=source_label)
-    if report.get("definition") == "portable_affine_private_adaptation_v1":
+    if report.get("definition") in (
+        "portable_affine_private_adaptation_v1",
+        "portable_affine_matched_all_old_v1",
+    ):
         from src.app.minigrid_private_affine_inspector import project_private_affine_report
 
         _require(
@@ -713,6 +739,17 @@ def project_key_door_report(
         return project_continuous_comparison_report(
             report, source_label=source_label, resources=resources, resource_label=resource_label
         )
+    if report.get("definition") in (
+        "taskspace_memory_adaptation_v1",
+        "taskspace_memory_native_adaptation_v1",
+    ):
+        from src.app.taskspace_adaptation_inspector_projection import (
+            project_taskspace_adaptation_report,
+        )
+
+        return project_taskspace_adaptation_report(
+            report, source_label=source_label, resources=resources, resource_label=resource_label
+        )
     if report.get("definition") in ("taskspace_memory_demo_v1", "taskspace_memory_native_v1"):
         from src.app.taskspace_memory_inspector_projection import project_taskspace_memory_report
 
@@ -728,6 +765,16 @@ def project_key_door_report(
         return project_minigrid_heldout_fifo_report(report, source_label=source_label)
     _require(_status(report.get("status")), "invalid report status")
     protocol = report.get("protocol")
+    if (
+        type(protocol) is dict
+        and protocol.get("definition") == "recurrent_readout_train_ABCA_native_v1"
+    ):
+        from src.app.recurrent_readout_inspector import project_recurrent_readout_report
+
+        _require(
+            resources is None and resource_label is None, "recurrent report owns its recorded costs"
+        )
+        return project_recurrent_readout_report(report, source_label=source_label)
     if (
         type(protocol) is dict
         and protocol.get("protocol_id") == "paired_key_door_own_policy_quota_v1"

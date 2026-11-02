@@ -16,9 +16,24 @@ from src.core.context_linear_state import ContextLinearFitSnapshot
 
 
 def run_probe(
-    runtime, spec, rehearsal, boundary, memory, paid_report, record, *, rehearsal_control=None
+    runtime,
+    spec,
+    rehearsal,
+    boundary,
+    memory,
+    paid_report,
+    record,
+    *,
+    rehearsal_control=None,
+    probe_update=None,
 ):
     """Use a detached donor; keep the completed runtime and its evidence fixed."""
+    if probe_update is not None and (
+        type(probe_update) is not str
+        or probe_update != "minimum_change"
+        or rehearsal_control is not None
+    ):
+        raise ValueError("minimum-change probe requires sequential retained probe")
     if rehearsal_control is not None and (
         type(rehearsal_control) is not str or rehearsal_control not in ("joint", "current_only")
     ):
@@ -64,6 +79,8 @@ def run_probe(
     )
     if rehearsal_control is not None:
         record["joint_rehearsal_control"] = rehearsal_control
+    if probe_update is not None:
+        record["linear_probe_update"] = probe_update
     arm_record = record["arm"]
     header = deepcopy({key: value for key, value in record.items() if key != "arm"})
 
@@ -156,6 +173,7 @@ def run_probe(
             separate_context_heads=True,
             linear_fit=True,
             head_tasks=TRANSFER_HEAD_TASKS,
+            **(dict(linear_probe_update=probe_update) if probe_update is not None else {}),
             **joint_options,
         )
         guard()

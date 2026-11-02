@@ -190,9 +190,129 @@ def summarize_context_return(episodes, *, seeded_initial=False):
     )
 
 
+def _require_train_readout_mode(options):
+    """Keep this opt-in ordinary TRAIN control separate from every probe mode."""
+    value = options.get("train_readout")
+    cohort = options.get("train_readout_cohort")
+    if cohort is not None and (
+        type(cohort) is not str or cohort != "joint" or type(value) is not str or value != "ce"
+    ):
+        raise ValueError("joint TRAIN CE readout cohort requires --train-readout ce")
+    if value is None:
+        return
+    if (
+        type(value) is not str
+        or value != "ce"
+        or options.get("method") != "bp"
+        or options.get("context_return") is not True
+        or options.get("replay") != "none"
+        or any(
+            options.get(key) is not False
+            for key in (
+                "policy_change",
+                "separate_context_heads",
+                "private_adaptation",
+                "adaptive_serving",
+                "calibrated_serving",
+                "catalog_study",
+                "reference_validation",
+                "record_train_fit",
+                "class_balanced_bp",
+                "reserved_probe",
+            )
+        )
+        or any(
+            options.get(key) is not None
+            for key in (
+                "paired_serving",
+                "probe_rehearsal",
+                "probe_update",
+                "train_update",
+                "incident_stream",
+                "catalog_action",
+                "catalog_context",
+                "probe_initialization",
+            )
+        )
+    ):
+        raise ValueError("TRAIN CE readout requires ordinary BP context-return without other modes")
+
+
+def _require_ce_probe_update_mode(options):
+    value = options.get("probe_update")
+    if type(value) is not str or value != "ce_rehearsal":
+        return False
+    if (
+        type(options.get("method")) is not str
+        or options["method"] != "bp"
+        or options.get("reserved_probe") is not True
+        or options.get("context_return") is not True
+        or type(options.get("probe_initialization")) is not str
+        or options["probe_initialization"] != "ce"
+        or options.get("separate_context_heads") is not False
+        or options.get("probe_output_only") is not False
+        or options.get("probe_update_diagnostics") is not False
+    ):
+        raise ValueError(
+            "CE rehearsal requires initialized ordinary BP reserved probe without SGD modes"
+        )
+    return True
+
+
+def _require_shared_replay_mode(options):
+    control = options.get("replay_joint")
+    if control is None:
+        return
+    if (
+        type(control) is not str
+        or control not in ("joint", "current_only")
+        or options.get("method") != "linear_fit"
+        or options.get("context_return") is not True
+        or options.get("replay") != "coverage"
+        or any(
+            options.get(key) not in (None, False)
+            for key in (
+                "separate_context_heads",
+                "policy_change",
+                "private_adaptation",
+                "reserved_probe",
+                "adaptive_serving",
+                "calibrated_serving",
+                "catalog_study",
+                "record_train_fit",
+                "class_balanced_bp",
+                "probe_return_once",
+                "probe_update_diagnostics",
+                "probe_output_only",
+                "reference_validation",
+                "reference_validation_protocol",
+            )
+        )
+        or any(
+            options.get(key) is not None
+            for key in (
+                "paired_serving",
+                "probe_rehearsal",
+                "probe_update",
+                "probe_initialization",
+                "train_readout",
+                "train_readout_cohort",
+                "catalog_action",
+                "catalog_context",
+                "incident_stream",
+            )
+        )
+    ):
+        raise ValueError(
+            "shared joint TRAIN replay requires ordinary shared linear context-return coverage alone"
+        )
+
+
 def run_example(
     *,
     replay="none",
+    replay_joint=None,
+    shared_serving=False,
     method="perceptron",
     policy_change=False,
     context_return=False,
@@ -200,6 +320,9 @@ def run_example(
     private_adaptation=False,
     paired_serving=None,
     probe_rehearsal=None,
+    probe_return_once=False,
+    probe_update=None,
+    train_update=None,
     adaptive_serving=False,
     incident_stream=None,
     calibrated_serving=False,
@@ -209,14 +332,132 @@ def run_example(
     reference_validation=False,
     record_train_fit=False,
     class_balanced_bp=False,
+    reserved_probe=False,
+    probe_initialization=None,
+    train_readout=None,
+    train_readout_cohort=None,
+    probe_update_diagnostics=False,
+    probe_output_only=False,
 ):
+    if type(replay) is not str or replay not in ("none", "recent", "coverage"):
+        raise ValueError("replay must be none, recent or coverage")
+    if shared_serving is not False:
+        from scripts.shared_linear_publication import require_mode
+
+        require_mode(locals())
+    _require_shared_replay_mode(locals())
+    linear_replay = (
+        method == "linear_fit"
+        and context_return is True
+        and separate_context_heads is False
+        and replay in ("recent", "coverage")
+    )
+    if (
+        type(probe_output_only) is not bool
+        or probe_output_only
+        and (reserved_probe is not True or context_return is not True or method != "bp")
+    ):
+        raise ValueError("output-only probe requires ordinary BP context-return reserved probe")
+    if (
+        type(probe_update_diagnostics) is not bool
+        or probe_update_diagnostics
+        and (reserved_probe is not True or context_return is not True or method != "bp")
+    ):
+        raise ValueError("probe update diagnostics require an ordinary BP reserved probe")
+    ce_reserved_probe = _require_ce_probe_update_mode(locals())
+    _require_train_readout_mode(locals())
+    linear_reserved_probe = (
+        reserved_probe is True
+        and method == "linear_fit"
+        and type(separate_context_heads) is bool
+        and probe_update == "minimum_change"
+        and type(probe_update) is str
+    )
+    linear_joint_probe = (
+        linear_reserved_probe
+        and separate_context_heads is False
+        and type(probe_rehearsal) is str
+        and probe_rehearsal in ("joint", "current_only")
+    )
+    if type(probe_return_once) is not bool or probe_return_once and not linear_joint_probe:
+        raise ValueError("once-return requires explicit ordinary shared-head rehearsal")
+    if probe_initialization is not None and (
+        type(probe_initialization) is not str
+        or probe_initialization != "ce"
+        or reserved_probe is not True
+        or method != "bp"
+    ):
+        raise ValueError("CE probe initialization requires an ordinary BP reserved probe")
+    if (
+        type(reserved_probe) is not bool
+        or reserved_probe
+        and (
+            (not linear_reserved_probe and method not in ("bp", "pc", "neutral_cpc", "gated_cpc"))
+            or context_return is not True
+            or (not linear_reserved_probe and separate_context_heads is not False)
+            or policy_change is not False
+            or replay != "none"
+            or private_adaptation is not False
+            or paired_serving is not None
+            or adaptive_serving is not False
+            or catalog_action is not None
+            or catalog_context is not None
+            or catalog_study is not False
+            or reference_validation is not False
+            or incident_stream is not None
+            or calibrated_serving is not False
+            or record_train_fit is not False
+            or class_balanced_bp is not False
+            or (not linear_reserved_probe and not ce_reserved_probe and probe_update is not None)
+            or (probe_rehearsal is not None and not linear_joint_probe)
+            or (not linear_reserved_probe and train_update is not None)
+        )
+    ):
+        raise ValueError(
+            "reserved probe requires ordinary native context-return without other modes"
+        )
+    if train_update is not None and (
+        type(train_update) is not str
+        or train_update != "minimum_change"
+        or method != "linear_fit"
+        or context_return is not True
+        or paired_serving not in (None, "retained_joint", "joint")
+        or (replay != "none" and not linear_replay)
+        or private_adaptation
+        or (probe_update is not None and not linear_reserved_probe)
+        or (probe_rehearsal is not None and not linear_joint_probe)
+        or reference_validation
+        or catalog_study
+        or catalog_action is not None
+        or catalog_context is not None
+        or adaptive_serving
+        or incident_stream is not None
+        or calibrated_serving
+        or record_train_fit
+        or class_balanced_bp
+    ):
+        raise ValueError("minimum-change TRAIN requires ordinary context-return LS")
+    if (
+        probe_update is not None
+        and not ce_reserved_probe
+        and (
+            type(probe_update) is not str
+            or probe_update != "minimum_change"
+            or (paired_serving != "retained_joint_probe" and not linear_reserved_probe)
+            or method != "linear_fit"
+            or context_return is not True
+            or (separate_context_heads is not True and not linear_reserved_probe)
+            or (probe_rehearsal is not None and not linear_joint_probe)
+        )
+    ):
+        raise ValueError("minimum-change probe requires sequential owned LS retained probe")
     if probe_rehearsal is not None and (
         type(probe_rehearsal) is not str
         or probe_rehearsal not in ("joint", "current_only")
-        or paired_serving != "retained_joint_probe"
+        or (paired_serving != "retained_joint_probe" and not linear_joint_probe)
         or method != "linear_fit"
         or context_return is not True
-        or separate_context_heads is not True
+        or (separate_context_heads is not True and not linear_joint_probe)
     ):
         raise ValueError("probe rehearsal requires explicit owned LS retained probe")
     if (
@@ -268,7 +509,13 @@ def run_example(
         or catalog_study
         or reference_validation
     )
-    source_handoff = private_adaptation or owned_serving
+    source_handoff = (
+        private_adaptation
+        or owned_serving
+        or reserved_probe
+        or train_readout is not None
+        or shared_serving
+    )
     if (catalog_action is not None or catalog_context is not None) and not (
         type(catalog_action) is str
         and catalog_action in ("wait", "wake1", "replay6-wake1")
@@ -317,7 +564,7 @@ def run_example(
         raise ValueError("adaptive serving requires explicit ordinary owned LS paired mode")
     if method == "linear_fit" and (
         context_return is not True
-        or replay != "none"
+        or (replay != "none" and not linear_replay)
         or policy_change is not False
         or type(separate_context_heads) is not bool
         or private_adaptation is not False
@@ -325,7 +572,7 @@ def run_example(
         or class_balanced_bp is not False
     ):
         raise ValueError(
-            "linear_fit requires ordinary context-return/replay none without TRAIN diagnostics"
+            "linear_fit requires ordinary context-return without TRAIN diagnostics; replay uses one head"
         )
     if (
         type(class_balanced_bp) is not bool
@@ -421,14 +668,18 @@ def run_example(
         "linear_fit",
     ):
         raise ValueError("method must be an explicit supported learner")
-    if method != "perceptron" and replay != "none":
+    if method not in ("perceptron", "linear_fit") and replay != "none":
         raise ValueError("native chronological recipe requires replay=none")
     native: Any = None
     linear: Any = None
     if method == "linear_fit":
-        from scripts import ticket_workflow_linear as linear
+        from scripts import ticket_workflow_linear
+
+        linear = ticket_workflow_linear
     elif method != "perceptron":
-        from scripts import ticket_workflow_native as native
+        from scripts import ticket_workflow_native
+
+        native = ticket_workflow_native
     started = monotonic()
     report: dict[str, Any] = dict(
         definition="chronological_ticket_workflow_v1",
@@ -444,15 +695,38 @@ def run_example(
     )
     learner = budget = stream = None
     helper = replay_budget = None
+    publication: Any = None
+    wake_row_counts: tuple[int, ...] = ()
+    wake_commit_count: int | None = None
     previous_receipts = ()
     attempted_updates = attempted_rows = returned_updates = 0
     snapshot_states: dict[int, Any] = {}
     same_state = (lambda a, b: a == b) if native is None else native.same_state
     torch_rng = None
+    train_readout_guard = None
+    train_readout_finished_snapshot = None
     python_rng = random.getstate() if linear is not None else None
     readout_key = "linear_readout_work" if linear is not None else "native_readout_work"
     if linear is not None:
         report.update(method=method, linear_readout_work=[])
+    if train_update is not None:
+        report["linear_train_update"] = train_update
+    if replay_joint is not None:
+        report["linear_replay_joint"] = replay_joint
+    if reserved_probe:
+        report["reserved_probe_requested"] = True
+        if linear_reserved_probe or ce_reserved_probe:
+            report["reserved_probe_update"] = probe_update
+        if linear_joint_probe:
+            report["reserved_probe_rehearsal"] = probe_rehearsal
+        if probe_return_once:
+            report["reserved_probe_return_once"] = True
+    if probe_initialization is not None:
+        report["probe_initialization_requested"] = probe_initialization
+    if train_readout is not None:
+        report["train_readout_requested"] = train_readout
+        if train_readout_cohort is not None:
+            report["train_readout_cohort_requested"] = train_readout_cohort
     if native is not None:
         torch_rng = native.require_torch().get_rng_state().clone()
         report.update(
@@ -491,7 +765,9 @@ def run_example(
         if linear is not None:
             report.update(
                 definition="linear_context_return_ticket_workflow_v1",
-                scope="current-packet fixed LS known-context return; no heldout, matched compute, CPC or release claim",
+                scope="explicit minimum-change LS known-context return; no heldout, matched compute, CPC or release claim"
+                if train_update is not None
+                else "current-packet fixed LS known-context return; no heldout, matched compute, CPC or release claim",
                 no_learning_control="same deterministic tasks and unchanged unfitted uniform initial state; reuse update0 outcomes without fitting",
             )
     if separate_context_heads:
@@ -520,9 +796,34 @@ def run_example(
     balanced = native.ClassBalancedUpdates(report) if class_balanced_bp else None
     context_guard = lambda: None
     rehearsal_options = {"context_return": True} if context_return else {}
+    progress_options = dict(
+        rehearsal_options, **({} if replay_joint is None else dict(shared_joint=replay_joint))
+    )
+
+    def require_train_update():
+        changed = (
+            ("linear_replay_joint" in report)
+            if replay_joint is None
+            else (
+                type(report.get("linear_replay_joint")) is not str
+                or report["linear_replay_joint"] != replay_joint
+            )
+        )
+        if changed:
+            raise ValueError("original shared joint TRAIN replay intent changed")
+        if linear is not None:
+            linear.require_train_update(report, train_update)
+            if helper is not None and (
+                type(report.get("replay_mode")) is not str
+                or report["replay_mode"] != replay
+                or report.get("replay_consent")
+                != "explicit synthetic original TRAIN packet reuse; not inbox permission renewal"
+            ):
+                raise ValueError("original TRAIN replay intent or consent changed")
 
     def before_update(features):
         nonlocal attempted_updates, attempted_rows
+        require_train_update()
         if (native is not None or linear is not None) and context_return:
             context_guard()
         if balanced is not None:
@@ -540,10 +841,14 @@ def run_example(
             )
         attempted_updates += 1
         attempted_rows += len(features)
+        if publication is not None:
+            publication.before_fit()
 
     def after_update():
         nonlocal returned_updates
         returned_updates += 1
+        if publication is not None:
+            publication.after_fit()
 
     # Why this: counts precede delegation, so a throwing update is never free.
     class CountedLearner(PerceptronLearner):
@@ -612,6 +917,8 @@ def run_example(
                 dict(role=b.role, context=b.context, row_ids=list(b.row_ids), rows=len(b.features))
                 for b in batches
             ]
+            # Why: refused report edits must not rewrite the cost of paid fits.
+            wake_row_counts = tuple(len(batch.features) for batch in batches)
             if policy_change or context_return:
                 phase_definitions = (
                     CONTEXT_RETURN_PHASES if context_return else POLICY_CHANGE_PHASES
@@ -633,7 +940,11 @@ def run_example(
             budget.attach_memory(sampler)
             learner = (
                 linear.counted_learner(
-                    before_update, after_update, separate=separate_context_heads, spec=spec
+                    before_update,
+                    after_update,
+                    separate=separate_context_heads,
+                    spec=spec,
+                    **(dict(train_update=train_update) if train_update is not None else {}),
                 )
                 if linear is not None
                 else CountedContextLearner(
@@ -660,12 +971,17 @@ def run_example(
                 from scripts.ticket_workflow_rehearsal import make_rehearsal, require_progress
 
                 helper, replay_budget = make_rehearsal(
-                    replay, learner, budget, sampler, **rehearsal_options
+                    replay, learner, budget, sampler, **progress_options
                 )
 
             def capture(point, state, batch):
                 snapshot_states[point] = state
 
+            if shared_serving:
+                from scripts.shared_linear_publication import SharedLinearPublication
+
+                publication = SharedLinearPublication(learner, spec, budget, batches)
+                report["shared_serving"] = publication.row
             stream = AttributionStream(
                 learner,
                 batches,
@@ -675,6 +991,12 @@ def run_example(
                 budget=budget,
                 observe_checkpoint=capture,
                 training_only=True,
+                **(dict(actor=publication.actor) if publication is not None else {}),
+                **(
+                    dict(replay_consent=True)
+                    if linear_joint_probe or replay_joint is not None
+                    else {}
+                ),
                 **({} if helper is None else {"rehearsal": helper}),
             )
             actor_pin = (
@@ -700,6 +1022,10 @@ def run_example(
                 linear_read_pins: list[Any] = []
 
                 def context_guard():
+                    if publication is not None:
+                        if report.get("shared_serving") is not publication.row:
+                            raise ValueError("original shared serving record replaced")
+                        publication.require()
                     if balanced is not None:
                         # Already inside the runtime write lease during training.
                         balanced.require_receipts(stream._runtime._inbox.applied_updates)
@@ -716,7 +1042,10 @@ def run_example(
                             torch_rng, native.require_torch().get_rng_state()
                         )
                         or not same_state(learner.snapshot_state(), original_seed)
-                        or not same_state(stream._runtime.actor.snapshot_state(), actor_pin)
+                        or not same_state(
+                            stream._runtime.actor.snapshot_state(),
+                            actor_pin if publication is None else publication.expected_actor,
+                        )
                         or budget_pin
                         != (
                             id(budget.budget),
@@ -770,7 +1099,7 @@ def run_example(
                             point - 4,
                             stream.candidate_snapshot(),
                             previous_receipts,
-                            **rehearsal_options,
+                            **progress_options,
                         )
                     stream.run_until(point)
                 state = stream.candidate_snapshot()
@@ -789,7 +1118,7 @@ def run_example(
                         point,
                         state,
                         previous_receipts,
-                        **rehearsal_options,
+                        **progress_options,
                     )
                     replay_pin = helper.report
                 report["checkpoints"].append(
@@ -832,6 +1161,39 @@ def run_example(
                 )
 
                 def require_source():
+                    require_train_update()
+                    if (
+                        "reserved_probe_return_once" in report
+                    ) is not probe_return_once or report.get(
+                        "reserved_probe_return_once", False
+                    ) is not probe_return_once:
+                        raise ValueError("original once-return intent changed")
+                    if (
+                        linear_joint_probe
+                        and report.get("reserved_probe_rehearsal") != probe_rehearsal
+                    ):
+                        raise ValueError("original shared rehearsal intent changed")
+                    if train_readout is not None and (
+                        report.get("train_readout_requested") != train_readout
+                        or report.get("train_readout_cohort_requested") != train_readout_cohort
+                        or type(report.get("train_readout_cohort_requested"))
+                        is not type(train_readout_cohort)
+                        or ("train_readout_cohort_requested" in report)
+                        != (train_readout_cohort is not None)
+                    ):
+                        raise ValueError("TRAIN CE readout intent changed")
+                    if (
+                        probe_initialization is not None
+                        and report.get("probe_initialization_requested") != probe_initialization
+                    ):
+                        raise ValueError("CE probe initialization intent changed")
+                    if ce_reserved_probe and (
+                        type(report.get("reserved_probe_update")) is not str
+                        or report.get("reserved_probe_update") != "ce_rehearsal"
+                    ):
+                        raise ValueError("CE probe update intent changed")
+                    if reserved_probe and report.get("reserved_probe_requested") is not True:
+                        raise ValueError("reserved probe intent changed")
                     context_guard()
                     if source_handoff and (
                         stream.completed_updates != point or len(stream.applied_updates) != point
@@ -844,10 +1206,12 @@ def run_example(
                             native.require_readout(predict, spec, state)
                         elif not _same_value(predict, readout_pin):
                             raise ValueError("context frozen predictor changed")
-                    if (
-                        not same_state(stream.candidate_snapshot(), state)
-                        or budget.updates_completed != point
-                    ):
+                    source_state = (
+                        stream.candidate_snapshot()
+                        if train_readout_finished_snapshot is None
+                        else train_readout_finished_snapshot()
+                    )
+                    if not same_state(source_state, state) or budget.updates_completed != point:
                         raise ValueError(
                             "frozen task readout changed original TRAIN source or budget"
                         )
@@ -867,7 +1231,7 @@ def run_example(
                             point,
                             state,
                             previous_receipts,
-                            **rehearsal_options,
+                            **progress_options,
                         )
                         if helper.report != replay_pin:
                             raise ValueError("original replay work changed during frozen inference")
@@ -1006,6 +1370,40 @@ def run_example(
                 if policy_change
                 else summarize(report["episodes"])
             )
+            if train_readout is not None:
+                from scripts.ticket_ce_tasks import run_train_readout
+
+                report["train_readout_source_training"] = dict(
+                    completed_updates=stream.completed_updates,
+                    applied_update_count=len(stream.applied_updates),
+                )
+                task_row = report["train_readout"] = {}
+                _, train_readout_guard = run_train_readout(
+                    stream,
+                    state,
+                    spec,
+                    report,
+                    budget,
+                    check_boundary=require_source,
+                    memory=sampler,
+                    row=task_row,
+                    **(
+                        dict(cohort=train_readout_cohort)
+                        if train_readout_cohort is not None
+                        else {}
+                    ),
+                )
+                require_source()
+                if task_row.get("complete") is not True:
+                    raise ValueError("TRAIN CE task execution incomplete")
+                report["stream"] = stream.finish()
+                from scripts.ticket_ce_tasks import _finished_snapshot
+
+                train_readout_finished_snapshot = _finished_snapshot(
+                    stream, report["stream"], report
+                )
+                train_readout_guard()
+                require_source()
             if private_adaptation:
                 from scripts.context_head_rehearsal import run_owned_pair
 
@@ -1029,6 +1427,82 @@ def run_example(
                 report.update(source_unchanged=True, actor_unchanged=True)
                 if private["complete"] is not True:
                     raise ValueError(f"private adaptation incomplete: {private.get('error')}")
+                report["stream"] = stream.finish()
+            if reserved_probe:
+                from scripts.ticket_native_probe import run_owned_probe
+
+                report["reserved_probe_source_training"] = dict(
+                    completed_updates=stream.completed_updates,
+                    applied_update_count=len(stream.applied_updates),
+                )
+                private = report["reserved_probe"] = {}
+                report.update(source_unchanged=None, actor_unchanged=None)
+                if probe_initialization is not None:
+                    from scripts.ticket_ce_probe import run_initialized_probe
+
+                    initialization_row = report["probe_initialization"] = {}
+                    run_initialized_probe(
+                        stream,
+                        state,
+                        spec,
+                        report,
+                        budget,
+                        check_boundary=require_source,
+                        memory=sampler,
+                        row=private,
+                        initialization_row=initialization_row,
+                        **(dict(ce_rehearsal=True) if ce_reserved_probe else {}),
+                        **(dict(probe_output_only=True) if probe_output_only else {}),
+                        **(dict(probe_update_diagnostics=True) if probe_update_diagnostics else {}),
+                    )
+                else:
+                    run_owned_probe(
+                        state,
+                        spec,
+                        report,
+                        budget,
+                        check_boundary=require_source,
+                        memory=sampler,
+                        row=private,
+                        **(dict(probe_output_only=True) if probe_output_only else {}),
+                        **(dict(probe_update_diagnostics=True) if probe_update_diagnostics else {}),
+                        **(dict(linear_probe_update=probe_update) if linear_reserved_probe else {}),
+                        **(
+                            dict(linear_rehearsal=probe_rehearsal, source_stream=stream)
+                            if linear_joint_probe
+                            else {}
+                        ),
+                        **(dict(linear_return_once=True) if probe_return_once else {}),
+                    )
+                work = private["preserved_training_work"]
+                if ce_reserved_probe:
+                    report["probe_auxiliary_updates"] = private.get("preserved_ce_rehearsal_work")
+                if linear_joint_probe:
+                    report["probe_auxiliary_updates"] = private.get(
+                        "preserved_linear_rehearsal_work"
+                    )
+                    report["probe_replay_examples"] = (
+                        report["probe_auxiliary_updates"].get("additional_rows_charged")
+                        if type(report["probe_auxiliary_updates"]) is dict
+                        else None
+                    )
+                report["probe_updates"] = (
+                    work["returned_updates"]
+                    if work["attempted_updates"] == work["returned_updates"]
+                    else None
+                )
+                if linear_joint_probe:
+                    report["probe_updates"] = (
+                        report["probe_auxiliary_updates"].get("applied_updates")
+                        if type(report["probe_auxiliary_updates"]) is dict
+                        and report["probe_auxiliary_updates"].get("application_unknown_updates")
+                        == 0
+                        else None
+                    )
+                require_source()
+                report.update(source_unchanged=True, actor_unchanged=True)
+                if private["complete"] is not True:
+                    raise ValueError(f"reserved probe incomplete: {private.get('error')}")
                 report["stream"] = stream.finish()
             if owned_serving:
                 from scripts.context_head_live import run_owned_case
@@ -1067,6 +1541,8 @@ def run_example(
                     **(
                         dict(probe_rehearsal=probe_rehearsal) if probe_rehearsal is not None else {}
                     ),
+                    **(dict(probe_update=probe_update) if probe_update is not None else {}),
+                    **(dict(train_update=train_update) if train_update is not None else {}),
                     **(dict(linear_fit=True) if linear is not None else {}),
                     **(dict(adaptive=True) if adaptive_serving else {}),
                     **(
@@ -1087,9 +1563,21 @@ def run_example(
                 if serving["complete"] is not True:
                     raise ValueError(f"paired serving incomplete: {serving.get('error')}")
                 report["stream"] = stream.finish()
+            if publication is not None:
+                require_source()
+                report.update(actor_unchanged=None)
+                publication.run(stream, require_source, context_guard)
+                require_source()
+                report["stream"] = stream.finish()
+                publication.observe_clock()
+                report.update(source_unchanged=True, actor_unchanged=True)
             report["complete"] = True
         except Exception as error:
             report["error"] = f"{type(error).__name__}: {error}"[:512]
+            if publication is not None:
+                report.update(source_unchanged=None, actor_unchanged=None)
+            if train_readout is not None:
+                report.update(source_unchanged=None, actor_unchanged=None)
             if linear is not None:
                 from src.core.learner_ports import TrainingUpdateFailed
 
@@ -1099,6 +1587,21 @@ def run_example(
             if helper is not None:
                 report["preserved_replay_receipts"] = previous_receipts
         finally:
+            if publication is not None:
+                try:
+                    publication.close()
+                except Exception as close_error:
+                    report.update(complete=False, source_unchanged=None, actor_unchanged=None)
+                    report.setdefault("error", f"{type(close_error).__name__}: {close_error}"[:512])
+                preserved = publication.preserved_work()
+                # Keep complete paid episodes once so the fixed-size CLI report
+                # fits its original bound. Failures still need a trusted copy.
+                if (
+                    report.get("complete") is not True
+                    or preserved.get("complete") is not True
+                    or not _same_value(report.get("shared_serving"), preserved)
+                ):
+                    report["shared_serving_preserved_work"] = preserved
             if balanced is not None:
                 balanced.finish()
             report["training_work"] = dict(
@@ -1118,7 +1621,9 @@ def run_example(
                 )
             if stream is not None:
                 try:
-                    report["applied_updates"] = [asdict(row) for row in stream.applied_updates]
+                    wake_receipts = stream.applied_updates
+                    report["applied_updates"] = [asdict(row) for row in wake_receipts]
+                    wake_commit_count = len(wake_receipts)
                 except Exception as receipt_error:
                     report.update(
                         complete=False,
@@ -1230,6 +1735,20 @@ def run_example(
                         feature_dim=len(CONTEXT_FEATURES) if context_return else len(FEATURES),
                     )
                 )
+                if reserved_probe:
+                    report["costs"]["scope"] = (
+                        "original TRAIN source only; reserved_probe records separate "
+                        "probe/return training, diagnostics and typed readouts"
+                    )
+                    if probe_initialization is not None:
+                        report["costs"]["scope"] += (
+                            "; probe_initialization records separate auxiliary TRAIN CE fitting and state derivation"
+                        )
+                if train_readout is not None:
+                    report["costs"]["scope"] = (
+                        "original TRAIN source only; train_readout records separate auxiliary "
+                        "CE fitting and known-TRAIN task execution; elapsed times overlap"
+                    )
             if linear is not None:
                 report["python_rng_unchanged"] = random.getstate() == python_rng
                 if not report["python_rng_unchanged"]:
@@ -1240,7 +1759,30 @@ def run_example(
                     "retained_checkpoint_coefficient_bytes",
                 ):
                     report["costs"].pop(key)
-                report["costs"].update(linear.costs(report))
+                report["costs"].update(
+                    linear.costs(report, wake_rows=wake_row_counts, wake_commits=wake_commit_count)
+                )
+                if reserved_probe:
+                    report["costs"]["scope"] = (
+                        "original TRAIN source only; reserved_probe records separate minimum-change "
+                        "probe/return updates, diagnostics and typed LS readouts; not matched total computation"
+                    )
+    if train_readout_guard is not None:
+        try:
+            train_readout_guard()
+        except Exception as error:
+            report.update(
+                complete=False,
+                source_unchanged=None,
+                actor_unchanged=None,
+            )
+            # Keep the initiating failure when this final check also refuses.
+            if not report.get("error"):
+                report["error"] = f"{type(error).__name__}: {error}"[:512]
+    if reserved_probe:
+        from src.app.reserved_probe_summary import add_reserved_probe_summary
+
+        add_reserved_probe_summary(report)
     return report
 
 
@@ -1248,6 +1790,11 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--replay", choices=("none", "recent", "coverage"), default="none")
+    parser.add_argument(
+        "--replay-joint",
+        choices=("joint", "current_only"),
+        help="explicit shared LS coverage TRAIN packet control",
+    )
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--policy-change", action="store_true")
     modes.add_argument("--context-return", action="store_true")
@@ -1256,6 +1803,12 @@ def main(argv=None):
     parser.add_argument("--class-balanced-bp", action="store_true")
     adaptation = parser.add_mutually_exclusive_group()
     adaptation.add_argument("--private-adaptation", action="store_true")
+    adaptation.add_argument("--reserved-probe", action="store_true")
+    adaptation.add_argument(
+        "--shared-serving",
+        action="store_true",
+        help="guarded shared LS coverage publication, typed serving and exact rollback",
+    )
     adaptation.add_argument(
         "--paired-serving",
         choices=(
@@ -1273,6 +1826,26 @@ def main(argv=None):
     parser.add_argument("--reference-validation-protocol", action="store_true")
     parser.add_argument("--catalog-context", choices=("clean", "mistakes"))
     parser.add_argument("--probe-rehearsal", choices=("joint", "current_only"))
+    parser.add_argument(
+        "--probe-return-once",
+        action="store_true",
+        help="fit each certified old TRAIN packet once on private return",
+    )
+    parser.add_argument("--probe-update", choices=("minimum_change", "ce_rehearsal"))
+    parser.add_argument("--probe-initialization", choices=("ce",))
+    parser.add_argument("--probe-update-diagnostics", action="store_true")
+    parser.add_argument("--probe-output-only", action="store_true")
+    parser.add_argument(
+        "--train-readout",
+        choices=("ce",),
+        help="separate TRAIN CE fit and four known-task episodes; no actor promotion",
+    )
+    parser.add_argument(
+        "--train-readout-cohort",
+        choices=("joint",),
+        help="joint old+fresh TRAIN18 and six tasks with --train-readout ce",
+    )
+    parser.add_argument("--train-update", choices=("minimum_change",))
     parser.add_argument("--adaptive-serving", action="store_true")
     parser.add_argument("--incident-stream", choices=("stationary", "shift"))
     parser.add_argument("--calibrated-serving", action="store_true")
@@ -1282,11 +1855,118 @@ def main(argv=None):
         default="perceptron",
     )
     args = parser.parse_args(argv)
+    if args.shared_serving:
+        from scripts.shared_linear_publication import require_mode
+
+        try:
+            require_mode(vars(args))
+        except ValueError as error:
+            parser.error(str(error))
+    try:
+        _require_shared_replay_mode(vars(args))
+    except ValueError as error:
+        parser.error(str(error))
+    if args.replay_joint is not None and args.output.exists():
+        raise FileExistsError("shared joint replay output must be new")
+    try:
+        ce_reserved_probe = _require_ce_probe_update_mode(vars(args))
+        _require_train_readout_mode(vars(args))
+    except ValueError as error:
+        parser.error(str(error))
+    if args.probe_output_only and (
+        not args.reserved_probe or not args.context_return or args.method != "bp"
+    ):
+        parser.error("--probe-output-only requires ordinary BP context-return reserved probe")
+    if args.probe_update_diagnostics and (not args.reserved_probe or args.method != "bp"):
+        parser.error("probe update diagnostics require an ordinary BP reserved probe")
+    if args.probe_initialization is not None and (not args.reserved_probe or args.method != "bp"):
+        parser.error("--probe-initialization ce requires --reserved-probe --method bp")
+    linear_reserved_probe = (
+        args.reserved_probe
+        and args.method == "linear_fit"
+        and args.probe_update == "minimum_change"
+    )
+    linear_joint_probe = (
+        linear_reserved_probe
+        and not args.separate_context_heads
+        and args.probe_rehearsal in ("joint", "current_only")
+    )
+    if args.probe_return_once and not linear_joint_probe:
+        parser.error("--probe-return-once requires explicit ordinary shared-head rehearsal")
+    if args.reserved_probe and (
+        not args.context_return
+        or args.policy_change
+        or args.private_adaptation
+        or args.paired_serving is not None
+        or args.reference_validation
+        or args.catalog_study
+        or args.catalog_action is not None
+        or (
+            not linear_reserved_probe
+            and args.method not in ("bp", "pc", "neutral_cpc", "gated_cpc")
+        )
+        or (not linear_reserved_probe and args.separate_context_heads)
+        or args.replay != "none"
+        or args.record_train_fit
+        or args.class_balanced_bp
+        or args.catalog_context is not None
+        or (not linear_reserved_probe and not ce_reserved_probe and args.probe_update is not None)
+        or (args.probe_rehearsal is not None and not linear_joint_probe)
+        or (not linear_reserved_probe and args.train_update is not None)
+        or args.adaptive_serving
+        or args.incident_stream is not None
+        or args.calibrated_serving
+        or args.reference_validation_protocol
+    ):
+        parser.error(
+            "--reserved-probe requires ordinary native --context-return without other modes"
+        )
+    if (args.reserved_probe or args.train_readout is not None) and args.output.exists():
+        raise FileExistsError("reserved probe output must be new")
+    linear_replay = (
+        args.method == "linear_fit"
+        and args.context_return
+        and not args.separate_context_heads
+        and args.replay in ("recent", "coverage")
+    )
+    if args.train_update is not None and (
+        args.method != "linear_fit"
+        or not args.context_return
+        or args.paired_serving not in (None, "retained_joint", "joint")
+        or (args.replay != "none" and not linear_replay)
+        or args.private_adaptation
+        or (args.probe_update is not None and not linear_reserved_probe)
+        or (args.probe_rehearsal is not None and not linear_joint_probe)
+        or args.reference_validation
+        or args.catalog_study
+        or args.catalog_action is not None
+        or args.catalog_context is not None
+        or args.adaptive_serving
+        or args.incident_stream is not None
+        or args.calibrated_serving
+        or args.record_train_fit
+        or args.class_balanced_bp
+    ):
+        parser.error("--train-update requires ordinary context-return LS")
+    if (
+        args.probe_update is not None
+        and not ce_reserved_probe
+        and (
+            (args.paired_serving != "retained_joint_probe" and not linear_reserved_probe)
+            or args.method != "linear_fit"
+            or not args.context_return
+            or (not args.separate_context_heads and not linear_reserved_probe)
+            or (args.probe_rehearsal is not None and not linear_joint_probe)
+        )
+    ):
+        parser.error(
+            "--probe-update requires sequential owned LS --paired-serving retained_joint_probe"
+        )
     if args.probe_rehearsal is not None and (
-        args.paired_serving != "retained_joint_probe"
+        (args.paired_serving != "retained_joint_probe" and not linear_joint_probe)
         or args.method != "linear_fit"
         or not args.context_return
-        or not args.separate_context_heads
+        or (not args.separate_context_heads and not linear_joint_probe)
     ):
         parser.error(
             "--probe-rehearsal requires ordinary owned LS --paired-serving retained_joint_probe"
@@ -1366,13 +2046,13 @@ def main(argv=None):
         parser.error("--adaptive-serving requires ordinary owned LS --paired-serving mode")
     if args.method == "linear_fit" and not (
         args.context_return
-        and args.replay == "none"
+        and (args.replay == "none" or linear_replay)
         and not args.private_adaptation
         and not args.record_train_fit
         and not args.class_balanced_bp
     ):
         parser.error(
-            "linear_fit requires ordinary --context-return --replay none without TRAIN diagnostics"
+            "linear_fit requires ordinary --context-return without TRAIN diagnostics; replay uses one head"
         )
     if args.class_balanced_bp and not (
         args.context_return
@@ -1389,7 +2069,7 @@ def main(argv=None):
         parser.error("--record-train-fit requires --context-return and a native method")
     if args.policy_change and args.replay != "none":
         parser.error("--policy-change requires --replay none")
-    if args.method != "perceptron" and args.replay != "none":
+    if args.method not in ("perceptron", "linear_fit") and args.replay != "none":
         parser.error("native workflows require --replay none")
     if args.separate_context_heads and (
         not args.context_return
@@ -1437,6 +2117,8 @@ def main(argv=None):
                 if args.probe_rehearsal is not None
                 else {}
             ),
+            **(dict(probe_update=args.probe_update) if args.probe_update is not None else {}),
+            **(dict(train_update=args.train_update) if args.train_update is not None else {}),
             **(dict(adaptive_serving=True) if args.adaptive_serving else {}),
             **(
                 dict(
@@ -1490,6 +2172,97 @@ def main(argv=None):
             )
             else 1
         )
+    if args.train_readout is not None:
+        report = run_example(
+            context_return=True,
+            method="bp",
+            train_readout=args.train_readout,
+            **(
+                dict(train_readout_cohort=args.train_readout_cohort)
+                if args.train_readout_cohort is not None
+                else {}
+            ),
+        )
+        from scripts.context_catalog_learning import write_catalog_report
+
+        return (
+            0
+            if write_catalog_report(
+                args.output,
+                report,
+                observed_work=dict(
+                    source=report.get("training_work"),
+                    train_readout=report.get(
+                        "preserved_train_readout", report.get("train_readout")
+                    ),
+                    train_readout_budget=report.get(
+                        "preserved_train_readout_budget", report.get("train_readout_budget")
+                    ),
+                ),
+                max_bytes=4 * 1024**2,
+            )
+            else 1
+        )
+    if args.reserved_probe:
+        report = run_example(
+            context_return=True,
+            method=args.method,
+            reserved_probe=True,
+            **(dict(probe_rehearsal=args.probe_rehearsal) if linear_joint_probe else {}),
+            **(dict(probe_return_once=True) if args.probe_return_once else {}),
+            **(dict(probe_update="ce_rehearsal") if ce_reserved_probe else {}),
+            **(dict(probe_output_only=True) if args.probe_output_only else {}),
+            **(dict(probe_update_diagnostics=True) if args.probe_update_diagnostics else {}),
+            **(
+                dict(
+                    separate_context_heads=args.separate_context_heads,
+                    probe_update=args.probe_update,
+                )
+                if linear_reserved_probe
+                else {}
+            ),
+            **(dict(train_update=args.train_update) if args.train_update is not None else {}),
+            **(
+                dict(probe_initialization=args.probe_initialization)
+                if args.probe_initialization is not None
+                else {}
+            ),
+        )
+        from scripts.context_catalog_learning import write_catalog_report
+
+        observed_work = dict(
+            source=report.get("training_work"),
+            probe=report.get("reserved_probe", {}).get("preserved_training_work"),
+        )
+        if linear_joint_probe:
+            observed_work["linear_rehearsal"] = report.get("reserved_probe", {}).get(
+                "preserved_linear_rehearsal_work"
+            )
+        if args.probe_initialization is not None:
+            observed_work["probe_initialization"] = report.get("probe_initialization")
+        if args.probe_update_diagnostics:
+            observed_work["probe_update_diagnostics"] = (
+                report.get("reserved_probe", {}).get("preserved_update_diagnostics", {}) or {}
+            ).get("work")
+        if ce_reserved_probe:
+            observed_work["probe_ce_rehearsal"] = report.get("reserved_probe", {}).get(
+                "preserved_ce_rehearsal_work"
+            )
+        if args.probe_output_only:
+            private_report = report.get("reserved_probe", {})
+            observed_work["probe_parameter_update_scope"] = private_report.get(
+                "preserved_metadata", private_report
+            ).get("parameter_update_scope")
+        return (
+            0
+            if write_catalog_report(
+                args.output,
+                report,
+                max_bytes=4 * 1024**2,
+                observed_work=observed_work,
+            )
+            else 1
+        )
     if args.private_adaptation:
         if args.output.exists():
             raise FileExistsError("private workflow output must be new")
@@ -1519,6 +2292,7 @@ def main(argv=None):
             context_return=True,
             separate_context_heads=True,
             **({"method": "linear_fit"} if args.method == "linear_fit" else {}),
+            **(dict(train_update=args.train_update) if args.train_update is not None else {}),
         )
     elif args.context_return:
         report = (
@@ -1531,7 +2305,14 @@ def main(argv=None):
             if args.class_balanced_bp
             else run_example(context_return=True, method=args.method, record_train_fit=True)
             if args.record_train_fit
-            else run_example(context_return=True, method=args.method)
+            else run_example(
+                context_return=True,
+                method=args.method,
+                **(dict(train_update=args.train_update) if args.train_update is not None else {}),
+                **(dict(replay=args.replay) if args.replay != "none" else {}),
+                **(dict(replay_joint=args.replay_joint) if args.replay_joint is not None else {}),
+                **(dict(shared_serving=True) if args.shared_serving else {}),
+            )
             if args.method != "perceptron"
             else run_example(context_return=True)
             if args.replay == "none"

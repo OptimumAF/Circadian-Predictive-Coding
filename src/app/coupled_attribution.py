@@ -22,6 +22,7 @@ from src.app.actor_shadow import ActorShadowRuntime, StableActor
 from src.app.counterfactual_controller import CounterfactualController
 from src.app.stream_capacity import StreamCapacity
 from src.app.stream_rehearsal import StreamRehearsal
+from src.core.shared_linear_replay import SharedJointReplayPolicy
 from src.app.stream_unit_renewal import StreamUnitRenewal
 from src.app.reference_prequential import ReferencePrequential
 from src.app.toy_execution_budget import ToyBudgetSession
@@ -472,8 +473,28 @@ class AttributionStream:
         training_only: bool = False,
         training_role: str = "train",
         actor: StableActor[Array, Array, Array, Any] | None = None,
+        replay_consent: bool = False,
     ) -> None:
         role = require_training_role(training_role)
+        shared_replay = (
+            type(rehearsal) is StreamRehearsal
+            and type(rehearsal._joint_context) is SharedJointReplayPolicy
+        )
+        if shared_replay and replay_consent is not True:
+            raise ValueError("shared joint replay requires original explicit TRAIN replay consent")
+        if (
+            type(replay_consent) is not bool
+            or replay_consent
+            and (
+                role != "train"
+                or training_only is not True
+                or (rehearsal is not None and not shared_replay)
+                or renewal is not None
+                or capacity is not None
+            )
+        ):
+            raise ValueError("explicit replay consent requires an ordinary TRAIN-only source")
+        self._replay_consent = self._original_replay_consent = replay_consent
         if actor is not None and (
             not isinstance(actor, StableActor) or role != "train" or not training_only
         ):
@@ -679,6 +700,11 @@ class AttributionStream:
 
     def _check_original(self) -> None:
         if (
+            type(self._replay_consent) is not bool
+            or self._replay_consent is not self._original_replay_consent
+        ):
+            raise ValueError("original source replay consent changed")
+        if (
             require_training_role(self._training_role) != self._original_training_role
             or self._runtime._training_role != self._original_training_role
             or self._runtime._original_training_role != self._original_training_role
@@ -837,7 +863,13 @@ class AttributionStream:
                     tick = self._next_tick
                     self._clock.advance_to(tick)
                     self._observe_features(tick)
-                    _record_tick(self._runtime, self._training, tick, self._delay)
+                    _record_tick(
+                        self._runtime,
+                        self._training,
+                        tick,
+                        self._delay,
+                        replay_consent=self._replay_consent,
+                    )
                     newly_completed = len(self._runtime.train_ready(max_updates=1))
                     self._completed += newly_completed
                     if self._rehearsal is not None and newly_completed:
@@ -1174,7 +1206,13 @@ class AttributionStream:
                     if feedback_reader is not None and tick < len(self._training):
                         self._predict_reference_packet(tick, feedback_reader)
                         boundary()
-                    _record_tick(self._runtime, self._training, tick, self._delay)
+                    _record_tick(
+                        self._runtime,
+                        self._training,
+                        tick,
+                        self._delay,
+                        replay_consent=self._replay_consent,
+                    )
                     observe_arrival(tick)
                     feedback = None
                     label_index = tick - self._delay
@@ -1484,6 +1522,7 @@ class AttributionStream:
         assert renewal is not None
         if renewal is not self._original_renewal:
             raise ValueError("attribution requires its original unit renewal helper")
+        assert renewal is not None
         renewal._check_binding()
         # Capacity has already recorded the state used for this wake. Renewal
         # owns its selection/charge; its after-state gets no additional wake vote.

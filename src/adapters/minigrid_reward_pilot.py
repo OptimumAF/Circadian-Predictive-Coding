@@ -341,6 +341,7 @@ def run_pilot(
     train_readouts: bool = False,
     momentum_control: bool = False,
     extended_control_readouts: bool = False,
+    joint_start=None,
 ) -> dict[str, Any]:
     """Execute one fixed bounded case; never retry a failed or uncertain update."""
     if type(warm_start) is not bool:
@@ -358,6 +359,14 @@ def run_pilot(
     ):
         raise ValueError(
             "extended_control_readouts must be an exact bool and requires momentum_control"
+        )
+    joint_warm = joint_start is not None
+    if joint_warm and (
+        not callable(joint_start)
+        or not (warm_start and train_readouts and momentum_control and extended_control_readouts)
+    ):
+        raise ValueError(
+            "joint_start requires the fixed complete warm/reward/control readout route"
         )
     report = _new_report()
     warm_report: dict[str, Any] = {}
@@ -377,6 +386,38 @@ def run_pilot(
             else describe_protocol(warm_start=True)
         )
         report["warm_start"] = warm_report
+        if joint_warm:
+            report["protocol"].update(
+                protocol_id="minigrid_joint128_reward_momentum_control_v1",
+                warm_start="actual enclosing joint128/1152 full two-head endpoint; no historical refit",
+                reference_path=None,
+                training="joint prefix paid by enclosing stream; fixed8reward+8zero-control updates",
+                joint_warm=True,
+                source_work_scope="source128/1152 reported separately by enclosing stream, no double count",
+                planned_work=dict(
+                    enclosing_joint_updates=128,
+                    enclosing_joint_rows=1152,
+                    native_train_calls=16,
+                    maximum_training_rows=256,
+                    reward_updates=8,
+                    momentum_control_updates=8,
+                    score_forwards=18,
+                    score_rows=162,
+                    collection_episodes=8,
+                    train_readout_episodes=18,
+                    maximum_collection_predictions=128,
+                    maximum_live_predictions=288,
+                    maximum_environment_steps=416,
+                    maximum_environment_resets=26,
+                    maximum_environment_closes=26,
+                    teacher_episodes=0,
+                    final_episodes=0,
+                    probe_updates=0,
+                    promotions=0,
+                ),
+                storage="current full joint handoff, bounded8 reward and8 original control trajectories/receipts; no historical weights/checkpoint chain",
+                limitations="fixed TRAIN trajectories/one seed; zero-loss control conditional on reward-arm observations; not equal FLOPs, reliability, heldout transfer or CPC benefit",
+            )
     diagnostics: dict[str, Any] = (
         (
             new_train_diagnostics(momentum_control=True)
@@ -422,6 +463,7 @@ def run_pilot(
     inbox_owner: Any = None
     collection_bytes = None
     captured_receipt = None
+    update: Any = None
     primary_error = None
     started = monotonic()
     whole_seconds = protocol["limits"]["body_seconds"]
@@ -597,7 +639,9 @@ def run_pilot(
         with ProcessRssSampler() as memory:
             if warm_start:
                 try:
-                    prepared = prepare_warm_start(warm_report, memory, deadline, warm_boundary)
+                    prepared = (joint_start if joint_warm else prepare_warm_start)(
+                        warm_report, memory, deadline, warm_boundary
+                    )
                 except Exception:
                     warm_payload = pickle.dumps(warm_report, protocol=5)
                     raise
@@ -612,6 +656,23 @@ def run_pilot(
                     raise ValueError("warm prefix must retain original128/1152 native counters")
                 base_updates, base_rows = 128, 1152
                 source = prepared["source"]
+                if joint_warm:
+                    from src.adapters.minigrid_public_cue_reward import PublicCueRewardLearner
+                    from src.adapters.minigrid_public_cue_recurrent_learner import (
+                        PublicCueRecurrentPolicy,
+                    )
+
+                    if (
+                        type(source) is not PublicCueRewardLearner
+                        or source.policy != PublicCueRecurrentPolicy()
+                        or any(
+                            (h.completed_updates, h.training_examples) != (64, 576)
+                            for h in source.snapshot_state().heads
+                        )
+                    ):
+                        raise ValueError(
+                            "joint warm factory lost its exact two-head128/1152 policy"
+                        )
                 if train_readouts:
                     diagnostic_sources = prepared["sources"]
                 warm_guard()
@@ -707,7 +768,14 @@ def run_pilot(
                         )
                     expected_rng = deepcopy(rng.bit_generator.state)
                     guard()
-                    update = RewardUpdate(collection["episode"], collection["behavior_state"])
+                    if joint_warm:
+                        from src.adapters.minigrid_public_cue_reward import PublicCueRewardUpdate
+
+                        update = PublicCueRewardUpdate(
+                            collection["episode"], collection["behavior_state"]
+                        )
+                    else:
+                        update = RewardUpdate(collection["episode"], collection["behavior_state"])
                     identity = slot["episode_id"]
                     if (
                         update.episode.episode_id != identity
@@ -903,6 +971,9 @@ def run_pilot(
                     guard()
 
                 try:
+                    joint_options: dict[str, Any] = (
+                        {"joint_episodes": tuple(control_episodes)} if joint_warm else {}
+                    )
                     completed_diagnostics = run_train_diagnostics(
                         diagnostics,
                         source,
@@ -916,6 +987,7 @@ def run_pilot(
                         **(
                             {"extended_control_readouts": True} if extended_control_readouts else {}
                         ),
+                        **joint_options,
                     )
                 except Exception:
                     diagnostic_payload = pickle.dumps(diagnostics, protocol=5)

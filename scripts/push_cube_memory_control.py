@@ -77,7 +77,16 @@ def _summary(raw, *, push):
     )
 
 
-def _require_native(raw, *, push, updates, rows):
+def _require_native(raw, *, push, updates, rows, prototype_rows=None):
+    # Retention changes search work, never the cumulative TRAIN exposure receipt.
+    bank_rows = rows if prototype_rows is None else prototype_rows
+    if prototype_rows is not None and (
+        type(bank_rows) is not int
+        or not 1 <= bank_rows <= min(rows, 256)
+        or type(raw.get("nearest_prototype_rows")) is not int
+        or raw["nearest_prototype_rows"] != bank_rows
+    ):
+        raise ValueError("retained endpoint stored-row receipt differs")
     transitions = raw["transitions"] if push else raw["episode"]["transitions"]
     count = len(transitions)
     if (
@@ -91,10 +100,10 @@ def _require_native(raw, *, push, updates, rows):
         or raw["prediction_returns"] != count
         or raw["nearest_prediction_attempts"] != count
         or raw["nearest_prediction_returns"] != count
-        or raw["nearest_distance_candidate_upper_bound"] != count * rows
-        or raw["nearest_distance_candidates_completed"] != count * rows
-        or raw["nearest_distance_feature_upper_bound"] != count * rows * 12
-        or raw["nearest_distance_feature_values_completed"] != count * rows * 12
+        or raw["nearest_distance_candidate_upper_bound"] != count * bank_rows
+        or raw["nearest_distance_candidates_completed"] != count * bank_rows
+        or raw["nearest_distance_feature_upper_bound"] != count * bank_rows * 12
+        or raw["nearest_distance_feature_values_completed"] != count * bank_rows * 12
         or len(raw["nearest_selected_indices"]) != count
     ):
         raise ValueError("frozen memory endpoint or paid retrieval work differs")

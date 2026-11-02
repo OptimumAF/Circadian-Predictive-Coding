@@ -21,7 +21,6 @@ from src.core.typed_decision import DecisionRequest
     "options",
     [
         dict(context_return=False),
-        dict(replay="recent"),
         dict(policy_change=True),
         dict(private_adaptation=True),
         dict(paired_serving="joint"),
@@ -33,7 +32,8 @@ def test_should_refuse_unsupported_linear_modes_before_data(options, monkeypatch
     monkeypatch.setattr(entry, "prepare_training", lambda **kw: pytest.fail("data"))
     kwargs = dict(context_return=True, method="linear_fit")
     kwargs.update(options)
-    with pytest.raises(ValueError, match="linear_fit"):
+    expected = "paired serving" if "paired_serving" in options else "linear_fit"
+    with pytest.raises(ValueError, match=expected):
         entry.run_example(**kwargs)
 
 
@@ -42,7 +42,6 @@ def test_should_refuse_unsupported_linear_modes_before_data(options, monkeypatch
     [
         [],
         ["--policy-change"],
-        ["--context-return", "--replay", "coverage"],
         ["--context-return", "--record-train-fit"],
         ["--context-return", "--class-balanced-bp"],
     ],

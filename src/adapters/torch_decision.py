@@ -25,6 +25,10 @@ def _same_values(left: Any, right: Any) -> bool:
     """Exact complete values, including tensor dtype/shape and RNG bytes."""
     if type(left) is not type(right):
         return False
+    # Why: RNG state contains hundreds of builtin scalars. Resolve Torch only
+    # for non-scalars; exact type/equality and every tensor check stay intact.
+    if type(left) in (int, float, bool, str, bytes, type(None)):
+        return bool(left == right)
     if type(left) is dict:
         return left.keys() == right.keys() and all(_same_values(left[k], right[k]) for k in left)
     if type(left) in (tuple, list):
@@ -52,6 +56,23 @@ class TorchDecisionWork:
     native_forward_attempts: int = 0
     native_forward_returns: int = 0
     decision_returns: int = 0
+
+
+def decision_from_logits(request, spec, logits, visits) -> DecisionResult:
+    """Normalize only permitted logits, preserving the original lexical tie rule."""
+    allowed = sorted(request.allowed_candidates, key=lambda item: item.candidate_id)
+    class_ids = tuple(item.candidate_id for item in spec.catalog)
+    raw = [float(logits[class_ids.index(item.candidate_id)]) for item in allowed]
+    weights = [exp(value - max(raw)) for value in raw]
+    mass = fsum(weights)
+    scores = tuple(
+        CandidateScore(item.candidate_id, value, weight / mass)
+        for item, value, weight in zip(allowed, raw, weights, strict=True)
+    )
+    winner = min(scores, key=lambda item: (-item.probability, item.candidate_id))
+    result = DecisionResult(request.request_id, winner.candidate_id, scores, visits, len(scores))
+    validate_decision_result(request, result)
+    return result
 
 
 class TorchDecisionPredictor:
@@ -112,21 +133,7 @@ class TorchDecisionPredictor:
                 self._work, native_forward_returns=self._work.native_forward_returns + 1
             )
             self.assert_unchanged()
-            allowed = sorted(request.allowed_candidates, key=lambda item: item.candidate_id)
-            class_ids = tuple(item.candidate_id for item in self._spec.catalog)
-            raw = [float(logits[class_ids.index(item.candidate_id)]) for item in allowed]
-            # All classes are projected natively, but only allowed logits normalize.
-            weights = [exp(value - max(raw)) for value in raw]
-            mass = fsum(weights)
-            scores = tuple(
-                CandidateScore(item.candidate_id, value, weight / mass)
-                for item, value, weight in zip(allowed, raw, weights, strict=True)
-            )
-            winner = min(scores, key=lambda item: (-item.probability, item.candidate_id))
-            result = DecisionResult(
-                request.request_id, winner.candidate_id, scores, visits, len(scores)
-            )
-            validate_decision_result(request, result)
+            result = decision_from_logits(request, self._spec, logits, visits)
             self._work = replace(self._work, decision_returns=self._work.decision_returns + 1)
             return result
         except Exception:

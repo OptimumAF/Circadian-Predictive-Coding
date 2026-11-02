@@ -10,6 +10,7 @@ from typing import Any
 import numpy as np
 
 from src.adapters.context_linear_fit_learner import ContextLinearFitLearner
+from src.adapters.linear_fit_learner import LinearFitLearner
 from src.adapters.context_linear_fit_decision import ContextLinearFitDecisionPredictor
 from src.adapters.linear_fit_learner import _rng_signature
 from src.app.coupled_attribution import _same_value
@@ -17,6 +18,30 @@ from src.app.fresh_task_probe import _validate_batches
 from src.core.context_linear_state import copy_context_linear_state
 from src.core.decision_features import DecisionFeatureSpec
 from scripts.run_ticket_workflow import CONTEXT_FEATURES, CATALOG
+
+
+class MinimumChangeProbeLearner(ContextLinearFitLearner):
+    """Disposable probe composition; never set a mode on the source learner."""
+
+    def train_batch(self, features, targets):
+        return self.train_batch_minimum_change(features, targets)
+
+    def fork(self):
+        child = MinimumChangeProbeLearner(self.policy)
+        child.restore_state(self.snapshot_state())
+        return child
+
+
+class MinimumChangeSingleProbeLearner(LinearFitLearner):
+    """Ordinary shared-head child; source callbacks and state stay outside."""
+
+    def train_batch(self, features, targets):
+        return self.train_batch_minimum_change(features, targets)
+
+    def fork(self):
+        child = MinimumChangeSingleProbeLearner(self.policy)
+        child.restore_state(self.snapshot_state())
+        return child
 
 
 def _validate_transfer_cohorts(cohorts, spec, head_tasks, *, episode_cohorts=False):
@@ -129,6 +154,7 @@ def bind_readouts(row, pins, boundary):
             "prior_native_updates",
             "prior_native_rows",
             *(("selected_head_tasks",) if "selected_head_tasks" in row else ()),
+            *(("linear_probe_update",) if "linear_probe_update" in row else ()),
         )
     }
 

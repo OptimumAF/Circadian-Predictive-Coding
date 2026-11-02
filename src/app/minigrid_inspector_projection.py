@@ -648,7 +648,7 @@ def _episode(
                 index < returned and _integer(action, 0, 6, "chosen action") == chosen,
                 "action is not the first raw argmax",
             )
-        if method == "recurrent_bc":
+        if method in ("recurrent_bc", "recurrent_readout_fit"):
             _require("features" not in prediction, "RNN evidence must retain original148 inputs")
         else:
             features: Any = prediction.get("features")
@@ -677,7 +677,7 @@ def _episode(
                 f"{pointer}/predictions/0" if predictions else None,
                 f"{pointer}/environment/transitions/0" if transitions else None,
                 f"{pointer}/predictions/0/features"
-                if predictions and method != "recurrent_bc"
+                if predictions and method not in ("recurrent_bc", "recurrent_readout_fit")
                 else None,
             )
         )
@@ -754,7 +754,7 @@ def _episode(
                     decision_pointer,
                     transition_pointer,
                     f"{decision_pointer}/features"
-                    if decision_pointer and method != "recurrent_bc"
+                    if decision_pointer and method not in ("recurrent_bc", "recurrent_readout_fit")
                     else None,
                 )
             )

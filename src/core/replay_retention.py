@@ -43,10 +43,15 @@ class ReplayRetentionPolicy:
         assert self.seed is not None
         # Why this: a seeded rank gives each distinct ID one stable draw, so
         # repeated epochs need no unbounded seen-ID ledger or process RNG.
-        digest = sha256(b"numpy_replay_bottom_k_v1")
-        digest.update(self.seed.to_bytes(8, "little"))
-        digest.update(bytes.fromhex(content_id))
-        return digest.digest()
+        return seeded_content_rank(self.seed, content_id)
+
+
+def seeded_content_rank(seed: int, content_id: str) -> bytes:
+    """Share the original stable hash bytes without widening replay policy types."""
+    digest = sha256(b"numpy_replay_bottom_k_v1")
+    digest.update(seed.to_bytes(8, "little"))
+    digest.update(bytes.fromhex(content_id))
+    return digest.digest()
 
 
 DEFAULT_REPLAY_RETENTION_POLICY = ReplayRetentionPolicy("content_hash")

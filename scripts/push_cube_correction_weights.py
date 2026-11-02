@@ -9,6 +9,7 @@ weights, create learners, use RNG or perform IO.
 from typing import Any
 
 from src.core.continuous_demonstration import ContinuousEpisode, copy_continuous_episode
+from src.core.cube_taskspace_state import cube_taskspace_spec
 
 GROUPS = ("corrections", "push", "a", "b", "train20")
 GROUP_ROWS = (50, 18, 15, 50, 15)
@@ -16,6 +17,8 @@ DEFINITION = "positive_train_prefix_group_weights_v1"
 AGGREGATED_GROUPS = ("current_corrections", "corrections", "push", "a", "b", "train20")
 AGGREGATED_GROUP_ROWS = (50, 50, 18, 15, 50, 15)
 AGGREGATED_DEFINITION = "positive_train_aggregated_prefix_group_weights_v1"
+COMPLETE_B22_GROUPS = (*AGGREGATED_GROUPS, "b22")
+COMPLETE_B22_DEFINITION = "positive_train_aggregated_complete_b22_group_weights_v1"
 
 
 def _own_groups(groups) -> tuple[ContinuousEpisode, ...]:
@@ -124,3 +127,66 @@ def build_aggregated_correction_weights(groups) -> tuple[tuple[float, ...], dict
         "ideal_correction_initial_mass": 1 / 12,
     }
     return values, protocol
+
+
+def _own_complete_b22_groups(groups) -> tuple[ContinuousEpisode, ...]:
+    if type(groups) is not tuple or len(groups) != 7:
+        raise ValueError("complete B22 requires the exact seven-group TRAIN tuple")
+    previous = _own_aggregated_groups(groups[:6])
+    final = groups[6]
+    if (
+        type(final) is not tuple
+        or len(final) != 2
+        or final[0] != "b22"
+        or type(final[0]) is not str
+        or type(final[1]) is not ContinuousEpisode
+    ):
+        raise ValueError("complete B22 must follow all six original groups")
+    b22 = final[1]
+    if (
+        type(b22.role) is not str
+        or b22.role != "train"
+        or b22.episode_id != "pick-cube-readiness-teacher-19"
+        or b22.context != "pick-cube-train-19"
+        or type(b22.transitions) is not tuple
+        or len(b22.transitions) != 22
+        or b22.spec != cube_taskspace_spec()
+        or b22.spec != previous[0].spec
+    ):
+        raise ValueError("complete B22 requires original TRAIN19/22rows/executed TS12 spec")
+    owned = (*previous, copy_continuous_episode(b22))
+    if len({episode.episode_id for episode in owned}) != 7:
+        raise ValueError("complete B22 and all198-row groups require distinct episode IDs")
+    return owned
+
+
+def complete_b22_training_groups(groups, b22) -> tuple[tuple[str, ContinuousEpisode], ...]:
+    """Own already-qualified198+B22 inputs, preserving separate source identities.
+
+    No file qualification/release authority, clocks, fitting or learner is supplied.
+    """
+    if type(groups) is not tuple:
+        raise ValueError("original aggregated groups require an exact tuple")
+    owned = _own_complete_b22_groups((*groups, ("b22", b22)))
+    return tuple(zip(COMPLETE_B22_GROUPS, owned, strict=True))
+
+
+def build_complete_b22_correction_weights(groups) -> tuple[tuple[float, ...], dict[str, Any]]:
+    """Keep all198 raw weights; add the same teacher-group mass for complete B22."""
+    episodes = _own_complete_b22_groups(groups)
+    prefix, _ = build_aggregated_correction_weights(groups[:6])
+    # Why: B22 is another complete teacher group. Reuse raw mass98 rather than
+    # introduce an outcome-selected priority or change the original198 weights.
+    values = (*prefix, *((98.0 / 22,) * 22))
+    return values, {
+        "definition": COMPLETE_B22_DEFINITION,
+        "group_order": list(COMPLETE_B22_GROUPS),
+        "groups": [
+            dict(group=name, episode_id=episode.episode_id, rows=len(episode.transitions))
+            for name, episode in zip(COMPLETE_B22_GROUPS, episodes, strict=True)
+        ],
+        "values": list(values),
+        "rule": "original198 raw prefix unchanged; complete B22 teacher raw mass98",
+        "ideal_group_mass": 1.0 / 7,
+        "ideal_each_correction_initial_mass": 1.0 / 14,
+    }

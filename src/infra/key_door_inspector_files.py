@@ -46,6 +46,7 @@ def render_key_door_inspector(projection: dict[str, Any]) -> bytes:
     encoded = encoded.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     template_name = {
         "minigrid_inspector_v1": "minigrid_inspector.html",
+        "recurrent_readout_inspector_v1": "minigrid_inspector.html",
         "minigrid_learnability_inspector_v1": "minigrid_inspector.html",
         "minigrid_saved_fifo_inspector_v1": "minigrid_inspector.html",
         "minigrid_heldout_fifo_inspector_v1": "minigrid_inspector.html",

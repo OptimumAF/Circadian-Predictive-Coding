@@ -45,15 +45,22 @@ def build_context(state: ContextPerceptronSnapshot) -> ContextPerceptronLearner:
     return ContextPerceptronLearner(copy_context_snapshot(state).policy)
 
 
-def _categorical_guard(spec, clock, *, build_learner, copy_state, resource_bytes, state_digest):
+def _categorical_guard(
+    spec, clock, *, build_learner, copy_state, resource_bytes, state_digest, validate_state=None
+):
     if type(spec) is not DecisionFeatureSpec:
         raise ValueError("context guard requires fixed feature spec")
     spec.__post_init__()
     ids = tuple(c.candidate_id for c in spec.catalog)
+    # Shared and routed snapshots have different geometry. Keep the established
+    # contextual validator as the default; only explicit adapters supply another.
+    validator = _head_spec if validate_state is None else validate_state
+    if not callable(validator):
+        raise ValueError("categorical guard requires a callable state validator")
 
     def state_valid(state):
         try:
-            _head_spec(spec, copy_state(state))
+            validator(spec, copy_state(state))
         except (ValueError, TypeError):
             return False
         return True

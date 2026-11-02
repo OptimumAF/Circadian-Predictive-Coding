@@ -1,8 +1,9 @@
 """Owned affine wake updates on arrived public296 TRAIN batches.
 
 The app owns roles, delayed labels and lifetime budgets. This port owns two
-optional fitted heads and native fit/row counters. One homogeneous batch replaces
-one head; no training rows, optimizer, RNG, replay or success chain is retained.
+optional fitted heads and native fit/row counters. A default homogeneous batch
+replaces one head; explicit minimum-change updates preserve its null-space.
+No training rows, optimizer, RNG, replay or success chain is retained.
 An unfitted head predicts uniform probabilities. This is squared-error fitting,
 not gradient descent or cross-entropy optimization.
 """
@@ -15,6 +16,7 @@ from src.adapters.minigrid_context_linear_policy import ContextLinearPolicy
 from src.core.categorical_linear_fit import (
     CategoricalLinearFit,
     fit_categorical_linear,
+    update_categorical_linear,
     predict_categorical_linear,
 )
 from src.core.categorical_probability_scores import (
@@ -25,6 +27,7 @@ from src.core.learner_ports import TrainingDiagnostic, TrainingUpdateFailed
 from src.core.minigrid_context_encoding import context_public_history
 
 DIAGNOSTIC = "arrived_public_cue_one_hot_least_squares_squared_error_v1"
+MINIMUM_CHANGE_DIAGNOSTIC = "arrived_public_cue_minimum_change_least_squares_squared_error_v1"
 FailureWork = tuple[int, int, int, int, bool]
 
 
@@ -142,10 +145,22 @@ class ContextLinearLearner:
         return child
 
     def train_batch(self, features, targets):
+        return self._train_batch(features, targets, minimum_change=False)
+
+    def train_batch_minimum_change(self, features, targets):
+        """Explicit current-packet update; no promise of retaining all old tasks.
+
+        The first fit is unchanged. Later updates preserve only coefficients
+        invisible to the current design; the app still owns roles and budgets.
+        """
+        return self._train_batch(features, targets, minimum_change=True)
+
+    def _train_batch(self, features, targets, *, minimum_change):
+        definition = MINIMUM_CHANGE_DIAGNOSTIC if minimum_change else DIAGNOSTIC
         before = self.snapshot_state()
         if before.failed_work is not None:
             raise TrainingUpdateFailed(
-                "affine owner already failed", DIAGNOSTIC, _failure(before.failed_work)
+                "affine owner already failed", definition, _failure(before.failed_work)
             )
         inputs, projected = _project(features)
         validate_class_targets(targets, len(inputs), 7)
@@ -155,9 +170,18 @@ class ContextLinearLearner:
             raise ValueError("one arrived affine update requires a homogeneous initial public cue")
         design, native_labels = projected[:, :296].copy(), labels.copy()
         expected_design = design.copy()
+        state_owner = id(self._state)
+        prior = before.heads[index]
+        # The comparison snapshot never enters the solver. A staged wrapper
+        # shares immutable coefficient tuples, but field replacement is refused.
+        staged_prior = replace(prior) if minimum_change and prior is not None else None
         completed = 0
         try:
-            model = fit_categorical_linear(design, native_labels, 7)
+            model = (
+                fit_categorical_linear(design, native_labels, 7)
+                if staged_prior is None
+                else update_categorical_linear(staged_prior, design, native_labels)
+            )
             completed = 1
             model = replace(model)
             if (model.feature_dim, model.num_classes, model.fit_rows) != (296, 7, len(inputs)):
@@ -167,7 +191,9 @@ class ContextLinearLearner:
                 or not _unchanged(native_labels, labels)
                 or not _unchanged(features, inputs)
                 or not _unchanged(targets, labels)
+                or id(self._state) != state_owner
                 or self.snapshot_state() != before
+                or (staged_prior is not None and replace(staged_prior) != prior)
             ):
                 raise ValueError("affine fit inputs or preceding state changed")
             heads = list(before.heads)
@@ -180,14 +206,14 @@ class ContextLinearLearner:
                     training_examples=before.training_examples + len(inputs),
                 )
             )
-            diagnostic = TrainingDiagnostic(DIAGNOSTIC, model.squared_error)
+            diagnostic = TrainingDiagnostic(definition, model.squared_error)
         except Exception as error:
             # Why: a failed/unknown physical solve is paid evidence, not a
             # successful app update. Preserve the preceding model and latch it.
             work = (1, len(inputs), completed, completed * len(inputs), True)
             self._state = replace(before, failed_work=work)
             raise TrainingUpdateFailed(
-                f"{type(error).__name__}: {error}"[:512], DIAGNOSTIC, _failure(work)
+                f"{type(error).__name__}: {error}"[:512], definition, _failure(work)
             ) from error
         self._state = after
         return diagnostic

@@ -5,6 +5,7 @@ Terminal zero features are codec evidence; only original observations/actions fi
 """
 
 from dataclasses import asdict, replace
+from typing import Any
 
 import numpy as np
 
@@ -23,6 +24,7 @@ from src.core.demonstration_episode import (
     EpisodeReplaySchema,
 )
 from src.core.temporal_decision_sequence import policy_for_phase
+from src.core.shared_linear_replay import SharedJointReplayPolicy
 from src.core.ticket_workflow import (
     ACTION_IDS,
     WorkflowCapabilities,
@@ -171,12 +173,20 @@ def _context_queue_batches(spec, batches):
     return tuple(prepared)
 
 
-def make_rehearsal(mode, learner, wake_budget, sampler, *, context_return=False):
+def make_rehearsal(mode, learner, wake_budget, sampler, *, context_return=False, shared_joint=None):
     if type(context_return) is not bool:
         raise ValueError("context_return must be an exact boolean")
     if mode not in ("recent", "coverage"):
         raise ValueError("explicit recent or coverage replay required")
+    if shared_joint is not None and (
+        type(shared_joint) is not str
+        or shared_joint not in ("joint", "current_only")
+        or mode != "coverage"
+        or context_return is not True
+    ):
+        raise ValueError("shared joint replay requires explicit context-return coverage control")
     width, steps = (9, 6) if context_return else (7, 3)
+    rows_per_event = steps if shared_joint is None else 2 * steps
     schema = EpisodeReplaySchema(width, steps, 6)
     limits = ReplayRetentionBudget(2 * steps, 2 * 8 * (schema.encoded_dim + 1))
     policy = (
@@ -184,7 +194,7 @@ def make_rehearsal(mode, learner, wake_budget, sampler, *, context_return=False)
         if mode == "recent"
         else CoverageStreamReplayPolicy(
             2,
-            steps,
+            rows_per_event,
             limits,
             ("v1-invoice-password", "v2-invoice-parcel")
             if context_return
@@ -193,11 +203,18 @@ def make_rehearsal(mode, learner, wake_budget, sampler, *, context_return=False)
     )
     replay_budget = ToyBudgetSession(
         ToyExecutionBudget(
-            max_replay_examples=6 * steps, max_wall_seconds=30, max_process_rss_bytes=512 * 1024**2
+            max_replay_examples=6 * rows_per_event,
+            max_wall_seconds=30,
+            max_process_rss_bytes=512 * 1024**2,
         ),
         wake_budget.clock,
     )
     replay_budget.attach_memory(sampler)
+    joint_options: dict[str, Any] = (
+        {}
+        if shared_joint is None
+        else dict(joint_shared=SharedJointReplayPolicy(width, 6, shared_joint))
+    )
     helper = StreamRehearsal(
         learner,
         wake_budget,
@@ -206,12 +223,21 @@ def make_rehearsal(mode, learner, wake_budget, sampler, *, context_return=False)
         total_updates=12,
         input_dim=width,
         episode_schema=schema,
+        **joint_options,
     )
     return helper, replay_budget
 
 
 def require_progress(
-    stream, helper, replay_budget, point, state, previous, *, context_return=False
+    stream,
+    helper,
+    replay_budget,
+    point,
+    state,
+    previous,
+    *,
+    context_return=False,
+    shared_joint=None,
 ):
     """Native additions require exact published original replay receipts."""
     if type(context_return) is not bool:
@@ -222,6 +248,10 @@ def require_progress(
         raise ValueError("previous replay publication receipt prefix changed")
     report = helper.report
     events = [e for e in report["events"] if e["updates"] <= point]
+    if shared_joint is not None:
+        return _require_shared_progress(
+            events, receipts, report, replay_budget, point, state, shared_joint, context_return
+        )
     expected_ids = tuple(f"rehearsal-{p}" for p in range(2, point + 1, 2))
     if (
         tuple(r["event_id"] for r in receipts) != expected_ids
@@ -249,4 +279,79 @@ def require_progress(
         or state.training_examples != steps * (point + committed)
     ):
         raise ValueError("native replay progress differs from published receipts and budgets")
+    return receipts
+
+
+def _require_shared_progress(
+    events, receipts, report, replay_budget, point, state, control, context_return
+):
+    """Joint events may skip; candidate native clocks include every fitted row."""
+    if (
+        type(control) is not str
+        or control not in ("joint", "current_only")
+        or context_return is not True
+    ):
+        raise ValueError("shared replay progress requires original explicit control")
+    if report.get("joint_shared", {}).get("policy") != dict(
+        feature_dim=9, num_classes=6, control=control
+    ):
+        raise ValueError("shared replay policy changed")
+    if tuple(e["event_id"] for e in events) != tuple(
+        f"rehearsal-{p}" for p in range(2, point + 1, 2)
+    ):
+        raise ValueError("shared replay event prefix differs")
+    complete = []
+    charged = 0
+    for event in events:
+        if event["status"] == "skipped":
+            if (
+                any(
+                    event[k] != 0
+                    for k in (
+                        "charged_exposures",
+                        "attempted_updates",
+                        "returned_updates",
+                        "committed_updates",
+                    )
+                )
+                or event["receipt"] is not None
+            ):
+                raise ValueError("skipped shared replay claimed work")
+            continue
+        detail = event.get("joint_shared", {})
+        if (
+            event["status"] != "complete"
+            or any(
+                event[k] != 1
+                for k in (
+                    "attempted_updates",
+                    "returned_updates",
+                    "committed_updates",
+                    "proposal_applied_updates",
+                )
+            )
+            or event["proposal_application_unknown_updates"] != 0
+            or event["unreturned_fit_work_unknown"] is not False
+            or event["charged_exposures"] != 12
+            or detail.get("control") != control
+            or detail.get("current_packet_rows") != 6
+            or detail.get("total_fit_rows") != 12
+            or detail.get("retained_train_rows_used") != (6 if control == "joint" else 0)
+            or detail.get("current_rows_used") != (6 if control == "joint" else 12)
+            or len(event["selected_episodes"]) != 1
+            or event["selected_episodes"][0]["role"] != "train"
+        ):
+            raise ValueError("shared replay publication or fitted-row work differs")
+        complete.append(event)
+        charged += event["charged_exposures"]
+    if (
+        tuple(e["receipt"] for e in complete) != receipts
+        or report["committed_updates"] != len(receipts)
+        or report["charged_exposures"] != charged
+        or replay_budget.replay_examples_completed != charged
+        or replay_budget.updates_completed != 0
+        or state.completed_updates != point + len(receipts)
+        or state.training_examples != 6 * point + charged
+    ):
+        raise ValueError("shared replay native progress differs from original receipts and budget")
     return receipts

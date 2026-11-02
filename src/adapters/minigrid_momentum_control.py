@@ -235,6 +235,12 @@ def run_momentum_control(
         initial = deepcopy(source.snapshot_state())
         _counts(initial, 128, 1152)
         policy = initial.policy
+        from src.adapters.minigrid_public_cue_reward import PublicCueRewardLearner
+
+        if type(source) is PublicCueRewardLearner:
+            policy = policy.native_policy
+            if any((h.completed_updates, h.training_examples) != (64, 576) for h in initial.heads):
+                raise ValueError("joint momentum control requires original two64/576 heads")
         if (
             policy.feature_dim,
             policy.hidden_dim,

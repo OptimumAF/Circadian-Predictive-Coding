@@ -7,7 +7,7 @@ No stream, replay, simulator, evaluation selection, checkpoint IO or promotion.
 
 from dataclasses import dataclass
 import math
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 
@@ -15,6 +15,7 @@ from src.core import continuous_bc as core
 from src.core import continuous_bc_diagnostics as residual
 from src.core import observation_standardization as observations
 from src.core import continuous_head_gauss_newton as head_update
+from src.core import continuous_full_gauss_newton as full_update
 from src.core.continuous_bc import Array, Parameters, OBJECTIVE
 from src.core.observation_standardization import ObservationStandardization
 from src.core.continuous_demonstration import (
@@ -170,6 +171,14 @@ class ContinuousBCSnapshot:
 
 @dataclass(frozen=True)
 class HeadGaussNewtonTrainingResult:
+    diagnostic: TrainingDiagnostic
+    loss_after: float
+    step_norm: float
+    work: dict[str, int | bool]
+
+
+@dataclass(frozen=True)
+class FullGaussNewtonTrainingResult:
     diagnostic: TrainingDiagnostic
     loss_after: float
     step_norm: float
@@ -383,6 +392,220 @@ class NumpyContinuousBCLearner:
         return HeadGaussNewtonTrainingResult(
             diagnostic, proposal.loss_after, proposal.step_norm, dict(work)
         )
+
+    def _full_source_owners(self) -> tuple:
+        state = self._state
+        owners: tuple[Any, ...] = (
+            state,
+            self._policy,
+            state.policy,
+            state.parameters,
+            state.velocity,
+            state.completed_updates,
+            state.training_examples,
+            *state.parameters,
+            *state.velocity,
+        )
+        for policy in (self._policy, state.policy):
+            spec = policy.spec
+            owners += (
+                spec,
+                spec.observation_dim,
+                spec.action_units,
+                spec.lower_bounds,
+                spec.upper_bounds,
+                policy.hidden_dim,
+                policy.seed,
+                policy.learning_rate,
+                policy.momentum,
+                policy.training_role,
+                policy.binary_gripper_axis,
+                policy.observation_standardization,
+            )
+            transform = policy.observation_standardization
+            if transform is not None:
+                owners += (transform.means, transform.scales, transform.fitted_rows)
+                if isinstance(transform, observations.ScaleFlooredObservationStandardization):
+                    owners += (transform.scale_floors, transform.effective_scales)
+        return owners
+
+    def _require_full_source(self, before, owners) -> None:
+        def require_owners():
+            if any(a is not b for a, b in zip(self._full_source_owners(), owners, strict=True)):
+                raise RuntimeError("full-network update source native owner replaced")
+
+        require_owners()
+        actual = _snapshot(self._state, _policy(self._policy))
+        require_owners()
+        if (
+            actual.policy != before.policy
+            or self._policy != before.policy
+            or self._state.policy != before.policy
+            or self._state.completed_updates != before.completed_updates
+            or self._state.training_examples != before.training_examples
+            or any(
+                a.dtype != np.float64 or a.shape != b.shape or not np.array_equal(a, b)
+                for a, b in zip(
+                    self._state.parameters + self._state.velocity,
+                    before.parameters + before.velocity,
+                    strict=True,
+                )
+            )
+        ):
+            raise RuntimeError("full-network update source changed before commit")
+
+    def train_full_gauss_newton_episode(
+        self, episode: ContinuousEpisode, *, row_weights: Array | None = None
+    ) -> FullGaussNewtonTrainingResult:
+        """One explicit TRAIN update; never role conversion or release authority."""
+        policy = _policy(self._policy)
+        if policy.training_role != "train":
+            raise ValueError("full-network update requires a TRAIN policy")
+        owned = copy_continuous_episode(episode)
+        features, targets = continuous_training_pairs(owned, role="train")
+        if owned.spec != policy.spec:
+            raise ValueError("full-network episode differs from policy spec")
+        return self.train_full_gauss_newton_batch(
+            np.asarray(features, dtype=np.float64),
+            np.asarray(targets, dtype=np.float64),
+            row_weights=row_weights,
+        )
+
+    def train_full_gauss_newton_batch(
+        self, features: Array, targets: Array, *, row_weights: Array | None = None
+    ) -> FullGaussNewtonTrainingResult:
+        """Explicit TRAIN-only entry; raw callers must hold TRAIN authority."""
+        if type(self) is not NumpyContinuousBCLearner:
+            raise ValueError("full-network update requires an exact continuous BP learner")
+        if _policy(self._policy).training_role != "train":
+            raise ValueError("full-network update requires a TRAIN policy")
+        return self._apply_full_gauss_newton_batch(features, targets, row_weights=row_weights)
+
+    def _apply_full_gauss_newton_batch(
+        self, features: Array, targets: Array, *, row_weights: Array | None = None
+    ) -> FullGaussNewtonTrainingResult:
+        """One bounded all-parameter proposal for the unchanged TRAIN objective.
+
+        Inner owned commit shared with the explicit disposable probe binding.
+        Outer adapters supply separate data-role authority; never infer that
+        authority from the retained policy's TRAIN role alone.
+        Source is unchanged until strict descent and original ownership validate.
+        Accepted curvature steps reset ALL momentum; they are not SGD velocity.
+        Rejected/failed work publishes nothing and remains permanently observed.
+        """
+        if type(self) is not NumpyContinuousBCLearner:
+            raise ValueError("full-network update requires an exact continuous BP learner")
+        owners = self._full_source_owners()
+        before = _snapshot(self._state, _policy(self._policy))
+        if before.policy.training_role != "train":
+            raise ValueError("full-network update requires a TRAIN policy")
+        definition = (
+            core.MIXED_OBJECTIVE if before.policy.binary_gripper_axis is not None else OBJECTIVE
+        )
+        if row_weights is not None:
+            definition = (
+                core.WEIGHTED_MIXED_OBJECTIVE
+                if before.policy.binary_gripper_axis is not None
+                else core.WEIGHTED_OBJECTIVE
+            )
+        work: dict[str, int | bool] = dict(
+            normalization_attempts=0,
+            normalization_completed=0,
+            normalization_rows=0,
+            normalization_values=0,
+            published_updates=0,
+        )
+        try:
+            self._require_full_source(before, owners)
+            work["normalization_attempts"] = 1
+            values = observations.standardize_observations(
+                features, before.policy.observation_standardization, before.policy.spec
+            )
+            work.update(
+                normalization_completed=1,
+                normalization_rows=len(values),
+                normalization_values=values.size,
+            )
+            self._require_full_source(before, owners)
+            proposal = full_update.propose_full_gauss_newton(
+                values,
+                targets,
+                before.parameters,
+                before.policy.spec,
+                binary_gripper_axis=before.policy.binary_gripper_axis,
+                row_weights=row_weights,
+            )
+            if type(proposal) is not full_update.FullGaussNewtonProposal:
+                raise ValueError("full-network update returned an invalid proposal")
+            self._merge_full_work(work, proposal.work)
+            self._require_full_source(before, owners)
+            if not proposal.accepted:
+                raise ValueError("full-network update rejected: " + proposal.reason)
+            if (
+                type(proposal.accepted) is not bool
+                or type(proposal.loss_before) is not float
+                or type(proposal.loss_after) is not float
+                or type(proposal.step_norm) is not float
+                or not math.isfinite(proposal.step_norm)
+                or not 0 <= proposal.step_norm <= head_update.MAX_STEP_NORM
+                or not math.isfinite(proposal.loss_before)
+                or not math.isfinite(proposal.loss_after)
+                or not 0 <= proposal.loss_after < proposal.loss_before
+                or proposal.work["accepted_proposals"] != 1
+            ):
+                raise ValueError("full-network proposal lacks strict finite descent")
+            core._targets(proposal.predictions_before, len(values), before.policy.spec)
+            core._targets(proposal.predictions_after, len(values), before.policy.spec)
+            velocity = cast(Parameters, tuple(np.zeros_like(a) for a in before.velocity))
+            candidate = _snapshot(
+                ContinuousBCSnapshot(
+                    before.policy,
+                    proposal.parameters,
+                    velocity,
+                    before.completed_updates + 1,
+                    before.training_examples + len(values),
+                ),
+                before.policy,
+            )
+            diagnostic = TrainingDiagnostic(definition, proposal.loss_before)
+            self._require_full_source(before, owners)
+        except Exception as error:
+            if isinstance(error, full_update.FullGaussNewtonFailed):
+                try:
+                    self._merge_full_work(work, error.work)
+                except Exception as invalid_work:
+                    # Even a malformed failure receipt must leave a paid failure
+                    # envelope, rather than escape as an ordinary input error.
+                    error = invalid_work
+            try:
+                self._require_full_source(before, owners)
+            except Exception as changed:
+                raise TrainingUpdateFailed(str(changed), definition, work) from error
+            raise TrainingUpdateFailed(
+                str(error) or type(error).__name__, definition, work
+            ) from error
+        self._state = candidate
+        work["published_updates"] = 1
+        return FullGaussNewtonTrainingResult(
+            diagnostic, proposal.loss_after, proposal.step_norm, dict(work)
+        )
+
+    @staticmethod
+    def _merge_full_work(work, returned) -> None:
+        expected = full_update._work()
+        if (
+            type(returned) is not dict
+            or set(returned) != set(expected)
+            or any(
+                type(returned[key]) is not type(value)
+                or type(value) is int
+                and not 0 <= returned[key] <= 2**53 - 1
+                for key, value in expected.items()
+            )
+        ):
+            work["unknown_partial_work"] = True
+            raise ValueError("full-network proposal returned invalid paid-work counters")
+        work.update(returned)
 
     def diagnose_training_conditioning(
         self, episode: ContinuousEpisode

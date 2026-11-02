@@ -20,6 +20,8 @@ from src.adapters.minigrid_policy_evaluation import (
     MiniGridEvaluationFailed,
     _copy_wide_neural_probe_snapshot,
     _copy_public_cue_probe_snapshot,
+    _public_cue_probe_plan,
+    _validate_joint_comparison_arm,
     _return_budget_guard,
     evaluate_memory_probe_checkpoint,
     evaluate_wide_neural_probe_checkpoint,
@@ -71,9 +73,14 @@ def _live_budget(
     wide_neural: bool = False,
     extended_wide_probe_budget: bool = False,
     public_cue: bool = False,
+    joint_public_cue: bool = False,
+    comparison_arm: str | None = None,
 ) -> tuple[ToyBudgetSession, Callable[[], None]]:
     """Accept elapsed-clock changes only from actual reads of this clock port."""
     _validate_extended_option(wide_neural, extended_wide_probe_budget)
+    _validate_joint_comparison_arm(comparison_arm, joint_public_cue)
+    if type(joint_public_cue) is not bool or joint_public_cue and public_cue is not True:
+        raise ValueError("joint public-cue readout requires explicit public-cue mode")
     if type(public_cue) is not bool or public_cue and (wide_neural or extended_wide_probe_budget):
         raise ValueError("public-cue readout requires its explicit separate budget mode")
     owner: list[ToyBudgetSession] = []
@@ -95,7 +102,11 @@ def _live_budget(
             max_training_updates=0,
             max_replay_examples=0,
             max_wall_seconds=(
-                WIDE_EXTENDED_LIVE_SECONDS
+                120.0
+                if comparison_arm is not None
+                else 80.0
+                if joint_public_cue
+                else WIDE_EXTENDED_LIVE_SECONDS
                 if extended_wide_probe_budget
                 else WIDE_LIVE_SECONDS
                 if wide_neural or public_cue
@@ -176,15 +187,27 @@ class ProbeRollouts:
         wide_method: str | None = None,
         extended_wide_probe_budget: bool = False,
         public_cue: bool = False,
+        joint_public_cue: bool = False,
+        comparison_arm: str | None = None,
     ) -> None:
+        _validate_joint_comparison_arm(comparison_arm, joint_public_cue)
         if (
-            type(public_cue) is not bool
+            type(joint_public_cue) is not bool
+            or joint_public_cue
+            and public_cue is not True
+            or type(public_cue) is not bool
             or public_cue
             and (wide_method is not None or extended_wide_probe_budget is not False)
         ):
             raise ValueError("public-cue games require an exact bool without wide modes")
         if type(source_updates) is not int or source_updates not in (
-            (2,) if public_cue else (0, 128)
+            (0,)
+            if comparison_arm == "cold_F"
+            else (128,)
+            if joint_public_cue
+            else (2,)
+            if public_cue
+            else (0, 128)
         ):
             raise ValueError("probe rollout requires the original0/128 source label")
         self.source_updates = source_updates
@@ -197,7 +220,16 @@ class ProbeRollouts:
         self.wide_method = wide_method
         self.extended_wide_probe_budget = extended_wide_probe_budget
         self.public_cue = public_cue
-        self._configuration = (source_updates, wide_method, extended_wide_probe_budget, public_cue)
+        self.joint_public_cue = joint_public_cue
+        self.comparison_arm = comparison_arm
+        self._configuration = (
+            source_updates,
+            wide_method,
+            extended_wide_probe_budget,
+            public_cue,
+            joint_public_cue,
+            comparison_arm,
+        )
         self.records: list[dict[str, Any]] = []
         self._sealed: list[
             tuple[dict[str, Any], bytes, Callable[[], None], Callable[[], None]]
@@ -209,11 +241,15 @@ class ProbeRollouts:
             or (self.wide_method is not None and type(self.wide_method) is not str)
             or type(self.extended_wide_probe_budget) is not bool
             or type(self.public_cue) is not bool
+            or type(self.joint_public_cue) is not bool
+            or (self.comparison_arm is not None and type(self.comparison_arm) is not str)
             or (
                 self.source_updates,
                 self.wide_method,
                 self.extended_wide_probe_budget,
                 self.public_cue,
+                self.joint_public_cue,
+                self.comparison_arm,
             )
             != self._configuration
         ):
@@ -277,11 +313,18 @@ class ProbeRollouts:
             budget_binding_preserved=None,
             evaluator_admitted=False,
         )
-        budget, binding = _live_budget(
-            **({"public_cue": True} if self.public_cue else {}),
-            **({"wide_neural": True} if self.wide_method is not None else {}),
-            **({"extended_wide_probe_budget": True} if self.extended_wide_probe_budget else {}),
-        )
+        options: dict[str, Any] = {}
+        if self.public_cue:
+            options["public_cue"] = True
+        if self.joint_public_cue:
+            options["joint_public_cue"] = True
+        if self.comparison_arm is not None:
+            options["comparison_arm"] = self.comparison_arm
+        if self.wide_method is not None:
+            options["wide_neural"] = True
+        if self.extended_wide_probe_budget:
+            options["extended_wide_probe_budget"] = True
+        budget, binding = _live_budget(**options)
         expected = None
         payload = None
         observed_elapsed = 0.0
@@ -292,7 +335,11 @@ class ProbeRollouts:
         def copy_endpoint(value):
             if self.public_cue:
                 return _copy_public_cue_probe_snapshot(
-                    value, source_updates=self.source_updates, phase=phase
+                    value,
+                    source_updates=self.source_updates,
+                    phase=phase,
+                    joint_public_cue=self.joint_public_cue,
+                    comparison_arm=self.comparison_arm,
                 )
             if self.wide_method is not None:
                 return _copy_wide_neural_probe_snapshot(
@@ -372,6 +419,12 @@ class ProbeRollouts:
                         budget=budget,
                         check_boundary=guard,
                         qualified_boundary=guard,
+                        **({"joint_public_cue": True} if self.joint_public_cue else {}),
+                        **(
+                            {"comparison_arm": self.comparison_arm}
+                            if self.comparison_arm is not None
+                            else {}
+                        ),
                     )
                 elif self.wide_method is not None:
                     result = evaluate_wide_neural_probe_checkpoint(
@@ -425,8 +478,11 @@ class ProbeRollouts:
             if (
                 type(work) is not dict
                 or any(type(work.get(key)) is not int or work[key] < 0 for key in keys)
-                or work["environment_resets_completed"] != (2 if self.public_cue else 4)
-                or not 0 < work["live_prediction_calls_returned"] <= (32 if self.public_cue else 64)
+                or work["environment_resets_completed"]
+                != (8 if self.joint_public_cue else 2 if self.public_cue else 4)
+                or not 0
+                < work["live_prediction_calls_returned"]
+                <= (128 if self.joint_public_cue else 32 if self.public_cue else 64)
                 or work["environment_steps_returned"] != work["live_prediction_calls_returned"]
                 or (
                     not self.public_cue
@@ -442,28 +498,53 @@ class ProbeRollouts:
                     and (
                         work["raw_score_forwards_completed"] != 0
                         or work["raw_score_rows_completed"] != 0
-                        or work["live_sessions_started"] != 2
+                        or work["live_sessions_started"] != (8 if self.joint_public_cue else 2)
                     )
                 )
             ):
                 raise ValueError("live probe endpoint returned invalid paid work")
             if self.public_cue:
-                role = "probe_test" if phase == "after_probe" else "train"
-                contexts = ("F-blue", "F-red") if phase == "after_probe" else ("A", "A")
+                role = (
+                    "probe_test_and_train"
+                    if self.joint_public_cue
+                    else "probe_test"
+                    if phase == "after_probe"
+                    else "train"
+                )
+                plan = _public_cue_probe_plan(phase, joint_public_cue=self.joint_public_cue)
                 episodes = paid.get("episodes", ())
                 if (
                     paid.get("method") != "recurrent_public_cue"
                     or paid.get("role") != role
                     or paid.get("state_unchanged") is not True
                     or paid.get("scores") != []
-                    or len(episodes) != 2
+                    or (
+                        self.joint_public_cue
+                        and (
+                            type(paid.get("native_training_updates")) is not int
+                            or paid["native_training_updates"] != expected.completed_updates
+                            or paid.get("native_training_examples") != expected.training_examples
+                            or paid.get("native_head_updates")
+                            != [h.completed_updates for h in expected.heads]
+                        )
+                    )
+                    or len(episodes) != len(plan)
                     or any(
                         e.get("status") != "complete"
-                        or e.get("source_role") != role
-                        or e.get("context") != c
+                        or e.get("source_role") != r
+                        or e.get("context") != layout.context
                         or e.get("cue") != q
                         or e.get("environment", {}).get("closed") is not True
-                        for e, c, q in zip(episodes, contexts, ("blue", "red"), strict=True)
+                        or (
+                            self.joint_public_cue
+                            and (
+                                e.get("state_unchanged") is not True
+                                or type(e.get("success")) is not bool
+                                or type(e.get("return")) not in (int, float)
+                                or not isfinite(e["return"])
+                            )
+                        )
+                        for e, (layout, q, r) in zip(episodes, plan, strict=True)
                     )
                 ):
                     raise ValueError("public-cue paid game roles/order/cleanup differ")

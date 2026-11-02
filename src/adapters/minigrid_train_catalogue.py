@@ -24,6 +24,7 @@ CATALOGUE_DEFINITION = "minigrid_joint_train_catalogue_v1"
 MAX_INPUT_ARRAY_BYTES = 16 * 1024**2
 
 CURRENT_REPETITIONS = (1, 1, 2, 2, 2, 2)
+RECURRING_CURRENT_REPETITIONS = (1, 1, 2, 2, 3, 3, 4, 4, 4, 4)
 
 
 @dataclass(frozen=True)
@@ -55,29 +56,31 @@ class CurrentRepetitionPlan:
     input_array_bytes: int
 
 
-def compose_repeated_current_training(episodes: tuple[DemonstrationEpisode, ...]):
-    """Six arrived TRAIN packets, repeated within each wake without a bank.
+def compose_repeated_current_training(
+    episodes: tuple[DemonstrationEpisode, ...], *, recurring: bool = False
+):
+    """Six or explicitly ten arrived TRAIN packets; repeat without a bank.
 
-    Repetition matches the fixed one-prior-packet joint recipe's batch shapes.
+    Default matches one prior packet/cue. Explicit recurrence matches the fixed
+    ten-arrival joint recipe with up to three earlier packets/cue.
     It adds exposures, not observations, trajectories or replay authority.
     """
-    if type(episodes) is not tuple or len(episodes) != 6:
-        raise ValueError("repeated-current control requires exactly six TRAIN packets")
-    witness, rows = _validate_sources(episodes, 6)
-    if (
-        any(len(episode.transitions) != 9 for episode in episodes)
-        or tuple(
-            int(context_public_history(episode.transitions[0].observation)[297])
-            for episode in episodes
-        )
-        != (0, 1) * 3
-    ):
+    if type(recurring) is not bool:
+        raise ValueError("recurring current repetition requires an exact bool")
+    repetitions = RECURRING_CURRENT_REPETITIONS if recurring else CURRENT_REPETITIONS
+    count = len(repetitions)
+    if type(episodes) is not tuple or len(episodes) != count:
+        raise ValueError(f"repeated-current control requires exactly {count} TRAIN packets")
+    witness, rows = _validate_sources(episodes, count)
+    if any(len(episode.transitions) != 9 for episode in episodes) or tuple(
+        int(context_public_history(episode.transitions[0].observation)[297]) for episode in episodes
+    ) != (0, 1) * (count // 2):
         raise ValueError(
             "repeated-current control requires nine rows and alternating blue/red cues"
         )
     training, wakes = [], []
     input_bytes = 0
-    for tick, (episode, copies) in enumerate(zip(episodes, CURRENT_REPETITIONS, strict=True)):
+    for tick, (episode, copies) in enumerate(zip(episodes, repetitions, strict=True)):
         witness.check(episodes)
         size = copies * 9 * 297 * 8
         if input_bytes + size > MAX_INPUT_ARRAY_BYTES:

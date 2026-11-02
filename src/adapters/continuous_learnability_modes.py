@@ -120,9 +120,9 @@ class RecordedContinuousPC:
         return result.diagnostic
 
 
-def _training_view(learner: NumpyContinuousPCLearner, episode):
+def _training_view(learner: ContinuousLearner, episode):
     state = learner.snapshot_state()
-    base = state.policy.base
+    base = state.policy.base if isinstance(state, ContinuousPCSnapshot) else state.policy
     if base.training_role != "train":
         raise ValueError("task-head diagnosis requires a TRAIN policy")
     features, targets = continuous_training_pairs(episode, role="train")
@@ -145,16 +145,22 @@ def diagnose_conditioning(learner: ContinuousLearner, episode):
     )
 
 
-def diagnose_residual(learner: ContinuousLearner, episode, stages):
-    if isinstance(learner, NumpyContinuousBCLearner):
+def diagnose_residual(learner: ContinuousLearner, episode, stages, *, prediction_observer=None):
+    if prediction_observer is not None and not callable(prediction_observer):
+        raise ValueError("prediction_observer must be callable or None")
+    if prediction_observer is None and isinstance(learner, NumpyContinuousBCLearner):
         return learner.diagnose_training_episode(episode, stages)
     _, features, targets = _training_view(learner, episode)
     labels = diagnostics._stage_labels(stages, len(features))
     predictions = learner.predict(features)
     result = diagnostics.continuous_bc_residuals(predictions, targets, episode.spec, labels)
-    return diagnostics.TrainingResidualDiagnostic(
+    diagnostic = diagnostics.TrainingResidualDiagnostic(
         result, 1, len(features), predictions.size, predictions.nbytes
     )
+    if prediction_observer is not None:
+        if prediction_observer(diagnostic, predictions, targets, labels) is not None:
+            raise ValueError("prediction_observer must retain its readings and return None")
+    return diagnostic
 
 
 def pc_work(episodes, policy, report, *, a_only_control):

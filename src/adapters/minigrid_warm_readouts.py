@@ -18,6 +18,7 @@ from src.adapters import minigrid_learning_pilot as shared
 from src.adapters.key_door_reward_pilot import _binding, _check_budget
 from src.adapters.minigrid_policy_evaluation import MiniGridEvaluationFailed, evaluate_checkpoint
 from src.adapters.torch_feature_rehearsal_pilot import _same_state
+from src.app.coupled_attribution import _same_value
 from src.app.toy_execution_budget import ToyBudgetSession, ToyExecutionBudget
 from src.core.minigrid_key_door import predefined_layouts
 
@@ -134,6 +135,7 @@ def run_train_diagnostics(
     check_boundary: Callable[[], None],
     control_state: Any = None,
     extended_control_readouts: bool = False,
+    joint_episodes=None,
 ) -> dict[str, Any]:
     """Keep the completed training clock frozen while a zero-update budget scores."""
     if (
@@ -152,6 +154,17 @@ def run_train_diagnostics(
         raise ValueError(
             "extended_control_readouts requires an owned control endpoint and exact bool"
         )
+    if joint_episodes is not None and (
+        type(joint_episodes) is not tuple
+        or len(joint_episodes) != 8
+        or control_state is None
+        or not extended_control_readouts
+    ):
+        raise ValueError("joint readouts require the complete fixed8-trajectory control comparison")
+    from src.adapters.torch_train_episode_batch import _binding as _episode_binding, _same_schedule
+
+    episode_pins = None if joint_episodes is None else _episode_binding(joint_episodes)
+    original_episodes = deepcopy(joint_episodes)
     if control_state is not None:
         states = (*states, (136, control_state))
     report.clear()
@@ -184,6 +197,14 @@ def run_train_diagnostics(
             )
             or not _same_state(expected_states, states)
             or not shared._check_signature(sources, source_signature)
+            or (
+                joint_episodes is not None
+                and (
+                    episode_pins is None
+                    or not _same_schedule(joint_episodes, episode_pins)
+                    or not _same_value(joint_episodes, original_episodes)
+                )
+            )
             or (
                 completed_payload is not None
                 and pickle.dumps(report, protocol=5) != completed_payload
@@ -238,6 +259,7 @@ def run_train_diagnostics(
         budget = ToyBudgetSession(
             ToyExecutionBudget(
                 max_training_updates=0,
+                max_replay_examples=0 if joint_episodes is not None else None,
                 max_wall_seconds=min(
                     210.0
                     if extended_control_readouts
@@ -256,18 +278,48 @@ def run_train_diagnostics(
         for index, (point, state) in enumerate(states):
             guard()
             try:
-                current = evaluate_checkpoint(
-                    source,
-                    state,
-                    method=records[index]["method"],
-                    updates=point,
-                    native_training_examples=state.training_examples,
-                    layouts=predefined_layouts()[:3],
-                    role="train",
-                    sources=sources,
-                    budget=budget,
-                    check_boundary=guard,
-                )
+                if joint_episodes is not None:
+                    from src.adapters.minigrid_policy_evaluation import (
+                        evaluate_joint_reward_checkpoint,
+                    )
+
+                    current = evaluate_joint_reward_checkpoint(
+                        source,
+                        state,
+                        updates=point,
+                        sources=sources,
+                        episodes=joint_episodes,
+                        budget=budget,
+                        check_boundary=guard,
+                    )
+                    from src.adapters.torch_recurrent_learner import TORCH_RECURRENT_CE_ID
+                    from src.adapters.torch_recurrent_reward import TORCH_RECURRENT_REWARD_ID
+                    from src.adapters.torch_recurrent_zero_loss import TORCH_RECURRENT_ZERO_LOSS_ID
+
+                    # The kernel's method identifies architecture. Preserve the
+                    # fixed comparison identity before this returned record is sealed.
+                    current.update(
+                        comparison_arm=("frozen_joint_bc", "reward", "momentum_only")[index],
+                        warm_objective=TORCH_RECURRENT_CE_ID,
+                        continuation_objective=(
+                            None,
+                            TORCH_RECURRENT_REWARD_ID,
+                            TORCH_RECURRENT_ZERO_LOSS_ID,
+                        )[index],
+                    )
+                else:
+                    current = evaluate_checkpoint(
+                        source,
+                        state,
+                        method=records[index]["method"],
+                        updates=point,
+                        native_training_examples=state.training_examples,
+                        layouts=predefined_layouts()[:3],
+                        role="train",
+                        sources=sources,
+                        budget=budget,
+                        check_boundary=guard,
+                    )
             except MiniGridEvaluationFailed as error:
                 current = error.report
             records[index] = owners[index] = current

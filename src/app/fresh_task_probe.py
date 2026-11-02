@@ -52,6 +52,7 @@ from src.core.categorical_training_diagnostic import (
 from src.core.coupled_energy import Array
 from src.core.learner_ports import NativeLearner, TrainingDiagnostic, TrainingUpdateFailed
 from src.core.probe_decision_diagnostics import decision_class_diagnostics
+from src.core.probe_update import ProbeUpdateFailed, ProbeUpdateReceipt
 
 
 def _validate_batches(
@@ -61,6 +62,7 @@ def _validate_batches(
     return_training: tuple[AttributionBatch, ...] = (),
     *,
     short_affine_return: bool = False,
+    short_readout_return: bool = False,
 ) -> None:
     if type(training) is not tuple or not 1 <= len(training) <= 16:
         raise ValueError("probe training must be a tuple containing 1..16 batches")
@@ -103,6 +105,7 @@ def _validate_batches(
             training_readouts,
             return_training,
             **(dict(short_affine_return=True) if short_affine_return else {}),
+            **(dict(short_readout_return=True) if short_readout_return else {}),
         )
     for batches, role in ((training, "probe_train"), (evaluation, "probe_test")):
         for batch in batches:
@@ -204,6 +207,24 @@ class _ProbeOptions(TypedDict, total=False):
     readout_progress: TrainingReadoutProgress | None
 
 
+class _TrainOptions(TypedDict, total=False):
+    stream: AttributionStream
+    update_callback: Callable[..., ProbeUpdateReceipt]
+    callback_events: list[dict[str, Any]]
+    phase: str
+
+
+def _train_options(stream, callback, events, phase="fresh") -> _TrainOptions:
+    options: _TrainOptions = {}
+    if stream is not None:
+        options["stream"] = stream
+    if callback is not None:
+        options["update_callback"] = callback
+        options["callback_events"] = events
+        options["phase"] = phase
+    return options
+
+
 def _probe_options(check_boundary, training_readouts, readout_progress) -> _ProbeOptions:
     # Preserve omitted default keywords while making the optional port types explicit.
     options: _ProbeOptions = {}
@@ -291,6 +312,9 @@ def _train(
     training_readouts: tuple[AttributionBatch, ...] = (),
     readout_progress: TrainingReadoutProgress | None = None,
     stream: AttributionStream | None = None,
+    update_callback: Callable[..., ProbeUpdateReceipt] | None = None,
+    callback_events: list[dict[str, Any]] | None = None,
+    phase: str = "fresh",
 ) -> None:
     for batch in training:
         budget.before_update()
@@ -299,6 +323,50 @@ def _train(
             check_boundary()
         progress.attempted_updates += 1
         progress.attempted_training_examples += len(batch.features)
+        if update_callback is not None:
+            if callback_events is None:
+                raise ValueError("auxiliary updates require separate work accounting")
+
+            refusal: Exception | None = None
+
+            def callback_boundary():
+                nonlocal refusal
+                if refusal is not None:
+                    raise refusal
+                try:
+                    budget.before_final()
+                    elapsed.read()
+                    if check_boundary is not None:
+                        check_boundary()
+                except Exception as error:
+                    # A caught boundary refusal cannot be repaired into acceptance.
+                    refusal = error
+                    raise
+
+            _callback_update(
+                update_callback,
+                learner,
+                batch,
+                training_readouts,
+                phase,
+                callback_boundary,
+                progress,
+                budget,
+                callback_events,
+            )
+            callback_boundary()
+            if progress.completed_updates in checkpoints:
+                _score(
+                    learner,
+                    evaluation,
+                    progress.completed_updates,
+                    budget,
+                    elapsed,
+                    progress,
+                    decision_diagnostics=decision_diagnostics,
+                    **_probe_options(check_boundary, training_readouts, readout_progress),
+                )
+            continue
         try:
             if stream is None:
                 diagnostic = learner.train_batch(batch.features.copy(), batch.targets.copy())
@@ -352,6 +420,44 @@ def _train(
             )
 
 
+def _callback_update(callback, learner, batch, retained, phase, boundary, progress, budget, events):
+    """Pay known application work before any later guard/score can fail."""
+    event = dict(
+        phase=phase,
+        current_rows=len(batch.features),
+        status="running",
+        work_known=False,
+        applied=False,
+    )
+    events.append(event)
+    receipt = None
+    try:
+        try:
+            receipt = callback(learner, batch, retained, phase=phase, check_boundary=boundary)
+        except ProbeUpdateFailed as error:
+            if type(error) is not ProbeUpdateFailed:
+                raise ValueError("auxiliary failure requires an exact type") from error
+            receipt = error.receipt
+            raise
+        if type(receipt) is not ProbeUpdateReceipt:
+            raise ValueError("auxiliary callback requires an exact receipt")
+        if not receipt.applied:
+            raise ValueError("successful auxiliary callback must apply its update")
+        boundary()
+        event["status"] = "complete"
+    except Exception:
+        event["status"] = "failed"
+        raise
+    finally:
+        if type(receipt) is ProbeUpdateReceipt:
+            validated = replace(receipt)
+            event.update(asdict(validated), work_known=True)
+            if validated.applied:
+                progress.completed_updates += 1
+                progress.completed_training_examples += len(batch.features)
+                budget.record_update()
+
+
 def _stream_update(
     stream: AttributionStream, batch: AttributionBatch, progress: _Progress
 ) -> TrainingDiagnostic:
@@ -387,6 +493,8 @@ def run_fresh_task_probe(
     rehearsal_factory: Callable[[Any, ToyBudgetSession, int], StreamRehearsal] | None = None,
     extra_f_exposure: bool = False,
     short_affine_return: bool = False,
+    short_readout_return: bool = False,
+    update_callback: Callable[..., ProbeUpdateReceipt] | None = None,
 ) -> dict[str, Any]:
     """Train fixed probe batches on an owned fork and retain measured partial work.
 
@@ -416,6 +524,9 @@ def run_fresh_task_probe(
     two eighteen-row old TRAIN monitors and independent equal return templates.
     It uses each TRAIN template once, checkpoints0/1/2 and a separate original
     two-update owner. The default sixteen-update recipe is unchanged.
+    Explicit short_readout_return instead admits metadata-free raw148/K7
+    nine-row F/old-TRAIN packets with the same two-update schedule; it does not
+    broaden short_affine_return or the learner's TRAIN-only episode interface.
     Optional endpoint_observer reads this same disposable learner after complete
     probe/return phases. It requires the full return recipe, owns its native-state
     checks and readout accounting, and must use the supplied protected boundary.
@@ -429,19 +540,41 @@ def run_fresh_task_probe(
     times by reference, using a fresh48-update budget and fixed0/12/24/48 readouts.
     It requires the full separate A16 return recipe and admits no rehearsal; the
     original input envelope, array storage bound and role assignments remain fixed.
+    An explicit update_callback replaces SGD in both phases. It receives only the
+    current role-tagged batch and admitted TRAIN monitors, now explicitly used
+    for rehearsal. Its scalar receipts and failures live in auxiliary_updates;
+    top-level updates/budget counts denote callback slots, not native SGD. No
+    native diagnostic is fabricated. Default readouts remain strictly readonly.
     """
+    if update_callback is not None and (
+        not callable(update_callback)
+        or rehearsal_factory is not None
+        or extra_f_exposure is not False
+        or short_affine_return is not False
+        or short_readout_return is not False
+        or type(training_readouts) is not tuple
+        or not training_readouts
+    ):
+        raise ValueError(
+            "update_callback requires retained TRAIN without rehearsal/extra/short modes"
+        )
     if type(input_diagnostics) is not bool:
         raise ValueError("input_diagnostics must be an exact bool")
     if type(short_affine_return) is not bool:
         raise ValueError("short_affine_return must be an exact bool")
-    if short_affine_return and (
+    if type(short_readout_return) is not bool:
+        raise ValueError("short_readout_return must be an exact bool")
+    if short_affine_return and short_readout_return:
+        raise ValueError("short return modes are mutually exclusive")
+    short_return = short_affine_return or short_readout_return
+    if short_return and (
         extra_f_exposure is not False
         or rehearsal_factory is not None
         or type(return_training) is not tuple
         or not return_training
     ):
         raise ValueError(
-            "short affine return requires its separate TRAIN return without extra F/rehearsal"
+            "short return requires its separate TRAIN return without extra F/rehearsal"
         )
     if type(extra_f_exposure) is not bool:
         raise ValueError("extra_f_exposure must be an exact bool")
@@ -460,15 +593,17 @@ def run_fresh_task_probe(
         raise ValueError(
             "extra F exposure requires the full original16 F/A16 recipe without rehearsal"
         )
-    original_probe_updates = 2 if short_affine_return else 48 if extra_f_exposure else 16
+    original_probe_updates = 2 if short_return else 48 if extra_f_exposure else 16
     original_checkpoints = (
-        (0, 1, 2) if short_affine_return else (0, 12, 24, 48) if extra_f_exposure else (0, 4, 8, 16)
+        (0, 1, 2) if short_return else (0, 12, 24, 48) if extra_f_exposure else (0, 4, 8, 16)
     )
-    return_checkpoints = (0, 1, 2) if short_affine_return else (0, 4, 8, 16)
-    return_updates = 2 if short_affine_return else 16
+    return_checkpoints = (0, 1, 2) if short_return else (0, 4, 8, 16)
+    return_updates = 2 if short_return else 16
+    # Why: both strictly admitted geometries reuse the existing internal two-fit
+    # schedule and input/paid-evidence guards, without widening old public modes.
     phase_options: dict[str, Any] = (
         dict(original_probe_updates=2, short_affine_return=True)
-        if short_affine_return
+        if short_return
         else dict(original_probe_updates=48)
         if extra_f_exposure
         else {}
@@ -493,6 +628,7 @@ def run_fresh_task_probe(
             training_readouts,
             return_training,
             **(dict(short_affine_return=True) if short_affine_return else {}),
+            **(dict(short_readout_return=True) if short_readout_return else {}),
         )
         validate_training_readouts(training, evaluation, training_readouts)
         validate_return_values(training, evaluation, training_readouts, return_training)
@@ -536,9 +672,10 @@ def run_fresh_task_probe(
     planned_f_training_rows = (
         sum(len(batch.features) for batch in training) * 3 if extra_f_exposure else None
     )
-    original_probe_authority = None if rehearsal_factory is None else _continuation_budget(budget)
-    original_probe_limits = None if rehearsal_factory is None else deepcopy(budget.budget)
-    original_probe_binding = None if rehearsal_factory is None else _return_budget_binding(budget)
+    guarded_updates = rehearsal_factory is not None or update_callback is not None
+    original_probe_authority = _continuation_budget(budget) if guarded_updates else None
+    original_probe_limits = deepcopy(budget.budget) if guarded_updates else None
+    original_probe_binding = _return_budget_binding(budget) if guarded_updates else None
     original_probe_last_clock = budget.last_clock
     if rehearsal_factory is not None and any(batch.episode is None for batch in training):
         raise ValueError("rehearsed probes require complete probe_train episode metadata")
@@ -569,6 +706,29 @@ def run_fresh_task_probe(
     replay_limits: ToyExecutionBudget | None = None
     replay_binding: tuple[Any, ...] | None = None
     stream_report: dict[str, Any] | None = None
+
+    callback_events: list[dict[str, Any]] = []
+    callback_inputs = callback_pin = callback_bindings = None
+
+    def callback_boundary() -> None:
+        rehearsal_boundary()
+        if callback_inputs is not None and (
+            not _same_value(callback_inputs, callback_pin)
+            or callback_bindings
+            != tuple(
+                (
+                    id(b),
+                    id(b.features),
+                    id(b.targets),
+                    id(b.row_ids),
+                    id(b.episode),
+                    id(b.packet_episodes),
+                )
+                for group in callback_inputs
+                for b in group
+            )
+        ):
+            raise ValueError("auxiliary probe input values or ownership changed")
 
     def rehearsal_boundary() -> None:
         nonlocal original_probe_last_clock
@@ -603,7 +763,13 @@ def run_fresh_task_probe(
                 raise ValueError("original independent probe replay budget or charges changed")
             helper._check_schema()
 
-    boundary = check_boundary if rehearsal_factory is None else rehearsal_boundary
+    boundary = (
+        callback_boundary
+        if update_callback is not None
+        else check_boundary
+        if rehearsal_factory is None
+        else rehearsal_boundary
+    )
     try:
         owned_training = tuple(map(_copy_batch, training))
         owned_evaluation = tuple(map(_copy_batch, evaluation))
@@ -624,6 +790,21 @@ def run_fresh_task_probe(
         if owned_training[0].episode is not None:
             episode_scope = _episode_scope(owned_training, owned_evaluation)
         owned_state = deepcopy(state)
+        if update_callback is not None:
+            callback_inputs = (owned_training, owned_evaluation, owned_readouts, owned_return)
+            callback_pin = deepcopy(callback_inputs)
+            callback_bindings = tuple(
+                (
+                    id(b),
+                    id(b.features),
+                    id(b.targets),
+                    id(b.row_ids),
+                    id(b.episode),
+                    id(b.packet_episodes),
+                )
+                for group in callback_inputs
+                for b in group
+            )
         elapsed.read()
         budget.before_final()
         if check_boundary is not None:
@@ -694,7 +875,7 @@ def run_fresh_task_probe(
             progress,
             decision_diagnostics=decision_diagnostics,
             **_probe_options(boundary, owned_readouts, readout_progress),
-            **({} if stream is None else {"stream": stream}),
+            **_train_options(stream, update_callback, callback_events),
         )
         if stream is not None:
             stream_report = stream.finish()
@@ -720,6 +901,18 @@ def run_fresh_task_probe(
         else "partial",
         "reserved_data_bytes": reserved_bytes,
     }
+    if update_callback is not None:
+        report["auxiliary_updates"] = dict(
+            events=callback_events,
+            native_sgd_updates=0,
+            counter_unit="callback application slots; not native SGD",
+            retained_data_array_bytes=sum(
+                b.features.nbytes + b.targets.nbytes for group in callback_pin for b in group
+            )
+            if callback_pin is not None
+            else 0,
+            scope="current role and explicitly admitted TRAIN rehearsal only; no probe-label bank; diagnostics remain native-only",
+        )
     failed_native_work = report.pop("_failed_native_work")
     if extra_f_exposure:
         report["extra_f_exposure"] = dict(
@@ -810,6 +1003,9 @@ def run_fresh_task_probe(
                 timing_status="unavailable" if measured is None else "partial",
             )
     if return_enabled:
+        callback_options: dict[str, Any] = (
+            {} if update_callback is None else dict(update_callback=update_callback)
+        )
         report["return_phase"] = _run_return_phase(
             learner if reason is None else None,
             owned_return,
@@ -825,6 +1021,7 @@ def run_fresh_task_probe(
             expected_return_limits,
             fixed_budgets,
             **phase_options,
+            **callback_options,
         )
         if (
             endpoint_observer is not None
@@ -913,6 +1110,7 @@ def _run_return_phase(
     *,
     original_probe_updates: int = 16,
     short_affine_return: bool = False,
+    update_callback: Callable[..., ProbeUpdateReceipt] | None = None,
 ) -> dict[str, Any]:
     """Reuse the existing fixed scoring/training loop on the same native learner."""
     if (
@@ -925,6 +1123,7 @@ def _run_return_phase(
     repeats = 1 if short_affine_return else 8
     progress = _Progress()
     monitor_progress = TrainingReadoutProgress()
+    callback_events: list[dict[str, Any]] = []
     elapsed = _Elapsed(timer)
     reason = None
     started = False
@@ -1009,6 +1208,7 @@ def _run_return_phase(
                 progress,
                 decision_diagnostics=decision_diagnostics,
                 **_probe_options(guard, monitors, monitor_progress),
+                **_train_options(None, update_callback, callback_events, "return"),
             )
             budget.before_final()
             elapsed.read()
@@ -1050,6 +1250,15 @@ def _run_return_phase(
         )
         report["input_guard_array_bytes"] = sum(
             b.features.nbytes + b.targets.nbytes for group in input_baseline for b in group
+        )
+    if update_callback is not None:
+        report["auxiliary_updates"] = dict(
+            events=callback_events,
+            native_sgd_updates=0,
+            counter_unit="callback application slots; not native SGD",
+        )
+        report["scope"] = (
+            "same private F learner; explicit old TRAIN return callbacks; separate auxiliary costs and slot counts; no native SGD or recovery claim"
         )
     failed = report.pop("_failed_native_work")
     if failed is not None:

@@ -5,7 +5,7 @@ environment, fit a learner, qualify an expert or publish a serving model.
 """
 
 from dataclasses import asdict
-from typing import cast
+from typing import cast, Any
 
 from src.core.continuous_demonstration import ContinuousEpisode, _vector
 from src.core.pick_cube_corrections import (
@@ -33,7 +33,14 @@ from src.core.pick_cube_readiness_corrections import (
     GOAL_CONSISTENT_OBSERVED_GRASP_PROVENANCE,
 )
 from src.core.pick_cube_train_context import pick_cube_training_context
-from src.infra.maniskill_continuous import ACTION_UNITS, ManiSkillPickCubeEpisode
+from src.core.pick_cube_probe_context import pick_cube_probe_binding
+from src.core.pick_cube_probe_corrections import (
+    ProbeCorrectionConsent,
+    ProbeCorrectionBatch,
+    STUDENT_ID,
+    PROVENANCE as PROBE_CORRECTION_PROVENANCE,
+)
+from src.infra.maniskill_continuous import ACTION_UNITS, ManiSkillPickCubeEpisode, ManiSkillWork
 from src.infra.maniskill_task_teacher import _geometry
 
 
@@ -60,6 +67,27 @@ class PickCubeCorrectionQuery:
         observed_grasp_corrections: bool = False,
         goal_consistent_corrections: bool = False,
     ) -> None:
+        self._initialize_query(
+            train_seed,
+            pick_cube_training_context(train_seed),
+            "train",
+            f"pick-cube-smoke-{train_seed}",
+            readiness_corrections=readiness_corrections,
+            observed_grasp_corrections=observed_grasp_corrections,
+            goal_consistent_corrections=goal_consistent_corrections,
+        )
+
+    def _initialize_query(
+        self,
+        seed,
+        context,
+        role,
+        episode_id,
+        *,
+        readiness_corrections,
+        observed_grasp_corrections,
+        goal_consistent_corrections,
+    ):
         if type(readiness_corrections) is not bool:
             raise ValueError("readiness_corrections must be an exact bool")
         if type(observed_grasp_corrections) is not bool:
@@ -75,8 +103,8 @@ class PickCubeCorrectionQuery:
         self._goal_consistent_corrections = self._admitted_goal_consistent = (
             goal_consistent_corrections
         )
-        self._context = pick_cube_training_context(train_seed)
-        self._seed = train_seed
+        self._context, self._seed = context, seed
+        self._binding = self._admitted_binding = (seed, context, role, episode_id)
         self._readiness_corrections = readiness_corrections
         self._observed_grasp_corrections = self._admitted_observed_grasp = (
             observed_grasp_corrections
@@ -104,6 +132,7 @@ class PickCubeCorrectionQuery:
         self._readiness_receipts: tuple[tuple, ...] = ()
 
     def _check_readiness_binding(self) -> None:
+        self._check_query_binding()
         if not self._admitted_readiness:
             return
         expected_teacher = (
@@ -208,14 +237,33 @@ class PickCubeCorrectionQuery:
         self._readiness_state = state
         self._check_readiness_binding()
 
+    def _check_query_binding(self):
+        binding = self._binding
+        if binding is not self._admitted_binding or len(binding) != 4:
+            raise ValueError("original correction role binding replaced")
+        seed, context, role, identity = binding
+        expected = (
+            (seed, pick_cube_training_context(seed), "train", f"pick-cube-smoke-{seed}")
+            if role == "train"
+            else (23, pick_cube_probe_binding("probe_train").context, "probe_train", STUDENT_ID)
+        )
+        if (
+            binding != expected
+            or type(seed) is not int
+            or self._seed is not seed
+            or self._context is not context
+        ):
+            raise ValueError("original correction role/reset/context changed")
+
     def _check_port(self, port, step, observation, *, label_offset: int = 0) -> None:
+        self._check_query_binding()
         if (
             type(port) is not ManiSkillPickCubeEpisode
             or type(port._seed) is not int
             or port._seed != self._seed
-            or port._role != "train"
+            or port._role != self._binding[2]
             or port._context != self._context
-            or port._episode_id != f"pick-cube-smoke-{self._seed}"
+            or port._episode_id != self._binding[3]
             or port._closed
             or port._failed
             or (self._port is not None and port is not self._port)
@@ -244,9 +292,9 @@ class PickCubeCorrectionQuery:
             type(port) is not ManiSkillPickCubeEpisode
             or type(port._seed) is not int
             or port._seed != self._seed
-            or port._role != "train"
+            or port._role != self._binding[2]
             or port._context != self._context
-            or port._episode_id != f"pick-cube-smoke-{self._seed}"
+            or port._episode_id != self._binding[3]
             or (self._port is not None and port is not self._port)
             or port._closed
             or port._failed
@@ -494,5 +542,188 @@ class PickCubeCorrectionQuery:
                 for label in self._labels
             ],
             batch=None,
+        )
+        return result
+
+
+class ProbeTrainCorrectionQuery(PickCubeCorrectionQuery):
+    """Explicit NEW fixed23 query authority, never a TRAIN role conversion.
+
+    Shared goal-consistent observed-grasp teacher only proposes labels. Student
+    actions, raw port records, ordinary TRAIN queries and original18row exports
+    remain separate. Any failed query/release permanently poisons this sequence.
+    """
+
+    def __init__(self, consent: ProbeCorrectionConsent):
+        if type(consent) is not ProbeCorrectionConsent:
+            raise ValueError("reserved corrections require explicit new query consent")
+        owned = ProbeCorrectionConsent(consent.max_queries, consent.role, consent.seed)
+        self._probe_consent = self._admitted_consent = owned
+        self._consent_seal = (owned.max_queries, owned.role, owned.seed)
+        self._released = False
+        self._student_port: Any = None
+        self._student_records: Any = None
+        self._student_spec: Any = None
+        self._probe_labels: Any = None
+        self._probe_label_seals: tuple[tuple[Any, ...], ...] = ()
+        self._query_active = False
+        binding = pick_cube_probe_binding("probe_train")
+        self._initialize_query(
+            23,
+            binding.context,
+            binding.role,
+            STUDENT_ID,
+            readiness_corrections=True,
+            observed_grasp_corrections=True,
+            goal_consistent_corrections=True,
+        )
+        self._probe_labels = self._labels
+
+    def _check_query_binding(self):
+        super()._check_query_binding()
+        consent = self._admitted_consent
+        ProbeCorrectionConsent(consent.max_queries, consent.role, consent.seed)
+        if (
+            self._probe_consent is not consent
+            or type(consent) is not ProbeCorrectionConsent
+            or (consent.max_queries, consent.role, consent.seed) != self._consent_seal
+        ):
+            raise ValueError("original reserved query consent changed")
+        if self._probe_labels is not None:
+            if self._labels is not self._probe_labels or not len(self._probe_label_seals) <= len(
+                self._labels
+            ) <= len(self._probe_label_seals) + int(self._query_active):
+                raise ValueError("original reserved paid label holder changed")
+            for label, seal in zip(self._labels, self._probe_label_seals):
+                current = (label, label.step, label.observation, label.target, label.stage)
+                if any(a is not b for a, b in zip(current, seal, strict=True)):
+                    raise ValueError("original reserved paid label evidence replaced")
+
+    def query(self, port, step: int, observation: tuple[float, ...]) -> None:
+        try:
+            self._check_query_binding()
+            if self._released:
+                raise ValueError("reserved query sequence already released")
+            if self._attempts >= self._consent_seal[0]:
+                raise ValueError("reserved teacher query cap permanently spent")
+            self._query_active = True
+            super().query(port, step, observation)
+            label = self._labels[-1]
+            self._probe_label_seals += (
+                (label, label.step, label.observation, label.target, label.stage),
+            )
+        except Exception:
+            self._failed = True
+            raise
+        finally:
+            self._query_active = False
+
+    def _check_port(self, port, step, observation, *, label_offset=0):
+        super()._check_port(port, step, observation, label_offset=label_offset)
+        work = port.work
+        if (
+            type(work) is not ManiSkillWork
+            or work != ManiSkillWork(step, step, step * 5, 0)
+            or any(
+                type(x) is not int for x in (port._attempts, port._completed, port._physics_ratio)
+            )
+            or port._attempts != step
+            or port._completed != step
+            or port._physics_ratio != 5
+            or type(port._seed) is not int
+            or port._seed != 23
+            or port._role != "probe_train"
+            or port._context != self._context
+            or port._episode_id != STUDENT_ID
+            or port._closed
+            or port._failed
+            or port._observation != observation
+            or len(port._records) != step
+        ):
+            raise ValueError("original reserved student native counters/work changed")
+        if self._student_port is None:
+            self._student_port, self._student_records, self._student_spec = (
+                port,
+                port._records,
+                port._spec,
+            )
+        if (
+            port is not self._student_port
+            or port._records is not self._student_records
+            or port._spec is not self._student_spec
+        ):
+            raise ValueError("original reserved student port/records/spec replaced")
+
+    def finish(
+        self, episode: ContinuousEpisode
+    ) -> PickCubeCorrectionBatch | ReadinessCorrectionBatch:
+        self._failed = True
+        raise ValueError("reserved corrections require explicit finish_probe, never TRAIN release")
+
+    def finish_probe(self, episode: ContinuousEpisode) -> ProbeCorrectionBatch:
+        try:
+            if self._failed or self._released:
+                raise ValueError("failed reserved query sequence releases no usable batch")
+            self._check_readiness_binding()
+            port: Any = self._port
+            if (
+                port is None
+                or port._role != "probe_train"
+                or port._seed != 23
+                or port._context != self._context
+                or port._episode_id != STUDENT_ID
+                or episode != port.episode()
+            ):
+                raise ValueError("reserved correction episode differs from queried trajectory")
+            self._check_readiness_binding()
+            original_port = (
+                port is self._student_port and port is self._port and port is self._readiness_port
+            )
+            if (
+                port is None
+                or type(port) is not ManiSkillPickCubeEpisode
+                or not original_port
+                or port._records is not self._student_records
+                or port._spec is not self._student_spec
+                or type(port._seed) is not int
+                or port._seed != 23
+                or port._role != "probe_train"
+                or port._context != self._context
+                or port._episode_id != STUDENT_ID
+                or port._closed
+                or port._failed
+                or port._spec != episode.spec
+                or type(port._attempts) is not int
+                or type(port._completed) is not int
+                or port._attempts != len(episode.transitions)
+                or port._completed != port._attempts
+                or type(port._physics_ratio) is not int
+                or port._physics_ratio != 5
+                or tuple(port._records) != episode.transitions
+                or port._observation != episode.transitions[-1].next_observation
+            ):
+                raise ValueError("reserved trajectory changed during final observation")
+            batch = ProbeCorrectionBatch(
+                self._admitted_consent,
+                episode,
+                cast(tuple[ReadinessCorrectionLabel, ...], tuple(self._labels)),
+                self._observed_grasp_receipts,
+            )
+            self._released = True
+            return batch
+        except Exception:
+            self._failed = True
+            raise
+
+    def report(self) -> dict:
+        result = super().report()
+        result.pop("train_seed", None)
+        result.update(
+            provenance=PROBE_CORRECTION_PROVENANCE,
+            role="probe_train",
+            seed=23,
+            max_queries=self._consent_seal[0],
+            failed=self._failed,
+            consent=dict(max_queries=self._consent_seal[0], role="probe_train", seed=23),
         )
         return result

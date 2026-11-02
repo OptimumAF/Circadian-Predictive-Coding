@@ -107,9 +107,17 @@ def _require_source_records(source):
 
 
 def _require_arm(
-    row, *, separate_context_heads=False, head_tasks=None, linear_fit=False, joint_rehearsal=None
+    row,
+    *,
+    separate_context_heads=False,
+    head_tasks=None,
+    linear_fit=False,
+    joint_rehearsal=None,
+    linear_probe_update=None,
 ):
     """Do not buy another arm after incomplete or replaced preceding evidence."""
+    if row.get("linear_probe_update") != linear_probe_update:
+        raise ValueError("linear probe update intent differs from paid evidence")
     if len(row["sessions"]) != 2 or any(
         s["limits"] != asdict(HEAD_LIMITS if separate_context_heads else LIMITS)
         or type(s["updates"]) is not int
@@ -122,6 +130,19 @@ def _require_arm(
         raise ValueError("original paid session limits/clocks differ")
     probe = row["probe"]
     returning = probe.get("return_phase", {})
+    if linear_probe_update is not None:
+        from src.adapters.context_linear_fit_learner import CONTEXT_MINIMUM_CHANGE_RESIDUAL_ID
+
+        if any(
+            type(phase.get("diagnostics")) is not list
+            or len(phase["diagnostics"]) != 16
+            or any(
+                type(d) is not dict or d.get("definition") != CONTEXT_MINIMUM_CHANGE_RESIDUAL_ID
+                for d in phase["diagnostics"]
+            )
+            for phase in (probe, returning)
+        ):
+            raise ValueError("minimum-change probe diagnostic differs from paid intent")
     if probe.get("status") != "complete" or returning.get("status") != "complete":
         raise ValueError("preceding probe/return incomplete; further arms closed")
     for index, result in enumerate((probe, returning)):
@@ -453,8 +474,24 @@ def run_arm(
     linear_fit=False,
     joint_rehearsal=None,
     training_bank=(),
+    linear_probe_update=None,
 ):
     """One original probe owner and two finite sessions, never budget renewal."""
+    if linear_probe_update is not None and (
+        type(linear_probe_update) is not str
+        or linear_probe_update != "minimum_change"
+        or linear_fit is not True
+        or separate_context_heads is not True
+        or head_tasks != TRANSFER_HEAD_TASKS
+        or joint_rehearsal is not None
+    ):
+        raise ValueError("minimum-change probe requires explicit sequential LS transfer")
+    if (
+        row is not None
+        and "linear_probe_update" in row
+        and row["linear_probe_update"] != linear_probe_update
+    ):
+        raise ValueError("linear probe update differs from admitted intent")
     if type(input_diagnostics) is not bool:
         raise ValueError("input_diagnostics must be an exact bool")
     if (
@@ -496,6 +533,14 @@ def run_arm(
             **(dict(episode_cohorts=True) if joint_rehearsal is not None else {}),
         )
     training, evaluation, monitors, returning = cohorts
+    probe_seed = seed
+    if linear_probe_update is not None:
+        from scripts.ticket_linear_probe import MinimumChangeProbeLearner
+
+        # Why: keep the original source/guard and cold default; only disposable
+        # F/A/return descendants choose the explicit residual operation.
+        probe_seed = MinimumChangeProbeLearner(state.policy)
+        probe_seed.restore_state(state)
     sessions = [
         ToyBudgetSession(HEAD_LIMITS if separate_context_heads else LIMITS, monotonic)
         for _ in range(2)
@@ -514,6 +559,8 @@ def run_arm(
     )
     if linear_fit and head_tasks is not None:
         row["selected_head_tasks"] = head_tasks
+    if linear_probe_update is not None:
+        row["linear_probe_update"] = linear_probe_update
     linear_pins: list[Any] | None = [] if linear_fit else None
     linear_episode_pins = None
     if linear_fit:
@@ -553,7 +600,7 @@ def run_arm(
                 **(dict(linear_episode_pins=linear_episode_pins) if linear_fit else {}),
             )
         row["probe"] = run_fresh_task_probe(
-            seed,
+            probe_seed,
             state,
             training,
             evaluation,
@@ -604,6 +651,9 @@ def run_arm(
         **(dict(head_tasks=head_tasks) if head_tasks is not None else {}),
         **(dict(linear_fit=True) if linear_fit else {}),
         **(dict(joint_rehearsal=joint_rehearsal) if joint_rehearsal is not None else {}),
+        **(
+            dict(linear_probe_update=linear_probe_update) if linear_probe_update is not None else {}
+        ),
     )
     return row
 

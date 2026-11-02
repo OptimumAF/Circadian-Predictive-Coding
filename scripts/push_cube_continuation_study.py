@@ -29,6 +29,13 @@ from scripts.push_cube_correction_weights import (
     build_aggregated_correction_weights,
 )
 from src.adapters.push_cube_correction_collection import collect_push_cube_corrections
+from src.adapters.numpy_retained_nearest_bc import (
+    NumpyRetainedNearestBCLearner,
+    RetainedNativePin,
+    pin_retained_native,
+    require_retained_native,
+    retained_costs,
+)
 from src.adapters.continuous_probe import copy_probe_plan, run_continuous_probe
 from src.adapters.continuous_probe_control import (
     _require_completed as require_completed_probe,
@@ -39,6 +46,7 @@ from src.adapters.continuous_train_continuation import run_continuous_train_cont
 from src.adapters.joint_readiness_corrections import run_joint_readiness_corrections
 from src.adapters.joint_readiness_stream import run_joint_readiness_stream
 from src.adapters.numpy_continuous_bc import NumpyContinuousBCLearner, _snapshot
+from src.adapters.readonly_continuous_affine import ReadonlyContinuousAffine
 from src.adapters.numpy_nearest_continuous_bc import (
     FixedInputNearestContinuousBCPolicy,
     NumpyNearestContinuousBCLearner,
@@ -352,11 +360,18 @@ def read_push_training(path: Path) -> ContinuousEpisode:
 
 
 def _pin(learner):
+    if type(learner) is ReadonlyContinuousAffine:
+        state = learner.snapshot_state()
+        return learner._state, state.policy, state
     return learner._state, learner._policy, _snapshot(learner._state, learner._policy)
 
 
 def _require(learner, pin):
     native, policy, snapshot = pin
+    if type(learner) is ReadonlyContinuousAffine:
+        if learner._state is not native or learner.snapshot_state() != snapshot:
+            raise RuntimeError("frozen affine study reader changed")
+        return
     if (
         learner._state is not native
         or learner._policy is not policy
@@ -366,6 +381,11 @@ def _require(learner, pin):
 
 
 def _pin_push_nearest(learner):
+    if type(learner) is NumpyRetainedNearestBCLearner:
+        pin = pin_retained_native(learner)
+        if pin.state.policy.spec != cube_taskspace_spec():
+            raise ValueError("retained Push requires fixed TRAIN cubeD12")
+        return pin
     if (
         type(learner) is not NumpyNearestContinuousBCLearner
         or type(learner._policy) is not FixedInputNearestContinuousBCPolicy
@@ -389,6 +409,10 @@ def _pin_push_nearest(learner):
 
 
 def _require_push_nearest(learner, pin, *, observe=True):
+    if type(pin) is RetainedNativePin:
+        require_retained_native(learner, pin, observe=observe)
+        return
+
     def native():
         if (
             type(learner) is not NumpyNearestContinuousBCLearner
@@ -446,7 +470,9 @@ def _roll_push_nearest(learner, *, label: str, seed: int = 17) -> dict[str, Any]
     if type(seed) is not int or seed not in (17, 19, 20):
         raise ValueError("Push frozen rollout seed must be an exact TRAIN integer17,19,20")
     pin = _pin_push_nearest(learner)
-    prototypes = pin[5].training_examples
+    retained = type(pin) is RetainedNativePin
+    state = pin.state if retained else pin[5]
+    prototypes = state.retained_rows if retained else state.training_examples
     report: dict[str, Any] = dict(
         complete=False,
         error=None,
@@ -465,8 +491,8 @@ def _roll_push_nearest(learner, *, label: str, seed: int = 17) -> dict[str, Any]
         source_unchanged=False,
         unreturned_prediction_possible=False,
         unreturned_native_work_unknown=False,
-        source_updates=pin[5].completed_updates,
-        source_training_rows=prototypes,
+        source_updates=state.completed_updates,
+        source_training_rows=state.training_examples,
         nearest_prediction_attempts=0,
         nearest_prediction_returns=0,
         nearest_distance_candidate_upper_bound=0,
@@ -478,6 +504,9 @@ def _roll_push_nearest(learner, *, label: str, seed: int = 17) -> dict[str, Any]
         unvalidated_nearest_prediction_work_unknown=False,
     )
     records: list[Any] = []
+    if retained:
+        report["retention"] = retained_costs(state)
+        report["nearest_prototype_rows"] = prototypes
     published = report["nearest_prediction_reports"]
     validated = 0
     port = None
@@ -618,15 +647,20 @@ def roll_push(learner, *, label: str, seed: int = 17) -> dict[str, Any]:
     """One bounded frozen TRAIN Push return; complete negative scores are valid."""
     if type(seed) is not int or seed not in (17, 19, 20):
         raise ValueError("Push frozen rollout seed must be an exact TRAIN integer17,19,20")
-    if type(learner) is NumpyNearestContinuousBCLearner:
+    if type(learner) in (NumpyNearestContinuousBCLearner, NumpyRetainedNearestBCLearner):
         if seed == 17:
             return _roll_push_nearest(learner, label=label)
         return _roll_push_nearest(learner, label=label, seed=seed)
     if (
-        type(learner) is not NumpyContinuousBCLearner
-        or learner._policy.spec != cube_taskspace_spec()
+        type(learner) not in (NumpyContinuousBCLearner, ReadonlyContinuousAffine)
+        or (
+            learner.policy.spec
+            if type(learner) is ReadonlyContinuousAffine
+            else learner._policy.spec
+        )
+        != cube_taskspace_spec()
     ):
-        raise ValueError("Push rollout requires an exact same-spec native BP")
+        raise ValueError("Push rollout requires an exact same-spec native BP or readonly affine")
     pin = _pin(learner)
     report: dict[str, Any] = dict(
         complete=False,
@@ -647,6 +681,10 @@ def roll_push(learner, *, label: str, seed: int = 17) -> dict[str, Any]:
         unreturned_prediction_possible=False,
         unreturned_native_work_unknown=False,
     )
+    if type(learner) is ReadonlyContinuousAffine:
+        report["policy"] = "frozen_readonly_continuous_affine"
+        report["source_affine_fit_rows"] = pin[2].model.fit_rows
+        report["optimizer_updates"] = 0
     port = None
     started = monotonic()
     try:

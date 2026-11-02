@@ -40,7 +40,11 @@ packages = [
 include-package-data = false
 
 [tool.setuptools.data-files]
-"share/doc/circadian-predictive-coding" = ["docs/native-ticket-setup.md"]
+"share/doc/circadian-predictive-coding" = [
+  "docs/native-ticket-setup.md",
+  "docs/recurrent-readout-sequential.md",
+  "docs/portable-affine-adaptation.md",
+]
 
 [tool.setuptools.package-dir]
 "src.infra.taskspace_demo_data" = "examples/taskspace_memory"

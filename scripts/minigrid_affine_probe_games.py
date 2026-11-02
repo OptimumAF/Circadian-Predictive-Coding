@@ -59,11 +59,14 @@ def _qualified_rehearsal_bytes(path):
     return raw
 
 
-def _rehearsal_states(report):
+def _rehearsal_states(report, *, joint_only=False):
     from scripts.run_minigrid_linear_fit_control import _context_linear_training_snapshot
 
+    if type(joint_only) is not bool:
+        raise ValueError("joint_only must be an exact bool")
+
     limits = dict(
-        max_training_updates=4,
+        max_training_updates=2 if joint_only else 4,
         max_wall_seconds=90,
         max_replay_examples=54,
         max_hidden_width=None,
@@ -72,14 +75,21 @@ def _rehearsal_states(report):
     budget = report.get("budget", {})
     arms = report.get("arms", ())
     if (
-        report.get("definition") != "minigrid_private_affine_rehearsal_comparison_v1"
+        report.get("definition")
+        != (
+            "minigrid_private_affine_joint_only_v1"
+            if joint_only
+            else "minigrid_private_affine_rehearsal_comparison_v1"
+        )
         or report.get("status") != "complete"
-        or len(arms) != 2
-        or [a.get("arm") for a in arms] != ["current_only", "joint_ABC_F"]
+        or len(arms) != (1 if joint_only else 2)
+        or [a.get("arm") for a in arms]
+        != (["joint_ABC_F"] if joint_only else ["current_only", "joint_ABC_F"])
         or not _same_value(budget.get("initial_limits"), limits)
         or not _same_value(budget.get("limits"), limits)
         or not _same_value(
-            (budget.get("updates_completed"), budget.get("replay_examples_completed")), (4, 54)
+            (budget.get("updates_completed"), budget.get("replay_examples_completed")),
+            (2 if joint_only else 4, 54),
         )
         or budget.get("started_at") != budget.get("observed_budget_started_at")
         or budget.get("ended_at", -1) < budget.get("started_at", 0)
@@ -89,7 +99,7 @@ def _rehearsal_states(report):
     states = []
     for index, arm in enumerate(arms):
         b, state = arm.get("budget", {}), arm.get("native_endpoint", {})
-        replay = 54 if index else 0
+        replay = 54 if arm["arm"] != "current_only" else 0
         if (
             arm.get("status") != "complete"
             or arm.get("source_native_state_unchanged") is not True
@@ -132,7 +142,12 @@ def _rehearsal_states(report):
                 "complete paid118 arm source/native8/180/head36/exposure evidence required"
             )
         states.append(state)
-    return tuple(_context_linear_training_snapshot(state) for state in states)
+    typed = tuple(_context_linear_training_snapshot(state) for state in states)
+    if joint_only and any(
+        not _same_value(asdict(value), raw) for value, raw in zip(typed, states, strict=True)
+    ):
+        raise ValueError("current joint endpoint conversion changed its paid full state")
+    return typed
 
 
 def describe_protocol():

@@ -23,6 +23,9 @@ from src.core.learner_ports import TrainingDiagnostic, TrainingUpdateFailed
 CONTEXT_LINEAR_RESIDUAL_ID = (
     "public_context_current_packet_one_hot_least_squares_sum_squared_residual_v1"
 )
+CONTEXT_MINIMUM_CHANGE_RESIDUAL_ID = (
+    "public_context_minimum_change_one_hot_least_squares_sum_squared_residual_v1"
+)
 
 
 class ContextLinearFitLearner:
@@ -60,20 +63,44 @@ class ContextLinearFitLearner:
         return child
 
     def train_batch(self, features, targets):
+        return self._train_batch(features, targets, minimum_change=False)
+
+    def train_batch_minimum_change(self, features, targets):
+        """Explicit nonsticky current-head operation; caller owns roles/lease/budget."""
+        return self._train_batch(features, targets, minimum_change=True)
+
+    def _owners(self):
+        # Why: equal-valued replacement is still an unobserved owner change.
+        # Hold references through the operation so object IDs cannot be recycled.
+        return (
+            self._policy,
+            self._state,
+            self._state.policy,
+            *(owner for head in self._state.heads for owner in (head, head.policy, head.model)),
+        )
+
+    def _train_batch(self, features, targets, *, minimum_change):
         before = self.snapshot_state()
         index, projected = route_context_features(features, routing_policy(before.policy))
         validate_class_targets(targets, len(features), before.policy.num_classes)
         rows = len(features)
         if before.completed_updates == MAX_COUNT or before.training_examples + rows > MAX_COUNT:
             raise ValueError("context linear counters would overflow")
-        owners = (id(self._policy), id(self._state))
+        owners = self._owners()
         original_features, original_targets = features.copy(), targets.copy()
         rng = _rng_signature()
         private = LinearFitLearner(before.heads[index].policy)
         private.restore_state(before.heads[index])
+        definition = (
+            CONTEXT_MINIMUM_CHANGE_RESIDUAL_ID if minimum_change else CONTEXT_LINEAR_RESIDUAL_ID
+        )
         private_commits = 0
         try:
-            diagnostic = private.train_batch(projected, targets)
+            diagnostic = (
+                private.train_batch_minimum_change(projected, targets)
+                if minimum_change
+                else private.train_batch(projected, targets)
+            )
             private_commits = 1
             heads = list(before.heads)
             heads[index] = private.snapshot_state()
@@ -86,14 +113,14 @@ class ContextLinearFitLearner:
                 )
             )
             if (
-                owners != (id(self._policy), id(self._state))
+                any(a is not b for a, b in zip(owners, self._owners(), strict=True))
                 or self.snapshot_state() != before
                 or not _same_array(features, original_features)
                 or not _same_array(targets, original_targets)
                 or _rng_signature() != rng
             ):
                 raise ValueError("context linear donor, raw inputs or RNG changed")
-            result = TrainingDiagnostic(CONTEXT_LINEAR_RESIDUAL_ID, diagnostic.value)
+            result = TrainingDiagnostic(definition, diagnostic.value)
         except Exception as error:
             work = (
                 error.work
@@ -113,7 +140,7 @@ class ContextLinearFitLearner:
                 unpublished_work=True,
             )
             raise TrainingUpdateFailed(
-                f"{type(error).__name__}: {error}"[:512], CONTEXT_LINEAR_RESIDUAL_ID, work
+                f"{type(error).__name__}: {error}"[:512], definition, work
             ) from error
         self._state = after
         return result

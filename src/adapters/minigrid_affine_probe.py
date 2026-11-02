@@ -25,10 +25,19 @@ from src.app.fresh_task_probe import run_fresh_task_probe, _validate_batches
 from src.app.probe_return_phase import budget_binding, paid_report_guard
 from src.app.toy_execution_budget import ToyBudgetSession, ToyExecutionBudget
 from src.core.minigrid_context_encoding import context_public_history
+from src.core.learner_ports import TrainingUpdateFailed
 from src.shared.process_memory import ProcessRssSampler
 
 
-def describe_protocol(*, retained_a4=False, return_old=False, native_games=False):
+def describe_protocol(
+    *, retained_a4=False, return_old=False, native_games=False, probe_update=None
+):
+    if probe_update is not None and (
+        type(probe_update) is not str or probe_update != "minimum_change"
+    ):
+        raise ValueError("probe_update must be omitted or exactly 'minimum_change'")
+    if probe_update is not None and (retained_a4 or return_old or native_games):
+        raise ValueError("minimum-change probe requires the ordinary after-C scope")
     if type(native_games) is not bool or (native_games and return_old is not True):
         raise ValueError("native_games requires an exact bool and return_old=True")
     if type(return_old) is not bool or (return_old and retained_a4 is not True):
@@ -85,23 +94,29 @@ def describe_protocol(*, retained_a4=False, return_old=False, native_games=False
             native_game_order="Fblue/Fred probe_test then A3blue/red/A4blue/red TRAIN; seed17/max16/rawK7argmax",
             native_game_budget="caller original150s512MiB zero-update/replay owner born before source preparation; no renewal",
         )
+    if probe_update is not None:
+        protocol.update(
+            probe_update=probe_update,
+            update_objective="disposable F minimum-change one-hot least-squares squared error; no retention guarantee",
+        )
     return protocol
 
 
 class _AffineProbeSource(ContextLinearLearner):
     """Existing one-child source pattern; full native state stays unchanged."""
 
-    def __init__(self, saved):
+    def __init__(self, saved, *, child_factory=None):
         super().__init__()
         self.restore_state(saved)
         self.fork_calls = 0
         self.child: ContextLinearLearner | None = None
+        self._child_factory = child_factory
 
     def fork(self):
         self.fork_calls += 1
         if self.fork_calls != 1:
             raise ValueError("affine probe permits exactly one disposable fork")
-        self.child = super().fork()
+        self.child = super().fork() if self._child_factory is None else self._child_factory()
         return self.child
 
 
@@ -180,12 +195,15 @@ def run_affine_fresh_probe(
     return_old=False,
     native_games=False,
     readout_budget=None,
+    probe_update=None,
 ):
     protocol = describe_protocol(
         retained_a4=retained_a4,
         **(dict(return_old=return_old) if return_old is not False else {}),
         **(dict(native_games=native_games) if native_games is not False else {}),
+        **(dict(probe_update=probe_update) if probe_update is not None else {}),
     )
+    protect_evidence = retained_a4 or probe_update is not None
     readout_check = None
     if native_games:
         from src.adapters import minigrid_policy_evaluation as games
@@ -230,6 +248,8 @@ def run_affine_fresh_probe(
         source_fork_calls=0,
         disposable_state=None,
     )
+    if probe_update is not None:
+        report["probe_update"] = probe_update
     native_attempts = native_returns = 0
     native_records: list[dict[str, Any]] = []
     native_proofs: list[Any] = []
@@ -258,7 +278,68 @@ def run_affine_fresh_probe(
             replace(limits),
             budget.clock,
         )
-        source = _AffineProbeSource(saved)
+        child_owner: ContextLinearLearner | None = None
+        selection_failed = False
+        selection_proof = None
+        if probe_update is not None:
+            selection_proof, _ = paid_report_guard(protocol)
+
+        def check_selection():
+            if probe_update is None:
+                return
+            if (
+                selection_failed
+                or report.get("protocol") is not protocol
+                or type(report.get("probe_update")) is not str
+                or report["probe_update"] != probe_update
+                or source._child_factory is not make_child
+                or source.child is not child_owner
+                or not _same_value(state, saved)
+            ):
+                raise ValueError("original isolated minimum-change probe intent/owner changed")
+            assert selection_proof is not None
+            selection_proof()
+
+        class IncrementalProbeLearner(ContextLinearLearner):
+            # Why: choice belongs to this disposable invocation, not its snapshot.
+            def train_batch(self, features, targets):
+                nonlocal selection_failed
+                check_selection()
+                result = super().train_batch_minimum_change(features, targets)
+                try:
+                    check_selection()
+                except Exception as error:
+                    # A known native commit with a lost outer return stays paid.
+                    selection_failed = True
+                    raise TrainingUpdateFailed(
+                        str(error),
+                        result.definition,
+                        dict(
+                            fit_calls_attempted=1,
+                            fit_rows_attempted=len(features),
+                            fit_calls_completed=1,
+                            fit_rows_completed=len(features),
+                            failure_work_may_be_unobserved=True,
+                        ),
+                    ) from error
+                return result
+
+            def fork(self):
+                check_selection()
+                child = IncrementalProbeLearner()
+                child.restore_state(self.snapshot_state())
+                check_selection()
+                return child
+
+        def make_child():
+            nonlocal child_owner
+            child_owner = IncrementalProbeLearner()
+            child_owner.restore_state(saved)
+            return child_owner
+
+        source = _AffineProbeSource(
+            saved, **(dict(child_factory=make_child) if probe_update is not None else {})
+        )
         return_budget = None
         return_limits = return_binding = return_clock = None
         return_templates: tuple[AttributionBatch, ...] = ()
@@ -293,7 +374,7 @@ def run_affine_fresh_probe(
         collection_checks: list[tuple[dict, Any]] = []
         probe_data_owner = probe_owner = None
         data_check = probe_check = protocol_check = trusted_probe = None
-        if retained_a4:
+        if protect_evidence:
             protocol_check, _ = paid_report_guard(protocol)
 
         def check_native_prefix():
@@ -321,6 +402,7 @@ def run_affine_fresh_probe(
 
         def guard():
             nonlocal observed_updates, observed_clock
+            check_selection()
             if (
                 budget_binding(budget) != binding
                 or not _same_value(vars(budget.budget), vars(expected_limits))
@@ -343,6 +425,7 @@ def run_affine_fresh_probe(
                 budget.before_final()
             observed_clock = budget.last_clock
             check_boundary()
+            check_selection()
             witness.check(episodes)
             if native_games:
                 check_native_prefix()
@@ -360,7 +443,7 @@ def run_affine_fresh_probe(
                     if report["probe_endpoint"] is not endpoint_owner:
                         raise ValueError("paid F endpoint was replaced during old TRAIN return")
                     endpoint_check()
-            if retained_a4:
+            if protect_evidence:
                 if report["protocol"] is not protocol:
                     raise ValueError("original retained probe protocol was replaced")
                 if protocol_check is not None:
@@ -394,7 +477,7 @@ def run_affine_fresh_probe(
                 if item.get("closed") is not True or item.get("status") != "complete":
                     raise ValueError("preceding affine collection is incomplete")
                 known_collection.append(deepcopy(item))
-                if retained_a4:
+                if protect_evidence:
                     check, _ = paid_report_guard(item)
                     collection_checks.append((item, check))
             current = None if source.child is None else source.child.snapshot_state()
@@ -416,6 +499,7 @@ def run_affine_fresh_probe(
             if native_games:
                 # Snapshot ports above may invoke callbacks after the first proof.
                 check_native_prefix()
+            check_selection()
 
         def observe(child, phase, boundary):
             nonlocal \
@@ -511,7 +595,7 @@ def run_affine_fresh_probe(
                 guard, report["collection"], distinct_probe=True
             )
             (training, evaluation), report["probe_data"] = _prepare_probe(raw_train, raw_test)
-            if retained_a4:
+            if protect_evidence:
                 probe_data_owner = report["probe_data"]
                 data_check, _ = paid_report_guard(probe_data_owner)
             _validate_batches(training, evaluation, monitors)
@@ -546,7 +630,7 @@ def run_affine_fresh_probe(
                 check_boundary=guard,
                 **return_options,
             )
-            if retained_a4:
+            if protect_evidence:
                 probe_owner = report["probe"]
                 probe_check, trusted_probe = paid_report_guard(probe_owner)
             guard()
@@ -596,9 +680,11 @@ def run_affine_fresh_probe(
                     ended_at=return_clock(),
                 )
             report["source_fork_calls"] = source.fork_calls
-            if source.child is not None:
+            # A refused replacement must not hide the original child's paid work.
+            paid_child = child_owner if probe_update is not None else source.child
+            if paid_child is not None:
                 try:
-                    report["disposable_state"] = asdict(source.child.snapshot_state())
+                    report["disposable_state"] = asdict(paid_child.snapshot_state())
                 except Exception as error:
                     report.update(
                         status="failed",

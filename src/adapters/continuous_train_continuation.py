@@ -142,15 +142,18 @@ def run_continuous_train_continuation(
     Mixed row weights are fixed batch supervision in training/reference order;
     all observations remain exposed and original clocks/authority stay intact.
     Explicit maximum_rows=198 admits both correction releases and old references;
+    maximum_rows=220 additionally admits complete B22 coverage without deleting rows.
     the default mixed148/head130 scopes and update ceilings remain unchanged.
     """
     if type(update_rule) is not str or update_rule not in ("head_gauss_newton", "bp_mixed"):
         raise ValueError("continuation update_rule must be head_gauss_newton or bp_mixed")
     mixed = update_rule == "bp_mixed"
     maximum_rows = _admit_maximum_rows(maximum_rows)
-    if maximum_rows == 198 and not mixed:
-        raise ValueError("expanded198-row scope requires explicit bp_mixed continuation")
-    row_options = {"maximum_rows": maximum_rows} if maximum_rows == 198 else {}
+    if maximum_rows in (198, 220) and not mixed:
+        raise ValueError(
+            f"expanded{maximum_rows}-row scope requires explicit bp_mixed continuation"
+        )
+    row_options = {"maximum_rows": maximum_rows} if maximum_rows != 148 else {}
     weighted = row_weights is not None
     if weighted and not mixed:
         raise ValueError("row weights require explicit bp_mixed continuation")
@@ -184,7 +187,8 @@ def run_continuous_train_continuation(
             else "continuation requires TRAIN common-MSE BP with D/H at most 64"
         )
     # Why: default mixed scope keeps the original148 rows; explicit198 admits
-    # both50-row correction releases without deleting old data. Head-GN stays130.
+    # both50-row correction releases, explicit220 adds a complete reference,
+    # without deleting old data. Head-GN stays130.
     originals, episodes = (
         _admit_inputs(training, references, policy.spec, maximum=maximum_rows)
         if mixed
@@ -370,9 +374,9 @@ def run_continuous_train_continuation(
             ),
         )
         metadata_keys += ("training_rule", "policy_transition")
-    if maximum_rows == 198:
+    if maximum_rows != 148:
         report["row_scope"] = dict(
-            maximum_rows=198,
+            maximum_rows=maximum_rows,
             default_maximum_rows=148,
             scope="explicit expanded released TRAIN inputs; no authority or update-budget renewal",
         )

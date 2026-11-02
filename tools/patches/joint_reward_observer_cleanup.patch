@@ -1,0 +1,21 @@
+--- a/fixture-repaired.py.txt
++++ b/fixture-repaired.py.txt
+@@ -33,9 +33,18 @@
+ sys.meta_path.insert(0,NoOtherModels())
+ TRAIN_KEYS={'public_batch','public_episode','typed_updates','ordinary_train','reward','zero','backward','sgd','public_weighted'}
+ def charge(costs):
++    closing = 'closes' in costs
++    if closing and (len(costs) != 1 or type(costs['closes']) is not int or costs['closes'] != 1):
++        raise ValueError('cleanup requires exactly one fixed close charge')
+     if information.get('readouts_started') and TRAIN_KEYS.intersection(costs):
+         counts['forbidden']+=1;raise RuntimeError('update after fixed readouts started')
+     for key,value in costs.items():counts[key]+=value
++    # Why: spent model/serialization work must not prevent bounded teardown.
++    # Only the fixed close wrapper gets this exception, never a readback or fit.
++    if closing:
++        if counts['closes'] > caps['closes']:
++            raise RuntimeError('original close allowance spent')
++        return
+     if any(counts[k]>v for k,v in caps.items()):raise RuntimeError('original native allowance spent')
+ def wrap(original,key,extra=None):
+     @wraps(original)

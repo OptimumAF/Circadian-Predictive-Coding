@@ -9,7 +9,15 @@ sharing the existing viewer does not require relabeling its evidence.
 from copy import deepcopy
 from typing import Any
 
-from .minigrid_affine_inspector import METHOD, SOURCES, _fixed, _native_costs, _object, _training
+from .minigrid_affine_inspector import (
+    LAYOUTS,
+    METHOD,
+    SOURCES,
+    _fixed,
+    _native_costs,
+    _object,
+    _training,
+)
 from .minigrid_inspector_projection import (
     _close,
     _envelope,
@@ -23,6 +31,7 @@ from .minigrid_inspector_projection import (
 from .minigrid_learnability_inspector import _flatten, _missing, _proofs
 
 DEFINITION = "portable_affine_private_adaptation_v1"
+ALL_OLD_DEFINITION = "portable_affine_matched_all_old_v1"
 ARMS = ("current_only", "joint_ABC_F")
 LABELS = ("F-only control", "Joint ABC + F")
 SLOTS = (
@@ -31,6 +40,30 @@ SLOTS = (
     ("A", "blue", "train"),
     ("A", "red", "train"),
 )
+ALL_OLD_SLOTS = SLOTS + tuple(
+    (context, cue, "train") for context in ("B", "C_train") for cue in ("blue", "red")
+)
+
+
+def _all_old_protocol(record):
+    _object(record, "all-old protocol")
+    _fixed(record, "definition", ALL_OLD_DEFINITION)
+    _fixed(record, "all_old_tasks", True)
+    if record.get("games") is None:
+        return
+    plan = _object(record["games"], "all-old game plan")
+    # Why: optional plan metadata may be unknown, but cannot contradict the
+    # exact observed roster admitted below.
+    for key, value in dict(
+        definition="minigrid_private_rehearsal_F_then_all_ABC_games_v1",
+        phases=list(ARMS),
+        contexts=[context for context, _, _ in ALL_OLD_SLOTS],
+        roles=[role for _, _, role in ALL_OLD_SLOTS],
+        games_per_phase=8,
+        seed=17,
+        max_steps_per_phase=128,
+    ).items():
+        _fixed(plan, key, value)
 
 
 def _costs(record, pointer, keys, label):
@@ -224,14 +257,15 @@ def _arm(arm, index, path):
     return _private_curves(arm, path), costs, _proofs(arm, path)
 
 
-def _games(phase, index, complete):
+def _games(phase, index, complete, *, all_old_tasks=False):
     pointer = f"/games/{index}"
+    slots = ALL_OLD_SLOTS if all_old_tasks else SLOTS
     records, proofs, costs = [], [], []
     if phase is not None:
         _object(phase, "private native phase")
         for key, value in dict(
             method=METHOD,
-            role="private_F_then_returned_A",
+            role="private_F_then_all_old_ABC" if all_old_tasks else "private_F_then_returned_A",
             rehearsal_arm=ARMS[index],
             updates=8,
             source_fit_calls=8,
@@ -240,6 +274,10 @@ def _games(phase, index, complete):
             new_optimizer_updates=0,
         ).items():
             _fixed(phase, key, value)
+        _require(
+            phase.get("include_old_tasks", False) is all_old_tasks,
+            "private native roster intent mismatch",
+        )
         _require(_status(phase.get("status")), "invalid private native status")
         done = phase["status"] == "complete"
         _require(not complete or done, "complete workflow contains partial native phase")
@@ -247,18 +285,31 @@ def _games(phase, index, complete):
             not done or phase.get("state_unchanged") is True, "complete native preservation missing"
         )
         _require(phase.get("scores") == [], "native phase contains labelled scores")
-        records = _records(phase.get("episodes", []), 4, "private native episodes")
+        records = _records(phase.get("episodes", []), len(slots), "private native episodes")
         _require(
-            not done or len(records) == 4 and all(e.get("status") == "complete" for e in records),
+            not done
+            or len(records) == len(slots)
+            and all(e.get("status") == "complete" for e in records),
             "complete private games missing",
         )
         proofs += _proofs(phase, pointer)
-        costs += _native_costs(phase, records, pointer=pointer, label="Private native readout")
+        costs += _native_costs(
+            phase,
+            records,
+            pointer=pointer,
+            label="Private native readout",
+            episode_limit=len(slots),
+        )
     else:
         _require(not complete, "complete workflow lacks native phase")
     episodes, failed = [], False
-    for i, (context, cue, role) in enumerate(SLOTS):
-        label = "Fresh F" if i < 2 else "Returning A"
+    for i, (context, cue, role) in enumerate(slots):
+        if i < 2:
+            label = "Fresh F"
+        elif all_old_tasks:
+            label = f"Old {context.removesuffix('_train')}"
+        else:
+            label = "Returning A"
         if i >= len(records):
             game = _missing(6, label, context, cue, role, 8)
         else:
@@ -267,14 +318,14 @@ def _games(phase, index, complete):
                 not failed or row.get("status") == "not_run", "native work follows failed episode"
             )
             if row.get("status") == "not_run":
-                for key, value in dict(
+                for slot_key, slot_value in dict(
                     context=context,
                     cue=cue,
                     source_role=role,
                     prediction_calls_attempted=0,
                     prediction_calls_returned=0,
                 ).items():
-                    _fixed(row, key, value)
+                    _fixed(row, slot_key, slot_value)
                 _require(
                     not row.get("predictions")
                     and row.get("environment") is None
@@ -296,6 +347,7 @@ def _games(phase, index, complete):
                     role=role,
                     branch_row=2 if i < 2 else 3,
                     allow_observed_failure_tail=True,
+                    expected_layout=LAYOUTS.get(context),
                 )
                 game.update(source_updates=6, phase=label, context=context, derived=False)
             failed = failed or row.get("status") != "complete"
@@ -305,7 +357,14 @@ def _games(phase, index, complete):
 
 def project_private_affine_report(report: dict[str, Any], *, source_label: str) -> dict[str, Any]:
     _envelope(report, source_label)
-    _fixed(report, "definition", DEFINITION)
+    _require(
+        type(report.get("definition")) is str
+        and report["definition"] in (DEFINITION, ALL_OLD_DEFINITION),
+        "unsupported private workflow definition",
+    )
+    all_old_tasks = report["definition"] == ALL_OLD_DEFINITION
+    if all_old_tasks and report.get("protocol") is not None:
+        _all_old_protocol(report["protocol"])
     _require(_status(report.get("status")), "invalid private workflow status")
     source = deepcopy(report)
     done = source["status"] == "complete"
@@ -393,7 +452,7 @@ def project_private_affine_report(report: dict[str, Any], *, source_label: str) 
         phase = phases[index] if index < len(phases) else None
         if index and phase is not None:
             _require(phases[0]["status"] == "complete", "native phase follows incomplete readout")
-        episodes, game_proofs, game_costs = _games(phase, index, done)
+        episodes, game_proofs, game_costs = _games(phase, index, done, all_old_tasks=all_old_tasks)
         conditions.append(
             dict(
                 key=label,
@@ -456,7 +515,7 @@ def project_private_affine_report(report: dict[str, Any], *, source_label: str) 
         )
     for row in conditions:
         row["proofs"] += _proofs(source, "")
-    return dict(
+    result: dict[str, Any] = dict(
         schema_id="minigrid_private_affine_inspector_v1",
         source_label=source_label,
         origin="recorded_artifact",
@@ -464,3 +523,6 @@ def project_private_affine_report(report: dict[str, Any], *, source_label: str) 
         conditions=conditions,
         global_costs=global_costs,
     )
+    if all_old_tasks:
+        result["all_old_tasks"] = True
+    return result

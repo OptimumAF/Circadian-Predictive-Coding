@@ -17,7 +17,11 @@ def test_should_keep_torch_optional_and_reuse_existing_constraint():
     assert "torch>=2.2,<3.0" in (root / "requirements-resnet.txt").read_text().splitlines()
     assert "include docs/native-ticket-setup.md" in (root / "MANIFEST.in").read_text()
     assert config["tool"]["setuptools"]["data-files"] == {
-        "share/doc/circadian-predictive-coding": ["docs/native-ticket-setup.md"]
+        "share/doc/circadian-predictive-coding": [
+            "docs/native-ticket-setup.md",
+            "docs/recurrent-readout-sequential.md",
+            "docs/portable-affine-adaptation.md",
+        ]
     }
 
 
